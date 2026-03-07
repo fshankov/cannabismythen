@@ -1,28 +1,6 @@
 ---
 export const prerender = false;
-
-const COOKIE_NAME = "site-auth";
-const password = import.meta.env.SITE_PASSWORD ?? "Time-Turner";
-
-let error = false;
-
-if (Astro.request.method === "POST") {
-  const data = await Astro.request.formData();
-  const entered = data.get("password")?.toString() ?? "";
-
-  if (entered === password) {
-    Astro.cookies.set(COOKIE_NAME, password, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      httpOnly: true,
-      sameSite: "lax",
-      secure: import.meta.env.PROD,
-    });
-    return Astro.redirect("/");
-  }
-
-  error = true;
-}
+// Auth is handled by /api/auth — this page only renders the login form.
 ---
 
 <!doctype html>
@@ -137,15 +115,15 @@ if (Astro.request.method === "POST") {
 
         try {
           const body = new FormData(form);
-          const res = await fetch('/login', {
+          const res = await fetch('/api/auth', {
             method: 'POST',
             body,
             credentials: 'same-origin',
-            redirect: 'follow',
           });
+          const json = await res.json();
 
-          if (res.ok || res.redirected) {
-            window.location.href = res.redirected ? res.url : '/';
+          if (json.ok) {
+            window.location.href = '/';
           } else {
             errorMsg.style.display = 'block';
             submitBtn.disabled = false;
