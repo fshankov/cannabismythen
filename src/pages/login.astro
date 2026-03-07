@@ -1,0 +1,124 @@
+---
+export const prerender = false;
+
+const COOKIE_NAME = "site-auth";
+const password = import.meta.env.SITE_PASSWORD ?? "Time-Turner";
+
+let error = false;
+
+if (Astro.request.method === "POST") {
+  const data = await Astro.request.formData();
+  const entered = data.get("password")?.toString() ?? "";
+
+  if (entered === password) {
+    Astro.cookies.set(COOKIE_NAME, password, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      httpOnly: true,
+      sameSite: "lax",
+      secure: import.meta.env.PROD,
+    });
+    return Astro.redirect("/");
+  }
+
+  error = true;
+}
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zugang — Cannabis: Mythen & Evidenz</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f4f4f0;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: #1a1a1a;
+      }
+
+      .card {
+        background: white;
+        border-radius: 10px;
+        padding: 2.5rem 3rem;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+      }
+
+      p.sub {
+        font-size: 0.875rem;
+        color: #666;
+        margin-bottom: 1.75rem;
+      }
+
+      input[type="password"] {
+        width: 100%;
+        padding: 0.65rem 0.9rem;
+        border: 1.5px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+
+      input[type="password"]:focus {
+        border-color: #2d6a4f;
+      }
+
+      button {
+        margin-top: 0.85rem;
+        width: 100%;
+        padding: 0.7rem;
+        background: #2d6a4f;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      button:hover { background: #1f4f3a; }
+
+      .error {
+        margin-top: 0.8rem;
+        font-size: 0.85rem;
+        color: #c0392b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Cannabis: Mythen &amp; Evidenz</h1>
+      <p class="sub">Bitte geben Sie das Zugangspasswort ein.</p>
+      <form method="POST">
+        <input
+          type="password"
+          name="password"
+          placeholder="Passwort"
+          autocomplete="current-password"
+          autofocus
+          required
+        />
+        <button type="submit">Einloggen</button>
+      </form>
+      {error && <p class="error">Falsches Passwort. Bitte versuchen Sie es erneut.</p>}
+    </div>
+  </body>
+</html>
