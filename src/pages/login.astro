@@ -107,18 +107,56 @@ if (Astro.request.method === "POST") {
     <div class="card">
       <h1>Cannabis: Mythen &amp; Evidenz</h1>
       <p class="sub">Bitte geben Sie das Zugangspasswort ein.</p>
-      <form method="POST">
+      <form id="loginForm">
         <input
           type="password"
+          id="passwordInput"
           name="password"
           placeholder="Passwort"
           autocomplete="current-password"
           autofocus
           required
         />
-        <button type="submit">Einloggen</button>
+        <button type="submit" id="submitBtn">Einloggen</button>
       </form>
-      {error && <p class="error">Falsches Passwort. Bitte versuchen Sie es erneut.</p>}
+      <p class="error" id="errorMsg" style="display:none">
+        Falsches Passwort. Bitte versuchen Sie es erneut.
+      </p>
     </div>
+
+    <script>
+      const form = document.getElementById('loginForm');
+      const errorMsg = document.getElementById('errorMsg');
+      const submitBtn = document.getElementById('submitBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorMsg.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = '…';
+
+        try {
+          const body = new FormData(form);
+          const res = await fetch('/login', {
+            method: 'POST',
+            body,
+            credentials: 'same-origin',
+            redirect: 'follow',
+          });
+
+          if (res.ok || res.redirected) {
+            window.location.href = res.redirected ? res.url : '/';
+          } else {
+            errorMsg.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Einloggen';
+          }
+        } catch {
+          errorMsg.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Einloggen';
+        }
+      });
+    </script>
   </body>
 </html>
