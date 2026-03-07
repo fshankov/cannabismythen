@@ -1,0 +1,47 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader } from "@lib/content";
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.dashboard.list();
+  const paths = [];
+
+  for (const slug of slugs) {
+    const entry = await reader.collections.dashboard.read(slug);
+    if (entry && entry.status === "published") {
+      paths.push({ params: { slug } });
+    }
+  }
+
+  return paths;
+}
+
+const { slug } = Astro.params;
+const entry = await reader.collections.dashboard.read(slug!);
+
+if (!entry || entry.status !== "published") {
+  return Astro.redirect("/dashboard/");
+}
+
+const { content, internalNotes, ...meta } = entry;
+const { node } = await content();
+---
+
+<BaseLayout title={meta.title} description={meta.summary || undefined}>
+  <article class="dashboard-page">
+    <header>
+      <h1>{meta.title}</h1>
+    </header>
+
+    <!--
+      TODO: Replace this static table rendering with an interactive
+      D3/React dashboard component (src/components/dashboard/).
+      The current view shows the raw indicator tables as a reference.
+    -->
+    <div class="dashboard-content" set:html={node} />
+
+    <footer>
+      <a href="/dashboard/">&larr; Alle Zielgruppen</a>
+    </footer>
+  </article>
+</BaseLayout>

@@ -1,0 +1,43 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader } from "@lib/content";
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.faq.list();
+  const paths = [];
+
+  for (const slug of slugs) {
+    const entry = await reader.collections.faq.read(slug);
+    if (entry && entry.status === "published") {
+      paths.push({ params: { slug } });
+    }
+  }
+
+  return paths;
+}
+
+const { slug } = Astro.params;
+const entry = await reader.collections.faq.read(slug!);
+
+if (!entry || entry.status !== "published") {
+  return Astro.redirect("/faq/");
+}
+
+const { content, internalNotes, ...meta } = entry;
+const { node } = await content();
+---
+
+<BaseLayout title={meta.title} description={meta.summary || undefined}>
+  <article class="faq-page">
+    <header>
+      <h1>{meta.title}</h1>
+      {meta.theme && <p class="theme-label">{meta.theme}</p>}
+    </header>
+
+    <div class="faq-content" set:html={node} />
+
+    <footer>
+      <a href="/faq/">&larr; Alle FAQ-Themen</a>
+    </footer>
+  </article>
+</BaseLayout>

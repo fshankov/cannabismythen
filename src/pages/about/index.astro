@@ -1,0 +1,33 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getPublishedEntries } from "@lib/content";
+
+const entries = await getPublishedEntries("about");
+
+// Sort by sortOrder
+entries.sort((a, b) => {
+  const orderA = (a[1] as any).sortOrder ?? 99;
+  const orderB = (b[1] as any).sortOrder ?? 99;
+  return orderA - orderB;
+});
+---
+
+<BaseLayout title="Über uns" description="Über das CaRM-Projekt und das Team">
+  <h1>Über das Projekt</h1>
+  <p>
+    Informationen zum CaRM-Forschungsprojekt, zur Methodik,
+    zum Team und zum Klassifikationssystem.
+  </p>
+
+  <nav class="about-nav">
+    {entries.map(([slug, entry]) => {
+      const e = entry as any;
+      return (
+        <a href={`/about/${slug}/`} class="about-card">
+          <h2>{e.title}</h2>
+          {e.summary && <p>{e.summary}</p>}
+        </a>
+      );
+    })}
+  </nav>
+</BaseLayout>

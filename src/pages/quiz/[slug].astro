@@ -1,0 +1,49 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader } from "@lib/content";
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.quiz.list();
+  const paths = [];
+
+  for (const slug of slugs) {
+    const entry = await reader.collections.quiz.read(slug);
+    if (entry && entry.status === "published") {
+      paths.push({ params: { slug } });
+    }
+  }
+
+  return paths;
+}
+
+const { slug } = Astro.params;
+const entry = await reader.collections.quiz.read(slug!);
+
+if (!entry || entry.status !== "published") {
+  return Astro.redirect("/quiz/");
+}
+
+const { content, internalNotes, ...meta } = entry;
+const { node } = await content();
+---
+
+<BaseLayout title={meta.title} description={meta.summary || undefined}>
+  <article class="quiz-page">
+    <header>
+      <h1>{meta.title}</h1>
+      {meta.theme && <p class="theme-label">Thema: {meta.theme}</p>}
+      {meta.questionCount > 0 && <p>{meta.questionCount} Fragen</p>}
+    </header>
+
+    <!--
+      TODO: Replace this static content rendering with an interactive
+      React quiz component (src/components/quiz/QuizPlayer.tsx).
+      The current view shows the raw quiz content as a reference.
+    -->
+    <div class="quiz-content" set:html={node} />
+
+    <footer>
+      <a href="/quiz/">&larr; Alle Quiz-Module</a>
+    </footer>
+  </article>
+</BaseLayout>

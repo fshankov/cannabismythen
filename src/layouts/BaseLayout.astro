@@ -1,0 +1,38 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Evidenzbasierte Informationen zu Cannabis-Mythen" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | Cannabis: Mythen & Evidenz</title>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="/">Start</a>
+        <a href="/factsheets/">Factsheets</a>
+        <a href="/faq/">FAQ</a>
+        <a href="/quiz/">Quiz</a>
+        <a href="/scrollytelling/">Scrollytelling</a>
+        <a href="/dashboard/">Dashboard</a>
+        <a href="/about/">Über uns</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p>&copy; {new Date().getFullYear()} CaRM-Projekt</p>
+    </footer>
+  </body>
+</html>

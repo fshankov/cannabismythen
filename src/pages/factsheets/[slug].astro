@@ -1,0 +1,65 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader } from "@lib/content";
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.factsheets.list();
+  const paths = [];
+
+  for (const slug of slugs) {
+    const entry = await reader.collections.factsheets.read(slug);
+    if (entry && entry.status === "published") {
+      paths.push({ params: { slug } });
+    }
+  }
+
+  return paths;
+}
+
+const { slug } = Astro.params;
+const entry = await reader.collections.factsheets.read(slug!);
+
+if (!entry || entry.status !== "published") {
+  return Astro.redirect("/factsheets/");
+}
+
+const { content, internalNotes, ...meta } = entry;
+// Render Markdoc content
+const { node } = await content();
+---
+
+<BaseLayout title={meta.title} description={meta.summary || undefined}>
+  <article class="factsheet">
+    <header>
+      <span class="myth-id">{meta.mythId}</span>
+      <h1>{meta.title}</h1>
+      <p class={`classification classification--${meta.classification}`}>
+        {meta.classificationLabel}
+      </p>
+      {meta.tags && meta.tags.length > 0 && (
+        <div class="tags">
+          {meta.tags.map((tag: string) => (
+            <span class="tag">{tag}</span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <div class="factsheet-content" set:html={node} />
+
+    {meta.relatedMyths && meta.relatedMyths.length > 0 && (
+      <aside class="related-myths">
+        <h2>Verwandte Mythen</h2>
+        <ul>
+          {meta.relatedMyths.map((id: string) => (
+            <li><a href={`/factsheets/${id}/`}>{id}</a></li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
+    <footer>
+      <a href="/factsheets/">&larr; Alle Factsheets</a>
+    </footer>
+  </article>
+</BaseLayout>

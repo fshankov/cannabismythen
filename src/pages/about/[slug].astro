@@ -1,0 +1,42 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader } from "@lib/content";
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.about.list();
+  const paths = [];
+
+  for (const slug of slugs) {
+    const entry = await reader.collections.about.read(slug);
+    if (entry && entry.status === "published") {
+      paths.push({ params: { slug } });
+    }
+  }
+
+  return paths;
+}
+
+const { slug } = Astro.params;
+const entry = await reader.collections.about.read(slug!);
+
+if (!entry || entry.status !== "published") {
+  return Astro.redirect("/about/");
+}
+
+const { content, internalNotes, ...meta } = entry;
+const { node } = await content();
+---
+
+<BaseLayout title={meta.title} description={meta.summary || undefined}>
+  <article class="about-page">
+    <header>
+      <h1>{meta.title}</h1>
+    </header>
+
+    <div class="about-content" set:html={node} />
+
+    <footer>
+      <a href="/about/">&larr; Übersicht</a>
+    </footer>
+  </article>
+</BaseLayout>

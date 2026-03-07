@@ -1,0 +1,26 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getPublishedEntries } from "@lib/content";
+
+const entries = await getPublishedEntries("dashboard");
+---
+
+<BaseLayout title="Dashboard" description="Daten zu Cannabis-Mythen nach Zielgruppen">
+  <h1>Dashboard: Daten nach Zielgruppen</h1>
+  <p>
+    Erkunden Sie die Forschungsdaten zu 42 Cannabis-Mythen,
+    aufgeschlüsselt nach fünf Zielgruppen und fünf Indikatoren.
+  </p>
+
+  <section class="dashboard-segments">
+    {entries.map(([slug, entry]) => {
+      const e = entry as any;
+      return (
+        <a href={`/dashboard/${slug}/`} class="segment-card">
+          <h2>{e.title}</h2>
+          {e.summary && <p>{e.summary}</p>}
+        </a>
+      );
+    })}
+  </section>
+</BaseLayout>

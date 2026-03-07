@@ -1,0 +1,33 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getPublishedEntries } from "@lib/content";
+
+const entries = await getPublishedEntries("faq");
+
+// Sort by sortOrder
+entries.sort((a, b) => {
+  const orderA = (a[1] as any).sortOrder ?? 99;
+  const orderB = (b[1] as any).sortOrder ?? 99;
+  return orderA - orderB;
+});
+---
+
+<BaseLayout title="FAQ" description="Häufig gestellte Fragen zu Cannabis">
+  <h1>Häufig gestellte Fragen</h1>
+  <p>
+    Antworten auf die wichtigsten Fragen rund um Cannabis — thematisch geordnet
+    und wissenschaftlich fundiert.
+  </p>
+
+  <nav class="faq-nav">
+    {entries.map(([slug, entry]) => {
+      const e = entry as any;
+      return (
+        <a href={`/faq/${slug}/`} class="faq-theme-card">
+          <h2>{e.title}</h2>
+          {e.summary && <p>{e.summary}</p>}
+        </a>
+      );
+    })}
+  </nav>
+</BaseLayout>

@@ -1,0 +1,88 @@
+---
+title: Redaktionelle Richtlinien
+summary: 'Migrated from wiki root: CONTRIBUTING.md'
+tags:
+- Meta
+- Wiki
+status: draft
+internalNotes: 'GENERATED-CONTENT: Editorial guidelines for wiki contributors
+
+
+  AUTHOR-QUESTION
+
+
+  GENERATED-CONTENT: Automatisch aus Daten/Bericht generiert
+
+
+  AUTHOR-QUESTION: Frage an das Redaktionsteam (Englisch)
+
+
+  AUTHOR-TODO: Aufgabe für Autor:innen (Englisch)
+
+
+  AUTHOR-REVIEW: Inhalt benötigt Expertenprüfung
+
+
+  IDEA: Vorschlag oder Umsetzungsidee'
+publishedAt: '2026-03-07'
+updatedAt: '2026-03-07'
+---
+
+# Redaktionelle Richtlinien / Editorial Guidelines
+## Sprache / Language Convention
+
+- **Alle Inhalte:** Deutsch (Originalsprache des Projekts)
+- **Technische Kommentare** (`
+` etc.): Englisch
+- **Dateinamen:** Englisch/ASCII (keine Umlaute: ae, oe, ue, ss statt ä, ö, ü, ß)
+- **YAML-Frontmatter-Schlüssel:** Englisch (entsprechend dem Astro Content Model)
+
+## Dateistruktur
+
+Jede Factsheet-Datei hat folgende Struktur:
+
+1. **YAML-Frontmatter** — Metadaten (id, Kategorie, Klassifikation, Tags)
+2. **Überschrift** — Mythos-Aussage
+3. **Einordnung** — Blockzitat mit Klassifikation
+4. **Synthese** — Zusammenfassung der Erkenntnisse
+5. **Zentrale Erkenntnisse / Fakten** — Aufzählung der wichtigsten Befunde
+6. **Referenzen** — Wissenschaftliche Quellen
+7. **Daten nach Zielgruppen** — Indikator-Tabelle
+
+## Status-Marker
+
+Verwenden Sie diese HTML-Kommentare zur Kennzeichnung des Bearbeitungsstandes:
+
+```html
+
+
+
+
+```
+
+**Wichtig:** Diese Kommentare sind im gerenderten Markdown **nicht sichtbar** — sie dienen nur der internen Kommunikation.
+
+## Klassifikationsskala
+
+| Code | Einordnung | Bedeutung |
+|------|-----------|-----------|
+| 1 | richtig | Entspricht dem wissenschaftlichen Kenntnisstand |
+| 2 | eher richtig | Tendenziell zutreffend, mit Einschränkungen |
+| 3 | eher falsch | Tendenziell nicht zutreffend, enthält Teilwahrheiten |
+| 4 | falsch | Widerspricht dem wissenschaftlichen Kenntnisstand |
+| 0 | keine Aussage möglich | Evidenzlage erlaubt keine Einordnung |
+
+## Kategorien und Themen
+
+### Themen (aus Content Model)
+`übergreifend` · `substanz` · `körper` · `körper_psyche` · `psyche` · `soziales` · `rechtliches`
+
+### Kategorien (aus myths.json)
+`Allgemein` · `Jugend` · `Vergleich/Konsum` · `Risiko` · `Schwangerschaft` · `Medizin` · `Kognition` · `Psyche` · `Abhängigkeit` · `Sozial` · `Gesellschaft` · `Gesundheit`
+
+## Stil-Hinweise
+
+- Wissenschaftlich präzise, aber verständlich
+- Keine wertenden Formulierungen gegenüber Konsumierenden
+- Quellenangaben stets mit vollständiger Referenz
+- Bei FAQ: Kurze Antwort in Alltagssprache, ausführliche Antwort mit Fachbegriffen

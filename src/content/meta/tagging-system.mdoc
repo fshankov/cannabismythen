@@ -1,0 +1,92 @@
+---
+title: Tagging-System und Kategorien
+summary: ''
+tags:
+- Meta
+status: draft
+internalNotes: 'GENERATED-CONTENT: Taxonomy documentation from myths.json, content-model-schemas.ts,
+  and factsheet-template.md'
+publishedAt: '2026-03-07'
+updatedAt: '2026-03-07'
+---
+
+# Tagging-System und Kategorien
+## Übersicht
+
+Jeder Mythos/jedes Factsheet hat mehrere Klassifikationsebenen. Diese werden im YAML-Frontmatter der Factsheet-Dateien und in der Übersichtstabelle verwendet.
+
+## 1. Themen (Thematische Cluster)
+
+Die 7 Themen gruppieren die 42 Mythen nach inhaltlicher Zugehörigkeit:
+
+| Thema | Schlüssel | Mythen | Beschreibung |
+|-------|----------|--------|-------------|
+| Übergreifend | `übergreifend` | M01–M04 | Allgemeine Aussagen über Cannabis |
+| Substanz | `substanz` | M05–M07 | Eigenschaften der Substanz selbst |
+| Körper | `körper` | M08–M17 | Körperliche/physische Wirkungen |
+| Körper & Psyche | `körper_psyche` | M18–M21 | Wirkungen an der Schnittstelle |
+| Psyche | `psyche` | M22–M32 | Psychische Wirkungen und Abhängigkeit |
+| Soziales | `soziales` | M33–M38 | Soziale und verhaltensb. Auswirkungen |
+| Rechtliches | `rechtliches` | M39–M42 | Gesellschaftliche und rechtliche Aspekte |
+
+## 2. Kategorien (aus myths.json)
+
+Die Kategorien stammen aus der ursprünglichen Datenstruktur:
+
+| Kategorie | Verwendung |
+|-----------|-----------|
+| `Allgemein` | Übergreifende Mythen |
+| `Jugend` | Jugendspezifische Aspekte |
+| `Vergleich/Konsum` | Substanzvergleiche |
+| `Risiko` | Allgemeine Risiken |
+| `Schwangerschaft` | Schwangerschaftsbezogene Risiken |
+| `Medizin` | Medizinische Anwendungen |
+| `Gesundheit` | Allgemeine Gesundheitsaspekte |
+| `Kognition` | Kognitive Auswirkungen |
+| `Psyche` | Psychische Gesundheit |
+| `Abhängigkeit` | Abhängigkeitsbezogene Aspekte |
+| `Sozial` | Soziale Auswirkungen |
+| `Gesellschaft` | Gesellschaftliche Aspekte |
+
+## 3. Klassifikation
+
+| Wert | Code | YAML-Schlüssel |
+|------|------|---------------|
+| richtig | 1 | `classification: richtig` |
+| eher richtig | 2 | `classification: eher richtig` |
+| eher falsch | 3 | `classification: eher falsch` |
+| falsch | 4 | `classification: falsch` |
+| keine Aussage möglich | 0 | `classification: keine Aussage möglich` |
+
+## 4. Zielgruppen-Codes
+
+| Code | Zielgruppe | JSON-Schlüssel |
+|------|-----------|---------------|
+| adults | Erwachsene (18-70) | `adults` / `allgemein` |
+| minors | Minderjährige (16-17) | `minors` / `jugendliche` |
+| consumers | Konsumierende | `consumers` / `konsumierende` |
+| young_adults | Junge Erwachsene (18-26) | `young_adults` |
+| parents | Eltern | `parents` / `eltern` |
+
+## 5. Quiz-Zuordnungen
+
+| Quiz-ID | Titel | Farbe | Mythen |
+|---------|-------|-------|--------|
+| `quiz-koerper` | Cannabis & Körper | #1976D2 | M01, M02, M03, M08, M09, M10, M11, M14, M15, M16, M17 |
+| `quiz-psyche` | Cannabis & Psyche | #7B1FA2 | M18, M19, M20, M22, M23, M24, M25, M26, M27, M28, M30 |
+| `quiz-alltag` | Cannabis & Alltag | #388E3C | M04, M05, M06, M07, M12, M13, M21, M29, M31, M32, M33 |
+| `quiz-gesellschaft` | Cannabis & Gesellschaft | #F57C00 | M34, M35, M36, M37, M38, M39, M40, M41, M42 |
+
+## 6. Inhaltliche Tags
+
+Neben den systematischen Kategorien können Factsheets freie Tags erhalten. Empfohlene Tags:
+
+| Bereich | Tags |
+|---------|------|
+| Substanz | `thc`, `cbd`, `cannabinoide`, `dosierung`, `konsumform` |
+| Gesundheit | `atemwege`, `herz-kreislauf`, `krebs`, `schwangerschaft`, `immunsystem` |
+| Psyche | `psychose`, `depression`, `angst`, `adhs`, `suizid`, `abhängigkeit` |
+| Kognition | `gedächtnis`, `aufmerksamkeit`, `wahrnehmung`, `verkehr` |
+| Soziales | `beziehungen`, `leistung`, `kreativität`, `aggression` |
+| Rechtliches | `legalisierung`, `jugendschutz`, `prävalenz` |
+| Medizin | `schmerzen`, `schlaf`, `übelkeit`, `spastik`, `entzündung` |

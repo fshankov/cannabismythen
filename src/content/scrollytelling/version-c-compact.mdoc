@@ -1,0 +1,254 @@
+---
+title: 'Scrollytelling Version C: Kompakt (6 Schritte)'
+versionLabel: C
+stepCount: 6
+summary: ''
+tags:
+- Scrollytelling
+status: published
+internalNotes: 'GENERATED-CONTENT: Scrollytelling Version C from Prototype/scrollytelling-version-C.md
+
+
+  AUTHOR-QUESTION: Which version should be the primary implementation? See overview
+  for comparison.'
+publishedAt: '2026-03-07'
+updatedAt: '2026-03-07'
+---
+
+# Scrollytelling Version C: Kompakt (6 Schritte)
+
+Quelle: `Prototype/scrollytelling-version-C.md`
+
+**Leitfrage:** „42 Annahmen. Fünf Gruppen. Keine einfache Antwort."
+
+**Design-Philosophie:** Jeder Schritt muss ein neues Gefühl erzeugen — nicht nur neues Wissen, sondern eine neue Emotion. Sechs Schritte, sechs emotionale Takte.
+
+**Geschätzte Scroll-Zeit:** 3-4 Minuten
+
+| Schritt | Emotionaler Takt | Leser:in fühlt... |
+|---|---|---|
+| 1 | **Überraschung** | „Moment — vieles stimmt tatsächlich?" |
+| 2 | **Spannung** | „Wer hat also Recht? Es kommt darauf an?!" |
+| 3 | **Sorge** | „Jugendliche informieren sich an den falschen Stellen" |
+| 4 | **Erkenntnis** | „Etwas kennen heißt nicht, es zu verstehen" |
+| 5 | **Auflösung** | „OK — manches stimmt, manches nicht. Nuance zählt" |
+| 6 | **Handlung** | „Ich will mich selbst testen / mehr erfahren" |
+
+---
+
+## Schritt 1 — „Nicht alles ist falsch"
+
+**Takt: ÜBERRASCHUNG — Erwartungen unterlaufen, Neugier wecken**
+
+Daten: Vollständige Klassifikationsverteilung — 15× richtig, 5× eher richtig, 11× eher falsch, 9× falsch, 2× keine Aussage
+
+> *42 Annahmen über Cannabis. Wissenschaftlich geprüft.*
+>
+> *Wie viele davon sind tatsächlich falsch? Die meisten Menschen tippen: die Mehrheit. Doch das Ergebnis überrascht.*
+>
+> *15 Annahmen sind richtig. Weitere 5 stimmen eher. Nur 9 sind eindeutig falsch.*
+>
+> *Die Wahrheit über Cannabis ist differenzierter, als viele denken — in beide Richtungen. Und wer was richtig einschätzt, hängt davon ab, wen man fragt.*
+
+**Diagramm:** Animiertes Waffle-Chart — 7×6 Gitter, 42 Quadrate.
+
+Animation: Alle 42 Quadrate erscheinen grau → Pause → Quadrate füllen sich nacheinander mit Klassifikationsfarbe, beginnend mit grün (richtig) → dann Lime (eher richtig) → Bernstein (eher falsch) → Koralle (falsch) → Grau (keine Aussage)
+
+Farben (dunkles Theme):
+- richtig: #4ADE80 (grün)
+- eher richtig: #A3E635 (lime)
+- eher falsch: #F59E0B (bernstein)
+- falsch: #EF6461 (koralle)
+- keine Aussage: #6B7280 (grau)
+
+---
+
+## Schritt 2 — „Wer hat Recht? Es kommt darauf an."
+
+**Takt: SPANNUNG — keine Gruppe hat ein Monopol auf die Wahrheit**
+
+Dies ist der **narrative Motor** — das zentrale Paradox der gesamten Geschichte.
+
+**Linke Spalte — „Wo Erfahrung hilft"** (Konsumierende besser):
+- #28: Motivationsverlust — Konsumierende 48,0% vs Erwachsene 25,1% (Lücke: +22,9)
+- #37: Soziales Niveau — Konsumierende 62,9% vs Erwachsene 35,8% (Lücke: +27,1)
+- #34: Schadet Beziehungen — Konsumierende 77,2% vs Erwachsene 54,2% (Lücke: +23,0)
+
+**Rechte Spalte — „Wo Erfahrung täuscht"** (Konsumierende schlechter):
+- #41: Legalisierung → mehr Konsum — Konsumierende 48,6% vs Erwachsene 79,3% (Lücke: −30,7)
+- #2: Cannabis ist harmlos — Konsumierende 45,7% vs Erwachsene 63,8% (Lücke: −18,1)
+- #5: Dosierung schwierig — Konsumierende 56,9% vs Erwachsene 76,4% (Lücke: −19,5)
+
+> *Fünf Bevölkerungsgruppen wurden befragt: Erwachsene, Minderjährige, aktuelle Konsumierende, junge Erwachsene und Eltern. Wer weiß am meisten?*
+>
+> *Es kommt auf die Frage an.*
+>
+> *Beim Thema Motivation und Stigma liegen Konsumierende weit vorn — sie wissen, dass Cannabis nicht zwingend antriebslos macht (+23 Punkte besser als der Durchschnitt) und nichts mit sozialem Niveau zu tun hat (+27).*
+>
+> *Aber bei der Frage, ob Cannabis harmlos ist? Da liegen Konsumierende gefährlich falsch: nur 46% erkennen, dass Cannabis nicht harmlos ist. Und dass die Teillegalisierung den Konsum ansteigen lässt — die größte Wissenslücke im gesamten Datensatz — schätzen nur 49% richtig ein.*
+>
+> *Eigene Erfahrung kann informieren — oder in die Irre führen.*
+
+**Diagramm:** Divergierendes Butterfly-Chart (horizontal, zentriert bei 0).
+
+Linke Balken: Koralle (#EF6461). Rechte Balken: Smaragd (#3ECF8E). Mittellinie: weiß mit Label „0 = kein Unterschied".
+
+**Interaktion:** Bei Hover/Tap expandiert jeder Balken, um alle 5 Gruppenbalken zu zeigen.
+
+---
+
+## Schritt 3 — „Die gefährlichste Wissenslücke"
+
+**Takt: SORGE — die Jugend-Informationskrise**
+
+Mythen-Daten:
+- #3: Heranwachsende → stärkere Schäden — ALLE Gruppen ~75-78% (EHER RICHTIG)
+- #24: Psychosen — Erwachsene 74,3%, Konsumierende 56,3%, Minderjährige 75,7% (EHER RICHTIG)
+
+Informationskanal-Daten:
+- Apotheke/Arztpraxis: Vertrauen 91,7 Pkt. · Nutzung Erwachsene 60,4% · Minderjährige 37,3%
+- Influencer:innen: Vertrauen 49,0 Pkt. · Nutzung Erwachsene 2,7% · Minderjährige 16,5%
+- Soziale Medien: Nutzung Erwachsene 7,6% · Minderjährige 26,7%
+- Beratungsstelle: Vertrauen 91,9 Pkt. · Nutzung Erwachsene 30,1% · Minderjährige 20,8%
+
+> *Beim Risiko für junge Gehirne herrscht seltener Konsens: rund 78% aller Gruppen wissen, dass Cannabis für Heranwachsende besonders schädlich ist.*
+>
+> *Aber beim Psychoserisiko bricht dieser Konsens: Konsumierende schätzen es deutlich schlechter ein als alle anderen — nur 56% statt 75%.*
+>
+> *Und woher kommt das Wissen? Die vertrauenswürdigsten Quellen — Apotheken und Beratungsstellen (jeweils über 91 Vertrauenspunkte) — werden von Erwachsenen am häufigsten genutzt (60%). Minderjährige suchen dagegen bei sozialen Medien (27%) und Influencer:innen (17%) — den Quellen mit dem niedrigsten Vertrauen.*
+>
+> *Die Kluft zwischen dem, wo Jugendliche suchen, und dem, was verlässlich ist, ist alarmierend.*
+
+**Diagramm:** Drei-Phasen-Animation innerhalb eines Schritts.
+
+**Phase 1** — „Der seltene Konsens": 5 Balken für Mythos #3, alle ~75-78%. Fast identisch.
+
+**Phase 2** — „Der Bruch": Dieselben 5 Balken verwandeln sich in Mythos #24 (Psychosen). Konsumierende-Balken schrumpft dramatisch auf 56,3%. Pulsierendes Label: „−22 Punkte"
+
+**Phase 3** — „Warum?": Balken transformieren sich in ein Dumbbell-Chart der Informationskanäle. Reihen sortiert nach Vertrauen. Influencer-Reihe hervorgehoben: „17% der Minderjährigen · 49 Vertrauenspunkte"
+
+**Warum drei Phasen in einem Schritt:** Das ist das emotionale Crescendo. Phase 1 schafft Komfort. Phase 2 zerstört ihn. Phase 3 erklärt ihn. Konsens → Bruch → Erklärung.
+
+---
+
+## Schritt 4 — „Bekannt heißt nicht verstanden"
+
+**Takt: ERKENNTNIS — das Meta-Muster über Wissen selbst**
+
+| Mythos | Kenntnis | Richtigkeit | Klassifikation |
+|---|---|---|---|
+| #10 — Cannabis wirkt gegen Schmerzen | 68,3% | 49,7% | EHER FALSCH |
+
+Weitere Scatter-Daten (Erwachsene):
+- #19: Kenntnis 60,6%, Richtigkeit 87,6% (bekannt UND verstanden)
+- #21: Kenntnis 64,5%, Richtigkeit 91,7% (bekannt UND verstanden)
+- #22: Kenntnis 58,1%, Richtigkeit 51,6% (bekannt, schlecht verstanden)
+- #28: Kenntnis 26,3%, Richtigkeit 25,1% (unbekannt UND missverstanden)
+
+> *Die bekannteste Behauptung der gesamten Studie: „Cannabis wirkt gegen Schmerzen." 68% der Bevölkerung kennen sie. Aber nur die Hälfte schätzt sie richtig ein.*
+>
+> *Die Wirklichkeit: Die schmerzlindernde Wirkung ist gering, beschränkt sich auf wenige Schmerzformen und geht mit erheblichen Nebenwirkungen einher. Selbstberichte werden auf Placeboeffekte zurückgeführt.*
+>
+> *Dieses Muster zieht sich durch die gesamte Studie: Bekanntheit ist nicht Verständnis. Über Cannabis wird viel gesprochen — aber richtig verstanden wird wenig.*
+
+**Diagramm:** Streudiagramm.
+- X-Achse: Kenntnis (0%–70%), Label „Bekanntheit"
+- Y-Achse: Richtigkeit (0–100 Punkte), Label „Richtigkeit"
+- Jeder Punkt = ein Mythos (40 Punkte, die mit Richtigkeitsdaten)
+- Punktgröße: proportional zu Bedeutung
+- Punktfarbe: Klassifikationsfarbe
+- Diagonale Linie: wo Kenntnis = Richtigkeit
+- Punkte UNTER der Diagonale = „bekannter als verstanden" (gefährlich)
+
+Quadranten-Labels:
+- Oben rechts: „Bekannt & Verstanden ✓" (smaragd)
+- Unten rechts: „Bekannt, aber Missverstanden ⚠" (koralle) ← Mythos #10 hier
+- Oben links: „Wenig bekannt, aber richtig eingeschätzt"
+- Unten links: „Weder bekannt noch verstanden"
+
+---
+
+## Schritt 5 — „Differenzieren statt Dramatisieren"
+
+**Takt: AUFLÖSUNG — Nuance IST die Antwort**
+
+**Drei WAHRE Mythen** (hohe Richtigkeit, grüne Badges):
+- #4: Cannabis weniger schädlich als Alkohol — Erwachsene 69,7% (RICHTIG)
+- #7: Zusätze/Streckmittel gefährlich — Erwachsene 85,7% (RICHTIG)
+- #6: Cannabis kann Hirnschäden verursachen — Erwachsene 89,0% (RICHTIG)
+
+**Drei FALSCHE Mythen** (niedrige Richtigkeit, Koralle-Badges):
+- #28: Motivationsverlust — Erwachsene 25,1% (FALSCH)
+- #26: Hilft gegen Depressionen — Erwachsene 30,2% (FALSCH)
+- #39: Großer Teil konsumiert — Erwachsene 25,5% (FALSCH)
+
+> *Cannabis IST weniger schädlich als Alkohol — 70% wissen das. Streckmittel im Schwarzmarkt-Cannabis SIND gefährlich — 86% stimmen zu. Cannabis KANN Hirnschäden verursachen — 89% liegen richtig.*
+>
+> *Aber Cannabis verursacht KEINEN generellen Motivationsverlust — nur 25% wissen das. Es hilft NICHT gegen Depressionen — nur 30% schätzen das richtig ein. Und nur 10% der Erwachsenen haben im letzten Jahr konsumiert — nicht die gefühlte Mehrheit.*
+>
+> *Risikokommunikation funktioniert nicht durch Panikmache und nicht durch Verharmlosung. Sie funktioniert durch Differenzierung: Es gibt echte Risiken und echte Übertreibungen. Beides gleichzeitig anzuerkennen ist der Schlüssel zu informierten Entscheidungen.*
+
+**Diagramm:** Geteilter Bildschirm — „Stimmt" vs „Stimmt nicht"
+
+Linke Spalte (Smaragd-Glühen): 3 Karten mit grünem „Stimmt"-Badge
+Rechte Spalte (Koralle-Glühen): 3 Karten mit rotem „Stimmt nicht"-Badge
+
+Trennlinie: Gold (#E8B84B) mit Label „Die Wahrheit liegt im Detail"
+
+---
+
+## Schritt 6 — „Wie gut kennen Sie sich aus?"
+
+**Takt: HANDLUNG — vom passiven Lesen zum aktiven Teilnehmen**
+
+> *42 Annahmen. Fünf Gruppen. Keine einfache Antwort.*
+>
+> *Konsumierende wissen mehr über Stigma — aber unterschätzen die Risiken. Eltern erkennen die Gefahren — aber halten an Vorurteilen fest. Minderjährige suchen an den falschen Stellen. Und die größte Kluft liegt nicht zwischen richtig und falsch — sondern zwischen bekannt und verstanden.*
+>
+> *Wie gut kennen Sie sich aus?*
+
+**Diagramm:** Das Waffle-Chart aus Schritt 1 kehrt zurück — transformiert.
+
+Animation: Jedes Quadrat pulsiert kurz mit der Gruppenfarbe der niedrigsten Richtigkeit für diesen Mythos.
+
+Gruppenfarben: Erwachsene #94A3B8, Konsumierende #2DD4BF, Junge Erwachsene #FBBF24, Eltern #818CF8, Minderjährige #FB923C
+
+**CTA-Karten:**
+
+1. **„Teste dein Wissen"** (Smaragd-Rahmen) → /quiz
+   *„Vier Quizze, 42 Fragen — wie schneidest du ab?"*
+
+2. **„Alle 42 Mythen"** (Gold-Rahmen) → /faktencheck
+   *„Filtern, sortieren, die Faktenlage erkunden"*
+
+3. **„Informationswege"** (Teal-Rahmen) → /informationswege
+   *„Wer vertraut welchen Quellen — und wer nutzt sie?"*
+
+---
+
+## Zusammenfassung: Verwendete Mythen
+
+| Schritt | Verwendete Mythen | Warum ausgewählt |
+|---|---|---|
+| 1 | Alle 42 (Aggregat) | Klassifikationsüberblick — die Überraschung |
+| 2 | #28, #37, #34, #41, #2, #5 | Drei größte Konsumierende-besser + drei größte Konsumierende-schlechter Lücken |
+| 3 | #3, #24 + Informationskanäle | Jugend-Konsens + Psychose-Bruch + Informationskrise |
+| 4 | #10, #19, #21, #22, #28 (Kontext) | Kenntnis × Richtigkeit — das Meta-Muster |
+| 5 | #4, #7, #6 (wahr) + #28, #26, #39 (falsch) | Beste Beispiele für „stimmt" vs „stimmt nicht" |
+| 6 | Alle 42 (Rückblende) | Waffle-Rückkehr — den Kreis schließen |
+
+**Insgesamt explizit vorgestellte Mythen:** 14 (von 42)
+**In Diagrammen sichtbare Mythen:** 40+ (Waffle zeigt alle, Scatter zeigt alle mit Richtigkeitsdaten)
+
+---
+
+## Vorteile von Version C
+
+| Dimension | Version A (9 Schritte) | Version B (10 Schritte) | **Version C (6 Schritte)** |
+|---|---|---|---|
+| **Scroll-Zeit** | 6-8 Min. | 6-8 Min. | **3-4 Min.** |
+| **Abbruch-Risiko** | Hoch (repetitiv) | Mittel (Schritt 4 bremst) | **Niedrig (jeder Schritt wechselt Register)** |
+| **Emotionale Vielfalt** | 3 Stimmungen | 5 Stimmungen | **6 Stimmungen (jeder Schritt = neue Emotion)** |
+| **Datendichte/Schritt** | Niedrig (1 Mythos) | Mittel (1-2 Mythen) | **Hoch (2-6 Datenpunkte, geschichtet)** |
+| **Social-Media-tauglich** | Bedingt | Bedingt | **Jeder Schritt funktioniert als eigenständige Grafik** |
+→ [Versionsvergleich](_overview.md) · [Chart-Spezifikationen](chart-specifications.md)

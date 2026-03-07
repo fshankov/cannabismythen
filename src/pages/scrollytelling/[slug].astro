@@ -1,0 +1,48 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader } from "@lib/content";
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.scrollytelling.list();
+  const paths = [];
+
+  for (const slug of slugs) {
+    const entry = await reader.collections.scrollytelling.read(slug);
+    if (entry && entry.status === "published") {
+      paths.push({ params: { slug } });
+    }
+  }
+
+  return paths;
+}
+
+const { slug } = Astro.params;
+const entry = await reader.collections.scrollytelling.read(slug!);
+
+if (!entry || entry.status !== "published") {
+  return Astro.redirect("/scrollytelling/");
+}
+
+const { content, internalNotes, ...meta } = entry;
+const { node } = await content();
+---
+
+<BaseLayout title={meta.title} description={meta.summary || undefined}>
+  <article class="scrollytelling-page">
+    <header>
+      <h1>{meta.title}</h1>
+      {meta.versionLabel && <p class="version-label">Version {meta.versionLabel}</p>}
+    </header>
+
+    <!--
+      TODO: Replace this static content rendering with an interactive
+      scrollytelling component using React + D3 (src/components/scrollytelling/).
+      The current view shows the narrative content as a reference.
+    -->
+    <div class="scrollytelling-content" set:html={node} />
+
+    <footer>
+      <a href="/scrollytelling/">&larr; Alle Versionen</a>
+    </footer>
+  </article>
+</BaseLayout>

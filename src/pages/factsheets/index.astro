@@ -1,0 +1,39 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader, getPublishedEntries } from "@lib/content";
+
+const entries = await getPublishedEntries("factsheets");
+
+// Sort by myth number
+entries.sort((a, b) => {
+  const numA = (a[1] as any).mythNumber ?? 0;
+  const numB = (b[1] as any).mythNumber ?? 0;
+  return numA - numB;
+});
+---
+
+<BaseLayout title="Factsheets" description="Wissenschaftliche Einordnung aller 42 Cannabis-Mythen">
+  <h1>Factsheets: 42 Cannabis-Mythen</h1>
+  <p>
+    Jeder Mythos wurde auf Basis aktueller wissenschaftlicher Evidenz eingeordnet.
+    Klicken Sie auf einen Mythos, um das vollständige Factsheet zu lesen.
+  </p>
+
+  <section class="factsheet-list">
+    {entries.map(([slug, entry]) => {
+      const e = entry as any;
+      return (
+        <article class="factsheet-card">
+          <a href={`/factsheets/${slug}/`}>
+            <span class="myth-number">Mythos {e.mythNumber}</span>
+            <h2>{e.title}</h2>
+            <span class={`classification classification--${e.classification}`}>
+              {e.classificationLabel}
+            </span>
+            {e.summary && <p>{e.summary}</p>}
+          </a>
+        </article>
+      );
+    })}
+  </section>
+</BaseLayout>

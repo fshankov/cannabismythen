@@ -1,0 +1,67 @@
+---
+title: Datenquellen — Verzeichnis der Quelldateien
+summary: ''
+tags:
+- Meta
+status: draft
+internalNotes: 'GENERATED-CONTENT: Reference of source data files used to generate
+  wiki content'
+publishedAt: '2026-03-07'
+updatedAt: '2026-03-07'
+---
+
+# Datenquellen — Verzeichnis der Quelldateien
+## Primäre Datenquellen
+
+| Datei | Pfad | Inhalt | Verwendet für |
+|-------|------|--------|--------------|
+| **myths.json** | `data/myths.json` | 42 Mythen (ID, Aussage, Klassifikation, Kategorie) | Factsheet-Übersicht, Quiz, INDEX |
+| **factsheets.json** | `data/factsheets.json` | 10 Factsheets (Synthese, Fakten, Referenzen) | Factsheets m01-m10, FAQ |
+| **myth_indicators.json** | `data/myth_indicators.json` | Indikatordaten für 5 Zielgruppen | Dashboard, Factsheets, Quiz-Vergleich |
+| **info_channels.json** | `data/info_channels.json` | Informationskanäle (Nutzung, Vertrauen, Potenzial) | Dashboard (Informationskanäle) |
+
+## Sekundäre Datenquellen
+
+| Datei | Pfad | Inhalt | Verwendet für |
+|-------|------|--------|--------------|
+| **Abschlussbericht** | `Sources/English translation/CaRM_Final_Report_English.md` | Vollständiger Forschungsbericht (39 Prüfthesen ab Zeile 3478) | Factsheets m11-m42, Methodik, About |
+| **Abschlussbericht (DOCX)** | `Sources/Abschlussbericht CaRM - final - ohne Endnote und nachformatiert.docx` | Original-DOCX des Berichts | Referenz für Textprüfung |
+| **quizzes.json** | `Prototype/quizzes.json` | 4 Quiz-Gruppierungen mit Mythos-Zuordnungen | Quiz-Dateien |
+| **scrollytelling_selection.json** | `Prototype/scrollytelling_selection.json` | 9 Mythen für Scrollytelling Version A | Scrollytelling Version A |
+| **scrollytelling-version-B.md** | `Prototype/scrollytelling-version-B.md` | Scrollytelling Version B (10 Schritte) | Scrollytelling Version B |
+| **scrollytelling-version-C.md** | `Prototype/scrollytelling-version-C.md` | Scrollytelling Version C (6 Schritte) | Scrollytelling Version C |
+
+## Vorlagen und Schemas
+
+| Datei | Pfad | Inhalt |
+|-------|------|--------|
+| **factsheet-template.md** | `Prototype/factsheet-template.md` | Template für Factsheet-Markdown-Dateien |
+| **content-model-schemas.ts** | `Prototype/content-model-schemas.ts` | TypeScript-Schema für Astro Content Collections |
+
+## Weitere Projektdokumente
+
+| Datei | Pfad | Inhalt |
+|-------|------|--------|
+| **about.qmd** | `about.qmd` | Bestehende About-Seite (Quarto) |
+| **CaRM_Miro_Materials.md** | `Sources/CaRM_Miro_Materials.md` | UX-Workshop-Materialien, Sitemap-Varianten |
+| **CaRM_Project_Delivery_Plan.md** | `Sources/CaRM_Project_Delivery_Plan.md` | Projektlieferplan (MVP → v2) |
+| **Web_Tool_Design_Recommendations.md** | `Web_Tool_Design_Recommendations.md` | UX/Design-Empfehlungen |
+
+## Excel-Daten
+
+| Datei | Pfad | Inhalt |
+|-------|------|--------|
+| **Ergebnisse CaRM Tab sort 1.xlsx** | `Sources/Ergebnisse CaRM Tab sort 1.xlsx` | Rohdaten der Mythen-Indikatoren |
+| **Ergebnisse CaRM NUR MYTHEN.xlsx** | `Sources/Ergebnisse CaRM NUR MYTHEN.xlsx` | Nur Mythen-bezogene Daten |
+| **CaRM_MythBeliefSurvey_EN.xlsx** | `Sources/English translation/CaRM_MythBeliefSurvey_EN.xlsx` | Befragungsdaten (englische Übersetzung) |
+
+## Hinweis zu Übersetzungsartefakten
+
+Die Datei `CaRM_Final_Report_English.md` enthält teilweise Übersetzungsartefakte, bei denen deutsche Wörter durch englische ersetzt wurden:
+- „with" statt „mit"
+- „Consumption" statt „Konsum"
+- „all" statt „alle"
+- „never" statt „nie"
+- „without" statt „ohne"
+
+Für die endgültige Textprüfung der Factsheets m11-m42 sollte immer das Original-DOCX (`Abschlussbericht CaRM - final - ohne Endnote und nachformatiert.docx`) herangezogen werden.

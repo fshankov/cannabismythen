@@ -1,0 +1,177 @@
+---
+title: Chart-Spezifikationen für Scrollytelling
+versionLabel: Tech
+stepCount: 0
+summary: ''
+tags:
+- Scrollytelling
+status: published
+internalNotes: 'GENERATED-CONTENT: Chart specifications for all scrollytelling versions
+
+
+  AUTHOR-TODO: Finalize chart library decision (D3 vs. Chart.js vs. Observable Plot)
+  based on team capabilities.
+
+
+  IDEA: Consider using Observable Framework for rapid prototyping of the scatter plot
+  (Step 4/7), then export to production D3.'
+publishedAt: '2026-03-07'
+updatedAt: '2026-03-07'
+---
+
+# Chart-Spezifikationen für Scrollytelling
+
+Technische Vorgaben für die Diagramme aller drei Scrollytelling-Versionen. Dieses Dokument dient als Referenz für die Implementierung.
+
+---
+
+## Farbpalette
+
+### Klassifikationsfarben (dunkles Theme)
+
+| Klassifikation | Farbe | Hex | Verwendung |
+|---|---|---|---|
+| richtig | Grün | `#4ADE80` | Waffle, Badges, Scatter-Punkte |
+| eher richtig | Lime | `#A3E635` | Waffle, Badges, Scatter-Punkte |
+| eher falsch | Bernstein | `#F59E0B` | Waffle, Badges, Scatter-Punkte |
+| falsch | Koralle | `#EF6461` | Waffle, Badges, Scatter-Punkte |
+| keine Aussage | Grau | `#6B7280` | Waffle |
+
+### Gruppenfarben
+
+| Gruppe | Farbe | Hex |
+|---|---|---|
+| Erwachsene (18-70) | Schieferblau | `#94A3B8` |
+| Konsumierende | Teal | `#2DD4BF` |
+| Junge Erwachsene | Gold | `#FBBF24` |
+| Eltern | Lila | `#818CF8` |
+| Minderjährige | Orange | `#FB923C` |
+
+### Akzentfarben
+
+| Verwendung | Farbe | Hex |
+|---|---|---|
+| Positiver Akzent (Konsumierende besser) | Smaragd | `#3ECF8E` |
+| Negativer Akzent (Konsumierende schlechter) | Koralle | `#EF6461` |
+| Neutral/Highlight | Gold | `#E8B84B` |
+| Hintergrund | Dunkelgrün | `#1A2F24` |
+
+---
+
+## Diagrammtypen nach Version
+
+### Version A — Original (9 Schritte)
+
+| Schritt | Diagrammtyp | Datenquelle | Anmerkungen |
+|---|---|---|---|
+| 1 | Gruppierter Balken | myth-26: Richtigkeit nach 3 Gruppen | Niedrige Werte hervorheben |
+| 2 | Geteilter Balken | myth-28: Erwachsene (25,1) vs Konsumierende (48,0) vs Eltern (27,7) | Erfahrungslücke zeigen |
+| 3 | Große Zahl + Punktarray | myth-39: wahrgenommene vs tatsächliche Prävalenz | Einzelne große Zahl |
+| 4 | Divergierender Balken | myth-02: Konsumierende vs Eltern, Erwachsene als Referenz | Gruppendisagreement |
+| 5 | Icon-Array / Waffle | myth-40: 36% richtig vs 64% falsch | Einfache Proportion |
+| 6 | Gruppierter Balken mit Highlight | myth-41: Konsumierende (48,6) vs Junge Erw. (73,1) vs Eltern (75,5) | „Richtig"-Klassifikation zeigen |
+| 7 | Gestapelter/Gradient-Balken | myth-10: Kenntnis (68,3%) vs Richtigkeit (49,7%) | Bekanntheit ≠ Verständnis |
+| 8 | Slope-Chart | myth-34: Konsumierende (77,2) → Eltern (53,7) | Divergenz zeigen |
+| 9 | Abschlussvergleich | myth-37: Richtigkeitsbalken (35,8%) + Stigma-Text | Anti-Stigma-Botschaft |
+
+### Version B — „Wer hat Recht?" (10 Schritte)
+
+| Schritt | Diagrammtyp | Datenpunkte | Anmerkungen |
+|---|---|---|---|
+| 1 | Animiertes Waffle (7×6) | Alle 42 Mythen nach Klassifikation | Grau → Farbe, grün zuerst |
+| 2 | Animierte Zahl → Gruppierte Balken | myth-28: 5 Gruppen-Richtigkeit | „25,1%" morpht in Balken |
+| 3 | Divergierendes Butterfly-Chart | 6 Mythen: 3 besser, 3 schlechter (Konsumierende vs Erwachsene) | Zentrales narratives Element |
+| 4 | 2× Radar/Spinnennetz | Eltern vs Konsumierende: 6 Mythen | Komplementäres Wissensmuster |
+| 5 | Morphende Balken | myth-03 (Konsens ~78%) → myth-24 (Konsumierende 56,3%) | Konsens → Bruch |
+| 6 | Dumbbell-Chart | 4 Informationskanäle: Minderjährige vs Erwachsene Nutzung | Linie = Vertrauensfarbe |
+| 7 | Streudiagramm | 40+ Mythen: Kenntnis (X) × Richtigkeit (Y) | Diagonale Referenzlinie |
+| 8 | Klassifikations-Badge-Parade | 3 „richtig"-Mythen (#4, #7, #6) | Grüne „Stimmt"-Badges |
+| 9 | Slope-Chart | 2 Mythen (#37, #39): Erwachsene → Konsumierende | Erfahrung hilft bei Stigma |
+| 10 | Waffle-Rückblende + CTA | Alle 42 Mythen + Gruppenfarb-Pulse | 3 CTA-Karten |
+
+### Version C — Kompakt (6 Schritte)
+
+| Schritt | Diagrammtyp | Datenpunkte | Anmerkungen |
+|---|---|---|---|
+| 1 | Animiertes Waffle (7×6) | Alle 42 Mythen nach Klassifikation | Identisch mit Version B, Schritt 1 |
+| 2 | Divergierendes Butterfly-Chart | 6 Mythen: Konsumierenden-Paradox | Identisch mit Version B, Schritt 3 |
+| 3 | Drei-Phasen-Animation | Phase 1: Balken myth-03, Phase 2: Balken myth-24, Phase 3: Dumbbell Informationskanäle | Komplexester Schritt technisch |
+| 4 | Streudiagramm | 40+ Mythen: Kenntnis × Richtigkeit | Identisch mit Version B, Schritt 7 |
+| 5 | Geteilte Karten | 3 „Stimmt" + 3 „Stimmt nicht" Karten | CSS-only möglich |
+| 6 | Waffle-Rückblende + CTA | Alle 42 Mythen + 3 CTA-Karten | Identisch mit Version B, Schritt 10 |
+
+---
+
+## Technische Umsetzung
+
+### Produktions-Stack
+
+| Technologie | Verwendung |
+|---|---|
+| **D3.js** | Waffle-Charts, Butterfly-Charts, Scatter-Plots, Dumbbell-Charts |
+| **Scrollama** | Scroll-basierte Triggerlogik für Animationen |
+| **CSS Transitions** | Badge-Animationen, Karten-Ein-/Ausblendungen |
+| **Framer Motion** (optional) | Morphing-Animationen zwischen Diagrammtypen |
+
+### Lovable/Prototyp-Annäherungen
+
+| Produktions-Chart | Lovable-Annäherung |
+|---|---|
+| Animiertes Waffle (D3) | CSS Grid + Tailwind animate |
+| Butterfly-Chart (D3) | Styled divs mit width%-Balken |
+| Morphende Balken (D3+Scrollama) | Zwei statische Ansichten, Fade-Übergang |
+| Streudiagramm (D3) | Statisch positionierte Punkte (CSS absolute) |
+| Split-Karten-Parade | Tailwind-Karten mit Slide-in-Animation |
+| Dumbbell-Chart (D3) | Styled divs mit left/right positioning |
+
+### Responsive-Vorgaben
+
+- **Desktop (>1024px):** Chart-Bereich 60% Breite, Text 40% (sticky sidebar)
+- **Tablet (768-1024px):** Chart oben, Text unten (full-width stack)
+- **Mobile (<768px):** Chart oben (aspect-ratio 4:3), Text scrollt darunter
+
+### Barrierefreiheit
+
+- Alle Diagramme benötigen `aria-label` mit Zusammenfassung der Kernaussage
+- Farben allein dürfen nicht die einzige Unterscheidung sein (zusätzliche Muster oder Labels)
+- Animationen müssen mit `prefers-reduced-motion` deaktivierbar sein
+- Screen-Reader-Alternative: Tabellarische Darstellung der Daten
+
+---
+
+## Animationsrichtlinien
+
+| Element | Dauer | Easing | Trigger |
+|---|---|---|---|
+| Waffle-Quadrat-Füllung | 80ms pro Quadrat | ease-out | Beim Scroll in Viewport |
+| Balken-Wachstum | 600ms | ease-in-out | Beim Scroll in Viewport |
+| Zahl-Morphing | 800ms | ease-out | Beim Scroll in Viewport |
+| Karten-Einblendung | 400ms | ease-out, 200ms versetzt | Beim Scroll in Viewport |
+| Phasen-Übergang (Schritt 3, Version C) | 800ms | ease-in-out | Beim weiteren Scrollen |
+| Scatter-Punkte-Einblendung | 40ms pro Punkt, links→rechts | ease-out | Beim Scroll in Viewport |
+
+---
+
+## Gemeinsame Elemente
+
+### Waffle-Chart (Schritte 1/6 in B und C, Schritt 5 in A)
+
+```
+Gitter: 7 Spalten × 6 Reihen = 42 Zellen
+Zellgröße: 48×48px (Desktop), 32×32px (Mobile)
+Abstand: 4px
+Gesamtgröße: ~360×300px (Desktop)
+Sortierung: nach Mythos-Nummer (m01 oben links → m42 unten rechts)
+```
+
+### CTA-Karten (Abschluss-Schritt)
+
+```
+Hintergrund: #1A2F24
+Rahmenfarbe: Smaragd / Gold / Teal (je nach Karte)
+Rundung: 12px
+Hover: translateY(-2px) + Rahmen-Glühen
+Anordnung: 3 Karten nebeneinander (Desktop), gestapelt (Mobile)
+```
+
+→ [Version A](version-A-original.md) · [Version B](version-B-wer-hat-recht.md) · [Version C](version-C-compact.md) · [Versionsvergleich](_overview.md)
