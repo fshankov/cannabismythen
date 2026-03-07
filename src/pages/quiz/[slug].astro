@@ -32,7 +32,7 @@ const { node } = await content();
     <header>
       <h1>{meta.title}</h1>
       {meta.theme && <p class="theme-label">Thema: {meta.theme}</p>}
-      {meta.questionCount > 0 && <p>{meta.questionCount} Fragen</p>}
+      {(meta.questionCount ?? 0) > 0 && <p>{meta.questionCount} Fragen</p>}
     </header>
 
     <!--
