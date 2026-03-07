@@ -17,8 +17,8 @@ The site presents 42 scientifically evaluated cannabis myths across multiple for
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/REPO_OWNER/cannabis-science-web.git
-cd cannabis-science-web
+git clone https://github.com/fshankov/cannabismythen.git
+cd cannabismythen
 
 # 2. Install dependencies
 npm install

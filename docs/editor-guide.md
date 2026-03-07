@@ -141,8 +141,8 @@ For developers who want to run the CMS locally:
 
 ```bash
 # Clone and install
-git clone https://github.com/REPO_OWNER/cannabis-science-web.git
-cd cannabis-science-web
+git clone https://github.com/fshankov/cannabismythen.git
+cd cannabismythen
 npm install
 
 # Create .env with your OAuth credentials

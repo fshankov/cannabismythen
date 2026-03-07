@@ -238,7 +238,7 @@ export default config({
   storage: {
     kind: "github",
     repo: {
-      owner: "Fedor",
+      owner: "fshankov",
       name: "cannabismythen",
     },
   },
