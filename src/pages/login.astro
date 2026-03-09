@@ -103,38 +103,46 @@ export const prerender = false;
     </div>
 
     <script>
-      const form = document.getElementById('loginForm');
-      const errorMsg = document.getElementById('errorMsg');
-      const submitBtn = document.getElementById('submitBtn');
+      const form = document.getElementById('loginForm') as HTMLFormElement | null;
+      const errorMsg = document.getElementById('errorMsg') as HTMLElement | null;
+      const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement | null;
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        errorMsg.style.display = 'none';
-        submitBtn.disabled = true;
-        submitBtn.textContent = '…';
-
-        try {
-          const body = new FormData(form);
-          const res = await fetch('/api/auth', {
-            method: 'POST',
-            body,
-            credentials: 'same-origin',
-          });
-          const json = await res.json();
-
-          if (json.ok) {
-            window.location.href = '/';
-          } else {
-            errorMsg.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Einloggen';
-          }
-        } catch {
-          errorMsg.style.display = 'block';
+      function showError(): void {
+        if (errorMsg) errorMsg.style.display = 'block';
+        if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Einloggen';
         }
-      });
+      }
+
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (errorMsg) errorMsg.style.display = 'none';
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = '…';
+          }
+
+          try {
+            const body = new FormData(form);
+            const res = await fetch('/api/auth', {
+              method: 'POST',
+              body,
+              credentials: 'same-origin',
+            });
+            const json = await res.json() as { ok: boolean };
+
+            if (json.ok) {
+              window.location.href = '/';
+            } else {
+              showError();
+            }
+          } catch {
+            showError();
+          }
+        });
+      }
     </script>
   </body>
 </html>
