@@ -1,21 +1,12 @@
 ---
 title: Content-Status — Fertigstellungsübersicht
-summary: ''
+summary: Aktueller Bearbeitungsstand aller Inhalte. Bitte nach jedem Review-Durchgang aktualisieren.
 tags:
-- Meta
-status: draft
-internalNotes: 'GENERATED-CONTENT: Content completion tracker
-
-
-  This file should be updated as content is reviewed and finalized
-
-
-  AUTHOR-TODO: Search all wiki files for AUTHOR-TODO markers and list them here
-
-
-  AUTHOR-TODO: Search all wiki files for AUTHOR-QUESTION markers and list them here'
+  - Meta
+status: published
+internalNotes: 'Dieses Dokument manuell aktualisieren wenn Einträge abgenommen werden. Offene Aufgaben werden pro Eintrag im Feld "Internal Notes" dokumentiert — direkt im jeweiligen Eintrag im CMS öffnen und nachschlagen.'
 publishedAt: '2026-03-07'
-updatedAt: '2026-03-07'
+updatedAt: '2026-03-09'
 ---
 
 # Content-Status — Fertigstellungsübersicht
@@ -23,71 +14,70 @@ updatedAt: '2026-03-07'
 ## Gesamtübersicht
 
 | Bereich | Dateien | Status | Anmerkungen |
-|---------|---------|--------|-------------|
-| Factsheets (m01-m10) | 10 | Generiert, Review nötig | Aus factsheets.json + Bericht |
-| Factsheets (m11-m42) | 26 | Generiert, Review nötig | Aus Abschlussbericht, Übersetzungsartefakte möglich |
-| Scrollytelling | 5 | Generiert | 3 Versionen + Übersicht + Chart-Specs |
-| Dashboard-Daten | 7 | Generiert | Aus JSON-Daten |
-| FAQ | 8 | Generiert, Review nötig | Kurze + ausführliche Antworten |
-| Quiz | 6 | Generiert, Review nötig | Feedback-Texte brauchen Prüfung |
+|---|---|---|---|
+| Factsheets m01–m10 | 10 | Generiert, Review nötig | Aus factsheets.json + Abschlussbericht |
+| Factsheets m11–m42 | 26 | Generiert, Review nötig | Aus Abschlussbericht; Übersetzungsartefakte möglich |
+| Scrollytelling | 4 | Generiert | 3 Versionen + Chart-Specs; Version auswählen |
+| Dashboard | 6 | Generiert | Aus myth_indicators.json und info_channels.json |
+| FAQ | 7 | Generiert, Review nötig | Kurze + ausführliche Antworten je Frage |
+| Quiz | 5 | Generiert, Review nötig | Feedback-Texte finalisieren |
 | About | 4 | Generiert, Ergänzung nötig | Team-Infos unvollständig |
-| Meta | 3 | Fertig | Dokumentation |
-| Root-Dateien | 4 | Fertig | README, INDEX, CONTRIBUTING, GLOSSARY |
+| Meta (Intern) | 7 | Aktuell | Dokumentation für das Redaktionsteam |
+| Projektlog | 1 | Laufend | Bei jeder Änderung neuen Eintrag ergänzen |
 
 ## Factsheet-Status im Detail
 
-| Nr | Datei | Quelle | Status | Offene Punkte |
-|----|-------|--------|--------|--------------|
-| 1 | m01-allheilmittel.md | JSON + Bericht | Review | — |
-| 2 | m02-harmlos.md | JSON + Bericht | Review | — |
-| 3 | m03-heranwachsende.md | JSON + Bericht | Review | — |
-| 4 | m04-weniger-schaedlich-alkohol.md | JSON + Bericht | Review | — |
-| 5 | m05-schwierig-dosieren.md | JSON + Bericht | Review | — |
-| 6 | m06-mischkonsum.md | JSON + Bericht | Review | — |
-| 7 | m07-zusaetze.md | JSON + Bericht | Review | — |
-| 8 | m08-foetus.md | JSON + Bericht | Review | — |
-| 9 | m09-ueberdosierung.md | JSON + Bericht | Review | — |
-| 10 | m10-schmerzen.md | JSON + Bericht | Review | — |
-| 11 | m11-uebelkeit.md | Bericht | Review | Übersetzungsartefakte prüfen |
-| 12 | m12-entzuendungen.md | Bericht | Review | Keine Aussage möglich |
-| 13 | m13-spastiken.md | Bericht | Review | — |
-| 14 | m14-herz-kreislauf.md | Bericht | Review | — |
-| 15 | m15-atemwege.md | Bericht | Review | — |
-| 16 | m16-krebs.md | Bericht | Review | — |
-| 17 | m17-abnehmen.md | Bericht | Review | Keine Aussage möglich |
-| 18 | m18-schlaf.md | Bericht | Review | — |
-| 19 | m19-wahrnehmung.md | Bericht | Review | — |
-| 20 | m20-kognition.md | Bericht | Review | — |
-| 21 | m21-verkehr.md | Bericht | Review | — |
-| 22 | m22-einstiegsdroge.md | Bericht | Review | — |
-| 23 | m23-abhaengigkeit.md | Bericht | Review | — |
-| 24 | m24-psychosen.md | Bericht | Review | — |
-| 25 | m25-angst.md | Bericht | Review | — |
-| 26 | m26-depressionen.md | Bericht | Review | — |
-| 27 | m27-adhs.md | Bericht | Review | — |
-| 28 | m28-motivation.md | Bericht | Review | — |
-| 29 | m29-gemuetslage.md | Bericht | Review | — |
-| 30 | m30-suizid.md | Bericht | Review | — |
-| 31/32 | m31-m32-entspannt-aggressiv.md | Bericht | Review | Kombidatei (a/b) |
-| 33 | m33-kreativ.md | Bericht | Review | — |
-| 34 | m34-soziale-beziehungen.md | Bericht | Review | — |
-| 35 | m35-soziale-regeln.md | Bericht | Review | — |
-| 36/37 | m36-m37-leistungen-niveau.md | Bericht | Review | Kombidatei (a/b) |
-| 38 | m38-cool.md | Bericht | Review | — |
-| 39 | m39-bevoelkerung-konsumiert.md | Bericht | Review | — |
-| 40 | m40-ueberall-erlaubt.md | Bericht | Review | — |
-| 41/42 | m41-m42-anstieg-konsum.md | Bericht | Review | Kombidatei (a/b) |
+| Nr | Datei im CMS | Quelle | Status | Offene Punkte |
+|---|---|---|---|---|
+| 1 | m01-allheilmittel | JSON + Bericht | Review | — |
+| 2 | m02-harmlos | JSON + Bericht | Review | — |
+| 3 | m03-heranwachsende | JSON + Bericht | Review | — |
+| 4 | m04-weniger-schaedlich-alkohol | JSON + Bericht | Review | — |
+| 5 | m05-schwierig-dosieren | JSON + Bericht | Review | — |
+| 6 | m06-mischkonsum | JSON + Bericht | Review | — |
+| 7 | m07-zusaetze | JSON + Bericht | Review | — |
+| 8 | m08-foetus | JSON + Bericht | Review | — |
+| 9 | m09-ueberdosierung | JSON + Bericht | Review | — |
+| 10 | m10-schmerzen | JSON + Bericht | Review | — |
+| 11 | m11-uebelkeit | Abschlussbericht | Review | Übersetzungsartefakte prüfen |
+| 12 | m12-entzuendungen | Abschlussbericht | Review | Klassifikation: keine Aussage möglich |
+| 13 | m13-spastiken | Abschlussbericht | Review | — |
+| 14 | m14-herz-kreislauf | Abschlussbericht | Review | — |
+| 15 | m15-atemwege | Abschlussbericht | Review | — |
+| 16 | m16-krebs | Abschlussbericht | Review | — |
+| 17 | m17-abnehmen | Abschlussbericht | Review | Klassifikation: keine Aussage möglich |
+| 18 | m18-schlaf | Abschlussbericht | Review | — |
+| 19 | m19-wahrnehmung | Abschlussbericht | Review | — |
+| 20 | m20-kognition | Abschlussbericht | Review | — |
+| 21 | m21-verkehr | Abschlussbericht | Review | — |
+| 22 | m22-einstiegsdroge | Abschlussbericht | Review | — |
+| 23 | m23-abhaengigkeit | Abschlussbericht | Review | — |
+| 24 | m24-psychosen | Abschlussbericht | Review | — |
+| 25 | m25-angst | Abschlussbericht | Review | — |
+| 26 | m26-depressionen | Abschlussbericht | Review | — |
+| 27 | m27-adhs | Abschlussbericht | Review | — |
+| 28 | m28-motivation | Abschlussbericht | Review | — |
+| 29 | m29-gemuetslage | Abschlussbericht | Review | — |
+| 30 | m30-suizid | Abschlussbericht | Review | — |
+| 31/32 | m31-m32-entspannt-aggressiv | Abschlussbericht | Review | Kombidatei (zwei Mythen) |
+| 33 | m33-kreativ | Abschlussbericht | Review | — |
+| 34 | m34-soziale-beziehungen | Abschlussbericht | Review | — |
+| 35 | m35-soziale-regeln | Abschlussbericht | Review | — |
+| 36/37 | m36-m37-leistungen-niveau | Abschlussbericht | Review | Kombidatei (zwei Mythen) |
+| 38 | m38-cool | Abschlussbericht | Review | — |
+| 39 | m39-bevoelkerung-konsumiert | Abschlussbericht | Review | — |
+| 40 | m40-ueberall-erlaubt | Abschlussbericht | Review | — |
+| 41/42 | m41-m42-anstieg-konsum | Abschlussbericht | Review | Kombidatei (zwei Mythen) |
 
-## Offene AUTHOR-TODOs
-Zum Auffinden aller offenen Aufgaben: In GitHub nach `AUTHOR-TODO` suchen.
+## Offene Aufgaben und Fragen
 
-## Offene AUTHOR-QUESTIONs
-Zum Auffinden aller offenen Fragen: In GitHub nach `AUTHOR-QUESTION` suchen.
+Offene Aufgaben (`AUTHOR-TODO`) und Fragen (`AUTHOR-QUESTION`) werden direkt im Feld **„Internal Notes"** des jeweiligen Eintrags dokumentiert. Um alle offenen Punkte zu finden: jeden Eintrag öffnen und das Internal-Notes-Feld prüfen, oder im Projektlog einen Sammeleintrag anlegen.
 
 ## Nächste Schritte
 
-1. Alle Factsheets gegen das Original-DOCX (Abschlussbericht) prüfen — insbesondere auf Übersetzungsartefakte
-2. FAQ-Antworten inhaltlich prüfen und ggf. anpassen
-3. Team-Informationen und Kontaktdaten ergänzen
-4. Scrollytelling-Version auswählen
+1. Alle Factsheets gegen das Original-DOCX (Abschlussbericht) prüfen — insbesondere m11–m42 auf Übersetzungsartefakte
+2. FAQ-Antworten inhaltlich prüfen und freigeben
+3. About / Team: Kontaktdaten und Teaminfos ergänzen
+4. Scrollytelling-Version für den Launch festlegen
 5. Quiz-Feedback-Texte finalisieren
+6. Status-Felder von „draft" auf „published" setzen sobald Einträge abgenommen sind

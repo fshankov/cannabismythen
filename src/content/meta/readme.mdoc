@@ -1,102 +1,119 @@
 ---
-title: Wiki README
-summary: 'Migrated from wiki root: README.md'
+title: Wiki README — Anleitung für Mitwirkende
+summary: Schritt-für-Schritt-Anleitung zum Bearbeiten von Inhalten im Keystatic-CMS. Für alle Mitwirkenden ohne technische Vorkenntnisse.
 tags:
-- Meta
-- Wiki
-status: draft
-internalNotes: 'GENERATED-CONTENT: This README provides guidance for non-technical
-  co-authors
-
-
-  GENERATED-CONTENT: ...
-
-
-  AUTHOR-QUESTION: ...
-
-
-  AUTHOR-TODO: ...
-
-
-  AUTHOR-REVIEW: ...
-
-
-  IDEA: ...
-
-
-  AUTHOR-TODO: Add contact information for technical support'
+  - Meta
+status: published
+internalNotes: Dieses Dokument richtet sich an nicht-technische Mitwirkende. Bitte aktuell halten wenn sich der Workflow ändert.
 publishedAt: '2026-03-07'
-updatedAt: '2026-03-07'
+updatedAt: '2026-03-09'
 ---
 
-# CaRM Content Wiki — Anleitung für Mitwirkende
-## Was ist dieses Wiki?
+# Anleitung für Mitwirkende
 
-Dieses Wiki enthält alle Inhalte des CaRM-Webtools (Cannabis: Risiken und Mythen) in bearbeitbarer Form. Es dient als gemeinsame Arbeitsgrundlage für das Redaktionsteam — auch ohne Programmierkenntnisse.
+## Was ist das CMS?
 
-## Wie bearbeite ich Dateien auf GitHub?
+Alle Inhalte des CaRM-Webtools werden über **Keystatic** bearbeitet — ein browserbasiertes CMS (Content Management System). Du arbeitest direkt im Browser, ohne GitHub oder Code anfassen zu müssen. Deine Änderungen werden automatisch gespeichert und auf der Website veröffentlicht.
 
-### Schritt 1: Datei öffnen
-Navigieren Sie im `wiki/`-Ordner zur gewünschten Datei und klicken Sie auf den Dateinamen.
+---
 
-### Schritt 2: Bearbeiten
-Klicken Sie auf das **Stift-Symbol** (✏️) oben rechts in der Dateiansicht, oder drücken Sie die Taste `E`.
+## Zugang zum CMS
 
-### Schritt 3: Änderungen vornehmen
-Bearbeiten Sie den Text direkt im Editor. Nutzen Sie den Tab **„Preview"** um Ihre Änderungen zu überprüfen.
+1. Rufe die CMS-Adresse auf: `[deine-netlify-url]/keystatic`
+2. Beim ersten Aufruf wirst du gebeten, dich mit GitHub anzumelden und die CaRM-App einmalig zu autorisieren — danach automatisch.
+3. Du siehst das Dashboard mit der linken Seitenleiste.
+
+Voraussetzung: Du musst von Fedor als Mitarbeiter:in zum GitHub-Repository eingeladen worden sein und die E-Mail-Einladung akzeptiert haben.
+
+---
+
+## Inhalte bearbeiten — Schritt für Schritt
+
+### Schritt 1: Sammlung öffnen
+
+In der linken Seitenleiste siehst du alle Sammlungen (z. B. „Factsheets", „FAQ", „Quiz"). Klicke auf die gewünschte Sammlung.
+
+### Schritt 2: Eintrag auswählen
+
+Du siehst eine Liste aller Einträge. Klicke auf den gewünschten Eintrag (z. B. „m03-heranwachsende").
+
+### Schritt 3: Inhalt bearbeiten
+
+Jeder Eintrag hat zwei Bereiche:
+
+- **Felder:** strukturierte Metadaten (Titel, Status, Thema, Klassifikation etc.) — du wählst aus Dropdowns oder tippst in Textfelder
+- **Inhaltseditor:** der eigentliche Fließtext — Markdown-Editor mit Werkzeugleiste für Formatierung
 
 ### Schritt 4: Änderungen speichern
-Scrollen Sie nach unten zum Bereich **„Commit changes"**:
-- Geben Sie eine kurze Beschreibung ein (z.B. „Mythos 5: Referenz ergänzt")
-- Wählen Sie **„Create a new branch"** (nicht direkt auf main!)
-- Klicken Sie auf **„Propose changes"**
 
-### Schritt 5: Pull Request erstellen
-GitHub erstellt automatisch einen „Pull Request". Beschreiben Sie kurz, was Sie geändert haben. Das Technik-Team überprüft die Änderungen und fügt sie ein.
+Klicke oben rechts auf **„Save"**. Das war's. Deine Änderung wird automatisch als Commit in GitHub geschrieben. Netlify erkennt das und baut die Website in ~2 Minuten neu. Du musst nichts weiter tun.
+
+### Schritt 5: Änderung auf der Live-Website prüfen
+
+Warte etwa 2 Minuten, dann lade die Website neu. Deine Änderung ist sichtbar.
+
+---
+
+## Neuen Eintrag anlegen
+
+Klicke in einer Sammlung oben rechts auf **„Create entry"**. Fülle Titel und Pflichtfelder aus, schreibe den Inhalt, speichere.
+
+---
+
+## Das Feld „Interne Notizen"
+
+Jeder Eintrag hat ein Feld **„Internal Notes"** — dein Scratchpad für das Team. Trage hier Fragen, Aufgaben oder Hinweise ein, z. B.:
+
+- `AUTHOR-TODO: Referenz zu Studie X ergänzen`
+- `AUTHOR-QUESTION: Soll dieser Abschnitt kürzer werden?`
+- `AUTHOR-REVIEW: Bitte gegen Abschlussbericht S. 47 prüfen`
+
+**Wichtig:** Dieses Feld wird **niemals** auf der öffentlichen Website angezeigt. Es ist ausschließlich im CMS sichtbar.
+
+---
+
+## Das Feld „Status"
+
+- **Draft** — in Bearbeitung, noch nicht freigegeben
+- **Published** — inhaltlich geprüft und freigegeben
+
+Der Status steuert aktuell keine Sichtbarkeit auf der Website, gibt dem Team aber eine klare Übersicht über den Bearbeitungsstand.
+
+---
 
 ## Markdown-Kurzanleitung
 
 | Formatierung | Eingabe | Ergebnis |
 |---|---|---|
-| Überschrift | `## Titel` | **Titel** (groß) |
+| Überschrift 2 | `## Titel` | Großer Abschnittstitel |
+| Überschrift 3 | `### Untertitel` | Kleinerer Abschnittstitel |
 | Fett | `**Text**` | **Text** |
 | Kursiv | `*Text*` | *Text* |
-| Link | `[Text](url)` | Klickbarer Link |
-| Liste | `- Punkt` | • Punkt |
+| Link | `[Linktext](https://...)` | Klickbarer Link |
+| Aufzählung | `- Punkt` | • Punkt |
+| Nummerierte Liste | `1. Punkt` | 1. Punkt |
 | Tabelle | `\| Spalte 1 \| Spalte 2 \|` | Tabellenzeile |
+| Blockzitat | `> Text` | Eingerücktes Zitat |
 
-## Spezielle Kommentare in den Dateien
+---
 
-In den Dateien finden Sie HTML-Kommentare, die im fertigen Text **nicht sichtbar** sind. Sie dienen der internen Kommunikation:
+## Sammlungen im Überblick
 
-| Kommentar | Bedeutung |
+| Sammlung im CMS | Inhalt |
 |---|---|
-| `
-` | Automatisch generierter Inhalt |
-| `
-` | Frage an das Redaktionsteam |
-| `
-` | Aufgabe für Autor:innen |
-| `
-` | Inhalt braucht Expertenprüfung |
-| `
-` | Vorschlag / Umsetzungsidee |
+| Factsheets | 36 Dateien für 42 Mythen (m01–m42) |
+| FAQ | 7 Themendateien mit Fragen und Antworten |
+| Quiz | 4 Themenquiz + Feedback-Texte |
+| Scrollytelling | 3 Versionen der Einstiegsseite |
+| Dashboard | Indikator-Daten nach Zielgruppen |
+| Über das Projekt | Projektbeschreibung, Methodik, Team |
+| Meta (Intern) | Diese Dokumentation — nur im CMS |
+| Projektlog | Änderungsprotokoll |
 
-**Tipp:** Suchen Sie nach `AUTHOR-QUESTION` oder `AUTHOR-TODO`, um offene Aufgaben zu finden.
+Vollständiger Überblick: siehe **CaRM Inhaltsübersicht** in dieser Sammlung.
 
-## Ordnerstruktur
-
-| Ordner | Inhalt |
-|---|---|
-| `factsheets/` | 36 Factsheet-Dateien für alle 42 Mythen |
-| `scrollytelling/` | 3 Versionen der Scrollytelling-Narrative |
-| `dashboard/` | Indikator-Daten nach Zielgruppen |
-| `faq/` | Häufig gestellte Fragen mit Antworten |
-| `quiz/` | Wissenstest-Inhalte (4 Themenquiz) |
-| `about/` | Projektbeschreibung, Methodik, Team |
-| `meta/` | Tagging-System, Status-Übersicht |
-
-Siehe [INDEX.md](INDEX.md) für die vollständige Navigation.
+---
 
 ## Kontakt bei Fragen
-Bei technischen Fragen wenden Sie sich an: [Kontaktperson einfügen]
+
+Bei technischen Problemen (Login, Fehler beim Speichern, Website baut nicht neu): Fedor Shankov — fshankov@gmail.com

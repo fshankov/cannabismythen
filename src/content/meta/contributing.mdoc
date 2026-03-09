@@ -1,88 +1,111 @@
 ---
 title: Redaktionelle Richtlinien
-summary: 'Migrated from wiki root: CONTRIBUTING.md'
+summary: Stilregeln, Feldübersicht und Klassifikationsschema für alle Mitwirkenden.
 tags:
-- Meta
-- Wiki
-status: draft
-internalNotes: 'GENERATED-CONTENT: Editorial guidelines for wiki contributors
-
-
-  AUTHOR-QUESTION
-
-
-  GENERATED-CONTENT: Automatisch aus Daten/Bericht generiert
-
-
-  AUTHOR-QUESTION: Frage an das Redaktionsteam (Englisch)
-
-
-  AUTHOR-TODO: Aufgabe für Autor:innen (Englisch)
-
-
-  AUTHOR-REVIEW: Inhalt benötigt Expertenprüfung
-
-
-  IDEA: Vorschlag oder Umsetzungsidee'
+  - Meta
+status: published
+internalNotes: Bitte aktuell halten wenn sich Felder oder Konventionen ändern.
 publishedAt: '2026-03-07'
-updatedAt: '2026-03-07'
+updatedAt: '2026-03-09'
 ---
 
-# Redaktionelle Richtlinien / Editorial Guidelines
-## Sprache / Language Convention
+# Redaktionelle Richtlinien
+
+## Sprache
 
 - **Alle Inhalte:** Deutsch (Originalsprache des Projekts)
-- **Technische Kommentare** (`
-` etc.): Englisch
-- **Dateinamen:** Englisch/ASCII (keine Umlaute: ae, oe, ue, ss statt ä, ö, ü, ß)
-- **YAML-Frontmatter-Schlüssel:** Englisch (entsprechend dem Astro Content Model)
+- **Dateinamen:** ASCII ohne Umlaute (ae, oe, ue, ss statt ä, ö, ü, ß) — wird automatisch vom CMS vergeben
+- **Feldbezeichnungen im CMS:** Englisch (technische Konvention)
 
-## Dateistruktur
+---
 
-Jede Factsheet-Datei hat folgende Struktur:
+## Felder in Keystatic — Übersicht
 
-1. **YAML-Frontmatter** — Metadaten (id, Kategorie, Klassifikation, Tags)
-2. **Überschrift** — Mythos-Aussage
-3. **Einordnung** — Blockzitat mit Klassifikation
-4. **Synthese** — Zusammenfassung der Erkenntnisse
-5. **Zentrale Erkenntnisse / Fakten** — Aufzählung der wichtigsten Befunde
-6. **Referenzen** — Wissenschaftliche Quellen
-7. **Daten nach Zielgruppen** — Indikator-Tabelle
+Jeder Eintrag hat strukturierte Felder oben und einen Inhaltseditor unten. Hier eine Übersicht der wichtigsten Felder:
 
-## Status-Marker
+### Pflichtfelder (alle Sammlungen)
 
-Verwenden Sie diese HTML-Kommentare zur Kennzeichnung des Bearbeitungsstandes:
+| Feld | Beschreibung |
+|---|---|
+| **Titel** | Anzeigename im CMS und auf der Website |
+| **Status** | `draft` = in Bearbeitung / `published` = freigegeben |
+| **Summary** | Kurzbeschreibung für Listenansichten und SEO (1–2 Sätze) |
+| **Internal Notes** | Interne Notizen — **nicht öffentlich**, nur im CMS sichtbar |
+| **Published Date** | Datum der inhaltlichen Freigabe |
+| **Last Updated** | Datum der letzten Änderung |
 
-```html
+### Felder nur in Factsheets
 
+| Feld | Beschreibung |
+|---|---|
+| **Myth ID** | Kennnummer: m01, m02 … m42 |
+| **Theme** | Thematischer Cluster (7 Optionen, Dropdown) |
+| **Category** | Spezifische Kategorie aus der ursprünglichen Datenstruktur |
+| **Classification** | Wissenschaftliche Einordnung (5 Optionen, Dropdown) |
+| **Classification Label** | Lesbarer Kurztext der Einordnung, z. B. „Das stimmt nicht." |
+| **Quiz IDs** | Welche Quiz(zes) dieses Factsheet einbinden (z. B. `quiz-koerper`) |
+| **Related Myths** | Verweise auf inhaltlich verwandte Mythen (z. B. `m10`, `m22`) |
 
+---
 
+## Das Feld „Internal Notes" — Konventionen
 
-```
+Das Internal-Notes-Feld ersetzt das frühere HTML-Kommentar-System. Verwende folgende Marker als Freitext:
 
-**Wichtig:** Diese Kommentare sind im gerenderten Markdown **nicht sichtbar** — sie dienen nur der internen Kommunikation.
+| Marker | Bedeutung |
+|---|---|
+| `AUTHOR-TODO: ...` | Konkrete Aufgabe die noch erledigt werden muss |
+| `AUTHOR-QUESTION: ...` | Frage an das Team, die eine Entscheidung erfordert |
+| `AUTHOR-REVIEW: ...` | Inhalt muss gegen eine Quelle geprüft werden |
+| `IDEA: ...` | Vorschlag oder Umsetzungsidee, noch nicht beschlossen |
+
+Beispiel: `AUTHOR-REVIEW: Gegen Abschlussbericht S. 47 prüfen — Übersetzungsartefakte möglich`
+
+---
+
+## Struktur eines Factsheet-Eintrags
+
+Der Inhaltsbereich eines Factsheets folgt dieser Gliederung:
+
+1. **Mythos-Aussage** — H1-Überschrift mit der Prüfthese
+2. **Einordnung** — Blockzitat mit Klassifikation und Label
+3. **Synthese** — 2–4 Sätze Zusammenfassung der wissenschaftlichen Befunde
+4. **Zentrale Erkenntnisse** — Aufzählung der wichtigsten Fakten
+5. **Referenzen** — Wissenschaftliche Quellen mit vollständiger Angabe
+6. **Daten nach Zielgruppen** — Indikator-Tabelle (Kenntnis, Bedeutung, Richtigkeit etc.)
+
+---
 
 ## Klassifikationsskala
 
-| Code | Einordnung | Bedeutung |
-|------|-----------|-----------|
-| 1 | richtig | Entspricht dem wissenschaftlichen Kenntnisstand |
-| 2 | eher richtig | Tendenziell zutreffend, mit Einschränkungen |
-| 3 | eher falsch | Tendenziell nicht zutreffend, enthält Teilwahrheiten |
-| 4 | falsch | Widerspricht dem wissenschaftlichen Kenntnisstand |
-| 0 | keine Aussage möglich | Evidenzlage erlaubt keine Einordnung |
+| Dropdown-Option | Bedeutung |
+|---|---|
+| **richtig** | Der Mythos entspricht dem wissenschaftlichen Kenntnisstand |
+| **eher richtig** | Tendenziell zutreffend, aber mit Einschränkungen |
+| **eher falsch** | Tendenziell nicht zutreffend, enthält Teilwahrheiten |
+| **falsch** | Der Mythos widerspricht dem wissenschaftlichen Kenntnisstand |
+| **keine Aussage möglich** | Die Evidenzlage erlaubt keine eindeutige Einordnung |
 
-## Kategorien und Themen
+---
 
-### Themen (aus Content Model)
-`übergreifend` · `substanz` · `körper` · `körper_psyche` · `psyche` · `soziales` · `rechtliches`
+## Themen-Cluster (Dropdown „Theme")
 
-### Kategorien (aus myths.json)
-`Allgemein` · `Jugend` · `Vergleich/Konsum` · `Risiko` · `Schwangerschaft` · `Medizin` · `Kognition` · `Psyche` · `Abhängigkeit` · `Sozial` · `Gesellschaft` · `Gesundheit`
+| Option | Enthaltene Mythen |
+|---|---|
+| übergreifend | M01–M04 |
+| substanz | M05–M07 |
+| körper | M08–M17 |
+| körper_psyche | M18–M21 |
+| psyche | M22–M32 |
+| soziales | M33–M38 |
+| rechtliches | M39–M42 |
+
+---
 
 ## Stil-Hinweise
 
-- Wissenschaftlich präzise, aber verständlich
+- Wissenschaftlich präzise, aber für ein breites Publikum verständlich
 - Keine wertenden Formulierungen gegenüber Konsumierenden
-- Quellenangaben stets mit vollständiger Referenz
-- Bei FAQ: Kurze Antwort in Alltagssprache, ausführliche Antwort mit Fachbegriffen
+- Quellenangaben stets vollständig (Autor, Jahr, Titel, DOI oder URL)
+- FAQ: Kurze Antwort in Alltagssprache, ausführliche Antwort mit Fachbegriffen
+- Tabellen für Indikator-Daten bevorzugen — keine langen Listen
