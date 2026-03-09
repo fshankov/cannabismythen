@@ -2,7 +2,7 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getPublishedEntries } from "@lib/content";
 
-const entries = await getPublishedEntries("faq");
+const entries = await getPublishedEntries("haeufigeFragen");
 
 // Sort by sortOrder
 entries.sort((a, b) => {
@@ -12,8 +12,8 @@ entries.sort((a, b) => {
 });
 ---
 
-<BaseLayout title="FAQ" description="Häufig gestellte Fragen zu Cannabis">
-  <h1>Häufig gestellte Fragen</h1>
+<BaseLayout title="Häufige Fragen" description="Häufig gestellte Fragen zu Cannabis">
+  <h1>Häufige Fragen</h1>
   <p>
     Antworten auf die wichtigsten Fragen rund um Cannabis — thematisch geordnet
     und wissenschaftlich fundiert.
@@ -23,7 +23,7 @@ entries.sort((a, b) => {
     {entries.map(([slug, entry]) => {
       const e = entry as any;
       return (
-        <a href={`/faq/${slug}/`} class="faq-theme-card">
+        <a href={`/haeufige-fragen/${slug}/`} class="faq-theme-card">
           <h2>{e.title}</h2>
           {e.summary && <p>{e.summary}</p>}
         </a>

@@ -3,11 +3,11 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 
 export async function getStaticPaths() {
-  const slugs = await reader.collections.quiz.list();
+  const slugs = await reader.collections.startseite.list();
   const paths = [];
 
   for (const slug of slugs) {
-    const entry = await reader.collections.quiz.read(slug);
+    const entry = await reader.collections.startseite.read(slug);
     if (entry && entry.status === "published") {
       paths.push({ params: { slug } });
     }
@@ -17,10 +17,10 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const entry = await reader.collections.quiz.read(slug!);
+const entry = await reader.collections.startseite.read(slug!);
 
 if (!entry || entry.status !== "published") {
-  return Astro.redirect("/quiz/");
+  return Astro.redirect("/");
 }
 
 const { content, internalNotes, ...meta } = entry;
@@ -28,22 +28,21 @@ const { node } = await content();
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>
-  <article class="quiz-page">
+  <article class="scrollytelling-page">
     <header>
       <h1>{meta.title}</h1>
-      {meta.theme && <p class="theme-label">Thema: {meta.theme}</p>}
-      {(meta.questionCount ?? 0) > 0 && <p>{meta.questionCount} Fragen</p>}
+      {meta.versionLabel && <p class="version-label">Version {meta.versionLabel}</p>}
     </header>
 
     <!--
       TODO: Replace this static content rendering with an interactive
-      React quiz component (src/components/quiz/QuizPlayer.tsx).
-      The current view shows the raw quiz content as a reference.
+      scrollytelling component using React + D3 (src/components/scrollytelling/).
+      The current view shows the narrative content as a reference.
     -->
-    <div class="quiz-content" set:html={node} />
+    <div class="scrollytelling-content" set:html={node} />
 
     <footer>
-      <a href="/quiz/">&larr; Alle Quiz-Module</a>
+      <a href="/">&larr; Startseite</a>
     </footer>
   </article>
 </BaseLayout>

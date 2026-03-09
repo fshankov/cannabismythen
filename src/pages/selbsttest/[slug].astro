@@ -3,11 +3,11 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 
 export async function getStaticPaths() {
-  const slugs = await reader.collections.scrollytelling.list();
+  const slugs = await reader.collections.selbsttest.list();
   const paths = [];
 
   for (const slug of slugs) {
-    const entry = await reader.collections.scrollytelling.read(slug);
+    const entry = await reader.collections.selbsttest.read(slug);
     if (entry && entry.status === "published") {
       paths.push({ params: { slug } });
     }
@@ -17,10 +17,10 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const entry = await reader.collections.scrollytelling.read(slug!);
+const entry = await reader.collections.selbsttest.read(slug!);
 
 if (!entry || entry.status !== "published") {
-  return Astro.redirect("/scrollytelling/");
+  return Astro.redirect("/selbsttest/");
 }
 
 const { content, internalNotes, ...meta } = entry;
@@ -28,21 +28,22 @@ const { node } = await content();
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>
-  <article class="scrollytelling-page">
+  <article class="quiz-page">
     <header>
       <h1>{meta.title}</h1>
-      {meta.versionLabel && <p class="version-label">Version {meta.versionLabel}</p>}
+      {meta.theme && <p class="theme-label">Thema: {meta.theme}</p>}
+      {(meta.questionCount ?? 0) > 0 && <p>{meta.questionCount} Fragen</p>}
     </header>
 
     <!--
       TODO: Replace this static content rendering with an interactive
-      scrollytelling component using React + D3 (src/components/scrollytelling/).
-      The current view shows the narrative content as a reference.
+      React quiz component (src/components/quiz/QuizPlayer.tsx).
+      The current view shows the raw quiz content as a reference.
     -->
-    <div class="scrollytelling-content" set:html={node} />
+    <div class="quiz-content" set:html={node} />
 
     <footer>
-      <a href="/scrollytelling/">&larr; Alle Versionen</a>
+      <a href="/selbsttest/">&larr; Alle Quiz-Module</a>
     </footer>
   </article>
 </BaseLayout>
