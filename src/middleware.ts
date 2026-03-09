@@ -3,6 +3,13 @@ import { defineMiddleware } from "astro:middleware";
 const COOKIE_NAME = "site-auth";
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  // During build-time prerendering, there is no real request context
+  // (no cookies, no headers). Skip auth — the Edge Function handles
+  // auth at request time when edgeMiddleware is enabled.
+  if (!context.request.headers.get("host")) {
+    return next();
+  }
+
   const { pathname } = context.url;
 
   // Never block: login page, keystatic CMS, API routes, static assets
