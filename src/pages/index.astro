@@ -1,8 +1,14 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
+import { getPublishedEntries } from "@lib/content";
+
+const scrollyEntries = await getPublishedEntries("startseite");
+
+// Filter out chart-specifications (technical, not a narrative)
+const narratives = scrollyEntries.filter(([slug]) => slug !== "chart-specifications");
 ---
 
-<BaseLayout title="Start">
+<BaseLayout title="Startseite">
   <h1>Cannabis: Mythen &amp; Evidenz</h1>
   <p>
     Willkommen bei der evidenzbasierten Informationsplattform zu Cannabis-Mythen.
@@ -10,15 +16,36 @@ import BaseLayout from "@layouts/BaseLayout.astro";
     fundierte Einordnungen zu 42 verbreiteten Cannabis-Mythen.
   </p>
 
+  {narratives.length > 0 && (
+    <section>
+      <h2>Scrollytelling</h2>
+      <p>
+        Entdecken Sie die überraschendsten Ergebnisse der CaRM-Forschung
+        in einer interaktiven, datengetriebenen Erzählung.
+      </p>
+      <div class="scrollytelling-versions">
+        {narratives.map(([slug, entry]) => {
+          const e = entry as any;
+          return (
+            <a href={`/startseite/${slug}/`} class="version-card">
+              <h3>{e.title}</h3>
+              {e.versionLabel && <span class="version-label">{e.versionLabel}</span>}
+              {e.stepCount > 0 && <p>{e.stepCount} Schritte</p>}
+              {e.summary && <p>{e.summary}</p>}
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  )}
+
   <section>
     <h2>Inhalte</h2>
     <ul>
-      <li><a href="/factsheets/">Factsheets</a> — Wissenschaftliche Einordnung aller 42 Mythen</li>
-      <li><a href="/faq/">FAQ</a> — Häufig gestellte Fragen nach Themen</li>
-      <li><a href="/quiz/">Quiz</a> — Testen Sie Ihr Wissen</li>
-      <li><a href="/scrollytelling/">Scrollytelling</a> — Interaktive Erzählung</li>
-      <li><a href="/dashboard/">Dashboard</a> — Daten nach Zielgruppen</li>
-      <li><a href="/about/">Über das Projekt</a> — Team, Methodik, Hintergrund</li>
+      <li><a href="/zahlen-und-fakten/">Zahlen &amp; Fakten</a> — Wissenschaftliche Einordnung aller 42 Mythen und Daten nach Zielgruppen</li>
+      <li><a href="/haeufige-fragen/">Häufige Fragen</a> — Häufig gestellte Fragen nach Themen</li>
+      <li><a href="/selbsttest/">Selbsttest / Quiz</a> — Testen Sie Ihr Wissen</li>
+      <li><a href="/ueber-uns/">Über uns</a> — Team, Methodik, Hintergrund</li>
     </ul>
   </section>
 </BaseLayout>
