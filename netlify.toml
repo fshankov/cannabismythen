@@ -4,12 +4,3 @@
 
 [build.environment]
   NODE_VERSION = "20"
-
-# Bundle content files with the Netlify Function so that
-# createReader(process.cwd(), ...) can find them at runtime.
-# Without this, the Keystatic reader returns empty collections on Netlify.
-[functions]
-  included_files = ["src/content/**"]
-
-# Netlify Functions handle all SSR routes (Keystatic admin, API, login)
-# The @astrojs/netlify adapter sets this up automatically.
