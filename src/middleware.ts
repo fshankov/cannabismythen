@@ -18,7 +18,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Check auth cookie
   const cookie = context.cookies.get(COOKIE_NAME);
-  const password = import.meta.env.SITE_PASSWORD ?? "Time-Turner";
+  const password = import.meta.env.SITE_PASSWORD;
 
   if (cookie?.value === password) {
     return next();

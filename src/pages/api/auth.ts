@@ -5,7 +5,7 @@ export const prerender = false;
 export const POST: APIRoute = async ({ request, cookies }) => {
   const data = await request.formData();
   const entered = data.get("password")?.toString() ?? "";
-  const password = import.meta.env.SITE_PASSWORD ?? "Time-Turner";
+  const password = import.meta.env.SITE_PASSWORD;
 
   if (entered === password) {
     cookies.set("site-auth", password, {
