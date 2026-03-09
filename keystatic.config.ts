@@ -232,6 +232,59 @@ const meta = collection({
   },
 });
 
+const changelog = collection({
+  label: "📋 Project Log",
+  slugField: "title",
+  path: "src/content/changelog/*",
+  format: { contentField: "notes" },
+  schema: {
+    title: fields.slug({
+      name: { label: "Entry Title", description: "e.g. 'Factsheet m03 überarbeitet'" },
+    }),
+    date: fields.date({
+      label: "Date",
+      description: "Date of the change or planned action.",
+      defaultValue: { kind: "today" },
+    }),
+    author: fields.text({
+      label: "Author",
+      description: "Who made or is responsible for this change.",
+    }),
+    type: fields.select({
+      label: "Type",
+      options: [
+        { label: "✏️ Content Update", value: "content_update" },
+        { label: "🆕 New Content", value: "new_content" },
+        { label: "🔍 Review / Feedback", value: "review" },
+        { label: "🐛 Fix", value: "fix" },
+        { label: "📌 Planned", value: "planned" },
+        { label: "🚀 Milestone", value: "milestone" },
+      ],
+      defaultValue: "content_update",
+    }),
+    status: fields.select({
+      label: "Status",
+      options: [
+        { label: "Done", value: "done" },
+        { label: "In Progress", value: "in_progress" },
+        { label: "Planned", value: "planned" },
+        { label: "Blocked", value: "blocked" },
+      ],
+      defaultValue: "done",
+    }),
+    affectedContent: fields.array(fields.text({ label: "Item" }), {
+      label: "Affected Content",
+      itemLabel: (props) => props.value,
+      description: "Which factsheets, FAQ entries, etc. were changed (e.g. m03, m07).",
+    }),
+    notes: fields.markdoc({
+      label: "Notes",
+      description:
+        "Details, rationale, outstanding questions, or next steps. Internal only.",
+    }),
+  },
+});
+
 // ─── Config export ──────────────────────────────────────────────────────────
 
 export default config({
@@ -250,5 +303,6 @@ export default config({
     dashboard,
     about,
     meta,
+    changelog,
   },
 });
