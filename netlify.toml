@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Netlify Functions handle all SSR routes (Keystatic admin, API, login)
+# The @astrojs/netlify adapter sets this up automatically.
