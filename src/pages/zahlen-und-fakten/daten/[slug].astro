@@ -1,4 +1,5 @@
 ---
+import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 
@@ -25,6 +26,7 @@ if (!entry || entry.status !== "published") {
 
 const { content, internalNotes, ...meta } = entry;
 const { node } = await content();
+const html = Markdoc.renderers.html(Markdoc.transform(node));
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>
@@ -38,7 +40,7 @@ const { node } = await content();
       D3/React dashboard component (src/components/dashboard/).
       The current view shows the raw indicator tables as a reference.
     -->
-    <div class="dashboard-content" set:html={node} />
+    <div class="dashboard-content" set:html={html} />
 
     <footer>
       <a href="/zahlen-und-fakten/">&larr; Zahlen &amp; Fakten</a>

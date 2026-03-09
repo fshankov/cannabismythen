@@ -1,4 +1,5 @@
 ---
+import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 
@@ -25,6 +26,7 @@ if (!entry || entry.status !== "published") {
 
 const { content, internalNotes, ...meta } = entry;
 const { node } = await content();
+const html = Markdoc.renderers.html(Markdoc.transform(node));
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>
@@ -39,7 +41,7 @@ const { node } = await content();
       scrollytelling component using React + D3 (src/components/scrollytelling/).
       The current view shows the narrative content as a reference.
     -->
-    <div class="scrollytelling-content" set:html={node} />
+    <div class="scrollytelling-content" set:html={html} />
 
     <footer>
       <a href="/">&larr; Startseite</a>

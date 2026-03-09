@@ -1,4 +1,5 @@
 ---
+import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 
@@ -25,6 +26,7 @@ if (!entry || entry.status !== "published") {
 
 const { content, internalNotes, ...meta } = entry;
 const { node } = await content();
+const html = Markdoc.renderers.html(Markdoc.transform(node));
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>
@@ -33,7 +35,7 @@ const { node } = await content();
       <h1>{meta.title}</h1>
     </header>
 
-    <div class="about-content" set:html={node} />
+    <div class="about-content" set:html={html} />
 
     <footer>
       <a href="/ueber-uns/">&larr; Übersicht</a>
