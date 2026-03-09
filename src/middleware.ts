@@ -16,10 +16,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
+  // If no SITE_PASSWORD is configured, the site is publicly accessible.
+  // Set SITE_PASSWORD in your environment (Netlify dashboard or local .env)
+  // to enable password protection.
+  const password = import.meta.env.SITE_PASSWORD;
+  if (!password) {
+    return next();
+  }
+
   // Check auth cookie
   const cookie = context.cookies.get(COOKIE_NAME);
-  const password = import.meta.env.SITE_PASSWORD;
-
   if (cookie?.value === password) {
     return next();
   }
