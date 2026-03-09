@@ -3,11 +3,11 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 
 export async function getStaticPaths() {
-  const slugs = await reader.collections.factsheets.list();
+  const slugs = await reader.collections.zahlenUndFakten.list();
   const paths = [];
 
   for (const slug of slugs) {
-    const entry = await reader.collections.factsheets.read(slug);
+    const entry = await reader.collections.zahlenUndFakten.read(slug);
     if (entry && entry.status === "published") {
       paths.push({ params: { slug } });
     }
@@ -17,10 +17,10 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const entry = await reader.collections.factsheets.read(slug!);
+const entry = await reader.collections.zahlenUndFakten.read(slug!);
 
 if (!entry || entry.status !== "published") {
-  return Astro.redirect("/factsheets/");
+  return Astro.redirect("/zahlen-und-fakten/");
 }
 
 const { content, internalNotes, ...meta } = entry;
@@ -52,14 +52,14 @@ const { node } = await content();
         <h2>Verwandte Mythen</h2>
         <ul>
           {meta.relatedMyths.map((id: string) => (
-            <li><a href={`/factsheets/${id}/`}>{id}</a></li>
+            <li><a href={`/zahlen-und-fakten/${id}/`}>{id}</a></li>
           ))}
         </ul>
       </aside>
     )}
 
     <footer>
-      <a href="/factsheets/">&larr; Alle Factsheets</a>
+      <a href="/zahlen-und-fakten/">&larr; Zahlen &amp; Fakten</a>
     </footer>
   </article>
 </BaseLayout>

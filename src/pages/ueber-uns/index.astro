@@ -2,7 +2,7 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getPublishedEntries } from "@lib/content";
 
-const entries = await getPublishedEntries("about");
+const entries = await getPublishedEntries("ueberUns");
 
 // Sort by sortOrder
 entries.sort((a, b) => {
@@ -23,7 +23,7 @@ entries.sort((a, b) => {
     {entries.map(([slug, entry]) => {
       const e = entry as any;
       return (
-        <a href={`/about/${slug}/`} class="about-card">
+        <a href={`/ueber-uns/${slug}/`} class="about-card">
           <h2>{e.title}</h2>
           {e.summary && <p>{e.summary}</p>}
         </a>

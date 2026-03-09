@@ -1,0 +1,66 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getPublishedEntries } from "@lib/content";
+
+const factsheetEntries = await getPublishedEntries("zahlenUndFakten");
+const dashboardEntries = await getPublishedEntries("zahlenUndFaktenDashboard");
+
+// Sort factsheets by myth number
+factsheetEntries.sort((a, b) => {
+  const numA = (a[1] as any).mythNumber ?? 0;
+  const numB = (b[1] as any).mythNumber ?? 0;
+  return numA - numB;
+});
+---
+
+<BaseLayout title="Zahlen & Fakten" description="Wissenschaftliche Einordnung aller 42 Cannabis-Mythen und Daten nach Zielgruppen">
+  <h1>Zahlen &amp; Fakten</h1>
+  <p>
+    Wissenschaftlich fundierte Einordnungen zu 42 verbreiteten Cannabis-Mythen
+    und Forschungsdaten nach Zielgruppen.
+  </p>
+
+  <section>
+    <h2>Mythen-Factsheets</h2>
+    <p>
+      Jeder Mythos wurde auf Basis aktueller wissenschaftlicher Evidenz eingeordnet.
+      Klicken Sie auf einen Mythos, um das vollständige Factsheet zu lesen.
+    </p>
+    <div class="factsheet-list">
+      {factsheetEntries.map(([slug, entry]) => {
+        const e = entry as any;
+        return (
+          <article class="factsheet-card">
+            <a href={`/zahlen-und-fakten/${slug}/`}>
+              <span class="myth-number">Mythos {e.mythNumber}</span>
+              <h3>{e.title}</h3>
+              <span class={`classification classification--${e.classification}`}>
+                {e.classificationLabel}
+              </span>
+              {e.summary && <p>{e.summary}</p>}
+            </a>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+
+  <section>
+    <h2>Daten nach Zielgruppen</h2>
+    <p>
+      Erkunden Sie die Forschungsdaten zu 42 Cannabis-Mythen,
+      aufgeschlüsselt nach fünf Zielgruppen und fünf Indikatoren.
+    </p>
+    <div class="dashboard-segments">
+      {dashboardEntries.map(([slug, entry]) => {
+        const e = entry as any;
+        return (
+          <a href={`/zahlen-und-fakten/daten/${slug}/`} class="segment-card">
+            <h3>{e.title}</h3>
+            {e.summary && <p>{e.summary}</p>}
+          </a>
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>

@@ -3,11 +3,11 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 
 export async function getStaticPaths() {
-  const slugs = await reader.collections.dashboard.list();
+  const slugs = await reader.collections.haeufigeFragen.list();
   const paths = [];
 
   for (const slug of slugs) {
-    const entry = await reader.collections.dashboard.read(slug);
+    const entry = await reader.collections.haeufigeFragen.read(slug);
     if (entry && entry.status === "published") {
       paths.push({ params: { slug } });
     }
@@ -17,10 +17,10 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const entry = await reader.collections.dashboard.read(slug!);
+const entry = await reader.collections.haeufigeFragen.read(slug!);
 
 if (!entry || entry.status !== "published") {
-  return Astro.redirect("/dashboard/");
+  return Astro.redirect("/haeufige-fragen/");
 }
 
 const { content, internalNotes, ...meta } = entry;
@@ -28,20 +28,16 @@ const { node } = await content();
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>
-  <article class="dashboard-page">
+  <article class="faq-page">
     <header>
       <h1>{meta.title}</h1>
+      {meta.theme && <p class="theme-label">{meta.theme}</p>}
     </header>
 
-    <!--
-      TODO: Replace this static table rendering with an interactive
-      D3/React dashboard component (src/components/dashboard/).
-      The current view shows the raw indicator tables as a reference.
-    -->
-    <div class="dashboard-content" set:html={node} />
+    <div class="faq-content" set:html={node} />
 
     <footer>
-      <a href="/dashboard/">&larr; Alle Zielgruppen</a>
+      <a href="/haeufige-fragen/">&larr; Alle Themen</a>
     </footer>
   </article>
 </BaseLayout>

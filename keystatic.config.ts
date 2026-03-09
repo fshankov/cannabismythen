@@ -35,10 +35,10 @@ const metaFields = {
 
 // ─── Collections ────────────────────────────────────────────────────────────
 
-const factsheets = collection({
-  label: "Factsheets",
+const zahlenUndFakten = collection({
+  label: "Zahlen & Fakten – Factsheets",
   slugField: "title",
-  path: "src/content/factsheets/*",
+  path: "src/content/zahlen-und-fakten/*",
   format: { contentField: "content" },
   schema: {
     title: fields.slug({ name: { label: "Title" } }),
@@ -97,10 +97,37 @@ const factsheets = collection({
   },
 });
 
-const faq = collection({
-  label: "FAQ",
+const zahlenUndFaktenDashboard = collection({
+  label: "Zahlen & Fakten – Dashboard",
   slugField: "title",
-  path: "src/content/faq/*",
+  path: "src/content/zahlen-und-fakten-dashboard/*",
+  format: { contentField: "content" },
+  schema: {
+    title: fields.slug({ name: { label: "Title" } }),
+    audienceSegment: fields.select({
+      label: "Audience Segment",
+      options: [
+        { label: "Erwachsene (18–70)", value: "erwachsene" },
+        { label: "Minderjährige (16–17)", value: "minderjaehrige" },
+        { label: "Konsumierende", value: "konsumierende" },
+        { label: "Junge Erwachsene (18–26)", value: "junge_erwachsene" },
+        { label: "Eltern", value: "eltern" },
+        { label: "Übergreifend", value: "uebergreifend" },
+      ],
+      defaultValue: "erwachsene",
+    }),
+    ...metaFields,
+    content: fields.markdoc({
+      label: "Content",
+      description: "Dashboard indicator data and descriptions (German).",
+    }),
+  },
+});
+
+const haeufigeFragen = collection({
+  label: "Häufige Fragen",
+  slugField: "title",
+  path: "src/content/haeufige-fragen/*",
   format: { contentField: "content" },
   schema: {
     title: fields.slug({ name: { label: "Title" } }),
@@ -130,10 +157,10 @@ const faq = collection({
   },
 });
 
-const quiz = collection({
-  label: "Quiz",
+const selbsttest = collection({
+  label: "Selbsttest / Quiz",
   slugField: "title",
-  path: "src/content/quiz/*",
+  path: "src/content/selbsttest/*",
   format: { contentField: "content" },
   schema: {
     title: fields.slug({ name: { label: "Title" } }),
@@ -151,10 +178,10 @@ const quiz = collection({
   },
 });
 
-const scrollytelling = collection({
-  label: "Scrollytelling",
+const startseite = collection({
+  label: "Startseite – Scrollytelling",
   slugField: "title",
-  path: "src/content/scrollytelling/*",
+  path: "src/content/startseite/*",
   format: { contentField: "content" },
   schema: {
     title: fields.slug({ name: { label: "Title" } }),
@@ -171,37 +198,10 @@ const scrollytelling = collection({
   },
 });
 
-const dashboard = collection({
-  label: "Dashboard",
+const ueberUns = collection({
+  label: "Über uns",
   slugField: "title",
-  path: "src/content/dashboard/*",
-  format: { contentField: "content" },
-  schema: {
-    title: fields.slug({ name: { label: "Title" } }),
-    audienceSegment: fields.select({
-      label: "Audience Segment",
-      options: [
-        { label: "Erwachsene (18–70)", value: "erwachsene" },
-        { label: "Minderjährige (16–17)", value: "minderjaehrige" },
-        { label: "Konsumierende", value: "konsumierende" },
-        { label: "Junge Erwachsene (18–26)", value: "junge_erwachsene" },
-        { label: "Eltern", value: "eltern" },
-        { label: "Übergreifend", value: "uebergreifend" },
-      ],
-      defaultValue: "erwachsene",
-    }),
-    ...metaFields,
-    content: fields.markdoc({
-      label: "Content",
-      description: "Dashboard indicator data and descriptions (German).",
-    }),
-  },
-});
-
-const about = collection({
-  label: "About",
-  slugField: "title",
-  path: "src/content/about/*",
+  path: "src/content/ueber-uns/*",
   format: { contentField: "content" },
   schema: {
     title: fields.slug({ name: { label: "Title" } }),
@@ -296,12 +296,12 @@ export default config({
     },
   },
   collections: {
-    factsheets,
-    faq,
-    quiz,
-    scrollytelling,
-    dashboard,
-    about,
+    zahlenUndFakten,
+    zahlenUndFaktenDashboard,
+    haeufigeFragen,
+    selbsttest,
+    startseite,
+    ueberUns,
     meta,
     changelog,
   },
