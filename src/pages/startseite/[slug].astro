@@ -4,6 +4,7 @@ export const prerender = true;
 import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
+import ScrollytellingViewer from "@components/scrollytelling/ScrollytellingViewer";
 
 export async function getStaticPaths() {
   const slugs = await reader.collections.startseite.list();
@@ -29,6 +30,17 @@ if (!entry || entry.status !== "published") {
 const { content, internalNotes, ...meta } = entry;
 const { node } = await content();
 const html = Markdoc.renderers.html(Markdoc.transform(node));
+
+// Build steps array for the interactive viewer
+const scrollySteps = (meta.steps || []).map((s: any) => ({
+  stepNumber: s.stepNumber,
+  heading: s.heading,
+  bodyText: s.bodyText,
+  hint: s.hint || "",
+  vizType: s.vizType,
+  ctaLabel: s.ctaLabel || "",
+  ctaUrl: s.ctaUrl || "",
+}));
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>
@@ -38,12 +50,15 @@ const html = Markdoc.renderers.html(Markdoc.transform(node));
       {meta.versionLabel && <p class="version-label">Version {meta.versionLabel}</p>}
     </header>
 
-    <!--
-      TODO: Replace this static content rendering with an interactive
-      scrollytelling component using React + D3 (src/components/scrollytelling/).
-      The current view shows the narrative content as a reference.
-    -->
-    <div class="scrollytelling-content" set:html={html} />
+    {scrollySteps.length > 0 ? (
+      <ScrollytellingViewer
+        steps={scrollySteps}
+        title={meta.title}
+        client:visible
+      />
+    ) : (
+      <div class="scrollytelling-content" set:html={html} />
+    )}
 
     <footer>
       <a href="/">&larr; Startseite</a>

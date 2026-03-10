@@ -187,13 +187,62 @@ const startseite = collection({
     title: fields.slug({ name: { label: "Title" } }),
     versionLabel: fields.text({
       label: "Version Label",
-      description: "e.g. Version A, Version B",
+      description: "e.g. v2.0",
     }),
     stepCount: fields.integer({ label: "Number of Steps" }),
+    steps: fields.array(
+      fields.object({
+        stepNumber: fields.integer({
+          label: "Step Number",
+          description: "1-based step number",
+        }),
+        heading: fields.text({
+          label: "Heading (H2)",
+          multiline: true,
+          description: "Step heading shown in the text column.",
+        }),
+        bodyText: fields.text({
+          label: "Body Text",
+          multiline: true,
+          description:
+            "Paragraph text for this step (German). Use \\n\\n for paragraph breaks.",
+        }),
+        hint: fields.text({
+          label: "Hint / Instruction",
+          description:
+            "Small hint text below the body, e.g. 'Tippe auf die Karte…'",
+        }),
+        vizType: fields.select({
+          label: "Visualization Type",
+          options: [
+            { label: "Big Number", value: "bigNumber" },
+            { label: "Context Cloud (Grey)", value: "contextCloud" },
+            { label: "Group Cloud (Colored)", value: "groupCloud" },
+            { label: "Color Reveal Cloud", value: "colorReveal" },
+            { label: "Trust Gap Chart", value: "trustGap" },
+          ],
+          defaultValue: "bigNumber",
+        }),
+        ctaLabel: fields.text({
+          label: "CTA Button Label",
+          description: "Optional call-to-action button text.",
+        }),
+        ctaUrl: fields.text({
+          label: "CTA Button URL",
+          description: "Optional call-to-action button link.",
+        }),
+      }),
+      {
+        label: "Scrollytelling Steps",
+        itemLabel: (props) =>
+          `Schritt ${props.fields.stepNumber.value}: ${props.fields.heading.value?.slice(0, 40) || "…"}`,
+      }
+    ),
     ...metaFields,
     content: fields.markdoc({
       label: "Content",
-      description: "Scrollytelling narrative steps and chart specs (German).",
+      description:
+        "Full specification document (German). Used as reference and rendered on detail page.",
     }),
   },
 });

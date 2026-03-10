@@ -632,3 +632,602 @@ a.version-card:hover {
     padding-right: var(--space-md);
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Scrollytelling v2.0 — Two-Column Sticky Layout
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Shell ──────────────────────────────────────────────────── */
+
+.scrollytelling {
+  position: relative;
+  margin-top: var(--space-xl);
+}
+
+.scrollytelling__container {
+  display: flex;
+  gap: var(--space-xl);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ── Text Column (left) ─────────────────────────────────────── */
+
+.scrollytelling__text-col {
+  flex: 0 0 40%;
+  max-width: 480px;
+}
+
+.scrollytelling__step {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-xl) 0;
+  opacity: 0.35;
+  transition: opacity 0.4s ease;
+}
+
+.scrollytelling__step--active {
+  opacity: 1;
+}
+
+.scrollytelling__step-label {
+  display: inline-block;
+  font-family: 'SF Mono', SFMono-Regular, ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.scrollytelling__heading {
+  font-size: 1.6rem;
+  line-height: 1.25;
+  margin-top: 0;
+  margin-bottom: var(--space-md);
+  color: var(--color-text);
+}
+
+.scrollytelling__body {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.scrollytelling__hint {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-top: var(--space-sm);
+}
+
+.scrollytelling__cta {
+  display: inline-block;
+  background: var(--color-text);
+  color: var(--color-surface);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: var(--space-md);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.scrollytelling__cta:hover {
+  background: #1E293B;
+  color: var(--color-surface);
+  transform: translateY(-2px);
+}
+
+/* ── Visualization Column (right, sticky) ───────────────────── */
+
+.scrollytelling__viz-col {
+  flex: 1;
+  position: sticky;
+  top: 80px;
+  height: calc(100vh - 100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Mobile viz (hidden on desktop) */
+.scrollytelling__viz-mobile {
+  display: none;
+}
+
+/* ── Viz: Big Number (Step 1) ───────────────────────────────── */
+
+.viz-big-number {
+  text-align: center;
+  width: 100%;
+}
+
+.viz-big-number__card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-md);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.viz-big-number__value {
+  display: block;
+  font-size: clamp(72px, 15vw, 140px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.viz-big-number__label {
+  display: block;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.viz-big-number__context {
+  font-size: 1.05rem;
+  color: #64748B;
+  margin-bottom: var(--space-md);
+}
+
+.viz-big-number__btn {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.viz-big-number__btn:hover {
+  background: #E2E8F0;
+  border-color: var(--color-text-muted);
+}
+
+/* ── Viz: Reveal Cards ──────────────────────────────────────── */
+
+.viz-reveal-card {
+  border-left: 3px solid #be123c;
+  background: #FFF1F2;
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+  text-align: left;
+  animation: fadeSlideUp 0.35s ease;
+}
+
+.viz-reveal-card--second {
+  border-left-color: var(--color-text-muted);
+  background: var(--color-bg);
+  transition: opacity 0.5s ease;
+}
+
+.viz-reveal-card__badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #be123c;
+  background: #FEE2E2;
+  padding: 0.15em 0.6em;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.viz-reveal-card__detail {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0;
+}
+
+/* ── Viz: Stat Row ──────────────────────────────────────────── */
+
+.viz-stat-row {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+  justify-content: center;
+}
+
+.viz-stat-chip {
+  background: #F1F5F9;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  text-align: center;
+}
+
+.viz-stat-chip__number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.viz-stat-chip__label {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Viz: Wordcloud shared ──────────────────────────────────── */
+
+.viz-cloud-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-md);
+  min-height: 200px;
+}
+
+.viz-cloud-word {
+  display: inline-block;
+  color: #64748B;
+  font-weight: 500;
+  padding: 2px 6px;
+  cursor: default;
+  transition: opacity 0.4s ease, color 0.5s ease, transform 0.2s ease;
+  border-radius: var(--radius-sm);
+}
+
+.viz-cloud-word:hover,
+.viz-cloud-word:focus {
+  color: var(--color-text) !important;
+  transform: scale(1.06);
+  background: rgba(15, 23, 42, 0.05);
+  outline: none;
+}
+
+/* ── Viz: Group Tabs ────────────────────────────────────────── */
+
+.viz-group-cloud {
+  width: 100%;
+}
+
+.viz-group-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+}
+
+.viz-group-tab {
+  border: 2px solid;
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 48px;
+  min-width: 48px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.viz-group-tab:hover {
+  opacity: 0.85;
+}
+
+/* ── Viz: Legend ─────────────────────────────────────────────── */
+
+.viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+  justify-content: center;
+  margin-top: var(--space-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.viz-legend-item {
+  white-space: nowrap;
+}
+
+/* ── Viz: CTA Cards ─────────────────────────────────────────── */
+
+.viz-cta-cards {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.viz-cta-card {
+  flex: 1;
+  border-radius: 10px;
+  padding: var(--space-md);
+  background: #FAFAFA;
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.viz-cta-card span {
+  display: block;
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+}
+
+.viz-cta-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+}
+
+.viz-cta-card--quiz {
+  border: 2px solid #047857;
+}
+
+.viz-cta-card--myths {
+  border: 2px solid var(--color-text);
+}
+
+/* ── Viz: Trust Gap / Dumbbell ──────────────────────────────── */
+
+.viz-trust-gap {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.viz-trust-gap__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+  justify-content: center;
+}
+
+.viz-trust-gap__legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.viz-trust-gap__legend-dot--adults {
+  background: #3B82F6;
+}
+
+.viz-trust-gap__legend-dot--minors {
+  background: #F97316;
+}
+
+.viz-dumbbell-row {
+  display: grid;
+  grid-template-columns: 120px 40px 1fr;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.viz-dumbbell-label {
+  font-size: 0.8rem;
+  color: var(--color-text);
+  font-weight: 500;
+  text-align: right;
+}
+
+.viz-dumbbell-trust {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-dumbbell-bar {
+  position: relative;
+  height: 24px;
+  background: #F1F5F9;
+  border-radius: var(--radius-full);
+}
+
+.viz-dumbbell-line {
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  background: rgba(148, 163, 184, 0.5);
+  transform: translateY(-50%);
+}
+
+.viz-dumbbell-dot {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.viz-dumbbell-dot--adults {
+  background: #3B82F6;
+  width: 16px;
+  height: 16px;
+}
+
+.viz-dumbbell-dot--minors {
+  background: #F97316;
+  width: 12px;
+  height: 12px;
+}
+
+.viz-trust-gap__footer {
+  display: flex;
+  gap: var(--space-lg);
+  justify-content: center;
+  margin-top: var(--space-lg);
+  font-size: 0.85rem;
+}
+
+.viz-trust-gap__table-details {
+  margin-top: var(--space-lg);
+  font-size: 0.85rem;
+}
+
+.viz-trust-gap__table-details summary {
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.viz-trust-gap__table-details table {
+  width: 100%;
+  margin-top: var(--space-sm);
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.viz-trust-gap__table-details th,
+.viz-trust-gap__table-details td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.viz-trust-gap__table-details th {
+  font-weight: 600;
+  background: var(--color-bg);
+}
+
+/* ── Animation keyframes ────────────────────────────────────── */
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Accessibility: reduced motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .viz-big-number__value,
+  .viz-cloud-word,
+  .viz-dumbbell-row,
+  .viz-cta-card,
+  .viz-stat-chip,
+  .viz-reveal-card,
+  .scrollytelling__step {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ── Screen-reader only ─────────────────────────────────────── */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── Responsive: Mobile ─────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  .scrollytelling__container {
+    flex-direction: column;
+  }
+
+  .scrollytelling__text-col {
+    flex: none;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .scrollytelling__viz-col {
+    display: none;
+  }
+
+  .scrollytelling__viz-mobile {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    height: 40vh;
+    min-height: 260px;
+    overflow: auto;
+    padding: var(--space-md);
+    transition: box-shadow 0.2s ease;
+  }
+
+  .scrollytelling__step {
+    min-height: 60vh;
+  }
+
+  .scrollytelling__heading {
+    font-size: 1.35rem;
+  }
+
+  .viz-big-number__value {
+    font-size: clamp(56px, 18vw, 80px);
+  }
+
+  .viz-big-number__btn {
+    width: 100%;
+  }
+
+  .viz-cta-cards {
+    flex-direction: column;
+  }
+
+  .viz-stat-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .viz-group-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .viz-dumbbell-row {
+    grid-template-columns: 90px 32px 1fr;
+  }
+
+  .viz-dumbbell-label {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .scrollytelling__viz-mobile {
+    height: 38vh;
+    min-height: 240px;
+  }
+}
