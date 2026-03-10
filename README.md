@@ -13,22 +13,6 @@ The site presents 42 scientifically evaluated cannabis myths across multiple for
 - **[Markdoc](https://markdoc.dev/)** — Content format
 - **TypeScript** throughout
 
-## Quick Start
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/fshankov/cannabismythen.git
-cd cannabismythen
-
-# 2. Install dependencies
-npm install
-
-# 3. Start the dev server
-npm run dev
-```
-
-Visit `http://localhost:4321` for the site, `http://localhost:4321/keystatic` for the CMS.
-
 ## Project Structure
 
 ```
@@ -55,11 +39,6 @@ cannabis-science-web/
 └── package.json
 ```
 
-## Content Editing
-
-Content is managed through Keystatic. See **[docs/editor-guide.md](docs/editor-guide.md)** for the full editor workflow.
-
-**For collaborators:** You need a free GitHub account and write access to this repository. The repo owner will invite you. Then visit the deployed `/keystatic` URL to start editing.
 
 ## Documentation
 
