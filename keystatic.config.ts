@@ -343,6 +343,7 @@ export default config({
       owner: "fshankov",
       name: "cannabismythen",
     },
+    branchPrefix: "content/",
   },
   collections: {
     zahlenUndFakten,
