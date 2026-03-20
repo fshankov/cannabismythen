@@ -169,11 +169,90 @@ const selbsttest = collection({
       description: "e.g. Körper, Psyche, Alltag, Gesellschaft",
     }),
     questionCount: fields.integer({ label: "Number of Questions" }),
+    questions: fields.array(
+      fields.object({
+        mythId: fields.text({
+          label: "Myth ID",
+          description: "Reference to a myth, e.g. m01, m22",
+        }),
+        statement: fields.text({
+          label: "Statement (DE)",
+          multiline: true,
+          description: "The myth statement shown on the quiz card.",
+        }),
+        correctClassification: fields.select({
+          label: "Correct Classification",
+          options: [
+            { label: "Richtig", value: "richtig" },
+            { label: "Eher richtig", value: "eher_richtig" },
+            { label: "Eher falsch", value: "eher_falsch" },
+            { label: "Falsch", value: "falsch" },
+            { label: "Keine Aussage möglich", value: "keine_aussage" },
+          ],
+          defaultValue: "falsch",
+        }),
+        explanation: fields.text({
+          label: "Explanation (DE)",
+          multiline: true,
+          description:
+            "1–2 sentence explanation shown after answering.",
+        }),
+        populationCorrectPct: fields.number({
+          label: "Population Correct %",
+          description:
+            "% of German adults who answered correctly. Leave empty if unavailable.",
+        }),
+        mythPageSlug: fields.text({
+          label: "Myth Page Slug",
+          description:
+            "Slug of the related factsheet page, e.g. m01-allheilmittel",
+        }),
+      }),
+      {
+        label: "Quiz Questions",
+        itemLabel: (props) =>
+          `${props.fields.mythId.value || "?"}: ${props.fields.statement.value?.slice(0, 50) || "…"}`,
+      }
+    ),
+    resultTiers: fields.array(
+      fields.object({
+        title: fields.text({
+          label: "Tier Title (DE)",
+          description: "e.g. Gut informiert, Cannabis-Experte",
+        }),
+        message: fields.text({
+          label: "Motivational Message (DE)",
+          multiline: true,
+        }),
+        minScore: fields.integer({
+          label: "Min Score",
+          description: "Minimum score for this tier (inclusive).",
+        }),
+        maxScore: fields.integer({
+          label: "Max Score",
+          description: "Maximum score for this tier (inclusive).",
+        }),
+        recommendedSlugs: fields.array(
+          fields.text({ label: "Factsheet Slug" }),
+          {
+            label: "Recommended Factsheets",
+            itemLabel: (props) => props.value,
+            description:
+              "2–3 factsheet slugs to recommend for this tier.",
+          }
+        ),
+      }),
+      {
+        label: "Result Tiers",
+        itemLabel: (props) =>
+          `${props.fields.minScore.value}–${props.fields.maxScore.value}: ${props.fields.title.value || "…"}`,
+      }
+    ),
     ...metaFields,
     content: fields.markdoc({
       label: "Content",
       description:
-        "Quiz questions, options, correct answers, and explanations (German).",
+        "Quiz questions, options, correct answers, and explanations (German). Used as reference — the interactive quiz reads from the structured 'questions' field above.",
     }),
   },
 });

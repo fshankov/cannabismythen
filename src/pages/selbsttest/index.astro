@@ -3,29 +3,43 @@ export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getPublishedEntries } from "@lib/content";
+import "../../styles/quiz.css";
 
 const entries = await getPublishedEntries("selbsttest");
 
 // Filter out feedback-texte for the quiz index (it's not a playable quiz)
 const quizzes = entries.filter(([slug]) => slug !== "feedback-texte");
+
+// Quiz descriptions for the index cards
+const quizDescriptions: Record<string, string> = {
+  "quiz-alltag": "Fahrtüchtigkeit, Arbeitsplatz, Schlaf und persönliche Leistung.",
+  "quiz-gesellschaft": "Sozialverhalten, Beziehungen, Legalisierung und öffentliche Wahrnehmung.",
+  "quiz-koerper": "Gesundheitsrisiken, Schmerzlinderung, Herz-Kreislauf, Atemwege und Krebs.",
+  "quiz-psyche": "Psychosen, kognitive Leistung, Abhängigkeit und emotionale Wirkungen.",
+};
 ---
 
 <BaseLayout title="Selbsttest / Quiz" description="Testen Sie Ihr Wissen über Cannabis-Mythen">
   <h1>Selbsttest: Was wissen Sie über Cannabis?</h1>
-  <p>
-    Testen Sie Ihr Wissen in vier thematischen Quiz-Modulen.
-    Jedes Quiz enthält Fragen zu verbreiteten Cannabis-Mythen mit
-    wissenschaftlich fundierten Erklärungen.
-  </p>
+
+  <div class="quiz-index__intro">
+    <p>
+      Testen Sie Ihr Wissen in vier thematischen Quiz-Modulen.
+      Jedes Quiz enthält Fragen zu verbreiteten Cannabis-Mythen mit
+      wissenschaftlich fundierten Erklärungen. Vergleichen Sie Ihre
+      Einschätzungen mit denen der deutschen Bevölkerung.
+    </p>
+  </div>
 
   <section class="quiz-selection">
     {quizzes.map(([slug, entry]) => {
       const e = entry as any;
+      const desc = quizDescriptions[slug as string] || "";
       return (
         <a href={`/selbsttest/${slug}/`} class="quiz-card">
           <h2>{e.title}</h2>
-          {e.questionCount > 0 && <p>{e.questionCount} Fragen</p>}
-          {e.summary && <p>{e.summary}</p>}
+          {e.questionCount > 0 && <p><strong>{e.questionCount} Fragen</strong></p>}
+          {desc && <p>{desc}</p>}
         </a>
       );
     })}

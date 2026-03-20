@@ -1,9 +1,10 @@
 ---
 export const prerender = true;
 
-import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
+import QuizPlayer from "@components/quiz/QuizPlayer";
+import "../../styles/quiz.css";
 
 export async function getStaticPaths() {
   const slugs = await reader.collections.selbsttest.list();
@@ -11,7 +12,7 @@ export async function getStaticPaths() {
 
   for (const slug of slugs) {
     const entry = await reader.collections.selbsttest.read(slug);
-    if (entry && entry.status === "published") {
+    if (entry && entry.status === "published" && slug !== "feedback-texte") {
       paths.push({ params: { slug } });
     }
   }
@@ -25,26 +26,11 @@ const entry = await reader.collections.selbsttest.read(slug!);
 if (!entry || entry.status !== "published") {
   return Astro.redirect("/selbsttest/");
 }
-
-const { content, internalNotes, ...meta } = entry;
-const { node } = await content();
-const html = Markdoc.renderers.html(Markdoc.transform(node));
 ---
 
-<BaseLayout title={meta.title} description={meta.summary || undefined}>
+<BaseLayout title={entry.title} description={entry.summary || "Cannabis-Quiz: Testen Sie Ihr Wissen"}>
   <article class="quiz-page">
-    <header>
-      <h1>{meta.title}</h1>
-      {meta.theme && <p class="theme-label">Thema: {meta.theme}</p>}
-      {(meta.questionCount ?? 0) > 0 && <p>{meta.questionCount} Fragen</p>}
-    </header>
-
-    <!--
-      TODO: Replace this static content rendering with an interactive
-      React quiz component (src/components/quiz/QuizPlayer.tsx).
-      The current view shows the raw quiz content as a reference.
-    -->
-    <div class="quiz-content" set:html={html} />
+    <QuizPlayer client:load quizSlug={slug!} />
 
     <footer>
       <a href="/selbsttest/">&larr; Alle Quiz-Module</a>
