@@ -18,7 +18,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     pathname.startsWith("/keystatic") ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_") ||
-    pathname.match(/\.(ico|png|svg|jpg|jpeg|css|js|woff2?)$/)
+    pathname.startsWith("/data/") ||
+    pathname.match(/\.(ico|png|svg|jpg|jpeg|gif|webp|css|js|mjs|woff2?|json|txt|xml)$/)
   ) {
     return next();
   }
