@@ -5,19 +5,12 @@
  * QuizPlayer, QuizCard, ResultScreen, ShareCard.
  */
 
-/** The 5 classification values used across the site. */
+/** The 4 classification values used in the quiz answer buttons. */
 export type Classification =
   | "richtig"
   | "eher_richtig"
   | "eher_falsch"
-  | "falsch"
-  | "keine_aussage";
-
-/** A single answer option the user can select. */
-export interface AnswerOption {
-  value: Classification;
-  labelKey: string; // i18n key for the button label
-}
+  | "falsch";
 
 /** A single myth/question within a quiz. */
 export interface QuizMyth {
@@ -29,8 +22,8 @@ export interface QuizMyth {
   correctClassification: Classification;
   /** 1–2 sentence explanation shown after answering */
   explanationKey: string;
-  /** % of German adults who answered correctly (null if unavailable) */
-  populationCorrectPct: number | null;
+  /** % of German adults who answered correctly (from CaRM survey) */
+  populationCorrectPct: number;
   /** Slug for the myth detail page, e.g. "m01-allheilmittel" */
   mythPageSlug: string;
 }
@@ -47,8 +40,6 @@ export interface QuizTheme {
   descriptionKey: string;
   /** The myths in this quiz */
   myths: QuizMyth[];
-  /** Recommended myth page slugs per result tier (indices 0–3) */
-  recommendedLinks: string[][];
 }
 
 /** Tracks the user's answer state for a single card. */
@@ -61,14 +52,14 @@ export interface CardAnswer {
 /** Result tier (0–3, lowest to highest). */
 export type ResultTierIndex = 0 | 1 | 2 | 3;
 
-/** A result tier definition. */
+/** A result tier definition (percentage-based boundaries). */
 export interface ResultTier {
   /** i18n key for the tier title */
   titleKey: string;
   /** i18n key for the motivational message */
   messageKey: string;
-  /** Score range: [min, max] inclusive */
-  range: [number, number];
+  /** Percentage range: [minPct, maxPct] inclusive */
+  rangePct: [number, number];
 }
 
 /** Complete quiz result after all questions answered. */
@@ -76,12 +67,13 @@ export interface QuizResult {
   themeSlug: string;
   totalQuestions: number;
   correctCount: number;
+  correctPct: number; // 0–100, percentage of questions correct
   percentile: number; // 0–100, "better than X% of adults"
   tierIndex: ResultTierIndex;
   answers: CardAnswer[];
 }
 
-/** Matomo event categories and actions. */
+/** Typed Matomo event for the quiz (kept for existing calls). */
 export type MatomoEventCategory = "Quiz";
 
 export type MatomoEventAction =
@@ -92,7 +84,6 @@ export type MatomoEventAction =
   | "result_card_shared"
   | "myth_link_clicked";
 
-/** Typed Matomo event for the quiz. */
 export interface MatomoEvent {
   category: MatomoEventCategory;
   action: MatomoEventAction;

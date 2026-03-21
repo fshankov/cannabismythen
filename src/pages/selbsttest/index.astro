@@ -10,12 +10,12 @@ const entries = await getPublishedEntries("selbsttest");
 // Filter out feedback-texte for the quiz index (it's not a playable quiz)
 const quizzes = entries.filter(([slug]) => slug !== "feedback-texte");
 
-// Quiz descriptions for the index cards
-const quizDescriptions: Record<string, string> = {
-  "quiz-alltag": "Fahrtüchtigkeit, Arbeitsplatz, Schlaf und persönliche Leistung.",
-  "quiz-gesellschaft": "Sozialverhalten, Beziehungen, Legalisierung und öffentliche Wahrnehmung.",
-  "quiz-koerper": "Gesundheitsrisiken, Schmerzlinderung, Herz-Kreislauf, Atemwege und Krebs.",
-  "quiz-psyche": "Psychosen, kognitive Leistung, Abhängigkeit und emotionale Wirkungen.",
+// Quiz card data: emoji + question count
+const quizMeta: Record<string, { emoji: string; count: number }> = {
+  "quiz-alltag": { emoji: "\u2615", count: 10 },
+  "quiz-gesellschaft": { emoji: "\uD83C\uDFDB\uFE0F", count: 9 },
+  "quiz-koerper": { emoji: "\uD83E\uDEC0", count: 10 },
+  "quiz-psyche": { emoji: "\uD83E\uDDE0", count: 11 },
 };
 ---
 
@@ -34,12 +34,14 @@ const quizDescriptions: Record<string, string> = {
   <section class="quiz-selection">
     {quizzes.map(([slug, entry]) => {
       const e = entry as any;
-      const desc = quizDescriptions[slug as string] || "";
+      const meta = quizMeta[slug as string];
       return (
-        <a href={`/selbsttest/${slug}/`} class="quiz-card">
-          <h2>{e.title}</h2>
-          {e.questionCount > 0 && <p><strong>{e.questionCount} Fragen</strong></p>}
-          {desc && <p>{desc}</p>}
+        <a href={`/selbsttest/${slug}/`} class="quiz-select-card">
+          <span class="quiz-select-card__emoji">{meta?.emoji || "\uD83D\uDCCB"}</span>
+          <h2 class="quiz-select-card__title">{e.title}</h2>
+          <span class="quiz-select-card__count">
+            {meta?.count || e.questionCount || "?"} Fragen
+          </span>
         </a>
       );
     })}

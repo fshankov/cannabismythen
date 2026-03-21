@@ -1,24 +1,14 @@
 /**
  * QuizPlayer — Interactive quiz island component (React).
  *
- * Main component that renders:
- *   - A start screen with quiz title and description
- *   - An all-cards-at-once responsive grid of QuizCards
- *   - A persistent progress bar
- *   - A result screen after all cards are answered
+ * Renders all myth cards in a responsive grid. No intermediate start screen —
+ * the quiz begins immediately when the component mounts.
  *
- * TODO before production:
- *   - Replace Matomo URL/siteId in BaseLayout.astro with real values
- *   - Create custom dimensions 1 (chosen_answer) and 2 (percentile_tier) in Matomo dashboard
- *   - Verify all explanation texts with the editorial team
- *   - Confirm population percentages match latest survey data
- *   - Review tier boundaries and percentile algorithm with UX team
- *   - Add proper error boundary for React island hydration failures
- *   - Consider adding a "restart quiz" button after results
+ * When all cards are answered, a full-screen result modal opens.
  */
 
-import { useState, useCallback, useMemo } from "react";
-import type { Classification, CardAnswer, QuizResult } from "./types";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import type { Classification, CardAnswer, QuizResult, QuizMyth } from "./types";
 import { QUIZ_THEMES, computePercentile, getTierIndex } from "./quizData";
 import { t } from "./i18n";
 import {
@@ -29,17 +19,65 @@ import {
 import QuizCard from "./QuizCard";
 import ProgressBar from "./ProgressBar";
 import ResultScreen from "./ResultScreen";
+import FactsheetPanel from "./FactsheetPanel";
+
+/** Shape of pre-rendered myth content passed from Astro. */
+export interface MythContentEntry {
+  html: string;
+  title: string;
+  classification: string;
+  classificationLabel: string;
+  refCount: number;
+}
+
+/** Shape of editable quiz text from Keystatic content. */
+export interface QuizTextEntry {
+  statement: string;
+  explanation: string;
+}
 
 interface QuizPlayerProps {
   /** Quiz slug, e.g. "quiz-alltag" */
   quizSlug: string;
+  /** JSON-serialized Record<mythId, MythContentEntry> from Astro build */
+  mythContent?: string;
+  /** JSON-serialized Record<mythId, QuizTextEntry> from Keystatic selbsttest content */
+  quizText?: string;
 }
 
-export default function QuizPlayer({ quizSlug }: QuizPlayerProps) {
+export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlayerProps) {
   const theme = QUIZ_THEMES[quizSlug];
-
-  const [started, setStarted] = useState(false);
   const [answers, setAnswers] = useState<Record<string, CardAnswer>>({});
+  const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
+  const hasTrackedStart = useRef(false);
+
+  // Parse myth content once
+  const mythContentMap: Record<string, MythContentEntry> = useMemo(() => {
+    if (!mythContent) return {};
+    try {
+      return JSON.parse(mythContent);
+    } catch {
+      return {};
+    }
+  }, [mythContent]);
+
+  // Parse Keystatic quiz text (statement + explanation per myth)
+  const quizTextMap: Record<string, QuizTextEntry> = useMemo(() => {
+    if (!quizText) return {};
+    try {
+      return JSON.parse(quizText);
+    } catch {
+      return {};
+    }
+  }, [quizText]);
+
+  // Track quiz start on mount
+  useEffect(() => {
+    if (theme && !hasTrackedStart.current) {
+      hasTrackedStart.current = true;
+      trackQuizStarted(t(theme.titleKey));
+    }
+  }, [theme]);
 
   if (!theme) {
     return (
@@ -57,31 +95,22 @@ export default function QuizPlayer({ quizSlug }: QuizPlayerProps) {
   const result: QuizResult | null = useMemo(() => {
     if (!allAnswered) return null;
 
-    const correctCount = Object.values(answers).filter((a) => a.isCorrect).length;
-    const percentile = computePercentile(theme.myths, correctCount);
-    const tierIndex = getTierIndex(correctCount);
+    const answersList = Object.values(answers);
+    const correctCount = answersList.filter((a) => a.isCorrect).length;
+    const correctPct = Math.round((correctCount / totalQuestions) * 100);
+    const percentile = computePercentile(theme.myths, answersList);
+    const tierIndex = getTierIndex(correctCount, totalQuestions);
 
     return {
       themeSlug: quizSlug,
       totalQuestions,
       correctCount,
+      correctPct,
       percentile,
       tierIndex,
-      answers: Object.values(answers),
+      answers: answersList,
     };
   }, [allAnswered, answers, theme.myths, quizSlug, totalQuestions]);
-
-  // Track completion
-  const prevAllAnswered = useMemo(() => allAnswered, [allAnswered]);
-  if (result && prevAllAnswered) {
-    // Side effect in render — we track once when result first appears.
-    // This is safe because result is memoized and only computed once.
-  }
-
-  const handleStart = useCallback(() => {
-    setStarted(true);
-    trackQuizStarted(t(theme.titleKey));
-  }, [theme.titleKey]);
 
   const handleAnswer = useCallback(
     (mythId: string, chosen: Classification) => {
@@ -103,9 +132,9 @@ export default function QuizPlayer({ quizSlug }: QuizPlayerProps) {
 
         // Check if this was the last answer
         if (Object.keys(next).length === totalQuestions) {
-          const correctCount = Object.values(next).filter((a) => a.isCorrect).length;
-          const percentile = computePercentile(theme.myths, correctCount);
-          const tierIndex = getTierIndex(correctCount);
+          const nextList = Object.values(next);
+          const correctCount = nextList.filter((a) => a.isCorrect).length;
+          const tierIndex = getTierIndex(correctCount, totalQuestions);
           trackQuizCompleted(t(theme.titleKey), correctCount, tierIndex);
         }
 
@@ -115,31 +144,18 @@ export default function QuizPlayer({ quizSlug }: QuizPlayerProps) {
     [theme.myths, theme.titleKey, answers, totalQuestions]
   );
 
-  // ── Start Screen ──────────────────────────────────────────────────
-  if (!started) {
-    return (
-      <div className="quiz-player quiz-player--start">
-        <div className="quiz-player__start-card">
-          <h2 className="quiz-player__title">{t(theme.titleKey)}</h2>
-          <p className="quiz-player__subtitle">{t(theme.subtitleKey)}</p>
-          <p className="quiz-player__description">
-            {t(theme.descriptionKey)}
-          </p>
-          <p className="quiz-player__meta">
-            {t("ui.questionsCount", { n: totalQuestions })}
-          </p>
-          <button
-            className="quiz-player__start-btn"
-            onClick={handleStart}
-          >
-            {t("ui.startQuiz")}
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const handleRestart = useCallback(() => {
+    setAnswers({});
+  }, []);
 
-  // ── Active Quiz ───────────────────────────────────────────────────
+  const handleShowFactsheet = useCallback((myth: QuizMyth) => {
+    setFactsheetMyth(myth);
+  }, []);
+
+  const handleCloseFactsheet = useCallback(() => {
+    setFactsheetMyth(null);
+  }, []);
+
   return (
     <div className="quiz-player quiz-player--active">
       <header className="quiz-player__header">
@@ -158,11 +174,29 @@ export default function QuizPlayer({ quizSlug }: QuizPlayerProps) {
             total={totalQuestions}
             answer={answers[myth.id] || null}
             onAnswer={handleAnswer}
+            onShowFactsheet={handleShowFactsheet}
+            statementText={quizTextMap[myth.id]?.statement}
+            explanationText={quizTextMap[myth.id]?.explanation}
           />
         ))}
       </div>
 
-      {result && <ResultScreen result={result} />}
+      {result && (
+        <ResultScreen
+          result={result}
+          onRestart={handleRestart}
+        />
+      )}
+
+      {factsheetMyth && (
+        <FactsheetPanel
+          myth={factsheetMyth}
+          mythContentEntry={mythContentMap[factsheetMyth.id]}
+          onClose={handleCloseFactsheet}
+          statementText={quizTextMap[factsheetMyth.id]?.statement}
+          explanationText={quizTextMap[factsheetMyth.id]?.explanation}
+        />
+      )}
     </div>
   );
 }

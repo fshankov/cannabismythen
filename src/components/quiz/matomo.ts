@@ -1,15 +1,6 @@
 /**
  * Matomo cookieless event tracking utility for the quiz system.
  *
- * IMPORTANT — Before production:
- *   1. Set the correct Matomo URL and site ID in BaseLayout.astro
- *   2. Create these custom dimensions in the Matomo dashboard:
- *      - Custom Dimension 1 (Action scope): "chosen_answer"
- *        Values: RICHTIG | EHER_RICHTIG | EHER_FALSCH | FALSCH | KEINE_AUSSAGE
- *      - Custom Dimension 2 (Action scope): "percentile_tier"
- *        Values: bottom30 | mid50 | top25 | top10
- *   3. Verify events appear in Matomo → Behaviour → Events
- *
  * This module provides a single typed function `trackQuizEvent()` so that
  * Matomo is never called ad-hoc inline. All 6 event types are handled here.
  */
@@ -55,10 +46,7 @@ export function trackQuizEvent(event: MatomoEvent): void {
   );
 }
 
-/**
- * Map of custom dimension names to Matomo dimension IDs.
- * TODO: Update these IDs to match your Matomo dashboard configuration.
- */
+/** Map of custom dimension names to Matomo dimension IDs. */
 const CUSTOM_DIMENSION_MAP: Record<string, number> = {
   chosen_answer: 1,
   percentile_tier: 2,

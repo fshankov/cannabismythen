@@ -15,4 +15,9 @@ export default defineConfig({
     // handles it, causing Bad Request errors for new users during OAuth.
     // Re-enable only if you specifically need edge-based auth middleware.
   }),
+  vite: {
+    optimizeDeps: {
+      include: ["echarts", "echarts-for-react"],
+    },
+  },
 });

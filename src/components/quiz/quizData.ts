@@ -2,95 +2,138 @@
  * Quiz data — structured myth entries for all 4 quiz themes.
  *
  * Data sourced from:
- *   - /src/content/selbsttest/quiz-*.mdoc (questions, classifications, feedback, population %)
- *   - /src/content/zahlen-und-fakten/*.mdoc (myth page slugs)
- *   - /src/content/selbsttest/feedback-texte.mdoc (population comparison data)
- *
- * TODO before production:
- *   - Verify all explanation texts with editorial team
- *   - Confirm population % figures match latest survey data
- *   - Review "keine_aussage" question handling with UX team
- *   - Add recommended myth links per tier (currently uses first 3 myths from each quiz)
+ *   - CaRM survey: "Ergebnisse CaRM Tab sort 1.xlsx", sheet "Volljährige"
+ *     (Richtigkeit d. Beurteilung column — Adults 18–70)
+ *   - /src/content/zahlen-und-fakten/*.mdoc (myth page slugs, classifications)
  */
 
-import type { QuizTheme, QuizMyth, ResultTier, ResultTierIndex } from "./types";
+import type { QuizTheme, QuizMyth, ResultTier, ResultTierIndex, Classification, CardAnswer } from "./types";
 
-// ─── Result Tiers ──────────────────────────────────────────────────────────────
+// ─── Result Tiers (percentage-based) ────────────────────────────────────────────
 
 export const RESULT_TIERS: ResultTier[] = [
   {
     titleKey: "tier.0.title",
     messageKey: "tier.0.message",
-    range: [0, 3],
+    rangePct: [0, 30],
   },
   {
     titleKey: "tier.1.title",
     messageKey: "tier.1.message",
-    range: [4, 6],
+    rangePct: [31, 55],
   },
   {
     titleKey: "tier.2.title",
     messageKey: "tier.2.message",
-    range: [7, 8],
+    rangePct: [56, 80],
   },
   {
     titleKey: "tier.3.title",
     messageKey: "tier.3.message",
-    range: [9, Infinity], // adapts to quiz length (9, 10, or 11)
+    rangePct: [81, 100],
   },
 ];
 
-export function getTierIndex(correct: number): ResultTierIndex {
-  if (correct <= 3) return 0;
-  if (correct <= 6) return 1;
-  if (correct <= 8) return 2;
+/** Get the tier index for a given score as percentage of total. */
+export function getTierIndex(correctCount: number, total: number): ResultTierIndex {
+  const pct = (correctCount / total) * 100;
+  if (pct <= 30) return 0;
+  if (pct <= 55) return 1;
+  if (pct <= 80) return 2;
   return 3;
+}
+
+// ─── Distance-based scoring (matches CaRM "Richtigkeit d. Beurteilung") ──────
+
+/** Ordinal position of each classification on the 4-point scale. */
+const CLASS_POS: Record<Classification, number> = {
+  richtig: 1,
+  eher_richtig: 2,
+  eher_falsch: 3,
+  falsch: 4,
+};
+
+/**
+ * Score a single answer on the same 0–100 "Richtigkeit" scale used by CaRM.
+ * 0 steps from correct → 100, 1 step → 66.67, 2 steps → 33.33, 3 steps → 0.
+ */
+export function distanceScore(
+  chosen: Classification,
+  correct: Classification
+): number {
+  const d = Math.abs(CLASS_POS[chosen] - CLASS_POS[correct]);
+  return ((3 - d) / 3) * 100;
 }
 
 // ─── Percentile Computation ────────────────────────────────────────────────────
 
 /**
- * Compute the percentile using dynamic programming over independent Bernoulli
- * variables. Each question has a known probability p_i that a random German
- * adult answers it correctly. We compute P(score < userScore) * 100.
+ * Compute the user's percentile using the CaRM distance-based scoring model.
  *
- * For "keine_aussage" questions with no population data, we assume 20% accuracy
- * (5 options, random guess).
+ * The "Richtigkeit d. Beurteilung / Punkte" values in the survey are composite
+ * scores (0–100) measuring average closeness to the correct classification —
+ * NOT binary "% who got it exactly right". See the Erläuterungen sheet.
+ *
+ * Algorithm:
+ *   1. Score each user answer on the same 0–100 scale (distanceScore).
+ *   2. Sum across all questions → user's total Richtigkeit.
+ *   3. Sum the population means → population total Richtigkeit.
+ *   4. Estimate population variance as Σ μ_i(100 − μ_i) (max-entropy bound).
+ *   5. Normal approximation: percentile = Φ((userTotal − popTotal) / σ) × 100.
  */
 export function computePercentile(
   myths: QuizMyth[],
-  correctCount: number
+  answers: CardAnswer[]
 ): number {
-  const n = myths.length;
-  const probs = myths.map((m) =>
-    m.populationCorrectPct !== null ? m.populationCorrectPct / 100 : 0.2
-  );
+  // Build a lookup from mythId → chosen classification
+  const chosenMap = new Map<string, Classification>();
+  for (const a of answers) {
+    chosenMap.set(a.mythId, a.chosenClassification);
+  }
 
-  // dp[j] = probability of getting exactly j correct after processing questions so far
-  let dp = new Array(n + 1).fill(0);
-  dp[0] = 1;
+  let userTotal = 0;
+  let popTotal = 0;
+  let popVariance = 0;
 
-  for (let i = 0; i < n; i++) {
-    const p = probs[i];
-    const newDp = new Array(n + 1).fill(0);
-    for (let j = 0; j <= i; j++) {
-      if (dp[j] === 0) continue;
-      newDp[j] += dp[j] * (1 - p); // wrong
-      newDp[j + 1] += dp[j] * p; // correct
+  for (const myth of myths) {
+    const chosen = chosenMap.get(myth.id);
+    if (chosen) {
+      userTotal += distanceScore(chosen, myth.correctClassification);
     }
-    dp = newDp;
+    const mu = myth.populationCorrectPct;
+    popTotal += mu;
+    popVariance += mu * (100 - mu);
   }
 
-  // percentile = P(random adult scores strictly less than userScore)
-  let cdf = 0;
-  for (let j = 0; j < correctCount; j++) {
-    cdf += dp[j];
-  }
+  const popSd = Math.sqrt(popVariance);
+  if (popSd === 0) return 50;
 
-  return Math.round(Math.min(99, Math.max(1, cdf * 100)));
+  const z = (userTotal - popTotal) / popSd;
+
+  // Standard normal CDF approximation (Abramowitz & Stegun 26.2.17)
+  const pctile = normalCdf(z) * 100;
+
+  return Math.round(Math.min(99, Math.max(1, pctile)));
 }
 
-// ─── Quiz: Cannabis & Alltag ───────────────────────────────────────────────────
+/** Standard normal CDF — rational approximation, max error < 7.5 × 10⁻⁸. */
+function normalCdf(x: number): number {
+  if (x < -8) return 0;
+  if (x > 8) return 1;
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  const absX = Math.abs(x);
+  const t = 1.0 / (1.0 + p * absX);
+  const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX / 2);
+  return 0.5 * (1.0 + sign * y);
+}
+
+// ─── Quiz: Cannabis & Alltag (10 questions, m12 dropped — keine_aussage) ──────
 
 const mythsAlltag: QuizMyth[] = [
   {
@@ -98,7 +141,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m04.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m04.explanation",
-    populationCorrectPct: 69.7,
+    populationCorrectPct: 69.66,
     mythPageSlug: "m04-weniger-schaedlich-alkohol",
   },
   {
@@ -106,7 +149,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m05.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m05.explanation",
-    populationCorrectPct: 76.4,
+    populationCorrectPct: 76.43,
     mythPageSlug: "m05-schwierig-dosieren",
   },
   {
@@ -114,7 +157,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m06.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m06.explanation",
-    populationCorrectPct: 89.0,
+    populationCorrectPct: 88.97,
     mythPageSlug: "m06-mischkonsum",
   },
   {
@@ -122,23 +165,15 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m07.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m07.explanation",
-    populationCorrectPct: 85.7,
+    populationCorrectPct: 85.70,
     mythPageSlug: "m07-zusaetze",
-  },
-  {
-    id: "m12",
-    statementKey: "myth.m12.statement",
-    correctClassification: "keine_aussage",
-    explanationKey: "myth.m12.explanation",
-    populationCorrectPct: null,
-    mythPageSlug: "m12-entzuendungen",
   },
   {
     id: "m13",
     statementKey: "myth.m13.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m13.explanation",
-    populationCorrectPct: 78.3,
+    populationCorrectPct: 78.32,
     mythPageSlug: "m13-spastiken",
   },
   {
@@ -146,7 +181,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m21.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m21.explanation",
-    populationCorrectPct: 91.7,
+    populationCorrectPct: 91.71,
     mythPageSlug: "m21-verkehr",
   },
   {
@@ -154,7 +189,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m29.statement",
     correctClassification: "eher_richtig",
     explanationKey: "myth.m29.explanation",
-    populationCorrectPct: 84.4,
+    populationCorrectPct: 84.40,
     mythPageSlug: "m29-gemuetslage",
   },
   {
@@ -162,7 +197,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m31.statement",
     correctClassification: "eher_richtig",
     explanationKey: "myth.m31.explanation",
-    populationCorrectPct: 82.0,
+    populationCorrectPct: 82.01,
     mythPageSlug: "m31-m32-entspannt-aggressiv",
   },
   {
@@ -170,7 +205,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m32.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m32.explanation",
-    populationCorrectPct: 57.9,
+    populationCorrectPct: 57.86,
     mythPageSlug: "m31-m32-entspannt-aggressiv",
   },
   {
@@ -178,12 +213,12 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m33.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m33.explanation",
-    populationCorrectPct: 61.0,
+    populationCorrectPct: 60.97,
     mythPageSlug: "m33-kreativ",
   },
 ];
 
-// ─── Quiz: Cannabis & Gesellschaft ─────────────────────────────────────────────
+// ─── Quiz: Cannabis & Gesellschaft (9 questions) ──────────────────────────────
 
 const mythsGesellschaft: QuizMyth[] = [
   {
@@ -191,7 +226,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m34.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m34.explanation",
-    populationCorrectPct: 54.2,
+    populationCorrectPct: 54.17,
     mythPageSlug: "m34-soziale-beziehungen",
   },
   {
@@ -199,7 +234,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m35.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m35.explanation",
-    populationCorrectPct: 63.3,
+    populationCorrectPct: 63.33,
     mythPageSlug: "m35-soziale-regeln",
   },
   {
@@ -207,7 +242,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m36.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m36.explanation",
-    populationCorrectPct: 55.3,
+    populationCorrectPct: 55.28,
     mythPageSlug: "m36-m37-leistungen-niveau",
   },
   {
@@ -215,7 +250,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m37.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m37.explanation",
-    populationCorrectPct: 35.8,
+    populationCorrectPct: 35.85,
     mythPageSlug: "m36-m37-leistungen-niveau",
   },
   {
@@ -223,7 +258,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m38.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m38.explanation",
-    populationCorrectPct: 61.8,
+    populationCorrectPct: 61.80,
     mythPageSlug: "m38-cool",
   },
   {
@@ -231,7 +266,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m39.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m39.explanation",
-    populationCorrectPct: 25.5,
+    populationCorrectPct: 25.50,
     mythPageSlug: "m39-bevoelkerung-konsumiert",
   },
   {
@@ -239,7 +274,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m40.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m40.explanation",
-    populationCorrectPct: 35.8,
+    populationCorrectPct: 35.76,
     mythPageSlug: "m40-ueberall-erlaubt",
   },
   {
@@ -247,7 +282,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m41.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m41.explanation",
-    populationCorrectPct: 79.3,
+    populationCorrectPct: 79.26,
     mythPageSlug: "m41-m42-anstieg-konsum",
   },
   {
@@ -255,12 +290,12 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m42.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m42.explanation",
-    populationCorrectPct: 53.1,
+    populationCorrectPct: 53.06,
     mythPageSlug: "m41-m42-anstieg-konsum",
   },
 ];
 
-// ─── Quiz: Cannabis & Körper ───────────────────────────────────────────────────
+// ─── Quiz: Cannabis & Körper (10 questions, m17 dropped — keine_aussage) ──────
 
 const mythsKoerper: QuizMyth[] = [
   {
@@ -268,7 +303,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m01.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m01.explanation",
-    populationCorrectPct: 49.1,
+    populationCorrectPct: 49.10,
     mythPageSlug: "m01-allheilmittel",
   },
   {
@@ -276,7 +311,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m02.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m02.explanation",
-    populationCorrectPct: 63.8,
+    populationCorrectPct: 63.77,
     mythPageSlug: "m02-harmlos",
   },
   {
@@ -284,7 +319,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m03.statement",
     correctClassification: "eher_richtig",
     explanationKey: "myth.m03.explanation",
-    populationCorrectPct: 77.9,
+    populationCorrectPct: 77.93,
     mythPageSlug: "m03-heranwachsende",
   },
   {
@@ -292,7 +327,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m08.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m08.explanation",
-    populationCorrectPct: 89.9,
+    populationCorrectPct: 89.87,
     mythPageSlug: "m08-foetus",
   },
   {
@@ -300,7 +335,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m09.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m09.explanation",
-    populationCorrectPct: 74.3,
+    populationCorrectPct: 74.30,
     mythPageSlug: "m09-ueberdosierung",
   },
   {
@@ -308,7 +343,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m10.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m10.explanation",
-    populationCorrectPct: 49.7,
+    populationCorrectPct: 49.74,
     mythPageSlug: "m10-schmerzen",
   },
   {
@@ -316,7 +351,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m11.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m11.explanation",
-    populationCorrectPct: 71.9,
+    populationCorrectPct: 71.89,
     mythPageSlug: "m11-uebelkeit",
   },
   {
@@ -324,7 +359,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m14.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m14.explanation",
-    populationCorrectPct: 76.2,
+    populationCorrectPct: 76.21,
     mythPageSlug: "m14-herz-kreislauf",
   },
   {
@@ -332,7 +367,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m15.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m15.explanation",
-    populationCorrectPct: 78.8,
+    populationCorrectPct: 78.80,
     mythPageSlug: "m15-atemwege",
   },
   {
@@ -340,20 +375,12 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m16.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m16.explanation",
-    populationCorrectPct: 73.6,
+    populationCorrectPct: 73.59,
     mythPageSlug: "m16-krebs",
-  },
-  {
-    id: "m17",
-    statementKey: "myth.m17.statement",
-    correctClassification: "keine_aussage",
-    explanationKey: "myth.m17.explanation",
-    populationCorrectPct: null,
-    mythPageSlug: "m17-abnehmen",
   },
 ];
 
-// ─── Quiz: Cannabis & Psyche ───────────────────────────────────────────────────
+// ─── Quiz: Cannabis & Psyche (11 questions) ──────────────────────────────────
 
 const mythsPsyche: QuizMyth[] = [
   {
@@ -361,7 +388,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m18.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m18.explanation",
-    populationCorrectPct: 56.4,
+    populationCorrectPct: 56.37,
     mythPageSlug: "m18-schlaf",
   },
   {
@@ -369,7 +396,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m19.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m19.explanation",
-    populationCorrectPct: 87.6,
+    populationCorrectPct: 87.56,
     mythPageSlug: "m19-wahrnehmung",
   },
   {
@@ -377,7 +404,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m20.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m20.explanation",
-    populationCorrectPct: 83.3,
+    populationCorrectPct: 83.34,
     mythPageSlug: "m20-kognition",
   },
   {
@@ -385,7 +412,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m22.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m22.explanation",
-    populationCorrectPct: 51.6,
+    populationCorrectPct: 51.65,
     mythPageSlug: "m22-einstiegsdroge",
   },
   {
@@ -393,7 +420,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m23.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m23.explanation",
-    populationCorrectPct: 63.7,
+    populationCorrectPct: 63.75,
     mythPageSlug: "m23-abhaengigkeit",
   },
   {
@@ -401,7 +428,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m24.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m24.explanation",
-    populationCorrectPct: 74.3,
+    populationCorrectPct: 74.25,
     mythPageSlug: "m24-psychosen",
   },
   {
@@ -409,7 +436,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m25.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m25.explanation",
-    populationCorrectPct: 60.6,
+    populationCorrectPct: 60.60,
     mythPageSlug: "m25-angst",
   },
   {
@@ -417,7 +444,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m26.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m26.explanation",
-    populationCorrectPct: 30.2,
+    populationCorrectPct: 30.18,
     mythPageSlug: "m26-depressionen",
   },
   {
@@ -425,7 +452,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m27.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m27.explanation",
-    populationCorrectPct: 55.9,
+    populationCorrectPct: 55.93,
     mythPageSlug: "m27-adhs",
   },
   {
@@ -433,7 +460,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m28.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m28.explanation",
-    populationCorrectPct: 25.1,
+    populationCorrectPct: 25.05,
     mythPageSlug: "m28-motivation",
   },
   {
@@ -441,7 +468,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m30.statement",
     correctClassification: "eher_richtig",
     explanationKey: "myth.m30.explanation",
-    populationCorrectPct: 83.0,
+    populationCorrectPct: 83.02,
     mythPageSlug: "m30-suizid",
   },
 ];
@@ -455,16 +482,6 @@ export const QUIZ_THEMES: Record<string, QuizTheme> = {
     subtitleKey: "quiz.alltag.subtitle",
     descriptionKey: "quiz.alltag.description",
     myths: mythsAlltag,
-    recommendedLinks: [
-      // Tier 0 (0–3): basics
-      ["m06-mischkonsum", "m21-verkehr", "m07-zusaetze"],
-      // Tier 1 (4–6): mid
-      ["m04-weniger-schaedlich-alkohol", "m29-gemuetslage", "m33-kreativ"],
-      // Tier 2 (7–8): good
-      ["m12-entzuendungen", "m31-m32-entspannt-aggressiv", "m13-spastiken"],
-      // Tier 3 (9+): expert
-      ["m31-m32-entspannt-aggressiv", "m12-entzuendungen", "m05-schwierig-dosieren"],
-    ],
   },
   "quiz-gesellschaft": {
     slug: "quiz-gesellschaft",
@@ -472,12 +489,6 @@ export const QUIZ_THEMES: Record<string, QuizTheme> = {
     subtitleKey: "quiz.gesellschaft.subtitle",
     descriptionKey: "quiz.gesellschaft.description",
     myths: mythsGesellschaft,
-    recommendedLinks: [
-      ["m39-bevoelkerung-konsumiert", "m40-ueberall-erlaubt", "m38-cool"],
-      ["m36-m37-leistungen-niveau", "m34-soziale-beziehungen", "m41-m42-anstieg-konsum"],
-      ["m35-soziale-regeln", "m41-m42-anstieg-konsum", "m39-bevoelkerung-konsumiert"],
-      ["m36-m37-leistungen-niveau", "m40-ueberall-erlaubt", "m34-soziale-beziehungen"],
-    ],
   },
   "quiz-koerper": {
     slug: "quiz-koerper",
@@ -485,12 +496,6 @@ export const QUIZ_THEMES: Record<string, QuizTheme> = {
     subtitleKey: "quiz.koerper.subtitle",
     descriptionKey: "quiz.koerper.description",
     myths: mythsKoerper,
-    recommendedLinks: [
-      ["m01-allheilmittel", "m02-harmlos", "m10-schmerzen"],
-      ["m08-foetus", "m14-herz-kreislauf", "m16-krebs"],
-      ["m09-ueberdosierung", "m15-atemwege", "m17-abnehmen"],
-      ["m10-schmerzen", "m01-allheilmittel", "m11-uebelkeit"],
-    ],
   },
   "quiz-psyche": {
     slug: "quiz-psyche",
@@ -498,12 +503,6 @@ export const QUIZ_THEMES: Record<string, QuizTheme> = {
     subtitleKey: "quiz.psyche.subtitle",
     descriptionKey: "quiz.psyche.description",
     myths: mythsPsyche,
-    recommendedLinks: [
-      ["m23-abhaengigkeit", "m24-psychosen", "m26-depressionen"],
-      ["m22-einstiegsdroge", "m18-schlaf", "m28-motivation"],
-      ["m25-angst", "m27-adhs", "m30-suizid"],
-      ["m28-motivation", "m26-depressionen", "m22-einstiegsdroge"],
-    ],
   },
 };
 

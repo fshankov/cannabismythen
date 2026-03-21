@@ -20,14 +20,12 @@ const translations: Record<Lang, Record<string, string>> = {
     "answer.eher_falsch": "Eher falsch",
     "answer.eher_richtig": "Eher richtig",
     "answer.richtig": "Richtig",
-    "answer.keine_aussage": "Keine Aussage möglich",
 
     // ── Classification display labels ─────────────────────────────────
-    "classification.falsch": "Falsch — Mythos",
-    "classification.eher_falsch": "Eher falsch — eher Mythos",
-    "classification.eher_richtig": "Eher richtig — Fakt mit Einschränkung",
-    "classification.richtig": "Richtig — Fakt",
-    "classification.keine_aussage": "Keine Aussage möglich — Unklare Evidenzlage",
+    "classification.falsch": "Falsch",
+    "classification.eher_falsch": "Eher falsch",
+    "classification.eher_richtig": "Eher richtig",
+    "classification.richtig": "Richtig",
 
     // ── Quiz theme titles ─────────────────────────────────────────────
     "quiz.alltag.title": "Cannabis & Alltag",
@@ -208,50 +206,49 @@ const translations: Record<Lang, Record<string, string>> = {
       "Internationale Studien zeigen bislang keinen klaren Anstieg des Konsums bei Minderjährigen nach einer Legalisierung. In einigen Regionen blieben die Raten stabil.",
 
     // ── Population comparison strings ─────────────────────────────────
-    "population.correct":
-      "{pct}\u00A0% der Erwachsenen in Deutschland schätzen das richtig ein.",
+    "population.score":
+      "Bev\u00F6lkerungswissen: {score} von 100 Punkten",
     "population.unavailable":
-      "Für diese Aussage liegen keine vergleichenden Daten vor.",
+      "F\u00FCr diese Aussage liegen keine vergleichenden Daten vor.",
 
     // ── Result tier titles & messages ─────────────────────────────────
     "tier.0.title": "Noch viel zu entdecken",
     "tier.0.message":
-      "Viele verbreitete Annahmen über Cannabis sind komplizierter als gedacht. Schauen Sie sich die Factsheets an — es lohnt sich!",
+      "Es gibt noch viel Spannendes über Cannabis zu lernen.",
     "tier.1.title": "Auf dem richtigen Weg",
     "tier.1.message":
-      "Sie liegen ungefähr im Durchschnitt der deutschen Bevölkerung. Einige Mythen haben es wirklich in sich!",
+      "Du hast schon einiges richtig eingeschätzt — weiter so!",
     "tier.2.title": "Gut informiert",
     "tier.2.message":
-      "Beeindruckend — Sie wissen mehr als die meisten Menschen in Deutschland über Cannabis.",
-    "tier.3.title": "Cannabis-Experte",
+      "Du kennst dich schon gut aus. Hier sind ein paar Themen zum Vertiefen.",
+    "tier.3.title": "Cannabis-Experte:in",
     "tier.3.message":
-      "Hervorragend! Ihr Wissen liegt deutlich über dem Durchschnitt. Sie können Mythen von Fakten unterscheiden.",
+      "Beeindruckend! Du hast fast alles richtig eingeschätzt.",
 
     // ── UI strings ────────────────────────────────────────────────────
-    "ui.startQuiz": "Quiz starten",
     "ui.progress": "{answered} von {total} beantwortet",
-    "ui.resultTitle": "Ihr Ergebnis",
-    "ui.scoreLabel": "{correct} von {total} richtig",
+    "ui.resultTitle": "Dein Ergebnis",
+    "ui.scoreHeadline": "{correct} von {total} richtig beantwortet",
+    "ui.correctPctLine": "{pct}\u00A0% richtig",
     "ui.percentileLine":
-      "Sie wissen mehr als {pct}\u00A0% der Erwachsenen in Deutschland.",
+      "Du weißt mehr als {pct}\u00A0% der Erwachsenen in Deutschland.",
     "ui.shareButton": "Ergebnis teilen",
-    "ui.copiedToClipboard": "In die Zwischenablage kopiert!",
+    "ui.copiedToClipboard": "Link kopiert! \u2713",
+    "ui.shareTitle": "Mein Cannabis-Quiz Ergebnis",
     "ui.shareText":
-      "Ich habe {correct} von {total} Cannabis-Mythen richtig eingeordnet und weiß damit mehr als {pct}\u00A0% der Deutschen. Teste dich selbst:",
-    "ui.learnMore": "Mehr erfahren",
-    "ui.recommendedLinks": "Diese Factsheets könnten Sie interessieren:",
+      "Ich habe {correct} von {total} Cannabis-Mythen richtig eingesch\u00E4tzt und wei\u00DF mehr als {pct}\u00A0% der Erwachsenen in Deutschland. Teste dich selbst: https://cannabismythen.de/selbsttest/",
     "ui.backToQuizzes": "Alle Quiz-Module",
+    "ui.restartQuiz": "Quiz wiederholen",
+    "ui.zahlenUndFakten": "Zahlen & Fakten entdecken",
     "ui.correct": "Richtig!",
     "ui.incorrect": "Leider falsch",
-    "ui.correctAnswer": "Richtige Einordnung:",
-    "ui.yourAnswer": "Ihre Antwort:",
+    "ui.correctAnswer": "Evidenzbasierte Bewertung:",
+    "ui.yourAnswer": "Deine Antwort:",
+    "ui.moreLink": "mehr \u2192",
     "ui.questionLabel": "Aussage {n} von {total}",
     "ui.siteName": "Cannabis: Mythen & Evidenz",
-    "ui.quizIndexTitle": "Selbsttest: Was wissen Sie über Cannabis?",
-    "ui.quizIndexIntro":
-      "Testen Sie Ihr Wissen in vier thematischen Quiz-Modulen. Jedes Quiz enthält Fragen zu verbreiteten Cannabis-Mythen mit wissenschaftlich fundierten Erklärungen.",
+    "ui.siteUrl": "cannabismythen.de",
     "ui.questionsCount": "{n} Fragen",
-    "ui.tryAnotherQuiz": "Weiteres Quiz ausprobieren",
   },
 
   // ── English (placeholder — to be filled) ──────────────────────────

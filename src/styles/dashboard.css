@@ -1,0 +1,731 @@
+/* ==================== CaRM DASHBOARD STYLES ==================== */
+/* Scoped where possible to avoid conflicts with cannabismythen global styles */
+
+/*
+ * Override the cannabismythen <main> max-width constraint.
+ * The dashboard needs more horizontal space than the default 1100px.
+ */
+main:has(.carm-explorer) {
+  max-width: 1440px;
+}
+
+.carm-explorer {
+  --color-bg: #ffffff;
+  --color-surface: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-text: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-primary: #1e40af;
+  --color-primary-light: #dbeafe;
+  --color-richtig: #047857;
+  --color-eher-richtig: #a16207;
+  --color-eher-falsch: #c2410c;
+  --color-falsch: #be123c;
+  --color-no-class: #6b7280;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --transition: 150ms ease;
+  --sidebar-width: 300px;
+
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* Reset global element styles that bleed into the React island */
+.carm-explorer h1,
+.carm-explorer h2,
+.carm-explorer h3,
+.carm-explorer h4 {
+  margin: 0;
+  letter-spacing: normal;
+}
+
+.carm-explorer p {
+  margin-bottom: 0;
+  color: inherit;
+}
+
+.carm-explorer a {
+  text-decoration: none;
+}
+
+.carm-explorer section {
+  margin-bottom: 0;
+}
+
+.carm-explorer table {
+  border-collapse: collapse;
+}
+
+.carm-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #64748b;
+}
+
+/* ==================== EXPLORER HEADER ==================== */
+.carm-explorer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.carm-explorer-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.carm-explorer-subtitle {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  margin-top: 1px;
+  margin-bottom: 0;
+}
+
+.carm-explorer .lang-switcher {
+  display: flex;
+  gap: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 3px;
+}
+
+.carm-explorer .lang-btn {
+  padding: 4px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-text-secondary);
+  transition: all var(--transition);
+}
+
+.carm-explorer .lang-btn.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.carm-explorer .lang-btn:hover:not(.active) {
+  background: var(--color-border);
+}
+
+/* ==================== APP LAYOUT (Grid) ==================== */
+.carm-explorer .app-layout {
+  display: grid;
+  grid-template-columns: 1fr var(--sidebar-width);
+  gap: 0 24px;
+  align-items: start;
+}
+
+.carm-explorer .chart-column {
+  min-width: 0;
+}
+
+/* ==================== TABS ==================== */
+.carm-explorer .tabs-bar {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.carm-explorer .tabs-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.carm-explorer .tab-btn {
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.carm-explorer .tab-btn:hover {
+  color: var(--color-text);
+}
+
+.carm-explorer .tab-btn.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* ==================== UTILITY BAR ==================== */
+.carm-explorer .utility-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.carm-explorer .utility-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.carm-explorer .util-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: white;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  font-family: var(--font-sans);
+}
+
+.carm-explorer .util-btn:hover {
+  background: var(--color-surface);
+  border-color: var(--color-text-secondary);
+}
+
+.carm-explorer .util-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ==================== HOW-TO MICROCOPY ==================== */
+.carm-explorer .howto-microcopy {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+  line-height: 1.4;
+  padding: 0 2px;
+}
+
+/* ==================== CHART AREA ==================== */
+.carm-explorer .chart-area {
+  position: relative;
+  min-height: 400px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: white;
+  overflow: hidden;
+}
+
+.carm-explorer .chart-area.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  border: none;
+  border-radius: 0;
+  min-height: 100vh;
+}
+
+/* ==================== VERDICT TAGS ==================== */
+.carm-explorer .verdict-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 0;
+}
+
+.carm-explorer .verdict-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 2px solid var(--tag-color, var(--color-border));
+  background: var(--tag-bg, transparent);
+  color: var(--tag-text, var(--color-text-secondary));
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
+}
+
+.carm-explorer .verdict-tag:hover {
+  opacity: 1 !important;
+}
+
+.carm-explorer .verdict-tag.active {
+  border-color: var(--tag-bg, var(--color-primary));
+}
+
+.carm-explorer .verdict-tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ==================== SIDEBAR ==================== */
+.carm-sidebar {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  border-left: 1px solid var(--color-border);
+  padding-left: 20px;
+  padding-bottom: 24px;
+}
+
+.carm-explorer .sidebar-section {
+  margin-bottom: 22px;
+}
+
+.carm-explorer .sidebar-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+}
+
+.carm-explorer .sidebar-icon {
+  font-size: 0.95rem;
+}
+
+.carm-explorer .sidebar-checklist {
+  display: flex;
+  flex-direction: column;
+}
+
+.carm-explorer .sidebar-check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 0.82rem;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+.carm-explorer .sidebar-check-item input[type='checkbox'],
+.carm-explorer .sidebar-check-item input[type='radio'] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.carm-explorer .sidebar-radio-item {
+  gap: 6px;
+}
+
+.carm-explorer .sidebar-ind-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.carm-explorer .sidebar-cat-label {
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.carm-explorer .sidebar-check-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.carm-explorer .sidebar-mini-btn {
+  padding: 2px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: white;
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: all var(--transition);
+}
+
+.carm-explorer .sidebar-mini-btn:hover,
+.carm-explorer .sidebar-mini-btn.active {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* ==================== DATA TABLE ==================== */
+.carm-explorer .data-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carm-explorer .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+}
+
+.carm-explorer .data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border-bottom: 2px solid var(--color-border);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.carm-explorer .data-table th:hover {
+  background: var(--color-border);
+}
+
+.carm-explorer .data-table th .sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0.4;
+  font-size: 0.7rem;
+}
+
+.carm-explorer .data-table th .sort-arrow.active {
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+.carm-explorer .data-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.carm-explorer .data-table tr {
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.carm-explorer .data-table tbody tr:hover {
+  background: var(--color-primary-light);
+}
+
+.carm-explorer .data-table .myth-cell {
+  max-width: 300px;
+  min-width: 160px;
+  line-height: 1.4;
+}
+
+.carm-explorer .data-table .value-cell {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.carm-explorer .data-table .na-value {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.carm-explorer .myth-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.carm-explorer .myth-header-label {
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.carm-explorer .verdict-header-select {
+  height: 24px;
+  padding: 0 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.68rem;
+  color: var(--color-text-secondary);
+  background: white;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  max-width: 120px;
+}
+
+.carm-explorer .verdict-header-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.carm-explorer .data-table th .th-icon {
+  font-size: 0.8rem;
+}
+
+/* ==================== CHIPS ==================== */
+.carm-explorer .class-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.carm-explorer .class-chip.richtig {
+  background: #ecfdf5;
+  color: #047857;
+}
+.carm-explorer .class-chip.eher_richtig {
+  background: #fefce8;
+  color: #a16207;
+}
+.carm-explorer .class-chip.eher_falsch {
+  background: #fff7ed;
+  color: #c2410c;
+}
+.carm-explorer .class-chip.falsch {
+  background: #fff1f2;
+  color: #be123c;
+}
+.carm-explorer .class-chip.no_classification {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.carm-explorer .cat-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ==================== SCATTER CONTROLS ==================== */
+.carm-explorer .scatter-controls {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.carm-explorer .control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.carm-explorer .control-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
+.carm-explorer .control-select {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  color: var(--color-text);
+  background: white;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.carm-explorer .control-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* ==================== LOLLIPOP INDICATOR TAGS ==================== */
+.carm-explorer .lollipop-indicator-tags {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.carm-explorer .indicator-tag {
+  padding: 5px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: white;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+}
+
+.carm-explorer .indicator-tag:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.carm-explorer .indicator-tag.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* ==================== DETAIL PANEL ==================== */
+.detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.detail-panel {
+  width: min(520px, 90vw);
+  background: white;
+  height: 100%;
+  overflow-y: auto;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  padding: 24px;
+  position: relative;
+}
+
+.detail-panel h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1.4;
+  padding-right: 40px;
+}
+
+.detail-section {
+  margin-bottom: 20px;
+}
+
+.detail-section-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.detail-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  background: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms ease;
+}
+
+.detail-close-btn:hover {
+  background: #f8fafc;
+}
+
+/* ==================== NO RESULTS / LOADING ==================== */
+.carm-explorer .no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 960px) {
+  .carm-explorer .app-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .carm-sidebar {
+    position: static;
+    max-height: none;
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+    padding-left: 0;
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  .carm-explorer-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .carm-explorer .tab-btn {
+    padding: 10px 12px;
+    font-size: 0.78rem;
+  }
+
+  .carm-explorer .data-table .myth-cell {
+    min-width: 140px;
+    max-width: 200px;
+  }
+
+  .detail-panel {
+    width: 100vw;
+  }
+
+  .carm-explorer .scatter-controls {
+    flex-direction: column;
+  }
+}

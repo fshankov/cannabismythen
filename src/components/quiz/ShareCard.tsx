@@ -1,7 +1,9 @@
 /**
- * ShareCard — Visually styled result card for sharing.
+ * ShareCard — Bold, dark shareable result card.
  *
- * Shows: tier title, score, percentile line, site name/URL.
+ * Visual style: deep forest green (#2d6a4f) background, white text,
+ * CSS medal/badge shape, achievement style.
+ *
  * "Ergebnis teilen" button uses native Web Share API with clipboard fallback.
  */
 
@@ -42,7 +44,7 @@ export default function ShareCard({ result, quizUrl }: ShareCardProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: t("ui.siteName"),
+          title: t("ui.shareTitle"),
           text: shareText,
           url: quizUrl,
         });
@@ -77,21 +79,27 @@ export default function ShareCard({ result, quizUrl }: ShareCardProps) {
   return (
     <div className="share-card">
       <div className="share-card__visual">
-        <div className={`share-card__tier-badge share-card__tier-badge--${result.tierIndex}`}>
+        {/* CSS medal badge */}
+        <div className="share-card__medal">
           <span className="share-card__emoji">{emoji}</span>
-          <span className="share-card__tier-title">{tierTitle}</span>
         </div>
+
+        <div className="share-card__tier-title">{tierTitle}</div>
 
         <div className="share-card__score">
           {result.correctCount} / {result.totalQuestions}
         </div>
+
+        <p className="share-card__pct">
+          {t("ui.correctPctLine", { pct: result.correctPct })}
+        </p>
 
         <p className="share-card__percentile">
           {t("ui.percentileLine", { pct: result.percentile })}
         </p>
 
         <div className="share-card__branding">
-          {t("ui.siteName")}
+          {t("ui.siteUrl")}
         </div>
       </div>
 

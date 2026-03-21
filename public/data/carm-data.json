@@ -1,0 +1,2318 @@
+{
+  "myths": [
+    {
+      "id": 1,
+      "text_de": "Cannabis = Allheilmittel",
+      "text_en": "Cannabis is a cure-all",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "category_en": "Medical and Therapeutic Benefits",
+      "text_short_de": "Allheilmittel",
+      "text_short_en": "Cure-all"
+    },
+    {
+      "id": 2,
+      "text_de": "Konsum ist harmlos",
+      "text_en": "Use is harmless",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 7,
+      "category_de": "Allgemeine Einschätzung der Gefährlichkeit",
+      "category_en": "General Risk Assessment",
+      "text_short_de": "Harmlos",
+      "text_short_en": "Harmless"
+    },
+    {
+      "id": 3,
+      "text_de": "Konsum durch Heranwachsende führt - stärker als bei Erwachsenen - zu gesundheitlichen Schäden",
+      "text_en": "Use by adolescents leads to greater health damage than in adults",
+      "classification_de": "2 - eher richtig",
+      "correctness_class": "eher_richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "category_en": "Physical and Developmental Risks",
+      "text_short_de": "Schädigt Heranwachsende stärker",
+      "text_short_en": "Harms adolescents more than adults"
+    },
+    {
+      "id": 4,
+      "text_de": "Weniger schädlich als Alkohol",
+      "text_en": "Less harmful than alcohol",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 7,
+      "category_de": "Allgemeine Einschätzung der Gefährlichkeit",
+      "category_en": "General Risk Assessment",
+      "text_short_de": "Weniger schädlich als Alkohol",
+      "text_short_en": "Less harmful than alcohol"
+    },
+    {
+      "id": 5,
+      "text_de": "Schwierig zu dosieren",
+      "text_en": "Difficult to dose",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Risiken durch Dosierung und Qualität",
+      "category_en": "Dosage and Quality Risks",
+      "text_short_de": "Schwierig zu dosieren",
+      "text_short_en": "Difficult to dose"
+    },
+    {
+      "id": 6,
+      "text_de": "Mischkonsum ist besonders risikoreich",
+      "text_en": "Poly-substance use is particularly risky",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Risiken durch Dosierung und Qualität",
+      "category_en": "Dosage and Quality Risks",
+      "text_short_de": "Mischkonsum besonders risikoreich",
+      "text_short_en": "Poly-substance use particularly risky"
+    },
+    {
+      "id": 7,
+      "text_de": "Zusätze führen zu erhöhten Gesundheitsrisiken",
+      "text_en": "Additives lead to increased health risks",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Risiken durch Dosierung und Qualität",
+      "category_en": "Dosage and Quality Risks",
+      "text_short_de": "Zusätze erhöhen Gesundheitsrisiken",
+      "text_short_en": "Additives increase health risks"
+    },
+    {
+      "id": 8,
+      "text_de": "Konsum schädigt den Fötus",
+      "text_en": "Use harms the fetus",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "category_en": "Physical and Developmental Risks",
+      "text_short_de": "Schädigt den Fötus",
+      "text_short_en": "Harms the fetus"
+    },
+    {
+      "id": 9,
+      "text_de": "Überdosierung führt nicht zum Tod",
+      "text_en": "Overdose does not lead to death",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 7,
+      "category_de": "Allgemeine Einschätzung der Gefährlichkeit",
+      "category_en": "General Risk Assessment",
+      "text_short_de": "Überdosierung führt nicht zum Tod",
+      "text_short_en": "Overdose does not lead to death"
+    },
+    {
+      "id": 10,
+      "text_de": "Cannabis lindert Schmerzen",
+      "text_en": "Cannabis relieves pain",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "category_en": "Medical and Therapeutic Benefits",
+      "text_short_de": "Lindert Schmerzen",
+      "text_short_en": "Relieves pain"
+    },
+    {
+      "id": 11,
+      "text_de": "Konsum bewirkt Übelkeit und Erbrechen",
+      "text_en": "Use causes nausea and vomiting",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "category_en": "Physical and Developmental Risks",
+      "text_short_de": "Verursacht Übelkeit und Erbrechen",
+      "text_short_en": "Causes nausea and vomiting"
+    },
+    {
+      "id": 12,
+      "text_de": "Cannabis hemmt Entzündungen",
+      "text_en": "Cannabis inhibits inflammation",
+      "classification_de": "keine Aussage möglich",
+      "correctness_class": "no_classification",
+      "scientifically_checked": false,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "category_en": "Medical and Therapeutic Benefits",
+      "text_short_de": "Hemmt Entzündungen",
+      "text_short_en": "Inhibits inflammation"
+    },
+    {
+      "id": 13,
+      "text_de": "Konsum lindert Spastiken",
+      "text_en": "Use relieves spasticity",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "category_en": "Medical and Therapeutic Benefits",
+      "text_short_de": "Lindert Spastiken",
+      "text_short_en": "Relieves spasticity"
+    },
+    {
+      "id": 14,
+      "text_de": "Konsum bewirkt Herz-Kreislaufkrankheiten",
+      "text_en": "Use causes cardiovascular diseases",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "category_en": "Physical and Developmental Risks",
+      "text_short_de": "Bewirkt Herz-Kreislaufkrankheiten",
+      "text_short_en": "Causes cardiovascular diseases"
+    },
+    {
+      "id": 15,
+      "text_de": "Inhalativer Konsum bewirkt Atemwegserkrankungen",
+      "text_en": "Inhalation causes respiratory diseases",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "category_en": "Physical and Developmental Risks",
+      "text_short_de": "Inhalation bewirkt Atemwegserkrankungen",
+      "text_short_en": "Inhalation causes respiratory diseases"
+    },
+    {
+      "id": 16,
+      "text_de": "Konsum verursacht Krebserkrankungen",
+      "text_en": "Use causes cancer",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "category_en": "Physical and Developmental Risks",
+      "text_short_de": "Verursacht Krebserkrankungen",
+      "text_short_en": "Causes cancer"
+    },
+    {
+      "id": 17,
+      "text_de": "Konsum hilft beim Abnehmen",
+      "text_en": "Use helps with weight loss",
+      "classification_de": "keine Aussage möglich",
+      "correctness_class": "no_classification",
+      "scientifically_checked": false,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "category_en": "Medical and Therapeutic Benefits",
+      "text_short_de": "Hilft beim Abnehmen",
+      "text_short_en": "Helps with weight loss"
+    },
+    {
+      "id": 18,
+      "text_de": "Konsum hilft bei Schlafproblemen",
+      "text_en": "Use helps with sleep problems",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "category_en": "Medical and Therapeutic Benefits",
+      "text_short_de": "Hilft bei Schlafproblemen",
+      "text_short_en": "Helps with sleep problems"
+    },
+    {
+      "id": 19,
+      "text_de": "Konsum verändert die Wahrnehmungen",
+      "text_en": "Use alters perceptions",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "category_en": "Effects on Mood and Perception",
+      "text_short_de": "Verändert Wahrnehmungen",
+      "text_short_en": "Alters perceptions"
+    },
+    {
+      "id": 20,
+      "text_de": "Konsum beeinträchtigt kognitive Fähigkeiten",
+      "text_en": "Use impairs cognitive abilities",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "category_en": "Mental Health Risks",
+      "text_short_de": "Beeinträchtigt kognitive Fähigkeiten",
+      "text_short_en": "Impairs cognitive abilities"
+    },
+    {
+      "id": 21,
+      "text_de": "Konsum gefährdet die Verkehrssicherheit",
+      "text_en": "Use endangers road safety",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "category_en": "Social Effects and Performance",
+      "text_short_de": "Gefährdet die Verkehrssicherheit",
+      "text_short_en": "Endangers road safety"
+    },
+    {
+      "id": 22,
+      "text_de": "Cannabis ist eine Einstiegsdroge",
+      "text_en": "Cannabis is a gateway drug",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "category_en": "Mental Health Risks",
+      "text_short_de": "Einstiegsdroge",
+      "text_short_en": "Gateway drug"
+    },
+    {
+      "id": 23,
+      "text_de": "Cannabis verursacht keine Abhängigkeit",
+      "text_en": "Cannabis does not cause addiction",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "category_en": "Mental Health Risks",
+      "text_short_de": "Verursacht keine Abhängigkeit",
+      "text_short_en": "Does not cause addiction"
+    },
+    {
+      "id": 24,
+      "text_de": "Konsum löst Psychosen aus",
+      "text_en": "Use triggers psychosis",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "category_en": "Mental Health Risks",
+      "text_short_de": "Löst Psychosen aus",
+      "text_short_en": "Triggers psychosis"
+    },
+    {
+      "id": 25,
+      "text_de": "Konsum hilft gegen Angst",
+      "text_en": "Use helps against anxiety",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "category_en": "Medical and Therapeutic Benefits",
+      "text_short_de": "Hilft gegen Angst",
+      "text_short_en": "Helps against anxiety"
+    },
+    {
+      "id": 26,
+      "text_de": "Konsum hilft gegen Depressionen",
+      "text_en": "Use helps against depression",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "category_en": "Medical and Therapeutic Benefits",
+      "text_short_de": "Hilft gegen Depressionen",
+      "text_short_en": "Helps against depression"
+    },
+    {
+      "id": 27,
+      "text_de": "Konsum hilft bei ADHS",
+      "text_en": "Use helps with ADHD",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "category_en": "Medical and Therapeutic Benefits",
+      "text_short_de": "Hilft bei ADHS",
+      "text_short_en": "Helps with ADHD"
+    },
+    {
+      "id": 28,
+      "text_de": "Konsum verursacht einen generellen Motivationsverlust",
+      "text_en": "Use causes general loss of motivation",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "category_en": "Mental Health Risks",
+      "text_short_de": "Genereller Motivationsverlust",
+      "text_short_en": "General loss of motivation"
+    },
+    {
+      "id": 29,
+      "text_de": "Konsum verbessert die Gemütslage",
+      "text_en": "Use improves mood",
+      "classification_de": "2 - eher richtig",
+      "correctness_class": "eher_richtig",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "category_en": "Effects on Mood and Perception",
+      "text_short_de": "Verbessert die Gemütslage",
+      "text_short_en": "Improves mood"
+    },
+    {
+      "id": 30,
+      "text_de": "Konsum führt zu Suizidgedanken",
+      "text_en": "Use leads to suicidal thoughts",
+      "classification_de": "2 - eher richtig",
+      "correctness_class": "eher_richtig",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "category_en": "Mental Health Risks",
+      "text_short_de": "Führt zu Suizidgedanken",
+      "text_short_en": "Leads to suicidal thoughts"
+    },
+    {
+      "id": 31,
+      "text_de": "Konsum entspannt",
+      "text_en": "Use is relaxing",
+      "classification_de": "2 - eher richtig",
+      "correctness_class": "eher_richtig",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "category_en": "Effects on Mood and Perception",
+      "text_short_de": "Entspannt",
+      "text_short_en": "Relaxing"
+    },
+    {
+      "id": 32,
+      "text_de": "Konsum macht nicht aggressiv",
+      "text_en": "Use does not make aggressive",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "category_en": "Effects on Mood and Perception",
+      "text_short_de": "Macht nicht aggressiv",
+      "text_short_en": "Not aggressive"
+    },
+    {
+      "id": 33,
+      "text_de": "Konsum macht kreativ",
+      "text_en": "Use makes creative",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "category_en": "Effects on Mood and Perception",
+      "text_short_de": "Macht kreativ",
+      "text_short_en": "Makes creative"
+    },
+    {
+      "id": 34,
+      "text_de": "Konsum schädigt soziale Beziehungen",
+      "text_en": "Use damages social relationships",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "category_en": "Social Effects and Performance",
+      "text_short_de": "Schädigt soziale Beziehungen",
+      "text_short_en": "Damages social relationships"
+    },
+    {
+      "id": 35,
+      "text_de": "Konsument*innen halten sich in geringerem Maße an soziale Regeln",
+      "text_en": "Users comply less with social rules",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "category_en": "Social Effects and Performance",
+      "text_short_de": "Geringere Regeltreue",
+      "text_short_en": "Less compliance with social rules"
+    },
+    {
+      "id": 36,
+      "text_de": "Konsum führt zu niedrigen Leistungen",
+      "text_en": "Use leads to low performance",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "category_en": "Social Effects and Performance",
+      "text_short_de": "Führt zu niedrigen Leistungen",
+      "text_short_en": "Leads to low performance"
+    },
+    {
+      "id": 37,
+      "text_de": "Konsum geht einher mit einem niedrigen sozialen Niveau",
+      "text_en": "Use is associated with low social status",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "category_en": "Social Effects and Performance",
+      "text_short_de": "Niedriges soziales Niveau",
+      "text_short_en": "Low social status"
+    },
+    {
+      "id": 38,
+      "text_de": "Konsum ist cool",
+      "text_en": "Use is cool",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "category_en": "Social Effects and Performance",
+      "text_short_de": "Ist cool",
+      "text_short_en": "Is cool"
+    },
+    {
+      "id": 39,
+      "text_de": "Ein großer Teil der Bevölkerung konsumiert Cannabis",
+      "text_en": "A large part of the population uses cannabis",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 6,
+      "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
+      "category_en": "Prevalence and Legislation",
+      "text_short_de": "Großteil der Bevölkerung konsumiert",
+      "text_short_en": "Large part of population uses it"
+    },
+    {
+      "id": 40,
+      "text_de": "Konsum ist nun für alle überall erlaubt",
+      "text_en": "Use is now allowed for everyone everywhere",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 6,
+      "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
+      "category_en": "Prevalence and Legislation",
+      "text_short_de": "Nun für alle überall erlaubt",
+      "text_short_en": "Now allowed for everyone everywhere"
+    },
+    {
+      "id": 41,
+      "text_de": "Neues Gesetz wird Anstieg des Cannabiskonsums bewirken",
+      "text_en": "New law will increase cannabis use",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 6,
+      "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
+      "category_en": "Prevalence and Legislation",
+      "text_short_de": "Neues Gesetz erhöht Konsum",
+      "text_short_en": "New law increases use"
+    },
+    {
+      "id": 42,
+      "text_de": "Neues Gesetz wird Anstieg des Cannabiskonsums bei Minderjährigen bewirken",
+      "text_en": "New law will increase cannabis use among minors",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 6,
+      "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
+      "category_en": "Prevalence and Legislation",
+      "text_short_de": "Neues Gesetz erhöht Konsum bei Minderjährigen",
+      "text_short_en": "New law increases use among minors"
+    }
+  ],
+  "metrics": [
+    {
+      "myth_id": 1,
+      "group_id": "adults",
+      "awareness": 12.32,
+      "significance": 52.82,
+      "correctness": 49.1,
+      "prevention_significance": 41.49
+    },
+    {
+      "myth_id": 2,
+      "group_id": "adults",
+      "awareness": 18.02,
+      "significance": 52.63,
+      "correctness": 63.77,
+      "prevention_significance": 31.78
+    },
+    {
+      "myth_id": 3,
+      "group_id": "adults",
+      "awareness": 48.64,
+      "significance": 76.78,
+      "correctness": 77.93,
+      "prevention_significance": 30.43
+    },
+    {
+      "myth_id": 4,
+      "group_id": "adults",
+      "awareness": 35.16,
+      "significance": 62.1,
+      "correctness": 69.66,
+      "prevention_significance": 27.37
+    },
+    {
+      "myth_id": 5,
+      "group_id": "adults",
+      "awareness": 16.33,
+      "significance": 68.51,
+      "correctness": 76.43,
+      "prevention_significance": 26.37
+    },
+    {
+      "myth_id": 6,
+      "group_id": "adults",
+      "awareness": 43.75,
+      "significance": 77.02,
+      "correctness": 88.97,
+      "prevention_significance": 21.93
+    },
+    {
+      "myth_id": 7,
+      "group_id": "adults",
+      "awareness": 35.06,
+      "significance": 76.49,
+      "correctness": 85.7,
+      "prevention_significance": 24.05
+    },
+    {
+      "myth_id": 8,
+      "group_id": "adults",
+      "awareness": 42.35,
+      "significance": 76.49,
+      "correctness": 89.87,
+      "prevention_significance": 21.16
+    },
+    {
+      "myth_id": 9,
+      "group_id": "adults",
+      "awareness": 20.71,
+      "significance": 66.53,
+      "correctness": 74.3,
+      "prevention_significance": 27.58
+    },
+    {
+      "myth_id": 10,
+      "group_id": "adults",
+      "awareness": 68.28,
+      "significance": 70.26,
+      "correctness": 49.74,
+      "prevention_significance": 46.58
+    },
+    {
+      "myth_id": 11,
+      "group_id": "adults",
+      "awareness": 17.95,
+      "significance": 60.15,
+      "correctness": 71.89,
+      "prevention_significance": 25.78
+    },
+    {
+      "myth_id": 12,
+      "group_id": "adults",
+      "awareness": 23.28,
+      "significance": 69.36,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 13,
+      "group_id": "adults",
+      "awareness": 28.64,
+      "significance": 59.71,
+      "correctness": 78.32,
+      "prevention_significance": 22.81
+    },
+    {
+      "myth_id": 14,
+      "group_id": "adults",
+      "awareness": 14.96,
+      "significance": 75.94,
+      "correctness": 76.21,
+      "prevention_significance": 29.92
+    },
+    {
+      "myth_id": 15,
+      "group_id": "adults",
+      "awareness": 16.03,
+      "significance": 69.73,
+      "correctness": 78.8,
+      "prevention_significance": 25.72
+    },
+    {
+      "myth_id": 16,
+      "group_id": "adults",
+      "awareness": 10.12,
+      "significance": 72.33,
+      "correctness": 73.59,
+      "prevention_significance": 29.95
+    },
+    {
+      "myth_id": 17,
+      "group_id": "adults",
+      "awareness": 5.55,
+      "significance": 48.94,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 18,
+      "group_id": "adults",
+      "awareness": 38.63,
+      "significance": 61.87,
+      "correctness": 56.37,
+      "prevention_significance": 39.33
+    },
+    {
+      "myth_id": 19,
+      "group_id": "adults",
+      "awareness": 60.56,
+      "significance": 71.83,
+      "correctness": 87.56,
+      "prevention_significance": 21.45
+    },
+    {
+      "myth_id": 20,
+      "group_id": "adults",
+      "awareness": 44.28,
+      "significance": 71.41,
+      "correctness": 83.34,
+      "prevention_significance": 23.88
+    },
+    {
+      "myth_id": 21,
+      "group_id": "adults",
+      "awareness": 64.45,
+      "significance": 82.84,
+      "correctness": 91.71,
+      "prevention_significance": 21.4
+    },
+    {
+      "myth_id": 22,
+      "group_id": "adults",
+      "awareness": 58.07,
+      "significance": 66.83,
+      "correctness": 51.65,
+      "prevention_significance": 44.41
+    },
+    {
+      "myth_id": 23,
+      "group_id": "adults",
+      "awareness": 16.43,
+      "significance": 58.35,
+      "correctness": 63.75,
+      "prevention_significance": 33.68
+    },
+    {
+      "myth_id": 24,
+      "group_id": "adults",
+      "awareness": 39.06,
+      "significance": 69.6,
+      "correctness": 74.25,
+      "prevention_significance": 28.48
+    },
+    {
+      "myth_id": 25,
+      "group_id": "adults",
+      "awareness": 32.18,
+      "significance": 60.49,
+      "correctness": 60.6,
+      "prevention_significance": 35.85
+    },
+    {
+      "myth_id": 26,
+      "group_id": "adults",
+      "awareness": 31.26,
+      "significance": 62.58,
+      "correctness": 30.18,
+      "prevention_significance": 54.67
+    },
+    {
+      "myth_id": 27,
+      "group_id": "adults",
+      "awareness": 30.37,
+      "significance": 60.45,
+      "correctness": 55.93,
+      "prevention_significance": 38.24
+    },
+    {
+      "myth_id": 28,
+      "group_id": "adults",
+      "awareness": 26.29,
+      "significance": 66.83,
+      "correctness": 25.05,
+      "prevention_significance": 60.32
+    },
+    {
+      "myth_id": 29,
+      "group_id": "adults",
+      "awareness": 32.89,
+      "significance": 59.2,
+      "correctness": 84.4,
+      "prevention_significance": 21.23
+    },
+    {
+      "myth_id": 30,
+      "group_id": "adults",
+      "awareness": 14.09,
+      "significance": 73.29,
+      "correctness": 83.02,
+      "prevention_significance": 25.83
+    },
+    {
+      "myth_id": 31,
+      "group_id": "adults",
+      "awareness": 57.16,
+      "significance": 62.08,
+      "correctness": 82.01,
+      "prevention_significance": 23.67
+    },
+    {
+      "myth_id": 32,
+      "group_id": "adults",
+      "awareness": 23.96,
+      "significance": 62.13,
+      "correctness": 57.86,
+      "prevention_significance": 38.42
+    },
+    {
+      "myth_id": 33,
+      "group_id": "adults",
+      "awareness": 18.75,
+      "significance": 51.36,
+      "correctness": 60.97,
+      "prevention_significance": 31.97
+    },
+    {
+      "myth_id": 34,
+      "group_id": "adults",
+      "awareness": 30.33,
+      "significance": 71.08,
+      "correctness": 54.17,
+      "prevention_significance": 44.25
+    },
+    {
+      "myth_id": 35,
+      "group_id": "adults",
+      "awareness": 13.89,
+      "significance": 66.75,
+      "correctness": 63.33,
+      "prevention_significance": 36.99
+    },
+    {
+      "myth_id": 36,
+      "group_id": "adults",
+      "awareness": 27.8,
+      "significance": 69.36,
+      "correctness": 55.28,
+      "prevention_significance": 42.95
+    },
+    {
+      "myth_id": 37,
+      "group_id": "adults",
+      "awareness": 12.48,
+      "significance": 55.44,
+      "correctness": 35.85,
+      "prevention_significance": 48.16
+    },
+    {
+      "myth_id": 38,
+      "group_id": "adults",
+      "awareness": 13.91,
+      "significance": 30.78,
+      "correctness": 61.8,
+      "prevention_significance": 23.73
+    },
+    {
+      "myth_id": 39,
+      "group_id": "adults",
+      "awareness": 18.44,
+      "significance": 54.83,
+      "correctness": 25.5,
+      "prevention_significance": 51.36
+    },
+    {
+      "myth_id": 40,
+      "group_id": "adults",
+      "awareness": 17.85,
+      "significance": 52.1,
+      "correctness": 35.76,
+      "prevention_significance": 44.39
+    },
+    {
+      "myth_id": 41,
+      "group_id": "adults",
+      "awareness": 47.56,
+      "significance": 66.33,
+      "correctness": 79.26,
+      "prevention_significance": 23.37
+    },
+    {
+      "myth_id": 42,
+      "group_id": "adults",
+      "awareness": 42.19,
+      "significance": 71.88,
+      "correctness": 53.06,
+      "prevention_significance": 45.73
+    },
+    {
+      "myth_id": 2,
+      "group_id": "minors",
+      "awareness": 21.26,
+      "significance": 53.61,
+      "correctness": 66.76,
+      "prevention_significance": 32.06
+    },
+    {
+      "myth_id": 3,
+      "group_id": "minors",
+      "awareness": 46.36,
+      "significance": 78.02,
+      "correctness": 74.75,
+      "prevention_significance": 32.92
+    },
+    {
+      "myth_id": 23,
+      "group_id": "minors",
+      "awareness": 17.81,
+      "significance": 63.48,
+      "correctness": 63.19,
+      "prevention_significance": 35.36
+    },
+    {
+      "myth_id": 24,
+      "group_id": "minors",
+      "awareness": 40.89,
+      "significance": 71.74,
+      "correctness": 75.67,
+      "prevention_significance": 28.08
+    },
+    {
+      "myth_id": 40,
+      "group_id": "minors",
+      "awareness": 19.18,
+      "significance": 57.62,
+      "correctness": 47.26,
+      "prevention_significance": 41.77
+    },
+    {
+      "myth_id": 19,
+      "group_id": "minors",
+      "awareness": 56.52,
+      "significance": 69.99,
+      "correctness": 88.1,
+      "prevention_significance": 20.67
+    },
+    {
+      "myth_id": 20,
+      "group_id": "minors",
+      "awareness": 45.64,
+      "significance": 72.08,
+      "correctness": 79.63,
+      "prevention_significance": 25.92
+    },
+    {
+      "myth_id": 21,
+      "group_id": "minors",
+      "awareness": 53.18,
+      "significance": 82.66,
+      "correctness": 89.26,
+      "prevention_significance": 22.83
+    },
+    {
+      "myth_id": 6,
+      "group_id": "minors",
+      "awareness": 48.83,
+      "significance": 77.89,
+      "correctness": 88.2,
+      "prevention_significance": 22.91
+    },
+    {
+      "myth_id": 14,
+      "group_id": "minors",
+      "awareness": 33.97,
+      "significance": 73.64,
+      "correctness": 75.93,
+      "prevention_significance": 28.67
+    },
+    {
+      "myth_id": 26,
+      "group_id": "minors",
+      "awareness": 30.03,
+      "significance": 56.06,
+      "correctness": 37.46,
+      "prevention_significance": 46.77
+    },
+    {
+      "myth_id": 27,
+      "group_id": "minors",
+      "awareness": 33.82,
+      "significance": 56.18,
+      "correctness": 59.99,
+      "prevention_significance": 34.79
+    },
+    {
+      "myth_id": 39,
+      "group_id": "minors",
+      "awareness": 30.98,
+      "significance": 57.23,
+      "correctness": 29.9,
+      "prevention_significance": 50.34
+    },
+    {
+      "myth_id": 41,
+      "group_id": "minors",
+      "awareness": 48.15,
+      "significance": 68.37,
+      "correctness": 78.19,
+      "prevention_significance": 25.75
+    },
+    {
+      "myth_id": 7,
+      "group_id": "minors",
+      "awareness": 42.85,
+      "significance": 75.75,
+      "correctness": 81.81,
+      "prevention_significance": 25.4
+    },
+    {
+      "myth_id": 18,
+      "group_id": "minors",
+      "awareness": 30.93,
+      "significance": 55.78,
+      "correctness": 59.87,
+      "prevention_significance": 34.82
+    },
+    {
+      "myth_id": 25,
+      "group_id": "minors",
+      "awareness": 35.37,
+      "significance": 59.76,
+      "correctness": 65.17,
+      "prevention_significance": 33.05
+    },
+    {
+      "myth_id": 4,
+      "group_id": "minors",
+      "awareness": 34.58,
+      "significance": 61.8,
+      "correctness": 61.47,
+      "prevention_significance": 32.04
+    },
+    {
+      "myth_id": 15,
+      "group_id": "minors",
+      "awareness": 28.9,
+      "significance": 72.47,
+      "correctness": 73.91,
+      "prevention_significance": 29.8
+    },
+    {
+      "myth_id": 16,
+      "group_id": "minors",
+      "awareness": 27.89,
+      "significance": 79.08,
+      "correctness": 77.26,
+      "prevention_significance": 29.64
+    },
+    {
+      "myth_id": 28,
+      "group_id": "minors",
+      "awareness": 27.47,
+      "significance": 65.4,
+      "correctness": 31.64,
+      "prevention_significance": 54.62
+    },
+    {
+      "myth_id": 32,
+      "group_id": "minors",
+      "awareness": 25.4,
+      "significance": 62.21,
+      "correctness": 62.13,
+      "prevention_significance": 35.66
+    },
+    {
+      "myth_id": 34,
+      "group_id": "minors",
+      "awareness": 40.6,
+      "significance": 73.4,
+      "correctness": 55.99,
+      "prevention_significance": 44.52
+    },
+    {
+      "myth_id": 38,
+      "group_id": "minors",
+      "awareness": 25.26,
+      "significance": 39.55,
+      "correctness": 62.01,
+      "prevention_significance": 28.45
+    },
+    {
+      "myth_id": 42,
+      "group_id": "minors",
+      "awareness": 48.42,
+      "significance": 68.82,
+      "correctness": 55.41,
+      "prevention_significance": 43.0
+    },
+    {
+      "myth_id": 1,
+      "group_id": "minors",
+      "awareness": 20.29,
+      "significance": 48.72,
+      "correctness": 47.29,
+      "prevention_significance": 38.2
+    },
+    {
+      "myth_id": 5,
+      "group_id": "minors",
+      "awareness": 27.68,
+      "significance": 67.58,
+      "correctness": 67.47,
+      "prevention_significance": 31.01
+    },
+    {
+      "myth_id": 9,
+      "group_id": "minors",
+      "awareness": 26.28,
+      "significance": 64.33,
+      "correctness": 66.75,
+      "prevention_significance": 30.38
+    },
+    {
+      "myth_id": 10,
+      "group_id": "minors",
+      "awareness": 49.01,
+      "significance": 60.65,
+      "correctness": 55.97,
+      "prevention_significance": 38.66
+    },
+    {
+      "myth_id": 11,
+      "group_id": "minors",
+      "awareness": 36.43,
+      "significance": 61.73,
+      "correctness": 72.85,
+      "prevention_significance": 26.06
+    },
+    {
+      "myth_id": 29,
+      "group_id": "minors",
+      "awareness": 33.94,
+      "significance": 57.47,
+      "correctness": 84.43,
+      "prevention_significance": 20.32
+    },
+    {
+      "myth_id": 30,
+      "group_id": "minors",
+      "awareness": 24.29,
+      "significance": 70.05,
+      "correctness": 82.14,
+      "prevention_significance": 25.22
+    },
+    {
+      "myth_id": 36,
+      "group_id": "minors",
+      "awareness": 32.91,
+      "significance": 67.88,
+      "correctness": 59.7,
+      "prevention_significance": 39.82
+    },
+    {
+      "myth_id": 8,
+      "group_id": "minors",
+      "awareness": 41.83,
+      "significance": 73.37,
+      "correctness": 85.42,
+      "prevention_significance": 22.21
+    },
+    {
+      "myth_id": 17,
+      "group_id": "minors",
+      "awareness": 13.47,
+      "significance": 45.48,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 22,
+      "group_id": "minors",
+      "awareness": 52.34,
+      "significance": 58.75,
+      "correctness": 55.28,
+      "prevention_significance": 37.69
+    },
+    {
+      "myth_id": 31,
+      "group_id": "minors",
+      "awareness": 55.34,
+      "significance": 57.41,
+      "correctness": 81.13,
+      "prevention_significance": 22.23
+    },
+    {
+      "myth_id": 33,
+      "group_id": "minors",
+      "awareness": 27.74,
+      "significance": 51.6,
+      "correctness": 61.67,
+      "prevention_significance": 32.03
+    },
+    {
+      "myth_id": 37,
+      "group_id": "minors",
+      "awareness": 19.87,
+      "significance": 59.67,
+      "correctness": 32.67,
+      "prevention_significance": 52.76
+    },
+    {
+      "myth_id": 12,
+      "group_id": "minors",
+      "awareness": 17.24,
+      "significance": 58.67,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 13,
+      "group_id": "minors",
+      "awareness": 17.7,
+      "significance": 56.4,
+      "correctness": 69.46,
+      "prevention_significance": 25.72
+    },
+    {
+      "myth_id": 35,
+      "group_id": "minors",
+      "awareness": 25.61,
+      "significance": 62.99,
+      "correctness": 68.13,
+      "prevention_significance": 31.41
+    },
+    {
+      "myth_id": 23,
+      "group_id": "consumers",
+      "awareness": 31.44,
+      "significance": 70.87,
+      "correctness": 45.67,
+      "prevention_significance": 49.92
+    },
+    {
+      "myth_id": 2,
+      "group_id": "consumers",
+      "awareness": 33.42,
+      "significance": 61.15,
+      "correctness": 45.68,
+      "prevention_significance": 45.96
+    },
+    {
+      "myth_id": 24,
+      "group_id": "consumers",
+      "awareness": 50.0,
+      "significance": 50.33,
+      "correctness": 56.27,
+      "prevention_significance": 30.8
+    },
+    {
+      "myth_id": 40,
+      "group_id": "consumers",
+      "awareness": 12.87,
+      "significance": 54.49,
+      "correctness": 50.0,
+      "prevention_significance": 42.05
+    },
+    {
+      "myth_id": 19,
+      "group_id": "consumers",
+      "awareness": 59.65,
+      "significance": 67.08,
+      "correctness": 84.37,
+      "prevention_significance": 22.16
+    },
+    {
+      "myth_id": 20,
+      "group_id": "consumers",
+      "awareness": 46.78,
+      "significance": 57.75,
+      "correctness": 73.02,
+      "prevention_significance": 25.53
+    },
+    {
+      "myth_id": 26,
+      "group_id": "consumers",
+      "awareness": 50.74,
+      "significance": 68.79,
+      "correctness": 25.53,
+      "prevention_significance": 61.9
+    },
+    {
+      "myth_id": 27,
+      "group_id": "consumers",
+      "awareness": 55.94,
+      "significance": 65.18,
+      "correctness": 49.85,
+      "prevention_significance": 43.99
+    },
+    {
+      "myth_id": 1,
+      "group_id": "consumers",
+      "awareness": 22.03,
+      "significance": 54.17,
+      "correctness": 43.07,
+      "prevention_significance": 46.36
+    },
+    {
+      "myth_id": 6,
+      "group_id": "consumers",
+      "awareness": 52.23,
+      "significance": 67.61,
+      "correctness": 84.52,
+      "prevention_significance": 21.17
+    },
+    {
+      "myth_id": 7,
+      "group_id": "consumers",
+      "awareness": 45.3,
+      "significance": 77.66,
+      "correctness": 86.52,
+      "prevention_significance": 23.66
+    },
+    {
+      "myth_id": 14,
+      "group_id": "consumers",
+      "awareness": 18.32,
+      "significance": 63.06,
+      "correctness": 63.96,
+      "prevention_significance": 31.53
+    },
+    {
+      "myth_id": 18,
+      "group_id": "consumers",
+      "awareness": 70.54,
+      "significance": 74.88,
+      "correctness": 46.08,
+      "prevention_significance": 51.06
+    },
+    {
+      "myth_id": 21,
+      "group_id": "consumers",
+      "awareness": 58.42,
+      "significance": 74.01,
+      "correctness": 81.92,
+      "prevention_significance": 24.6
+    },
+    {
+      "myth_id": 25,
+      "group_id": "consumers",
+      "awareness": 44.31,
+      "significance": 65.73,
+      "correctness": 54.93,
+      "prevention_significance": 41.76
+    },
+    {
+      "myth_id": 41,
+      "group_id": "consumers",
+      "awareness": 40.59,
+      "significance": 39.02,
+      "correctness": 48.58,
+      "prevention_significance": 27.32
+    },
+    {
+      "myth_id": 15,
+      "group_id": "consumers",
+      "awareness": 30.45,
+      "significance": 59.35,
+      "correctness": 72.09,
+      "prevention_significance": 26.45
+    },
+    {
+      "myth_id": 16,
+      "group_id": "consumers",
+      "awareness": 14.85,
+      "significance": 65.56,
+      "correctness": 65.0,
+      "prevention_significance": 32.89
+    },
+    {
+      "myth_id": 33,
+      "group_id": "consumers",
+      "awareness": 54.7,
+      "significance": 63.03,
+      "correctness": 52.64,
+      "prevention_significance": 41.91
+    },
+    {
+      "myth_id": 3,
+      "group_id": "consumers",
+      "awareness": 59.41,
+      "significance": 69.58,
+      "correctness": 78.33,
+      "prevention_significance": 27.67
+    },
+    {
+      "myth_id": 8,
+      "group_id": "consumers",
+      "awareness": 34.65,
+      "significance": 68.81,
+      "correctness": 84.76,
+      "prevention_significance": 21.95
+    },
+    {
+      "myth_id": 10,
+      "group_id": "consumers",
+      "awareness": 77.48,
+      "significance": 71.79,
+      "correctness": 45.69,
+      "prevention_significance": 49.64
+    },
+    {
+      "myth_id": 29,
+      "group_id": "consumers",
+      "awareness": 56.44,
+      "significance": 76.75,
+      "correctness": 82.16,
+      "prevention_significance": 27.75
+    },
+    {
+      "myth_id": 30,
+      "group_id": "consumers",
+      "awareness": 10.64,
+      "significance": 44.96,
+      "correctness": 71.32,
+      "prevention_significance": 20.62
+    },
+    {
+      "myth_id": 32,
+      "group_id": "consumers",
+      "awareness": 58.17,
+      "significance": 71.65,
+      "correctness": 46.1,
+      "prevention_significance": 49.17
+    },
+    {
+      "myth_id": 39,
+      "group_id": "consumers",
+      "awareness": 40.1,
+      "significance": 47.12,
+      "correctness": 22.22,
+      "prevention_significance": 48.77
+    },
+    {
+      "myth_id": 4,
+      "group_id": "consumers",
+      "awareness": 72.52,
+      "significance": 75.09,
+      "correctness": 87.49,
+      "prevention_significance": 21.98
+    },
+    {
+      "myth_id": 9,
+      "group_id": "consumers",
+      "awareness": 55.94,
+      "significance": 77.43,
+      "correctness": 88.35,
+      "prevention_significance": 22.04
+    },
+    {
+      "myth_id": 12,
+      "group_id": "consumers",
+      "awareness": 43.07,
+      "significance": 70.31,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 28,
+      "group_id": "consumers",
+      "awareness": 38.37,
+      "significance": 47.31,
+      "correctness": 47.96,
+      "prevention_significance": 36.52
+    },
+    {
+      "myth_id": 31,
+      "group_id": "consumers",
+      "awareness": 80.45,
+      "significance": 84.16,
+      "correctness": 74.77,
+      "prevention_significance": 35.14
+    },
+    {
+      "myth_id": 34,
+      "group_id": "consumers",
+      "awareness": 24.26,
+      "significance": 52.04,
+      "correctness": 77.21,
+      "prevention_significance": 23.2
+    },
+    {
+      "myth_id": 36,
+      "group_id": "consumers",
+      "awareness": 33.91,
+      "significance": 47.69,
+      "correctness": 73.24,
+      "prevention_significance": 23.99
+    },
+    {
+      "myth_id": 38,
+      "group_id": "consumers",
+      "awareness": 25.5,
+      "significance": 33.01,
+      "correctness": 45.31,
+      "prevention_significance": 33.59
+    },
+    {
+      "myth_id": 42,
+      "group_id": "consumers",
+      "awareness": 35.64,
+      "significance": 47.22,
+      "correctness": 71.76,
+      "prevention_significance": 25.0
+    },
+    {
+      "myth_id": 5,
+      "group_id": "consumers",
+      "awareness": 17.82,
+      "significance": 54.17,
+      "correctness": 56.94,
+      "prevention_significance": 30.83
+    },
+    {
+      "myth_id": 11,
+      "group_id": "consumers",
+      "awareness": 18.56,
+      "significance": 43.11,
+      "correctness": 53.33,
+      "prevention_significance": 29.16
+    },
+    {
+      "myth_id": 13,
+      "group_id": "consumers",
+      "awareness": 48.02,
+      "significance": 60.79,
+      "correctness": 88.14,
+      "prevention_significance": 17.72
+    },
+    {
+      "myth_id": 17,
+      "group_id": "consumers",
+      "awareness": 11.39,
+      "significance": 52.9,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 22,
+      "group_id": "consumers",
+      "awareness": 51.98,
+      "significance": 37.3,
+      "correctness": 69.84,
+      "prevention_significance": 21.87
+    },
+    {
+      "myth_id": 37,
+      "group_id": "consumers",
+      "awareness": 13.12,
+      "significance": 40.38,
+      "correctness": 62.89,
+      "prevention_significance": 26.54
+    },
+    {
+      "myth_id": 35,
+      "group_id": "consumers",
+      "awareness": 14.11,
+      "significance": 47.95,
+      "correctness": 70.76,
+      "prevention_significance": 25.38
+    },
+    {
+      "myth_id": 2,
+      "group_id": "young_adults",
+      "awareness": 21.24,
+      "significance": 60.94,
+      "correctness": 52.82,
+      "prevention_significance": 41.04
+    },
+    {
+      "myth_id": 23,
+      "group_id": "young_adults",
+      "awareness": 16.99,
+      "significance": 62.18,
+      "correctness": 64.1,
+      "prevention_significance": 36.03
+    },
+    {
+      "myth_id": 40,
+      "group_id": "young_adults",
+      "awareness": 16.01,
+      "significance": 57.82,
+      "correctness": 50.34,
+      "prevention_significance": 38.23
+    },
+    {
+      "myth_id": 24,
+      "group_id": "young_adults",
+      "awareness": 50.0,
+      "significance": 71.9,
+      "correctness": 71.9,
+      "prevention_significance": 30.72
+    },
+    {
+      "myth_id": 27,
+      "group_id": "young_adults",
+      "awareness": 47.06,
+      "significance": 57.11,
+      "correctness": 55.56,
+      "prevention_significance": 37.02
+    },
+    {
+      "myth_id": 20,
+      "group_id": "young_adults",
+      "awareness": 50.33,
+      "significance": 71.86,
+      "correctness": 81.39,
+      "prevention_significance": 25.28
+    },
+    {
+      "myth_id": 41,
+      "group_id": "young_adults",
+      "awareness": 42.48,
+      "significance": 58.21,
+      "correctness": 73.08,
+      "prevention_significance": 23.95
+    },
+    {
+      "myth_id": 19,
+      "group_id": "young_adults",
+      "awareness": 62.42,
+      "significance": 71.2,
+      "correctness": 87.43,
+      "prevention_significance": 21.08
+    },
+    {
+      "myth_id": 26,
+      "group_id": "young_adults",
+      "awareness": 34.97,
+      "significance": 65.11,
+      "correctness": 30.53,
+      "prevention_significance": 55.95
+    },
+    {
+      "myth_id": 14,
+      "group_id": "young_adults",
+      "awareness": 18.3,
+      "significance": 75.0,
+      "correctness": 69.64,
+      "prevention_significance": 33.81
+    },
+    {
+      "myth_id": 3,
+      "group_id": "young_adults",
+      "awareness": 49.35,
+      "significance": 69.76,
+      "correctness": 78.59,
+      "prevention_significance": 27.59
+    },
+    {
+      "myth_id": 7,
+      "group_id": "young_adults",
+      "awareness": 43.46,
+      "significance": 76.01,
+      "correctness": 86.22,
+      "prevention_significance": 23.28
+    },
+    {
+      "myth_id": 6,
+      "group_id": "young_adults",
+      "awareness": 51.96,
+      "significance": 75.26,
+      "correctness": 88.47,
+      "prevention_significance": 21.3
+    },
+    {
+      "myth_id": 21,
+      "group_id": "young_adults",
+      "awareness": 57.52,
+      "significance": 77.65,
+      "correctness": 88.64,
+      "prevention_significance": 21.25
+    },
+    {
+      "myth_id": 28,
+      "group_id": "young_adults",
+      "awareness": 32.35,
+      "significance": 65.66,
+      "correctness": 30.64,
+      "prevention_significance": 56.5
+    },
+    {
+      "myth_id": 39,
+      "group_id": "young_adults",
+      "awareness": 29.41,
+      "significance": 52.96,
+      "correctness": 25.56,
+      "prevention_significance": 50.52
+    },
+    {
+      "myth_id": 18,
+      "group_id": "young_adults",
+      "awareness": 54.25,
+      "significance": 61.65,
+      "correctness": 55.42,
+      "prevention_significance": 39.48
+    },
+    {
+      "myth_id": 25,
+      "group_id": "young_adults",
+      "awareness": 44.44,
+      "significance": 59.56,
+      "correctness": 59.31,
+      "prevention_significance": 35.49
+    },
+    {
+      "myth_id": 16,
+      "group_id": "young_adults",
+      "awareness": 15.36,
+      "significance": 68.79,
+      "correctness": 70.21,
+      "prevention_significance": 30.78
+    },
+    {
+      "myth_id": 15,
+      "group_id": "young_adults",
+      "awareness": 21.24,
+      "significance": 71.28,
+      "correctness": 76.92,
+      "prevention_significance": 27.38
+    },
+    {
+      "myth_id": 8,
+      "group_id": "young_adults",
+      "awareness": 44.44,
+      "significance": 72.06,
+      "correctness": 87.25,
+      "prevention_significance": 21.23
+    },
+    {
+      "myth_id": 10,
+      "group_id": "young_adults",
+      "awareness": 66.99,
+      "significance": 66.99,
+      "correctness": 49.27,
+      "prevention_significance": 44.85
+    },
+    {
+      "myth_id": 34,
+      "group_id": "young_adults",
+      "awareness": 34.31,
+      "significance": 70.16,
+      "correctness": 57.46,
+      "prevention_significance": 41.78
+    },
+    {
+      "myth_id": 42,
+      "group_id": "young_adults",
+      "awareness": 39.87,
+      "significance": 64.48,
+      "correctness": 57.38,
+      "prevention_significance": 40.16
+    },
+    {
+      "myth_id": 32,
+      "group_id": "young_adults",
+      "awareness": 35.62,
+      "significance": 63.3,
+      "correctness": 55.35,
+      "prevention_significance": 39.51
+    },
+    {
+      "myth_id": 33,
+      "group_id": "young_adults",
+      "awareness": 34.64,
+      "significance": 54.09,
+      "correctness": 61.32,
+      "prevention_significance": 32.83
+    },
+    {
+      "myth_id": 38,
+      "group_id": "young_adults",
+      "awareness": 24.51,
+      "significance": 29.78,
+      "correctness": 54.67,
+      "prevention_significance": 25.42
+    },
+    {
+      "myth_id": 4,
+      "group_id": "young_adults",
+      "awareness": 53.92,
+      "significance": 67.07,
+      "correctness": 78.38,
+      "prevention_significance": 24.48
+    },
+    {
+      "myth_id": 1,
+      "group_id": "young_adults",
+      "awareness": 16.01,
+      "significance": 53.47,
+      "correctness": 46.94,
+      "prevention_significance": 43.19
+    },
+    {
+      "myth_id": 36,
+      "group_id": "young_adults",
+      "awareness": 32.68,
+      "significance": 66.0,
+      "correctness": 59.67,
+      "prevention_significance": 38.73
+    },
+    {
+      "myth_id": 5,
+      "group_id": "young_adults",
+      "awareness": 16.67,
+      "significance": 67.32,
+      "correctness": 73.86,
+      "prevention_significance": 28.1
+    },
+    {
+      "myth_id": 11,
+      "group_id": "young_adults",
+      "awareness": 32.68,
+      "significance": 58.33,
+      "correctness": 67.33,
+      "prevention_significance": 28.07
+    },
+    {
+      "myth_id": 30,
+      "group_id": "young_adults",
+      "awareness": 15.36,
+      "significance": 69.5,
+      "correctness": 79.43,
+      "prevention_significance": 26.24
+    },
+    {
+      "myth_id": 9,
+      "group_id": "young_adults",
+      "awareness": 34.64,
+      "significance": 70.75,
+      "correctness": 78.62,
+      "prevention_significance": 25.22
+    },
+    {
+      "myth_id": 29,
+      "group_id": "young_adults",
+      "awareness": 39.22,
+      "significance": 64.72,
+      "correctness": 85.83,
+      "prevention_significance": 22.33
+    },
+    {
+      "myth_id": 37,
+      "group_id": "young_adults",
+      "awareness": 16.99,
+      "significance": 52.56,
+      "correctness": 37.82,
+      "prevention_significance": 44.49
+    },
+    {
+      "myth_id": 22,
+      "group_id": "young_adults",
+      "awareness": 56.21,
+      "significance": 55.81,
+      "correctness": 62.6,
+      "prevention_significance": 33.99
+    },
+    {
+      "myth_id": 31,
+      "group_id": "young_adults",
+      "awareness": 68.3,
+      "significance": 67.78,
+      "correctness": 81.18,
+      "prevention_significance": 26.12
+    },
+    {
+      "myth_id": 13,
+      "group_id": "young_adults",
+      "awareness": 33.66,
+      "significance": 47.25,
+      "correctness": 78.32,
+      "prevention_significance": 18.96
+    },
+    {
+      "myth_id": 12,
+      "group_id": "young_adults",
+      "awareness": 24.51,
+      "significance": 62.22,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 17,
+      "group_id": "young_adults",
+      "awareness": 5.56,
+      "significance": 58.82,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 35,
+      "group_id": "young_adults",
+      "awareness": 12.75,
+      "significance": 56.41,
+      "correctness": 70.94,
+      "prevention_significance": 28.72
+    },
+    {
+      "myth_id": 40,
+      "group_id": "parents",
+      "awareness": 17.83,
+      "significance": 55.19,
+      "correctness": 37.68,
+      "prevention_significance": 45.41
+    },
+    {
+      "myth_id": 23,
+      "group_id": "parents",
+      "awareness": 16.47,
+      "significance": 69.02,
+      "correctness": 61.18,
+      "prevention_significance": 38.75
+    },
+    {
+      "myth_id": 24,
+      "group_id": "parents",
+      "awareness": 40.89,
+      "significance": 65.87,
+      "correctness": 71.09,
+      "prevention_significance": 28.57
+    },
+    {
+      "myth_id": 2,
+      "group_id": "parents",
+      "awareness": 21.12,
+      "significance": 49.24,
+      "correctness": 68.5,
+      "prevention_significance": 27.83
+    },
+    {
+      "myth_id": 3,
+      "group_id": "parents",
+      "awareness": 50.97,
+      "significance": 80.41,
+      "correctness": 76.93,
+      "prevention_significance": 32.19
+    },
+    {
+      "myth_id": 20,
+      "group_id": "parents",
+      "awareness": 46.71,
+      "significance": 71.81,
+      "correctness": 84.37,
+      "prevention_significance": 23.11
+    },
+    {
+      "myth_id": 28,
+      "group_id": "parents",
+      "awareness": 28.88,
+      "significance": 60.18,
+      "correctness": 27.74,
+      "prevention_significance": 55.53
+    },
+    {
+      "myth_id": 26,
+      "group_id": "parents",
+      "awareness": 35.27,
+      "significance": 61.51,
+      "correctness": 31.5,
+      "prevention_significance": 53.26
+    },
+    {
+      "myth_id": 14,
+      "group_id": "parents",
+      "awareness": 16.67,
+      "significance": 74.81,
+      "correctness": 71.32,
+      "prevention_significance": 32.25
+    },
+    {
+      "myth_id": 41,
+      "group_id": "parents",
+      "awareness": 48.26,
+      "significance": 64.12,
+      "correctness": 75.5,
+      "prevention_significance": 24.18
+    },
+    {
+      "myth_id": 21,
+      "group_id": "parents",
+      "awareness": 65.89,
+      "significance": 85.0,
+      "correctness": 91.18,
+      "prevention_significance": 22.31
+    },
+    {
+      "myth_id": 6,
+      "group_id": "parents",
+      "awareness": 44.77,
+      "significance": 76.19,
+      "correctness": 88.02,
+      "prevention_significance": 22.08
+    },
+    {
+      "myth_id": 19,
+      "group_id": "parents",
+      "awareness": 64.15,
+      "significance": 71.7,
+      "correctness": 89.63,
+      "prevention_significance": 20.26
+    },
+    {
+      "myth_id": 39,
+      "group_id": "parents",
+      "awareness": 16.67,
+      "significance": 51.16,
+      "correctness": 25.58,
+      "prevention_significance": 49.22
+    },
+    {
+      "myth_id": 42,
+      "group_id": "parents",
+      "awareness": 40.5,
+      "significance": 71.29,
+      "correctness": 55.18,
+      "prevention_significance": 45.1
+    },
+    {
+      "myth_id": 27,
+      "group_id": "parents",
+      "awareness": 32.95,
+      "significance": 61.76,
+      "correctness": 55.29,
+      "prevention_significance": 38.98
+    },
+    {
+      "myth_id": 25,
+      "group_id": "parents",
+      "awareness": 33.14,
+      "significance": 56.73,
+      "correctness": 60.62,
+      "prevention_significance": 34.74
+    },
+    {
+      "myth_id": 7,
+      "group_id": "parents",
+      "awareness": 36.24,
+      "significance": 80.75,
+      "correctness": 84.67,
+      "prevention_significance": 26.13
+    },
+    {
+      "myth_id": 10,
+      "group_id": "parents",
+      "awareness": 68.99,
+      "significance": 69.85,
+      "correctness": 47.85,
+      "prevention_significance": 47.47
+    },
+    {
+      "myth_id": 22,
+      "group_id": "parents",
+      "awareness": 63.57,
+      "significance": 65.34,
+      "correctness": 51.32,
+      "prevention_significance": 44.14
+    },
+    {
+      "myth_id": 36,
+      "group_id": "parents",
+      "awareness": 30.81,
+      "significance": 65.2,
+      "correctness": 55.35,
+      "prevention_significance": 41.26
+    },
+    {
+      "myth_id": 18,
+      "group_id": "parents",
+      "awareness": 44.57,
+      "significance": 62.9,
+      "correctness": 53.48,
+      "prevention_significance": 41.19
+    },
+    {
+      "myth_id": 32,
+      "group_id": "parents",
+      "awareness": 29.65,
+      "significance": 63.4,
+      "correctness": 55.34,
+      "prevention_significance": 40.39
+    },
+    {
+      "myth_id": 16,
+      "group_id": "parents",
+      "awareness": 12.6,
+      "significance": 73.33,
+      "correctness": 68.21,
+      "prevention_significance": 33.95
+    },
+    {
+      "myth_id": 4,
+      "group_id": "parents",
+      "awareness": 40.12,
+      "significance": 65.06,
+      "correctness": 72.14,
+      "prevention_significance": 27.18
+    },
+    {
+      "myth_id": 15,
+      "group_id": "parents",
+      "awareness": 18.22,
+      "significance": 67.73,
+      "correctness": 76.6,
+      "prevention_significance": 27.09
+    },
+    {
+      "myth_id": 9,
+      "group_id": "parents",
+      "awareness": 20.93,
+      "significance": 64.8,
+      "correctness": 75.31,
+      "prevention_significance": 26.48
+    },
+    {
+      "myth_id": 30,
+      "group_id": "parents",
+      "awareness": 13.37,
+      "significance": 70.53,
+      "correctness": 82.61,
+      "prevention_significance": 25.02
+    },
+    {
+      "myth_id": 29,
+      "group_id": "parents",
+      "awareness": 35.85,
+      "significance": 57.3,
+      "correctness": 85.05,
+      "prevention_significance": 20.25
+    },
+    {
+      "myth_id": 37,
+      "group_id": "parents",
+      "awareness": 12.02,
+      "significance": 61.83,
+      "correctness": 37.63,
+      "prevention_significance": 51.4
+    },
+    {
+      "myth_id": 34,
+      "group_id": "parents",
+      "awareness": 30.43,
+      "significance": 72.86,
+      "correctness": 53.72,
+      "prevention_significance": 45.13
+    },
+    {
+      "myth_id": 1,
+      "group_id": "parents",
+      "awareness": 11.82,
+      "significance": 52.46,
+      "correctness": 45.9,
+      "prevention_significance": 42.62
+    },
+    {
+      "myth_id": 38,
+      "group_id": "parents",
+      "awareness": 15.31,
+      "significance": 29.96,
+      "correctness": 59.49,
+      "prevention_significance": 25.82
+    },
+    {
+      "myth_id": 5,
+      "group_id": "parents",
+      "awareness": 18.8,
+      "significance": 64.26,
+      "correctness": 75.26,
+      "prevention_significance": 25.36
+    },
+    {
+      "myth_id": 31,
+      "group_id": "parents",
+      "awareness": 62.02,
+      "significance": 62.5,
+      "correctness": 80.52,
+      "prevention_significance": 24.81
+    },
+    {
+      "myth_id": 11,
+      "group_id": "parents",
+      "awareness": 18.6,
+      "significance": 55.21,
+      "correctness": 71.87,
+      "prevention_significance": 23.47
+    },
+    {
+      "myth_id": 8,
+      "group_id": "parents",
+      "awareness": 48.45,
+      "significance": 81.2,
+      "correctness": 91.6,
+      "prevention_significance": 21.33
+    },
+    {
+      "myth_id": 35,
+      "group_id": "parents",
+      "awareness": 15.89,
+      "significance": 63.82,
+      "correctness": 62.6,
+      "prevention_significance": 36.75
+    },
+    {
+      "myth_id": 13,
+      "group_id": "parents",
+      "awareness": 32.56,
+      "significance": 56.35,
+      "correctness": 81.55,
+      "prevention_significance": 20.24
+    },
+    {
+      "myth_id": 12,
+      "group_id": "parents",
+      "awareness": 26.74,
+      "significance": 69.57,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 33,
+      "group_id": "parents",
+      "awareness": 22.29,
+      "significance": 53.62,
+      "correctness": 56.81,
+      "prevention_significance": 35.3
+    },
+    {
+      "myth_id": 17,
+      "group_id": "parents",
+      "awareness": 6.59,
+      "significance": 50.0,
+      "correctness": null,
+      "prevention_significance": null
+    }
+  ],
+  "groups": [
+    {
+      "id": "adults",
+      "name_de": "Volljährige (18–70)",
+      "name_en": "Adults (18–70)"
+    },
+    {
+      "id": "minors",
+      "name_de": "Minderjährige (16–17)",
+      "name_en": "Minors (16–17)"
+    },
+    {
+      "id": "consumers",
+      "name_de": "Konsumierende",
+      "name_en": "Consumers (past 30 days)"
+    },
+    {
+      "id": "young_adults",
+      "name_de": "Junge Erwachsene (18–26)",
+      "name_en": "Young Adults (18–26)"
+    },
+    {
+      "id": "parents",
+      "name_de": "Eltern",
+      "name_en": "Parents"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name_de": "Medizinischer und therapeutischer Nutzen",
+      "name_en": "Medical and Therapeutic Benefits"
+    },
+    {
+      "id": 2,
+      "name_de": "Risiken für den Körper und die Entwicklung",
+      "name_en": "Physical and Developmental Risks"
+    },
+    {
+      "id": 3,
+      "name_de": "Risiken für die psychische Gesundheit",
+      "name_en": "Mental Health Risks"
+    },
+    {
+      "id": 4,
+      "name_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "name_en": "Effects on Mood and Perception"
+    },
+    {
+      "id": 5,
+      "name_de": "Risiken durch Dosierung und Qualität",
+      "name_en": "Dosage and Quality Risks"
+    },
+    {
+      "id": 6,
+      "name_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
+      "name_en": "Prevalence and Legislation"
+    },
+    {
+      "id": 7,
+      "name_de": "Allgemeine Einschätzung der Gefährlichkeit",
+      "name_en": "General Risk Assessment"
+    }
+  ],
+  "correctness_classes": {
+    "richtig": {
+      "de": "Richtig",
+      "en": "Correct"
+    },
+    "eher_richtig": {
+      "de": "Eher richtig",
+      "en": "Rather correct"
+    },
+    "eher_falsch": {
+      "de": "Eher falsch",
+      "en": "Rather incorrect"
+    },
+    "falsch": {
+      "de": "Falsch",
+      "en": "Incorrect"
+    },
+    "no_classification": {
+      "de": "Keine Aussage möglich",
+      "en": "No classification possible"
+    }
+  }
+}
