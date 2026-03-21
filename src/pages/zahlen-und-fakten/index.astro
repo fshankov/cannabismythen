@@ -1,9 +1,10 @@
 ---
 export const prerender = true;
 
+import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import MythenExplorer from "@components/dashboard/MythenExplorer";
-import { getPublishedEntries } from "@lib/content";
+import { reader, getPublishedEntries } from "@lib/content";
 import "../../styles/dashboard.css";
 
 // Build myth ID → factsheet slug mapping
@@ -16,8 +17,50 @@ for (const [slug, entry] of factsheetEntries) {
     mythSlugs[e.mythNumber] = slug;
   }
 }
+
+// Pre-render factsheet HTML for the detail panel (same approach as Quiz pages)
+const mythContentMap: Record<
+  number,
+  {
+    html: string;
+    title: string;
+    classification: string;
+    classificationLabel: string;
+    refCount: number;
+  }
+> = {};
+
+for (const [slug, entry] of factsheetEntries) {
+  const e = entry as any;
+  if (!e.mythNumber) continue;
+
+  try {
+    const fullEntry = await reader.collections.zahlenUndFakten.read(slug);
+    if (fullEntry && fullEntry.content) {
+      const { node } = await fullEntry.content();
+      const fullHtml = Markdoc.renderers.html(Markdoc.transform(node));
+
+      const refMatch = fullHtml.match(/<li>/g);
+      const refCount = refMatch ? refMatch.length : 0;
+
+      mythContentMap[e.mythNumber] = {
+        html: fullHtml,
+        title: fullEntry.title as string,
+        classification: (fullEntry as any).classification || "",
+        classificationLabel: (fullEntry as any).classificationLabel || "",
+        refCount,
+      };
+    }
+  } catch {
+    // If a factsheet fails to render, skip it
+  }
+}
 ---
 
 <BaseLayout title="Zahlen & Fakten" description="Interaktive Datenvisualisierung zu 42 Cannabis-Mythen — Erkunden Sie wissenschaftliche Einordnungen, Bevölkerungsdaten und Indikatoren.">
-  <MythenExplorer client:load mythSlugs={mythSlugs} />
+  <MythenExplorer
+    client:load
+    mythSlugs={mythSlugs}
+    mythContent={JSON.stringify(mythContentMap)}
+  />
 </BaseLayout>

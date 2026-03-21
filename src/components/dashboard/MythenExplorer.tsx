@@ -16,30 +16,45 @@ import TableView from './views/TableView';
 import BarView from './views/BarView';
 import ScatterView from './views/ScatterView';
 import LollipopView from './views/LollipopView';
-import DetailPanel from './DetailPanel';
+import FactsheetPanel from './FactsheetPanel';
 
-/**
- * Map from myth IDs to factsheet slugs.
- * This allows the detail panel to link to full factsheet pages.
- * The mapping follows the pattern: myth ID → slug (e.g., 1 → "m01-allheilmittel")
- */
+/** Pre-rendered factsheet content from Keystatic (passed from Astro at build time). */
+export interface MythContentEntry {
+  html: string;
+  title: string;
+  classification: string;
+  classificationLabel: string;
+  refCount: number;
+}
+
 interface Props {
   /** Map of myth ID → factsheet page slug */
   mythSlugs?: Record<number, string>;
+  /** JSON-serialised Record<mythId, MythContentEntry> of pre-rendered factsheet HTML */
+  mythContent?: string;
 }
 
-export default function MythenExplorer({ mythSlugs }: Props) {
+export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
   const [data, setData] = useState<CarmData | null>(null);
   const [state, setState] = useState<AppState>(() => {
     const defaults = getDefaultState();
-    // Default to German since cannabismythen is a German site
     defaults.lang = 'de';
     const fromUrl = urlToState();
-    return { ...defaults, ...fromUrl };
+    return { ...defaults, ...fromUrl, lang: 'de' };
   });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
+
+  // Parse pre-rendered myth content passed as JSON from Astro
+  const mythContentMap: Record<number, MythContentEntry> = useMemo(() => {
+    if (!mythContent) return {};
+    try {
+      return JSON.parse(mythContent);
+    } catch {
+      return {};
+    }
+  }, [mythContent]);
 
   // Build myth slug map from props
   const mythSlugMap = useMemo(() => {
@@ -73,13 +88,13 @@ export default function MythenExplorer({ mythSlugs }: Props) {
 
   const handleDownloadCSV = useCallback(() => {
     if (!data) return;
-    const csv = exportCSV(filteredMyths, data.metrics, state.groupIds, state.lang);
+    const csv = exportCSV(filteredMyths, data.metrics, state.groupIds, 'de');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `cannabis-myths-${state.indicator}.csv`;
     link.click();
-  }, [data, filteredMyths, state.groupIds, state.indicator, state.lang]);
+  }, [data, filteredMyths, state.groupIds, state.indicator]);
 
   const handleFullscreen = useCallback(() => {
     if (!isFullscreen && chartRef.current) {
@@ -116,24 +131,8 @@ export default function MythenExplorer({ mythSlugs }: Props) {
     <div className="carm-explorer">
       <div className="carm-explorer-header">
         <div className="carm-explorer-header-left">
-          <h2 className="carm-explorer-title">{t('app.title', state.lang)}</h2>
-          <p className="carm-explorer-subtitle">{t('app.subtitle', state.lang)}</p>
-        </div>
-        <div className="lang-switcher" role="group" aria-label="Language">
-          <button
-            className={`lang-btn ${state.lang === 'de' ? 'active' : ''}`}
-            onClick={() => update('lang', 'de')}
-            aria-pressed={state.lang === 'de'}
-          >
-            DE
-          </button>
-          <button
-            className={`lang-btn ${state.lang === 'en' ? 'active' : ''}`}
-            onClick={() => update('lang', 'en')}
-            aria-pressed={state.lang === 'en'}
-          >
-            EN
-          </button>
+          <h2 className="carm-explorer-title">{t('app.title', 'de')}</h2>
+          <p className="carm-explorer-subtitle">{t('app.subtitle', 'de')}</p>
         </div>
       </div>
 
@@ -141,7 +140,7 @@ export default function MythenExplorer({ mythSlugs }: Props) {
         <section className="chart-column">
           <ViewTabs
             view={state.view}
-            lang={state.lang}
+            lang={'de'}
             onChange={(v: ViewTab) => update('view', v)}
           />
 
@@ -152,7 +151,7 @@ export default function MythenExplorer({ mythSlugs }: Props) {
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
-                {copied ? t('util.copied', state.lang) : t('util.share', state.lang)}
+                {copied ? t('util.copied', 'de') : t('util.share', 'de')}
               </button>
               <button className="util-btn" onClick={handleDownloadCSV}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -166,16 +165,16 @@ export default function MythenExplorer({ mythSlugs }: Props) {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                 </svg>
-                {isFullscreen ? t('util.exitFullscreen', state.lang) : t('util.fullscreen', state.lang)}
+                {isFullscreen ? t('util.exitFullscreen', 'de') : t('util.fullscreen', 'de')}
               </button>
             </div>
           </div>
 
-          <p className="howto-microcopy">{t(`howto.${state.view}` as any, state.lang)}</p>
+          <p className="howto-microcopy">{t(`howto.${state.view}` as any, 'de')}</p>
 
           <div className={`chart-area${isFullscreen ? ' fullscreen' : ''}`} ref={chartRef}>
             {filteredMyths.length === 0 ? (
-              <div className="no-results">{t('misc.noResults', state.lang)}</div>
+              <div className="no-results">{t('misc.noResults', 'de')}</div>
             ) : (
               <>
                 {state.view === 'table' && (
@@ -194,20 +193,18 @@ export default function MythenExplorer({ mythSlugs }: Props) {
             )}
           </div>
 
-          <VerdictTags lang={state.lang} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
+          <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
         </section>
 
         <Sidebar state={state} data={data} update={update} />
       </div>
 
       {selectedMyth && (
-        <DetailPanel
+        <FactsheetPanel
           myth={selectedMyth}
-          metrics={data.metrics}
-          groups={data.groups}
-          state={state}
+          mythContentEntry={mythContentMap[selectedMyth.id]}
+          factsheetSlug={mythSlugMap?.get(selectedMyth.id)}
           onClose={() => selectMyth(null)}
-          mythSlugMap={mythSlugMap}
         />
       )}
     </div>
