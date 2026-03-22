@@ -16,6 +16,7 @@ import TableView from './views/TableView';
 import BarView from './views/BarView';
 import ScatterView from './views/ScatterView';
 import LollipopView from './views/LollipopView';
+import OverviewView from './views/OverviewView';
 import FactsheetPanel from './FactsheetPanel';
 
 /** Pre-rendered factsheet content from Keystatic (passed from Astro at build time). */
@@ -188,6 +189,9 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
                 )}
                 {state.view === 'lollipop' && (
                   <LollipopView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
+                )}
+                {state.view === 'overview' && (
+                  <OverviewView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} categories={data.categories} />
                 )}
               </>
             )}

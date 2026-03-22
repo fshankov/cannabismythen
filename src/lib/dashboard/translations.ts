@@ -37,6 +37,7 @@ const translations = {
   'view.bar': { de: 'Balken', en: 'Bar' },
   'view.scatter': { de: 'Streuung', en: 'Scatter' },
   'view.lollipop': { de: 'Lollipop', en: 'Lollipop' },
+  'view.overview': { de: 'Übersicht', en: 'Overview' },
 
   // Table
   'table.myth': { de: 'Mythos', en: 'Myth' },
@@ -101,6 +102,10 @@ const translations = {
   'howto.lollipop': {
     de: 'Jeder Punkt ist ein Mythos über alle fünf Gruppen. Klicken zum Hervorheben, Doppelklick für Details.',
     en: 'Each dot is one myth positioned across all five groups. Click to highlight; double-click for details.',
+  },
+  'howto.overview': {
+    de: 'Alle Mythen auf einen Blick, nach Kategorie sortiert. Farbe = Wissenschaftliches Urteil. Balken = gewählte Metrik. Klick für Details.',
+    en: 'All myths at a glance, grouped by category. Color = science verdict. Bar = selected metric. Click for details.',
   },
   // Tooltip labels
   'tooltip.category': { de: 'Kategorie', en: 'Category' },
