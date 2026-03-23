@@ -4,6 +4,9 @@ export const prerender = true;
 import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
+import QuizPlayer from "@components/quiz/QuizPlayer";
+import { QUIZ_THEMES } from "@components/quiz/quizData";
+import "../../styles/quiz.css";
 
 export async function getStaticPaths() {
   const slugs = await reader.collections.selbsttest.list();
@@ -11,7 +14,7 @@ export async function getStaticPaths() {
 
   for (const slug of slugs) {
     const entry = await reader.collections.selbsttest.read(slug);
-    if (entry && entry.status === "published") {
+    if (entry && entry.status === "published" && slug !== "feedback-texte") {
       paths.push({ params: { slug } });
     }
   }
@@ -26,25 +29,58 @@ if (!entry || entry.status !== "published") {
   return Astro.redirect("/selbsttest/");
 }
 
-const { content, internalNotes, ...meta } = entry;
-const { node } = await content();
-const html = Markdoc.renderers.html(Markdoc.transform(node));
+// Build quiz text map from Keystatic-editable questions (statement + explanation)
+const quizTextMap: Record<string, { statement: string; explanation: string }> = {};
+if (entry.questions) {
+  for (const q of entry.questions) {
+    if (q.mythId && q.statement) {
+      quizTextMap[q.mythId] = {
+        statement: q.statement,
+        explanation: q.explanation || "",
+      };
+    }
+  }
+}
+
+// Pre-render myth page content for the factsheet panel
+const theme = QUIZ_THEMES[slug!];
+const mythContentMap: Record<string, { html: string; title: string; classification: string; classificationLabel: string; refCount: number }> = {};
+
+if (theme) {
+  for (const myth of theme.myths) {
+    try {
+      const mythEntry = await reader.collections.zahlenUndFakten.read(myth.mythPageSlug);
+      if (mythEntry && mythEntry.content) {
+        const { node } = await mythEntry.content();
+        const fullHtml = Markdoc.renderers.html(Markdoc.transform(node));
+
+        // Count references (lines starting with a number followed by a period in the Referenzen section)
+        const refMatch = fullHtml.match(/<li>/g);
+        const refCount = refMatch ? refMatch.length : 0;
+
+        mythContentMap[myth.id] = {
+          html: fullHtml,
+          title: mythEntry.title as string,
+          classification: mythEntry.classification as string,
+          classificationLabel: mythEntry.classificationLabel as string,
+          refCount,
+        };
+      }
+    } catch {
+      // If a myth page doesn't exist or fails to render, skip it
+    }
+  }
+}
 ---
 
-<BaseLayout title={meta.title} description={meta.summary || undefined}>
+<BaseLayout title={entry.title} description={entry.summary || "Cannabis-Quiz: Testen Sie Ihr Wissen"}>
   <article class="quiz-page">
-    <header>
-      <h1>{meta.title}</h1>
-      {meta.theme && <p class="theme-label">Thema: {meta.theme}</p>}
-      {(meta.questionCount ?? 0) > 0 && <p>{meta.questionCount} Fragen</p>}
-    </header>
-
-    <!--
-      TODO: Replace this static content rendering with an interactive
-      React quiz component (src/components/quiz/QuizPlayer.tsx).
-      The current view shows the raw quiz content as a reference.
-    -->
-    <div class="quiz-content" set:html={html} />
+    <QuizPlayer
+      client:load
+      quizSlug={slug!}
+      mythContent={JSON.stringify(mythContentMap)}
+      quizText={JSON.stringify(quizTextMap)}
+    />
 
     <footer>
       <a href="/selbsttest/">&larr; Alle Quiz-Module</a>

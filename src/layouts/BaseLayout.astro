@@ -17,6 +17,22 @@ const { title, description = "Evidenzbasierte Informationen zu Cannabis-Mythen" 
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} | Cannabis: Mythen & Evidenz</title>
+
+    {/* Matomo Analytics — cookieless mode (no GDPR banner needed) */}
+    {/* TODO: Replace MATOMO_URL and SITE_ID with real values before production */}
+    <script is:inline>
+      var _paq = window._paq = window._paq || [];
+      _paq.push(['disableCookies']);
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        var u="https://MATOMO_URL/";
+        _paq.push(['setTrackerUrl', u+'matomo.php']);
+        _paq.push(['setSiteId', 'SITE_ID']);
+        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+      })();
+    </script>
   </head>
   <body>
     <header>
@@ -27,6 +43,7 @@ const { title, description = "Evidenzbasierte Informationen zu Cannabis-Mythen" 
         <a href="/selbsttest/">Selbsttest / Quiz</a>
         <a href="/ueber-uns/">Über uns</a>
       </nav>
+      <div id="quiz-progress-slot"></div>
     </header>
     <main>
       <slot />

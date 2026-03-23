@@ -1,68 +1,92 @@
 ---
 export const prerender = true;
 
+import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { getPublishedEntries } from "@lib/content";
+import MythenExplorer from "@components/dashboard/MythenExplorer";
+import { reader, getPublishedEntries } from "@lib/content";
+import "../../styles/dashboard.css";
 
+// Combined myth factsheets: one .mdoc covers two CaRM myth IDs.
+// Map the secondary myth ID to the same slug and content.
+const COMBINED_MYTHS: Record<number, number> = {
+  32: 31, // m31-m32-entspannt-aggressiv
+  37: 36, // m36-m37-leistungen-niveau
+  42: 41, // m41-m42-anstieg-konsum
+};
+
+// Build myth ID → factsheet slug mapping
 const factsheetEntries = await getPublishedEntries("zahlenUndFakten");
-const dashboardEntries = await getPublishedEntries("zahlenUndFaktenDashboard");
+const mythSlugs: Record<number, string> = {};
 
-// Sort factsheets by myth number
-factsheetEntries.sort((a, b) => {
-  const numA = (a[1] as any).mythNumber ?? 0;
-  const numB = (b[1] as any).mythNumber ?? 0;
-  return numA - numB;
-});
+for (const [slug, entry] of factsheetEntries) {
+  const e = entry as any;
+  if (e.mythNumber) {
+    mythSlugs[e.mythNumber] = slug;
+  }
+}
+// Add secondary IDs for combined myths
+for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
+  if (mythSlugs[Number(primary)]) {
+    mythSlugs[Number(secondary)] = mythSlugs[Number(primary)];
+  }
+}
+
+// Pre-render factsheet HTML for the detail panel (same approach as Quiz pages)
+const mythContentMap: Record<
+  number,
+  {
+    html: string;
+    title: string;
+    classification: string;
+    classificationLabel: string;
+    refCount: number;
+  }
+> = {};
+
+for (const [slug, entry] of factsheetEntries) {
+  const e = entry as any;
+  if (!e.mythNumber) continue;
+
+  try {
+    const fullEntry = await reader.collections.zahlenUndFakten.read(slug);
+    if (fullEntry && fullEntry.content) {
+      const { node } = await fullEntry.content();
+      const fullHtml = Markdoc.renderers.html(Markdoc.transform(node));
+
+      const refMatch = fullHtml.match(/<li>/g);
+      const refCount = refMatch ? refMatch.length : 0;
+
+      // Strip "Mythos XX:" or "Mythos XX/YY:" prefix from the display title
+      const rawTitle = fullEntry.title as string;
+      const cleanTitle = rawTitle.replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "");
+
+      mythContentMap[e.mythNumber] = {
+        html: fullHtml,
+        title: cleanTitle,
+        classification: (fullEntry as any).classification || "",
+        classificationLabel: (fullEntry as any).classificationLabel || "",
+        refCount,
+      };
+    }
+  } catch {
+    // If a factsheet fails to render, skip it
+  }
+}
+
+// Copy content entries for secondary combined myth IDs
+for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
+  const p = Number(primary);
+  if (mythContentMap[p]) {
+    mythContentMap[Number(secondary)] = mythContentMap[p];
+  }
+}
 ---
 
-<BaseLayout title="Zahlen & Fakten" description="Wissenschaftliche Einordnung aller 42 Cannabis-Mythen und Daten nach Zielgruppen">
-  <h1>Zahlen &amp; Fakten</h1>
-  <p>
-    Wissenschaftlich fundierte Einordnungen zu 42 verbreiteten Cannabis-Mythen
-    und Forschungsdaten nach Zielgruppen.
-  </p>
-
-  <section>
-    <h2>Mythen-Factsheets</h2>
-    <p>
-      Jeder Mythos wurde auf Basis aktueller wissenschaftlicher Evidenz eingeordnet.
-      Klicken Sie auf einen Mythos, um das vollständige Factsheet zu lesen.
-    </p>
-    <div class="factsheet-list">
-      {factsheetEntries.map(([slug, entry]) => {
-        const e = entry as any;
-        return (
-          <article class="factsheet-card">
-            <a href={`/zahlen-und-fakten/${slug}/`}>
-              <span class="myth-number">Mythos {e.mythNumber}</span>
-              <h3>{e.title}</h3>
-              <span class={`classification classification--${e.classification}`}>
-                {e.classificationLabel}
-              </span>
-              {e.summary && <p>{e.summary}</p>}
-            </a>
-          </article>
-        );
-      })}
-    </div>
-  </section>
-
-  <section>
-    <h2>Daten nach Zielgruppen</h2>
-    <p>
-      Erkunden Sie die Forschungsdaten zu 42 Cannabis-Mythen,
-      aufgeschlüsselt nach fünf Zielgruppen und fünf Indikatoren.
-    </p>
-    <div class="dashboard-segments">
-      {dashboardEntries.map(([slug, entry]) => {
-        const e = entry as any;
-        return (
-          <a href={`/zahlen-und-fakten/daten/${slug}/`} class="segment-card">
-            <h3>{e.title}</h3>
-            {e.summary && <p>{e.summary}</p>}
-          </a>
-        );
-      })}
-    </div>
-  </section>
+<BaseLayout title="Zahlen & Fakten" description="Interaktive Datenvisualisierung zu 42 Cannabis-Mythen — Erkunden Sie wissenschaftliche Einordnungen, Bevölkerungsdaten und Indikatoren.">
+  <MythenExplorer
+    client:load
+    mythSlugs={mythSlugs}
+    mythContent={JSON.stringify(mythContentMap)}
+  />
 </BaseLayout>

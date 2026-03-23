@@ -1,7 +1,6 @@
 ---
 export const prerender = true;
 
-import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 
@@ -18,34 +17,12 @@ export async function getStaticPaths() {
 
   return paths;
 }
-
-const { slug } = Astro.params;
-const entry = await reader.collections.zahlenUndFaktenDashboard.read(slug!);
-
-if (!entry || entry.status !== "published") {
-  return Astro.redirect("/zahlen-und-fakten/");
-}
-
-const { content, internalNotes, ...meta } = entry;
-const { node } = await content();
-const html = Markdoc.renderers.html(Markdoc.transform(node));
 ---
 
-<BaseLayout title={meta.title} description={meta.summary || undefined}>
-  <article class="dashboard-page">
-    <header>
-      <h1>{meta.title}</h1>
-    </header>
-
-    <!--
-      TODO: Replace this static table rendering with an interactive
-      D3/React dashboard component (src/components/dashboard/).
-      The current view shows the raw indicator tables as a reference.
-    -->
-    <div class="dashboard-content" set:html={html} />
-
-    <footer>
-      <a href="/zahlen-und-fakten/">&larr; Zahlen &amp; Fakten</a>
-    </footer>
-  </article>
+<BaseLayout title="Weiterleitung" description="Diese Seite wurde in den interaktiven Dashboard-Explorer integriert.">
+  <p>
+    Diese Seite wurde in den neuen interaktiven
+    <a href="/zahlen-und-fakten/">Mythen Explorer</a> integriert.
+  </p>
+  <script is:inline>window.location.replace('/zahlen-und-fakten/');</script>
 </BaseLayout>
