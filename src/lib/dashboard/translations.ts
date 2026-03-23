@@ -100,8 +100,8 @@ const translations = {
     en: 'Each dot is one myth. X/Y axes show the selected indicators. Color = science verdict. Click a dot for details.',
   },
   'howto.lollipop': {
-    de: 'Jeder Punkt ist ein Mythos über alle fünf Gruppen. Klicken zum Hervorheben, Doppelklick für Details.',
-    en: 'Each dot is one myth positioned across all five groups. Click to highlight; double-click for details.',
+    de: 'Jeder Punkt ist ein Mythos über alle sechs Gruppen. Klicken zum Hervorheben, Doppelklick für Details.',
+    en: 'Each dot is one myth positioned across all six groups. Click to highlight; double-click for details.',
   },
   'howto.overview': {
     de: 'Alle Mythen auf einen Blick, nach Kategorie sortiert. Farbe = Wissenschaftliches Urteil. Balken = gewählte Metrik. Klick für Details.',

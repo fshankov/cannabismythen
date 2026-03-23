@@ -5,7 +5,7 @@ export type CorrectnessClass =
   | 'falsch'
   | 'no_classification';
 
-export type GroupId = 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
+export type GroupId = 'general_population' | 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
 
 export type Indicator = 'awareness' | 'significance' | 'correctness' | 'prevention_significance';
 

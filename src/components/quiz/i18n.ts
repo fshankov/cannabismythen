@@ -207,7 +207,7 @@ const translations: Record<Lang, Record<string, string>> = {
 
     // ── Population comparison strings ─────────────────────────────────
     "population.score":
-      "Bev\u00F6lkerungswissen: {score} von 100 Punkten",
+      "Gesamtbev\u00F6lkerung: {score} von 100 Punkten",
     "population.unavailable":
       "F\u00FCr diese Aussage liegen keine vergleichenden Daten vor.",
 
@@ -231,12 +231,12 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.scoreHeadline": "{correct} von {total} richtig beantwortet",
     "ui.correctPctLine": "{pct}\u00A0% richtig",
     "ui.percentileLine":
-      "Du weißt mehr als {pct}\u00A0% der Erwachsenen in Deutschland.",
+      "Du weißt mehr als {pct}\u00A0% der Bevölkerung in Deutschland.",
     "ui.shareButton": "Ergebnis teilen",
     "ui.copiedToClipboard": "Link kopiert! \u2713",
     "ui.shareTitle": "Mein Cannabis-Quiz Ergebnis",
     "ui.shareText":
-      "Ich habe {correct} von {total} Cannabis-Mythen richtig eingesch\u00E4tzt und wei\u00DF mehr als {pct}\u00A0% der Erwachsenen in Deutschland. Teste dich selbst: https://cannabismythen.de/selbsttest/",
+      "Ich habe {correct} von {total} Cannabis-Mythen richtig eingesch\u00E4tzt und wei\u00DF mehr als {pct}\u00A0% der Bev\u00F6lkerung in Deutschland. Teste dich selbst: https://cannabismythen.de/selbsttest/",
     "ui.backToQuizzes": "Alle Quiz-Module",
     "ui.restartQuiz": "Quiz wiederholen",
     "ui.zahlenUndFakten": "Zahlen & Fakten entdecken",

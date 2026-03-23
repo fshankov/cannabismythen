@@ -550,6 +550,342 @@
   "metrics": [
     {
       "myth_id": 1,
+      "group_id": "general_population",
+      "awareness": 12.55,
+      "significance": 52.7,
+      "correctness": 49.05,
+      "prevention_significance": 41.39
+    },
+    {
+      "myth_id": 2,
+      "group_id": "general_population",
+      "awareness": 18.11,
+      "significance": 52.66,
+      "correctness": 63.86,
+      "prevention_significance": 31.79
+    },
+    {
+      "myth_id": 3,
+      "group_id": "general_population",
+      "awareness": 48.57,
+      "significance": 76.81,
+      "correctness": 77.84,
+      "prevention_significance": 30.5
+    },
+    {
+      "myth_id": 4,
+      "group_id": "general_population",
+      "awareness": 35.14,
+      "significance": 62.09,
+      "correctness": 69.42,
+      "prevention_significance": 27.51
+    },
+    {
+      "myth_id": 5,
+      "group_id": "general_population",
+      "awareness": 16.66,
+      "significance": 68.48,
+      "correctness": 76.17,
+      "prevention_significance": 26.5
+    },
+    {
+      "myth_id": 6,
+      "group_id": "general_population",
+      "awareness": 43.9,
+      "significance": 77.05,
+      "correctness": 88.95,
+      "prevention_significance": 21.96
+    },
+    {
+      "myth_id": 7,
+      "group_id": "general_population",
+      "awareness": 35.28,
+      "significance": 76.47,
+      "correctness": 85.59,
+      "prevention_significance": 24.09
+    },
+    {
+      "myth_id": 8,
+      "group_id": "general_population",
+      "awareness": 42.34,
+      "significance": 76.4,
+      "correctness": 89.74,
+      "prevention_significance": 21.19
+    },
+    {
+      "myth_id": 9,
+      "group_id": "general_population",
+      "awareness": 20.87,
+      "significance": 66.47,
+      "correctness": 74.08,
+      "prevention_significance": 27.66
+    },
+    {
+      "myth_id": 10,
+      "group_id": "general_population",
+      "awareness": 67.72,
+      "significance": 69.98,
+      "correctness": 49.92,
+      "prevention_significance": 46.35
+    },
+    {
+      "myth_id": 11,
+      "group_id": "general_population",
+      "awareness": 18.48,
+      "significance": 60.2,
+      "correctness": 71.92,
+      "prevention_significance": 25.79
+    },
+    {
+      "myth_id": 12,
+      "group_id": "general_population",
+      "awareness": 23.11,
+      "significance": 69.05,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 13,
+      "group_id": "general_population",
+      "awareness": 28.32,
+      "significance": 59.61,
+      "correctness": 78.06,
+      "prevention_significance": 22.89
+    },
+    {
+      "myth_id": 14,
+      "group_id": "general_population",
+      "awareness": 15.51,
+      "significance": 75.87,
+      "correctness": 76.2,
+      "prevention_significance": 29.88
+    },
+    {
+      "myth_id": 15,
+      "group_id": "general_population",
+      "awareness": 16.4,
+      "significance": 69.81,
+      "correctness": 78.66,
+      "prevention_significance": 25.84
+    },
+    {
+      "myth_id": 16,
+      "group_id": "general_population",
+      "awareness": 10.64,
+      "significance": 72.53,
+      "correctness": 73.7,
+      "prevention_significance": 29.94
+    },
+    {
+      "myth_id": 17,
+      "group_id": "general_population",
+      "awareness": 5.78,
+      "significance": 48.84,
+      "correctness": null,
+      "prevention_significance": null
+    },
+    {
+      "myth_id": 18,
+      "group_id": "general_population",
+      "awareness": 38.4,
+      "significance": 61.69,
+      "correctness": 56.47,
+      "prevention_significance": 39.2
+    },
+    {
+      "myth_id": 19,
+      "group_id": "general_population",
+      "awareness": 60.44,
+      "significance": 71.78,
+      "correctness": 87.57,
+      "prevention_significance": 21.43
+    },
+    {
+      "myth_id": 20,
+      "group_id": "general_population",
+      "awareness": 44.32,
+      "significance": 71.43,
+      "correctness": 83.24,
+      "prevention_significance": 23.93
+    },
+    {
+      "myth_id": 21,
+      "group_id": "general_population",
+      "awareness": 64.13,
+      "significance": 82.83,
+      "correctness": 91.64,
+      "prevention_significance": 21.45
+    },
+    {
+      "myth_id": 22,
+      "group_id": "general_population",
+      "awareness": 57.91,
+      "significance": 66.6,
+      "correctness": 51.75,
+      "prevention_significance": 44.21
+    },
+    {
+      "myth_id": 23,
+      "group_id": "general_population",
+      "awareness": 16.47,
+      "significance": 58.5,
+      "correctness": 63.73,
+      "prevention_significance": 33.73
+    },
+    {
+      "myth_id": 24,
+      "group_id": "general_population",
+      "awareness": 39.12,
+      "significance": 69.66,
+      "correctness": 74.3,
+      "prevention_significance": 28.47
+    },
+    {
+      "myth_id": 25,
+      "group_id": "general_population",
+      "awareness": 32.27,
+      "significance": 60.47,
+      "correctness": 60.74,
+      "prevention_significance": 35.77
+    },
+    {
+      "myth_id": 26,
+      "group_id": "general_population",
+      "awareness": 31.22,
+      "significance": 62.39,
+      "correctness": 30.39,
+      "prevention_significance": 54.44
+    },
+    {
+      "myth_id": 27,
+      "group_id": "general_population",
+      "awareness": 30.47,
+      "significance": 60.32,
+      "correctness": 56.05,
+      "prevention_significance": 38.14
+    },
+    {
+      "myth_id": 28,
+      "group_id": "general_population",
+      "awareness": 26.33,
+      "significance": 66.79,
+      "correctness": 25.24,
+      "prevention_significance": 60.15
+    },
+    {
+      "myth_id": 29,
+      "group_id": "general_population",
+      "awareness": 32.92,
+      "significance": 59.15,
+      "correctness": 84.4,
+      "prevention_significance": 21.21
+    },
+    {
+      "myth_id": 30,
+      "group_id": "general_population",
+      "awareness": 14.39,
+      "significance": 73.2,
+      "correctness": 82.99,
+      "prevention_significance": 25.82
+    },
+    {
+      "myth_id": 31,
+      "group_id": "general_population",
+      "awareness": 57.11,
+      "significance": 61.95,
+      "correctness": 81.98,
+      "prevention_significance": 23.63
+    },
+    {
+      "myth_id": 32,
+      "group_id": "general_population",
+      "awareness": 24.0,
+      "significance": 62.13,
+      "correctness": 57.98,
+      "prevention_significance": 38.34
+    },
+    {
+      "myth_id": 33,
+      "group_id": "general_population",
+      "awareness": 19.01,
+      "significance": 51.37,
+      "correctness": 60.99,
+      "prevention_significance": 31.97
+    },
+    {
+      "myth_id": 34,
+      "group_id": "general_population",
+      "awareness": 30.62,
+      "significance": 71.14,
+      "correctness": 54.22,
+      "prevention_significance": 44.26
+    },
+    {
+      "myth_id": 35,
+      "group_id": "general_population",
+      "awareness": 14.23,
+      "significance": 66.64,
+      "correctness": 63.47,
+      "prevention_significance": 36.83
+    },
+    {
+      "myth_id": 36,
+      "group_id": "general_population",
+      "awareness": 27.94,
+      "significance": 69.32,
+      "correctness": 55.41,
+      "prevention_significance": 42.86
+    },
+    {
+      "myth_id": 37,
+      "group_id": "general_population",
+      "awareness": 12.7,
+      "significance": 55.56,
+      "correctness": 35.76,
+      "prevention_significance": 48.3
+    },
+    {
+      "myth_id": 38,
+      "group_id": "general_population",
+      "awareness": 14.24,
+      "significance": 31.03,
+      "correctness": 61.81,
+      "prevention_significance": 23.86
+    },
+    {
+      "myth_id": 39,
+      "group_id": "general_population",
+      "awareness": 18.8,
+      "significance": 54.9,
+      "correctness": 25.63,
+      "prevention_significance": 51.33
+    },
+    {
+      "myth_id": 40,
+      "group_id": "general_population",
+      "awareness": 17.89,
+      "significance": 52.26,
+      "correctness": 36.09,
+      "prevention_significance": 44.31
+    },
+    {
+      "myth_id": 41,
+      "group_id": "general_population",
+      "awareness": 47.58,
+      "significance": 66.39,
+      "correctness": 79.23,
+      "prevention_significance": 23.44
+    },
+    {
+      "myth_id": 42,
+      "group_id": "general_population",
+      "awareness": 42.37,
+      "significance": 71.79,
+      "correctness": 53.12,
+      "prevention_significance": 45.65
+    },
+    {
+      "myth_id": 1,
       "group_id": "adults",
       "awareness": 12.32,
       "significance": 52.82,
@@ -2230,6 +2566,11 @@
     }
   ],
   "groups": [
+    {
+      "id": "general_population",
+      "name_de": "Gesamtbevölkerung (16–70)",
+      "name_en": "General Population (16–70)"
+    },
     {
       "id": "adults",
       "name_de": "Volljährige (18–70)",

@@ -2,8 +2,9 @@
  * Quiz data — structured myth entries for all 4 quiz themes.
  *
  * Data sourced from:
- *   - CaRM survey: "Ergebnisse CaRM Tab sort 1.xlsx", sheet "Volljährige"
- *     (Richtigkeit d. Beurteilung column — Adults 18–70)
+ *   - CaRM survey: "Ergebnisse CaRM Tab sort 1.xlsx", sheets "Volljährige" + "Minderjährige"
+ *     (Richtigkeit d. Beurteilung — population-weighted Gesamtbevölkerung 16–70,
+ *      weights: 97.1% adults 18–70, 2.9% minors 16–17, based on German demographics)
  *   - /src/content/zahlen-und-fakten/*.mdoc (myth page slugs, classifications)
  */
 
@@ -141,7 +142,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m04.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m04.explanation",
-    populationCorrectPct: 69.66,
+    populationCorrectPct: 69.42,
     mythPageSlug: "m04-weniger-schaedlich-alkohol",
   },
   {
@@ -149,7 +150,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m05.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m05.explanation",
-    populationCorrectPct: 76.43,
+    populationCorrectPct: 76.17,
     mythPageSlug: "m05-schwierig-dosieren",
   },
   {
@@ -157,7 +158,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m06.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m06.explanation",
-    populationCorrectPct: 88.97,
+    populationCorrectPct: 88.95,
     mythPageSlug: "m06-mischkonsum",
   },
   {
@@ -165,7 +166,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m07.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m07.explanation",
-    populationCorrectPct: 85.70,
+    populationCorrectPct: 85.59,
     mythPageSlug: "m07-zusaetze",
   },
   {
@@ -173,7 +174,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m13.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m13.explanation",
-    populationCorrectPct: 78.32,
+    populationCorrectPct: 78.06,
     mythPageSlug: "m13-spastiken",
   },
   {
@@ -181,7 +182,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m21.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m21.explanation",
-    populationCorrectPct: 91.71,
+    populationCorrectPct: 91.64,
     mythPageSlug: "m21-verkehr",
   },
   {
@@ -197,7 +198,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m31.statement",
     correctClassification: "eher_richtig",
     explanationKey: "myth.m31.explanation",
-    populationCorrectPct: 82.01,
+    populationCorrectPct: 81.98,
     mythPageSlug: "m31-m32-entspannt-aggressiv",
   },
   {
@@ -205,7 +206,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m32.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m32.explanation",
-    populationCorrectPct: 57.86,
+    populationCorrectPct: 57.98,
     mythPageSlug: "m31-m32-entspannt-aggressiv",
   },
   {
@@ -213,7 +214,7 @@ const mythsAlltag: QuizMyth[] = [
     statementKey: "myth.m33.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m33.explanation",
-    populationCorrectPct: 60.97,
+    populationCorrectPct: 60.99,
     mythPageSlug: "m33-kreativ",
   },
 ];
@@ -226,7 +227,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m34.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m34.explanation",
-    populationCorrectPct: 54.17,
+    populationCorrectPct: 54.22,
     mythPageSlug: "m34-soziale-beziehungen",
   },
   {
@@ -234,7 +235,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m35.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m35.explanation",
-    populationCorrectPct: 63.33,
+    populationCorrectPct: 63.47,
     mythPageSlug: "m35-soziale-regeln",
   },
   {
@@ -242,7 +243,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m36.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m36.explanation",
-    populationCorrectPct: 55.28,
+    populationCorrectPct: 55.41,
     mythPageSlug: "m36-m37-leistungen-niveau",
   },
   {
@@ -250,7 +251,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m37.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m37.explanation",
-    populationCorrectPct: 35.85,
+    populationCorrectPct: 35.76,
     mythPageSlug: "m36-m37-leistungen-niveau",
   },
   {
@@ -258,7 +259,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m38.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m38.explanation",
-    populationCorrectPct: 61.80,
+    populationCorrectPct: 61.81,
     mythPageSlug: "m38-cool",
   },
   {
@@ -266,7 +267,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m39.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m39.explanation",
-    populationCorrectPct: 25.50,
+    populationCorrectPct: 25.63,
     mythPageSlug: "m39-bevoelkerung-konsumiert",
   },
   {
@@ -274,7 +275,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m40.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m40.explanation",
-    populationCorrectPct: 35.76,
+    populationCorrectPct: 36.09,
     mythPageSlug: "m40-ueberall-erlaubt",
   },
   {
@@ -282,7 +283,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m41.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m41.explanation",
-    populationCorrectPct: 79.26,
+    populationCorrectPct: 79.23,
     mythPageSlug: "m41-m42-anstieg-konsum",
   },
   {
@@ -290,7 +291,7 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m42.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m42.explanation",
-    populationCorrectPct: 53.06,
+    populationCorrectPct: 53.12,
     mythPageSlug: "m41-m42-anstieg-konsum",
   },
 ];
@@ -303,7 +304,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m01.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m01.explanation",
-    populationCorrectPct: 49.10,
+    populationCorrectPct: 49.05,
     mythPageSlug: "m01-allheilmittel",
   },
   {
@@ -311,7 +312,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m02.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m02.explanation",
-    populationCorrectPct: 63.77,
+    populationCorrectPct: 63.86,
     mythPageSlug: "m02-harmlos",
   },
   {
@@ -319,7 +320,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m03.statement",
     correctClassification: "eher_richtig",
     explanationKey: "myth.m03.explanation",
-    populationCorrectPct: 77.93,
+    populationCorrectPct: 77.84,
     mythPageSlug: "m03-heranwachsende",
   },
   {
@@ -327,7 +328,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m08.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m08.explanation",
-    populationCorrectPct: 89.87,
+    populationCorrectPct: 89.74,
     mythPageSlug: "m08-foetus",
   },
   {
@@ -335,7 +336,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m09.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m09.explanation",
-    populationCorrectPct: 74.30,
+    populationCorrectPct: 74.08,
     mythPageSlug: "m09-ueberdosierung",
   },
   {
@@ -343,7 +344,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m10.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m10.explanation",
-    populationCorrectPct: 49.74,
+    populationCorrectPct: 49.92,
     mythPageSlug: "m10-schmerzen",
   },
   {
@@ -351,7 +352,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m11.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m11.explanation",
-    populationCorrectPct: 71.89,
+    populationCorrectPct: 71.92,
     mythPageSlug: "m11-uebelkeit",
   },
   {
@@ -359,7 +360,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m14.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m14.explanation",
-    populationCorrectPct: 76.21,
+    populationCorrectPct: 76.20,
     mythPageSlug: "m14-herz-kreislauf",
   },
   {
@@ -367,7 +368,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m15.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m15.explanation",
-    populationCorrectPct: 78.80,
+    populationCorrectPct: 78.66,
     mythPageSlug: "m15-atemwege",
   },
   {
@@ -375,7 +376,7 @@ const mythsKoerper: QuizMyth[] = [
     statementKey: "myth.m16.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m16.explanation",
-    populationCorrectPct: 73.59,
+    populationCorrectPct: 73.70,
     mythPageSlug: "m16-krebs",
   },
 ];
@@ -388,7 +389,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m18.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m18.explanation",
-    populationCorrectPct: 56.37,
+    populationCorrectPct: 56.47,
     mythPageSlug: "m18-schlaf",
   },
   {
@@ -396,7 +397,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m19.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m19.explanation",
-    populationCorrectPct: 87.56,
+    populationCorrectPct: 87.57,
     mythPageSlug: "m19-wahrnehmung",
   },
   {
@@ -404,7 +405,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m20.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m20.explanation",
-    populationCorrectPct: 83.34,
+    populationCorrectPct: 83.24,
     mythPageSlug: "m20-kognition",
   },
   {
@@ -412,7 +413,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m22.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m22.explanation",
-    populationCorrectPct: 51.65,
+    populationCorrectPct: 51.75,
     mythPageSlug: "m22-einstiegsdroge",
   },
   {
@@ -420,7 +421,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m23.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m23.explanation",
-    populationCorrectPct: 63.75,
+    populationCorrectPct: 63.73,
     mythPageSlug: "m23-abhaengigkeit",
   },
   {
@@ -428,7 +429,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m24.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m24.explanation",
-    populationCorrectPct: 74.25,
+    populationCorrectPct: 74.30,
     mythPageSlug: "m24-psychosen",
   },
   {
@@ -436,7 +437,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m25.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m25.explanation",
-    populationCorrectPct: 60.60,
+    populationCorrectPct: 60.74,
     mythPageSlug: "m25-angst",
   },
   {
@@ -444,7 +445,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m26.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m26.explanation",
-    populationCorrectPct: 30.18,
+    populationCorrectPct: 30.39,
     mythPageSlug: "m26-depressionen",
   },
   {
@@ -452,7 +453,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m27.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m27.explanation",
-    populationCorrectPct: 55.93,
+    populationCorrectPct: 56.05,
     mythPageSlug: "m27-adhs",
   },
   {
@@ -460,7 +461,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m28.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m28.explanation",
-    populationCorrectPct: 25.05,
+    populationCorrectPct: 25.24,
     mythPageSlug: "m28-motivation",
   },
   {
@@ -468,7 +469,7 @@ const mythsPsyche: QuizMyth[] = [
     statementKey: "myth.m30.statement",
     correctClassification: "eher_richtig",
     explanationKey: "myth.m30.explanation",
-    populationCorrectPct: 83.02,
+    populationCorrectPct: 82.99,
     mythPageSlug: "m30-suizid",
   },
 ];

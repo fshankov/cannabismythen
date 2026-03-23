@@ -22,7 +22,7 @@ export interface QuizMyth {
   correctClassification: Classification;
   /** 1–2 sentence explanation shown after answering */
   explanationKey: string;
-  /** % of German adults who answered correctly (from CaRM survey) */
+  /** % of German general population (16–70) who answered correctly (from CaRM survey, population-weighted) */
   populationCorrectPct: number;
   /** Slug for the myth detail page, e.g. "m01-allheilmittel" */
   mythPageSlug: string;
@@ -68,7 +68,7 @@ export interface QuizResult {
   totalQuestions: number;
   correctCount: number;
   correctPct: number; // 0–100, percentage of questions correct
-  percentile: number; // 0–100, "better than X% of adults"
+  percentile: number; // 0–100, "better than X% of the general population (16–70)"
   tierIndex: ResultTierIndex;
   answers: CardAnswer[];
 }
