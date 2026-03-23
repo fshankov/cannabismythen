@@ -4,10 +4,14 @@
  * Renders all myth cards in a responsive grid. No intermediate start screen —
  * the quiz begins immediately when the component mounts.
  *
+ * The progress bar is portalled into the site <header> via #quiz-progress-slot,
+ * so it appears as a merged second row inside the glassmorphism nav.
+ *
  * When all cards are answered, a full-screen result modal opens.
  */
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { Classification, CardAnswer, QuizResult, QuizMyth } from "./types";
 import { QUIZ_THEMES, computePercentile, getTierIndex } from "./quizData";
 import { t } from "./i18n";
@@ -45,11 +49,42 @@ interface QuizPlayerProps {
   quizText?: string;
 }
 
+// ── Scoring: distance from evidence-based classification ─────────────────────
+// exact match → +2, 1 step → +1, 2 steps → −1, 3 steps → −2
+const CLASS_POS: Record<Classification, number> = {
+  richtig: 1,
+  eher_richtig: 2,
+  eher_falsch: 3,
+  falsch: 4,
+};
+
+function answerScore(chosen: Classification, correct: Classification): number {
+  const d = Math.abs(CLASS_POS[chosen] - CLASS_POS[correct]);
+  if (d === 0) return 2;
+  if (d === 1) return 1;
+  if (d === 2) return -1;
+  return -2;
+}
+
 export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlayerProps) {
   const theme = QUIZ_THEMES[quizSlug];
   const [answers, setAnswers] = useState<Record<string, CardAnswer>>({});
   const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
+  const [lastScoreDelta, setLastScoreDelta] = useState(0);
   const hasTrackedStart = useRef(false);
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+
+  // Find the portal target in the DOM
+  useEffect(() => {
+    const el = document.getElementById("quiz-progress-slot");
+    if (el) {
+      setPortalTarget(el);
+      el.classList.add("quiz-progress-slot--active");
+    }
+    return () => {
+      if (el) el.classList.remove("quiz-progress-slot--active");
+    };
+  }, []);
 
   // Parse myth content once
   const mythContentMap: Record<string, MythContentEntry> = useMemo(() => {
@@ -91,6 +126,16 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
   const answeredCount = Object.keys(answers).length;
   const allAnswered = answeredCount === totalQuestions;
 
+  // Compute running score
+  const totalScore = useMemo(() => {
+    let s = 0;
+    for (const a of Object.values(answers)) {
+      const myth = theme.myths.find((m) => m.id === a.mythId);
+      if (myth) s += answerScore(a.chosenClassification, myth.correctClassification);
+    }
+    return s;
+  }, [answers, theme.myths]);
+
   // Compute result when all questions answered
   const result: QuizResult | null = useMemo(() => {
     if (!allAnswered) return null;
@@ -118,6 +163,8 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
       if (!myth || answers[mythId]) return;
 
       const isCorrect = chosen === myth.correctClassification;
+      const delta = answerScore(chosen, myth.correctClassification);
+      setLastScoreDelta(delta);
 
       const newAnswer: CardAnswer = {
         mythId,
@@ -146,6 +193,7 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
 
   const handleRestart = useCallback(() => {
     setAnswers({});
+    setLastScoreDelta(0);
   }, []);
 
   const handleShowFactsheet = useCallback((myth: QuizMyth) => {
@@ -156,14 +204,29 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
     setFactsheetMyth(null);
   }, []);
 
+  // The progress bar portalled into the site header
+  const progressBarContent = (
+    <ProgressBar
+      answered={answeredCount}
+      total={totalQuestions}
+      score={totalScore}
+      lastScoreDelta={lastScoreDelta}
+      quizTitle={t(theme.titleKey)}
+    />
+  );
+
   return (
     <div className="quiz-player quiz-player--active">
-      <header className="quiz-player__header">
-        <h2 className="quiz-player__title quiz-player__title--small">
-          {t(theme.titleKey)}
-        </h2>
-        <ProgressBar answered={answeredCount} total={totalQuestions} />
-      </header>
+      {/* Portal progress bar into site <header> */}
+      {portalTarget
+        ? createPortal(progressBarContent, portalTarget)
+        : (
+          // Fallback: render inline if portal target not found
+          <header className="quiz-player__header">
+            {progressBarContent}
+          </header>
+        )
+      }
 
       <div className="quiz-player__grid">
         {theme.myths.map((myth, i) => (

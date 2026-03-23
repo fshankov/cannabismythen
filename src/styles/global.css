@@ -151,30 +151,32 @@ hr {
 /* ── Site Layout ────────────────────────────────────────────── */
 
 header {
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.03);
 }
 
 header nav {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-sm) var(--space-lg);
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-sm) var(--space-lg);
+  gap: var(--space-xs) var(--space-lg);
   align-items: center;
 }
 
 header nav a {
   text-decoration: none;
-  font-size: 0.925rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--color-text-secondary);
-  padding: var(--space-xs) 0;
+  padding: 6px 0;
   border-bottom: 2px solid transparent;
   transition:
     color var(--transition-fast),
@@ -183,11 +185,18 @@ header nav a {
 
 header nav a:first-child {
   font-weight: 700;
+  font-size: 0.9rem;
   color: var(--color-accent);
   margin-right: auto;
+  border-bottom: none;
 }
 
 header nav a:hover {
+  color: var(--color-accent);
+}
+
+header nav a[aria-current="page"],
+header nav a.active {
   color: var(--color-accent);
   border-bottom-color: var(--color-accent);
 }
@@ -593,14 +602,20 @@ a.version-card:hover {
 
   header nav {
     gap: var(--space-xs) var(--space-md);
+    padding: var(--space-xs) var(--space-md);
+  }
+
+  header nav a {
+    font-size: 0.78rem;
   }
 
   header nav a:first-child {
     width: 100%;
     margin-right: 0;
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: var(--space-xs);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    margin-bottom: 2px;
+    font-size: 0.82rem;
   }
 
   .factsheet-list,
