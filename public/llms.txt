@@ -1,0 +1,38 @@
+# Cannabis Mythen & Evidenz
+
+> Evidenzbasierte Informationen zu Cannabis-Mythen — eine wissenschaftliche Faktencheck-Plattform auf Basis der CaRM-Studie.
+
+## About
+
+This website presents evidence-based information about common cannabis myths in German. It classifies 42 myths using scientific research data from the CaRM (Cannabis: Realities and Myths) study. The platform targets multiple audiences: adults (18–70), minors (16–17), consumers, young adults (18–26), and parents.
+
+## Sections
+
+- [Zahlen & Fakten](/zahlen-und-fakten/): 36 factsheets covering 42 cannabis myths with scientific classifications
+- [Häufige Fragen](/haeufige-fragen/): Frequently asked questions about cannabis, grouped by health themes
+- [Selbsttest](/selbsttest/): Interactive quizzes testing cannabis knowledge across 4 themes (Alltag, Körper, Psyche, Gesellschaft)
+- [Über uns](/ueber-uns/): Project information, team, methodology, and classification system
+
+## Technology
+
+Built with Astro 6, React 18, Keystatic CMS, Markdoc, D3.js, ECharts, and deployed on Netlify.
+
+## Content Structure
+
+Content is managed via Keystatic CMS with 8 collections:
+- **zahlenUndFakten**: Core factsheets (myth ID m01–m42) with classifications: richtig, eher richtig, eher falsch, falsch, keine Aussage möglich
+- **haeufigeFragen**: FAQ entries grouped by theme with audience targeting
+- **selbsttest**: Quiz modules with structured questions, scoring tiers, and factsheet recommendations
+- **startseite**: Scrollytelling narratives with step-based visualizations
+- **ueberUns**: About pages (team, methodology, classification, project)
+- **zahlenUndFaktenDashboard**: Audience-segmented dashboard indicator data
+- **meta**: Internal reference documents
+- **changelog**: Project activity log
+
+## Data
+
+Research data from the CaRM study is available at `/data/carm-data.json`.
+
+## Source
+
+- Repository: https://github.com/fshankov/cannabismythen
