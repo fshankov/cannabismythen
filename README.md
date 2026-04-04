@@ -6,51 +6,65 @@ The site presents 42 scientifically evaluated cannabis myths across multiple for
 
 ## Tech Stack
 
-- **[Astro](https://astro.build/)** — Static site framework
+- **[Astro](https://astro.build/)** — SSR framework, deployed via Netlify adapter
 - **[Keystatic](https://keystatic.com/)** — Git-based CMS (GitHub mode)
 - **[React](https://react.dev/)** — Interactive components (quiz, dashboard, scrollytelling)
-- **[D3.js](https://d3js.org/)** — Data visualizations
+- **[ECharts](https://echarts.apache.org/)** + **[D3.js](https://d3js.org/)** — Data visualizations
 - **[Markdoc](https://markdoc.dev/)** — Content format
 - **TypeScript** throughout
 
 ## Project Structure
 
 ```
-cannabis-science-web/
+cannabismythen/
 ├── src/
-│   ├── pages/              # Astro routes (public website)
-│   ├── components/         # React components (quiz, dashboard, scrollytelling)
-│   ├── content/            # Keystatic-managed content collections
-│   │   ├── factsheets/     # 36 entries covering 42 myths
-│   │   ├── faq/            # 7 thematic FAQ pages
-│   │   ├── quiz/           # 5 quiz modules + feedback texts
-│   │   ├── scrollytelling/ # 3 narrative versions + chart specs
-│   │   ├── dashboard/      # 6 audience-specific indicator pages
-│   │   ├── about/          # 4 project info pages
-│   │   └── meta/           # 10 internal reference entries
-│   ├── layouts/            # Base HTML layout
-│   └── lib/                # Utilities, D3 visualizations
-├── docs/                   # Architecture & setup documentation
-├── editorial/              # Editorial notes (not public)
-├── planning/               # Project planning (not public)
-├── research/               # Research materials (not public)
-├── keystatic.config.ts     # CMS collection schemas
-├── astro.config.mjs        # Astro configuration
+│   ├── pages/                        # Astro routes (public website)
+│   │   ├── index.astro               # Homepage / scrollytelling entry
+│   │   ├── login.astro               # Auth gate
+│   │   ├── haeufige-fragen/          # FAQ section
+│   │   ├── selbsttest/               # Interactive quiz
+│   │   ├── startseite/               # Scrollytelling viewer
+│   │   ├── ueber-uns/                # About / methodology
+│   │   ├── zahlen-und-fakten/        # Myth factsheets + data dashboard
+│   │   └── api/                      # Auth + Keystatic API routes
+│   ├── components/
+│   │   ├── dashboard/                # Mythen explorer (charts, sidebar, panels)
+│   │   ├── quiz/                     # Quiz player, cards, result screen
+│   │   ├── scrollytelling/           # Scrollytelling viewer
+│   │   └── shared/                   # Shared UI components (FactsheetPanel)
+│   ├── content/                      # Keystatic-managed content collections
+│   │   ├── zahlen-und-fakten/        # 42 myth factsheets (m01–m42)
+│   │   ├── zahlen-und-fakten-dashboard/ # 6 audience-specific indicator pages
+│   │   ├── haeufige-fragen/          # 8 thematic FAQ pages
+│   │   ├── selbsttest/               # 4 quiz modules + feedback texts
+│   │   ├── startseite/               # Scrollytelling content + chart specs
+│   │   ├── ueber-uns/                # 4 project / methodology pages
+│   │   ├── meta/                     # Internal reference entries (glossary, tagging, etc.)
+│   │   └── changelog/                # Release notes
+│   ├── layouts/
+│   │   └── BaseLayout.astro          # Base HTML shell
+│   ├── lib/
+│   │   ├── content.ts                # Content loading utilities
+│   │   └── dashboard/                # Dashboard data, types, colors, URL state
+│   ├── styles/                       # Global CSS + section-specific styles
+│   └── middleware.ts                 # Auth middleware (Netlify edge)
+├── public/
+│   ├── data/carm-data.json           # Pre-processed CaRM dataset
+│   └── favicon.svg
+├── editorial/                        # Editorial notes placeholder (not public)
+├── keystatic.config.ts               # CMS collection schemas
+├── astro.config.mjs                  # Astro + Netlify configuration
+├── markdoc.config.mjs                # Markdoc tag definitions
+├── netlify.toml                      # Netlify build settings
 └── package.json
 ```
 
-
-## Documentation
-
-- [Architecture](docs/architecture.md) — System design, technology choices, content model
-- [Content Model](docs/content-model.md) — Collection schemas, fields, and workflow
-- [Editor Guide](docs/editor-guide.md) — How to use Keystatic, GitHub setup, collaborator workflow
-- [Migration Notes](docs/migration-notes.md) — How wiki content was migrated to this repo
+> `_local/` — local-only reference materials (research docs, design specs, AI workflow guides). Gitignored, not part of the build.
 
 ## Language
 
 - **Website content:** German
-- **Code, documentation, commit messages:** English
+- **Code, comments, commit messages:** English
 
 ## Scripts
 
