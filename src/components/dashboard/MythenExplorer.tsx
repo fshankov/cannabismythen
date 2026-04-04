@@ -17,6 +17,7 @@ import BarView from './views/BarView';
 import ScatterView from './views/ScatterView';
 import LollipopView from './views/LollipopView';
 import OverviewView from './views/OverviewView';
+import CircularView from './views/CircularView';
 import FactsheetPanel from './FactsheetPanel';
 import type { MythContentEntry } from './FactsheetPanel';
 
@@ -186,6 +187,9 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
                 )}
                 {state.view === 'overview' && (
                   <OverviewView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} categories={data.categories} />
+                )}
+                {state.view === 'circular' && (
+                  <CircularView myths={filteredMyths} metrics={data.metrics} state={state} groups={data.groups} onSelectMyth={selectMyth} />
                 )}
               </>
             )}

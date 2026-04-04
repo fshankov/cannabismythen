@@ -38,6 +38,7 @@ const translations = {
   'view.scatter': { de: 'Streuung', en: 'Scatter' },
   'view.lollipop': { de: 'Lollipop', en: 'Lollipop' },
   'view.overview': { de: 'Übersicht', en: 'Overview' },
+  'view.circular': { de: 'Circular', en: 'Circular' },
 
   // Table
   'table.myth': { de: 'Mythos', en: 'Myth' },
@@ -106,6 +107,10 @@ const translations = {
   'howto.overview': {
     de: 'Alle Mythen auf einen Blick, nach Kategorie sortiert. Farbe = Wissenschaftliches Urteil. Balken = gewählte Metrik. Klick für Details.',
     en: 'All myths at a glance, grouped by category. Color = science verdict. Bar = selected metric. Click for details.',
+  },
+  'howto.circular': {
+    de: 'Kreisdiagramm mit allen vier Indikatoren je Mythos. Farbige Segmente = Kenntnis, Bedeutung, Richtigkeit, Prävention. Hover für Details, Klick für Factsheet.',
+    en: 'Circular chart with all four indicators per myth. Colored segments = Awareness, Significance, Correctness, Prevention. Hover for details, click for factsheet.',
   },
   // Tooltip labels
   'tooltip.category': { de: 'Kategorie', en: 'Category' },

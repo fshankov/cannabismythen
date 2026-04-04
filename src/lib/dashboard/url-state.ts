@@ -2,7 +2,7 @@ import type { AppState, ViewTab, GroupId, Indicator, Lang, VerdictFilter, Correc
 
 const ALL_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 const ALL_INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance'];
-const ALL_VIEWS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview'];
+const ALL_VIEWS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular'];
 const ALL_VERDICTS: CorrectnessClass[] = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
 
 const DEFAULTS: AppState = {

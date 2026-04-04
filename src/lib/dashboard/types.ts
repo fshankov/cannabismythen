@@ -57,7 +57,7 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview';
+export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular';
 
 export type Lang = 'de' | 'en';
 
