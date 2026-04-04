@@ -1,9 +1,11 @@
-import type { AppState, ViewTab, GroupId, Indicator, Lang, VerdictFilter, CorrectnessClass } from './types';
+import type { AppState, ViewTab, GroupId, Indicator, Lang, VerdictFilter, CorrectnessClass, SourceMetricType, SourceGroupId } from './types';
 
 const ALL_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 const ALL_INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance'];
-const ALL_VIEWS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular'];
+const ALL_VIEWS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'sources'];
 const ALL_VERDICTS: CorrectnessClass[] = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
+const ALL_SOURCE_METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
+const ALL_SOURCE_GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 
 const DEFAULTS: AppState = {
   lang: 'de',
@@ -17,6 +19,8 @@ const DEFAULTS: AppState = {
   scatterX: 'awareness',
   scatterY: 'prevention_significance',
   lollipopIndicator: 'awareness',
+  sourceMetric: 'prevention',
+  sourceGroup: 'adults',
 };
 
 export function stateToUrl(state: Partial<AppState>): string {
@@ -37,6 +41,10 @@ export function stateToUrl(state: Partial<AppState>): string {
   if (state.scatterY && state.scatterY !== DEFAULTS.scatterY) params.set('sy', state.scatterY);
   if (state.lollipopIndicator && state.lollipopIndicator !== DEFAULTS.lollipopIndicator)
     params.set('li', state.lollipopIndicator);
+  if (state.sourceMetric && state.sourceMetric !== DEFAULTS.sourceMetric)
+    params.set('sm', state.sourceMetric);
+  if (state.sourceGroup && state.sourceGroup !== DEFAULTS.sourceGroup)
+    params.set('sg', state.sourceGroup);
   const qs = params.toString();
   return qs ? `?${qs}` : '';
 }
@@ -81,6 +89,12 @@ export function urlToState(): Partial<AppState> {
 
   const li = params.get('li');
   if (ALL_INDICATORS.includes(li as Indicator)) state.lollipopIndicator = li as Indicator;
+
+  const sm = params.get('sm');
+  if (ALL_SOURCE_METRICS.includes(sm as SourceMetricType)) state.sourceMetric = sm as SourceMetricType;
+
+  const sg = params.get('sg');
+  if (ALL_SOURCE_GROUPS.includes(sg as SourceGroupId)) state.sourceGroup = sg as SourceGroupId;
 
   return state;
 }

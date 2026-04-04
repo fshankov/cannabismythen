@@ -72,6 +72,17 @@ const translations = {
   // Lollipop
   'lollipop.title': { de: 'Gruppenvergleich', en: 'Group Comparison' },
 
+  // Sources tab
+  'view.sources': { de: 'Informationsquellen', en: 'Information Sources' },
+  'howto.sources': {
+    de: 'Informationswege zur Beschaffung und Wahrnehmung von Gesundheitsinformationen. Wählen Sie Metrik und Bevölkerungsgruppe. Eingerückte Einträge = Unterkategorien.',
+    en: 'Information pathways for seeking and perceiving health information. Select metric and population group. Indented entries = subcategories.',
+  },
+  'sources.metric.search': { de: 'Suche', en: 'Search' },
+  'sources.metric.perception': { de: 'Wahrnehmung', en: 'Perception' },
+  'sources.metric.trust': { de: 'Vertrauen', en: 'Trust' },
+  'sources.metric.prevention': { de: 'Präventionspotential', en: 'Prevention Potential' },
+
   // Verdict tags
   'verdict.all': { de: 'Alle Mythen', en: 'All Myths' },
   'verdict.richtig': { de: 'Fakt', en: 'Fact' },

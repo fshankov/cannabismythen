@@ -57,11 +57,47 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular';
+export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'sources';
 
 export type Lang = 'de' | 'en';
 
 export type VerdictFilter = CorrectnessClass | 'all';
+
+export type SourceMetricType = 'search' | 'perception' | 'trust' | 'prevention';
+export type SourceGroupId = 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
+
+export interface InformationSource {
+  id: number;
+  name: string;
+  category: string;
+  parentId: number | null;
+}
+
+export interface SourceCategory {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface SourceGroup {
+  id: SourceGroupId;
+  name: string;
+}
+
+export interface SourceMetricDef {
+  label: string;
+  description: string;
+  unit: string;
+  scale: [number, number];
+  data: Record<SourceGroupId, Record<string, number>>;
+}
+
+export interface InformationSourcesData {
+  sourceCategories: SourceCategory[];
+  sourceGroups: SourceGroup[];
+  sources: InformationSource[];
+  metrics: Record<SourceMetricType, SourceMetricDef>;
+}
 
 export interface AppState {
   lang: Lang;
@@ -75,4 +111,6 @@ export interface AppState {
   scatterX: Indicator;
   scatterY: Indicator;
   lollipopIndicator: Indicator;
+  sourceMetric: SourceMetricType;
+  sourceGroup: SourceGroupId;
 }

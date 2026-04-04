@@ -1,7 +1,7 @@
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t } from '../../lib/dashboard/translations';
 
-const TABS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular'];
+const TABS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'sources'];
 
 interface Props {
   view: ViewTab;

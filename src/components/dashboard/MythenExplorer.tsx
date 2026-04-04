@@ -18,6 +18,7 @@ import ScatterView from './views/ScatterView';
 import LollipopView from './views/LollipopView';
 import OverviewView from './views/OverviewView';
 import CircularView from './views/CircularView';
+import InformationSourcesView from './views/InformationSourcesView';
 import FactsheetPanel from './FactsheetPanel';
 import type { MythContentEntry } from './FactsheetPanel';
 
@@ -132,7 +133,7 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
         </div>
       </div>
 
-      <div className="app-layout">
+      <div className={`app-layout${state.view === 'sources' ? ' app-layout--full' : ''}`}>
         <section className="chart-column">
           <ViewTabs
             view={state.view}
@@ -169,7 +170,9 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
           <p className="howto-microcopy">{t(`howto.${state.view}` as any, 'de')}</p>
 
           <div className={`chart-area${isFullscreen ? ' fullscreen' : ''}`} ref={chartRef}>
-            {filteredMyths.length === 0 ? (
+            {state.view === 'sources' ? (
+              <InformationSourcesView state={state} update={update} />
+            ) : filteredMyths.length === 0 ? (
               <div className="no-results">{t('misc.noResults', 'de')}</div>
             ) : (
               <>
@@ -195,10 +198,14 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
             )}
           </div>
 
-          <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
+          {state.view !== 'sources' && (
+            <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
+          )}
         </section>
 
-        <Sidebar state={state} data={data} update={update} />
+        {state.view !== 'sources' && (
+          <Sidebar state={state} data={data} update={update} />
+        )}
       </div>
 
       {selectedMyth && (
