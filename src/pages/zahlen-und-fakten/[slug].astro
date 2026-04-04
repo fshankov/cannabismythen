@@ -29,7 +29,26 @@ if (!entry || entry.status !== "published") {
 const { content, internalNotes, ...meta } = entry;
 // Render Markdoc content: AST node → renderable tree → HTML string
 const { node } = await content();
-const html = Markdoc.renderers.html(Markdoc.transform(node));
+let html = Markdoc.renderers.html(Markdoc.transform(node));
+
+/**
+ * Decision E: Section-level <details> for Fachebene content.
+ * Wraps "Zentrale Erkenntnisse" and "Referenzen" sections in collapsible
+ * <details> elements. "Einordnung" and "Synthese" remain always visible
+ * as the Grundlagen layer.
+ */
+const FACHEBENE_HEADINGS = ['Zentrale Erkenntnisse', 'Referenzen'];
+
+for (const heading of FACHEBENE_HEADINGS) {
+  // Match <h2>Heading</h2> and everything after it until the next <h2> or end
+  const regex = new RegExp(
+    `(<h2[^>]*>\\s*${heading}\\s*</h2>)([\\s\\S]*?)(?=<h2[^>]*>|$)`,
+    'i'
+  );
+  html = html.replace(regex, (_, h2Tag, body) => {
+    return `<details class="fachebene-section"><summary class="fachebene-summary">${heading}</summary><div class="fachebene-content">${body}</div></details>`;
+  });
+}
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>

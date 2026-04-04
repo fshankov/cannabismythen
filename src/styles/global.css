@@ -21,12 +21,27 @@
   --color-accent-hover: #1f4f3a;
   --color-accent-light: #e8f5ef;
 
-  /* Classification verdicts */
-  --color-richtig: #16a34a;
-  --color-eher-richtig: #4d7c0f;
-  --color-eher-falsch: #b45309;
-  --color-falsch: #dc2626;
-  --color-keine-aussage: #6b7280;
+  /* Classification verdicts — Unified Emerald/Lime/Amber/Rose palette
+     (Decision A: deuteranopia-safe, avoids traffic-light associations) */
+  --color-richtig: #047857;          /* Emerald-700 */
+  --color-eher-richtig: #4d7c0f;     /* Lime-700 */
+  --color-eher-falsch: #b45309;      /* Amber-700 */
+  --color-falsch: #be123c;           /* Rose-700 */
+  --color-keine-aussage: #6b7280;    /* Gray-500 */
+
+  /* Classification backgrounds */
+  --color-richtig-bg: #ecfdf5;       /* Emerald-50 */
+  --color-eher-richtig-bg: #f7fee7;  /* Lime-50 */
+  --color-eher-falsch-bg: #fffbeb;   /* Amber-50 */
+  --color-falsch-bg: #fff1f2;        /* Rose-50 */
+  --color-keine-aussage-bg: #f3f4f6; /* Gray-100 */
+
+  /* Additional missing tokens */
+  --color-bg-subtle: #eeeee8;        /* Section dividers, alternate rows */
+  --color-surface-raised: #f8fafc;   /* Sidebar, toolbar backgrounds */
+  --color-border-strong: #cbd5e1;    /* Emphasized borders */
+  --color-text-inverse: #ffffff;     /* Text on dark backgrounds */
+  --color-accent-muted: #95c4ad;     /* Disabled accent / decorative */
 
   /* Spacing scale */
   --space-xs: 0.25rem;
@@ -51,6 +66,13 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+  /* Typography — Decision C: Inter Variable for display elements */
+  --font-display: 'Inter Variable', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-body: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
+               'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, 'Cascadia Code',
+               'Fira Code', Menlo, Monaco, Consolas, monospace;
 
   /* Transitions */
   --transition-fast: 0.15s ease;
@@ -89,6 +111,7 @@ body {
 }
 
 h1, h2, h3, h4 {
+  font-family: var(--font-display);
   line-height: 1.25;
   font-weight: 700;
   color: var(--color-text);
@@ -173,6 +196,7 @@ header nav {
 
 header nav a {
   text-decoration: none;
+  font-family: var(--font-display);
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--color-text-secondary);
@@ -352,6 +376,7 @@ a.version-card:hover {
 
 .classification {
   display: inline-block;
+  font-family: var(--font-display);
   font-size: 0.825rem;
   font-weight: 600;
   padding: 0.25em 0.7em;
@@ -361,27 +386,31 @@ a.version-card:hover {
 }
 
 .classification--richtig {
-  background: #dcfce7;
+  background: var(--color-richtig-bg);
   color: var(--color-richtig);
+  border-left: 3px solid var(--color-richtig);
 }
 
 .classification--eher_richtig {
-  background: #ecfccb;
+  background: var(--color-eher-richtig-bg);
   color: var(--color-eher-richtig);
+  border-left: 3px dashed var(--color-eher-richtig);
 }
 
 .classification--eher_falsch {
-  background: #fef3c7;
+  background: var(--color-eher-falsch-bg);
   color: var(--color-eher-falsch);
+  border-left: 3px dotted var(--color-eher-falsch);
 }
 
 .classification--falsch {
-  background: #fee2e2;
+  background: var(--color-falsch-bg);
   color: var(--color-falsch);
+  border-left: 3px double var(--color-falsch);
 }
 
 .classification--keine_aussage {
-  background: #f3f4f6;
+  background: var(--color-keine-aussage-bg);
   color: var(--color-keine-aussage);
 }
 
@@ -528,6 +557,67 @@ a.version-card:hover {
 }
 
 
+/* ── Fachebene Collapsible Sections (Decision E) ─────────────── */
+
+.fachebene-section {
+  margin-top: var(--space-xl);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle, #eeeee8);
+}
+
+.fachebene-section[open] {
+  background: var(--color-surface);
+}
+
+.fachebene-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text);
+  list-style: none;
+  user-select: none;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.fachebene-summary::-webkit-details-marker {
+  display: none;
+}
+
+.fachebene-summary::after {
+  content: '▸';
+  font-size: 0.9em;
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.fachebene-section[open] > .fachebene-summary::after {
+  transform: rotate(90deg);
+}
+
+.fachebene-summary:hover {
+  background: rgba(45, 106, 79, 0.04);
+}
+
+.fachebene-content {
+  padding: 0 var(--space-lg) var(--space-lg);
+}
+
+.fachebene-content p,
+.fachebene-content ul,
+.fachebene-content ol,
+.fachebene-content table {
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+
 /* ── Related Myths Aside ────────────────────────────────────── */
 
 .related-myths {
@@ -556,6 +646,105 @@ a.version-card:hover {
 
 .related-myths a {
   font-size: 0.925rem;
+}
+
+
+/* ── FAQ Page & TOC (Decision F: Hybrid jump links + full) ──── */
+
+.faq-page {
+  max-width: var(--max-width-prose);
+  margin: 0 auto;
+}
+
+.faq-page > header {
+  position: static;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: var(--space-xl);
+}
+
+.faq-toc {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.faq-toc__label {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.faq-toc__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-md);
+}
+
+.faq-toc__list li {
+  margin: 0;
+}
+
+.faq-toc__list a {
+  font-size: 0.875rem;
+  color: var(--color-accent);
+  text-decoration: none;
+  padding: 2px 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.faq-toc__list a:hover {
+  border-bottom-color: var(--color-accent);
+}
+
+.faq-content {
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.faq-content h2 {
+  font-size: 1.35rem;
+  margin-top: var(--space-2xl);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 2px solid var(--color-accent-light);
+  scroll-margin-top: 80px;
+}
+
+.faq-content p {
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+.faq-page > footer {
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.faq-page > footer a {
+  font-size: 0.925rem;
+  font-weight: 500;
+}
+
+.theme-label {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 
@@ -645,6 +834,71 @@ a.version-card:hover {
   main {
     padding-left: var(--space-md);
     padding-right: var(--space-md);
+  }
+}
+
+
+/* ── Mobile Bottom Tab Bar (Decision D) ────────────────────── */
+
+.mobile-tab-bar {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .mobile-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(24px) saturate(1.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    border-top: 1px solid rgba(226, 232, 240, 0.4);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    justify-content: space-around;
+    align-items: center;
+    height: calc(56px + env(safe-area-inset-bottom, 0));
+  }
+
+  .mobile-tab-bar__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex: 1;
+    padding: 6px 0;
+    text-decoration: none;
+    color: var(--color-text-muted);
+    font-family: var(--font-display);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: color var(--transition-fast);
+    min-height: 44px;
+    border: none;
+  }
+
+  .mobile-tab-bar__item:hover,
+  .mobile-tab-bar__item[aria-current="page"],
+  .mobile-tab-bar__item.active {
+    color: var(--color-accent);
+  }
+
+  .mobile-tab-bar__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Add bottom padding to main and footer so content isn't hidden behind tab bar */
+  main {
+    padding-bottom: calc(var(--space-3xl) + 56px + env(safe-area-inset-bottom, 0));
+  }
+
+  footer {
+    padding-bottom: calc(var(--space-xl) + 56px + env(safe-area-inset-bottom, 0));
   }
 }
 

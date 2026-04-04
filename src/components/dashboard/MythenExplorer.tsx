@@ -18,15 +18,9 @@ import ScatterView from './views/ScatterView';
 import LollipopView from './views/LollipopView';
 import OverviewView from './views/OverviewView';
 import FactsheetPanel from './FactsheetPanel';
+import type { MythContentEntry } from './FactsheetPanel';
 
-/** Pre-rendered factsheet content from Keystatic (passed from Astro at build time). */
-export interface MythContentEntry {
-  html: string;
-  title: string;
-  classification: string;
-  classificationLabel: string;
-  refCount: number;
-}
+export type { MythContentEntry };
 
 interface Props {
   /** Map of myth ID → factsheet page slug */

@@ -24,15 +24,9 @@ import QuizCard from "./QuizCard";
 import ProgressBar from "./ProgressBar";
 import ResultScreen from "./ResultScreen";
 import FactsheetPanel from "./FactsheetPanel";
+import type { MythContentEntry } from "./FactsheetPanel";
 
-/** Shape of pre-rendered myth content passed from Astro. */
-export interface MythContentEntry {
-  html: string;
-  title: string;
-  classification: string;
-  classificationLabel: string;
-  refCount: number;
-}
+export type { MythContentEntry };
 
 /** Shape of editable quiz text from Keystatic content. */
 export interface QuizTextEntry {

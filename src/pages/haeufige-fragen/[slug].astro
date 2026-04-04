@@ -28,7 +28,27 @@ if (!entry || entry.status !== "published") {
 
 const { content, internalNotes, ...meta } = entry;
 const { node } = await content();
-const html = Markdoc.renderers.html(Markdoc.transform(node));
+let html = Markdoc.renderers.html(Markdoc.transform(node));
+
+/**
+ * Decision F: Hybrid FAQ — jump links + full rendering.
+ * Extract all <h2> headings, add id attributes for anchoring,
+ * and build a TOC nav at the top.
+ */
+interface FaqHeading {
+  id: string;
+  text: string;
+}
+
+const headings: FaqHeading[] = [];
+let headingIndex = 0;
+
+html = html.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (match, attrs, inner) => {
+  const text = inner.replace(/<[^>]+>/g, '').trim();
+  const id = `faq-${++headingIndex}-${text.toLowerCase().replace(/[^a-zäöüß0-9]+/g, '-').replace(/-+$/, '')}`;
+  headings.push({ id, text });
+  return `<h2${attrs} id="${id}">${inner}</h2>`;
+});
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>
@@ -37,6 +57,17 @@ const html = Markdoc.renderers.html(Markdoc.transform(node));
       <h1>{meta.title}</h1>
       {meta.theme && <p class="theme-label">{meta.theme}</p>}
     </header>
+
+    {headings.length > 1 && (
+      <nav class="faq-toc" aria-label="Inhaltsübersicht">
+        <p class="faq-toc__label">Auf dieser Seite:</p>
+        <ul class="faq-toc__list">
+          {headings.map((h) => (
+            <li><a href={`#${h.id}`}>{h.text}</a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
 
     <div class="faq-content" set:html={html} />
 
