@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import ReactECharts from 'echarts-for-react';
-import type { Myth, Metric, Group, AppState, Indicator } from '../../../lib/dashboard/types';
+import type { Myth, Metric, Group, AppState } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, buildTooltipHtml } from '../../../lib/dashboard/data';
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
 import { t } from '../../../lib/dashboard/translations';
@@ -14,15 +14,13 @@ interface Props {
   onSelectMyth: (id: number) => void;
 }
 
-const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance'];
-
 function jitter(mythId: number): number {
   const frac = ((mythId * 0.6180339887) % 1);
   return (frac - 0.5) * 0.4;
 }
 
 export default function LollipopView({ myths, metrics, groups, state, update, onSelectMyth }: Props) {
-  const indicator = state.lollipopIndicator;
+  const indicator = state.indicator;
   const selectedMythId = state.selectedMythId;
 
   const chartData = useMemo(() => {
@@ -164,17 +162,6 @@ export default function LollipopView({ myths, metrics, groups, state, update, on
 
   return (
     <div>
-      <div className="lollipop-indicator-tags">
-        {INDICATORS.map((ind) => (
-          <button
-            key={ind}
-            className={`indicator-tag ${ind === indicator ? 'active' : ''}`}
-            onClick={() => update('lollipopIndicator', ind)}
-          >
-            {t(`indicator.${ind}.short` as any, state.lang)}
-          </button>
-        ))}
-      </div>
       <ReactECharts
         option={option}
         style={{ height: Math.max(300, groups.length * 80 + 60) }}

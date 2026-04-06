@@ -11,7 +11,7 @@ import type {
 import { loadData, filterMyths, exportCSV } from '../../lib/dashboard/data';
 import { t } from '../../lib/dashboard/translations';
 import { urlToState, getDefaultState, pushState } from '../../lib/dashboard/url-state';
-import Sidebar from './Sidebar';
+import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
 import VerdictTags from './VerdictTags';
 import TableView from './views/TableView';
@@ -148,74 +148,72 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions }: 
         </div>
       </div>
 
-      <div className={`app-layout${(state.view === 'sources' || state.view === 'sources_v2') ? ' app-layout--full' : ''}`}>
-        <section className="chart-column">
-          <ViewTabs
-            view={state.view}
-            lang={'de'}
-            onChange={(v: ViewTab) => update('view', v)}
-          />
-
-          <div className="utility-bar">
-            <div className="utility-buttons">
-              <button className="util-btn" onClick={handleShareLink}>
-                <Share2 size={13} strokeWidth={2} aria-hidden="true" />
-                {copied ? t('util.copied', 'de') : t('util.share', 'de')}
-              </button>
-              <button className="util-btn" onClick={handleDownloadCSV}>
-                <Download size={13} strokeWidth={2} aria-hidden="true" />
-                CSV
-              </button>
-              <button className="util-btn" onClick={handleFullscreen}>
-                {isFullscreen
-                  ? <Minimize2 size={13} strokeWidth={2} aria-hidden="true" />
-                  : <Maximize2 size={13} strokeWidth={2} aria-hidden="true" />
-                }
-                {isFullscreen ? t('util.exitFullscreen', 'de') : t('util.fullscreen', 'de')}
-              </button>
-            </div>
-          </div>
-
-          <p className="howto-microcopy">{t(`howto.${state.view}` as any, 'de')}</p>
-
-          <div className={`chart-area${isFullscreen ? ' fullscreen' : ''}`} ref={chartRef}>
-            {state.view === 'sources' ? (
-              <InformationSourcesView state={state} update={update} definitions={defs} />
-            ) : state.view === 'sources_v2' ? (
-              <InformationSourcesV2View state={state} update={update} definitions={defs} />
-            ) : filteredMyths.length === 0 ? (
-              <div className="no-results">{t('misc.noResults', 'de')}</div>
-            ) : (
-              <>
-                {state.view === 'table' && (
-                  <TableView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
-                )}
-                {state.view === 'bar' && (
-                  <BarView myths={filteredMyths} metrics={data.metrics} state={state} onSelectMyth={selectMyth} />
-                )}
-                {state.view === 'scatter' && (
-                  <ScatterView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
-                )}
-                {state.view === 'lollipop' && (
-                  <LollipopView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
-                )}
-                {state.view === 'overview' && (
-                  <OverviewView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} categories={data.categories} />
-                )}
-                {state.view === 'circular' && (
-                  <CircularView myths={filteredMyths} metrics={data.metrics} state={state} groups={data.groups} onSelectMyth={selectMyth} />
-                )}
-              </>
-            )}
-          </div>
-
-          {state.view !== 'sources' && state.view !== 'sources_v2' && (
-            <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
-          )}
-        </section>
+      <div className="app-layout">
+        <ViewTabs
+          view={state.view}
+          lang={'de'}
+          onChange={(v: ViewTab) => update('view', v)}
+        />
 
         {state.view !== 'sources' && state.view !== 'sources_v2' && (
-          <Sidebar state={state} data={data} update={update} definitions={defs} />
+          <FilterBar state={state} data={data} update={update} definitions={defs} />
+        )}
+
+        <div className="utility-bar">
+          <div className="utility-buttons">
+            <button className="util-btn" onClick={handleShareLink}>
+              <Share2 size={13} strokeWidth={2} aria-hidden="true" />
+              {copied ? t('util.copied', 'de') : t('util.share', 'de')}
+            </button>
+            <button className="util-btn" onClick={handleDownloadCSV}>
+              <Download size={13} strokeWidth={2} aria-hidden="true" />
+              CSV
+            </button>
+            <button className="util-btn" onClick={handleFullscreen}>
+              {isFullscreen
+                ? <Minimize2 size={13} strokeWidth={2} aria-hidden="true" />
+                : <Maximize2 size={13} strokeWidth={2} aria-hidden="true" />
+              }
+              {isFullscreen ? t('util.exitFullscreen', 'de') : t('util.fullscreen', 'de')}
+            </button>
+          </div>
+        </div>
+
+        <p className="howto-microcopy">{t(`howto.${state.view}` as any, 'de')}</p>
+
+        <div className={`chart-area${isFullscreen ? ' fullscreen' : ''}`} ref={chartRef}>
+          {state.view === 'sources' ? (
+            <InformationSourcesView state={state} update={update} definitions={defs} />
+          ) : state.view === 'sources_v2' ? (
+            <InformationSourcesV2View state={state} update={update} definitions={defs} />
+          ) : filteredMyths.length === 0 ? (
+            <div className="no-results">{t('misc.noResults', 'de')}</div>
+          ) : (
+            <>
+              {state.view === 'table' && (
+                <TableView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
+              )}
+              {state.view === 'bar' && (
+                <BarView myths={filteredMyths} metrics={data.metrics} state={state} onSelectMyth={selectMyth} />
+              )}
+              {state.view === 'scatter' && (
+                <ScatterView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
+              )}
+              {state.view === 'lollipop' && (
+                <LollipopView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
+              )}
+              {state.view === 'overview' && (
+                <OverviewView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} categories={data.categories} />
+              )}
+              {state.view === 'circular' && (
+                <CircularView myths={filteredMyths} metrics={data.metrics} state={state} groups={data.groups} onSelectMyth={selectMyth} />
+              )}
+            </>
+          )}
+        </div>
+
+        {state.view !== 'sources' && state.view !== 'sources_v2' && (
+          <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
         )}
       </div>
 
