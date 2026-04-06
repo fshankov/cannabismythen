@@ -1,5 +1,7 @@
-import type { AppState, CarmData, DashboardDefinitions, GroupId, Indicator } from '../../lib/dashboard/types';
+import type { AppState, CarmData, DashboardDefinitions, Indicator } from '../../lib/dashboard/types';
 import { t } from '../../lib/dashboard/translations';
+import { Tag, Users, BarChart3, Eye, TrendingUp, Target, Shield } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import InfoTooltip from './InfoTooltip';
 
 interface Props {
@@ -9,11 +11,11 @@ interface Props {
   definitions?: DashboardDefinitions | null;
 }
 
-const INDICATORS: { id: Indicator; icon: string }[] = [
-  { id: 'awareness', icon: '👁️' },
-  { id: 'significance', icon: '⚖️' },
-  { id: 'correctness', icon: '✅' },
-  { id: 'prevention_significance', icon: '🛡️' },
+const INDICATORS: { id: Indicator; Icon: LucideIcon }[] = [
+  { id: 'awareness',             Icon: Eye },
+  { id: 'significance',          Icon: TrendingUp },
+  { id: 'correctness',           Icon: Target },
+  { id: 'prevention_significance', Icon: Shield },
 ];
 
 export default function Sidebar({ state, data, update, definitions }: Props) {
@@ -34,7 +36,7 @@ export default function Sidebar({ state, data, update, definitions }: Props) {
       {/* Categories */}
       <div className="sidebar-section">
         <h3 className="sidebar-heading">
-          <span className="sidebar-icon">🏷️</span>
+          <Tag size={13} strokeWidth={2} aria-hidden="true" className="sidebar-icon" />
           {t('sidebar.categories', state.lang)}
         </h3>
         <div className="sidebar-check-actions">
@@ -82,7 +84,7 @@ export default function Sidebar({ state, data, update, definitions }: Props) {
       {/* Population Groups */}
       <div className="sidebar-section">
         <h3 className="sidebar-heading">
-          <span className="sidebar-icon">👥</span>
+          <Users size={13} strokeWidth={2} aria-hidden="true" className="sidebar-icon" />
           {t('sidebar.groups', state.lang)}
           <InfoTooltip
             title={t('sidebar.groups', state.lang)}
@@ -126,7 +128,7 @@ export default function Sidebar({ state, data, update, definitions }: Props) {
       {/* Indicator */}
       <div className="sidebar-section">
         <h3 className="sidebar-heading">
-          <span className="sidebar-icon">📊</span>
+          <BarChart3 size={13} strokeWidth={2} aria-hidden="true" className="sidebar-icon" />
           {t('sidebar.indicator', state.lang)}
           <InfoTooltip
             title={t('sidebar.indicator', state.lang)}
@@ -138,20 +140,20 @@ export default function Sidebar({ state, data, update, definitions }: Props) {
           />
         </h3>
         <div className="sidebar-checklist">
-          {INDICATORS.map((ind) => {
-            const def = definitions?.mythIndicators?.[ind.id];
+          {INDICATORS.map(({ id, Icon }) => {
+            const def = definitions?.mythIndicators?.[id];
             return (
-              <label key={ind.id} className="sidebar-check-item sidebar-radio-item sidebar-group-item">
+              <label key={id} className="sidebar-check-item sidebar-radio-item sidebar-group-item">
                 <input
                   type="radio"
                   name="indicator"
-                  checked={state.indicator === ind.id}
-                  onChange={() => update('indicator', ind.id)}
+                  checked={state.indicator === id}
+                  onChange={() => update('indicator', id)}
                 />
-                <span className="sidebar-ind-icon">{ind.icon}</span>
+                <Icon size={14} strokeWidth={1.75} aria-hidden="true" className="sidebar-ind-icon" />
                 <span className="sidebar-group-label">
                   <span className="sidebar-group-name">
-                    {t(`indicator.${ind.id}` as any, state.lang)}
+                    {t(`indicator.${id}` as any, state.lang)}
                     {def && (
                       <InfoTooltip
                         title={def.label}

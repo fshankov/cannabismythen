@@ -5,6 +5,9 @@ import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import MythenExplorer from "@components/dashboard/MythenExplorer";
 import { reader, getPublishedEntries } from "@lib/content";
+// Dashboard definitions — loaded at build time from Keystatic singleton.
+// Edit via /keystatic (Dashboard – Definitionen & Glossar) → commit to
+// content/ branch → Netlify rebuilds → tooltips show updated text.
 import definitionsData from "../../content/dashboard-definitionen.json";
 import "../../styles/dashboard.css";
 

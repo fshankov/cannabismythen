@@ -377,7 +377,8 @@ main:has(.carm-explorer) {
 }
 
 .carm-explorer .sidebar-icon {
-  font-size: 0.9rem;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
 }
 
 .carm-explorer .sidebar-checklist {
@@ -465,10 +466,15 @@ main:has(.carm-explorer) {
 }
 
 .carm-explorer .sidebar-ind-icon {
-  font-size: 0.9rem;
   flex-shrink: 0;
-  margin-top: 2px;
-  transition: transform var(--transition);
+  margin-top: 1px;
+  color: var(--color-text-muted);
+  transition: color var(--transition);
+}
+
+/* Selected indicator row — icon picks up primary color */
+.carm-explorer .sidebar-check-item:has(input[type='radio']:checked) .sidebar-ind-icon {
+  color: var(--color-primary);
 }
 
 .carm-explorer .sidebar-cat-label {
