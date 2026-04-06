@@ -273,12 +273,12 @@
 /* Correct/incorrect border colours on the back face */
 .quiz-card--correct .quiz-card__back {
   border-color: var(--color-richtig);
-  background: #f0fdf4;
+  background: var(--color-richtig-bg);
 }
 
 .quiz-card--incorrect .quiz-card__back {
   border-color: var(--color-eher-falsch);
-  background: #fffbeb;
+  background: var(--color-eher-falsch-bg);
 }
 
 /* Correct/incorrect on front when in read-only mode */
@@ -288,12 +288,12 @@
 
 .quiz-card--correct:not(.quiz-card--flipped) .quiz-card__front {
   border-color: var(--color-richtig);
-  background: #f0fdf4;
+  background: var(--color-richtig-bg);
 }
 
 .quiz-card--incorrect:not(.quiz-card--flipped) .quiz-card__front {
   border-color: var(--color-eher-falsch);
-  background: #fffbeb;
+  background: var(--color-eher-falsch-bg);
 }
 
 
@@ -402,25 +402,25 @@
 
 /* Button color variants */
 .quiz-card__btn--falsch:hover:not(:disabled) {
-  background: #fee2e2;
+  background: var(--color-falsch-bg);
   border-color: var(--color-falsch);
   color: var(--color-falsch);
 }
 
 .quiz-card__btn--eher_falsch:hover:not(:disabled) {
-  background: #fef3c7;
+  background: var(--color-eher-falsch-bg);
   border-color: var(--color-eher-falsch);
   color: var(--color-eher-falsch);
 }
 
 .quiz-card__btn--eher_richtig:hover:not(:disabled) {
-  background: #ecfccb;
+  background: var(--color-eher-richtig-bg);
   border-color: var(--color-eher-richtig);
   color: var(--color-eher-richtig);
 }
 
 .quiz-card__btn--richtig:hover:not(:disabled) {
-  background: #dcfce7;
+  background: var(--color-richtig-bg);
   border-color: var(--color-richtig);
   color: var(--color-richtig);
 }
@@ -444,12 +444,12 @@
 }
 
 .quiz-card__result-badge--correct {
-  background: #dcfce7;
+  background: var(--color-richtig-bg);
   color: var(--color-richtig);
 }
 
 .quiz-card__result-badge--incorrect {
-  background: #fef3c7;
+  background: var(--color-eher-falsch-bg);
   color: var(--color-eher-falsch);
 }
 
@@ -520,24 +520,30 @@
   border-radius: var(--radius-sm);
 }
 
+/* Classification color variants — use tokens from global.css (Design.md palette).
+   Border-left style indicators provide colorblind-safe shape cues. */
 .classification--richtig {
-  background: #dcfce7;
+  background: var(--color-richtig-bg);
   color: var(--color-richtig);
+  border-left: 3px solid var(--color-richtig);
 }
 
 .classification--eher_richtig {
-  background: #ecfccb;
+  background: var(--color-eher-richtig-bg);
   color: var(--color-eher-richtig);
+  border-left: 3px dashed var(--color-eher-richtig);
 }
 
 .classification--eher_falsch {
-  background: #fef3c7;
+  background: var(--color-eher-falsch-bg);
   color: var(--color-eher-falsch);
+  border-left: 3px dotted var(--color-eher-falsch);
 }
 
 .classification--falsch {
-  background: #fee2e2;
+  background: var(--color-falsch-bg);
   color: var(--color-falsch);
+  border-left: 3px double var(--color-falsch);
 }
 
 

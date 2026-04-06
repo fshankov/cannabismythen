@@ -6,7 +6,7 @@
  *
  * Usage:
  *   import { t } from "./i18n";
- *   t("quiz.alltag.title") // → "Cannabis & Alltag"
+ *   t("quiz.medizin.title") // → "Medizinischer Nutzen"
  */
 
 type Lang = "de" | "en";
@@ -28,25 +28,31 @@ const translations: Record<Lang, Record<string, string>> = {
     "classification.richtig": "Richtig",
 
     // ── Quiz theme titles ─────────────────────────────────────────────
-    "quiz.alltag.title": "Cannabis & Alltag",
-    "quiz.alltag.subtitle": "Was weißt du über Cannabis im Alltag?",
-    "quiz.alltag.description":
-      "Wirkungen auf Fahrtüchtigkeit, Arbeitsplatz, Schlaf und persönliche Leistung.",
-    "quiz.gesellschaft.title": "Cannabis & Gesellschaft",
+    "quiz.medizin.title": "Medizinischer Nutzen",
+    "quiz.medizin.subtitle":
+      "Was weißt du über den therapeutischen Nutzen von Cannabis?",
+    "quiz.medizin.description":
+      "Schmerzlinderung, Spastiken, Schlaf, Angst, Depressionen und ADHS.",
+    "quiz.risiken.title": "Risiken & Gesundheit",
+    "quiz.risiken.subtitle":
+      "Was weißt du über die gesundheitlichen Risiken von Cannabis?",
+    "quiz.risiken.description":
+      "Entwicklung, Körper, Psyche — von Fötus bis Sucht und Suizidgedanken.",
+    "quiz.stimmung.title": "Stimmung & Wahrnehmung",
+    "quiz.stimmung.subtitle":
+      "Was weißt du über die Wirkungen von Cannabis auf Stimmung und Sinne?",
+    "quiz.stimmung.description":
+      "Entspannung, Kreativität, Motivation, Aggression und Wahrnehmung.",
+    "quiz.gesellschaft.title": "Gesellschaft & Gesetz",
     "quiz.gesellschaft.subtitle":
       "Was weißt du über Cannabis in der Gesellschaft?",
     "quiz.gesellschaft.description":
-      "Sozialverhalten, Beziehungen, Legalisierung und öffentliche Wahrnehmung.",
-    "quiz.koerper.title": "Cannabis & Körper",
-    "quiz.koerper.subtitle":
-      "Was weißt du über die körperlichen Wirkungen von Cannabis?",
-    "quiz.koerper.description":
-      "Gesundheitsrisiken, Schmerzlinderung, Herz-Kreislauf, Atemwege und Krebs.",
-    "quiz.psyche.title": "Cannabis & Psyche",
-    "quiz.psyche.subtitle":
-      "Was weißt du über Cannabis und die Psyche?",
-    "quiz.psyche.description":
-      "Psychosen, kognitive Leistung, Abhängigkeit und emotionale Wirkungen.",
+      "Verbreitung, Verkehr, soziale Folgen, Legalisierung und Vorurteile.",
+    "quiz.gefaehrlichkeit.title": "Gefährlichkeit",
+    "quiz.gefaehrlichkeit.subtitle":
+      "Was weißt du über die allgemeine Gefährlichkeit von Cannabis?",
+    "quiz.gefaehrlichkeit.description":
+      "Alkohol-Vergleich, Harmlosigkeit, Dosierung und Mischkonsum.",
 
     // ── Myth statements ───────────────────────────────────────────────
     "myth.m01.statement": "Cannabis ist ein Allheilmittel.",
