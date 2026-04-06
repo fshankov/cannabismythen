@@ -134,40 +134,17 @@ function normalCdf(x: number): number {
   return 0.5 * (1.0 + sign * y);
 }
 
-// ─── Quiz: Cannabis & Alltag (10 questions, m12 dropped — keine_aussage) ──────
+// ─── Quiz 1: Medizinischer und therapeutischer Nutzen (7 questions) ──────────
+// m12 (Entzündungen) and m17 (Abnehmen) skipped — keine_aussage classification
 
-const mythsAlltag: QuizMyth[] = [
+const mythsMedizin: QuizMyth[] = [
   {
-    id: "m04",
-    statementKey: "myth.m04.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m04.explanation",
-    populationCorrectPct: 69.42,
-    mythPageSlug: "m04-weniger-schaedlich-alkohol",
-  },
-  {
-    id: "m05",
-    statementKey: "myth.m05.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m05.explanation",
-    populationCorrectPct: 76.17,
-    mythPageSlug: "m05-schwierig-dosieren",
-  },
-  {
-    id: "m06",
-    statementKey: "myth.m06.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m06.explanation",
-    populationCorrectPct: 88.95,
-    mythPageSlug: "m06-mischkonsum",
-  },
-  {
-    id: "m07",
-    statementKey: "myth.m07.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m07.explanation",
-    populationCorrectPct: 85.59,
-    mythPageSlug: "m07-zusaetze",
+    id: "m10",
+    statementKey: "myth.m10.statement",
+    correctClassification: "eher_falsch",
+    explanationKey: "myth.m10.explanation",
+    populationCorrectPct: 49.92,
+    mythPageSlug: "m10-schmerzen",
   },
   {
     id: "m13",
@@ -178,259 +155,12 @@ const mythsAlltag: QuizMyth[] = [
     mythPageSlug: "m13-spastiken",
   },
   {
-    id: "m21",
-    statementKey: "myth.m21.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m21.explanation",
-    populationCorrectPct: 91.64,
-    mythPageSlug: "m21-verkehr",
-  },
-  {
-    id: "m29",
-    statementKey: "myth.m29.statement",
-    correctClassification: "eher_richtig",
-    explanationKey: "myth.m29.explanation",
-    populationCorrectPct: 84.40,
-    mythPageSlug: "m29-gemuetslage",
-  },
-  {
-    id: "m31",
-    statementKey: "myth.m31.statement",
-    correctClassification: "eher_richtig",
-    explanationKey: "myth.m31.explanation",
-    populationCorrectPct: 81.98,
-    mythPageSlug: "m31-m32-entspannt-aggressiv",
-  },
-  {
-    id: "m32",
-    statementKey: "myth.m32.statement",
-    correctClassification: "eher_falsch",
-    explanationKey: "myth.m32.explanation",
-    populationCorrectPct: 57.98,
-    mythPageSlug: "m31-m32-entspannt-aggressiv",
-  },
-  {
-    id: "m33",
-    statementKey: "myth.m33.statement",
-    correctClassification: "eher_falsch",
-    explanationKey: "myth.m33.explanation",
-    populationCorrectPct: 60.99,
-    mythPageSlug: "m33-kreativ",
-  },
-];
-
-// ─── Quiz: Cannabis & Gesellschaft (9 questions) ──────────────────────────────
-
-const mythsGesellschaft: QuizMyth[] = [
-  {
-    id: "m34",
-    statementKey: "myth.m34.statement",
-    correctClassification: "eher_falsch",
-    explanationKey: "myth.m34.explanation",
-    populationCorrectPct: 54.22,
-    mythPageSlug: "m34-soziale-beziehungen",
-  },
-  {
-    id: "m35",
-    statementKey: "myth.m35.statement",
-    correctClassification: "eher_falsch",
-    explanationKey: "myth.m35.explanation",
-    populationCorrectPct: 63.47,
-    mythPageSlug: "m35-soziale-regeln",
-  },
-  {
-    id: "m36",
-    statementKey: "myth.m36.statement",
-    correctClassification: "eher_falsch",
-    explanationKey: "myth.m36.explanation",
-    populationCorrectPct: 55.41,
-    mythPageSlug: "m36-m37-leistungen-niveau",
-  },
-  {
-    id: "m37",
-    statementKey: "myth.m37.statement",
-    correctClassification: "falsch",
-    explanationKey: "myth.m37.explanation",
-    populationCorrectPct: 35.76,
-    mythPageSlug: "m36-m37-leistungen-niveau",
-  },
-  {
-    id: "m38",
-    statementKey: "myth.m38.statement",
-    correctClassification: "falsch",
-    explanationKey: "myth.m38.explanation",
-    populationCorrectPct: 61.81,
-    mythPageSlug: "m38-cool",
-  },
-  {
-    id: "m39",
-    statementKey: "myth.m39.statement",
-    correctClassification: "falsch",
-    explanationKey: "myth.m39.explanation",
-    populationCorrectPct: 25.63,
-    mythPageSlug: "m39-bevoelkerung-konsumiert",
-  },
-  {
-    id: "m40",
-    statementKey: "myth.m40.statement",
-    correctClassification: "falsch",
-    explanationKey: "myth.m40.explanation",
-    populationCorrectPct: 36.09,
-    mythPageSlug: "m40-ueberall-erlaubt",
-  },
-  {
-    id: "m41",
-    statementKey: "myth.m41.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m41.explanation",
-    populationCorrectPct: 79.23,
-    mythPageSlug: "m41-m42-anstieg-konsum",
-  },
-  {
-    id: "m42",
-    statementKey: "myth.m42.statement",
-    correctClassification: "eher_falsch",
-    explanationKey: "myth.m42.explanation",
-    populationCorrectPct: 53.12,
-    mythPageSlug: "m41-m42-anstieg-konsum",
-  },
-];
-
-// ─── Quiz: Cannabis & Körper (10 questions, m17 dropped — keine_aussage) ──────
-
-const mythsKoerper: QuizMyth[] = [
-  {
-    id: "m01",
-    statementKey: "myth.m01.statement",
-    correctClassification: "falsch",
-    explanationKey: "myth.m01.explanation",
-    populationCorrectPct: 49.05,
-    mythPageSlug: "m01-allheilmittel",
-  },
-  {
-    id: "m02",
-    statementKey: "myth.m02.statement",
-    correctClassification: "falsch",
-    explanationKey: "myth.m02.explanation",
-    populationCorrectPct: 63.86,
-    mythPageSlug: "m02-harmlos",
-  },
-  {
-    id: "m03",
-    statementKey: "myth.m03.statement",
-    correctClassification: "eher_richtig",
-    explanationKey: "myth.m03.explanation",
-    populationCorrectPct: 77.84,
-    mythPageSlug: "m03-heranwachsende",
-  },
-  {
-    id: "m08",
-    statementKey: "myth.m08.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m08.explanation",
-    populationCorrectPct: 89.74,
-    mythPageSlug: "m08-foetus",
-  },
-  {
-    id: "m09",
-    statementKey: "myth.m09.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m09.explanation",
-    populationCorrectPct: 74.08,
-    mythPageSlug: "m09-ueberdosierung",
-  },
-  {
-    id: "m10",
-    statementKey: "myth.m10.statement",
-    correctClassification: "eher_falsch",
-    explanationKey: "myth.m10.explanation",
-    populationCorrectPct: 49.92,
-    mythPageSlug: "m10-schmerzen",
-  },
-  {
-    id: "m11",
-    statementKey: "myth.m11.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m11.explanation",
-    populationCorrectPct: 71.92,
-    mythPageSlug: "m11-uebelkeit",
-  },
-  {
-    id: "m14",
-    statementKey: "myth.m14.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m14.explanation",
-    populationCorrectPct: 76.20,
-    mythPageSlug: "m14-herz-kreislauf",
-  },
-  {
-    id: "m15",
-    statementKey: "myth.m15.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m15.explanation",
-    populationCorrectPct: 78.66,
-    mythPageSlug: "m15-atemwege",
-  },
-  {
-    id: "m16",
-    statementKey: "myth.m16.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m16.explanation",
-    populationCorrectPct: 73.70,
-    mythPageSlug: "m16-krebs",
-  },
-];
-
-// ─── Quiz: Cannabis & Psyche (11 questions) ──────────────────────────────────
-
-const mythsPsyche: QuizMyth[] = [
-  {
     id: "m18",
     statementKey: "myth.m18.statement",
     correctClassification: "eher_falsch",
     explanationKey: "myth.m18.explanation",
     populationCorrectPct: 56.47,
     mythPageSlug: "m18-schlaf",
-  },
-  {
-    id: "m19",
-    statementKey: "myth.m19.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m19.explanation",
-    populationCorrectPct: 87.57,
-    mythPageSlug: "m19-wahrnehmung",
-  },
-  {
-    id: "m20",
-    statementKey: "myth.m20.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m20.explanation",
-    populationCorrectPct: 83.24,
-    mythPageSlug: "m20-kognition",
-  },
-  {
-    id: "m22",
-    statementKey: "myth.m22.statement",
-    correctClassification: "eher_falsch",
-    explanationKey: "myth.m22.explanation",
-    populationCorrectPct: 51.75,
-    mythPageSlug: "m22-einstiegsdroge",
-  },
-  {
-    id: "m23",
-    statementKey: "myth.m23.statement",
-    correctClassification: "falsch",
-    explanationKey: "myth.m23.explanation",
-    populationCorrectPct: 63.73,
-    mythPageSlug: "m23-abhaengigkeit",
-  },
-  {
-    id: "m24",
-    statementKey: "myth.m24.statement",
-    correctClassification: "richtig",
-    explanationKey: "myth.m24.explanation",
-    populationCorrectPct: 74.30,
-    mythPageSlug: "m24-psychosen",
   },
   {
     id: "m25",
@@ -457,12 +187,81 @@ const mythsPsyche: QuizMyth[] = [
     mythPageSlug: "m27-adhs",
   },
   {
-    id: "m28",
-    statementKey: "myth.m28.statement",
+    id: "m01",
+    statementKey: "myth.m01.statement",
     correctClassification: "falsch",
-    explanationKey: "myth.m28.explanation",
-    populationCorrectPct: 25.24,
-    mythPageSlug: "m28-motivation",
+    explanationKey: "myth.m01.explanation",
+    populationCorrectPct: 49.05,
+    mythPageSlug: "m01-allheilmittel",
+  },
+];
+
+// ─── Quiz 2: Risiken für Entwicklung, Körper und Psyche (11 questions) ────────
+
+const mythsRisiken: QuizMyth[] = [
+  {
+    id: "m03",
+    statementKey: "myth.m03.statement",
+    correctClassification: "eher_richtig",
+    explanationKey: "myth.m03.explanation",
+    populationCorrectPct: 77.84,
+    mythPageSlug: "m03-heranwachsende",
+  },
+  {
+    id: "m08",
+    statementKey: "myth.m08.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m08.explanation",
+    populationCorrectPct: 89.74,
+    mythPageSlug: "m08-foetus",
+  },
+  {
+    id: "m14",
+    statementKey: "myth.m14.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m14.explanation",
+    populationCorrectPct: 76.20,
+    mythPageSlug: "m14-herz-kreislauf",
+  },
+  {
+    id: "m15",
+    statementKey: "myth.m15.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m15.explanation",
+    populationCorrectPct: 78.66,
+    mythPageSlug: "m15-atemwege",
+  },
+  {
+    id: "m16",
+    statementKey: "myth.m16.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m16.explanation",
+    populationCorrectPct: 73.70,
+    mythPageSlug: "m16-krebs",
+  },
+  {
+    id: "m11",
+    statementKey: "myth.m11.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m11.explanation",
+    populationCorrectPct: 71.92,
+    mythPageSlug: "m11-uebelkeit",
+  },
+  {
+    id: "m24",
+    statementKey: "myth.m24.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m24.explanation",
+    populationCorrectPct: 74.30,
+    mythPageSlug: "m24-psychosen",
+  },
+  {
+    id: "m20",
+    statementKey: "myth.m20.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m20.explanation",
+    populationCorrectPct: 83.24,
+    mythPageSlug: "m20-kognition",
   },
   {
     id: "m30",
@@ -472,17 +271,238 @@ const mythsPsyche: QuizMyth[] = [
     populationCorrectPct: 82.99,
     mythPageSlug: "m30-suizid",
   },
+  {
+    id: "m23",
+    statementKey: "myth.m23.statement",
+    correctClassification: "falsch",
+    explanationKey: "myth.m23.explanation",
+    populationCorrectPct: 63.73,
+    mythPageSlug: "m23-abhaengigkeit",
+  },
+  {
+    id: "m22",
+    statementKey: "myth.m22.statement",
+    correctClassification: "eher_falsch",
+    explanationKey: "myth.m22.explanation",
+    populationCorrectPct: 51.75,
+    mythPageSlug: "m22-einstiegsdroge",
+  },
+];
+
+// ─── Quiz 3: Wirkung auf Stimmung und Wahrnehmung (6 questions) ───────────────
+
+const mythsStimmung: QuizMyth[] = [
+  {
+    id: "m31",
+    statementKey: "myth.m31.statement",
+    correctClassification: "eher_richtig",
+    explanationKey: "myth.m31.explanation",
+    populationCorrectPct: 81.98,
+    mythPageSlug: "m31-m32-entspannt-aggressiv",
+  },
+  {
+    id: "m29",
+    statementKey: "myth.m29.statement",
+    correctClassification: "eher_richtig",
+    explanationKey: "myth.m29.explanation",
+    populationCorrectPct: 84.40,
+    mythPageSlug: "m29-gemuetslage",
+  },
+  {
+    id: "m33",
+    statementKey: "myth.m33.statement",
+    correctClassification: "eher_falsch",
+    explanationKey: "myth.m33.explanation",
+    populationCorrectPct: 60.99,
+    mythPageSlug: "m33-kreativ",
+  },
+  {
+    id: "m32",
+    statementKey: "myth.m32.statement",
+    correctClassification: "eher_falsch",
+    explanationKey: "myth.m32.explanation",
+    populationCorrectPct: 57.98,
+    mythPageSlug: "m31-m32-entspannt-aggressiv",
+  },
+  {
+    id: "m28",
+    statementKey: "myth.m28.statement",
+    correctClassification: "falsch",
+    explanationKey: "myth.m28.explanation",
+    populationCorrectPct: 25.24,
+    mythPageSlug: "m28-motivation",
+  },
+  {
+    id: "m19",
+    statementKey: "myth.m19.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m19.explanation",
+    populationCorrectPct: 87.57,
+    mythPageSlug: "m19-wahrnehmung",
+  },
+];
+
+// ─── Quiz 4: Bevölkerung, Gesellschaft und Gesetzgebung (10 questions) ─────────
+
+const mythsGesellschaft: QuizMyth[] = [
+  {
+    id: "m39",
+    statementKey: "myth.m39.statement",
+    correctClassification: "falsch",
+    explanationKey: "myth.m39.explanation",
+    populationCorrectPct: 25.63,
+    mythPageSlug: "m39-bevoelkerung-konsumiert",
+  },
+  {
+    id: "m21",
+    statementKey: "myth.m21.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m21.explanation",
+    populationCorrectPct: 91.64,
+    mythPageSlug: "m21-verkehr",
+  },
+  {
+    id: "m34",
+    statementKey: "myth.m34.statement",
+    correctClassification: "eher_falsch",
+    explanationKey: "myth.m34.explanation",
+    populationCorrectPct: 54.22,
+    mythPageSlug: "m34-soziale-beziehungen",
+  },
+  {
+    id: "m36",
+    statementKey: "myth.m36.statement",
+    correctClassification: "eher_falsch",
+    explanationKey: "myth.m36.explanation",
+    populationCorrectPct: 55.41,
+    mythPageSlug: "m36-m37-leistungen-niveau",
+  },
+  {
+    id: "m37",
+    statementKey: "myth.m37.statement",
+    correctClassification: "falsch",
+    explanationKey: "myth.m37.explanation",
+    populationCorrectPct: 35.76,
+    mythPageSlug: "m36-m37-leistungen-niveau",
+  },
+  {
+    id: "m35",
+    statementKey: "myth.m35.statement",
+    correctClassification: "eher_falsch",
+    explanationKey: "myth.m35.explanation",
+    populationCorrectPct: 63.47,
+    mythPageSlug: "m35-soziale-regeln",
+  },
+  {
+    id: "m38",
+    statementKey: "myth.m38.statement",
+    correctClassification: "falsch",
+    explanationKey: "myth.m38.explanation",
+    populationCorrectPct: 61.81,
+    mythPageSlug: "m38-cool",
+  },
+  {
+    id: "m41",
+    statementKey: "myth.m41.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m41.explanation",
+    populationCorrectPct: 79.23,
+    mythPageSlug: "m41-m42-anstieg-konsum",
+  },
+  {
+    id: "m42",
+    statementKey: "myth.m42.statement",
+    correctClassification: "eher_falsch",
+    explanationKey: "myth.m42.explanation",
+    populationCorrectPct: 53.12,
+    mythPageSlug: "m41-m42-anstieg-konsum",
+  },
+  {
+    id: "m40",
+    statementKey: "myth.m40.statement",
+    correctClassification: "falsch",
+    explanationKey: "myth.m40.explanation",
+    populationCorrectPct: 36.09,
+    mythPageSlug: "m40-ueberall-erlaubt",
+  },
+];
+
+// ─── Quiz 5: Allgemeine Einschätzung der Gefährlichkeit (6 questions) ─────────
+
+const mythsGefaehrlichkeit: QuizMyth[] = [
+  {
+    id: "m04",
+    statementKey: "myth.m04.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m04.explanation",
+    populationCorrectPct: 69.42,
+    mythPageSlug: "m04-weniger-schaedlich-alkohol",
+  },
+  {
+    id: "m02",
+    statementKey: "myth.m02.statement",
+    correctClassification: "falsch",
+    explanationKey: "myth.m02.explanation",
+    populationCorrectPct: 63.86,
+    mythPageSlug: "m02-harmlos",
+  },
+  {
+    id: "m09",
+    statementKey: "myth.m09.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m09.explanation",
+    populationCorrectPct: 74.08,
+    mythPageSlug: "m09-ueberdosierung",
+  },
+  {
+    id: "m05",
+    statementKey: "myth.m05.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m05.explanation",
+    populationCorrectPct: 76.17,
+    mythPageSlug: "m05-schwierig-dosieren",
+  },
+  {
+    id: "m06",
+    statementKey: "myth.m06.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m06.explanation",
+    populationCorrectPct: 88.95,
+    mythPageSlug: "m06-mischkonsum",
+  },
+  {
+    id: "m07",
+    statementKey: "myth.m07.statement",
+    correctClassification: "richtig",
+    explanationKey: "myth.m07.explanation",
+    populationCorrectPct: 85.59,
+    mythPageSlug: "m07-zusaetze",
+  },
 ];
 
 // ─── Quiz Themes ───────────────────────────────────────────────────────────────
 
 export const QUIZ_THEMES: Record<string, QuizTheme> = {
-  "quiz-alltag": {
-    slug: "quiz-alltag",
-    titleKey: "quiz.alltag.title",
-    subtitleKey: "quiz.alltag.subtitle",
-    descriptionKey: "quiz.alltag.description",
-    myths: mythsAlltag,
+  "quiz-medizin": {
+    slug: "quiz-medizin",
+    titleKey: "quiz.medizin.title",
+    subtitleKey: "quiz.medizin.subtitle",
+    descriptionKey: "quiz.medizin.description",
+    myths: mythsMedizin,
+  },
+  "quiz-risiken": {
+    slug: "quiz-risiken",
+    titleKey: "quiz.risiken.title",
+    subtitleKey: "quiz.risiken.subtitle",
+    descriptionKey: "quiz.risiken.description",
+    myths: mythsRisiken,
+  },
+  "quiz-stimmung": {
+    slug: "quiz-stimmung",
+    titleKey: "quiz.stimmung.title",
+    subtitleKey: "quiz.stimmung.subtitle",
+    descriptionKey: "quiz.stimmung.description",
+    myths: mythsStimmung,
   },
   "quiz-gesellschaft": {
     slug: "quiz-gesellschaft",
@@ -491,26 +511,20 @@ export const QUIZ_THEMES: Record<string, QuizTheme> = {
     descriptionKey: "quiz.gesellschaft.description",
     myths: mythsGesellschaft,
   },
-  "quiz-koerper": {
-    slug: "quiz-koerper",
-    titleKey: "quiz.koerper.title",
-    subtitleKey: "quiz.koerper.subtitle",
-    descriptionKey: "quiz.koerper.description",
-    myths: mythsKoerper,
-  },
-  "quiz-psyche": {
-    slug: "quiz-psyche",
-    titleKey: "quiz.psyche.title",
-    subtitleKey: "quiz.psyche.subtitle",
-    descriptionKey: "quiz.psyche.description",
-    myths: mythsPsyche,
+  "quiz-gefaehrlichkeit": {
+    slug: "quiz-gefaehrlichkeit",
+    titleKey: "quiz.gefaehrlichkeit.title",
+    subtitleKey: "quiz.gefaehrlichkeit.subtitle",
+    descriptionKey: "quiz.gefaehrlichkeit.description",
+    myths: mythsGefaehrlichkeit,
   },
 };
 
 /** All quiz slugs in display order. */
 export const QUIZ_SLUGS = [
-  "quiz-alltag",
+  "quiz-medizin",
+  "quiz-risiken",
+  "quiz-stimmung",
   "quiz-gesellschaft",
-  "quiz-koerper",
-  "quiz-psyche",
+  "quiz-gefaehrlichkeit",
 ] as const;
