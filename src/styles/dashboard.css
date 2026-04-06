@@ -12,24 +12,38 @@ main:has(.carm-explorer) {
 .carm-explorer {
   --color-bg: #ffffff;
   --color-surface: #f8fafc;
+  --color-surface-raised: #f1f5f9;
   --color-border: #e2e8f0;
-  --color-text: #1e293b;
-  --color-text-secondary: #64748b;
-  /* Decision B: unified to forest green — same accent as site */
+  --color-border-strong: #cbd5e1;
+  /* Text — slightly warmer near-black + better secondary contrast (WCAG AA) */
+  --color-text: #1a1a2e;
+  --color-text-secondary: #4a5568;
+  --color-text-muted: #718096;
+  /* Accent — forest green */
   --color-primary: #2d6a4f;
+  --color-primary-hover: #1f4f3a;
   --color-primary-light: #e8f5ef;
-  /* Classification — unified Emerald/Lime/Amber/Rose (Decision A) */
+  --color-primary-muted: #95c4ad;
+  /* Classification — deuteranopia-safe Emerald/Lime/Amber/Rose */
   --color-richtig: #047857;
   --color-eher-richtig: #4d7c0f;
   --color-eher-falsch: #b45309;
   --color-falsch: #be123c;
   --color-no-class: #6b7280;
+  /* Layout */
   --radius: 8px;
   --radius-sm: 4px;
+  --radius-full: 9999px;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
   --font-sans: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  /* Motion */
   --transition: 150ms ease;
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
   --sidebar-width: 300px;
 
   font-family: var(--font-sans);
@@ -172,7 +186,8 @@ main:has(.carm-explorer) {
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  transition: all var(--transition);
+  transition: color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
   white-space: nowrap;
 }
 
@@ -183,6 +198,12 @@ main:has(.carm-explorer) {
 .carm-explorer .tab-btn.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
+}
+
+.carm-explorer .tab-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
 /* ==================== UTILITY BAR ==================== */
@@ -212,14 +233,22 @@ main:has(.carm-explorer) {
   color: var(--color-text-secondary);
   font-size: 0.72rem;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
   white-space: nowrap;
   font-family: var(--font-sans);
 }
 
 .carm-explorer .util-btn:hover {
-  background: var(--color-surface);
-  border-color: var(--color-text-secondary);
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.carm-explorer .util-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-light), 0 0 0 4px var(--color-primary);
 }
 
 .carm-explorer .util-btn svg {
@@ -306,41 +335,87 @@ main:has(.carm-explorer) {
   border-left: 1px solid var(--color-border);
   padding-left: 20px;
   padding-bottom: 24px;
+  /* Custom scrollbar — thin, unobtrusive */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
 }
 
+.carm-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.carm-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.carm-sidebar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+/* Dividers between sidebar sections */
 .carm-explorer .sidebar-section {
-  margin-bottom: 22px;
+  padding-top: 18px;
+  margin-bottom: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.carm-explorer .sidebar-section:first-child {
+  padding-top: 0;
+  border-top: none;
 }
 
 .carm-explorer .sidebar-heading {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-secondary);
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
   margin-bottom: 10px;
+  padding-bottom: 6px;
 }
 
 .carm-explorer .sidebar-icon {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .carm-explorer .sidebar-checklist {
   display: flex;
   flex-direction: column;
+  gap: 1px;
+  margin-bottom: 18px;
 }
 
+/* Each filter row — padded, rounded, hover/active highlight */
 .carm-explorer .sidebar-check-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 0;
+  padding: 5px 6px;
   font-size: 0.82rem;
   cursor: pointer;
   line-height: 1.3;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+
+.carm-explorer .sidebar-check-item:hover {
+  background: var(--color-primary-light);
+}
+
+/* Selected radio row highlight */
+.carm-explorer .sidebar-check-item:has(input[type='radio']:checked) {
+  background: var(--color-primary-light);
+}
+
+.carm-explorer .sidebar-check-item:has(input[type='radio']:checked) .sidebar-group-name {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.carm-explorer .sidebar-check-item:has(input[type='radio']:checked) .sidebar-ind-icon {
+  filter: none;
 }
 
 .carm-explorer .sidebar-check-item input[type='checkbox'],
@@ -368,16 +443,19 @@ main:has(.carm-explorer) {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .carm-explorer .sidebar-group-name {
   font-size: 0.78rem;
   line-height: 1.35;
+  transition: color var(--transition);
 }
 
 .carm-explorer .sidebar-group-n {
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-weight: 400;
+  font-variant-numeric: tabular-nums;
 }
 
 .carm-explorer .sidebar-group-desc {
@@ -390,6 +468,7 @@ main:has(.carm-explorer) {
   font-size: 0.9rem;
   flex-shrink: 0;
   margin-top: 2px;
+  transition: transform var(--transition);
 }
 
 .carm-explorer .sidebar-cat-label {
@@ -436,18 +515,20 @@ main:has(.carm-explorer) {
   left: 50%;
   transform: translateX(-50%);
   width: max-content;
-  max-width: 280px;
+  /* Clamp width so card never overflows on small screens */
+  max-width: min(280px, calc(100vw - 32px));
   background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   padding: 10px 12px;
-  z-index: 100;
+  z-index: 200;
   pointer-events: none;
   opacity: 0;
-  transition: opacity var(--transition);
-  /* Prevent card from being announced by screen readers when hidden */
+  /* Pair visibility with opacity so it's removed from a11y tree when hidden */
   visibility: hidden;
+  transition: opacity var(--duration-fast) var(--ease-out),
+              visibility 0s linear var(--duration-fast);
 }
 
 .carm-explorer .info-tooltip-card--above {
@@ -462,12 +543,15 @@ main:has(.carm-explorer) {
   pointer-events: auto;
   opacity: 1;
   visibility: visible;
+  /* When opening, remove visibility delay */
+  transition: opacity var(--duration-fast) var(--ease-out),
+              visibility 0s linear 0s;
 }
 
 .carm-explorer .info-tooltip-title {
   margin: 0 0 4px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text);
   line-height: 1.3;
 }
@@ -476,11 +560,12 @@ main:has(.carm-explorer) {
   display: inline-block;
   margin-bottom: 6px;
   font-size: 0.68rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-primary);
   background: var(--color-primary-light);
   border-radius: var(--radius-sm);
-  padding: 1px 5px;
+  padding: 1px 6px;
+  font-variant-numeric: tabular-nums;
 }
 
 .carm-explorer .info-tooltip-desc {
@@ -491,10 +576,12 @@ main:has(.carm-explorer) {
 }
 
 .carm-explorer .info-tooltip-scale {
-  margin: 5px 0 0;
-  font-size: 0.68rem;
-  color: var(--color-text-secondary);
-  opacity: 0.8;
+  margin: 6px 0 0;
+  padding-top: 5px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.67rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* InfoTooltip inside pill buttons — keep icon color consistent */
@@ -588,11 +675,16 @@ main:has(.carm-explorer) {
 
 .carm-explorer .data-table tr {
   cursor: pointer;
-  transition: background var(--transition);
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
 .carm-explorer .data-table tbody tr:hover {
   background: var(--color-primary-light);
+}
+
+.carm-explorer .data-table tbody tr:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .carm-explorer .data-table .myth-cell {
@@ -603,8 +695,10 @@ main:has(.carm-explorer) {
 
 .carm-explorer .data-table .value-cell {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
   text-align: right;
   white-space: nowrap;
+  color: var(--color-text);
 }
 
 .carm-explorer .data-table .na-value {
@@ -739,14 +833,20 @@ main:has(.carm-explorer) {
 }
 
 .carm-explorer .indicator-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 5px 14px;
   border: 1px solid var(--color-border);
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   background: white;
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
   font-family: var(--font-sans);
   color: var(--color-text-secondary);
 }
@@ -754,12 +854,19 @@ main:has(.carm-explorer) {
 .carm-explorer .indicator-tag:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .carm-explorer .indicator-tag.active {
   background: var(--color-primary);
   color: white;
   border-color: var(--color-primary);
+  box-shadow: none;
+}
+
+.carm-explorer .indicator-tag:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-light), 0 0 0 4px var(--color-primary);
 }
 
 /* ==================== DETAIL PANEL ==================== */
@@ -1288,14 +1395,20 @@ main:has(.carm-explorer) {
 }
 
 .circular-group-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 12px;
   border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border-radius: var(--radius-full);
   background: white;
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
   font-family: var(--font-sans);
   color: var(--color-text-secondary);
   white-space: nowrap;
@@ -1304,12 +1417,19 @@ main:has(.carm-explorer) {
 .circular-group-btn:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .circular-group-btn.active {
   background: var(--color-primary);
   color: white;
   border-color: var(--color-primary);
+  box-shadow: none;
+}
+
+.circular-group-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-light), 0 0 0 4px var(--color-primary);
 }
 
 .circular-tooltip {
@@ -1447,7 +1567,7 @@ main:has(.carm-explorer) {
 }
 
 /* ==================== RESPONSIVE ==================== */
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
   .carm-explorer .app-layout {
     grid-template-columns: 1fr;
     gap: 0;
@@ -1457,10 +1577,14 @@ main:has(.carm-explorer) {
     position: static;
     max-height: none;
     border-left: none;
-    border-top: 1px solid var(--color-border);
+    border-top: 2px solid var(--color-border);
     padding-left: 0;
-    padding-top: 16px;
-    margin-top: 16px;
+    padding-top: 20px;
+    margin-top: 20px;
+    /* On tablet, show filters in a 2-column grid */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0 32px;
   }
 
   .carm-explorer-header {
@@ -1484,6 +1608,37 @@ main:has(.carm-explorer) {
 
   .carm-explorer .scatter-controls {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .carm-sidebar {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  /* Ensure all pill buttons meet 44px touch target */
+  .carm-explorer .indicator-tag,
+  .carm-explorer .circular-group-btn {
+    min-height: 36px;
+    padding: 7px 14px;
+  }
+
+  /* Tooltips: ensure card doesn't overflow left/right edge */
+  .carm-explorer .info-tooltip-card {
+    left: 0;
+    transform: none;
+    right: auto;
+  }
+
+  .carm-explorer .info-tooltip-card--above {
+    bottom: calc(100% + 4px);
+  }
+
+  .carm-explorer .info-tooltip-card--below {
+    top: calc(100% + 4px);
   }
 }
 
@@ -1549,5 +1704,16 @@ main:has(.carm-explorer) {
   .sources-v2-control-group {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* ==================== REDUCED MOTION ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .carm-explorer *,
+  .carm-explorer *::before,
+  .carm-explorer *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
