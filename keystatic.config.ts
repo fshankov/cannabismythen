@@ -1,4 +1,4 @@
-import { config, collection, fields } from "@keystatic/core";
+import { config, collection, singleton, fields } from "@keystatic/core";
 
 // ─── Shared field helpers ───────────────────────────────────────────────────
 // Reusable field groups used across multiple collections.
@@ -413,6 +413,212 @@ const changelog = collection({
   },
 });
 
+// ─── Singletons ─────────────────────────────────────────────────────────────
+
+const dashboardDefinitionen = singleton({
+  label: "Dashboard – Definitionen & Glossar",
+  path: "src/content/dashboard-definitionen",
+  format: { data: "json" },
+  schema: {
+    // Population group definitions
+    groups: fields.object(
+      {
+        general_population: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Gesamtbevölkerung (16–70)" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue: "Alle Befragten (Volljährige und Minderjährige kombiniert).",
+            }),
+          },
+          { label: "Gesamtbevölkerung" }
+        ),
+        adults: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Erwachsene (18–70)" }),
+            sampleSize: fields.text({ label: "Stichprobe", defaultValue: "n = 2.097" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue:
+                "Repräsentative Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund.",
+            }),
+          },
+          { label: "Erwachsene (18–70)" }
+        ),
+        minors: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Minderjährige (16–17)" }),
+            sampleSize: fields.text({ label: "Stichprobe", defaultValue: "n = 555" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue:
+                "Repräsentative Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel.",
+            }),
+          },
+          { label: "Minderjährige (16–17)" }
+        ),
+        consumers: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Konsumierende" }),
+            sampleSize: fields.text({ label: "Stichprobe", defaultValue: "n = 358" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue:
+                "Personen mit Cannabis-Konsum in den letzten 30 Tagen (30-Tage-Prävalenz).",
+            }),
+          },
+          { label: "Konsumierende" }
+        ),
+        young_adults: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Junge Erwachsene (18–26)" }),
+            sampleSize: fields.text({ label: "Stichprobe", defaultValue: "n = 333" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue: "Teilgruppe der Volljährigen im Alter von 18–26 Jahren.",
+            }),
+          },
+          { label: "Junge Erwachsene (18–26)" }
+        ),
+        parents: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Eltern" }),
+            sampleSize: fields.text({ label: "Stichprobe", defaultValue: "n = 539" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue: "Volljährige mit mindestens einem Kind unter 18 Jahren.",
+            }),
+          },
+          { label: "Eltern" }
+        ),
+      },
+      { label: "Bevölkerungsgruppen" }
+    ),
+
+    // Myth indicator definitions
+    mythIndicators: fields.object(
+      {
+        awareness: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Kenntnis (%)" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue: "Anteil der Befragten, die den Mythos kennen. Höher = bekannter.",
+            }),
+            scale: fields.text({ label: "Skala", defaultValue: "0–100 %" }),
+          },
+          { label: "Kenntnis" }
+        ),
+        significance: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Bedeutung (Punkte)" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue:
+                "Subjektive Wichtigkeit des Mythos für eigene Entscheidungen. Nur bei Personen erhoben, die den Mythos kennen.",
+            }),
+            scale: fields.text({ label: "Skala", defaultValue: "0–100 Punkte" }),
+          },
+          { label: "Bedeutung" }
+        ),
+        correctness: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Richtigkeit (Punkte)" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue:
+                "Übereinstimmung der Einschätzung mit der wissenschaftlichen Klassifikation. Höher = treffender.",
+            }),
+            scale: fields.text({ label: "Skala", defaultValue: "0–100 Punkte" }),
+          },
+          { label: "Richtigkeit" }
+        ),
+        prevention_significance: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Präventionsbedeutung (Punkte)" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue:
+                "Kombination aus Bedeutung und Fehleinschätzung. Höher = größerer Präventionsbedarf.",
+            }),
+            scale: fields.text({ label: "Skala", defaultValue: "0–100 Punkte" }),
+          },
+          { label: "Präventionsbedeutung" }
+        ),
+      },
+      { label: "Mythen-Indikatoren" }
+    ),
+
+    // Sources indicator definitions
+    sourcesIndicators: fields.object(
+      {
+        search: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Suche (%)" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue:
+                "Anteil der Befragten, die diesen Kanal aktiv zur Information nutzen würden.",
+            }),
+            scale: fields.text({ label: "Skala", defaultValue: "0–100 %" }),
+          },
+          { label: "Suche" }
+        ),
+        perception: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Wahrnehmung (%)" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue:
+                "Anteil, der über diesen Kanal ungeplant Gesundheitsinformationen wahrnimmt.",
+            }),
+            scale: fields.text({ label: "Skala", defaultValue: "0–100 %" }),
+          },
+          { label: "Wahrnehmung" }
+        ),
+        trust: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Vertrauen (Punkte)" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue: "Eingeschätzte Vertrauenswürdigkeit der Quelle (0–100).",
+            }),
+            scale: fields.text({ label: "Skala", defaultValue: "0–100 Punkte" }),
+          },
+          { label: "Vertrauen" }
+        ),
+        prevention: fields.object(
+          {
+            label: fields.text({ label: "Label", defaultValue: "Präventionspotential (Punkte)" }),
+            definition: fields.text({
+              label: "Definition",
+              multiline: true,
+              defaultValue:
+                "Kombinierter Wert aus Suche, Wahrnehmung und Vertrauen. Höher = größeres Potential für Prävention.",
+            }),
+            scale: fields.text({ label: "Skala", defaultValue: "0–100 Punkte" }),
+          },
+          { label: "Präventionspotential" }
+        ),
+      },
+      { label: "Informationsquellen-Indikatoren" }
+    ),
+  },
+});
+
 // ─── Config export ──────────────────────────────────────────────────────────
 
 export default config({
@@ -433,5 +639,8 @@ export default config({
     ueberUns,
     meta,
     changelog,
+  },
+  singletons: {
+    dashboardDefinitionen,
   },
 });

@@ -1,0 +1,77 @@
+{
+  "groups": {
+    "general_population": {
+      "label": "Gesamtbevölkerung (16–70)",
+      "definition": "Alle Befragten (Volljährige und Minderjährige kombiniert)."
+    },
+    "adults": {
+      "label": "Erwachsene (18–70)",
+      "sampleSize": "n = 2.097",
+      "definition": "Repräsentative Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund."
+    },
+    "minors": {
+      "label": "Minderjährige (16–17)",
+      "sampleSize": "n = 555",
+      "definition": "Repräsentative Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel."
+    },
+    "consumers": {
+      "label": "Konsumierende",
+      "sampleSize": "n = 358",
+      "definition": "Personen mit Cannabis-Konsum in den letzten 30 Tagen (30-Tage-Prävalenz)."
+    },
+    "young_adults": {
+      "label": "Junge Erwachsene (18–26)",
+      "sampleSize": "n = 333",
+      "definition": "Teilgruppe der Volljährigen im Alter von 18–26 Jahren."
+    },
+    "parents": {
+      "label": "Eltern",
+      "sampleSize": "n = 539",
+      "definition": "Volljährige mit mindestens einem Kind unter 18 Jahren."
+    }
+  },
+  "mythIndicators": {
+    "awareness": {
+      "label": "Kenntnis (%)",
+      "definition": "Anteil der Befragten, die den Mythos kennen. Höher = bekannter.",
+      "scale": "0–100 %"
+    },
+    "significance": {
+      "label": "Bedeutung (Punkte)",
+      "definition": "Subjektive Wichtigkeit des Mythos für eigene Entscheidungen. Nur bei Personen erhoben, die den Mythos kennen.",
+      "scale": "0–100 Punkte"
+    },
+    "correctness": {
+      "label": "Richtigkeit (Punkte)",
+      "definition": "Übereinstimmung der Einschätzung mit der wissenschaftlichen Klassifikation. Höher = treffender.",
+      "scale": "0–100 Punkte"
+    },
+    "prevention_significance": {
+      "label": "Präventionsbedeutung (Punkte)",
+      "definition": "Kombination aus Bedeutung und Fehleinschätzung. Höher = größerer Präventionsbedarf.",
+      "scale": "0–100 Punkte"
+    }
+  },
+  "sourcesIndicators": {
+    "search": {
+      "label": "Suche (%)",
+      "definition": "Anteil der Befragten, die diesen Kanal aktiv zur Information nutzen würden.",
+      "scale": "0–100 %"
+    },
+    "perception": {
+      "label": "Wahrnehmung (%)",
+      "definition": "Anteil, der über diesen Kanal ungeplant Gesundheitsinformationen wahrnimmt.",
+      "scale": "0–100 %"
+    },
+    "trust": {
+      "label": "Vertrauen (Punkte)",
+      "definition": "Eingeschätzte Vertrauenswürdigkeit der Quelle (0–100).",
+      "scale": "0–100 Punkte"
+    },
+    "prevention": {
+      "label": "Präventionspotential (Punkte)",
+      "definition": "Kombinierter Wert aus Suche, Wahrnehmung und Vertrauen. Höher = größeres Potential für Prävention.",
+      "scale": "0–100 Punkte"
+    }
+  }
+}
