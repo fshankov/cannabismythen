@@ -356,9 +356,40 @@ main:has(.carm-explorer) {
   gap: 6px;
 }
 
+.carm-explorer .sidebar-group-item {
+  align-items: flex-start;
+}
+
+.carm-explorer .sidebar-group-item input[type='radio'] {
+  margin-top: 3px;
+}
+
+.carm-explorer .sidebar-group-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.carm-explorer .sidebar-group-name {
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.carm-explorer .sidebar-group-n {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.carm-explorer .sidebar-group-desc {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
 .carm-explorer .sidebar-ind-icon {
   font-size: 0.9rem;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .carm-explorer .sidebar-cat-label {

@@ -85,14 +85,24 @@ export default function Sidebar({ state, data, update }: Props) {
         </h3>
         <div className="sidebar-checklist">
           {data.groups.map((g) => (
-            <label key={g.id} className="sidebar-check-item sidebar-radio-item">
+            <label key={g.id} className="sidebar-check-item sidebar-radio-item sidebar-group-item">
               <input
                 type="radio"
                 name="population-group"
                 checked={state.groupIds[0] === g.id}
                 onChange={() => update('groupIds', [g.id])}
               />
-              <span>{state.lang === 'de' ? g.name_de : g.name_en}</span>
+              <span className="sidebar-group-label">
+                <span className="sidebar-group-name">
+                  {state.lang === 'de' ? g.name_de : g.name_en}
+                  {g.n != null && <span className="sidebar-group-n"> (n = {g.n.toLocaleString('de-DE')})</span>}
+                </span>
+                {(state.lang === 'de' ? g.description_de : g.description_en) && (
+                  <span className="sidebar-group-desc">
+                    {state.lang === 'de' ? g.description_de : g.description_en}
+                  </span>
+                )}
+              </span>
             </label>
           ))}
         </div>
@@ -106,7 +116,7 @@ export default function Sidebar({ state, data, update }: Props) {
         </h3>
         <div className="sidebar-checklist">
           {INDICATORS.map((ind) => (
-            <label key={ind.id} className="sidebar-check-item sidebar-radio-item">
+            <label key={ind.id} className="sidebar-check-item sidebar-radio-item sidebar-group-item">
               <input
                 type="radio"
                 name="indicator"
@@ -114,7 +124,10 @@ export default function Sidebar({ state, data, update }: Props) {
                 onChange={() => update('indicator', ind.id)}
               />
               <span className="sidebar-ind-icon">{ind.icon}</span>
-              <span>{t(`indicator.${ind.id}` as any, state.lang)}</span>
+              <span className="sidebar-group-label">
+                <span className="sidebar-group-name">{t(`indicator.${ind.id}` as any, state.lang)}</span>
+                <span className="sidebar-group-desc">{t(`indicator.${ind.id}.description` as any, state.lang)}</span>
+              </span>
             </label>
           ))}
         </div>

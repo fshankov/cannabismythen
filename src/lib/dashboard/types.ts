@@ -36,6 +36,9 @@ export interface Group {
   id: GroupId;
   name_de: string;
   name_en: string;
+  n?: number;
+  description_de?: string;
+  description_en?: string;
 }
 
 export interface Category {
