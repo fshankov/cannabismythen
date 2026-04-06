@@ -5,6 +5,7 @@ import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import MythenExplorer from "@components/dashboard/MythenExplorer";
 import { reader, getPublishedEntries } from "@lib/content";
+import definitionsData from "../../content/dashboard-definitionen.json";
 import "../../styles/dashboard.css";
 
 // Combined myth factsheets: one .mdoc covers two CaRM myth IDs.
@@ -88,5 +89,6 @@ for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
     client:load
     mythSlugs={mythSlugs}
     mythContent={JSON.stringify(mythContentMap)}
+    definitions={JSON.stringify(definitionsData)}
   />
 </BaseLayout>

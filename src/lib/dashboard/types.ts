@@ -98,6 +98,19 @@ export interface SourceMetricDef {
   data: Record<SourceGroupId, Record<string, number>>;
 }
 
+export interface DefinitionEntry {
+  label: string;
+  sampleSize?: string;
+  definition: string;
+  scale?: string;
+}
+
+export interface DashboardDefinitions {
+  groups: Partial<Record<string, DefinitionEntry>>;
+  mythIndicators: Partial<Record<string, DefinitionEntry>>;
+  sourcesIndicators: Partial<Record<string, DefinitionEntry>>;
+}
+
 export interface InformationSourcesData {
   sourceCategories: SourceCategory[];
   sourceGroups: SourceGroup[];

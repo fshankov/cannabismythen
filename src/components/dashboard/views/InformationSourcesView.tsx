@@ -2,16 +2,19 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
 import type {
   AppState,
+  DashboardDefinitions,
   InformationSourcesData,
   SourceMetricType,
   SourceGroupId,
   InformationSource,
 } from '../../../lib/dashboard/types';
 import { t } from '../../../lib/dashboard/translations';
+import InfoTooltip from '../InfoTooltip';
 
 interface Props {
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
+  definitions?: DashboardDefinitions | null;
 }
 
 const METRIC_KEYS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
@@ -33,7 +36,7 @@ const GROUP_LABELS: Record<SourceGroupId, string> = {
 
 const GROUP_KEYS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 
-export default function InformationSourcesView({ state, update }: Props) {
+export default function InformationSourcesView({ state, update, definitions }: Props) {
   const [sourceData, setSourceData] = useState<InformationSourcesData | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -261,15 +264,25 @@ export default function InformationSourcesView({ state, update }: Props) {
       {/* Metric selector pills */}
       <div className="sources-controls">
         <div className="sources-pills">
-          {METRIC_KEYS.map((m) => (
-            <button
-              key={m}
-              className={`indicator-tag ${m === metric ? 'active' : ''}`}
-              onClick={() => update('sourceMetric', m)}
-            >
-              {METRIC_LABELS[m]}
-            </button>
-          ))}
+          {METRIC_KEYS.map((m) => {
+            const def = definitions?.sourcesIndicators?.[m];
+            return (
+              <button
+                key={m}
+                className={`indicator-tag ${m === metric ? 'active' : ''}`}
+                onClick={() => update('sourceMetric', m)}
+              >
+                {METRIC_LABELS[m]}
+                {def && (
+                  <InfoTooltip
+                    title={def.label}
+                    definition={def.definition}
+                    scale={def.scale}
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
         <div className="sources-pills">
           {GROUP_KEYS.map((g) => (

@@ -497,6 +497,18 @@ main:has(.carm-explorer) {
   opacity: 0.8;
 }
 
+/* InfoTooltip inside pill buttons — keep icon color consistent */
+.carm-explorer .indicator-tag .info-tooltip-trigger,
+.carm-explorer .circular-group-btn .info-tooltip-trigger {
+  color: inherit;
+  opacity: 0.7;
+}
+
+.carm-explorer .indicator-tag.active .info-tooltip-trigger,
+.carm-explorer .indicator-tag .info-tooltip-trigger:hover {
+  opacity: 1;
+}
+
 .carm-explorer .sidebar-check-actions {
   display: flex;
   gap: 6px;

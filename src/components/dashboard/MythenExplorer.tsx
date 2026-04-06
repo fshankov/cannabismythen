@@ -5,6 +5,7 @@ import type {
   ViewTab,
   Myth,
   VerdictFilter,
+  DashboardDefinitions,
 } from '../../lib/dashboard/types';
 import { loadData, filterMyths, exportCSV } from '../../lib/dashboard/data';
 import { t } from '../../lib/dashboard/translations';
@@ -30,9 +31,11 @@ interface Props {
   mythSlugs?: Record<number, string>;
   /** JSON-serialised Record<mythId, MythContentEntry> of pre-rendered factsheet HTML */
   mythContent?: string;
+  /** JSON-serialised DashboardDefinitions from dashboard-definitionen.json */
+  definitions?: string;
 }
 
-export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
+export default function MythenExplorer({ mythSlugs, mythContent, definitions }: Props) {
   const [data, setData] = useState<CarmData | null>(null);
   const [state, setState] = useState<AppState>(() => {
     const defaults = getDefaultState();
@@ -53,6 +56,16 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
       return {};
     }
   }, [mythContent]);
+
+  // Parse dashboard definitions passed as JSON from Astro
+  const defs: DashboardDefinitions | null = useMemo(() => {
+    if (!definitions) return null;
+    try {
+      return JSON.parse(definitions);
+    } catch {
+      return null;
+    }
+  }, [definitions]);
 
   // Build myth slug map from props
   const mythSlugMap = useMemo(() => {
@@ -172,9 +185,9 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
 
           <div className={`chart-area${isFullscreen ? ' fullscreen' : ''}`} ref={chartRef}>
             {state.view === 'sources' ? (
-              <InformationSourcesView state={state} update={update} />
+              <InformationSourcesView state={state} update={update} definitions={defs} />
             ) : state.view === 'sources_v2' ? (
-              <InformationSourcesV2View state={state} update={update} />
+              <InformationSourcesV2View state={state} update={update} definitions={defs} />
             ) : filteredMyths.length === 0 ? (
               <div className="no-results">{t('misc.noResults', 'de')}</div>
             ) : (
@@ -207,7 +220,7 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
         </section>
 
         {state.view !== 'sources' && state.view !== 'sources_v2' && (
-          <Sidebar state={state} data={data} update={update} />
+          <Sidebar state={state} data={data} update={update} definitions={defs} />
         )}
       </div>
 
