@@ -19,6 +19,7 @@ import LollipopView from './views/LollipopView';
 import OverviewView from './views/OverviewView';
 import CircularView from './views/CircularView';
 import InformationSourcesView from './views/InformationSourcesView';
+import InformationSourcesV2View from './views/InformationSourcesV2View';
 import FactsheetPanel from './FactsheetPanel';
 import type { MythContentEntry } from './FactsheetPanel';
 
@@ -133,7 +134,7 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
         </div>
       </div>
 
-      <div className={`app-layout${state.view === 'sources' ? ' app-layout--full' : ''}`}>
+      <div className={`app-layout${(state.view === 'sources' || state.view === 'sources_v2') ? ' app-layout--full' : ''}`}>
         <section className="chart-column">
           <ViewTabs
             view={state.view}
@@ -172,6 +173,8 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
           <div className={`chart-area${isFullscreen ? ' fullscreen' : ''}`} ref={chartRef}>
             {state.view === 'sources' ? (
               <InformationSourcesView state={state} update={update} />
+            ) : state.view === 'sources_v2' ? (
+              <InformationSourcesV2View state={state} update={update} />
             ) : filteredMyths.length === 0 ? (
               <div className="no-results">{t('misc.noResults', 'de')}</div>
             ) : (
@@ -198,12 +201,12 @@ export default function MythenExplorer({ mythSlugs, mythContent }: Props) {
             )}
           </div>
 
-          {state.view !== 'sources' && (
+          {state.view !== 'sources' && state.view !== 'sources_v2' && (
             <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
           )}
         </section>
 
-        {state.view !== 'sources' && (
+        {state.view !== 'sources' && state.view !== 'sources_v2' && (
           <Sidebar state={state} data={data} update={update} />
         )}
       </div>

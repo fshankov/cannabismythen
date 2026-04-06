@@ -83,6 +83,18 @@ const translations = {
   'sources.metric.trust': { de: 'Vertrauen', en: 'Trust' },
   'sources.metric.prevention': { de: 'Präventionspotential', en: 'Prevention Potential' },
 
+  // Sources V2
+  'view.sources_v2': { de: 'Informationsquellen V2', en: 'Information Sources V2' },
+  'howto.sources_v2': {
+    de: 'Alle vier Metriken pro Quelle in einem Diagramm. Wechseln Sie zwischen Hantel-Diagramm, kleinen Diagrammen und Strategie-Matrix. Klicken Sie auf eine Zeile, um Unterkategorien anzuzeigen.',
+    en: 'All four metrics per source in one chart. Switch between dumbbell, small multiples, and strategy matrix. Click a row to reveal subcategories.',
+  },
+  'sources_v2.mode.dumbbell': { de: 'Hantel-Diagramm', en: 'Dumbbell' },
+  'sources_v2.mode.multiples': { de: 'Kleine Diagramme', en: 'Small Multiples' },
+  'sources_v2.mode.matrix': { de: 'Strategie-Matrix', en: 'Strategy Matrix' },
+  'sources_v2.sort.prevention': { de: 'Nach Prävention', en: 'By Prevention' },
+  'sources_v2.sort.gap': { de: 'Nach Lücke (Vertrauen−Suche)', en: 'By Gap (Trust−Search)' },
+
   // Verdict tags
   'verdict.all': { de: 'Alle Mythen', en: 'All Myths' },
   'verdict.richtig': { de: 'Fakt', en: 'Fact' },

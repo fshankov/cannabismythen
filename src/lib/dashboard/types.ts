@@ -57,7 +57,10 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'sources';
+export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'sources' | 'sources_v2';
+
+export type SourcesV2Mode = 'dumbbell' | 'multiples' | 'matrix';
+export type SourcesV2Sort = 'prevention' | 'gap';
 
 export type Lang = 'de' | 'en';
 
@@ -113,4 +116,8 @@ export interface AppState {
   lollipopIndicator: Indicator;
   sourceMetric: SourceMetricType;
   sourceGroup: SourceGroupId;
+  sourcesV2Mode: SourcesV2Mode;
+  sourcesV2Sort: SourcesV2Sort;
+  sourcesV2Group: SourceGroupId;
+  sourcesV2Expanded: number[];
 }

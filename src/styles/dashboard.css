@@ -1343,3 +1343,68 @@ main:has(.carm-explorer) {
     flex-direction: column;
   }
 }
+
+/* ==================== INFORMATION SOURCES V2 ==================== */
+.sources-v2-view {
+  padding: 8px 4px 20px;
+}
+
+.sources-v2-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.sources-v2-control-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sources-v2-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 78px;
+}
+
+.sources-v2-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+}
+
+.sources-v2-legend-divider {
+  color: #cbd5e1;
+}
+
+.sources-v2-legend-hint {
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  font-style: italic;
+}
+
+@media (max-width: 720px) {
+  .sources-v2-label {
+    min-width: 100%;
+  }
+  .sources-v2-control-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

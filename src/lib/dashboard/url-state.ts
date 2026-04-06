@@ -1,8 +1,10 @@
-import type { AppState, ViewTab, GroupId, Indicator, Lang, VerdictFilter, CorrectnessClass, SourceMetricType, SourceGroupId } from './types';
+import type { AppState, ViewTab, GroupId, Indicator, Lang, VerdictFilter, CorrectnessClass, SourceMetricType, SourceGroupId, SourcesV2Mode, SourcesV2Sort } from './types';
 
 const ALL_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 const ALL_INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance'];
-const ALL_VIEWS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'sources'];
+const ALL_VIEWS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'sources', 'sources_v2'];
+const ALL_V2_MODES: SourcesV2Mode[] = ['dumbbell', 'multiples', 'matrix'];
+const ALL_V2_SORTS: SourcesV2Sort[] = ['prevention', 'gap'];
 const ALL_VERDICTS: CorrectnessClass[] = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
 const ALL_SOURCE_METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
 const ALL_SOURCE_GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
@@ -21,6 +23,10 @@ const DEFAULTS: AppState = {
   lollipopIndicator: 'awareness',
   sourceMetric: 'prevention',
   sourceGroup: 'adults',
+  sourcesV2Mode: 'dumbbell',
+  sourcesV2Sort: 'prevention',
+  sourcesV2Group: 'adults',
+  sourcesV2Expanded: [],
 };
 
 export function stateToUrl(state: Partial<AppState>): string {
@@ -45,6 +51,14 @@ export function stateToUrl(state: Partial<AppState>): string {
     params.set('sm', state.sourceMetric);
   if (state.sourceGroup && state.sourceGroup !== DEFAULTS.sourceGroup)
     params.set('sg', state.sourceGroup);
+  if (state.sourcesV2Mode && state.sourcesV2Mode !== DEFAULTS.sourcesV2Mode)
+    params.set('v2m', state.sourcesV2Mode);
+  if (state.sourcesV2Sort && state.sourcesV2Sort !== DEFAULTS.sourcesV2Sort)
+    params.set('v2s', state.sourcesV2Sort);
+  if (state.sourcesV2Group && state.sourcesV2Group !== DEFAULTS.sourcesV2Group)
+    params.set('v2g', state.sourcesV2Group);
+  if (state.sourcesV2Expanded && state.sourcesV2Expanded.length > 0)
+    params.set('v2x', state.sourcesV2Expanded.join(','));
   const qs = params.toString();
   return qs ? `?${qs}` : '';
 }
@@ -95,6 +109,18 @@ export function urlToState(): Partial<AppState> {
 
   const sg = params.get('sg');
   if (ALL_SOURCE_GROUPS.includes(sg as SourceGroupId)) state.sourceGroup = sg as SourceGroupId;
+
+  const v2m = params.get('v2m');
+  if (ALL_V2_MODES.includes(v2m as SourcesV2Mode)) state.sourcesV2Mode = v2m as SourcesV2Mode;
+
+  const v2s = params.get('v2s');
+  if (ALL_V2_SORTS.includes(v2s as SourcesV2Sort)) state.sourcesV2Sort = v2s as SourcesV2Sort;
+
+  const v2g = params.get('v2g');
+  if (ALL_SOURCE_GROUPS.includes(v2g as SourceGroupId)) state.sourcesV2Group = v2g as SourceGroupId;
+
+  const v2x = params.get('v2x');
+  if (v2x) state.sourcesV2Expanded = v2x.split(',').map(Number).filter((n) => !isNaN(n));
 
   return state;
 }
