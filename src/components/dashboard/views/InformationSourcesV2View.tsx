@@ -2,15 +2,18 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import * as d3 from 'd3';
 import type {
   AppState,
+  DashboardDefinitions,
   InformationSourcesData,
   SourceMetricType,
   SourceGroupId,
   InformationSource,
 } from '../../../lib/dashboard/types';
+import InfoTooltip from '../InfoTooltip';
 
 interface Props {
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
+  definitions?: DashboardDefinitions | null;
 }
 
 const METRIC_KEYS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
@@ -50,7 +53,7 @@ interface RowDatum {
   max: number | null;
 }
 
-export default function InformationSourcesV2View({ state, update }: Props) {
+export default function InformationSourcesV2View({ state, update, definitions }: Props) {
   const [sourceData, setSourceData] = useState<InformationSourcesData | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -730,15 +733,25 @@ export default function InformationSourcesV2View({ state, update }: Props) {
 
       {/* Metric legend */}
       <div className="sources-v2-legend">
-        {METRIC_KEYS.map((m) => (
-          <span key={m} className="sources-legend-item">
-            <span
-              className="sources-legend-dot"
-              style={{ backgroundColor: METRIC_COLORS[m] }}
-            />
-            {METRIC_LABELS[m]}
-          </span>
-        ))}
+        {METRIC_KEYS.map((m) => {
+          const def = definitions?.sourcesIndicators?.[m];
+          return (
+            <span key={m} className="sources-legend-item">
+              <span
+                className="sources-legend-dot"
+                style={{ backgroundColor: METRIC_COLORS[m] }}
+              />
+              {METRIC_LABELS[m]}
+              {def && (
+                <InfoTooltip
+                  title={def.label}
+                  definition={def.definition}
+                  scale={def.scale}
+                />
+              )}
+            </span>
+          );
+        })}
         <span className="sources-v2-legend-divider">•</span>
         <span className="sources-v2-legend-hint">
           Textfarbe = Kategorie · Klick auf Zeile für Unterkategorien

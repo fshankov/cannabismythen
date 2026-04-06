@@ -2569,32 +2569,49 @@
     {
       "id": "general_population",
       "name_de": "Gesamtbevölkerung (16–70)",
-      "name_en": "General Population (16–70)"
+      "name_en": "General Population (16–70)",
+      "description_de": "Alle Befragten (Volljährige und Minderjährige kombiniert).",
+      "description_en": "All respondents (adults and minors combined)."
     },
     {
       "id": "adults",
-      "name_de": "Volljährige (18–70)",
-      "name_en": "Adults (18–70)"
+      "name_de": "Erwachsene (18–70)",
+      "name_en": "Adults (18–70)",
+      "n": 2097,
+      "description_de": "Repräsentative Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund.",
+      "description_en": "Representative sample of the population (18–70 yrs), weighted by gender, age, education, and migration background."
     },
     {
       "id": "minors",
       "name_de": "Minderjährige (16–17)",
-      "name_en": "Minors (16–17)"
+      "name_en": "Minors (16–17)",
+      "n": 555,
+      "description_de": "Repräsentative Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel.",
+      "description_en": "Representative sample of 16–17-year-olds from the Horizoom youth panel."
     },
     {
       "id": "consumers",
       "name_de": "Konsumierende",
-      "name_en": "Consumers (past 30 days)"
+      "name_en": "Consumers (past 30 days)",
+      "n": 358,
+      "description_de": "Personen mit Cannabis-Konsum in den letzten 30 Tagen (30-Tage-Prävalenz).",
+      "description_en": "Persons who consumed cannabis in the past 30 days (30-day prevalence)."
     },
     {
       "id": "young_adults",
       "name_de": "Junge Erwachsene (18–26)",
-      "name_en": "Young Adults (18–26)"
+      "name_en": "Young Adults (18–26)",
+      "n": 333,
+      "description_de": "Teilgruppe der Volljährigen im Alter von 18–26 Jahren.",
+      "description_en": "Subgroup of adults aged 18–26 years."
     },
     {
       "id": "parents",
       "name_de": "Eltern",
-      "name_en": "Parents"
+      "name_en": "Parents",
+      "n": 539,
+      "description_de": "Volljährige mit mindestens einem Kind unter 18 Jahren.",
+      "description_en": "Adults with at least one child under 18 years of age."
     }
   ],
   "categories": [

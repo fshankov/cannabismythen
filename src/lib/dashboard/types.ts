@@ -36,6 +36,9 @@ export interface Group {
   id: GroupId;
   name_de: string;
   name_en: string;
+  n?: number;
+  description_de?: string;
+  description_en?: string;
 }
 
 export interface Category {
@@ -93,6 +96,19 @@ export interface SourceMetricDef {
   unit: string;
   scale: [number, number];
   data: Record<SourceGroupId, Record<string, number>>;
+}
+
+export interface DefinitionEntry {
+  label: string;
+  sampleSize?: string;
+  definition: string;
+  scale?: string;
+}
+
+export interface DashboardDefinitions {
+  groups: Partial<Record<string, DefinitionEntry>>;
+  mythIndicators: Partial<Record<string, DefinitionEntry>>;
+  sourcesIndicators: Partial<Record<string, DefinitionEntry>>;
 }
 
 export interface InformationSourcesData {

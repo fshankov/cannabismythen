@@ -32,6 +32,42 @@ const translations = {
   'indicator.correctness.short': { de: 'Richtigkeit', en: 'Correctness' },
   'indicator.prevention_significance.short': { de: 'Prävention', en: 'Prevention' },
 
+  // Indicator descriptions
+  'indicator.awareness.description': {
+    de: 'Anteil der Befragten, die den Mythos kennen. Höher = bekannter.',
+    en: 'Share of respondents who know the myth. Higher = better known.',
+  },
+  'indicator.significance.description': {
+    de: 'Subjektive Wichtigkeit des Mythos für eigene Entscheidungen (0–100). Nur bei Personen erhoben, die den Mythos kennen.',
+    en: 'Subjective importance of the myth for personal decisions (0–100). Only measured among respondents who know the myth.',
+  },
+  'indicator.correctness.description': {
+    de: 'Übereinstimmung der Einschätzung mit der wissenschaftlichen Klassifikation (0–100). Höher = treffender.',
+    en: 'Agreement of respondents\' assessment with the scientific classification (0–100). Higher = more accurate.',
+  },
+  'indicator.prevention_significance.description': {
+    de: 'Kombination aus Bedeutung und Fehleinschätzung (0–100). Höher = größerer Präventionsbedarf.',
+    en: 'Combination of significance and misassessment (0–100). Higher = greater prevention need.',
+  },
+
+  // Source metric descriptions
+  'sources.metric.search.description': {
+    de: 'Anteil der Befragten, die diesen Kanal aktiv zur Information nutzen würden.',
+    en: 'Share of respondents who would actively use this channel to seek information.',
+  },
+  'sources.metric.perception.description': {
+    de: 'Anteil, der über diesen Kanal ungeplant Gesundheitsinformationen wahrnimmt.',
+    en: 'Share who unplannedly perceive health information through this channel.',
+  },
+  'sources.metric.trust.description': {
+    de: 'Eingeschätzte Vertrauenswürdigkeit der Quelle (0–100).',
+    en: 'Perceived trustworthiness of the source (0–100).',
+  },
+  'sources.metric.prevention.description': {
+    de: 'Kombinierter Wert aus Suche, Wahrnehmung und Vertrauen (0–100). Höher = größeres Potential für Prävention.',
+    en: 'Combined score of search, perception, and trust (0–100). Higher = greater prevention potential.',
+  },
+
   // View tabs
   'view.table': { de: 'Tabelle', en: 'Table' },
   'view.bar': { de: 'Balken', en: 'Bar' },
