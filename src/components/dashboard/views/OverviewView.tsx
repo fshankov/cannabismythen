@@ -14,7 +14,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import type { Myth, Metric, AppState, Indicator, Category } from '../../../lib/dashboard/types';
+import type { Myth, Metric, AppState, Category } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, formatValue } from '../../../lib/dashboard/data';
 import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
 import { t } from '../../../lib/dashboard/translations';
@@ -27,13 +27,6 @@ interface Props {
   onSelectMyth: (id: number) => void;
   categories: Category[];
 }
-
-const INDICATOR_OPTIONS: { key: Indicator; label: string; icon: string }[] = [
-  { key: 'awareness', label: 'Kenntnis', icon: '👁️' },
-  { key: 'significance', label: 'Bedeutung', icon: '⚖️' },
-  { key: 'correctness', label: 'Richtigkeit', icon: '✅' },
-  { key: 'prevention_significance', label: 'Prävention', icon: '🛡️' },
-];
 
 const VERDICT_LABELS: Record<string, string> = {
   richtig: 'Fakt',
@@ -92,20 +85,6 @@ export default function OverviewView({ myths, metrics, state, update, onSelectMy
 
   return (
     <div className="overview-view">
-      {/* Indicator selector */}
-      <div className="overview-indicator-bar">
-        <span className="overview-indicator-label">Metrik:</span>
-        {INDICATOR_OPTIONS.map((opt) => (
-          <button
-            key={opt.key}
-            className={`indicator-tag ${indicator === opt.key ? 'active' : ''}`}
-            onClick={() => update('indicator', opt.key)}
-          >
-            {opt.icon} {opt.label}
-          </button>
-        ))}
-      </div>
-
       {/* Summary strip */}
       <div className="overview-summary">
         <span className="overview-summary-count">{myths.length} Mythen</span>

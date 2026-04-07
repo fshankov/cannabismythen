@@ -44,8 +44,6 @@ main:has(.carm-explorer) {
   --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
   --duration-fast: 150ms;
   --duration-normal: 250ms;
-  --sidebar-width: 300px;
-
   font-family: var(--font-sans);
   color: var(--color-text);
   line-height: 1.6;
@@ -145,19 +143,10 @@ main:has(.carm-explorer) {
   background: var(--color-border);
 }
 
-/* ==================== APP LAYOUT (Grid) ==================== */
+/* ==================== APP LAYOUT ==================== */
 .carm-explorer .app-layout {
-  display: grid;
-  grid-template-columns: 1fr var(--sidebar-width);
-  gap: 0 24px;
-  align-items: start;
-}
-
-.carm-explorer .app-layout--full {
-  grid-template-columns: 1fr;
-}
-
-.carm-explorer .chart-column {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
@@ -326,160 +315,130 @@ main:has(.carm-explorer) {
   flex-shrink: 0;
 }
 
-/* ==================== SIDEBAR ==================== */
-.carm-sidebar {
-  position: sticky;
-  top: 16px;
-  max-height: calc(100vh - 32px);
-  overflow-y: auto;
-  border-left: 1px solid var(--color-border);
-  padding-left: 20px;
-  padding-bottom: 24px;
-  /* Custom scrollbar — thin, unobtrusive */
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
+/* ==================== FILTER BAR ==================== */
+.carm-explorer .filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  padding: 12px 0;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.carm-sidebar::-webkit-scrollbar {
-  width: 4px;
-}
-.carm-sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.carm-sidebar::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 2px;
-}
-
-/* Dividers between sidebar sections */
-.carm-explorer .sidebar-section {
-  padding-top: 18px;
-  margin-bottom: 0;
-  border-top: 1px solid var(--color-border);
-}
-
-.carm-explorer .sidebar-section:first-child {
-  padding-top: 0;
-  border-top: none;
-}
-
-.carm-explorer .sidebar-heading {
+.carm-explorer .filter-section {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.carm-explorer .filter-section--categories {
+  flex-basis: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.carm-explorer .filter-label {
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--color-text-muted);
-  margin-bottom: 10px;
-  padding-bottom: 6px;
-}
-
-.carm-explorer .sidebar-icon {
+  white-space: nowrap;
   flex-shrink: 0;
-  color: var(--color-text-muted);
 }
 
-.carm-explorer .sidebar-checklist {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  margin-bottom: 18px;
-}
-
-/* Each filter row — padded, rounded, hover/active highlight */
-.carm-explorer .sidebar-check-item {
-  display: flex;
+.carm-explorer .filter-label--toggle {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 6px;
-  font-size: 0.82rem;
+  gap: 6px;
+  background: none;
+  border: none;
   cursor: pointer;
-  line-height: 1.3;
+  padding: 0;
+  font-family: var(--font-sans);
+  transition: color var(--transition);
+}
+
+.carm-explorer .filter-label--toggle:hover {
+  color: var(--color-primary);
+}
+
+.carm-explorer .filter-cat-count {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
   border-radius: var(--radius-sm);
-  transition: background var(--transition);
+  padding: 1px 6px;
 }
 
-.carm-explorer .sidebar-check-item:hover {
+.carm-explorer .filter-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.carm-explorer .filter-categories {
+  width: 100%;
+  padding-top: 8px;
+}
+
+.carm-explorer .filter-cat-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.carm-explorer .filter-cat-action {
+  padding: 2px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: white;
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: all var(--transition);
+}
+
+.carm-explorer .filter-cat-action:hover,
+.carm-explorer .filter-cat-action.active {
   background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
-/* Selected radio row highlight */
-.carm-explorer .sidebar-check-item:has(input[type='radio']:checked) {
+.carm-explorer .filter-cat-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.carm-explorer .filter-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: white;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
+}
+
+.carm-explorer .filter-cat-chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.carm-explorer .filter-cat-chip.active {
   background: var(--color-primary-light);
-}
-
-.carm-explorer .sidebar-check-item:has(input[type='radio']:checked) .sidebar-group-name {
+  border-color: var(--color-primary);
   color: var(--color-primary);
   font-weight: 600;
-}
-
-.carm-explorer .sidebar-check-item:has(input[type='radio']:checked) .sidebar-ind-icon {
-  filter: none;
-}
-
-.carm-explorer .sidebar-check-item input[type='checkbox'],
-.carm-explorer .sidebar-check-item input[type='radio'] {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--color-primary);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.carm-explorer .sidebar-radio-item {
-  gap: 6px;
-}
-
-.carm-explorer .sidebar-group-item {
-  align-items: flex-start;
-}
-
-.carm-explorer .sidebar-group-item input[type='radio'] {
-  margin-top: 3px;
-}
-
-.carm-explorer .sidebar-group-label {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.carm-explorer .sidebar-group-name {
-  font-size: 0.78rem;
-  line-height: 1.35;
-  transition: color var(--transition);
-}
-
-.carm-explorer .sidebar-group-n {
-  color: var(--color-text-muted);
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-}
-
-.carm-explorer .sidebar-group-desc {
-  font-size: 0.7rem;
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-}
-
-.carm-explorer .sidebar-ind-icon {
-  flex-shrink: 0;
-  margin-top: 1px;
-  color: var(--color-text-muted);
-  transition: color var(--transition);
-}
-
-/* Selected indicator row — icon picks up primary color */
-.carm-explorer .sidebar-check-item:has(input[type='radio']:checked) .sidebar-ind-icon {
-  color: var(--color-primary);
-}
-
-.carm-explorer .sidebar-cat-label {
-  font-size: 0.78rem;
-  line-height: 1.35;
 }
 
 /* ── InfoTooltip ─────────────────────────────────────────────────────────── */
@@ -591,8 +550,7 @@ main:has(.carm-explorer) {
 }
 
 /* InfoTooltip inside pill buttons — keep icon color consistent */
-.carm-explorer .indicator-tag .info-tooltip-trigger,
-.carm-explorer .circular-group-btn .info-tooltip-trigger {
+.carm-explorer .indicator-tag .info-tooltip-trigger {
   color: inherit;
   opacity: 0.7;
 }
@@ -602,30 +560,6 @@ main:has(.carm-explorer) {
   opacity: 1;
 }
 
-.carm-explorer .sidebar-check-actions {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.carm-explorer .sidebar-mini-btn {
-  padding: 2px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: white;
-  color: var(--color-text-secondary);
-  font-size: 0.7rem;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  transition: all var(--transition);
-}
-
-.carm-explorer .sidebar-mini-btn:hover,
-.carm-explorer .sidebar-mini-btn.active {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
 
 /* ==================== DATA TABLE ==================== */
 .carm-explorer .data-table-container {
@@ -742,7 +676,9 @@ main:has(.carm-explorer) {
 }
 
 .carm-explorer .data-table th .th-icon {
-  font-size: 0.8rem;
+  display: inline-flex;
+  vertical-align: middle;
+  color: var(--color-text-muted);
 }
 
 /* ==================== CHIPS ==================== */
@@ -830,14 +766,7 @@ main:has(.carm-explorer) {
   box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
-/* ==================== LOLLIPOP INDICATOR TAGS ==================== */
-.carm-explorer .lollipop-indicator-tags {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-  flex-wrap: wrap;
-}
-
+/* ==================== INDICATOR TAGS ==================== */
 .carm-explorer .indicator-tag {
   display: inline-flex;
   align-items: center;
@@ -954,22 +883,6 @@ main:has(.carm-explorer) {
 /* ==================== OVERVIEW VIEW ==================== */
 .overview-view {
   padding: 16px;
-}
-
-.overview-indicator-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
-}
-
-.overview-indicator-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-text-secondary);
 }
 
 .overview-summary {
@@ -1382,62 +1295,6 @@ main:has(.carm-explorer) {
   overflow: visible;
 }
 
-.circular-group-switcher {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-  padding: 0 8px;
-}
-
-.circular-group-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-text-secondary);
-  margin-right: 2px;
-}
-
-.circular-group-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: white;
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease-out),
-              background var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out),
-              box-shadow var(--duration-fast) var(--ease-out);
-  font-family: var(--font-sans);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
-.circular-group-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
-}
-
-.circular-group-btn.active {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-  box-shadow: none;
-}
-
-.circular-group-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--color-primary-light), 0 0 0 4px var(--color-primary);
-}
-
 .circular-tooltip {
   position: absolute;
   pointer-events: none;
@@ -1574,25 +1431,6 @@ main:has(.carm-explorer) {
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
-  .carm-explorer .app-layout {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .carm-sidebar {
-    position: static;
-    max-height: none;
-    border-left: none;
-    border-top: 2px solid var(--color-border);
-    padding-left: 0;
-    padding-top: 20px;
-    margin-top: 20px;
-    /* On tablet, show filters in a 2-column grid */
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 0 32px;
-  }
-
   .carm-explorer-header {
     flex-direction: column;
     align-items: flex-start;
@@ -1618,18 +1456,19 @@ main:has(.carm-explorer) {
 }
 
 @media (max-width: 640px) {
-  .carm-sidebar {
-    grid-template-columns: 1fr;
-    gap: 0;
-    padding-top: 16px;
-    margin-top: 16px;
-  }
-
   /* Ensure all pill buttons meet 44px touch target */
   .carm-explorer .indicator-tag,
-  .carm-explorer .circular-group-btn {
+  .carm-explorer .filter-cat-chip {
     min-height: 36px;
     padding: 7px 14px;
+  }
+
+  .carm-explorer .filter-bar {
+    gap: 12px 16px;
+  }
+
+  .carm-explorer .filter-section {
+    flex-basis: 100%;
   }
 
   /* Tooltips: ensure card doesn't overflow left/right edge */

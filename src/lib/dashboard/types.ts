@@ -129,7 +129,6 @@ export interface AppState {
   selectedMythId: number | null;
   scatterX: Indicator;
   scatterY: Indicator;
-  lollipopIndicator: Indicator;
   sourceMetric: SourceMetricType;
   sourceGroup: SourceGroupId;
   sourcesV2Mode: SourcesV2Mode;

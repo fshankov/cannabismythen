@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import type { Myth, Metric, AppState, GroupId, Group, Indicator } from '../../../lib/dashboard/types';
+import type { Myth, Metric, AppState, Group, Indicator } from '../../../lib/dashboard/types';
 import { getMythMetric, getMythShortText } from '../../../lib/dashboard/data';
 
 /* ── Indicator config ──────────────────────────────────────────── */
@@ -106,7 +106,7 @@ export default function CircularView({
   groups,
   onSelectMyth,
 }: Props) {
-  const [selectedGroup, setSelectedGroup] = useState<GroupId>('general_population');
+  const selectedGroup = state.groupIds[0] || 'adults';
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -276,22 +276,6 @@ export default function CircularView({
       onMouseMove={handleMouseMove}
       style={{ position: 'relative' }}
     >
-      {/* Group switcher */}
-      <div className="circular-group-switcher">
-        <span className="circular-group-label">
-          {lang === 'de' ? 'Bevölkerungsgruppe:' : 'Population group:'}
-        </span>
-        {groups.map((g) => (
-          <button
-            key={g.id}
-            className={`circular-group-btn${selectedGroup === g.id ? ' active' : ''}`}
-            onClick={() => setSelectedGroup(g.id)}
-          >
-            {lang === 'de' ? g.name_de : g.name_en}
-          </button>
-        ))}
-      </div>
-
       <svg
         width={size}
         height={size}

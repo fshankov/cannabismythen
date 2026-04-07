@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { Eye, TrendingUp, Target, Shield } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { Myth, Metric, AppState, Indicator, VerdictFilter, CorrectnessClass } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, formatValue } from '../../../lib/dashboard/data';
 import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
@@ -15,11 +17,11 @@ interface Props {
 type SortKey = 'myth' | 'verdict' | 'awareness' | 'significance' | 'correctness' | 'prevention_significance';
 type SortDir = 'asc' | 'desc';
 
-const INDICATOR_COLS: { key: Indicator; icon: string }[] = [
-  { key: 'awareness', icon: '👁️' },
-  { key: 'significance', icon: '⚖️' },
-  { key: 'correctness', icon: '✅' },
-  { key: 'prevention_significance', icon: '🛡️' },
+const INDICATOR_COLS: { key: Indicator; Icon: LucideIcon }[] = [
+  { key: 'awareness', Icon: Eye },
+  { key: 'significance', Icon: TrendingUp },
+  { key: 'correctness', Icon: Target },
+  { key: 'prevention_significance', Icon: Shield },
 ];
 
 const VERDICT_OPTIONS: { key: VerdictFilter; tKey: string }[] = [
@@ -111,7 +113,7 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
                 onClick={() => toggleSort(col.key)}
                 style={{ textAlign: 'right' }}
               >
-                <span className="th-icon">{col.icon}</span>{' '}
+                <span className="th-icon"><col.Icon size={14} strokeWidth={1.75} aria-hidden="true" /></span>{' '}
                 {t(`indicator.${col.key}.short` as any, state.lang)} {renderSortArrow(col.key)}
               </th>
             ))}

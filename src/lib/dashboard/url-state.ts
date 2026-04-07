@@ -20,7 +20,6 @@ const DEFAULTS: AppState = {
   selectedMythId: null,
   scatterX: 'awareness',
   scatterY: 'prevention_significance',
-  lollipopIndicator: 'awareness',
   sourceMetric: 'prevention',
   sourceGroup: 'adults',
   sourcesV2Mode: 'dumbbell',
@@ -45,8 +44,6 @@ export function stateToUrl(state: Partial<AppState>): string {
   if (state.selectedMythId) params.set('myth', String(state.selectedMythId));
   if (state.scatterX && state.scatterX !== DEFAULTS.scatterX) params.set('sx', state.scatterX);
   if (state.scatterY && state.scatterY !== DEFAULTS.scatterY) params.set('sy', state.scatterY);
-  if (state.lollipopIndicator && state.lollipopIndicator !== DEFAULTS.lollipopIndicator)
-    params.set('li', state.lollipopIndicator);
   if (state.sourceMetric && state.sourceMetric !== DEFAULTS.sourceMetric)
     params.set('sm', state.sourceMetric);
   if (state.sourceGroup && state.sourceGroup !== DEFAULTS.sourceGroup)
@@ -100,9 +97,6 @@ export function urlToState(): Partial<AppState> {
 
   const sy = params.get('sy');
   if (ALL_INDICATORS.includes(sy as Indicator)) state.scatterY = sy as Indicator;
-
-  const li = params.get('li');
-  if (ALL_INDICATORS.includes(li as Indicator)) state.lollipopIndicator = li as Indicator;
 
   const sm = params.get('sm');
   if (ALL_SOURCE_METRICS.includes(sm as SourceMetricType)) state.sourceMetric = sm as SourceMetricType;
