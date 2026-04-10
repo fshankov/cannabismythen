@@ -21,14 +21,16 @@ cannabismythen/
 │   ├── pages/                        # Astro routes (public website)
 │   │   ├── index.astro               # Homepage / scrollytelling entry
 │   │   ├── login.astro               # Auth gate
-│   │   ├── haeufige-fragen/          # FAQ section
-│   │   ├── selbsttest/               # Interactive quiz
+│   │   ├── fakten-karten/            # Fakten-Karten — flip card grid with category filter
+│   │   ├── haeufige-fragen/          # Ihre Fragen — FAQ section
+│   │   ├── selbsttest/               # Selbsttest — interactive quiz
 │   │   ├── startseite/               # Scrollytelling viewer
-│   │   ├── ueber-uns/                # About / methodology
-│   │   ├── zahlen-und-fakten/        # Myth factsheets + data dashboard
+│   │   ├── ueber-uns/                # Über das Projekt — about / methodology
+│   │   ├── zahlen-und-fakten/        # Daten-Explorer — factsheets + data dashboard
 │   │   └── api/                      # Auth + Keystatic API routes
 │   ├── components/
 │   │   ├── dashboard/                # Mythen explorer (charts, sidebar, panels)
+│   │   ├── fakten-karten/            # FaktenCard + FaktenKartenExplorer
 │   │   ├── quiz/                     # Quiz player, cards, result screen
 │   │   ├── scrollytelling/           # Scrollytelling viewer
 │   │   └── shared/                   # Shared UI components (FactsheetPanel)
