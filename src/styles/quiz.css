@@ -1333,3 +1333,145 @@
   border-radius: var(--radius-full);
   letter-spacing: 0.02em;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Fakten-Karten — Educational flip cards (no quiz interaction)
+   Reuses .quiz-card__cell, __inner, __face, __front, __back,
+   __statement, __more-btn and 3D flip classes.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Verdict Bar (top of front face) ─────────────────────────── */
+
+.fakten-card__verdict-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0.5em 0.75em;
+  margin: calc(-1 * var(--space-lg)) calc(-1 * var(--space-lg)) var(--space-md) calc(-1 * var(--space-lg));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.fakten-card__verdict-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.fakten-card__verdict-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Front face layout ─────────────────────────────────────── */
+
+.fakten-card__front {
+  display: flex;
+  flex-direction: column;
+}
+
+.fakten-card__front .quiz-card__statement {
+  flex: 1;
+}
+
+/* ── Back face layout ──────────────────────────────────────── */
+
+.fakten-card__back {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.fakten-card__summary {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+  flex: 1;
+}
+
+/* ── Flip hint (bottom right) ────────────────────────────────── */
+
+.fakten-card__flip-hint {
+  display: block;
+  text-align: right;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-top: auto;
+  padding-top: var(--space-xs);
+  opacity: 0.7;
+}
+
+/* ── Fakten-Karten Explorer ──────────────────────────────────── */
+
+.fakten-explorer {
+  width: 100%;
+}
+
+.fakten-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.fakten-filter-bar__btn {
+  padding: 0.4em 0.9em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+  font-family: inherit;
+}
+
+.fakten-filter-bar__btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.fakten-filter-bar__btn--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.fakten-explorer__count {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+.fakten-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-auto-rows: 340px;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+/* ── Card filter animation ───────────────────────────────────── */
+
+.fakten-grid .quiz-card__cell {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fakten-grid .quiz-card__cell--hidden {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
