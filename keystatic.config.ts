@@ -14,9 +14,9 @@ const statusField = fields.select({
 
 const metaFields = {
   summary: fields.text({
-    label: "Summary",
+    label: "Zusammenfassung (SEO / Listings)",
     multiline: true,
-    description: "Short description for listings and SEO.",
+    description: "Kurzbeschreibung für Suchergebnisse und Übersichtsseiten. Nicht zu verwechseln mit der Karten-Zusammenfassung (cardSummary) der Fakten-Karten.",
   }),
   tags: fields.array(fields.text({ label: "Tag" }), {
     label: "Tags",
@@ -36,7 +36,7 @@ const metaFields = {
 // ─── Collections ────────────────────────────────────────────────────────────
 
 const zahlenUndFakten = collection({
-  label: "Zahlen & Fakten – Factsheets",
+  label: "🃏 Fakten-Karten – Mythen-Faktenblätter",
   slugField: "title",
   path: "src/content/zahlen-und-fakten/*",
   format: { contentField: "content" },
@@ -63,7 +63,10 @@ const zahlenUndFakten = collection({
       ],
       defaultValue: "übergreifend",
     }),
-    category: fields.text({ label: "Category" }),
+    category: fields.text({
+      label: "Kategorie (intern)",
+      description: "Interne Feinkategorie, z. B. Medizin, Risiko, Sozial. Nur für redaktionelle Orientierung.",
+    }),
     categoryGroup: fields.select({
       label: "Themengruppe",
       description: "Übergeordnete Themengruppe für die Fakten-Karten-Filterung.",
@@ -91,13 +94,13 @@ const zahlenUndFakten = collection({
       defaultValue: "falsch",
     }),
     classificationLabel: fields.text({
-      label: "Classification Label",
-      description: 'Human-readable label, e.g. "Das stimmt nicht."',
+      label: "Einordnung – Kurzformel",
+      description: 'Lesbare Kurzformel der Einordnung, z. B. "Das stimmt nicht." Wird auf der Fakten-Karte und im Daten-Explorer angezeigt.',
     }),
     cardSummary: fields.text({
-      label: "Karten-Zusammenfassung",
+      label: "⭐ Karten-Zusammenfassung (Fakten-Karte Rückseite)",
       multiline: true,
-      description: "2–3 prägnante Sätze für die Rückseite der Fakten-Karte. Barrierefrei, faktenbasiert, zum Weiterlesen einladend. Wird im Fakten-Karten-Raster angezeigt.",
+      description: "2–3 prägnante Sätze für die Rückseite der Fakten-Karte. Faktenbasiert, allgemeinverständlich, zum Weiterlesen einladend. Maximal ~250 Zeichen. Wird ausschließlich auf den Fakten-Karten angezeigt.",
     }),
     relatedMyths: fields.array(fields.text({ label: "Myth ID" }), {
       label: "Related Myths",
@@ -117,7 +120,7 @@ const zahlenUndFakten = collection({
 });
 
 const zahlenUndFaktenDashboard = collection({
-  label: "Zahlen & Fakten – Dashboard",
+  label: "📊 Daten-Explorer – Zielgruppen-Indikatoren",
   slugField: "title",
   path: "src/content/zahlen-und-fakten-dashboard/*",
   format: { contentField: "content" },
@@ -144,7 +147,7 @@ const zahlenUndFaktenDashboard = collection({
 });
 
 const haeufigeFragen = collection({
-  label: "Häufige Fragen",
+  label: "❓ Ihre Fragen – FAQ",
   slugField: "title",
   path: "src/content/haeufige-fragen/*",
   format: { contentField: "content" },
@@ -177,7 +180,7 @@ const haeufigeFragen = collection({
 });
 
 const selbsttest = collection({
-  label: "Selbsttest / Quiz",
+  label: "🧪 Selbsttest – Quiz-Module",
   slugField: "title",
   path: "src/content/selbsttest/*",
   format: { contentField: "content" },
@@ -277,7 +280,7 @@ const selbsttest = collection({
 });
 
 const startseite = collection({
-  label: "Startseite – Scrollytelling",
+  label: "🏠 Startseite – Scrollytelling",
   slugField: "title",
   path: "src/content/startseite/*",
   format: { contentField: "content" },
@@ -346,7 +349,7 @@ const startseite = collection({
 });
 
 const ueberUns = collection({
-  label: "Über uns",
+  label: "ℹ️ Über das Projekt – Seiten",
   slugField: "title",
   path: "src/content/ueber-uns/*",
   format: { contentField: "content" },
@@ -365,7 +368,7 @@ const ueberUns = collection({
 });
 
 const meta = collection({
-  label: "Meta (Internal)",
+  label: "⚙️ Meta (intern)",
   slugField: "title",
   path: "src/content/meta/*",
   format: { contentField: "content" },
@@ -435,7 +438,7 @@ const changelog = collection({
 // ─── Singletons ─────────────────────────────────────────────────────────────
 
 const dashboardDefinitionen = singleton({
-  label: "Dashboard – Definitionen & Glossar",
+  label: "📊 Daten-Explorer – Definitionen & Glossar",
   path: "src/content/dashboard-definitionen",
   format: { data: "json" },
   schema: {
@@ -650,12 +653,14 @@ export default config({
     branchPrefix: "content/",
   },
   collections: {
-    zahlenUndFakten,
-    zahlenUndFaktenDashboard,
-    haeufigeFragen,
-    selbsttest,
-    startseite,
-    ueberUns,
+    // ── Public sections — in nav order ──────────────────────────────────────
+    zahlenUndFakten,        // 🃏 Fakten-Karten  →  /fakten-karten/ + /zahlen-und-fakten/[slug]
+    zahlenUndFaktenDashboard, // 📊 Daten-Explorer  →  /zahlen-und-fakten/
+    haeufigeFragen,         // ❓ Ihre Fragen  →  /haeufige-fragen/
+    selbsttest,             // 🧪 Selbsttest  →  /selbsttest/
+    startseite,             // 🏠 Startseite  →  / (homepage scrollytelling)
+    ueberUns,               // ℹ️ Über das Projekt  →  /ueber-uns/
+    // ── Internal ────────────────────────────────────────────────────────────
     meta,
     changelog,
   },
