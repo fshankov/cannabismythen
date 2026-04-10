@@ -40,7 +40,7 @@ interface Section {
  * - 'quiz': Uses quiz z-index, body scroll is NOT locked (quiz manages its own scroll)
  * - 'dashboard': Locks body scroll, higher z-index for dashboard overlay
  */
-type PanelContext = 'quiz' | 'dashboard';
+type PanelContext = 'quiz' | 'dashboard' | 'fakten-karten';
 
 interface FactsheetPanelProps {
   /** Panel context — controls z-index, scroll-lock, and animation timing */

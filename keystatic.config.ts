@@ -64,7 +64,21 @@ const zahlenUndFakten = collection({
       defaultValue: "übergreifend",
     }),
     category: fields.text({ label: "Category" }),
-    categoryGroup: fields.text({ label: "Category Group" }),
+    categoryGroup: fields.select({
+      label: "Themengruppe",
+      description: "Übergeordnete Themengruppe für die Fakten-Karten-Filterung.",
+      options: [
+        { label: "Medizinischer und therapeutischer Nutzen", value: "Medizinischer und therapeutischer Nutzen" },
+        { label: "Risiken für den Körper und die Entwicklung", value: "Risiken für den Körper und die Entwicklung" },
+        { label: "Risiken für die psychische Gesundheit", value: "Risiken für die psychische Gesundheit" },
+        { label: "Einfluss auf Stimmung und Wahrnehmung", value: "Einfluss auf Stimmung und Wahrnehmung" },
+        { label: "Soziale Auswirkungen und Leistungsfähigkeit", value: "Soziale Auswirkungen und Leistungsfähigkeit" },
+        { label: "Risiken durch Dosierung und Qualität", value: "Risiken durch Dosierung und Qualität" },
+        { label: "Verbreitung in der Bevölkerung und Gesetzgebung", value: "Verbreitung in der Bevölkerung und Gesetzgebung" },
+        { label: "Allgemeine Einschätzung der Gefährlichkeit", value: "Allgemeine Einschätzung der Gefährlichkeit" },
+      ],
+      defaultValue: "Medizinischer und therapeutischer Nutzen",
+    }),
     classification: fields.select({
       label: "Classification",
       options: [
@@ -79,6 +93,11 @@ const zahlenUndFakten = collection({
     classificationLabel: fields.text({
       label: "Classification Label",
       description: 'Human-readable label, e.g. "Das stimmt nicht."',
+    }),
+    cardSummary: fields.text({
+      label: "Karten-Zusammenfassung",
+      multiline: true,
+      description: "2–3 prägnante Sätze für die Rückseite der Fakten-Karte. Barrierefrei, faktenbasiert, zum Weiterlesen einladend. Wird im Fakten-Karten-Raster angezeigt.",
     }),
     relatedMyths: fields.array(fields.text({ label: "Myth ID" }), {
       label: "Related Myths",
