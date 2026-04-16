@@ -1,0 +1,121 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "cannabismythen" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - link "Fakten-Karten" [ref=e5] [cursor=pointer]:
+        - /url: /fakten-karten/
+      - link "Daten-Explorer" [ref=e6] [cursor=pointer]:
+        - /url: /zahlen-und-fakten/
+      - link "Ihre Fragen" [ref=e7] [cursor=pointer]:
+        - /url: /haeufige-fragen/
+      - link "Selbsttest" [ref=e8] [cursor=pointer]:
+        - /url: /selbsttest/
+      - link "Über das Projekt" [ref=e9] [cursor=pointer]:
+        - /url: /ueber-uns/
+  - main [ref=e10]:
+    - 'region "Einstieg: Cannabis-Mythen und ihre Einordnung" [ref=e12]':
+      - generic:
+        - generic: Cannabis ist ein Allheilmittel
+        - generic: Cannabiskonsum ist harmlos
+        - generic: Jüngere sind stärker gefährdet
+        - generic: Weniger schädlich als Alkohol
+        - generic: Cannabis ist schwer dosierbar
+        - generic: Mischkonsum ist besonders riskant
+        - generic: Zusätze erhöhen das Risiko
+        - generic: Konsum schädigt den Fötus
+        - generic: Cannabis führt nicht zum Tod
+        - generic: Cannabis wirkt gegen Schmerzen
+        - generic: Konsum bewirkt Übelkeit
+        - generic: Cannabis hemmt Entzündungen
+        - generic: Cannabiskonsum löst Spasmen
+        - generic: Cannabis schädigt das Herz
+        - generic: Konsum schadet den Atemwegen
+        - generic: Cannabis verursacht Krebs
+        - generic: Cannabis hilft beim Abnehmen
+        - generic: Cannabis hilft beim Schlafen
+        - generic: Konsum verändert die Wahrnehmung
+        - generic: Konsum beeinträchtigt die Kognition
+        - generic: Cannabis gefährdet im Verkehr
+        - generic: Cannabis ist eine Einstiegsdroge
+        - generic: Cannabis macht nicht abhängig
+        - generic: Konsum verursacht Psychosen
+        - generic: Cannabis wirkt gegen Angst
+        - generic: Cannabis hilft gegen Depressionen
+        - generic: Cannabis hilft bei ADHS
+        - generic: Cannabis macht antriebslos
+        - generic: Konsum verbessert die Stimmung
+        - generic: Konsum führt zu Suizidgedanken
+        - generic: Cannabis entspannt und beruhigt
+        - generic: Cannabis macht kreativ
+        - generic: Konsum schädigt Beziehungen
+        - generic: Konsumierende missachten Regeln
+        - generic: Konsum senkt schulische Leistungen
+        - generic: Cannabiskonsum ist cool
+        - generic: Cannabis konsumieren viele
+        - generic: Konsum ist nun überall erlaubt
+        - generic: Legalisierung erhöht den Konsum
+      - generic:
+        - generic: Cannabis ist ein Allheilmittel
+        - generic: Cannabiskonsum ist harmlos
+        - generic: Jüngere sind stärker gefährdet
+        - generic: Weniger schädlich als Alkohol
+        - generic: Cannabis ist schwer dosierbar
+        - generic: Mischkonsum ist besonders riskant
+        - generic: Zusätze erhöhen das Risiko
+        - generic: Konsum schädigt den Fötus
+        - generic: Cannabis führt nicht zum Tod
+        - generic: Cannabis wirkt gegen Schmerzen
+        - generic: Konsum bewirkt Übelkeit
+        - generic: Cannabis hemmt Entzündungen
+        - generic: Cannabiskonsum löst Spasmen
+        - generic: Cannabis schädigt das Herz
+        - generic: Konsum schadet den Atemwegen
+        - generic: Cannabis verursacht Krebs
+        - generic: Cannabis hilft beim Abnehmen
+        - generic: Cannabis hilft beim Schlafen
+        - generic: Konsum verändert die Wahrnehmung
+        - generic: Konsum beeinträchtigt die Kognition
+        - generic: Cannabis gefährdet im Verkehr
+        - generic: Cannabis ist eine Einstiegsdroge
+        - generic: Cannabis macht nicht abhängig
+        - generic: Konsum verursacht Psychosen
+        - generic: Cannabis wirkt gegen Angst
+        - generic: Cannabis hilft gegen Depressionen
+        - generic: Cannabis hilft bei ADHS
+        - generic: Cannabis macht antriebslos
+        - generic: Konsum verbessert die Stimmung
+        - generic: Konsum führt zu Suizidgedanken
+        - generic: Cannabis entspannt und beruhigt
+        - generic: Cannabis macht kreativ
+        - generic: Konsum schädigt Beziehungen
+        - generic: Konsumierende missachten Regeln
+        - generic: Konsum senkt schulische Leistungen
+        - generic: Cannabiskonsum ist cool
+        - generic: Cannabis konsumieren viele
+        - generic: Konsum ist nun überall erlaubt
+        - generic: Legalisierung erhöht den Konsum
+      - generic:
+        - generic:
+          - paragraph: ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft
+          - heading "Was glauben wir zu wissen — und was stimmt wirklich?" [level=1]:
+            - generic: Was glauben wir zu wissen —
+            - generic: und was stimmt wirklich?
+      - link "Zum Inhalt scrollen" [ref=e13] [cursor=pointer]:
+        - /url: "#main-content"
+        - img [ref=e14]
+  - contentinfo [ref=e16]:
+    - paragraph [ref=e17]: © 2026 CaRM-Projekt
+  - generic [ref=e20]:
+    - button "Menu" [ref=e21]:
+      - img [ref=e23]
+      - generic: Menu
+    - button "Inspect" [ref=e27]:
+      - img [ref=e29]
+      - generic: Inspect
+    - button "Audit" [ref=e31]:
+      - img [ref=e33]
+      - generic: Audit
+    - button "Settings" [ref=e36]:
+      - img [ref=e38]
+      - generic: Settings

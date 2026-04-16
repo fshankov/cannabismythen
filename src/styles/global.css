@@ -53,6 +53,7 @@
   --space-3xl: 4rem;
 
   /* Layout */
+  --nav-height: 56px;
   --max-width: 1100px;
   --max-width-prose: 740px;
 
@@ -174,14 +175,47 @@ hr {
 /* ── Site Layout ────────────────────────────────────────────── */
 
 header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(24px) saturate(1.5);
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.3);
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.03);
+  /* Light glass — default for all pages and after hero scroll */
+  background: rgba(244, 244, 240, 0.75);
+  backdrop-filter: blur(22px) saturate(1.6);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.45);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+/* ── Hero-page: dark green glass before scroll ───────────────── */
+body.has-hero header:not(.is-scrolled) {
+  background: rgba(8, 26, 16, 0.22);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+  box-shadow: none;
+}
+
+body.has-hero header:not(.is-scrolled) nav a {
+  color: rgba(210, 236, 222, 0.68);
+  border-bottom-color: transparent;
+}
+
+body.has-hero header:not(.is-scrolled) nav a:first-child {
+  color: #95c4ad;
+}
+
+body.has-hero header:not(.is-scrolled) nav a:hover {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+body.has-hero header:not(.is-scrolled) nav a[aria-current="page"],
+body.has-hero header:not(.is-scrolled) nav a.active {
+  color: #b5dbc8;
+  border-bottom-color: rgba(181, 219, 200, 0.55);
 }
 
 header nav {
@@ -228,8 +262,17 @@ header nav a.active {
 main {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: var(--space-xl) var(--space-lg) var(--space-3xl);
+  /* Top padding compensates for the fixed nav */
+  padding: calc(var(--nav-height) + var(--space-xl)) var(--space-lg) var(--space-3xl);
   min-height: 60vh;
+}
+
+/* ── Hero page: main is full-bleed (hero handles its own sizing) */
+body.has-hero main {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
 }
 
 footer {
@@ -805,6 +848,15 @@ a.version-card:hover {
     border-bottom: 1px solid rgba(226, 232, 240, 0.5);
     margin-bottom: 2px;
     font-size: 0.82rem;
+  }
+
+  /* Tighten nav-height offset on mobile where nav wraps */
+  main {
+    padding-top: calc(var(--nav-height) + 4rem + var(--space-xl));
+  }
+
+  body.has-hero main {
+    padding-top: 0;
   }
 
   .factsheet-list,

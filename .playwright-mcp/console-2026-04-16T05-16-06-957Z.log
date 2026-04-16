@@ -1,0 +1,4 @@
+[   38075ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4321/favicon.ico:0
+[   38330ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:4321/node_modules/.vite/deps/chunk-GG6IGNHI.js?v=7e75137a:21608
+[   47853ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:4321/hero-preview:0
+[   52566ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:4321/node_modules/.vite/deps/chunk-GG6IGNHI.js?v=7e75137a:21608

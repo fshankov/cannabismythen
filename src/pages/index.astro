@@ -3,58 +3,43 @@ export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
-import ScrollytellingViewer from "@components/scrollytelling/ScrollytellingViewer";
+import { HeroBlock } from "@components/hero/HeroBlock";
+import { mythPositions } from "@components/hero/mythPositions";
+import type { HeroMyth } from "@components/hero/HeroBlock";
 
-// Load the v2 scrollytelling entry (the only published narrative)
-const allSlugs = await reader.collections.startseite.list();
-let scrollySteps: any[] = [];
-let scrollyTitle = "";
+// ── Hero content from Keystatic ─────────────────────────────────────────────
+const heroBlockData = await reader.singletons.heroBlock.read();
+const headline1 = heroBlockData?.headline1 ?? "Was glauben wir zu wissen —";
+const headline2 = heroBlockData?.headline2 ?? "und was stimmt wirklich?";
+const eyebrow   = heroBlockData?.eyebrow   ?? "ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft";
+
+// ── Myth classifications from Keystatic ────────────────────────────────────
+const clsBySlugPrefix = new Map<string, string>();
+const allSlugs = await reader.collections.zahlenUndFakten.list();
 
 for (const slug of allSlugs) {
-  if (slug === "chart-specifications") continue;
-  const entry = await reader.collections.startseite.read(slug);
-  if (entry && entry.status === "published" && entry.steps && entry.steps.length > 0) {
-    scrollyTitle = entry.title;
-    scrollySteps = entry.steps.map((s: any) => ({
-      stepNumber: s.stepNumber,
-      heading: s.heading,
-      bodyText: s.bodyText,
-      hint: s.hint || "",
-      vizType: s.vizType,
-      ctaLabel: s.ctaLabel || "",
-      ctaUrl: s.ctaUrl || "",
-    }));
-    break; // use the first published entry with steps
+  const entry = await reader.collections.zahlenUndFakten.read(slug);
+  if (!entry) continue;
+  const prefixMatch = slug.match(/^(m\d+-m\d+|m\d+)/);
+  if (prefixMatch) {
+    clsBySlugPrefix.set(prefixMatch[1], entry.classification);
   }
 }
+
+const heroMyths: HeroMyth[] = mythPositions.map(pos => ({
+  id: pos.id,
+  text: pos.text,
+  classification: clsBySlugPrefix.get(pos.id) ?? "keine_aussage",
+  position: pos,
+}));
 ---
 
-<BaseLayout title="Startseite">
-  <h1>Cannabis: Mythen &amp; Evidenz</h1>
-  <p>
-    Willkommen bei der evidenzbasierten Informationsplattform zu Cannabis-Mythen.
-    Dieses Projekt basiert auf dem CaRM-Forschungsprojekt und bietet wissenschaftlich
-    fundierte Einordnungen zu 42 verbreiteten Cannabis-Mythen.
-  </p>
-
-  {scrollySteps.length > 0 ? (
-    <ScrollytellingViewer
-      steps={scrollySteps}
-      title={scrollyTitle}
-      client:visible
-    />
-  ) : (
-    <p><em>Das Scrollytelling wird in Kürze hier angezeigt.</em></p>
-  )}
-
-  <section>
-    <h2>Inhalte</h2>
-    <ul>
-      <li><a href="/fakten-karten/">Fakten-Karten</a> — Wissenschaftliche Einordnung aller 42 Cannabis-Mythen</li>
-      <li><a href="/zahlen-und-fakten/">Daten-Explorer</a> — Interaktive Datenvisualisierung nach Zielgruppen</li>
-      <li><a href="/haeufige-fragen/">Ihre Fragen</a> — Häufig gestellte Fragen nach Themen</li>
-      <li><a href="/selbsttest/">Selbsttest</a> — Testen Sie Ihr Wissen über Cannabis-Mythen</li>
-      <li><a href="/ueber-uns/">Über das Projekt</a> — Team, Methodik, Hintergrund</li>
-    </ul>
-  </section>
+<BaseLayout title="Startseite" heroMode={true}>
+  <HeroBlock
+    myths={heroMyths}
+    headline1={headline1}
+    headline2={headline2}
+    eyebrow={eyebrow}
+    client:load
+  />
 </BaseLayout>

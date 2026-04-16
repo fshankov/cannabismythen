@@ -1,13 +1,19 @@
 ---
 import "../styles/global.css";
 import "@fontsource-variable/inter";
+import "@fontsource/dm-serif-display";
 
 interface Props {
   title: string;
   description?: string;
+  heroMode?: boolean;
 }
 
-const { title, description = "Evidenzbasierte Informationen zu Cannabis-Mythen" } = Astro.props;
+const {
+  title,
+  description = "Evidenzbasierte Informationen zu Cannabis-Mythen",
+  heroMode = false,
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -35,7 +41,7 @@ const { title, description = "Evidenzbasierte Informationen zu Cannabis-Mythen" 
       })();
     </script>
   </head>
-  <body>
+  <body class={heroMode ? "has-hero" : ""}>
     <header>
       <nav>
         <a href="/">cannabismythen</a>
@@ -50,9 +56,28 @@ const { title, description = "Evidenzbasierte Informationen zu Cannabis-Mythen" 
     <main>
       <slot />
     </main>
-    <footer>
+    <footer id="main-content">
       <p>&copy; {new Date().getFullYear()} CaRM-Projekt</p>
     </footer>
+
+    {/* Scroll-aware nav: adds .is-scrolled once user leaves the hero zone */}
+    <script is:inline>
+      (function () {
+        var header = document.querySelector('header');
+        if (!header) return;
+        // Non-hero pages are always in the "scrolled" (light) state
+        if (!document.body.classList.contains('has-hero')) {
+          header.classList.add('is-scrolled');
+          return;
+        }
+        function update() {
+          // Transition once the user has scrolled ~85 % of viewport height
+          header.classList.toggle('is-scrolled', window.scrollY > window.innerHeight * 0.85);
+        }
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+      })();
+    </script>
 
     {/* Decision D: Mobile bottom tab bar — visible < 1024px, hidden on desktop */}
     <nav class="mobile-tab-bar" aria-label="Mobile-Navigation">

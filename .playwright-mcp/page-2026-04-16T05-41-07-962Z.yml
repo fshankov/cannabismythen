@@ -1,0 +1,104 @@
+- generic [active] [ref=e1]:
+  - 'region "Einstieg: Cannabis-Mythen und ihre Einordnung" [ref=e4]':
+    - generic:
+      - generic: Cannabis ist ein Allheilmittel
+      - generic: Cannabiskonsum ist harmlos
+      - generic: Jüngere sind stärker gefährdet
+      - generic: Weniger schädlich als Alkohol
+      - generic: Cannabis ist schwer dosierbar
+      - generic: Mischkonsum ist besonders riskant
+      - generic: Zusätze erhöhen das Risiko
+      - generic: Konsum schädigt den Fötus
+      - generic: Cannabis führt nicht zum Tod
+      - generic: Cannabis wirkt gegen Schmerzen
+      - generic: Konsum bewirkt Übelkeit
+      - generic: Cannabis hemmt Entzündungen
+      - generic: Cannabiskonsum löst Spasmen
+      - generic: Cannabis schädigt das Herz
+      - generic: Konsum schadet den Atemwegen
+      - generic: Cannabis verursacht Krebs
+      - generic: Cannabis hilft beim Abnehmen
+      - generic: Cannabis hilft beim Schlafen
+      - generic: Konsum verändert die Wahrnehmung
+      - generic: Konsum beeinträchtigt die Kognition
+      - generic: Cannabis gefährdet im Verkehr
+      - generic: Cannabis ist eine Einstiegsdroge
+      - generic: Cannabis macht nicht abhängig
+      - generic: Konsum verursacht Psychosen
+      - generic: Cannabis wirkt gegen Angst
+      - generic: Cannabis hilft gegen Depressionen
+      - generic: Cannabis hilft bei ADHS
+      - generic: Cannabis macht antriebslos
+      - generic: Konsum verbessert die Stimmung
+      - generic: Konsum führt zu Suizidgedanken
+      - generic: Cannabis entspannt und beruhigt
+      - generic: Cannabis macht kreativ
+      - generic: Konsum schädigt Beziehungen
+      - generic: Konsumierende missachten Regeln
+      - generic: Konsum senkt schulische Leistungen
+      - generic: Cannabiskonsum ist cool
+      - generic: Cannabis konsumieren viele
+      - generic: Konsum ist nun überall erlaubt
+      - generic: Legalisierung erhöht den Konsum
+    - generic:
+      - generic: Cannabis ist ein Allheilmittel
+      - generic: Cannabiskonsum ist harmlos
+      - generic: Jüngere sind stärker gefährdet
+      - generic: Weniger schädlich als Alkohol
+      - generic: Cannabis ist schwer dosierbar
+      - generic: Mischkonsum ist besonders riskant
+      - generic: Zusätze erhöhen das Risiko
+      - generic: Konsum schädigt den Fötus
+      - generic: Cannabis führt nicht zum Tod
+      - generic: Cannabis wirkt gegen Schmerzen
+      - generic: Konsum bewirkt Übelkeit
+      - generic: Cannabis hemmt Entzündungen
+      - generic: Cannabiskonsum löst Spasmen
+      - generic: Cannabis schädigt das Herz
+      - generic: Konsum schadet den Atemwegen
+      - generic: Cannabis verursacht Krebs
+      - generic: Cannabis hilft beim Abnehmen
+      - generic: Cannabis hilft beim Schlafen
+      - generic: Konsum verändert die Wahrnehmung
+      - generic: Konsum beeinträchtigt die Kognition
+      - generic: Cannabis gefährdet im Verkehr
+      - generic: Cannabis ist eine Einstiegsdroge
+      - generic: Cannabis macht nicht abhängig
+      - generic: Konsum verursacht Psychosen
+      - generic: Cannabis wirkt gegen Angst
+      - generic: Cannabis hilft gegen Depressionen
+      - generic: Cannabis hilft bei ADHS
+      - generic: Cannabis macht antriebslos
+      - generic: Konsum verbessert die Stimmung
+      - generic: Konsum führt zu Suizidgedanken
+      - generic: Cannabis entspannt und beruhigt
+      - generic: Cannabis macht kreativ
+      - generic: Konsum schädigt Beziehungen
+      - generic: Konsumierende missachten Regeln
+      - generic: Konsum senkt schulische Leistungen
+      - generic: Cannabiskonsum ist cool
+      - generic: Cannabis konsumieren viele
+      - generic: Konsum ist nun überall erlaubt
+      - generic: Legalisierung erhöht den Konsum
+    - generic:
+      - generic:
+        - paragraph: ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft
+        - heading "Was glauben wir zu wissen — und was stimmt wirklich?" [level=1]:
+          - generic: Was glauben wir zu wissen —
+          - generic: und was stimmt wirklich?
+    - link "Zum Inhalt scrollen" [ref=e5] [cursor=pointer]:
+      - /url: "#main-content"
+      - img [ref=e6]
+  - generic [ref=e10]:
+    - button "Menu" [ref=e11]:
+      - img [ref=e13]
+      - generic: Menu
+    - button "Inspect" [ref=e17]:
+      - img [ref=e19]
+      - generic: Inspect
+    - button "Audit" [ref=e21]:
+      - img [ref=e23]
+      - generic: Audit
+    - button "Settings" [ref=e26]:
+      - img [ref=e28]
+      - generic: Settings

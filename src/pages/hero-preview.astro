@@ -1,0 +1,80 @@
+---
+/**
+ * /hero-preview — standalone preview route for the hero block.
+ *
+ * Renders the HeroBlock fullscreen with no site chrome so the design
+ * can be iterated in isolation. When ready to integrate, add HeroBlock
+ * to index.astro and delete this file.
+ */
+export const prerender = true;
+
+import "@fontsource/dm-serif-display";
+import { reader } from "@lib/content";
+import { HeroBlock } from "@components/hero/HeroBlock";
+import { mythPositions } from "@components/hero/mythPositions";
+import type { HeroMyth } from "@components/hero/HeroBlock";
+
+// ── Read hero config from Keystatic ─────────────────────────────────────────
+const heroBlockData = await reader.singletons.heroBlock.read();
+const headline1 = heroBlockData?.headline1 ?? "Was glauben wir zu wissen —";
+const headline2 = heroBlockData?.headline2 ?? "und was stimmt wirklich?";
+const eyebrow   = heroBlockData?.eyebrow   ?? "cannabismythen.de · 42 Mythen · wissenschaftlich geprüft";
+
+// ── Read all myth classifications from Keystatic ─────────────────────────────
+// Build a map of: slug-prefix → classification
+const clsBySlugPrefix = new Map<string, string>();
+const allSlugs = await reader.collections.zahlenUndFakten.list();
+
+for (const slug of allSlugs) {
+  const entry = await reader.collections.zahlenUndFakten.read(slug);
+  if (!entry) continue;
+  // Extract the myth ID prefix from the slug (e.g. "m01" from "m01-allheilmittel",
+  // or "m31-m32" from "m31-m32-entspannt-aggressiv").
+  const prefixMatch = slug.match(/^(m\d+-m\d+|m\d+)/);
+  if (prefixMatch) {
+    clsBySlugPrefix.set(prefixMatch[1], entry.classification);
+  }
+}
+
+// ── Merge positions with live classifications ────────────────────────────────
+const heroMyths: HeroMyth[] = mythPositions.map(pos => ({
+  id: pos.id,
+  text: pos.text,
+  classification: clsBySlugPrefix.get(pos.id) ?? "keine_aussage",
+  position: pos,
+}));
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hero Preview — cannabismythen.de</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #1f4f3a;
+        font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+      }
+      /* Ensure the hero fills the full viewport height on the preview page */
+      .hero-preview-wrapper > section {
+        height: 100vh !important;
+        max-height: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hero-preview-wrapper" id="main-content">
+      <HeroBlock
+        myths={heroMyths}
+        headline1={headline1}
+        headline2={headline2}
+        eyebrow={eyebrow}
+        client:load
+      />
+    </div>
+  </body>
+</html>

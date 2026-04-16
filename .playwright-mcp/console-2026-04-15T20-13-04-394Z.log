@@ -1,0 +1,4 @@
+[     418ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:4321/node_modules/.vite/deps/chunk-GG6IGNHI.js?v=44ec957a:21608
+[    1270ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:4321/favicon.ico:0
+[    1382ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://127.0.0.1:4321/node_modules/.vite/deps/chunk-GG6IGNHI.js?v=44ec957a:21608
+[    1696ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:4321/api/keystatic/github/refresh-token:0

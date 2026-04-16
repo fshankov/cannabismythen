@@ -437,6 +437,44 @@ const changelog = collection({
 
 // ─── Singletons ─────────────────────────────────────────────────────────────
 
+const heroBlock = singleton({
+  label: "🏔️ Hero-Block – Startseite",
+  path: "src/content/hero-block",
+  format: { data: "yaml" },
+  schema: {
+    headline1: fields.text({
+      label: "Headline Zeile 1",
+      description: "Erste Zeile der Hauptüberschrift. Inter fett, Off-White.",
+      defaultValue: "Was glauben wir zu wissen —",
+    }),
+    headline2: fields.text({
+      label: "Headline Zeile 2",
+      description: "Zweite Zeile der Hauptüberschrift. DM Serif Display, kursiv, Salbei-Grün.",
+      defaultValue: "und was stimmt wirklich?",
+    }),
+    eyebrow: fields.text({
+      label: "Eyebrow-Label",
+      description: "Kleiner Claim über der Überschrift (Kapitälchen).",
+      defaultValue: "cannabismythen.de · 42 Mythen · wissenschaftlich geprüft",
+    }),
+    hoverHint: fields.text({
+      label: "Hover-Hinweis",
+      description: "Kurztext der den interaktiven Nebel-Effekt erklärt (Desktop). Wird auf Touch-Geräten versteckt.",
+      defaultValue: "Bewege die Maus — hebe den Nebel und entdecke die Mythen",
+    }),
+    ctaLabel: fields.text({
+      label: "CTA Button-Text",
+      description: "Beschriftung des Call-to-Action-Buttons unter dem Hinweis. Leer lassen = kein Button.",
+      defaultValue: "Mythen entdecken",
+    }),
+    ctaUrl: fields.text({
+      label: "CTA Button-Link",
+      description: "Ziel-URL des CTA-Buttons.",
+      defaultValue: "/fakten-karten/",
+    }),
+  },
+});
+
 const dashboardDefinitionen = singleton({
   label: "📊 Daten-Explorer – Definitionen & Glossar",
   path: "src/content/dashboard-definitionen",
@@ -665,6 +703,7 @@ export default config({
     changelog,
   },
   singletons: {
+    heroBlock,
     dashboardDefinitionen,
   },
 });
