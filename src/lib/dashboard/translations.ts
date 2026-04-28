@@ -75,6 +75,8 @@ const translations = {
   'view.lollipop': { de: 'Lollipop', en: 'Lollipop' },
   'view.overview': { de: 'Übersicht', en: 'Overview' },
   'view.circular': { de: 'Circular', en: 'Circular' },
+  'view.ladder': { de: 'Indikator-Leiter', en: 'Indicator Ladder' },
+  'view.strips': { de: 'Streifen', en: 'Strips' },
 
   // Table
   'table.myth': { de: 'Mythos', en: 'Myth' },
@@ -171,6 +173,17 @@ const translations = {
     de: 'Kreisdiagramm mit allen vier Indikatoren je Mythos. Farbige Segmente = Kenntnis, Bedeutung, Richtigkeit, Prävention. Hover für Details, Klick für Factsheet.',
     en: 'Circular chart with all four indicators per myth. Colored segments = Awareness, Significance, Correctness, Prevention. Hover for details, click for factsheet.',
   },
+  'howto.ladder': {
+    de: 'Vier vertikale Achsen, eine pro Indikator (0–100). Jeder Mythos ist ein Punkt pro Achse, Farbe = Urteil. Tippen Sie eine Bevölkerungsgruppe und einen Punkt zum Hervorheben; nochmals tippen für Details.',
+    en: 'Four vertical axes, one per indicator (0–100). Each myth is one dot per axis, color = verdict. Tap a population and a dot to highlight; tap again for details.',
+  },
+  'howto.strips': {
+    de: 'Vier horizontale Streifen, einer pro Indikator. Jeder Punkt ist ein Mythos. Tippen Sie eine Bevölkerungsgruppe und einen Punkt zum Hervorheben; nochmals tippen für Details.',
+    en: 'Four horizontal strips, one per indicator. Each dot is one myth. Tap a population and a dot to highlight; tap again for details.',
+  },
+  'misc.population': { de: 'Bevölkerungsgruppe', en: 'Population' },
+  'misc.viewDetails': { de: 'Details anzeigen', en: 'View details' },
+  'misc.deselect': { de: 'Auswahl aufheben', en: 'Deselect' },
   // Tooltip labels
   'tooltip.category': { de: 'Kategorie', en: 'Category' },
   'tooltip.group': { de: 'Gruppe', en: 'Group' },

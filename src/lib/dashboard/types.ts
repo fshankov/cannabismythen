@@ -60,7 +60,7 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'sources' | 'sources_v2';
+export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'sources' | 'sources_v2';
 
 export type SourcesV2Mode = 'dumbbell' | 'multiples' | 'matrix';
 export type SourcesV2Sort = 'prevention' | 'gap';
