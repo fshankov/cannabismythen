@@ -248,13 +248,41 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.zahlenUndFakten": "Zahlen & Fakten entdecken",
     "ui.correct": "Richtig!",
     "ui.incorrect": "Leider falsch",
+    "ui.feedback.correct": "Das ist korrekt.",
+    "ui.feedback.near": "Du warst nah dran.",
+    "ui.feedback.far": "Das ist leider nicht korrekt.",
+    "ui.mythVerdict": "Die Aussage \u201e{statement}\u201c ist {verdict}.",
+    "ui.classificationPhrase.richtig": "richtig",
+    "ui.classificationPhrase.eher_richtig": "eher richtig",
+    "ui.classificationPhrase.eher_falsch": "eher falsch",
+    "ui.classificationPhrase.falsch": "falsch",
     "ui.correctAnswer": "Evidenzbasierte Bewertung:",
     "ui.yourAnswer": "Deine Antwort:",
+    "ui.yourAnswerLabel": "Ihre Antwort",
     "ui.moreLink": "mehr \u2192",
     "ui.questionLabel": "Aussage {n} von {total}",
     "ui.siteName": "Cannabis: Mythen & Evidenz",
     "ui.siteUrl": "cannabismythen.de",
     "ui.questionsCount": "{n} Fragen",
+    "ui.nextQuestion": "N\u00e4chste Frage",
+    "ui.previousQuestion": "Zur\u00fcck",
+    "ui.finishQuiz": "Ergebnis ansehen",
+    "ui.populationLine":
+      "{pct}\u00a0% der Befragten in Deutschland haben diese Aussage korrekt eingesch\u00e4tzt.",
+    "ui.populationUnavailable":
+      "F\u00fcr diese Aussage liegen keine vergleichenden Daten vor.",
+    "ui.persistenceNotice":
+      "Wir speichern Ihren Fortschritt nur in diesem Browser.",
+    "ui.progressRestored":
+      "Fortschritt wiederhergestellt.",
+    "ui.resetProgress": "Quiz zur\u00fccksetzen",
+    "ui.retrospectiveTitle": "Ihre Antworten im \u00dcberblick",
+    "ui.scoreHeadlineCompare":
+      "Sie wussten {correct}\u202f/\u202f{total} \u2014 besser als {pct}\u202f% der Befragten.",
+    "ui.exploreData": "Daten-Explorer \u00f6ffnen",
+    "ui.shareResultHeading": "Ergebnis teilen",
+    "ui.openMythDetail": "Details zu dieser Aussage \u2192",
+    "ui.skipToResult": "Direkt zum Ergebnis",
   },
 
   // ── English (placeholder — to be filled) ──────────────────────────

@@ -1,24 +1,43 @@
 /**
- * QuizPlayer — Interactive quiz island component (React).
+ * QuizPlayer — Interactive one-question-at-a-time quiz flow.
  *
- * Renders all myth cards in a responsive grid. No intermediate start screen —
- * the quiz begins immediately when the component mounts.
+ * Flow:
+ *   1. Component mounts → optionally restores progress from localStorage
+ *   2. Renders ONE QuizCard at a time, full-bleed on mobile
+ *   3. After each answer the card flips to show feedback + verdict + explanation
+ *   4. "Nächste Frage" advances to the next question
+ *   5. After the last question the ResultScreen is rendered inline with a
+ *      retrospective list, share card and cross-link to the data explorer.
  *
- * The progress bar is portalled into the site <header> via #quiz-progress-slot,
- * so it appears as a merged second row inside the glassmorphism nav.
- *
- * When all cards are answered, a full-screen result modal opens.
+ * Progress is persisted in localStorage under `cm-quiz-progress::<slug>` so a
+ * reload doesn't lose the user's answers. Users see an explicit notice and
+ * can reset the quiz at any time.
  */
 
-import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
-import type { Classification, CardAnswer, QuizResult, QuizMyth } from "./types";
-import { QUIZ_THEMES, computePercentile, getTierIndex } from "./quizData";
+import type {
+  CardAnswer,
+  Classification,
+  QuizMyth,
+  QuizResult,
+} from "./types";
+import {
+  QUIZ_THEMES,
+  computePercentile,
+  getTierIndex,
+} from "./quizData";
 import { t } from "./i18n";
 import {
-  trackQuizStarted,
   trackAnswerSubmitted,
   trackQuizCompleted,
+  trackQuizStarted,
 } from "./matomo";
 import QuizCard from "./QuizCard";
 import ProgressBar from "./ProgressBar";
@@ -35,7 +54,7 @@ export interface QuizTextEntry {
 }
 
 interface QuizPlayerProps {
-  /** Quiz slug, e.g. "quiz-alltag" */
+  /** Quiz slug, e.g. "quiz-risiken" */
   quizSlug: string;
   /** JSON-serialized Record<mythId, MythContentEntry> from Astro build */
   mythContent?: string;
@@ -44,7 +63,6 @@ interface QuizPlayerProps {
 }
 
 // ── Scoring: distance from evidence-based classification ─────────────────────
-// exact match → +2, 1 step → +1, 2 steps → −1, 3 steps → −2
 const CLASS_POS: Record<Classification, number> = {
   richtig: 1,
   eher_richtig: 2,
@@ -60,13 +78,101 @@ function answerScore(chosen: Classification, correct: Classification): number {
   return -2;
 }
 
-export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlayerProps) {
+interface PersistedState {
+  v: 1;
+  answers: Record<string, CardAnswer>;
+  currentIndex: number;
+  finished: boolean;
+}
+
+function storageKey(slug: string): string {
+  return `cm-quiz-progress::${slug}`;
+}
+
+function loadProgress(slug: string): PersistedState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(storageKey(slug));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PersistedState;
+    if (parsed && parsed.v === 1 && typeof parsed.answers === "object") {
+      return parsed;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function saveProgress(slug: string, state: PersistedState): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(storageKey(slug), JSON.stringify(state));
+  } catch {
+    // ignore (quota / private mode)
+  }
+}
+
+function clearProgress(slug: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(storageKey(slug));
+  } catch {
+    // ignore
+  }
+}
+
+export default function QuizPlayer({
+  quizSlug,
+  mythContent,
+  quizText,
+}: QuizPlayerProps) {
   const theme = QUIZ_THEMES[quizSlug];
   const [answers, setAnswers] = useState<Record<string, CardAnswer>>({});
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [finished, setFinished] = useState(false);
   const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
   const [lastScoreDelta, setLastScoreDelta] = useState(0);
+  const [restoredNotice, setRestoredNotice] = useState(false);
   const hasTrackedStart = useRef(false);
+  const hydrated = useRef(false);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+
+  // Hydrate from localStorage on mount
+  useEffect(() => {
+    if (!theme || hydrated.current) return;
+    hydrated.current = true;
+    const saved = loadProgress(quizSlug);
+    if (saved) {
+      const validAnswers: Record<string, CardAnswer> = {};
+      for (const m of theme.myths) {
+        if (saved.answers[m.id]) validAnswers[m.id] = saved.answers[m.id];
+      }
+      setAnswers(validAnswers);
+      const safeIndex = Math.min(
+        Math.max(0, saved.currentIndex || 0),
+        theme.myths.length - 1
+      );
+      setCurrentIndex(safeIndex);
+      setFinished(Boolean(saved.finished));
+      if (Object.keys(validAnswers).length > 0) {
+        setRestoredNotice(true);
+        const tid = setTimeout(() => setRestoredNotice(false), 4000);
+        return () => clearTimeout(tid);
+      }
+    }
+  }, [quizSlug, theme]);
+
+  // Persist on every state change once hydrated
+  useEffect(() => {
+    if (!hydrated.current || !theme) return;
+    saveProgress(quizSlug, {
+      v: 1,
+      answers,
+      currentIndex,
+      finished,
+    });
+  }, [quizSlug, theme, answers, currentIndex, finished]);
 
   // Find the portal target in the DOM
   useEffect(() => {
@@ -80,7 +186,7 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
     };
   }, []);
 
-  // Parse myth content once
+  // Parse content maps once
   const mythContentMap: Record<string, MythContentEntry> = useMemo(() => {
     if (!mythContent) return {};
     try {
@@ -90,7 +196,6 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
     }
   }, [mythContent]);
 
-  // Parse Keystatic quiz text (statement + explanation per myth)
   const quizTextMap: Record<string, QuizTextEntry> = useMemo(() => {
     if (!quizText) return {};
     try {
@@ -100,7 +205,7 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
     }
   }, [quizText]);
 
-  // Track quiz start on mount
+  // Track quiz start once per mount
   useEffect(() => {
     if (theme && !hasTrackedStart.current) {
       hasTrackedStart.current = true;
@@ -120,7 +225,6 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
   const answeredCount = Object.keys(answers).length;
   const allAnswered = answeredCount === totalQuestions;
 
-  // Compute running score
   const totalScore = useMemo(() => {
     let s = 0;
     for (const a of Object.values(answers)) {
@@ -130,16 +234,13 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
     return s;
   }, [answers, theme.myths]);
 
-  // Compute result when all questions answered
   const result: QuizResult | null = useMemo(() => {
     if (!allAnswered) return null;
-
     const answersList = Object.values(answers);
     const correctCount = answersList.filter((a) => a.isCorrect).length;
     const correctPct = Math.round((correctCount / totalQuestions) * 100);
     const percentile = computePercentile(theme.myths, answersList);
     const tierIndex = getTierIndex(correctCount, totalQuestions);
-
     return {
       themeSlug: quizSlug,
       totalQuestions,
@@ -147,7 +248,9 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
       correctPct,
       percentile,
       tierIndex,
-      answers: answersList,
+      answers: theme.myths
+        .map((m) => answersList.find((a) => a.mythId === m.id)!)
+        .filter(Boolean),
     };
   }, [allAnswered, answers, theme.myths, quizSlug, totalQuestions]);
 
@@ -170,25 +273,45 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
 
       setAnswers((prev) => {
         const next = { ...prev, [mythId]: newAnswer };
-
-        // Check if this was the last answer
         if (Object.keys(next).length === totalQuestions) {
-          const nextList = Object.values(next);
-          const correctCount = nextList.filter((a) => a.isCorrect).length;
+          const list = Object.values(next);
+          const correctCount = list.filter((a) => a.isCorrect).length;
           const tierIndex = getTierIndex(correctCount, totalQuestions);
           trackQuizCompleted(t(theme.titleKey), correctCount, tierIndex);
         }
-
         return next;
       });
     },
     [theme.myths, theme.titleKey, answers, totalQuestions]
   );
 
+  const handleNext = useCallback(() => {
+    if (currentIndex < totalQuestions - 1) {
+      setCurrentIndex((i) => i + 1);
+    } else {
+      setFinished(true);
+    }
+  }, [currentIndex, totalQuestions]);
+
+  const handlePrev = useCallback(() => {
+    if (currentIndex > 0) {
+      setCurrentIndex((i) => i - 1);
+      setFinished(false);
+    }
+  }, [currentIndex]);
+
+  const handleJumpTo = useCallback((idx: number) => {
+    setCurrentIndex(idx);
+    setFinished(false);
+  }, []);
+
   const handleRestart = useCallback(() => {
     setAnswers({});
     setLastScoreDelta(0);
-  }, []);
+    setCurrentIndex(0);
+    setFinished(false);
+    clearProgress(quizSlug);
+  }, [quizSlug]);
 
   const handleShowFactsheet = useCallback((myth: QuizMyth) => {
     setFactsheetMyth(myth);
@@ -198,7 +321,16 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
     setFactsheetMyth(null);
   }, []);
 
-  // The progress bar portalled into the site header
+  // Resolve current myth (clamp to valid range)
+  const safeIndex = Math.min(
+    Math.max(0, currentIndex),
+    Math.max(0, totalQuestions - 1)
+  );
+  const currentMyth = theme.myths[safeIndex];
+  const currentAnswer = currentMyth ? answers[currentMyth.id] || null : null;
+
+  const showResults = finished && result !== null;
+
   const progressBarContent = (
     <ProgressBar
       answered={answeredCount}
@@ -215,33 +347,122 @@ export default function QuizPlayer({ quizSlug, mythContent, quizText }: QuizPlay
       {portalTarget
         ? createPortal(progressBarContent, portalTarget)
         : (
-          // Fallback: render inline if portal target not found
           <header className="quiz-player__header">
             {progressBarContent}
           </header>
         )
       }
 
-      <div className="quiz-player__grid">
-        {theme.myths.map((myth, i) => (
+      {!showResults && currentMyth && (
+        <div className="quiz-player__flow">
           <QuizCard
-            key={myth.id}
-            myth={myth}
-            index={i}
+            key={currentMyth.id}
+            myth={currentMyth}
+            index={safeIndex}
             total={totalQuestions}
-            answer={answers[myth.id] || null}
+            answer={currentAnswer}
             onAnswer={handleAnswer}
+            onNext={handleNext}
             onShowFactsheet={handleShowFactsheet}
-            statementText={quizTextMap[myth.id]?.statement}
-            explanationText={quizTextMap[myth.id]?.explanation}
+            isLastQuestion={safeIndex === totalQuestions - 1}
+            statementText={quizTextMap[currentMyth.id]?.statement}
+            explanationText={quizTextMap[currentMyth.id]?.explanation}
           />
-        ))}
-      </div>
 
-      {result && (
+          <nav
+            className="quiz-player__nav"
+            aria-label="Frage-Navigation"
+          >
+            <button
+              type="button"
+              className="quiz-player__nav-btn"
+              onClick={handlePrev}
+              disabled={safeIndex === 0}
+            >
+              ← {t("ui.previousQuestion")}
+            </button>
+            <ol className="quiz-player__dots" aria-label="Fortschritt">
+              {theme.myths.map((m, i) => {
+                const a = answers[m.id];
+                const state = a
+                  ? a.isCorrect
+                    ? "correct"
+                    : "incorrect"
+                  : "open";
+                return (
+                  <li key={m.id}>
+                    <button
+                      type="button"
+                      className={`quiz-player__dot quiz-player__dot--${state} ${
+                        i === safeIndex ? "quiz-player__dot--current" : ""
+                      }`}
+                      aria-label={t("ui.questionLabel", {
+                        n: i + 1,
+                        total: totalQuestions,
+                      })}
+                      aria-current={i === safeIndex ? "step" : undefined}
+                      onClick={() => handleJumpTo(i)}
+                    >
+                      {i + 1}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+            {allAnswered ? (
+              <button
+                type="button"
+                className="quiz-player__nav-btn quiz-player__nav-btn--primary"
+                onClick={() => setFinished(true)}
+              >
+                {t("ui.skipToResult")} →
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="quiz-player__nav-btn"
+                onClick={handleNext}
+                disabled={
+                  !currentAnswer || safeIndex === totalQuestions - 1
+                }
+              >
+                {t("ui.nextQuestion")} →
+              </button>
+            )}
+          </nav>
+
+          <div className="quiz-player__notice" role="note">
+            <span aria-hidden="true">🔒</span>{" "}
+            {restoredNotice
+              ? `${t("ui.progressRestored")} ${t("ui.persistenceNotice")}`
+              : t("ui.persistenceNotice")}
+            {answeredCount > 0 && (
+              <>
+                {" "}
+                <button
+                  type="button"
+                  className="quiz-player__reset-link"
+                  onClick={handleRestart}
+                >
+                  {t("ui.resetProgress")}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showResults && result && (
         <ResultScreen
           result={result}
+          theme={theme}
+          quizTextMap={quizTextMap}
           onRestart={handleRestart}
+          onJumpToQuestion={(idx) => {
+            setFinished(false);
+            setCurrentIndex(idx);
+          }}
+          onShowFactsheet={handleShowFactsheet}
         />
       )}
 
