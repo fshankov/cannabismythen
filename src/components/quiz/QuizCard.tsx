@@ -130,12 +130,11 @@ export default function QuizCard({
     verdict: verdictPhrase,
   });
 
-  const populationLine =
-    typeof myth.populationCorrectPct === "number"
-      ? t("ui.populationLine", {
-          pct: Math.round(myth.populationCorrectPct),
-        })
-      : t("ui.populationUnavailable");
+  const hasPopData = typeof myth.populationCorrectPct === "number";
+  const popPct = hasPopData ? Math.round(myth.populationCorrectPct) : 0;
+  const populationLine = hasPopData
+    ? t("ui.populationLine", { pct: popPct })
+    : t("ui.populationUnavailable");
 
   return (
     <div
@@ -223,6 +222,24 @@ export default function QuizCard({
                 )}
 
                 <p className="quiz-card__explanation">{explanation}</p>
+
+                {hasPopData && (
+                  <div
+                    className="quiz-card__pop-bar"
+                    role="img"
+                    aria-label={`${popPct} Prozent der Befragten antworteten korrekt`}
+                  >
+                    <div className="quiz-card__pop-bar-track">
+                      <div
+                        className="quiz-card__pop-bar-fill"
+                        style={{ width: `${popPct}%` }}
+                      />
+                    </div>
+                    <span className="quiz-card__pop-bar-value">
+                      {popPct} %
+                    </span>
+                  </div>
+                )}
 
                 <p className="quiz-card__population">{populationLine}</p>
 

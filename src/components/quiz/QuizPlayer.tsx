@@ -2,16 +2,23 @@
  * QuizPlayer — Interactive one-question-at-a-time quiz flow.
  *
  * Flow:
- *   1. Component mounts → optionally restores progress from localStorage
- *   2. Renders ONE QuizCard at a time, full-bleed on mobile
- *   3. After each answer the card flips to show feedback + verdict + explanation
- *   4. "Nächste Frage" advances to the next question
+ *   1. Component mounts → progress is restored synchronously from localStorage
+ *      via lazy useState initializers (no flash of empty state).
+ *   2. Renders ONE QuizCard at a time, full-bleed on mobile.
+ *   3. After each answer the card flips to show feedback, the myth verdict,
+ *      a 2-sentence explanation, and a population comparison bar.
+ *   4. "Nächste Frage" advances to the next question.
  *   5. After the last question the ResultScreen is rendered inline with a
  *      retrospective list, share card and cross-link to the data explorer.
  *
  * Progress is persisted in localStorage under `cm-quiz-progress::<slug>` so a
  * reload doesn't lose the user's answers. Users see an explicit notice and
  * can reset the quiz at any time.
+ *
+ * Architecture: the outer `QuizPlayer` resolves the theme; if the slug is
+ * unknown it renders an error and bails out. Otherwise it mounts
+ * `QuizPlayerInner` with a non-null `theme`, so every hook lives behind a
+ * stable, theme-guaranteed component (no Rules-of-Hooks gotchas).
  */
 
 import {
@@ -27,6 +34,7 @@ import type {
   Classification,
   QuizMyth,
   QuizResult,
+  QuizTheme,
 } from "./types";
 import {
   QUIZ_THEMES,
@@ -60,6 +68,8 @@ interface QuizPlayerProps {
   mythContent?: string;
   /** JSON-serialized Record<mythId, QuizTextEntry> from Keystatic selbsttest content */
   quizText?: string;
+  /** Optional Keystatic summary used in the intro card */
+  quizSummary?: string;
 }
 
 // ── Scoring: distance from evidence-based classification ─────────────────────
@@ -122,59 +132,89 @@ function clearProgress(slug: string): void {
   }
 }
 
-export default function QuizPlayer({
+/** Per-quiz accent token (one of the four classification colours) used to
+ *  tint the progress bar fill, the dot ring, and the next-question CTA. */
+const QUIZ_ACCENT: Record<string, string> = {
+  "quiz-medizin": "var(--color-richtig)",
+  "quiz-risiken": "var(--color-falsch)",
+  "quiz-stimmung": "var(--color-eher-richtig)",
+  "quiz-gefaehrlichkeit": "var(--color-eher-falsch)",
+  "quiz-gesellschaft": "var(--color-accent)",
+};
+
+export default function QuizPlayer(props: QuizPlayerProps) {
+  const theme = QUIZ_THEMES[props.quizSlug];
+  if (!theme) {
+    return (
+      <div className="quiz-player quiz-player--error">
+        <p>Quiz nicht gefunden: {props.quizSlug}</p>
+      </div>
+    );
+  }
+  return <QuizPlayerInner {...props} theme={theme} />;
+}
+
+interface QuizPlayerInnerProps extends QuizPlayerProps {
+  theme: QuizTheme;
+}
+
+function QuizPlayerInner({
   quizSlug,
   mythContent,
   quizText,
-}: QuizPlayerProps) {
-  const theme = QUIZ_THEMES[quizSlug];
-  const [answers, setAnswers] = useState<Record<string, CardAnswer>>({});
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [finished, setFinished] = useState(false);
+  quizSummary,
+  theme,
+}: QuizPlayerInnerProps) {
+  const totalQuestions = theme.myths.length;
+  const accent = QUIZ_ACCENT[quizSlug] ?? "var(--color-accent)";
+
+  // ── Lazy state initialisers: read localStorage SYNCHRONOUSLY before first
+  //    render. No useEffect race, no flash of empty state on reload.
+  const [answers, setAnswers] = useState<Record<string, CardAnswer>>(() => {
+    const saved = loadProgress(quizSlug);
+    if (!saved) return {};
+    const valid: Record<string, CardAnswer> = {};
+    for (const m of theme.myths) {
+      if (saved.answers[m.id]) valid[m.id] = saved.answers[m.id];
+    }
+    return valid;
+  });
+
+  const [currentIndex, setCurrentIndex] = useState<number>(() => {
+    const saved = loadProgress(quizSlug);
+    const raw = saved?.currentIndex ?? 0;
+    return Math.min(Math.max(0, raw), Math.max(0, totalQuestions - 1));
+  });
+
+  const [finished, setFinished] = useState<boolean>(() => {
+    const saved = loadProgress(quizSlug);
+    return Boolean(saved?.finished);
+  });
+
   const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
   const [lastScoreDelta, setLastScoreDelta] = useState(0);
-  const [restoredNotice, setRestoredNotice] = useState(false);
+  const [restoredNotice, setRestoredNotice] = useState<boolean>(() => {
+    const saved = loadProgress(quizSlug);
+    return Boolean(saved && Object.keys(saved.answers).length > 0);
+  });
+
   const hasTrackedStart = useRef(false);
-  const hydrated = useRef(false);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
 
-  // Hydrate from localStorage on mount
+  // ── Hide the "Fortschritt wiederhergestellt" notice after a moment.
   useEffect(() => {
-    if (!theme || hydrated.current) return;
-    hydrated.current = true;
-    const saved = loadProgress(quizSlug);
-    if (saved) {
-      const validAnswers: Record<string, CardAnswer> = {};
-      for (const m of theme.myths) {
-        if (saved.answers[m.id]) validAnswers[m.id] = saved.answers[m.id];
-      }
-      setAnswers(validAnswers);
-      const safeIndex = Math.min(
-        Math.max(0, saved.currentIndex || 0),
-        theme.myths.length - 1
-      );
-      setCurrentIndex(safeIndex);
-      setFinished(Boolean(saved.finished));
-      if (Object.keys(validAnswers).length > 0) {
-        setRestoredNotice(true);
-        const tid = setTimeout(() => setRestoredNotice(false), 4000);
-        return () => clearTimeout(tid);
-      }
-    }
-  }, [quizSlug, theme]);
+    if (!restoredNotice) return;
+    const tid = setTimeout(() => setRestoredNotice(false), 4000);
+    return () => clearTimeout(tid);
+  }, [restoredNotice]);
 
-  // Persist on every state change once hydrated
+  // ── Persist on every state change. The lazy initializers mean the first
+  //    write is identical to what was already on disk → safe no-op.
   useEffect(() => {
-    if (!hydrated.current || !theme) return;
-    saveProgress(quizSlug, {
-      v: 1,
-      answers,
-      currentIndex,
-      finished,
-    });
-  }, [quizSlug, theme, answers, currentIndex, finished]);
+    saveProgress(quizSlug, { v: 1, answers, currentIndex, finished });
+  }, [quizSlug, answers, currentIndex, finished]);
 
-  // Find the portal target in the DOM
+  // ── Find the portal target inside the site <header>.
   useEffect(() => {
     const el = document.getElementById("quiz-progress-slot");
     if (el) {
@@ -186,7 +226,7 @@ export default function QuizPlayer({
     };
   }, []);
 
-  // Parse content maps once
+  // ── Parse content maps once.
   const mythContentMap: Record<string, MythContentEntry> = useMemo(() => {
     if (!mythContent) return {};
     try {
@@ -205,23 +245,14 @@ export default function QuizPlayer({
     }
   }, [quizText]);
 
-  // Track quiz start once per mount
+  // ── Track quiz start once per mount.
   useEffect(() => {
-    if (theme && !hasTrackedStart.current) {
+    if (!hasTrackedStart.current) {
       hasTrackedStart.current = true;
       trackQuizStarted(t(theme.titleKey));
     }
-  }, [theme]);
+  }, [theme.titleKey]);
 
-  if (!theme) {
-    return (
-      <div className="quiz-player quiz-player--error">
-        <p>Quiz nicht gefunden: {quizSlug}</p>
-      </div>
-    );
-  }
-
-  const totalQuestions = theme.myths.length;
   const answeredCount = Object.keys(answers).length;
   const allAnswered = answeredCount === totalQuestions;
 
@@ -310,6 +341,7 @@ export default function QuizPlayer({
     setLastScoreDelta(0);
     setCurrentIndex(0);
     setFinished(false);
+    setRestoredNotice(false);
     clearProgress(quizSlug);
   }, [quizSlug]);
 
@@ -321,7 +353,7 @@ export default function QuizPlayer({
     setFactsheetMyth(null);
   }, []);
 
-  // Resolve current myth (clamp to valid range)
+  // Resolve current myth (clamp index in case theme size changed).
   const safeIndex = Math.min(
     Math.max(0, currentIndex),
     Math.max(0, totalQuestions - 1)
@@ -330,6 +362,7 @@ export default function QuizPlayer({
   const currentAnswer = currentMyth ? answers[currentMyth.id] || null : null;
 
   const showResults = finished && result !== null;
+  const showIntro = !showResults && answeredCount === 0;
 
   const progressBarContent = (
     <ProgressBar
@@ -341,20 +374,42 @@ export default function QuizPlayer({
     />
   );
 
+  const estimatedMinutes = Math.max(1, Math.round(totalQuestions * 0.5));
+
   return (
-    <div className="quiz-player quiz-player--active">
-      {/* Portal progress bar into site <header> */}
+    <div
+      className="quiz-player quiz-player--active"
+      style={{ ["--quiz-accent" as string]: accent }}
+    >
       {portalTarget
         ? createPortal(progressBarContent, portalTarget)
         : (
           <header className="quiz-player__header">
             {progressBarContent}
           </header>
-        )
-      }
+        )}
 
       {!showResults && currentMyth && (
         <div className="quiz-player__flow">
+          {showIntro && (
+            <header className="quiz-player__intro">
+              <p className="quiz-player__intro-eyebrow">Selbsttest</p>
+              <h1 className="quiz-player__intro-title">
+                {t(theme.titleKey)}
+              </h1>
+              <p className="quiz-player__intro-subtitle">
+                {t(theme.subtitleKey)}
+              </p>
+              {quizSummary && (
+                <p className="quiz-player__intro-summary">{quizSummary}</p>
+              )}
+              <p className="quiz-player__intro-meta">
+                {t("ui.questionsCount", { n: totalQuestions })} · ca.{" "}
+                {estimatedMinutes} Min.
+              </p>
+            </header>
+          )}
+
           <QuizCard
             key={currentMyth.id}
             myth={currentMyth}
