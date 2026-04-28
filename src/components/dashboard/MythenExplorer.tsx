@@ -20,6 +20,8 @@ import ScatterView from './views/ScatterView';
 import LollipopView from './views/LollipopView';
 import OverviewView from './views/OverviewView';
 import CircularView from './views/CircularView';
+import LadderView from './views/LadderView';
+import StripsView from './views/StripsView';
 import InformationSourcesView from './views/InformationSourcesView';
 import InformationSourcesV2View from './views/InformationSourcesV2View';
 import FactsheetPanel from './FactsheetPanel';
@@ -207,6 +209,12 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions }: 
               )}
               {state.view === 'circular' && (
                 <CircularView myths={filteredMyths} metrics={data.metrics} state={state} groups={data.groups} onSelectMyth={selectMyth} />
+              )}
+              {state.view === 'ladder' && (
+                <LadderView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
+              )}
+              {state.view === 'strips' && (
+                <StripsView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
               )}
             </>
           )}
