@@ -180,7 +180,9 @@
 }
 
 .quiz-player__flow {
-  max-width: 720px;
+  /* Reduced from 720px: card maxes at 480px, so we leave breathing room for
+     the dot strip and the persistence notice but stop sprawling on desktop. */
+  max-width: 520px;
   margin: 0 auto;
   padding: var(--space-lg) 0 var(--space-2xl);
   display: flex;
@@ -188,18 +190,24 @@
   gap: var(--space-lg);
 }
 
-/* ── Flow cell: stacks two faces in a 1×1 grid + faux-deck behind ───── */
+/* ── Flow cell: portrait card locked to a 3:4 aspect ratio ────────────
+   v2 redesign — the front and back faces occupy the SAME rectangle
+   (Anki / Quizlet pattern). Long explanations scroll inside the back
+   face with a soft mask-fade. */
 
 .quiz-card__cell--flow {
-  /* min-height keeps short questions tall; long explanations grow. */
-  min-height: 540px;
   position: relative;
   isolation: isolate;
-  /* perspective for the flip lives on the cell. */
-  perspective: 1400px;
+  perspective: 1600px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  aspect-ratio: 3 / 4;
 }
 
-/* Two pseudo-elements that look like the next two cards in the deck. */
+/* Two pseudo-elements that look like the next cards in the deck.
+   They fan VERTICALLY below the active card with a clear shadow stack
+   so the deck reads as a deck. */
 .quiz-card__cell--flow::before,
 .quiz-card__cell--flow::after {
   content: "";
@@ -208,54 +216,60 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
   z-index: -1;
+  pointer-events: none;
   transition:
     transform var(--dur-slide) var(--ease-card),
     opacity var(--dur-slide) var(--ease-card);
-  pointer-events: none;
 }
 
 .quiz-card__cell--flow::before {
-  transform: translate(6px, 8px) rotate(1.4deg);
+  transform: translate(0, 16px) scale(0.965);
+  box-shadow: 0 2px 8px rgba(26, 26, 46, 0.06);
 }
 
 .quiz-card__cell--flow::after {
-  transform: translate(12px, 16px) rotate(-1deg);
-  opacity: 0.6;
+  transform: translate(0, 32px) scale(0.93);
+  opacity: 0.55;
+  box-shadow: 0 4px 16px rgba(26, 26, 46, 0.05);
 }
 
-/* Thin out the deck as the user progresses. */
-.quiz-card__cell--flow[data-deck="1"]::after { opacity: 0; transform: translate(8px, 10px) rotate(-0.4deg); }
+/* Thin out the deck as the user progresses through the questions. */
+.quiz-card__cell--flow[data-deck="1"]::after {
+  opacity: 0;
+  transform: translate(0, 16px) scale(0.965);
+}
 .quiz-card__cell--flow[data-deck="0"]::before,
-.quiz-card__cell--flow[data-deck="0"]::after  { opacity: 0; }
+.quiz-card__cell--flow[data-deck="0"]::after {
+  opacity: 0;
+}
 
-/* Grid-stack the front + back faces so the back grows with content. */
+/* The flow card uses the standard 3D flip — both faces are absolutely
+   positioned and fill the cell. No more grid-stack. */
 .quiz-card--flow .quiz-card__inner {
-  display: grid;
-  grid-template-areas: "stack";
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .quiz-card--flow .quiz-card__face {
-  grid-area: stack;
-  position: static;
-  inset: auto;
-  padding: var(--space-xl);
+  position: absolute;
+  inset: 0;
+  padding: 18px 18px 16px;
   display: flex;
   flex-direction: column;
-  align-self: stretch;
-  min-height: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  /* Card never extends; long explanations scroll inside the back face. */
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .quiz-card--flow .quiz-card__back {
   /* Stay rotated so it's hidden until the inner flips. */
   transform: rotateY(180deg);
-}
-
-/* Flow faces: stronger border and always-on shadow. */
-.quiz-card--flow .quiz-card__face {
-  border: 1px solid var(--color-border-strong);
-  box-shadow: var(--shadow-md);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -265,9 +279,18 @@
 }
 
 .quiz-card--flow .quiz-card__statement {
-  font-size: 1.45rem;
-  line-height: 1.4;
-  margin-bottom: var(--space-xl);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(20px, 3.2vw, 26px);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  /* Vertically center the statement between the topbar and the verdict
+     scale. The scale itself uses margin-top: auto to anchor to the bottom;
+     statement uses margin: auto 0 so the slack distributes evenly above
+     and below it. */
+  margin: auto 0;
+  flex: 0 0 auto;
+  hyphens: auto;
 }
 
 /* Always-visible answer buttons in flow mode */
@@ -281,6 +304,366 @@
 .quiz-card--flow .quiz-card__btn {
   padding: 14px 12px;
   font-size: 0.95rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VerdictScale — 4-segment horizontal verdict scale (Phase B).
+
+   Replaces the old 2×2 button grid on the front face. Reads as a
+   left-to-right spectrum (falsch → richtig) with a gradient hairline
+   above the row that mirrors the same colours.
+   ═══════════════════════════════════════════════════════════════ */
+
+.verdict-scale {
+  /* margin-top: auto pins the scale to the bottom of the front face's
+     flex column, leaving the statement to absorb vertical slack. */
+  margin-top: auto;
+}
+
+.verdict-scale__spectrum {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--color-falsch) 0%,
+    var(--color-eher-falsch) 33%,
+    var(--color-eher-richtig) 66%,
+    var(--color-richtig) 100%
+  );
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+
+.verdict-scale__row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.verdict-scale__seg {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 4px;
+  min-height: 56px;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--color-border);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.verdict-scale__seg:last-child {
+  border-right: 0;
+}
+
+.verdict-scale__seg:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.verdict-scale__seg:disabled {
+  cursor: default;
+}
+
+.verdict-scale__glyph {
+  font-size: 1rem;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.verdict-scale__label {
+  text-align: center;
+  line-height: 1.15;
+}
+
+.verdict-scale__kbd {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 0.55rem;
+  font-family: var(--font-mono, monospace);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: var(--color-text-muted);
+}
+
+/* Hide the keyboard hints on touch-only devices — irrelevant noise there. */
+@media (hover: none) {
+  .verdict-scale__kbd {
+    display: none;
+  }
+}
+
+/* Per-segment hover tints — matches the back-face tier palette. */
+.verdict-scale__seg--falsch:hover:not(:disabled) {
+  background: var(--color-falsch-bg);
+  color: var(--color-falsch);
+}
+
+.verdict-scale__seg--eher_falsch:hover:not(:disabled) {
+  background: var(--color-eher-falsch-bg);
+  color: var(--color-eher-falsch);
+}
+
+.verdict-scale__seg--eher_richtig:hover:not(:disabled) {
+  background: var(--color-eher-richtig-bg);
+  color: var(--color-eher-richtig);
+}
+
+.verdict-scale__seg--richtig:hover:not(:disabled) {
+  background: var(--color-richtig-bg);
+  color: var(--color-richtig);
+}
+
+/* Selected (committed answer) — solid fill in the verdict colour. */
+.verdict-scale__seg.is-selected.verdict-scale__seg--falsch {
+  background: var(--color-falsch);
+  color: #fff;
+}
+
+.verdict-scale__seg.is-selected.verdict-scale__seg--eher_falsch {
+  background: var(--color-eher-falsch);
+  color: #fff;
+}
+
+.verdict-scale__seg.is-selected.verdict-scale__seg--eher_richtig {
+  background: var(--color-eher-richtig);
+  color: #fff;
+}
+
+.verdict-scale__seg.is-selected.verdict-scale__seg--richtig {
+  background: var(--color-richtig);
+  color: #fff;
+}
+
+/* Compact form for review rows: tiny squares, no labels. */
+.verdict-scale--compact .verdict-scale__row {
+  box-shadow: none;
+}
+
+.verdict-scale--compact .verdict-scale__seg {
+  min-height: 36px;
+  padding: 6px;
+  font-size: 0; /* hide any text leak */
+}
+
+.verdict-scale--compact .verdict-scale__glyph {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.verdict-scale--compact .verdict-scale__kbd {
+  display: none;
+}
+
+/* Sub-380 px viewports (iPhone SE-class): drop to 2×2 so each segment has
+   room for its glyph + label without truncation. */
+@media (max-width: 380px) {
+  .verdict-scale__row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .verdict-scale__seg {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .verdict-scale__seg:nth-child(2n) {
+    border-right: 0;
+  }
+  .verdict-scale__seg:nth-last-child(-n+2) {
+    border-bottom: 0;
+  }
+  /* Re-divide odd children with a right border so the 2×2 grid has lines. */
+  .verdict-scale__seg:nth-child(2n+1) {
+    border-right: 1px solid var(--color-border);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   v2 back-face hierarchy — Phase A redesign.
+   Order top→bottom inside .quiz-card__back:
+     1. Topbar (counter)                    flex-shrink: 0
+     2. Verdict banner (largest, tinted)    flex-shrink: 0
+     3. Myth-line ("Der Mythos … ist Y.")   flex-shrink: 0
+     4. Optional answer chip (when wrong)   flex-shrink: 0
+     5. Explanation (scroll, fills gap)     flex: 1 1 auto, min-height: 0
+     6. Population bar                      flex-shrink: 0
+     7. Action row                          flex-shrink: 0
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Shared topbar between front & back so the card feels stable. */
+.quiz-card--flow .quiz-card__topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.quiz-card--flow .quiz-card__counter {
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-card--flow .quiz-card__category {
+  color: var(--color-accent);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: right;
+  /* Truncate gracefully on narrow phones rather than wrapping. */
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 2 — Verdict banner. The colleague's three-tier headline lives here. */
+.quiz-card--flow .quiz-card__verdict-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+  margin-top: var(--space-sm);
+}
+
+.quiz-card--flow .quiz-card__verdict-glyph {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.quiz-card--flow.is-correct .quiz-card__verdict-banner {
+  background: var(--color-richtig-bg);
+  color: var(--color-richtig);
+}
+
+.quiz-card--flow.is-near .quiz-card__verdict-banner {
+  background: var(--color-eher-falsch-bg);
+  color: var(--color-eher-falsch);
+}
+
+.quiz-card--flow.is-far .quiz-card__verdict-banner {
+  background: var(--color-falsch-bg);
+  color: var(--color-falsch);
+}
+
+/* Tier-tinted background gradient on the back face only. Overrides the
+   legacy .quiz-card--correct/--incorrect tinting that lives further down
+   in this file (which only handled the binary case). */
+.quiz-card--flow.is-correct .quiz-card__back {
+  border-color: var(--color-richtig);
+  background: linear-gradient(180deg, var(--color-richtig-bg), var(--color-surface) 40%);
+}
+
+.quiz-card--flow.is-near .quiz-card__back {
+  border-color: var(--color-eher-falsch);
+  background: linear-gradient(180deg, var(--color-eher-falsch-bg), var(--color-surface) 40%);
+}
+
+.quiz-card--flow.is-far .quiz-card__back {
+  border-color: var(--color-falsch);
+  background: linear-gradient(180deg, var(--color-falsch-bg), var(--color-surface) 40%);
+}
+
+/* 3 — Myth-line. Smaller than the verdict banner; the verdict word is
+   bolded for scannability. */
+.quiz-card--flow .quiz-card__myth-line {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.quiz-card--flow .quiz-card__myth-line strong {
+  font-weight: 700;
+}
+
+/* 4 — Optional answer-note (only rendered when the user was wrong). */
+.quiz-card--flow .quiz-card__answer-note {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin: 6px 0 0;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.quiz-card--flow .quiz-card__answer-chip {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+/* 5 — Explanation. Wraps in a flex: 1 container so it absorbs whatever
+   space is left after the other (flex-shrink: 0) blocks have laid out.
+   The inner div scrolls; overscroll-behavior: contain prevents the page
+   from scrolling when the inner reaches its end. */
+.quiz-card--flow .quiz-card__explanation-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0; /* required for flex children to actually shrink */
+  margin-top: var(--space-sm);
+}
+
+.quiz-card--flow .quiz-card__explanation {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  /* Override the line-clamp from the legacy .quiz-card__explanation block. */
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  /* Soft mask-fade at the bottom hints at scrollable overflow. */
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 90%, transparent 100%);
+          mask-image: linear-gradient(180deg, #000 0%, #000 90%, transparent 100%);
+  /* Reset margin set by legacy rules. */
+  margin: 0;
+}
+
+.quiz-card--flow .quiz-card__explanation::-webkit-scrollbar {
+  width: 4px;
+}
+
+.quiz-card--flow .quiz-card__explanation::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+.quiz-card--flow .quiz-card__explanation p {
+  margin: 0 0 0.6em;
 }
 
 /* Back-face additions for the flow layout */
@@ -388,6 +771,61 @@
   justify-content: space-between;
   gap: var(--space-sm);
   margin-top: auto;
+}
+
+/* ── v2 flow-specific overrides for pop bar + back actions ──────
+   Inside the fixed-aspect 3:4 card, these blocks must NOT use
+   margin-top: auto (which would steal vertical space from the
+   scrollable explanation above them). They sit naturally below the
+   explanation-wrap which has flex: 1 1 auto. */
+.quiz-card--flow .quiz-card__pop-bar {
+  margin-top: 10px;
+  margin-bottom: 0;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.quiz-card--flow .quiz-card__pop-bar-track {
+  height: 6px;
+}
+
+.quiz-card--flow .quiz-card__pop-bar-fill {
+  background: linear-gradient(
+    90deg,
+    var(--quiz-accent, var(--color-accent)),
+    #40916c
+  );
+}
+
+.quiz-card--flow .quiz-card__pop-bar-value {
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  text-align: left;
+  min-width: 0;
+}
+
+.quiz-card--flow .quiz-card__back-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+.quiz-card--flow .quiz-card__back-actions .quiz-card__next-btn {
+  padding: 9px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.quiz-card--flow .quiz-card__back-actions .quiz-card__more-btn {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 0;
 }
 
 .quiz-card__next-btn {
@@ -667,9 +1105,11 @@
   min-height: 340px;
 }
 
-/* The flow cell sets its own perspective above; reset min-height inheritance. */
+/* v2: the flow cell uses aspect-ratio (declared in the redesign block above),
+   not min-height. Explicitly null out the inherited min-height: 340px from
+   the generic .quiz-card__cell so it doesn't fight the aspect ratio. */
 .quiz-card__cell.quiz-card__cell--flow {
-  min-height: 540px;
+  min-height: 0;
 }
 
 /* ── Card (outer clickable wrapper) ───────────────────────────── */
@@ -1003,16 +1443,10 @@
   overflow: hidden;
 }
 
-/* In the flow layout the card grows with its content — no clamp. */
-.quiz-card--flow .quiz-card__explanation {
-  display: block;
-  flex: 0 1 auto;
-  -webkit-line-clamp: unset;
-  -webkit-box-orient: unset;
-  overflow: visible;
-  margin-top: var(--space-sm);
-  margin-bottom: var(--space-md);
-}
+/* v2: the flow explanation is wrapped in .quiz-card__explanation-wrap and
+   styled in the back-face hierarchy block above. Leaving this rule empty
+   so any later cascade tweaks have an obvious anchor; the real styles are
+   under .quiz-card--flow .quiz-card__explanation-wrap. */
 
 /* Back face: "mehr" button */
 .quiz-card__more-btn {
@@ -1942,10 +2376,8 @@
 }
 
 @media (max-width: 640px) {
-  .quiz-selection {
-    grid-template-columns: 1fr;
-    grid-auto-rows: 300px;
-  }
+  /* v2: the .quiz-selection mobile rules now live in the snap-carousel
+     block further down. Intentionally no .quiz-selection rule here. */
 
   .quiz-header-bar {
     gap: var(--space-sm);
@@ -1978,16 +2410,24 @@
     min-height: 300px;
   }
 
+  /* v2: card stays 3:4 on mobile too. The max-height cap leaves room for
+     the dot strip + nav + persistence notice on shorter phones. Dropped
+     the legacy min-height: 600px which conflicted with aspect-ratio. */
   .quiz-card__cell--flow {
-    min-height: 600px;
+    max-height: min(640px, calc(100svh - 240px));
+  }
+
+  .quiz-player__flow {
+    max-width: none;
+    padding: var(--space-md) var(--space-md) var(--space-2xl);
   }
 
   .quiz-card--flow .quiz-card__face {
-    padding: var(--space-lg);
+    padding: 16px 16px 14px;
   }
 
   .quiz-card--flow .quiz-card__statement {
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 4.5vw, 1.2rem);
   }
 
   .quiz-card--flow .quiz-card__buttons {
@@ -2047,14 +2487,16 @@
   color: var(--color-text-secondary);
 }
 
+/* v2: tighter, content-sized tile. The legacy 340 px grid-auto-rows row
+   forced a wasteful ~200 px of empty space below the title; the new tile
+   is content-sized and sits ~200 px tall on desktop, ~140 px on mobile. */
 .quiz-selection {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  grid-auto-rows: 340px;
-  gap: var(--space-lg);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  /* No grid-auto-rows — let the tile size to its content. */
+  gap: var(--space-md);
 }
 
-/* Quiz selection card — matching the in-quiz card style */
 .quiz-select-card {
   display: flex;
   flex-direction: column;
@@ -2064,10 +2506,12 @@
   text-decoration: none;
   color: inherit;
   background: var(--color-surface);
-  border: 2px solid var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl) var(--space-lg);
-  height: 100%;
+  padding: var(--space-lg) var(--space-md);
+  /* Content-sized tile with a sensible minimum so they share a baseline
+     when titles vary in length. */
+  min-height: 200px;
   box-sizing: border-box;
   transition:
     border-color var(--transition),
@@ -2079,18 +2523,18 @@
 .quiz-select-card:hover {
   border-color: var(--color-accent);
   box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .quiz-select-card__emoji {
-  font-size: 2.5rem;
-  margin-bottom: var(--space-md);
+  font-size: 2rem;
+  margin-bottom: var(--space-sm);
   display: block;
   line-height: 1;
 }
 
 .quiz-select-card__title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-text);
   margin: 0 0 var(--space-sm) 0;
@@ -2098,13 +2542,46 @@
 }
 
 .quiz-select-card__count {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-accent);
   background: var(--color-accent-light);
   padding: 0.2em 0.7em;
   border-radius: var(--radius-full);
   letter-spacing: 0.02em;
+}
+
+/* Mobile: snap-carousel instead of a vertical wall of tall tiles. */
+@media (max-width: 640px) {
+  .quiz-selection {
+    grid-auto-flow: column;
+    grid-auto-columns: 78%;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    /* Bleed the row to the page edges so the snap targets feel native. */
+    margin-left: calc(-1 * var(--space-lg));
+    margin-right: calc(-1 * var(--space-lg));
+    padding: 4px var(--space-lg);
+    /* Allow the focus ring on the first tile to render outside the row. */
+    overflow-y: visible;
+  }
+
+  .quiz-select-card {
+    scroll-snap-align: start;
+    min-height: 140px;
+    padding: var(--space-md);
+  }
+
+  .quiz-select-card__emoji {
+    font-size: 1.7rem;
+    margin-bottom: 4px;
+  }
+
+  .quiz-select-card__title {
+    font-size: 0.95rem;
+  }
 }
 
 
@@ -2247,4 +2724,495 @@
   width: 0;
   height: 0;
   overflow: hidden;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Phase C — Deck overview, swipe edges, shortcut help.
+   Phase D — Streak chip, confidence input.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── DeckOverview (sheet listing all questions) ─────────────────── */
+
+.deck-overview {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: deckOverviewFadeIn 0.18s ease;
+}
+
+@keyframes deckOverviewFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.deck-overview__panel {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-lg);
+  width: min(720px, 100%);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  animation: deckOverviewSlideUp 0.24s var(--ease-card);
+  outline: none;
+}
+
+@keyframes deckOverviewSlideUp {
+  from { transform: translateY(20%); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+.deck-overview__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.deck-overview__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.deck-overview__close {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.deck-overview__close:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.deck-overview__grid {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-sm);
+  overflow-y: auto;
+}
+
+.deck-overview__card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-left: 4px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.deck-overview__card:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.deck-overview__card.is-current {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.deck-overview__card.is-correct {
+  border-left-color: var(--color-richtig);
+  background: var(--color-richtig-bg);
+}
+
+.deck-overview__card.is-near {
+  border-left-color: var(--color-eher-falsch);
+  background: var(--color-eher-falsch-bg);
+}
+
+.deck-overview__card.is-far {
+  border-left-color: var(--color-falsch);
+  background: var(--color-falsch-bg);
+}
+
+.deck-overview__card.is-open {
+  border-left-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.deck-overview__num {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.deck-overview__stmt {
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--color-text);
+  font-weight: 500;
+  /* Cap at 3 lines so the tiles share a baseline. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.deck-overview__verdict-chip {
+  align-self: flex-start;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--color-text-secondary);
+}
+
+.deck-overview__card.is-correct .deck-overview__verdict-chip {
+  background: var(--color-richtig);
+  color: #fff;
+}
+
+.deck-overview__card.is-near .deck-overview__verdict-chip {
+  background: var(--color-eher-falsch);
+  color: #fff;
+}
+
+.deck-overview__card.is-far .deck-overview__verdict-chip {
+  background: var(--color-falsch);
+  color: #fff;
+}
+
+@media (min-width: 720px) {
+  .deck-overview {
+    align-items: center;
+  }
+
+  .deck-overview__panel {
+    border-radius: var(--radius-lg);
+    max-height: 75vh;
+  }
+}
+
+/* ── Übersicht trigger button (replaces dots row as primary deck nav) ──── */
+
+.quiz-player__overview-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.quiz-player__overview-btn:hover {
+  background: var(--color-accent-light);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.quiz-player__overview-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.quiz-player__overview-btn-glyph {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.quiz-player__overview-row {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+/* Hide the dots row on coarse / no-hover (mobile) — they're noise next to
+   the overview button there. Still rendered for desktop keyboard users. */
+@media (hover: none) and (pointer: coarse) {
+  .quiz-player__dots {
+    display: none;
+  }
+}
+
+/* ── Swipe edge gradient overlays (front face only) ─────────────── */
+
+.quiz-card__swipe-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: #fff;
+  pointer-events: none;
+  border-radius: var(--radius-lg);
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.12s linear;
+}
+
+.quiz-card__swipe-edge--prev {
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(45, 106, 79, 0.85),
+    rgba(45, 106, 79, 0)
+  );
+  opacity: var(--swipe-progress-prev, 0);
+}
+
+.quiz-card__swipe-edge--next {
+  right: 0;
+  background: linear-gradient(
+    -90deg,
+    rgba(45, 106, 79, 0.85),
+    rgba(45, 106, 79, 0)
+  );
+  opacity: var(--swipe-progress-next, 0);
+}
+
+/* ── ShortcutHelp popover ──────────────────────────────────────── */
+
+.shortcut-help {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: deckOverviewFadeIn 0.18s ease;
+}
+
+.shortcut-help__panel {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: min(420px, 90vw);
+  outline: none;
+  animation: deckOverviewSlideUp 0.24s var(--ease-card);
+}
+
+.shortcut-help__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.shortcut-help__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.shortcut-help__close {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.shortcut-help__close:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.shortcut-help__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shortcut-help__row {
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Streak chip (front face only) ─────────────────────────────── */
+
+.quiz-card__streak {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  animation: streakPop 0.35s var(--ease-card);
+}
+
+@keyframes streakPop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-card__streak {
+    animation: none;
+  }
+}
+
+/* ── Confidence input (slide-up overlay on front face) ─────────── */
+
+.quiz-card__confidence {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-accent-light);
+  border-top: 1px solid var(--color-accent);
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0));
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  z-index: 3;
+  animation: confidenceSlideUp 0.25s var(--ease-card);
+}
+
+@keyframes confidenceSlideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-card__confidence {
+    animation: none;
+  }
+}
+
+.quiz-card__confidence-label {
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.quiz-card__confidence-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.quiz-card__confidence-btn {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-accent);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.quiz-card__confidence-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.quiz-card__confidence-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ── Micro-copy line under the pop bar (back face) ─────────────── */
+
+.quiz-card--flow .quiz-card__micro-copy {
+  font-size: 0.7rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  margin: 6px 0 0;
+  flex-shrink: 0;
+}
+
+/* ── Result screen — Nächstes Modul link ───────────────────────── */
+
+.quiz-result__next-module {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-accent-light);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.quiz-result__next-module:hover {
+  background: var(--color-accent);
+  color: var(--color-surface);
 }

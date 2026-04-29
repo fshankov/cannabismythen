@@ -1,0 +1,98 @@
+<h2>Proposed Figma File Structure</h2>
+<p class="subtitle">4-page layout — each page has a distinct purpose for the designer review.</p>
+
+<div class="section">
+<div style="display:grid;gap:1rem;grid-template-columns:1fr 1fr;">
+
+  <div style="border:2px solid #6b57ff;border-radius:12px;padding:1.25rem;background:#f9f8ff">
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
+      <span style="background:#6b57ff;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0">1</span>
+      <strong>Project Brief</strong>
+    </div>
+    <ul style="font-size:0.82rem;color:#444;margin:0;padding-left:1.2rem;line-height:1.7">
+      <li>What this site does + who it serves</li>
+      <li>Design philosophy (4 pillars)</li>
+      <li>Key references (politifact, infektionsschutz…)</li>
+      <li>Live site link: cannabismythen.netlify.app</li>
+      <li>Classification system explanation</li>
+      <li>The 5-leaf directional symbol concept</li>
+      <li>Logo brief (magnifying glass + brain/cloud)</li>
+    </ul>
+    <p style="font-size:0.75rem;color:#888;margin-top:0.75rem;margin-bottom:0">🔒 Read-only context for designer</p>
+  </div>
+
+  <div style="border:2px solid #2d6a4f;border-radius:12px;padding:1.25rem;background:#f4faf7">
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
+      <span style="background:#2d6a4f;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0">2</span>
+      <strong>Current Design System</strong>
+    </div>
+    <ul style="font-size:0.82rem;color:#444;margin:0;padding-left:1.2rem;line-height:1.7">
+      <li>Color palette — all swatches with hex/role</li>
+      <li>Classification colors (4 verdicts + keine Aussage)</li>
+      <li>Type scale — Inter Variable, all sizes rendered</li>
+      <li>Current Lucide icons in use (~15 icons)</li>
+      <li>Recommended icon map from design.md (~58 icons)</li>
+      <li>Spacing tokens + border radius examples</li>
+      <li>The current SVG classification symbol draft</li>
+    </ul>
+    <p style="font-size:0.75rem;color:#888;margin-top:0.75rem;margin-bottom:0">📋 Full token reference, read-only</p>
+  </div>
+
+  <div style="border:2px solid #b45309;border-radius:12px;padding:1.25rem;background:#fffbf5">
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
+      <span style="background:#b45309;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0">3</span>
+      <strong>Screenshots + Annotations</strong>
+    </div>
+    <ul style="font-size:0.82rem;color:#444;margin:0;padding-left:1.2rem;line-height:1.7">
+      <li>Homepage hero — desktop + mobile</li>
+      <li>Fakten-Karten card front — desktop + mobile</li>
+      <li>Fakten-Karten card back (clicked) — desktop + mobile</li>
+      <li>Selbsttest quiz card front — desktop + mobile</li>
+      <li>Selbsttest quiz card back (flipped) — desktop + mobile</li>
+      <li>Dashboard lollipop — desktop + mobile</li>
+      <li>Myth popup ("mehr") — desktop + mobile</li>
+    </ul>
+    <p style="font-size:0.75rem;color:#888;margin-top:0.75rem;margin-bottom:0">📸 Live screenshots with design question callouts</p>
+  </div>
+
+  <div style="border:2px solid #be123c;border-radius:12px;padding:1.25rem;background:#fff5f7">
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
+      <span style="background:#be123c;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0">4</span>
+      <strong>Open Questions + Designer Sandbox</strong>
+    </div>
+    <ul style="font-size:0.82rem;color:#444;margin:0;padding-left:1.2rem;line-height:1.7">
+      <li>"Does the color palette work for health content?"</li>
+      <li>"What fonts would you recommend instead/alongside?"</li>
+      <li>"How to add depth to the flat cards?"</li>
+      <li>"Refine or redesign the 5-leaf symbol?"</li>
+      <li>"Logo concept — sketch your ideas here"</li>
+      <li>"Which icons for dashboard indicators?"</li>
+      <li>"Should population icons be colored/illustrated?"</li>
+      <li>+ Empty frames for designer's proposals</li>
+    </ul>
+    <p style="font-size:0.75rem;color:#888;margin-top:0.75rem;margin-bottom:0">✏️ Active workspace — designer edits/comments here</p>
+  </div>
+
+</div>
+</div>
+
+<div class="section" style="margin-top:1rem;padding:1rem;background:#f8f8f6;border-radius:8px;border-left:3px solid #2d6a4f">
+  <p style="margin:0;font-size:0.85rem"><strong>Implementation pipeline:</strong> Claude Code (Sonnet) → Playwright screenshots of live site → Figma MCP creates file + populates all 4 pages → share with sashpershina@gmail.com as commenter. No paid plan needed.</p>
+</div>
+
+<div class="options" style="margin-top:1rem">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>This structure looks good — proceed</h3>
+      <p>Write the plan and create the Figma file</p>
+    </div>
+  </div>
+  <div class="option" data-choice="tweak" onclick="toggleSelect(this)">
+    <div class="letter">~</div>
+    <div class="content">
+      <h3>Tweak something</h3>
+      <p>Tell me what to change in the terminal</p>
+    </div>
+  </div>
+</div>

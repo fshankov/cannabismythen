@@ -1,0 +1,600 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "cannabismythen" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - link "Fakten-Karten" [ref=e5] [cursor=pointer]:
+        - /url: /fakten-karten/
+      - link "Daten-Explorer" [ref=e6] [cursor=pointer]:
+        - /url: /zahlen-und-fakten/
+      - link "Ihre Fragen" [ref=e7] [cursor=pointer]:
+        - /url: /haeufige-fragen/
+      - link "Selbsttest" [ref=e8] [cursor=pointer]:
+        - /url: /selbsttest/
+      - link "Über das Projekt" [ref=e9] [cursor=pointer]:
+        - /url: /ueber-uns/
+  - main [ref=e10]:
+    - heading "Fakten-Karten" [level=1] [ref=e11]
+    - paragraph [ref=e12]: Stimmt das? 42 verbreitete Cannabis-Mythen, sofort eingeordnet — tippen Sie auf eine Karte für die Erklärung.
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - button "Alle" [ref=e16] [cursor=pointer]
+        - button "Medizinischer und therapeutischer Nutzen" [ref=e17] [cursor=pointer]
+        - button "Risiken für den Körper und die Entwicklung" [ref=e18] [cursor=pointer]
+        - button "Risiken für die psychische Gesundheit" [ref=e19] [cursor=pointer]
+        - button "Einfluss auf Stimmung und Wahrnehmung" [ref=e20] [cursor=pointer]
+        - button "Soziale Auswirkungen und Leistungsfähigkeit" [ref=e21] [cursor=pointer]
+        - button "Risiken durch Dosierung und Qualität" [ref=e22] [cursor=pointer]
+        - button "Verbreitung in der Bevölkerung und Gesetzgebung" [ref=e23] [cursor=pointer]
+        - button "Allgemeine Einschätzung der Gefährlichkeit" [ref=e24] [cursor=pointer]
+      - paragraph [ref=e25]: 39 Mythen insgesamt
+      - generic [ref=e26]:
+        - button "Cannabis ist ein Allheilmittel. — Erklärung" [ref=e587] [cursor=pointer]:
+          - generic [ref=e29]:
+            - generic [ref=e30]:
+              - generic [ref=e31]:
+                - generic [ref=e32]: ✗
+                - generic [ref=e33]: Das stimmt nicht.
+              - paragraph [ref=e34]: Cannabis ist ein Allheilmittel.
+              - generic [ref=e35]: ↩ Erklärung
+            - generic [ref=e36]:
+              - paragraph [ref=e37]: Cannabis ist kein Allheilmittel. Die Wirksamkeit ist nur für wenige Erkrankungen belegt und geht mit erheblichen Risiken einher. Die vollständige Einordnung zeigt, warum Vorsicht geboten ist.
+              - button "mehr erfahren →" [ref=e38]
+              - generic [ref=e39]: ↩ zurück
+        - button "Cannabiskonsum ist harmlos. — Karte umdrehen" [ref=e41] [cursor=pointer]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]:
+                - generic [ref=e45]: ✗
+                - generic [ref=e46]: Das stimmt nicht.
+              - paragraph [ref=e47]: Cannabiskonsum ist harmlos.
+              - generic [ref=e48]: ↩ Erklärung
+            - generic [ref=e49]:
+              - paragraph [ref=e50]: Cannabis ist nicht harmlos. Studien belegen klare Risiken für Psyche, Körper und Sozialleben – besonders bei frühem und häufigem Konsum. Mehr zu den konkreten Gefahren im Factsheet.
+              - button "mehr erfahren →" [ref=e51]
+              - generic [ref=e52]: ↩ zurück
+        - button "Cannabiskonsum durch Heranwachsende führt in stärkerem Maße als bei Erwachsenen zu gesundheitlichen Schäden. — Karte umdrehen" [ref=e54] [cursor=pointer]:
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e57]:
+                - generic [ref=e58]: ✓
+                - generic [ref=e59]: Das stimmt eher.
+              - paragraph [ref=e60]: Cannabiskonsum durch Heranwachsende führt in stärkerem Maße als bei Erwachsenen zu gesundheitlichen Schäden.
+              - generic [ref=e61]: ↩ Erklärung
+            - generic [ref=e62]:
+              - paragraph [ref=e63]: "Jugendliche sind besonders gefährdet: Früher, häufiger Konsum kann Gehirnentwicklung, Abhängigkeitsrisiko und Psychoserisiko stärker beeinflussen. Die Details zeigen wichtige Altersunterschiede."
+              - button "mehr erfahren →" [ref=e64]
+              - generic [ref=e65]: ↩ zurück
+        - button "Cannabis ist weniger schädlich als Alkohol. — Karte umdrehen" [ref=e67] [cursor=pointer]:
+          - generic [ref=e68]:
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - generic [ref=e71]: ✓
+                - generic [ref=e72]: Das stimmt.
+              - paragraph [ref=e73]: Cannabis ist weniger schädlich als Alkohol.
+              - generic [ref=e74]: ↩ Erklärung
+            - generic [ref=e75]:
+              - paragraph [ref=e76]: Cannabis verursacht laut Experten deutlich weniger Schäden als Alkohol – sowohl gesundheitlich als auch sozial. Die Einordnung erklärt, worauf dieser Vergleich basiert.
+              - button "mehr erfahren →" [ref=e77]
+              - generic [ref=e78]: ↩ zurück
+        - button "Cannabis ist schwierig zu dosieren. — Karte umdrehen" [ref=e80] [cursor=pointer]:
+          - generic [ref=e81]:
+            - generic [ref=e82]:
+              - generic [ref=e83]:
+                - generic [ref=e84]: ✓
+                - generic [ref=e85]: Das stimmt.
+              - paragraph [ref=e86]: Cannabis ist schwierig zu dosieren.
+              - generic [ref=e87]: ↩ Erklärung
+            - generic [ref=e88]:
+              - paragraph [ref=e89]: "Besonders für Unerfahrene ist Cannabis schwer zu dosieren: Schwankender THC-Gehalt und verzögerter Wirkungseintritt erhöhen das Risiko. Mehr zu den Hintergründen im Factsheet."
+              - button "mehr erfahren →" [ref=e90]
+              - generic [ref=e91]: ↩ zurück
+        - button "Mischkonsum von Cannabis mit anderen Substanzen ist besonders risikoreich. — Karte umdrehen" [ref=e93] [cursor=pointer]:
+          - generic [ref=e94]:
+            - generic [ref=e95]:
+              - generic [ref=e96]:
+                - generic [ref=e97]: ✓
+                - generic [ref=e98]: Das stimmt.
+              - paragraph [ref=e99]: Mischkonsum von Cannabis mit anderen Substanzen ist besonders risikoreich.
+              - generic [ref=e100]: ↩ Erklärung
+            - generic [ref=e101]:
+              - paragraph [ref=e102]: Mischkonsum mit Alkohol oder anderen Substanzen erhöht die Risiken deutlich – von Vergiftungen bis zu psychischen Folgen. Die Einordnung zeigt die wichtigsten Kombinationsrisiken.
+              - button "mehr erfahren →" [ref=e103]
+              - generic [ref=e104]: ↩ zurück
+        - button "Zusätze im Cannabis führen zu erhöhten Gesundheitsrisiken. — Karte umdrehen" [ref=e106] [cursor=pointer]:
+          - generic [ref=e107]:
+            - generic [ref=e108]:
+              - generic [ref=e109]:
+                - generic [ref=e110]: ✓
+                - generic [ref=e111]: Das stimmt.
+              - paragraph [ref=e112]: Zusätze im Cannabis führen zu erhöhten Gesundheitsrisiken.
+              - generic [ref=e113]: ↩ Erklärung
+            - generic [ref=e114]:
+              - paragraph [ref=e115]: Illegales Cannabis kann gefährliche Streckmittel oder synthetische Cannabinoide enthalten, die schwere Gesundheitsschäden verursachen. Die Einordnung zeigt die konkreten Gefahren.
+              - button "mehr erfahren →" [ref=e116]
+              - generic [ref=e117]: ↩ zurück
+        - button "Cannabiskonsum schädigt den Fötus. — Karte umdrehen" [ref=e119] [cursor=pointer]:
+          - generic [ref=e120]:
+            - generic [ref=e121]:
+              - generic [ref=e122]:
+                - generic [ref=e123]: ✓
+                - generic [ref=e124]: Das stimmt.
+              - paragraph [ref=e125]: Cannabiskonsum schädigt den Fötus.
+              - generic [ref=e126]: ↩ Erklärung
+            - generic [ref=e127]:
+              - paragraph [ref=e128]: Cannabiskonsum in der Schwangerschaft kann dem Fötus schaden – geringeres Geburtsgewicht und spätere Entwicklungsprobleme sind belegt. Mehr zu den Risiken im Factsheet.
+              - button "mehr erfahren →" [ref=e129]
+              - generic [ref=e130]: ↩ zurück
+        - button "Eine Überdosierung von Cannabis führt nicht zum Tod. — Karte umdrehen" [ref=e132] [cursor=pointer]:
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - generic [ref=e136]: ✓
+                - generic [ref=e137]: Das stimmt.
+              - paragraph [ref=e138]: Eine Überdosierung von Cannabis führt nicht zum Tod.
+              - generic [ref=e139]: ↩ Erklärung
+            - generic [ref=e140]:
+              - paragraph [ref=e141]: Das Risiko, an einer Cannabis-Überdosierung zu sterben, ist praktisch null. Überdosierungen sind aber möglich und können unangenehme Symptome verursachen. Mehr dazu im Factsheet.
+              - button "mehr erfahren →" [ref=e142]
+              - generic [ref=e143]: ↩ zurück
+        - button "Cannabis wirkt gegen Schmerzen. — Karte umdrehen" [ref=e145] [cursor=pointer]:
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - generic [ref=e148]:
+                - generic [ref=e149]: ✗
+                - generic [ref=e150]: Das stimmt eher nicht.
+              - paragraph [ref=e151]: Cannabis wirkt gegen Schmerzen.
+              - generic [ref=e152]: ↩ Erklärung
+            - generic [ref=e153]:
+              - paragraph [ref=e154]: Cannabis zeigt nur bei wenigen chronischen Schmerzen geringe Effekte. Beobachtete Linderung wird teils auf den Placebo-Effekt zurückgeführt. Die Einordnung zeigt die Grenzen.
+              - button "mehr erfahren →" [ref=e155]
+              - generic [ref=e156]: ↩ zurück
+        - button "Cannabiskonsum bewirkt Übelkeit und Erbrechen — Karte umdrehen" [ref=e158] [cursor=pointer]:
+          - generic [ref=e159]:
+            - generic [ref=e160]:
+              - generic [ref=e161]:
+                - generic [ref=e162]: ✓
+                - generic [ref=e163]: Das stimmt.
+              - paragraph [ref=e164]: Cannabiskonsum bewirkt Übelkeit und Erbrechen
+              - generic [ref=e165]: ↩ Erklärung
+            - generic [ref=e166]:
+              - paragraph [ref=e167]: Cannabis kann Übelkeit lindern, aber auch selbst auslösen. Häufiger Konsum kann zum Cannabinoid-Hyperemesis-Syndrom mit schwerem Erbrechen führen. Mehr dazu im Factsheet.
+              - button "mehr erfahren →" [ref=e168]
+              - generic [ref=e169]: ↩ zurück
+        - button "Cannabis hemmt Entzündungen — Karte umdrehen" [ref=e171] [cursor=pointer]:
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - generic [ref=e174]:
+                - generic [ref=e175]: ~
+                - generic [ref=e176]: Das ist unklar.
+              - paragraph [ref=e177]: Cannabis hemmt Entzündungen
+              - generic [ref=e178]: ↩ Erklärung
+            - generic [ref=e179]:
+              - paragraph [ref=e180]: Ob Cannabis Entzündungen hemmt, ist wissenschaftlich unklar. Bisherige Studien liefern widersprüchliche Ergebnisse. Die Einordnung erklärt den aktuellen Forschungsstand.
+              - button "mehr erfahren →" [ref=e181]
+              - generic [ref=e182]: ↩ zurück
+        - button "Cannabiskonsum löst Spasmen — Karte umdrehen" [ref=e184] [cursor=pointer]:
+          - generic [ref=e185]:
+            - generic [ref=e186]:
+              - generic [ref=e187]:
+                - generic [ref=e188]: ✓
+                - generic [ref=e189]: Das stimmt.
+              - paragraph [ref=e190]: Cannabiskonsum löst Spasmen
+              - generic [ref=e191]: ↩ Erklärung
+            - generic [ref=e192]:
+              - paragraph [ref=e193]: Cannabis kann bei Multipler Sklerose Spastiken und neuropathische Schmerzen lindern, die Effekte fallen aber insgesamt gering aus. Die Einordnung zeigt die Evidenzlage.
+              - button "mehr erfahren →" [ref=e194]
+              - generic [ref=e195]: ↩ zurück
+        - button "Cannabiskonsum verursacht Herz-Kreislaufkrankheiten — Karte umdrehen" [ref=e197] [cursor=pointer]:
+          - generic [ref=e198]:
+            - generic [ref=e199]:
+              - generic [ref=e200]:
+                - generic [ref=e201]: ✓
+                - generic [ref=e202]: Das stimmt.
+              - paragraph [ref=e203]: Cannabiskonsum verursacht Herz-Kreislaufkrankheiten
+              - generic [ref=e204]: ↩ Erklärung
+            - generic [ref=e205]:
+              - paragraph [ref=e206]: Besonders inhalativer Cannabiskonsum erhöht das Risiko für Herz-Kreislauf-Erkrankungen wie Herzinfarkt und Schlaganfall. Mehr zu den Zusammenhängen im Factsheet.
+              - button "mehr erfahren →" [ref=e207]
+              - generic [ref=e208]: ↩ zurück
+        - button "Inhalativer Cannabiskonsum bewirkt Atemwegserkrankungen — Karte umdrehen" [ref=e210] [cursor=pointer]:
+          - generic [ref=e211]:
+            - generic [ref=e212]:
+              - generic [ref=e213]:
+                - generic [ref=e214]: ✓
+                - generic [ref=e215]: Das stimmt.
+              - paragraph [ref=e216]: Inhalativer Cannabiskonsum bewirkt Atemwegserkrankungen
+              - generic [ref=e217]: ↩ Erklärung
+            - generic [ref=e218]:
+              - paragraph [ref=e219]: Häufiges Cannabisrauchen schädigt die Atemwege und erhöht das Risiko für chronische Atemwegserkrankungen. Die Einordnung zeigt die Gefahren je nach Konsumform.
+              - button "mehr erfahren →" [ref=e220]
+              - generic [ref=e221]: ↩ zurück
+        - button "Cannabiskonsum verursacht Krebserkrankungen — Karte umdrehen" [ref=e223] [cursor=pointer]:
+          - generic [ref=e224]:
+            - generic [ref=e225]:
+              - generic [ref=e226]:
+                - generic [ref=e227]: ✓
+                - generic [ref=e228]: Das stimmt.
+              - paragraph [ref=e229]: Cannabiskonsum verursacht Krebserkrankungen
+              - generic [ref=e230]: ↩ Erklärung
+            - generic [ref=e231]:
+              - paragraph [ref=e232]: Cannabiskonsum erhöht das Risiko für bestimmte Krebsarten, insbesondere Hodenkrebs und möglicherweise Lungenkrebs. Die Einordnung zeigt den aktuellen Wissensstand.
+              - button "mehr erfahren →" [ref=e233]
+              - generic [ref=e234]: ↩ zurück
+        - button "Cannabiskonsum hilft beim Abnehmen — Karte umdrehen" [ref=e236] [cursor=pointer]:
+          - generic [ref=e237]:
+            - generic [ref=e238]:
+              - generic [ref=e239]:
+                - generic [ref=e240]: ~
+                - generic [ref=e241]: Das ist unklar.
+              - paragraph [ref=e242]: Cannabiskonsum hilft beim Abnehmen
+              - generic [ref=e243]: ↩ Erklärung
+            - generic [ref=e244]:
+              - paragraph [ref=e245]: Ob Cannabis beim Abnehmen hilft, ist wissenschaftlich unklar. Einzelne Studien zeigen widersprüchliche Befunde bei methodischen Einschränkungen. Mehr dazu im Factsheet.
+              - button "mehr erfahren →" [ref=e246]
+              - generic [ref=e247]: ↩ zurück
+        - button "Cannabiskonsum hilft bei Schlafproblemen — Karte umdrehen" [ref=e249] [cursor=pointer]:
+          - generic [ref=e250]:
+            - generic [ref=e251]:
+              - generic [ref=e252]:
+                - generic [ref=e253]: ✗
+                - generic [ref=e254]: Das stimmt eher nicht.
+              - paragraph [ref=e255]: Cannabiskonsum hilft bei Schlafproblemen
+              - generic [ref=e256]: ↩ Erklärung
+            - generic [ref=e257]:
+              - paragraph [ref=e258]: Es gibt nicht genug Belege, dass Cannabis bei Schlafproblemen hilft. Regelmäßiger Konsum kann Schlafprobleme sogar verursachen. Die Einordnung erklärt warum.
+              - button "mehr erfahren →" [ref=e259]
+              - generic [ref=e260]: ↩ zurück
+        - button "Cannabiskonsum verändert die Wahrnehmungen — Karte umdrehen" [ref=e262] [cursor=pointer]:
+          - generic [ref=e263]:
+            - generic [ref=e264]:
+              - generic [ref=e265]:
+                - generic [ref=e266]: ✓
+                - generic [ref=e267]: Das stimmt.
+              - paragraph [ref=e268]: Cannabiskonsum verändert die Wahrnehmungen
+              - generic [ref=e269]: ↩ Erklärung
+            - generic [ref=e270]:
+              - paragraph [ref=e271]: "Cannabis verändert die Wahrnehmung: Zeitgefühl, Geräuschintensität und Gedankenkontrolle können beeinflusst werden. Die Einordnung zeigt die verschiedenen Effekte."
+              - button "mehr erfahren →" [ref=e272]
+              - generic [ref=e273]: ↩ zurück
+        - button "Cannabiskonsum beeinträchtigt kognitive Fähigkeiten — Karte umdrehen" [ref=e275] [cursor=pointer]:
+          - generic [ref=e276]:
+            - generic [ref=e277]:
+              - generic [ref=e278]:
+                - generic [ref=e279]: ✓
+                - generic [ref=e280]: Das stimmt.
+              - paragraph [ref=e281]: Cannabiskonsum beeinträchtigt kognitive Fähigkeiten
+              - generic [ref=e282]: ↩ Erklärung
+            - generic [ref=e283]:
+              - paragraph [ref=e284]: Cannabiskonsum beeinträchtigt Gedächtnis, Aufmerksamkeit und Verarbeitungsgeschwindigkeit – besonders bei häufigem und frühem Konsum. Mehr zur Erholung nach Abstinenz im Factsheet.
+              - button "mehr erfahren →" [ref=e285]
+              - generic [ref=e286]: ↩ zurück
+        - button "Cannabiskonsum gefährdet die Verkehrssicherheit — Karte umdrehen" [ref=e288] [cursor=pointer]:
+          - generic [ref=e289]:
+            - generic [ref=e290]:
+              - generic [ref=e291]:
+                - generic [ref=e292]: ✓
+                - generic [ref=e293]: Das stimmt.
+              - paragraph [ref=e294]: Cannabiskonsum gefährdet die Verkehrssicherheit
+              - generic [ref=e295]: ↩ Erklärung
+            - generic [ref=e296]:
+              - paragraph [ref=e297]: Cannabis beeinträchtigt Wahrnehmung und Reaktionsfähigkeit und erhöht das Unfallrisiko im Straßenverkehr deutlich. Die Einordnung zeigt die konkreten Risiken.
+              - button "mehr erfahren →" [ref=e298]
+              - generic [ref=e299]: ↩ zurück
+        - button "Cannabis ist eine Einstiegsdroge — Karte umdrehen" [ref=e301] [cursor=pointer]:
+          - generic [ref=e302]:
+            - generic [ref=e303]:
+              - generic [ref=e304]:
+                - generic [ref=e305]: ✗
+                - generic [ref=e306]: Das stimmt eher nicht.
+              - paragraph [ref=e307]: Cannabis ist eine Einstiegsdroge
+              - generic [ref=e308]: ↩ Erklärung
+            - generic [ref=e309]:
+              - paragraph [ref=e310]: Cannabis ist eher keine Einstiegsdroge – Alkohol und Nikotin sind die primären Einstiegssubstanzen. Die Einordnung erklärt, warum die Gateway-These nicht haltbar ist.
+              - button "mehr erfahren →" [ref=e311]
+              - generic [ref=e312]: ↩ zurück
+        - button "Cannabis verursacht keine Abhängigkeit — Karte umdrehen" [ref=e314] [cursor=pointer]:
+          - generic [ref=e315]:
+            - generic [ref=e316]:
+              - generic [ref=e317]:
+                - generic [ref=e318]: ✗
+                - generic [ref=e319]: Das stimmt nicht.
+              - paragraph [ref=e320]: Cannabis verursacht keine Abhängigkeit
+              - generic [ref=e321]: ↩ Erklärung
+            - generic [ref=e322]:
+              - paragraph [ref=e323]: Cannabis kann abhängig machen. Besonders bei frühem Einstieg und häufigem Konsum steigt das Risiko für eine Cannabisgebrauchsstörung. Mehr zu Entzugssymptomen im Factsheet.
+              - button "mehr erfahren →" [ref=e324]
+              - generic [ref=e325]: ↩ zurück
+        - button "Cannabiskonsum verursacht Psychosen — Karte umdrehen" [ref=e327] [cursor=pointer]:
+          - generic [ref=e328]:
+            - generic [ref=e329]:
+              - generic [ref=e330]:
+                - generic [ref=e331]: ✓
+                - generic [ref=e332]: Das stimmt.
+              - paragraph [ref=e333]: Cannabiskonsum verursacht Psychosen
+              - generic [ref=e334]: ↩ Erklärung
+            - generic [ref=e335]:
+              - paragraph [ref=e336]: Cannabiskonsum erhöht das Risiko für Psychosen – besonders bei Jugendlichen und bei intensivem Konsum von hochpotentem Cannabis. Die Einordnung zeigt die Zusammenhänge.
+              - button "mehr erfahren →" [ref=e337]
+              - generic [ref=e338]: ↩ zurück
+        - button "Cannabiskonsum wirkt gegen Angst — Karte umdrehen" [ref=e340] [cursor=pointer]:
+          - generic [ref=e341]:
+            - generic [ref=e342]:
+              - generic [ref=e343]:
+                - generic [ref=e344]: ✗
+                - generic [ref=e345]: Das stimmt eher nicht.
+              - paragraph [ref=e346]: Cannabiskonsum wirkt gegen Angst
+              - generic [ref=e347]: ↩ Erklärung
+            - generic [ref=e348]:
+              - paragraph [ref=e349]: Es gibt keinen Nachweis, dass Cannabis Angst wirksam lindert. Höhere THC-Dosen können sogar Angstzustände auslösen. Die Einordnung zeigt die komplexen Zusammenhänge.
+              - button "mehr erfahren →" [ref=e350]
+              - generic [ref=e351]: ↩ zurück
+        - button "Konsum hilft gegen Depressionen — Karte umdrehen" [ref=e353] [cursor=pointer]:
+          - generic [ref=e354]:
+            - generic [ref=e355]:
+              - generic [ref=e356]:
+                - generic [ref=e357]: ✗
+                - generic [ref=e358]: Das stimmt nicht.
+              - paragraph [ref=e359]: Konsum hilft gegen Depressionen
+              - generic [ref=e360]: ↩ Erklärung
+            - generic [ref=e361]:
+              - paragraph [ref=e362]: Cannabis hilft nicht gegen Depressionen. Regelmäßiger Konsum wird sogar mit einem erhöhten Risiko für depressive Symptome verbunden. Mehr dazu im Factsheet.
+              - button "mehr erfahren →" [ref=e363]
+              - generic [ref=e364]: ↩ zurück
+        - button "Konsum hilft bei ADHS — Karte umdrehen" [ref=e366] [cursor=pointer]:
+          - generic [ref=e367]:
+            - generic [ref=e368]:
+              - generic [ref=e369]:
+                - generic [ref=e370]: ✗
+                - generic [ref=e371]: Das stimmt eher nicht.
+              - paragraph [ref=e372]: Konsum hilft bei ADHS
+              - generic [ref=e373]: ↩ Erklärung
+            - generic [ref=e374]:
+              - paragraph [ref=e375]: Trotz Selbstberichten von Betroffenen gibt es keine wissenschaftliche Evidenz, dass Cannabis bei ADHS wirksam hilft. Die Einordnung erklärt den aktuellen Forschungsstand.
+              - button "mehr erfahren →" [ref=e376]
+              - generic [ref=e377]: ↩ zurück
+        - button "Konsum verursacht einen generellen Motivationsverlust — Karte umdrehen" [ref=e379] [cursor=pointer]:
+          - generic [ref=e380]:
+            - generic [ref=e381]:
+              - generic [ref=e382]:
+                - generic [ref=e383]: ✗
+                - generic [ref=e384]: Das stimmt nicht.
+              - paragraph [ref=e385]: Konsum verursacht einen generellen Motivationsverlust
+              - generic [ref=e386]: ↩ Erklärung
+            - generic [ref=e387]:
+              - paragraph [ref=e388]: Ein genereller Motivationsverlust durch Cannabis ist wissenschaftlich nicht bestätigt. Das sogenannte amotivationale Syndrom gilt als widerlegt. Mehr zur Studienlage im Factsheet.
+              - button "mehr erfahren →" [ref=e389]
+              - generic [ref=e390]: ↩ zurück
+        - button "Konsum verbessert die Gemütslage — Karte umdrehen" [ref=e392] [cursor=pointer]:
+          - generic [ref=e393]:
+            - generic [ref=e394]:
+              - generic [ref=e395]:
+                - generic [ref=e396]: ✓
+                - generic [ref=e397]: Das stimmt eher.
+              - paragraph [ref=e398]: Konsum verbessert die Gemütslage
+              - generic [ref=e399]: ↩ Erklärung
+            - generic [ref=e400]:
+              - paragraph [ref=e401]: Cannabis kann die Stimmung kurzfristig verbessern, aber auch verschlechtern. Der Effekt hängt von vielen Faktoren ab. Die Einordnung zeigt die Hintergründe.
+              - button "mehr erfahren →" [ref=e402]
+              - generic [ref=e403]: ↩ zurück
+        - button "Konsum führt zu Suizidgedanken — Karte umdrehen" [ref=e405] [cursor=pointer]:
+          - generic [ref=e406]:
+            - generic [ref=e407]:
+              - generic [ref=e408]:
+                - generic [ref=e409]: ✓
+                - generic [ref=e410]: Das stimmt eher.
+              - paragraph [ref=e411]: Konsum führt zu Suizidgedanken
+              - generic [ref=e412]: ↩ Erklärung
+            - generic [ref=e413]:
+              - paragraph [ref=e414]: Cannabiskonsum steht im Zusammenhang mit erhöhter Suizidalität – besonders bei frühem, häufigem und intensivem Konsum. Die Einordnung zeigt die wichtigen Risikofaktoren.
+              - button "mehr erfahren →" [ref=e415]
+              - generic [ref=e416]: ↩ zurück
+        - button "Cannabiskonsum entspannt (a) und macht nicht aggressiv (b) — Karte umdrehen" [ref=e418] [cursor=pointer]:
+          - generic [ref=e419]:
+            - generic [ref=e420]:
+              - generic [ref=e422]: ✗
+              - paragraph [ref=e423]: Cannabiskonsum entspannt (a) und macht nicht aggressiv (b)
+              - generic [ref=e424]: ↩ Erklärung
+            - generic [ref=e425]:
+              - paragraph [ref=e426]: Cannabis wird oft als entspannend empfunden, kann aber auch Aggression fördern – besonders bei chronischem Konsum. Die Einordnung zeigt die gegensätzlichen Wirkungen.
+              - button "mehr erfahren →" [ref=e427]
+              - generic [ref=e428]: ↩ zurück
+        - button "Cannabiskonsum macht kreativ — Karte umdrehen" [ref=e430] [cursor=pointer]:
+          - generic [ref=e431]:
+            - generic [ref=e432]:
+              - generic [ref=e433]:
+                - generic [ref=e434]: ✗
+                - generic [ref=e435]: Das stimmt eher nicht.
+              - paragraph [ref=e436]: Cannabiskonsum macht kreativ
+              - generic [ref=e437]: ↩ Erklärung
+            - generic [ref=e438]:
+              - paragraph [ref=e439]: Nicht Cannabis selbst, sondern Persönlichkeitsmerkmale der Konsumenten erklären höhere Kreativität. Hohe THC-Dosen können Kreativität sogar mindern. Mehr dazu im Factsheet.
+              - button "mehr erfahren →" [ref=e440]
+              - generic [ref=e441]: ↩ zurück
+        - button "Cannabiskonsum schädigt soziale Beziehungen — Karte umdrehen" [ref=e443] [cursor=pointer]:
+          - generic [ref=e444]:
+            - generic [ref=e445]:
+              - generic [ref=e446]:
+                - generic [ref=e447]: ✗
+                - generic [ref=e448]: Das stimmt eher nicht.
+              - paragraph [ref=e449]: Cannabiskonsum schädigt soziale Beziehungen
+              - generic [ref=e450]: ↩ Erklärung
+            - generic [ref=e451]:
+              - paragraph [ref=e452]: Cannabis schädigt Beziehungen nicht grundsätzlich. Problematisch wird es erst bei Abhängigkeit oder Konsum ohne andere. Die Einordnung zeigt die wichtigen Unterschiede.
+              - button "mehr erfahren →" [ref=e453]
+              - generic [ref=e454]: ↩ zurück
+        - button "Cannabiskonsument*innen halten sich in geringerem Maße an soziale Regeln — Karte umdrehen" [ref=e456] [cursor=pointer]:
+          - generic [ref=e457]:
+            - generic [ref=e458]:
+              - generic [ref=e459]:
+                - generic [ref=e460]: ✗
+                - generic [ref=e461]: Das stimmt eher nicht.
+              - paragraph [ref=e462]: Cannabiskonsument*innen halten sich in geringerem Maße an soziale Regeln
+              - generic [ref=e463]: ↩ Erklärung
+            - generic [ref=e464]:
+              - paragraph [ref=e465]: Cannabiskonsumierende halten sich nicht weniger an Regeln als andere. Bestimmte Persönlichkeitsmerkmale gehen eher mit Konsum einher. Die Einordnung zeigt die Studienlage.
+              - button "mehr erfahren →" [ref=e466]
+              - generic [ref=e467]: ↩ zurück
+        - button "Cannabiskonsum führt zu niedrigen Leistungen (a) und geht einher mit einem niedrigen sozialen Niveau (b) — Karte umdrehen" [ref=e469] [cursor=pointer]:
+          - generic [ref=e470]:
+            - generic [ref=e471]:
+              - generic [ref=e473]: ✗
+              - paragraph [ref=e474]: Cannabiskonsum führt zu niedrigen Leistungen (a) und geht einher mit einem niedrigen sozialen Niveau (b)
+              - generic [ref=e475]: ↩ Erklärung
+            - generic [ref=e476]:
+              - paragraph [ref=e477]: Cannabiskonsum führt nicht direkt zu niedrigen Leistungen oder niedrigem sozialem Status. Hintergrundfaktoren erklären die Zusammenhänge besser. Mehr dazu im Factsheet.
+              - button "mehr erfahren →" [ref=e478]
+              - generic [ref=e479]: ↩ zurück
+        - button "Cannabiskonsum ist cool — Karte umdrehen" [ref=e481] [cursor=pointer]:
+          - generic [ref=e482]:
+            - generic [ref=e483]:
+              - generic [ref=e484]:
+                - generic [ref=e485]: ✗
+                - generic [ref=e486]: Das stimmt nicht.
+              - paragraph [ref=e487]: Cannabiskonsum ist cool
+              - generic [ref=e488]: ↩ Erklärung
+            - generic [ref=e489]:
+              - paragraph [ref=e490]: Cannabiskonsum wird von der Mehrheit nicht als cool betrachtet. Große Teile der Jugendlichen und Erwachsenen lehnen Konsum ab. Die Einordnung zeigt die gesellschaftliche Sicht.
+              - button "mehr erfahren →" [ref=e491]
+              - generic [ref=e492]: ↩ zurück
+        - button "Ein großer Teil der Bevölkerung konsumiert Cannabis — Karte umdrehen" [ref=e494] [cursor=pointer]:
+          - generic [ref=e495]:
+            - generic [ref=e496]:
+              - generic [ref=e497]:
+                - generic [ref=e498]: ✗
+                - generic [ref=e499]: Das stimmt nicht.
+              - paragraph [ref=e500]: Ein großer Teil der Bevölkerung konsumiert Cannabis
+              - generic [ref=e501]: ↩ Erklärung
+            - generic [ref=e502]:
+              - paragraph [ref=e503]: Nur etwa 10 % der Erwachsenen in Deutschland konsumieren Cannabis. Unter jungen Erwachsenen ist es etwa jeder Vierte. Die Einordnung zeigt die genauen Zahlen.
+              - button "mehr erfahren →" [ref=e504]
+              - generic [ref=e505]: ↩ zurück
+        - button "Cannabiskonsum ist nun für alle überall erlaubt — Karte umdrehen" [ref=e507] [cursor=pointer]:
+          - generic [ref=e508]:
+            - generic [ref=e509]:
+              - generic [ref=e510]:
+                - generic [ref=e511]: ✗
+                - generic [ref=e512]: Das stimmt nicht.
+              - paragraph [ref=e513]: Cannabiskonsum ist nun für alle überall erlaubt
+              - generic [ref=e514]: ↩ Erklärung
+            - generic [ref=e515]:
+              - paragraph [ref=e516]: "Cannabis ist in Deutschland nur eingeschränkt erlaubt: Mengengrenzen, Altersbeschränkungen und Konsumverbotszonen gelten. Die Einordnung zeigt die konkreten Regeln."
+              - button "mehr erfahren →" [ref=e517]
+              - generic [ref=e518]: ↩ zurück
+        - button "Neues Gesetz wird Anstieg des Cannabiskonsums bewirken (a), insbesondere bei Minderjährigen (b) — Karte umdrehen" [ref=e520] [cursor=pointer]:
+          - generic [ref=e521]:
+            - generic [ref=e522]:
+              - generic [ref=e524]: ✗
+              - paragraph [ref=e525]: Neues Gesetz wird Anstieg des Cannabiskonsums bewirken (a), insbesondere bei Minderjährigen (b)
+              - generic [ref=e526]: ↩ Erklärung
+            - generic [ref=e527]:
+              - paragraph [ref=e528]: Legalisierung erhöht den Cannabiskonsum bei Erwachsenen, aber nicht bei Minderjährigen – so die internationale Evidenz. Die Einordnung zeigt die Erfahrungen anderer Länder.
+              - button "mehr erfahren →" [ref=e529]
+              - generic [ref=e530]: ↩ zurück
+      - dialog "Cannabis ist ein Allheilmittel." [ref=e588]:
+        - generic [active] [ref=e589]:
+          - button "Schließen" [ref=e591] [cursor=pointer]: ×
+          - generic [ref=e592]:
+            - paragraph [ref=e593]: Cannabis ist ein Allheilmittel.
+            - generic [ref=e594]:
+              - generic [ref=e595]: "Wissenschaftliches Urteil:"
+              - generic [ref=e596]: Das stimmt nicht.
+            - generic [ref=e597]:
+              - heading "Einordnung" [level=3] [ref=e598]
+              - paragraph [ref=e600]: Als Allheilmittel werden Substanzen oder Mittel beschrieben, die zur Heilung oder Behandlung aller Krankheiten und Beschwerden geeignet sind.
+            - generic [ref=e601]:
+              - heading "Synthese" [level=3] [ref=e602]
+              - paragraph [ref=e604]: Cannabis ist kein Allheilmittel. Die wissenschaftliche Evidenz für die Wirksamkeit von Cannabis in der Behandlung von verschiedenen Erkrankungen oder Symptomen ist unzureichend und geht je nach Konsumform, -häufigkeit und -menge mit erheblichen zusätzlichen gesundheitlichen Risiken einher.
+            - button "Zentrale Erkenntnisse ▾" [ref=e606] [cursor=pointer]:
+              - generic [ref=e607]: Zentrale Erkenntnisse
+              - generic [ref=e608]: ▾
+            - button "Referenzen(52 Quellen) ▾" [ref=e610] [cursor=pointer]:
+              - generic [ref=e611]:
+                - text: Referenzen
+                - generic [ref=e612]: (52 Quellen)
+              - generic [ref=e613]: ▾
+            - generic [ref=e614]:
+              - heading "Daten nach Zielgruppen" [level=3] [ref=e615]
+              - table [ref=e617]:
+                - rowgroup [ref=e618]:
+                  - row "Zielgruppe Kenntnis Bedeutung Richtigkeit Präv. Bedeutung Bev. Relevanz" [ref=e619]:
+                    - columnheader "Zielgruppe" [ref=e620]
+                    - columnheader "Kenntnis" [ref=e621]
+                    - columnheader "Bedeutung" [ref=e622]
+                    - columnheader "Richtigkeit" [ref=e623]
+                    - columnheader "Präv. Bedeutung" [ref=e624]
+                    - columnheader "Bev. Relevanz" [ref=e625]
+                - rowgroup [ref=e626]:
+                  - row "Erwachsene (18-70) 12.3 52.8 49.1 41.5 5.6" [ref=e627]:
+                    - cell "Erwachsene (18-70)" [ref=e628]
+                    - cell "12.3" [ref=e629]
+                    - cell "52.8" [ref=e630]
+                    - cell "49.1" [ref=e631]
+                    - cell "41.5" [ref=e632]
+                    - cell "5.6" [ref=e633]
+                  - row "Minderjährige (16-17) 20.3 48.7 47.3 38.2 8.5" [ref=e634]:
+                    - cell "Minderjährige (16-17)" [ref=e635]
+                    - cell "20.3" [ref=e636]
+                    - cell "48.7" [ref=e637]
+                    - cell "47.3" [ref=e638]
+                    - cell "38.2" [ref=e639]
+                    - cell "8.5" [ref=e640]
+                  - row "Konsumierende 22.0 54.2 43.1 46.4 —" [ref=e641]:
+                    - cell "Konsumierende" [ref=e642]
+                    - cell "22.0" [ref=e643]
+                    - cell "54.2" [ref=e644]
+                    - cell "43.1" [ref=e645]
+                    - cell "46.4" [ref=e646]
+                    - cell "—" [ref=e647]
+                  - row "Junge Erwachsene (18-26) 16.0 53.5 46.9 43.2 —" [ref=e648]:
+                    - cell "Junge Erwachsene (18-26)" [ref=e649]
+                    - cell "16.0" [ref=e650]
+                    - cell "53.5" [ref=e651]
+                    - cell "46.9" [ref=e652]
+                    - cell "43.2" [ref=e653]
+                    - cell "—" [ref=e654]
+                  - row "Eltern 11.8 52.5 45.9 42.6 —" [ref=e655]:
+                    - cell "Eltern" [ref=e656]
+                    - cell "11.8" [ref=e657]
+                    - cell "52.5" [ref=e658]
+                    - cell "45.9" [ref=e659]
+                    - cell "42.6" [ref=e660]
+                    - cell "—" [ref=e661]
+            - link "Zur vollständigen Seite →" [ref=e662] [cursor=pointer]:
+              - /url: /zahlen-und-fakten/m01-allheilmittel/
+  - contentinfo [ref=e531]:
+    - paragraph [ref=e532]: © 2026 CaRM-Projekt
+  - navigation "Mobile-Navigation" [ref=e533]:
+    - link "Karten" [ref=e534] [cursor=pointer]:
+      - /url: /fakten-karten/
+      - img [ref=e535]
+      - generic [ref=e538]: Karten
+    - link "Daten" [ref=e539] [cursor=pointer]:
+      - /url: /zahlen-und-fakten/
+      - img [ref=e540]
+      - generic [ref=e542]: Daten
+    - link "Selbsttest" [ref=e543] [cursor=pointer]:
+      - /url: /selbsttest/
+      - img [ref=e544]
+      - generic [ref=e554]: Selbsttest
+    - link "Ihre Fragen" [ref=e555] [cursor=pointer]:
+      - /url: /haeufige-fragen/
+      - img [ref=e556]
+      - generic [ref=e559]: Ihre Fragen
+    - link "Projekt" [ref=e560] [cursor=pointer]:
+      - /url: /ueber-uns/
+      - img [ref=e561]
+      - generic [ref=e563]: Projekt
+  - generic [ref=e566]:
+    - button "Menu" [ref=e567]:
+      - img [ref=e569]
+      - generic: Menu
+    - button "Inspect" [ref=e573]:
+      - img [ref=e575]
+      - generic: Inspect
+    - button "Audit" [ref=e577]:
+      - img [ref=e579]
+      - generic: Audit
+    - button "Settings" [ref=e582]:
+      - img [ref=e584]
+      - generic: Settings

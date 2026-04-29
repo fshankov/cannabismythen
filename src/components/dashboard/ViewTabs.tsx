@@ -1,7 +1,12 @@
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t } from '../../lib/dashboard/translations';
 
-const TABS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'sources', 'sources_v2'];
+// Tab order: Lollipop / Indikatoren / Gruppen / Tabelle / Quellen / Quellen V2.
+// Bar/Scatter/Übersicht/Circular/Indikator-Leiter were removed from the public
+// nav per UX feedback. The view components stay registered in MythenExplorer so
+// existing share-links (?view=bar etc.) keep resolving — only the tab buttons
+// are gone, not the views themselves.
+const TABS: ViewTab[] = ['lollipop', 'strips', 'strips_groups', 'table', 'sources', 'sources_v2'];
 
 interface Props {
   view: ViewTab;

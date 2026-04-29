@@ -10,16 +10,34 @@ interface InfoTooltipProps {
 
 export default function InfoTooltip({ title, definition, scale, sampleSize }: InfoTooltipProps) {
   const [open, setOpen] = useState(false);
-  const [above, setAbove] = useState(true);
+  /** Viewport-relative pixel position of the card while open. Positioned with
+   *  `position: fixed` so the popup escapes any parent stacking context (e.g. an
+   *  absolute-positioned wrapper around the trigger). This guarantees the card
+   *  always renders on top of neighbouring `i` triggers. */
+  const [pos, setPos] = useState<{ top: number; left: number; width: number; below: boolean } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Decide whether to render above or below based on available space
+  // Compute viewport-relative position. Prefers above the trigger; if there
+  // isn't enough room (e.g. the trigger sits near the top of the screen on
+  // mobile), flips below.
   const updatePosition = () => {
     if (!triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    // Card is ~140px tall at most; prefer top unless less than 160px above viewport
-    setAbove(rect.top > 160);
+    const r = triggerRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const padding = 8;
+    const width = Math.min(280, vw - 2 * padding);
+    const measuredH = cardRef.current?.offsetHeight || 160;
+    const aboveSpace = r.top - padding;
+    const belowSpace = vh - r.bottom - padding;
+    // Prefer above when there's room; otherwise below if below has more space
+    const below = aboveSpace < measuredH + 12 && belowSpace > aboveSpace;
+    const top = below ? r.bottom + 6 : r.top - 6 - measuredH;
+    let left = r.left + r.width / 2 - width / 2;
+    if (left < padding) left = padding;
+    if (left + width > vw - padding) left = vw - padding - width;
+    setPos({ top, left, width, below });
   };
 
   const handleOpen = () => {
@@ -52,7 +70,22 @@ export default function InfoTooltip({ title, definition, scale, sampleSize }: In
   useEffect(() => {
     if (open) {
       cardRef.current?.focus();
+      // Re-measure once the card is mounted so above/below is based on real height
+      const id = requestAnimationFrame(() => updatePosition());
+      return () => cancelAnimationFrame(id);
     }
+  }, [open]);
+
+  // Reposition on scroll / resize while open (the trigger may move)
+  useEffect(() => {
+    if (!open) return;
+    const onChange = () => updatePosition();
+    window.addEventListener('scroll', onChange, true);
+    window.addEventListener('resize', onChange);
+    return () => {
+      window.removeEventListener('scroll', onChange, true);
+      window.removeEventListener('resize', onChange);
+    };
   }, [open]);
 
   const tooltipId = `tooltip-${title.replace(/\s+/g, '-').toLowerCase()}`;
@@ -85,7 +118,15 @@ export default function InfoTooltip({ title, definition, scale, sampleSize }: In
         id={tooltipId}
         role="tooltip"
         tabIndex={-1}
-        className={`info-tooltip-card${open ? ' info-tooltip-card--open' : ''}${above ? ' info-tooltip-card--above' : ' info-tooltip-card--below'}`}
+        className={`info-tooltip-card info-tooltip-card--fixed${open ? ' info-tooltip-card--open' : ''}`}
+        style={pos ? {
+          position: 'fixed',
+          top: pos.top,
+          left: pos.left,
+          width: pos.width,
+          maxWidth: pos.width,
+          transform: 'none',
+        } : undefined}
         onMouseEnter={handleOpen}
         onMouseLeave={() => setOpen(false)}
       >

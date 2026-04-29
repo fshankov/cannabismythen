@@ -1,0 +1,304 @@
+---
+import { CORRECTNESS_COLORS } from "@lib/dashboard/colors";
+import type { CorrectnessClass } from "@lib/dashboard/types";
+
+type VerdictKey = "falsch" | "eher_falsch" | "eher_richtig" | "richtig";
+
+export interface Props {
+  eyebrow: string;
+  headline: string;
+  subhead: string;
+  sampleMythText: string;
+  sampleMythClassification: VerdictKey;
+  primaryCtaLabel: string;
+  primaryCtaUrl: string;
+  secondaryCtaLabel: string;
+  secondaryCtaUrl: string;
+}
+
+const {
+  eyebrow,
+  headline,
+  subhead,
+  sampleMythText,
+  sampleMythClassification,
+  primaryCtaLabel,
+  primaryCtaUrl,
+  secondaryCtaLabel,
+  secondaryCtaUrl,
+} = Astro.props;
+
+const verdictButtons: Array<{ key: VerdictKey; label: string }> = [
+  { key: "falsch", label: "Falsch" },
+  { key: "eher_falsch", label: "Eher falsch" },
+  { key: "eher_richtig", label: "Eher richtig" },
+  { key: "richtig", label: "Richtig" },
+];
+---
+
+<section class="quiz-hook" aria-labelledby="quiz-hook-heading">
+  <div class="quiz-hook__inner">
+    <div class="quiz-hook__copy">
+      <p class="quiz-hook__eyebrow">{eyebrow}</p>
+      <h2 id="quiz-hook-heading" class="quiz-hook__headline">{headline}</h2>
+      <p class="quiz-hook__subhead">{subhead}</p>
+
+      <div class="quiz-hook__ctas">
+        <a href={primaryCtaUrl} class="quiz-hook__primary">
+          {primaryCtaLabel}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+            <path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a href={secondaryCtaUrl} class="quiz-hook__secondary">
+          {secondaryCtaLabel}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Non-interactive quiz-card preview — teaser only, real quiz lives at /selbsttest/ -->
+    <div class="quiz-hook__preview" aria-hidden="true">
+      <div class="quiz-hook__preview-card">
+        <div class="quiz-hook__preview-eyebrow">
+          <span class="quiz-hook__preview-dot"></span>
+          Frage 1 von 10
+        </div>
+        <p class="quiz-hook__preview-statement">{sampleMythText}</p>
+        <div class="quiz-hook__preview-buttons">
+          {verdictButtons.map((b) => {
+            const isAnswer = b.key === sampleMythClassification;
+            const color = CORRECTNESS_COLORS[b.key as CorrectnessClass];
+            return (
+              <div
+                class={`quiz-hook__preview-button ${isAnswer ? "is-answer" : ""}`}
+                style={isAnswer ? `border-color:${color}; color:${color};` : ""}
+              >
+                {b.label}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .quiz-hook {
+    background: #1f4f3a;
+    padding: clamp(4rem, 9vw, 8rem) clamp(1.25rem, 4vw, 3rem);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle radial glow to echo the hero's atmosphere */
+  .quiz-hook::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 40%, rgba(107, 196, 160, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .quiz-hook__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: center;
+    position: relative;
+  }
+
+  @media (max-width: 900px) {
+    .quiz-hook__inner {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+  }
+
+  .quiz-hook__copy {
+    max-width: 34ch;
+  }
+
+  @media (max-width: 900px) {
+    .quiz-hook__copy { max-width: 100%; text-align: center; margin: 0 auto; }
+  }
+
+  .quiz-hook__eyebrow {
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2.6px;
+    text-transform: uppercase;
+    color: #95c4ad;
+    margin: 0 0 1.25rem 0;
+  }
+
+  .quiz-hook__headline {
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 4.5vw, 42px);
+    line-height: 1.1;
+    letter-spacing: -0.8px;
+    color: #edf4f0;
+    margin: 0 0 1.25rem 0;
+  }
+
+  .quiz-hook__subhead {
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-size: clamp(15px, 1.15vw, 17px);
+    line-height: 1.6;
+    color: rgba(237, 244, 240, 0.8);
+    margin: 0 0 2rem 0;
+  }
+
+  .quiz-hook__ctas {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 900px) {
+    .quiz-hook__ctas { justify-content: center; }
+  }
+
+  .quiz-hook__primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    background: #6bc4a0;
+    color: #0d2e20;
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 6px 16px rgba(107, 196, 160, 0.25);
+  }
+
+  .quiz-hook__primary:hover {
+    background: #7ed0ad;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(107, 196, 160, 0.35);
+  }
+
+  .quiz-hook__secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: rgba(237, 244, 240, 0.78);
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(237, 244, 240, 0.25);
+    padding-bottom: 2px;
+    transition: color 0.2s ease, border-color 0.2s ease, gap 0.2s ease;
+  }
+
+  .quiz-hook__secondary:hover {
+    color: #edf4f0;
+    border-color: rgba(237, 244, 240, 0.55);
+    gap: 8px;
+  }
+
+  /* ── Preview card ─────────────────────────────────────────────────────── */
+
+  .quiz-hook__preview {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1200px;
+  }
+
+  .quiz-hook__preview-card {
+    width: 100%;
+    max-width: 380px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.5rem 1.5rem 1.75rem;
+    box-shadow:
+      0 20px 50px rgba(0, 0, 0, 0.35),
+      0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: rotate(-3deg);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  @media (hover: hover) {
+    .quiz-hook__preview-card:hover {
+      transform: rotate(-1deg) translateY(-4px);
+      box-shadow:
+        0 26px 60px rgba(0, 0, 0, 0.4),
+        0 4px 14px rgba(0, 0, 0, 0.18);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .quiz-hook__preview-card { max-width: 340px; padding: 1.25rem 1.25rem 1.5rem; transform: rotate(-2deg); }
+  }
+
+  .quiz-hook__preview-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .quiz-hook__preview-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    display: inline-block;
+  }
+
+  .quiz-hook__preview-statement {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(20px, 2.2vw, 24px);
+    line-height: 1.3;
+    color: var(--color-text);
+    margin: 0 0 1.25rem 0;
+    min-height: 3.2em;
+  }
+
+  .quiz-hook__preview-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .quiz-hook__preview-button {
+    padding: 10px 8px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 10px;
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-align: center;
+    background: #fff;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .quiz-hook__preview-button.is-answer {
+    border-width: 2px;
+    font-weight: 700;
+    background: rgba(180, 83, 9, 0.04);
+  }
+</style>

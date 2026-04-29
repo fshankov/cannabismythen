@@ -1,0 +1,4 @@
+{"type":"server-started","port":50571,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:50571","screen_dir":"/Users/feodorshankov/Documents/GitHub/cannabismythen/.superpowers/brainstorm/65392-1776328381/content","state_dir":"/Users/feodorshankov/Documents/GitHub/cannabismythen/.superpowers/brainstorm/65392-1776328381/state"}
+{"type":"screen-added","file":"/Users/feodorshankov/Documents/GitHub/cannabismythen/.superpowers/brainstorm/65392-1776328381/content/platform.html"}
+{"type":"screen-added","file":"/Users/feodorshankov/Documents/GitHub/cannabismythen/.superpowers/brainstorm/65392-1776328381/content/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}

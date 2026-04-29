@@ -13,24 +13,34 @@
 
 import { useEffect, useRef } from "react";
 
+import type { Direction } from "./types";
+
 export interface UsePointerSwipeOptions {
   /** When false, no listeners are attached. */
   enabled: boolean;
   /** Pixels of horizontal travel required to commit. Default: min(140, 35vw). */
   threshold?: number;
-  /** Called once the swipe past threshold finishes its off-screen animation. */
-  onCommit: () => void;
+  /** Called once the swipe past threshold finishes its off-screen animation.
+   *  Receives the direction the user swiped: "next" (left swipe) or
+   *  "prev" (right swipe). */
+  onCommit: (direction: Direction) => void;
+  /** Optional gate: when provided and returns false, a commit in that
+   *  direction is ignored (the card springs back). Use to disable
+   *  left-swipe-back at index 0, etc. */
+  canCommit?: (direction: Direction) => boolean;
 }
 
 export function usePointerSwipe(
   ref: React.RefObject<HTMLElement | null>,
-  { enabled, threshold, onCommit }: UsePointerSwipeOptions,
+  { enabled, threshold, onCommit, canCommit }: UsePointerSwipeOptions,
 ): void {
-  // Latest onCommit captured in a ref so we don't re-attach listeners every render.
+  // Latest callbacks captured in refs so we don't re-attach listeners every render.
   const onCommitRef = useRef(onCommit);
+  const canCommitRef = useRef(canCommit);
   useEffect(() => {
     onCommitRef.current = onCommit;
-  }, [onCommit]);
+    canCommitRef.current = canCommit;
+  }, [onCommit, canCommit]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -52,6 +62,18 @@ export function usePointerSwipe(
     const setVars = (x: number) => {
       el.style.setProperty("--swipe-x", `${x}px`);
       el.style.setProperty("--swipe-rot", `${x / 20}deg`);
+      // 0…1 progress used by edge-gradient overlays — clamped at 1 so it
+      // saturates as the user nears commit threshold. Negative direction
+      // (next) writes to --swipe-progress-next; positive (prev) to -prev.
+      const progress = Math.min(1, Math.abs(x) / computedThreshold);
+      el.style.setProperty(
+        "--swipe-progress-next",
+        x < 0 ? String(progress) : "0"
+      );
+      el.style.setProperty(
+        "--swipe-progress-prev",
+        x > 0 ? String(progress) : "0"
+      );
     };
 
     const reset = (animate: boolean) => {
@@ -122,13 +144,19 @@ export function usePointerSwipe(
       }
 
       if (wasCaptured && Math.abs(finalDx) >= computedThreshold) {
-        const direction = finalDx < 0 ? -1 : 1;
-        const offscreen = direction * window.innerWidth * 1.1;
+        const direction: Direction = finalDx < 0 ? "next" : "prev";
+        // Caller can veto commit (e.g. left-swipe-back at index 0).
+        if (canCommitRef.current && !canCommitRef.current(direction)) {
+          reset(true);
+          return;
+        }
+        const sign = direction === "next" ? -1 : 1;
+        const offscreen = sign * window.innerWidth * 1.1;
         el.style.transition = "transform var(--dur-slide) var(--ease-card)";
         setVars(offscreen);
         const commit = () => {
           el.removeEventListener("transitionend", commit);
-          onCommitRef.current();
+          onCommitRef.current(direction);
         };
         el.addEventListener("transitionend", commit);
       } else if (wasCaptured) {

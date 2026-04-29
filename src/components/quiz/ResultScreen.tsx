@@ -8,7 +8,7 @@
 
 import { useEffect, useRef } from "react";
 import type { CardAnswer, QuizResult, QuizTheme } from "./types";
-import { RESULT_TIERS } from "./quizData";
+import { QUIZ_THEMES, RESULT_TIERS } from "./quizData";
 import { t } from "./i18n";
 import { trackResultCardViewed } from "./matomo";
 import ShareCard from "./ShareCard";
@@ -62,6 +62,20 @@ export default function ResultScreen({
     typeof window !== "undefined"
       ? `${window.location.origin}/selbsttest/${result.themeSlug}/`
       : `/selbsttest/${result.themeSlug}/`;
+
+  // ── Next module computation (Phase C §3.14) ──────────────────────────
+  // Walks the QUIZ_THEMES order and picks the next slug after the current
+  // one, wrapping to the first when at the end. Out of scope per the plan:
+  // skipping already-finished modules (the plan flags this for product
+  // review). Using simple insertion order is the intentional V1 behaviour.
+  const themeSlugs = Object.keys(QUIZ_THEMES);
+  const currentSlugIdx = themeSlugs.indexOf(result.themeSlug);
+  const nextSlug =
+    currentSlugIdx === -1
+      ? themeSlugs[0]
+      : themeSlugs[(currentSlugIdx + 1) % themeSlugs.length];
+  const nextTheme = nextSlug ? QUIZ_THEMES[nextSlug] : undefined;
+  const nextThemeTitle = nextTheme ? t(nextTheme.titleKey) : null;
 
   return (
     <section
@@ -167,6 +181,14 @@ export default function ResultScreen({
       </div>
 
       <div className="quiz-result__actions">
+        {nextSlug && nextThemeTitle && nextSlug !== result.themeSlug && (
+          <a
+            href={`/selbsttest/${nextSlug}/`}
+            className="quiz-result__next-module"
+          >
+            {t("ui.nextModule.cta", { title: nextThemeTitle })}
+          </a>
+        )}
         <button
           type="button"
           className="quiz-modal__restart-btn"

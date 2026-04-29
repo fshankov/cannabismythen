@@ -28,13 +28,10 @@ import {
   useIsCoarsePointer,
   usePrefersReducedMotion,
 } from "./usePointerSwipe";
-
-const ALL_OPTIONS: Classification[] = [
-  "falsch",
-  "eher_falsch",
-  "eher_richtig",
-  "richtig",
-];
+import VerdictScale from "./VerdictScale";
+import StreakChip from "./StreakChip";
+import ConfidenceInput from "./ConfidenceInput";
+import { trackCardSwiped } from "./matomo";
 
 /** Stable hash for deterministic randomization. */
 function hashCode(s: string): number {
@@ -44,18 +41,6 @@ function hashCode(s: string): number {
     h |= 0;
   }
   return Math.abs(h);
-}
-
-/** Deterministic Fisher-Yates shuffle seeded by `seed`. */
-function shuffleStable<T>(arr: readonly T[], seed: number): T[] {
-  const out = [...arr];
-  let s = seed || 1;
-  for (let i = out.length - 1; i > 0; i--) {
-    s = (s * 1103515245 + 12345) & 0x7fffffff;
-    const j = s % (i + 1);
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
 }
 
 /** Map a hash to a tilt in (-1.5°, +1.5°). */
@@ -80,6 +65,23 @@ function feedbackKey(chosen: Classification, correct: Classification): string {
   return "ui.feedback.far";
 }
 
+/** Tier class derived from the same ordinal distance as feedbackKey().
+ *  Single source of truth for back-face background tinting + verdict-banner
+ *  colour. Keep in sync with feedbackKey(). */
+function tierClass(chosen: Classification, correct: Classification): string {
+  const d = Math.abs(CLASS_POS[chosen] - CLASS_POS[correct]);
+  if (d === 0) return "is-correct";
+  if (d === 1) return "is-near";
+  return "is-far";
+}
+
+/** Glyph paired with the verdict banner — colour-blind safe shape cue. */
+const TIER_GLYPH: Record<"is-correct" | "is-near" | "is-far", string> = {
+  "is-correct": "✓",
+  "is-near": "≈",
+  "is-far": "✕",
+};
+
 interface QuizCardProps {
   myth: QuizMyth;
   index: number;
@@ -87,6 +89,8 @@ interface QuizCardProps {
   answer: CardAnswer | null;
   onAnswer: (mythId: string, chosen: Classification) => void;
   onNext: () => void;
+  /** Optional: enables left-to-right swipe-back on the front face. */
+  onPrev?: () => void;
   onShowFactsheet?: (myth: QuizMyth) => void;
   isLastQuestion: boolean;
   /** Statement text from Keystatic content (overrides i18n key) */
@@ -95,6 +99,16 @@ interface QuizCardProps {
   explanationText?: string;
   /** How many phantom cards are stacked behind this one (0–2). */
   deckBehind?: number;
+  /** Quiz theme label shown in the front-face topbar (e.g. "Medizinischer Nutzen"). */
+  categoryLabel?: string;
+  /** When ≥ 2, render a 🔥 streak chip pinned to the front face top-right. */
+  streakCount?: number;
+  /** When true, the confidence-input panel slides up after the answer pick. */
+  confidenceEnabled?: boolean;
+  /** Called once the user picks a confidence level. */
+  onConfidenceSet?: (mythId: string, c: "sure" | "unsure") => void;
+  /** Population pct of the *general population* — used in micro-copy table. */
+  populationCorrectPct?: number;
 }
 
 export default function QuizCard({
@@ -104,14 +118,23 @@ export default function QuizCard({
   answer,
   onAnswer,
   onNext,
+  onPrev,
   onShowFactsheet,
   isLastQuestion,
   statementText,
   explanationText,
   deckBehind = 0,
+  categoryLabel,
+  streakCount = 0,
+  confidenceEnabled = false,
+  onConfidenceSet,
 }: QuizCardProps) {
   const isAnswered = answer !== null;
-  const flipped = isAnswered;
+  // Card flip is gated on confidence pick when the feature is enabled,
+  // so the user gets a chance to self-rate before seeing the verdict.
+  const awaitingConfidence =
+    isAnswered && confidenceEnabled && !answer?.confidence;
+  const flipped = isAnswered && !awaitingConfidence;
   const cardRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const liveRef = useRef<HTMLDivElement>(null);
@@ -122,19 +145,24 @@ export default function QuizCard({
   const isCoarsePointer = useIsCoarsePointer();
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  // Drag-to-advance is only useful once the user has answered (back face).
+  // Front-face swipe back/forward (Phase C §3.10). Disabled on the back
+  // face so the inner explanation can scroll horizontally without
+  // hijacking. Vertical scroll wins via the SLOP check inside the hook.
+  // Left-swipe (=== "prev") is vetoed at index 0 via canCommit.
   usePointerSwipe(cardRef, {
-    enabled: isAnswered && isCoarsePointer && !prefersReducedMotion,
-    onCommit: onNext,
+    enabled: !flipped && isCoarsePointer && !prefersReducedMotion,
+    canCommit: (dir) => (dir === "prev" ? index > 0 : true),
+    onCommit: (dir) => {
+      trackCardSwiped(dir);
+      if (dir === "next") onNext();
+      else if (onPrev) onPrev();
+    },
   });
 
-  // Stable per-myth answer order (deterministic so reload doesn't shuffle)
-  const orderedOptions = useMemo(
-    () => shuffleStable(ALL_OPTIONS, hashCode(myth.id)),
-    [myth.id]
-  );
-
   // Idle tilt (deterministic per myth). Falls back to 0 for SSR sanity.
+  // Note: the verdict-scale renders in a fixed left-to-right order
+  // (falsch → richtig). The old shuffled 4-button grid is gone — the
+  // spectrum metaphor only works if the segments stay in spectrum order.
   const tilt = useMemo(() => tiltFromHash(hashCode(myth.id)), [myth.id]);
 
   // Focus the back when the user answers (announces feedback).
@@ -154,6 +182,10 @@ export default function QuizCard({
       : "quiz-card--incorrect"
     : "";
 
+  const tier = answer
+    ? tierClass(answer.chosenClassification, myth.correctClassification)
+    : "";
+
   const feedbackText = answer
     ? t(feedbackKey(answer.chosenClassification, myth.correctClassification))
     : "";
@@ -161,6 +193,13 @@ export default function QuizCard({
   const verdictPhrase = t(
     `ui.classificationPhrase.${myth.correctClassification}`
   );
+  // The verdict template is split into prefix + bolded verdict + suffix so
+  // we can render the verdict word as a <strong> without relying on dangerouslySet
+  // markup. Template shape: `Der Mythos „{statement}" ist {verdict}.`
+  const mythVerdictPrefix = t("ui.mythVerdict", {
+    statement,
+    verdict: "__VERDICT_PH__",
+  }).split("__VERDICT_PH__");
   const mythVerdict = t("ui.mythVerdict", {
     statement,
     verdict: verdictPhrase,
@@ -168,9 +207,29 @@ export default function QuizCard({
 
   const hasPopData = typeof myth.populationCorrectPct === "number";
   const popPct = hasPopData ? Math.round(myth.populationCorrectPct) : 0;
-  const populationLine = hasPopData
-    ? t("ui.populationLine", { pct: popPct })
-    : t("ui.populationUnavailable");
+
+  // Micro-copy under the population bar — picks one short line that ties
+  // the user's answer back to their streak / the population. See plan §3.7.
+  // Only computed when there's an answer; the back face only renders when
+  // the card is flipped, which only happens after answering.
+  let microCopyText: string | null = null;
+  if (answer && hasPopData) {
+    const dist = Math.abs(
+      CLASS_POS[answer.chosenClassification] -
+        CLASS_POS[myth.correctClassification]
+    );
+    if (streakCount >= 3) {
+      microCopyText = t("ui.microCopy.streak", { n: streakCount });
+    } else if (answer.isCorrect && popPct < 50) {
+      microCopyText = t("ui.microCopy.correct", { missPct: 100 - popPct });
+    } else if (answer.isCorrect && popPct >= 50) {
+      microCopyText = t("ui.microCopy.popular", { pct: popPct });
+    } else if (dist === 1) {
+      microCopyText = t("ui.microCopy.nearMiss", { pct: popPct });
+    } else {
+      microCopyText = t("ui.microCopy.farMiss", { pct: popPct });
+    }
+  }
 
   const cellStyle: CSSProperties = {
     ["--card-tilt" as string]: `${tilt.toFixed(2)}deg`,
@@ -192,6 +251,7 @@ export default function QuizCard({
           "quiz-card--flow",
           isAnswered ? "quiz-card--answered" : "",
           correctClass,
+          tier,
           flipped ? "quiz-card--flipped" : "",
         ]
           .filter(Boolean)
@@ -200,29 +260,52 @@ export default function QuizCard({
         <div className="quiz-card__inner">
           {/* ── FRONT FACE ──────────────────────────────────────── */}
           <div className="quiz-card__face quiz-card__front">
-            <span className="quiz-card__number">
-              {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-            </span>
+            {/* Swipe edge overlays — opacity bound to --swipe-progress-*
+                vars written by usePointerSwipe. Aria-hidden because they
+                are pure visual feedback. */}
+            {index > 0 && (
+              <div
+                className="quiz-card__swipe-edge quiz-card__swipe-edge--prev"
+                aria-hidden="true"
+              >
+                ←
+              </div>
+            )}
+            <div
+              className="quiz-card__swipe-edge quiz-card__swipe-edge--next"
+              aria-hidden="true"
+            >
+              →
+            </div>
+
+            {/* Streak chip lives INSIDE the front face so the 3D flip
+                hides it on the back via backface-visibility. See
+                StreakChip.tsx for the rationale. */}
+            <StreakChip count={streakCount} />
+
+            <div className="quiz-card__topbar">
+              <span className="quiz-card__counter">
+                {String(index + 1).padStart(2, "0")} /{" "}
+                {String(total).padStart(2, "0")}
+              </span>
+              {categoryLabel && (
+                <span className="quiz-card__category">{categoryLabel}</span>
+              )}
+            </div>
+
             <p className="quiz-card__statement">{statement}</p>
 
-            <div
-              className="quiz-card__buttons quiz-card__buttons--always"
-              role="group"
-              aria-label="Einordnung wählen"
-            >
-              {orderedOptions.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  className={`quiz-card__btn quiz-card__btn--${opt}`}
-                  onClick={() => handleAnswerClick(opt)}
-                  disabled={isAnswered}
-                  aria-label={`${t(`answer.${opt}`)} — ${statement}`}
-                >
-                  {t(`answer.${opt}`)}
-                </button>
-              ))}
-            </div>
+            <VerdictScale
+              selected={answer ? answer.chosenClassification : null}
+              disabled={isAnswered}
+              onChoose={handleAnswerClick}
+            />
+
+            {awaitingConfidence && onConfidenceSet && (
+              <ConfidenceInput
+                onChoose={(c) => onConfidenceSet(myth.id, c)}
+              />
+            )}
           </div>
 
           {/* ── BACK FACE ───────────────────────────────────────── */}
@@ -233,55 +316,58 @@ export default function QuizCard({
           >
             {isAnswered && answer && (
               <>
-                <div className="quiz-card__result-header">
-                  <span
-                    className={`quiz-card__result-badge ${
-                      answer.isCorrect
-                        ? "quiz-card__result-badge--correct"
-                        : "quiz-card__result-badge--incorrect"
-                    }`}
-                  >
-                    {feedbackText}
-                  </span>
-                  <span className="quiz-card__number">
+                {/* Topbar — same shape as the front so the card feels stable
+                    front-to-back. */}
+                <div className="quiz-card__topbar">
+                  <span className="quiz-card__counter">
                     {String(index + 1).padStart(2, "0")} /{" "}
                     {String(total).padStart(2, "0")}
                   </span>
                 </div>
 
-                <p className="quiz-card__verdict-line">{mythVerdict}</p>
+                {/* 1 — The verdict (largest text, tier-coloured banner).
+                    This is the colleague's three-tier headline. */}
+                <div className="quiz-card__verdict-banner">
+                  <span
+                    className="quiz-card__verdict-glyph"
+                    aria-hidden="true"
+                  >
+                    {TIER_GLYPH[tier as keyof typeof TIER_GLYPH]}
+                  </span>
+                  <span>{feedbackText}</span>
+                </div>
 
-                {/* Two-chip layout: user's answer (always) + correct answer (if wrong). */}
-                <dl
-                  className="quiz-card__answer-chips"
-                  data-correct={answer.isCorrect ? "true" : "false"}
-                >
-                  <div>
-                    <dt>{t("ui.yourAnswerLabel")}</dt>
-                    <dd>
-                      <span
-                        className={`classification classification--${answer.chosenClassification}`}
-                      >
-                        {t(`classification.${answer.chosenClassification}`)}
-                      </span>
-                    </dd>
+                {/* 2 — The myth-line: "Der Mythos „X" ist Y." with the verdict
+                    word bolded. */}
+                <p className="quiz-card__myth-line">
+                  {mythVerdictPrefix[0]}
+                  <strong>{verdictPhrase}</strong>
+                  {mythVerdictPrefix[1]}
+                </p>
+
+                {/* 3 — Optional answer chip: only when the user was wrong. */}
+                {!answer.isCorrect && (
+                  <p className="quiz-card__answer-note">
+                    {t("ui.yourAnswerLabel")}
+                    {": "}
+                    <span
+                      className={`quiz-card__answer-chip classification classification--${answer.chosenClassification}`}
+                    >
+                      {t(`classification.${answer.chosenClassification}`)}
+                    </span>
+                  </p>
+                )}
+
+                {/* 4 — Scrollable explanation. The wrap fills remaining space;
+                    inner div scrolls with overscroll-contain so page never
+                    scrolls when the inner reaches its end. */}
+                <div className="quiz-card__explanation-wrap">
+                  <div className="quiz-card__explanation">
+                    <p>{explanation}</p>
                   </div>
-                  {!answer.isCorrect && (
-                    <div>
-                      <dt>{t("ui.correctAnswerLabel")}</dt>
-                      <dd>
-                        <span
-                          className={`classification classification--${myth.correctClassification}`}
-                        >
-                          {t(`classification.${myth.correctClassification}`)}
-                        </span>
-                      </dd>
-                    </div>
-                  )}
-                </dl>
+                </div>
 
-                <p className="quiz-card__explanation">{explanation}</p>
-
+                {/* 5 — Population bar pinned to the bottom. */}
                 {hasPopData && (
                   <div
                     className="quiz-card__pop-bar"
@@ -295,13 +381,18 @@ export default function QuizCard({
                       />
                     </div>
                     <span className="quiz-card__pop-bar-value">
-                      {popPct} %
+                      {popPct} % {t("ui.populationCorrectShort")}
                     </span>
                   </div>
                 )}
 
-                <p className="quiz-card__population">{populationLine}</p>
+                {/* 6 — Micro-copy line. One short sentence that contextualises
+                    the user's answer against their streak / the population. */}
+                {microCopyText && (
+                  <p className="quiz-card__micro-copy">{microCopyText}</p>
+                )}
 
+                {/* 7 — Action row pinned to the very bottom. */}
                 <div className="quiz-card__back-actions">
                   {onShowFactsheet && (
                     <button
@@ -329,7 +420,7 @@ export default function QuizCard({
                   {t("ui.swipeHint")}
                 </p>
 
-                {/* SR-only live region announcing the feedback */}
+                {/* SR-only live region announcing the feedback. */}
                 <div
                   ref={liveRef}
                   className="sr-only"

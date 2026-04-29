@@ -6,6 +6,9 @@ import { reader } from "@lib/content";
 import { HeroBlock } from "@components/hero/HeroBlock";
 import { mythPositions } from "@components/hero/mythPositions";
 import type { HeroMyth } from "@components/hero/HeroBlock";
+import CredibilityBlock from "@components/home/CredibilityBlock.astro";
+import HeadlineFindingBlock from "@components/home/HeadlineFindingBlock.astro";
+import QuizHookBlock from "@components/home/QuizHookBlock.astro";
 
 // ── Hero content from Keystatic ─────────────────────────────────────────────
 const heroBlockData = await reader.singletons.heroBlock.read();
@@ -32,6 +35,19 @@ const heroMyths: HeroMyth[] = mythPositions.map(pos => ({
   classification: clsBySlugPrefix.get(pos.id) ?? "keine_aussage",
   position: pos,
 }));
+
+// ── Editorial section content ───────────────────────────────────────────────
+const credibility = await reader.singletons.credibilityBlock.read();
+const headlineFinding = await reader.singletons.headlineFinding.read();
+const quizHook = await reader.singletons.quizHookBlock.read();
+
+const credibilityRows = credibility
+  ? [
+      { label: credibility.row1Label, value: credibility.row1Value, link: credibility.row1Link || undefined },
+      { label: credibility.row2Label, value: credibility.row2Value, link: credibility.row2Link || undefined },
+      { label: credibility.row3Label, value: credibility.row3Value, link: credibility.row3Link || undefined },
+    ]
+  : [];
 ---
 
 <BaseLayout title="Startseite" heroMode={true}>
@@ -42,4 +58,42 @@ const heroMyths: HeroMyth[] = mythPositions.map(pos => ({
     eyebrow={eyebrow}
     client:load
   />
+
+  {credibility && (
+    <CredibilityBlock
+      eyebrow={credibility.eyebrow}
+      headline={credibility.headline}
+      lede={credibility.lede}
+      rows={credibilityRows}
+    />
+  )}
+
+  {headlineFinding && (
+    <HeadlineFindingBlock
+      eyebrow={headlineFinding.eyebrow}
+      leadClause={headlineFinding.leadClause}
+      counterClause={headlineFinding.counterClause}
+      counterClassification={headlineFinding.counterClassification as "richtig" | "eher_richtig" | "eher_falsch" | "falsch" | "no_classification"}
+      dashboardCardTitle={headlineFinding.dashboardCardTitle}
+      dashboardCardBody={headlineFinding.dashboardCardBody}
+      dashboardCtaLabel={headlineFinding.dashboardCtaLabel}
+      faktenKartenCardTitle={headlineFinding.faktenKartenCardTitle}
+      faktenKartenCardBody={headlineFinding.faktenKartenCardBody}
+      faktenKartenCtaLabel={headlineFinding.faktenKartenCtaLabel}
+    />
+  )}
+
+  {quizHook && (
+    <QuizHookBlock
+      eyebrow={quizHook.eyebrow}
+      headline={quizHook.headline}
+      subhead={quizHook.subhead}
+      sampleMythText={quizHook.sampleMythText}
+      sampleMythClassification={quizHook.sampleMythClassification as "falsch" | "eher_falsch" | "eher_richtig" | "richtig"}
+      primaryCtaLabel={quizHook.primaryCtaLabel}
+      primaryCtaUrl={quizHook.primaryCtaUrl}
+      secondaryCtaLabel={quizHook.secondaryCtaLabel}
+      secondaryCtaUrl={quizHook.secondaryCtaUrl}
+    />
+  )}
 </BaseLayout>

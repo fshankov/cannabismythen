@@ -25,6 +25,7 @@ import StripsView from './views/StripsView';
 import InformationSourcesView from './views/InformationSourcesView';
 import InformationSourcesV2View from './views/InformationSourcesV2View';
 import FactsheetPanel from './FactsheetPanel';
+import DashboardOnboarding from './DashboardOnboarding';
 import type { MythContentEntry } from './FactsheetPanel';
 
 export type { MythContentEntry };
@@ -36,9 +37,13 @@ interface Props {
   mythContent?: string;
   /** JSON-serialised DashboardDefinitions from dashboard-definitionen.json */
   definitions?: string;
+  /** JSON-serialised Record<mythId, themeSlug> mapping each myth to its
+   *  Selbsttest theme (quiz-medizin / quiz-risiken / etc). Used by the
+   *  Streifen view for the Themen filter / Themen pivot mode. */
+  mythThemes?: string;
 }
 
-export default function MythenExplorer({ mythSlugs, mythContent, definitions }: Props) {
+export default function MythenExplorer({ mythSlugs, mythContent, definitions, mythThemes }: Props) {
   const [data, setData] = useState<CarmData | null>(null);
   const [state, setState] = useState<AppState>(() => {
     const defaults = getDefaultState();
@@ -70,6 +75,16 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions }: 
     }
   }, [definitions]);
 
+  // Parse mythId → Selbsttest theme slug map
+  const mythThemeMap: Record<number, string> = useMemo(() => {
+    if (!mythThemes) return {};
+    try {
+      return JSON.parse(mythThemes);
+    } catch {
+      return {};
+    }
+  }, [mythThemes]);
+
   // Build myth slug map from props
   const mythSlugMap = useMemo(() => {
     if (!mythSlugs) return undefined;
@@ -83,6 +98,17 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions }: 
   useEffect(() => {
     pushState(state);
   }, [state]);
+
+  // Keep stripsMode synced with the active view tab — the pivot is now driven
+  // by tab choice (view='strips' → indicator pivot, view='strips_groups' →
+  // group pivot) rather than an in-view toggle.
+  useEffect(() => {
+    if (state.view === 'strips' && state.stripsMode !== 'indicator') {
+      setState((prev) => ({ ...prev, stripsMode: 'indicator' }));
+    } else if (state.view === 'strips_groups' && state.stripsMode !== 'group') {
+      setState((prev) => ({ ...prev, stripsMode: 'group' }));
+    }
+  }, [state.view, state.stripsMode]);
 
   const update = useCallback(<K extends keyof AppState>(key: K, value: AppState[K]) => {
     setState((prev) => ({ ...prev, [key]: value }));
@@ -128,14 +154,24 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions }: 
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
+  // selectMyth is the "open factsheet" action passed to all views.
+  // It sets BOTH the highlight (selectedMythId) and the factsheet open state
+  // (factsheetMythId). The Streifen view, however, uses update('selectedMythId', …)
+  // for its stage-1 highlight and only calls selectMyth for stage 2.
   const selectMyth = useCallback((id: number | null) => {
-    setState((prev) => ({ ...prev, selectedMythId: id }));
+    setState((prev) => ({ ...prev, selectedMythId: id, factsheetMythId: id }));
   }, []);
 
-  const selectedMyth: Myth | null = useMemo(() => {
-    if (!data || !state.selectedMythId) return null;
-    return data.myths.find((m) => m.id === state.selectedMythId) || null;
-  }, [data, state.selectedMythId]);
+  // Closing the factsheet keeps the highlight intact, so users can read the
+  // inline values (Streifen view) without losing context.
+  const closeFactsheet = useCallback(() => {
+    setState((prev) => ({ ...prev, factsheetMythId: null }));
+  }, []);
+
+  const factsheetMyth: Myth | null = useMemo(() => {
+    if (!data || !state.factsheetMythId) return null;
+    return data.myths.find((m) => m.id === state.factsheetMythId) || null;
+  }, [data, state.factsheetMythId]);
 
   if (!data) {
     return <div className="carm-loading">Daten werden geladen…</div>;
@@ -151,6 +187,12 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions }: 
       </div>
 
       <div className="app-layout">
+        {/* First-visit guidance for the Streifen view: welcome card +
+            opt-in 4-step Driver.js tour + persistent "Hilfe" button.
+            Mounts only when view='strips' so it doesn't interfere with
+            the other 10 visualizations. */}
+        <DashboardOnboarding active={state.view === 'strips'} />
+
         <ViewTabs
           view={state.view}
           lang={'de'}
@@ -158,30 +200,50 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions }: 
         />
 
         {state.view !== 'sources' && state.view !== 'sources_v2' && (
-          <FilterBar state={state} data={data} update={update} definitions={defs} />
+          <FilterBar
+            state={state}
+            data={data}
+            update={update}
+            definitions={defs}
+            // Streifen tabs (Indikatoren / Gruppen) ship their own switchers
+            // AND their own categories pill row, so collapse the FilterBar's
+            // indicator + group + categories sections for both tabs.
+            hideIndicators={state.view === 'strips' || state.view === 'strips_groups'}
+            hideGroups={state.view === 'strips' || state.view === 'strips_groups'}
+            hideCategories={state.view === 'strips' || state.view === 'strips_groups'}
+          />
         )}
 
-        <div className="utility-bar">
-          <div className="utility-buttons">
-            <button className="util-btn" onClick={handleShareLink}>
-              <Share2 size={13} strokeWidth={2} aria-hidden="true" />
-              {copied ? t('util.copied', 'de') : t('util.share', 'de')}
-            </button>
-            <button className="util-btn" onClick={handleDownloadCSV}>
-              <Download size={13} strokeWidth={2} aria-hidden="true" />
-              CSV
-            </button>
-            <button className="util-btn" onClick={handleFullscreen}>
-              {isFullscreen
-                ? <Minimize2 size={13} strokeWidth={2} aria-hidden="true" />
-                : <Maximize2 size={13} strokeWidth={2} aria-hidden="true" />
-              }
-              {isFullscreen ? t('util.exitFullscreen', 'de') : t('util.fullscreen', 'de')}
-            </button>
+        {/* On strips tabs (Indikatoren / Gruppen) the utility buttons render
+            BELOW the chart + categories pills with a clear gap; everywhere
+            else they stay at the top as today. */}
+        {state.view !== 'strips' && state.view !== 'strips_groups' && (
+          <div className="utility-bar">
+            <div className="utility-buttons">
+              <button className="util-btn" onClick={handleShareLink}>
+                <Share2 size={13} strokeWidth={2} aria-hidden="true" />
+                {copied ? t('util.copied', 'de') : t('util.share', 'de')}
+              </button>
+              <button className="util-btn" onClick={handleDownloadCSV}>
+                <Download size={13} strokeWidth={2} aria-hidden="true" />
+                CSV
+              </button>
+              <button className="util-btn" onClick={handleFullscreen}>
+                {isFullscreen
+                  ? <Minimize2 size={13} strokeWidth={2} aria-hidden="true" />
+                  : <Maximize2 size={13} strokeWidth={2} aria-hidden="true" />
+                }
+                {isFullscreen ? t('util.exitFullscreen', 'de') : t('util.fullscreen', 'de')}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
-        <p className="howto-microcopy">{t(`howto.${state.view}` as any, 'de')}</p>
+        {/* Howto microcopy hidden on the strips tabs (Indikatoren / Gruppen):
+            the in-view rows + categories pills are self-explanatory. */}
+        {state.view !== 'strips' && state.view !== 'strips_groups' && (
+          <p className="howto-microcopy">{t(`howto.${state.view}` as any, 'de')}</p>
+        )}
 
         <div className={`chart-area${isFullscreen ? ' fullscreen' : ''}`} ref={chartRef}>
           {state.view === 'sources' ? (
@@ -213,24 +275,58 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions }: 
               {state.view === 'ladder' && (
                 <LadderView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
               )}
-              {state.view === 'strips' && (
-                <StripsView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
+              {(state.view === 'strips' || state.view === 'strips_groups') && (
+                <StripsView
+                  myths={filteredMyths}
+                  metrics={data.metrics}
+                  groups={data.groups}
+                  categories={data.categories}
+                  state={state}
+                  update={update}
+                  onSelectMyth={selectMyth}
+                  definitions={defs}
+                  mythThemes={mythThemeMap}
+                  mythContentMap={mythContentMap}
+                />
               )}
             </>
           )}
         </div>
 
-        {state.view !== 'sources' && state.view !== 'sources_v2' && (
+        {state.view !== 'sources' && state.view !== 'sources_v2' && state.view !== 'strips' && state.view !== 'strips_groups' && (
           <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
+        )}
+
+        {/* Utility buttons after the chart area on strips tabs, with a gap. */}
+        {(state.view === 'strips' || state.view === 'strips_groups') && (
+          <div className="utility-bar utility-bar--bottom">
+            <div className="utility-buttons">
+              <button className="util-btn" onClick={handleShareLink}>
+                <Share2 size={13} strokeWidth={2} aria-hidden="true" />
+                {copied ? t('util.copied', 'de') : t('util.share', 'de')}
+              </button>
+              <button className="util-btn" onClick={handleDownloadCSV}>
+                <Download size={13} strokeWidth={2} aria-hidden="true" />
+                CSV
+              </button>
+              <button className="util-btn" onClick={handleFullscreen}>
+                {isFullscreen
+                  ? <Minimize2 size={13} strokeWidth={2} aria-hidden="true" />
+                  : <Maximize2 size={13} strokeWidth={2} aria-hidden="true" />
+                }
+                {isFullscreen ? t('util.exitFullscreen', 'de') : t('util.fullscreen', 'de')}
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
-      {selectedMyth && (
+      {factsheetMyth && (
         <FactsheetPanel
-          myth={selectedMyth}
-          mythContentEntry={mythContentMap[selectedMyth.id]}
-          factsheetSlug={mythSlugMap?.get(selectedMyth.id)}
-          onClose={() => selectMyth(null)}
+          myth={factsheetMyth}
+          mythContentEntry={mythContentMap[factsheetMyth.id]}
+          factsheetSlug={mythSlugMap?.get(factsheetMyth.id)}
+          onClose={closeFactsheet}
         />
       )}
     </div>

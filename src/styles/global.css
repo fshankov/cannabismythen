@@ -903,6 +903,36 @@ a.version-card:hover {
 }
 
 @media (max-width: 1023px) {
+  /* On mobile the bottom mobile-tab-bar covers all site navigation, so the
+     top header is redundant — hide it site-wide and reclaim the vertical space
+     the fixed header would otherwise reserve at the top of <main>. */
+  body > header {
+    display: none;
+  }
+
+  /* Exception: during a quiz, the QuizPlayer portals a progress bar into the
+     header via #quiz-progress-slot. Keep the header visible *only* when that
+     slot is active, but hide its nav so we just show the progress bar. */
+  body:has(#quiz-progress-slot.quiz-progress-slot--active) > header {
+    display: block;
+  }
+
+  body:has(#quiz-progress-slot.quiz-progress-slot--active) > header > nav {
+    display: none;
+  }
+
+  main {
+    /* Drop the calc(var(--nav-height) + …) compensation since there's no
+       fixed header to clear; keep only the standard top breathing room. */
+    padding-top: var(--space-xl);
+  }
+
+  /* On quiz pages where the header is re-shown for the progress bar, keep
+     enough top padding to clear it. */
+  body:has(#quiz-progress-slot.quiz-progress-slot--active) main {
+    padding-top: calc(var(--nav-height, 56px) + var(--space-md));
+  }
+
   .mobile-tab-bar {
     display: flex;
     position: fixed;

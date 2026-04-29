@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz Redesign v2 — Constant-Size Card</title>
+<style>
+  :root{
+    --bg:#f4f4f0; --surface:#fff; --paper:#fdf6e9;
+    --ink:#1a1a2e; --muted:#6b7280; --secondary:#374151;
+    --border:#e5e7eb; --border-strong:#d4d4d8;
+    --accent:#2d6a4f; --accent-hover:#1e4d39; --accent-light:#e6f0eb;
+    --richtig:#047857; --richtig-bg:#d1fae5;
+    --eher-richtig:#4d7c0f; --eher-richtig-bg:#ecfccb;
+    --eher-falsch:#b45309; --eher-falsch-bg:#fef3c7;
+    --falsch:#be123c; --falsch-bg:#ffe4e6;
+    --shadow-sm:0 1px 2px rgba(26,26,46,.04), 0 4px 16px rgba(26,26,46,.06);
+    --shadow-md:0 2px 6px rgba(26,26,46,.06), 0 12px 32px rgba(26,26,46,.10);
+    --shadow-lg:0 8px 24px rgba(26,26,46,.12), 0 24px 56px rgba(26,26,46,.14);
+    --radius:10px; --radius-lg:14px; --radius-full:999px;
+    --serif:'Source Serif 4','Charter','Iowan Old Style',Georgia,serif;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --dur-flip:520ms;
+    --ease-card:cubic-bezier(.2,.7,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  body{padding:24px 16px 80px;line-height:1.5}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(22px,3.8vw,30px);margin:0 0 6px;letter-spacing:-.01em}
+  .lede{color:var(--muted);font-size:14px;max-width:64ch;margin:0 0 28px}
+  .stage{max-width:760px;margin:0 auto}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 18px 22px;margin-bottom:24px;box-shadow:var(--shadow-sm)}
+  .panel h2{font-family:var(--serif);font-size:18px;font-weight:600;margin:0 0 4px}
+  .panel .why{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--accent-light);color:var(--accent);margin-right:6px;vertical-align:middle}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .controls button{font:inherit;font-size:12px;padding:6px 12px;border:1px solid var(--border-strong);border-radius:999px;background:var(--surface);cursor:pointer;color:var(--secondary)}
+  .controls button.is-on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  /* ─────────── Constant-size card with deck ─────────── */
+  .deck{
+    position:relative;
+    width:100%;
+    max-width:480px;
+    aspect-ratio: 3 / 4;
+    margin:24px auto 0;
+    perspective:1600px;
+    isolation:isolate;
+  }
+  .deck::before,.deck::after{
+    content:"";position:absolute;inset:0;border-radius:var(--radius-lg);
+    background:var(--surface);border:1px solid var(--border);
+    box-shadow:var(--shadow-sm);z-index:-1;pointer-events:none;
+    transition:transform .35s var(--ease-card), opacity .35s;
+  }
+  .deck::before{transform:translate(0,16px) scale(.965)}
+  .deck::after{transform:translate(0,32px) scale(.93);opacity:.55;box-shadow:0 4px 16px rgba(26,26,46,.05)}
+
+  .card{
+    position:relative;
+    width:100%; height:100%;
+    transform-style:preserve-3d;
+    transition: transform var(--dur-flip) var(--ease-card);
+    transform: rotate(var(--tilt,-.4deg));
+  }
+  .card.is-flipped{ transform: rotate(var(--tilt,-.4deg)) rotateY(180deg); }
+  .card.dragging{ transition:none; }
+  .card.swipe-out{
+    transform:
+      rotate(var(--tilt,-.4deg))
+      translateX(var(--swipe-x,0))
+      rotate(var(--swipe-rot,0deg));
+    opacity:var(--swipe-opacity,1);
+  }
+
+  .face{
+    position:absolute; inset:0;
+    background:var(--surface);
+    border:1px solid var(--border-strong);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-md);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    padding:18px 18px 16px;
+    display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .face.back{ transform:rotateY(180deg); }
+  .card.is-correct .face.back   { border-color:var(--richtig);     background:linear-gradient(180deg, var(--richtig-bg), #fff 40%); }
+  .card.is-near    .face.back   { border-color:var(--eher-falsch); background:linear-gradient(180deg, var(--eher-falsch-bg), #fff 40%); }
+  .card.is-far     .face.back   { border-color:var(--falsch);      background:linear-gradient(180deg, var(--falsch-bg), #fff 40%); }
+
+  /* Front face content */
+  .topbar{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+  .topbar .cat{color:var(--accent);font-weight:700;letter-spacing:.06em}
+  .statement{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(20px,3.2vw,26px);
+    line-height:1.25;
+    letter-spacing:-.005em;
+    margin:auto 0;
+    hyphens:auto;
+  }
+
+  /* 4-segment scale */
+  .scale{margin-top:auto}
+  .spectrum{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--falsch) 0%, var(--eher-falsch) 33%, var(--eher-richtig) 66%, var(--richtig) 100%);margin-bottom:6px;opacity:.85}
+  .row{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border-strong);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .seg{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:11px 4px;font:inherit;font-size:11px;font-weight:600;color:var(--secondary);background:transparent;border:0;border-right:1px solid var(--border);cursor:pointer;min-height:56px;transition:background .15s, color .15s}
+  .seg:last-child{border-right:0}
+  .seg .glyph{font-size:16px;line-height:1;margin-bottom:4px;display:block}
+  .seg .kbd{position:absolute;top:3px;right:5px;font-size:9px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;color:var(--muted);font-family:ui-monospace,monospace}
+  .seg.is-falsch:hover{background:var(--falsch-bg);color:var(--falsch)}
+  .seg.is-eher-falsch:hover{background:var(--eher-falsch-bg);color:var(--eher-falsch)}
+  .seg.is-eher-richtig:hover{background:var(--eher-richtig-bg);color:var(--eher-richtig)}
+  .seg.is-richtig:hover{background:var(--richtig-bg);color:var(--richtig)}
+
+  /* Streak chip */
+  .streak{position:absolute;top:14px;right:62px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:999px;padding:3px 9px;font-size:10px;font-weight:700;display:none;align-items:center;gap:4px;animation:pop .35s var(--ease-card);z-index:3}
+  .streak::before{content:"🔥"}
+  .streak.is-on{display:inline-flex}
+  @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
+  /* Back face content */
+  .verdict-banner{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px;border-radius:10px;
+    font-family:var(--serif);font-weight:600;font-size:18px;line-height:1.2;
+    flex-shrink:0;
+  }
+  .verdict-banner .v-glyph{font-size:22px;line-height:1}
+  .card.is-correct .verdict-banner{background:var(--richtig-bg);color:var(--richtig)}
+  .card.is-near    .verdict-banner{background:var(--eher-falsch-bg);color:var(--eher-falsch)}
+  .card.is-far     .verdict-banner{background:var(--falsch-bg);color:var(--falsch)}
+
+  .myth-line{
+    font-family:var(--serif);font-weight:500;font-size:15px;line-height:1.45;
+    margin:12px 0 0;color:var(--ink);
+    flex-shrink:0;
+  }
+  .myth-line strong{font-weight:700}
+
+  .your-answer-note{
+    font-size:11px;color:var(--muted);margin:6px 0 0;font-weight:600;
+    flex-shrink:0;
+  }
+  .your-answer-note .chip{
+    display:inline-block;background:rgba(0,0,0,.05);color:var(--secondary);
+    padding:1px 7px;border-radius:999px;margin-left:4px;font-weight:700;
+  }
+
+  .explanation-wrap{
+    position:relative; flex:1 1 auto; min-height:0;
+    margin-top:12px;
+  }
+  .explanation{
+    height:100%;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    padding-right:6px;
+    font-family:var(--serif);font-size:14px;line-height:1.55;
+    color:var(--secondary);
+    -webkit-mask-image:linear-gradient(180deg,#000 0%, #000 90%, transparent 100%);
+            mask-image:linear-gradient(180deg,#000 0%, #000 90%, transparent 100%);
+  }
+  .explanation::-webkit-scrollbar{width:4px}
+  .explanation::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:2px}
+  .explanation p{margin:0 0 .6em}
+  .explanation .more-link{color:var(--accent);font-weight:600;text-decoration:none;border-bottom:1px solid currentColor}
+
+  .pop-bar{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11px;color:var(--muted);flex-shrink:0}
+  .pop-bar .track{flex:1;height:6px;border-radius:999px;background:rgba(0,0,0,.06);overflow:hidden}
+  .pop-bar .fill{height:100%;background:linear-gradient(90deg,var(--accent),#40916c);border-radius:999px;width:50%;transition:width .8s var(--ease-card)}
+  .micro-copy{font-size:11px;color:var(--accent);font-weight:600;margin:6px 0 0;flex-shrink:0}
+
+  .actions{display:flex;justify-content:space-between;gap:8px;margin-top:10px;flex-shrink:0}
+  .actions button{font:inherit;font-weight:600;font-size:13px;padding:8px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border-strong);background:#fff;color:var(--secondary)}
+  .actions button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .actions button.primary:hover{background:var(--accent-hover)}
+
+  /* Confidence input */
+  .confidence{
+    display:none;
+    position:absolute;left:0;right:0;bottom:0;
+    background:var(--accent-light);border-top:1px solid var(--accent);
+    padding:14px 16px calc(16px + env(safe-area-inset-bottom,0));
+    border-bottom-left-radius:var(--radius-lg);border-bottom-right-radius:var(--radius-lg);
+    align-items:center;justify-content:space-between;gap:10px;
+    animation:slideUp .25s var(--ease-card);z-index:3;
+  }
+  .confidence.is-on{display:flex}
+  .confidence span{font-size:13px;color:var(--accent);font-weight:700}
+  .confidence .conf-buttons{display:flex;gap:6px}
+  .confidence button{font:inherit;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid var(--accent);border-radius:999px;background:#fff;color:var(--accent);cursor:pointer}
+  .confidence button:hover{background:var(--accent);color:#fff}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+  /* Swipe edges */
+  .swipe-edge{position:absolute;top:0;bottom:0;width:64px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;opacity:0;pointer-events:none;border-radius:var(--radius-lg);z-index:4}
+  .swipe-edge.left{left:0;background:linear-gradient(90deg,rgba(45,106,79,.85),transparent)}
+  .swipe-edge.right{right:0;background:linear-gradient(-90deg,rgba(45,106,79,.85),transparent)}
+
+  /* Below-card chrome */
+  .dots{display:flex;justify-content:center;gap:6px;margin-top:18px}
+  .dots button{width:26px;height:26px;border-radius:999px;border:1px solid var(--border-strong);background:#fff;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;font-variant-numeric:tabular-nums;font-family:inherit;display:flex;align-items:center;justify-content:center;padding:0}
+  .dots button.current{outline:2px solid var(--accent);outline-offset:2px;transform:scale(1.08)}
+  .dots button.correct{background:var(--richtig-bg);border-color:var(--richtig);color:var(--richtig)}
+  .dots button.near{background:var(--eher-falsch-bg);border-color:var(--eher-falsch);color:var(--eher-falsch)}
+  .dots button.far{background:var(--falsch-bg);border-color:var(--falsch);color:var(--falsch)}
+
+  .overview-btn{margin:14px auto 0;display:block;font:inherit;font-size:12px;font-weight:600;padding:8px 14px;border:1px solid var(--border-strong);border-radius:999px;background:#fff;color:var(--secondary);cursor:pointer}
+  .overview-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* Overview sheet */
+  .sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:50}
+  .sheet.is-on{display:flex;animation:fadeIn .2s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .sheet-panel{background:var(--surface);border-top-left-radius:18px;border-top-right-radius:18px;width:100%;max-width:640px;max-height:80vh;overflow-y:auto;padding:18px 18px 28px;animation:sheetUp .25s ease}
+  @keyframes sheetUp{from{transform:translateY(40px)}to{transform:translateY(0)}}
+  .sheet-panel h3{font-family:var(--serif);font-size:18px;font-weight:600;margin:0 0 12px}
+  .sheet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+  .mini-card{border:1px solid var(--border);border-radius:10px;padding:10px;background:#fff;text-align:left;cursor:pointer;font:inherit}
+  .mini-card .num{font-size:11px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+  .mini-card .stmt{font-family:var(--serif);font-size:13px;line-height:1.35;margin-top:4px;color:var(--ink)}
+  .mini-card .v{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-top:6px;display:inline-block;padding:2px 7px;border-radius:999px}
+  .mini-card.correct{background:var(--richtig-bg);border-color:var(--richtig)}
+  .mini-card.correct .v{background:var(--richtig);color:#fff}
+  .mini-card.near{background:var(--eher-falsch-bg);border-color:var(--eher-falsch)}
+  .mini-card.near .v{background:var(--eher-falsch);color:#fff}
+  .mini-card.far{background:var(--falsch-bg);border-color:var(--falsch)}
+  .mini-card.far .v{background:var(--falsch);color:#fff}
+  .mini-card.current{outline:2px solid var(--accent);outline-offset:2px}
+  .sheet-close{display:block;margin-top:14px;width:100%;padding:11px;background:var(--accent);color:#fff;border:0;border-radius:8px;font:inherit;font-weight:700;cursor:pointer}
+
+  details>summary{cursor:pointer;font-weight:600;color:var(--accent);margin-top:8px}
+  pre{background:#0e1f17;color:#d1fae5;padding:10px;border-radius:8px;font-size:11.5px;overflow-x:auto}
+
+  @media (max-width:380px){
+    .row{grid-template-columns:1fr 1fr}
+    .seg{border-right:0;border-bottom:1px solid var(--border)}
+    .seg:nth-child(2n){border-right:0}
+    .seg:nth-last-child(-n+2){border-bottom:0}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <h1>Quiz redesign v2 — constant-size card</h1>
+  <p class="lede">Card now keeps its exact dimensions front and back. Pick an answer to flip; long explanations scroll inside the card. Toggles below let you compare states.</p>
+
+  <div class="panel">
+    <h2><span class="badge">Live</span> Constant-size flipping card</h2>
+    <p class="why">Card aspect-ratio is locked to 3 : 4. Front and back occupy the same rectangle — the card never grows. Long explanations scroll inside with a soft fade at the bottom edge.</p>
+
+    <div class="controls" id="toggles">
+      <button data-toggle="streak">Streak chip</button>
+      <button data-toggle="confidence">Confidence input</button>
+      <button data-toggle="long">Long explanation</button>
+      <button data-toggle="reset" id="resetBtn">Reset to front</button>
+    </div>
+
+    <div class="deck">
+      <div class="card" id="card" style="--tilt:-.6deg">
+        <span class="streak" id="streak">3 in a row</span>
+
+        <!-- FRONT -->
+        <div class="face front" id="front">
+          <div class="topbar">
+            <span id="counter">03 / 07</span>
+            <span class="cat">Medizin</span>
+          </div>
+          <p class="statement" id="statement">Cannabis lindert chronische Schmerzen.</p>
+          <div class="scale">
+            <div class="spectrum" aria-hidden="true"></div>
+            <div class="row" role="radiogroup" aria-label="Antwort wählen">
+              <button class="seg is-falsch"        data-pick="falsch"><span class="glyph">↓</span>Falsch<span class="kbd">1</span></button>
+              <button class="seg is-eher-falsch"   data-pick="eher_falsch"><span class="glyph">◣</span>Eher falsch<span class="kbd">2</span></button>
+              <button class="seg is-eher-richtig"  data-pick="eher_richtig"><span class="glyph">◤</span>Eher richtig<span class="kbd">3</span></button>
+              <button class="seg is-richtig"       data-pick="richtig"><span class="glyph">↑</span>Richtig<span class="kbd">4</span></button>
+            </div>
+          </div>
+          <div class="confidence" id="confidence">
+            <span>Wie sicher?</span>
+            <div class="conf-buttons">
+              <button id="conf-unsure">Eher unsicher</button>
+              <button id="conf-sure">Sehr sicher</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BACK -->
+        <div class="face back" id="back">
+          <div class="topbar">
+            <span id="counterBack">03 / 07</span>
+            <span class="cat">Medizin</span>
+          </div>
+
+          <div class="verdict-banner" id="verdictBanner">
+            <span class="v-glyph" id="verdictGlyph">~</span>
+            <span id="verdictText">Du warst nah dran.</span>
+          </div>
+
+          <p class="myth-line" id="mythLine">
+            Der Mythos „Cannabis lindert chronische Schmerzen" ist <strong id="mythVerdictWord">eher falsch</strong>.
+          </p>
+
+          <p class="your-answer-note" id="yourAnswerNote">
+            Deine Antwort: <span class="chip" id="yourAnswerChip">Eher richtig</span>
+          </p>
+
+          <div class="explanation-wrap">
+            <div class="explanation" id="explanation">
+              <p id="explainP1">Cannabinoide zeigen nur bei bestimmten chronischen Schmerzen kleine positive Effekte. Selbstbeobachtete Schmerzlinderung wird oft auf den Placebo-Effekt zurückgeführt.</p>
+              <p id="explainP2" hidden>In klinischen Studien zeigt sich ein moderater Effekt bei neuropathischen Schmerzen (NNT ~10), aber kein konsistenter Vorteil gegenüber Standardanalgetika bei nicht-neuropathischen Schmerzen. Die Evidenz für Krebsschmerzen ist gemischt; multiple Sklerose-Spastiken zeigen den klarsten Nutzen.</p>
+              <p id="explainP3" hidden>Eine Meta-Analyse aus 2023 (Cochrane) fasst zusammen: bei chronischen, nicht-cancer-bezogenen Schmerzen ist der Effekt gering und sollte gegen die Risiken (Sucht, kognitive Effekte, Verkehrssicherheit) abgewogen werden. Aktuelle deutsche Leitlinien empfehlen Cannabis nur als Reservetherapie nach Ausschöpfung etablierter Optionen.</p>
+              <a class="more-link" href="#">Mehr lesen →</a>
+            </div>
+          </div>
+
+          <div class="pop-bar">
+            <div class="track"><div class="fill" style="width:50%"></div></div>
+            <span><strong style="color:var(--ink)">50 %</strong> haben richtig eingeschätzt</span>
+          </div>
+
+          <p class="micro-copy" id="microCopy">Mehr als die Hälfte der Befragten lag falsch — du warst nah dran.</p>
+
+          <div class="actions">
+            <button onclick="resetCard()">Details</button>
+            <button class="primary" onclick="resetCard()">Nächste Frage →</button>
+          </div>
+        </div>
+
+        <div class="swipe-edge left"  id="edgeL">←</div>
+        <div class="swipe-edge right" id="edgeR">→</div>
+      </div>
+    </div>
+
+    <div class="dots" id="dots"></div>
+    <button class="overview-btn" onclick="document.getElementById('sheet').classList.add('is-on')">Übersicht aller 7 Fragen ↑</button>
+  </div>
+
+  <div class="panel">
+    <h2><span class="badge">A</span> Three-tier feedback (per colleague's request)</h2>
+    <p class="why">The verdict line on the back face uses three exact strings, depending on how far the user's pick was from the evidence-based classification.</p>
+    <ul style="font-size:13px;line-height:1.7;margin:0;padding-left:20px">
+      <li><strong style="color:var(--richtig)">0 steps</strong> (correct match) → "Das ist korrekt."</li>
+      <li><strong style="color:var(--eher-falsch)">1 step</strong> off → "Du warst nah dran."</li>
+      <li><strong style="color:var(--falsch)">2+ steps</strong> off → "Das ist leider nicht korrekt."</li>
+    </ul>
+    <p class="why" style="margin-top:10px">These three strings already exist in <code>src/components/quiz/i18n.ts</code> at <code>ui.feedback.{correct,near,far}</code>. The bug was visual hierarchy, not copy: the small "Du warst nah dran" badge competed with two big chips and the verdict line. The new back face leads with the human verdict, then the myth statement, then the optional answer note.</p>
+  </div>
+
+  <div class="panel">
+    <h2><span class="badge">B</span> "Der Mythos … ist …"</h2>
+    <p class="why">Replaces the existing template. Old: <em>Die Aussage „X" ist Y.</em> · New: <em>Der Mythos „X" ist Y.</em></p>
+    <pre>// i18n.ts
+"ui.mythVerdict": "Der Mythos „{statement}" ist {verdict}.",</pre>
+  </div>
+
+  <div class="panel">
+    <h2><span class="badge">C</span> Why constant size + flip (not reveal-in-place)</h2>
+    <p class="why">A real card is the same size on both sides. The flip is iconic — it tells the user "you turned the card over" without a word. Reveal-in-place broke that metaphor by extending the card downward when answered. Constant size with internal scroll for long explanations is the Anki / Quizlet pattern; it has 30 years of UX research behind it.</p>
+    <p class="why">Card uses <code>aspect-ratio: 3 / 4</code>. At <code>max-width:480px</code> that's 480 × 640 desktop; on a 390 px phone with 16 px padding, ~358 × 477 — fits one viewport on most phones with the dot strip + overview button still visible.</p>
+  </div>
+
+  <div class="panel">
+    <h2><span class="badge">D</span> Internal scroll handles long explanations</h2>
+    <p class="why">The explanation block has <code>overflow-y:auto</code> with <code>overscroll-behavior:contain</code> (no scroll-jacking the page) and a <code>mask-image</code> bottom-fade so users see content is cut off. Click "Long explanation" in the toggle row to feel it.</p>
+  </div>
+
+  <div class="panel">
+    <h2><span class="badge">E</span> Confidence input (slides up over the front)</h2>
+    <p class="why">After picking a verdict, a small "Wie sicher?" panel slides up from the bottom of the front face. Picking either button dismisses it and triggers the flip. Adds research-grade calibration for ~one extra tap. Off by default; opt-in per quiz.</p>
+  </div>
+
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="sheet-panel">
+    <h3>Übersicht — Medizinischer Nutzen (7 Fragen)</h3>
+    <div class="sheet-grid" id="sheetGrid"></div>
+    <button class="sheet-close" onclick="document.getElementById('sheet').classList.remove('is-on')">Schließen</button>
+  </div>
+</div>
+
+<script>
+  const sample = [
+    {n:'01', stmt:'Cannabis ist ein Allheilmittel.', state:'far'},
+    {n:'02', stmt:'Cannabis macht psychisch süchtig.', state:'correct'},
+    {n:'03', stmt:'Cannabis lindert chronische Schmerzen.', state:'current'},
+    {n:'04', stmt:'CBD wirkt nicht psychoaktiv.', state:''},
+    {n:'05', stmt:'Cannabis hilft gegen Übelkeit bei Chemo.', state:''},
+    {n:'06', stmt:'THC verursacht Angst.', state:''},
+    {n:'07', stmt:'Cannabis ist als Medizin zugelassen.', state:''},
+  ];
+  const verdicts = {falsch:'falsch', eher_falsch:'eher falsch', eher_richtig:'eher richtig', richtig:'richtig'};
+  const ORDER = ['falsch','eher_falsch','eher_richtig','richtig'];
+  const correctForCurrent = 'eher_falsch';
+
+  const dotsEl = document.getElementById('dots');
+  sample.forEach((q,i)=>{
+    const b=document.createElement('button');
+    b.textContent=i+1;
+    if(q.state==='correct') b.classList.add('correct');
+    if(q.state==='near')    b.classList.add('near');
+    if(q.state==='far')     b.classList.add('far');
+    if(q.state==='current') b.classList.add('current');
+    dotsEl.appendChild(b);
+  });
+
+  const sheetGrid=document.getElementById('sheetGrid');
+  sample.forEach(q=>{
+    const div=document.createElement('button');
+    div.className='mini-card '+(q.state||'');
+    let v = '';
+    if(q.state==='correct') v = '<span class="v">korrekt</span>';
+    if(q.state==='near')    v = '<span class="v">nah dran</span>';
+    if(q.state==='far')     v = '<span class="v">nicht korrekt</span>';
+    div.innerHTML=`<div class="num">${q.n}</div><div class="stmt">${q.stmt}</div>${v}`;
+    div.addEventListener('click',()=>document.getElementById('sheet').classList.remove('is-on'));
+    sheetGrid.appendChild(div);
+  });
+
+  document.getElementById('sheet').addEventListener('click',(e)=>{ if(e.target.id==='sheet') e.target.classList.remove('is-on'); });
+
+  let confidenceEnabled=false, longExplain=false;
+  document.querySelectorAll('#toggles button[data-toggle]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const t=btn.dataset.toggle;
+      btn.classList.toggle('is-on');
+      if(t==='streak') document.getElementById('streak').classList.toggle('is-on');
+      if(t==='confidence') confidenceEnabled = !confidenceEnabled;
+      if(t==='long'){
+        longExplain = !longExplain;
+        document.getElementById('explainP2').hidden = !longExplain;
+        document.getElementById('explainP3').hidden = !longExplain;
+      }
+      if(t==='reset') resetCard();
+    });
+  });
+
+  function pick(picked){
+    const correct = correctForCurrent;
+    const dist = Math.abs(ORDER.indexOf(picked) - ORDER.indexOf(correct));
+    let tier, text, glyph;
+    if(dist===0){      tier='is-correct'; text='Das ist korrekt.';            glyph='✓'; }
+    else if(dist===1){ tier='is-near';    text='Du warst nah dran.';          glyph='~'; }
+    else {             tier='is-far';     text='Das ist leider nicht korrekt.'; glyph='✕'; }
+    const card = document.getElementById('card');
+    card.classList.remove('is-correct','is-near','is-far');
+    card.classList.add(tier);
+    document.getElementById('verdictText').textContent = text;
+    document.getElementById('verdictGlyph').textContent = glyph;
+    document.getElementById('mythVerdictWord').textContent = verdicts[correct];
+    if(picked === correct){
+      document.getElementById('yourAnswerNote').style.display='none';
+    } else {
+      document.getElementById('yourAnswerNote').style.display='';
+      document.getElementById('yourAnswerChip').textContent = verdicts[picked].charAt(0).toUpperCase()+verdicts[picked].slice(1);
+    }
+    const popPct=50;
+    const mc = document.getElementById('microCopy');
+    if(dist===0)        mc.textContent = `Genau richtig — ${100-popPct} % der Befragten lagen daneben.`;
+    else if(dist===1)   mc.textContent = `Mehr als die Hälfte der Befragten lag falsch — du warst nah dran.`;
+    else                mc.textContent = `Daneben — ${popPct} % der Befragten haben es korrekt eingeschätzt.`;
+
+    if(confidenceEnabled){
+      document.getElementById('confidence').classList.add('is-on');
+    } else {
+      setTimeout(()=>flip(), 220);
+    }
+  }
+  function flip(){
+    document.getElementById('confidence').classList.remove('is-on');
+    document.getElementById('card').classList.add('is-flipped');
+  }
+  function resetCard(){
+    const card=document.getElementById('card');
+    card.classList.remove('is-flipped','is-correct','is-near','is-far');
+    document.getElementById('confidence').classList.remove('is-on');
+  }
+  document.querySelectorAll('.row .seg').forEach(s=>{
+    s.addEventListener('click',()=>pick(s.dataset.pick));
+  });
+  document.getElementById('conf-sure').addEventListener('click',flip);
+  document.getElementById('conf-unsure').addEventListener('click',flip);
+
+  document.addEventListener('keydown',(e)=>{
+    if(e.key>='1' && e.key<='4' && !document.getElementById('card').classList.contains('is-flipped')){
+      pick(ORDER[+e.key-1]);
+    }
+    if(e.key==='Escape') resetCard();
+  });
+
+  (function(){
+    const card=document.getElementById('card');
+    const edgeL=document.getElementById('edgeL');
+    const edgeR=document.getElementById('edgeR');
+    let pid=null,sx=0,sy=0,dx=0,captured=false,abandoned=false;
+    const SLOP=8;
+    const threshold=()=>Math.min(140, window.innerWidth*.28);
+    function setX(x){
+      card.style.setProperty('--swipe-x', x+'px');
+      card.style.setProperty('--swipe-rot', (x/24)+'deg');
+      card.style.setProperty('--swipe-opacity', Math.max(.3, 1-Math.abs(x)/600));
+      edgeR.style.opacity = x>0 ? Math.min(1, x/120) : 0;
+      edgeL.style.opacity = x<0 ? Math.min(1, -x/120) : 0;
+    }
+    card.addEventListener('pointerdown',e=>{
+      if(card.classList.contains('is-flipped')) return;
+      if(pid!==null) return;
+      pid=e.pointerId; sx=e.clientX; sy=e.clientY; dx=0; captured=false; abandoned=false;
+      card.classList.add('dragging');
+    });
+    card.addEventListener('pointermove',e=>{
+      if(pid!==e.pointerId||abandoned) return;
+      const ndx=e.clientX-sx, ndy=e.clientY-sy;
+      if(!captured){
+        if(Math.abs(ndy)>Math.abs(ndx) && Math.abs(ndy)>SLOP){ abandoned=true; return; }
+        if(Math.abs(ndx)<=SLOP) return;
+        captured=true;
+        try{ card.setPointerCapture(pid);}catch{}
+      }
+      dx=ndx; setX(dx);
+    });
+    card.addEventListener('pointerup',e=>{
+      if(pid!==e.pointerId) return;
+      const f=dx, was=captured;
+      pid=null; captured=false; card.classList.remove('dragging');
+      try{ card.releasePointerCapture(e.pointerId);}catch{}
+      if(was && Math.abs(f)>=threshold()){
+        const dir=f<0?-1:1;
+        card.classList.add('swipe-out');
+        setX(dir*window.innerWidth*1.1);
+        setTimeout(()=>{
+          card.classList.remove('swipe-out');
+          setX(0);
+          document.getElementById('counter').textContent     = (dir>0?'04':'02')+' / 07';
+          document.getElementById('counterBack').textContent = (dir>0?'04':'02')+' / 07';
+          document.getElementById('statement').textContent = dir>0
+            ? 'CBD wirkt nicht psychoaktiv.'
+            : 'Cannabis macht psychisch süchtig.';
+          resetCard();
+        },360);
+      } else if(was){
+        card.style.transition='transform var(--dur-flip) var(--ease-card)';
+        setX(0);
+        setTimeout(()=>card.style.transition='', 360);
+      }
+    });
+    card.addEventListener('pointercancel',()=>{ pid=null; captured=false; setX(0); card.classList.remove('dragging'); });
+  })();
+</script>
+</body>
+</html>

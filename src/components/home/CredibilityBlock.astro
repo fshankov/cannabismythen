@@ -1,0 +1,186 @@
+---
+export interface Props {
+  eyebrow: string;
+  headline: string;
+  lede: string;
+  rows: Array<{ label: string; value: string; link?: string }>;
+}
+
+const { eyebrow, headline, lede, rows } = Astro.props;
+---
+
+<section class="credibility-block" aria-labelledby="credibility-heading">
+  <div class="credibility-block__inner">
+    <div class="credibility-block__intro">
+      <p class="credibility-block__eyebrow">{eyebrow}</p>
+      <h2 id="credibility-heading" class="credibility-block__headline">
+        {headline}
+      </h2>
+      <p class="credibility-block__lede">{lede}</p>
+    </div>
+
+    <ul class="credibility-block__rows">
+      {rows.map((row, i) => (
+        <li class="credibility-row">
+          <div class="credibility-row__marker" aria-hidden="true">
+            <span class="credibility-row__index">0{i + 1}</span>
+          </div>
+          <div class="credibility-row__body">
+            <p class="credibility-row__label">{row.label}</p>
+            <p class="credibility-row__value">
+              {row.link ? (
+                <a href={row.link} class="credibility-row__link">
+                  {row.value}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M7 17L17 7M17 7H8M17 7v9" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              ) : (
+                row.value
+              )}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .credibility-block {
+    background: var(--color-bg);
+    padding: clamp(5rem, 10vw, 9rem) clamp(1.25rem, 4vw, 3rem) clamp(4rem, 8vw, 7rem);
+    position: relative;
+  }
+
+  /* Soft gradient bridge from the dark hero — pulls the eye down into the editorial section */
+  .credibility-block::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to bottom, #1f4f3a 0%, rgba(31, 79, 58, 0.35) 35%, var(--color-bg) 100%);
+    pointer-events: none;
+    transform: translateY(-100%);
+  }
+
+  .credibility-block__inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .credibility-block__inner {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+  }
+
+  .credibility-block__intro {
+    max-width: 38ch;
+  }
+
+  .credibility-block__eyebrow {
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.6px;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 1.25rem 0;
+  }
+
+  .credibility-block__headline {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(28px, 4.4vw, 46px);
+    line-height: 1.1;
+    letter-spacing: -0.2px;
+    color: var(--color-text);
+    margin: 0 0 1.25rem 0;
+  }
+
+  .credibility-block__lede {
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-size: clamp(15px, 1.15vw, 17px);
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+    margin: 0;
+    max-width: 42ch;
+  }
+
+  .credibility-block__rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid rgba(26, 26, 46, 0.08);
+  }
+
+  .credibility-row {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 1.25rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(26, 26, 46, 0.08);
+    align-items: baseline;
+  }
+
+  .credibility-row__marker {
+    display: flex;
+    align-items: baseline;
+  }
+
+  .credibility-row__index {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--color-accent-muted);
+    line-height: 1;
+    letter-spacing: 0.5px;
+  }
+
+  .credibility-row__body {
+    min-width: 0;
+  }
+
+  .credibility-row__label {
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin: 0 0 6px 0;
+  }
+
+  .credibility-row__value {
+    font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    font-size: clamp(15px, 1.05vw, 16.5px);
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    margin: 0;
+    max-width: 56ch;
+  }
+
+  .credibility-row__link {
+    color: var(--color-accent);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid rgba(45, 106, 79, 0.3);
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .credibility-row__link:hover {
+    color: var(--color-accent-hover);
+    border-bottom-color: var(--color-accent-hover);
+  }
+</style>

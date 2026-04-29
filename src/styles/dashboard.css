@@ -205,6 +205,13 @@ main:has(.carm-explorer) {
   gap: 8px;
 }
 
+/* Bottom-positioned utility bar — used on the strips tabs where the buttons
+   render under the chart + categories with a clear gap above. */
+.carm-explorer .utility-bar--bottom {
+  margin-top: 24px;
+  margin-bottom: 0;
+}
+
 .carm-explorer .utility-buttons {
   display: flex;
   gap: 6px;
@@ -487,13 +494,19 @@ main:has(.carm-explorer) {
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   padding: 10px 12px;
-  z-index: 200;
+  z-index: 9999;
   pointer-events: none;
   opacity: 0;
   /* Pair visibility with opacity so it's removed from a11y tree when hidden */
   visibility: hidden;
   transition: opacity var(--duration-fast) var(--ease-out),
               visibility 0s linear var(--duration-fast);
+}
+
+/* When using viewport-relative (fixed) positioning, the inline style sets
+   position/top/left/width directly. */
+.carm-explorer .info-tooltip-card--fixed {
+  /* No additional rules needed — inline style takes over. */
 }
 
 .carm-explorer .info-tooltip-card--above {
@@ -519,6 +532,16 @@ main:has(.carm-explorer) {
   font-weight: 700;
   color: var(--color-text);
   line-height: 1.3;
+  /* Wrap long titles instead of overflowing */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.carm-explorer .info-tooltip-desc,
+.carm-explorer .info-tooltip-scale,
+.carm-explorer .info-tooltip-sample {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .carm-explorer .info-tooltip-sample {
@@ -1699,6 +1722,1298 @@ main:has(.carm-explorer) {
   }
 }
 
+/* ==================== STRIPS V2 (vertical) ==================== */
+.strips-v2 {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 4px 12px;
+}
+
+/* Two-column grid: col 1 = iOS toggle, col 2 = chart content wrapper that
+   stacks the switcher row, the strip-headers row, and the SVG. Because all
+   three rows live inside the same column-2 child (.strips-grid__content),
+   ResizeObserver measures one width and every row computes against it. */
+.strips-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  column-gap: 8px;
+  margin-bottom: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.strips-grid__toggle {
+  grid-column: 1;
+  grid-row: 1;
+  /* Vertically align the compact pill with the switcher + headers area
+     above the SVG, not the entire content stack. */
+  align-self: start;
+  margin-top: 4px;
+}
+
+.strips-grid__content {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+/* Legacy class kept for any older callers — same horizontal layout. */
+.strips-top-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* iPhone-style two-position toggle (vertical orientation) */
+.strips-ios-toggle {
+  position: relative;
+  flex: 0 0 auto;
+  cursor: pointer;
+  background: var(--color-bg-subtle, #eeeee8);
+  border: 1px solid var(--color-border, #cbd5e1);
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.strips-ios-toggle--vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 30px;
+  /* Sized to span the switcher row + strip-headers row above the SVG so the
+     toggle visually sits next to BOTH rows of icon boxes. */
+  min-height: 120px;
+  padding: 4px 0;
+  border-radius: 999px;
+}
+
+.strips-ios-toggle:hover {
+  border-color: var(--color-accent, #2d6a4f);
+}
+
+.strips-ios-toggle:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.strips-ios-side {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--color-text-secondary, #94a3b8);
+  transition: color 0.18s ease;
+  pointer-events: none;
+}
+
+.strips-ios-side.active {
+  color: white;
+}
+
+.strips-ios-thumb {
+  position: absolute;
+  background: var(--color-accent, #2d6a4f);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  pointer-events: none;
+  z-index: 1;
+  transition: top 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.strips-ios-thumb--vertical {
+  left: 2px;
+  width: calc(100% - 4px);
+  height: 24px;
+}
+
+.strips-ios-thumb--vertical.up {
+  top: 2px;
+}
+
+.strips-ios-thumb--vertical.down {
+  top: calc(100% - 26px);
+}
+
+/* Switcher and strip-header rows share the SAME geometry so each switcher
+   item sits column-aligned directly above its strip header. Both rows use:
+     - identical padding-left / padding-right (matching the SVG margin)
+     - identical gap between items
+     - identical box dimensions (.strips-switch-btn / .strips-header-btn)
+   The widths are set inline by the React component (style={{ width: colW }})
+   so we don't need to repeat them here.
+
+   Container overflow MUST stay visible so the absolutely-positioned 'i'
+   icon in the rightmost column doesn't get clipped. */
+.strips-switcher,
+.strips-headers {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: visible;
+  box-sizing: border-box;
+  margin-bottom: 4px;
+}
+
+/* The unified box geometry — identical between switcher items and headers. */
+.strips-switch,
+.strips-header {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  /* Allow the absolute-positioned 'i' to render beyond the column box if it
+     bumps the screen edge in the rightmost column. */
+  overflow: visible;
+}
+
+.strips-switch-btn,
+.strips-header-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  min-height: 56px;
+  padding: 8px 4px 6px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: white;
+  color: var(--color-text-secondary, #4a5568);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.66rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.strips-switch-btn:hover,
+.strips-header-btn:hover {
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+}
+
+/* Active selection — same accent treatment for both rows */
+.strips-switch.active .strips-switch-btn,
+.strips-header.anchor .strips-header-btn {
+  background: var(--color-accent-light, #e8f5ef);
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+  font-weight: 600;
+}
+
+.strips-switch-btn:focus-visible,
+.strips-header-btn:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.strips-switch-label,
+.strips-header-label {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  width: 100%;
+  font-size: 0.66rem;
+}
+
+/* Sort indicator: small absolute badge in the bottom-left corner of each
+   strip-header box, so the box's icon+label structure stays identical to
+   the switcher boxes above. */
+.strips-header-sort {
+  position: absolute;
+  bottom: 2px;
+  left: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  color: var(--color-text-muted, #94a3b8);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.strips-header.anchor .strips-header-sort {
+  color: var(--color-accent, #2d6a4f);
+  opacity: 1;
+}
+
+/* 'i' info button — absolute-positioned in the top-right corner of every
+   switcher and strip-header block. No z-index here so the tooltip card
+   (position: fixed inside) can render on top across siblings. The icon is
+   inset slightly so it never visually clips against the column edge. */
+.strips-switch-info,
+.strips-header-info {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  line-height: 0;
+  pointer-events: auto;
+}
+
+.strips-switch-info .info-tooltip-trigger,
+.strips-header-info .info-tooltip-trigger {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+.strips-switch.active .strips-switch-info .info-tooltip-trigger,
+.strips-header.anchor .strips-header-info .info-tooltip-trigger {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-switch-info .info-tooltip-trigger:hover,
+.strips-switch-info .info-tooltip-trigger:focus-visible,
+.strips-header-info .info-tooltip-trigger:hover,
+.strips-header-info .info-tooltip-trigger:focus-visible {
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-svg-v2 {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  font-family: var(--font-sans, system-ui);
+  touch-action: manipulation;
+}
+
+/* Stage-1 readout — sticky bottom bar */
+.strips-readout {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--color-bg-subtle, #eeeee8);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius, 8px);
+  box-shadow: 0 -2px 12px rgba(15, 23, 42, 0.08);
+}
+
+.strips-readout-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.strips-readout-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.strips-readout-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.85rem;
+  color: var(--color-text, #1e293b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.strips-readout-close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: white;
+  color: var(--color-text-secondary, #4a5568);
+  border-radius: 6px;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.strips-readout-close:hover {
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-readout-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.strips-readout-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: white;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 999px;
+  font-size: 0.74rem;
+  color: var(--color-text-secondary, #4a5568);
+}
+
+.strips-readout-chip.anchor {
+  border-color: var(--color-accent, #2d6a4f);
+  background: var(--color-accent-light, #e8f5ef);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-readout-chip-label {
+  font-weight: 500;
+}
+
+.strips-readout-chip-val {
+  font-weight: 700;
+  color: var(--color-text, #1e293b);
+}
+
+.strips-readout-chip.anchor .strips-readout-chip-val {
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-readout-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.strips-readout-more {
+  min-height: 36px;
+  padding: 7px 18px;
+  border: 0;
+  background: var(--color-accent, #2d6a4f);
+  color: white;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.strips-readout-more:hover {
+  background: var(--color-accent-dark, #1f5239);
+}
+
+.strips-readout-more:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .strips-mode-btn {
+    padding: 6px 10px;
+    font-size: 0.74rem;
+  }
+
+  .strips-switch-btn {
+    min-height: 52px;
+    padding: 6px 4px;
+    font-size: 0.62rem;
+  }
+
+  .strips-switch-label {
+    font-size: 0.62rem;
+  }
+
+  .strips-readout-text {
+    font-size: 0.78rem;
+  }
+
+  .strips-readout-chip {
+    font-size: 0.7rem;
+  }
+}
+
+/* ==================== STRIPS V3 (3-pivot, vertical pills) ==================== */
+.strips-v3 {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 4px 12px;
+}
+
+/* Single-column layout: pivot is now driven by the top tab (Indikatoren /
+   Gruppen), so there's no in-view pivot rail. */
+.strips-grid3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.strips-grid3__content {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+/* Three rows of icon-blocks above the SVG */
+.strips-row-wrap {
+  margin-bottom: 4px;
+}
+
+.strips-row {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: visible;
+  box-sizing: border-box;
+  position: relative;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  border-radius: 12px;
+  transition: background 0.18s ease;
+}
+
+/* The pivot row sits directly above the SVG and acts as the strip headers.
+   Leave a 10px gap below it so the connector line drawn from each block's
+   bottom is visible against the white background. */
+.strips-row-wrap.is-pivot-wrap {
+  margin-bottom: 10px;
+}
+
+.strips-block {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.strips-block-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  min-height: 56px;
+  padding: 8px 4px 6px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: white;
+  color: var(--color-text-secondary, #4a5568);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.66rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.strips-block-btn:hover:not(:disabled) {
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-block.active .strips-block-btn {
+  background: var(--color-accent-light, #e8f5ef);
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+  font-weight: 600;
+}
+
+/* In-SVG strip headers — absolutely positioned over the SVG's header area
+   so each strip rectangle reads as ONE unified box: header on top, divider
+   line, dots area below. */
+.strips-svg-headers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* Children re-enable for the i tooltip + button. */
+}
+
+.strips-svg-header {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 4px 4px;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.strips-svg-header__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  color: var(--color-text, #1e293b);
+}
+
+.strips-svg-header__emoji {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.strips-svg-header__label {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  max-width: 100%;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--color-text, #1e293b);
+}
+
+.strips-svg-header__info {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  line-height: 0;
+}
+
+.strips-svg-header__info .info-tooltip-trigger {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+.strips-svg-header__info .info-tooltip-trigger:hover,
+.strips-svg-header__info .info-tooltip-trigger:focus-visible {
+  color: var(--color-accent, #2d6a4f);
+}
+
+/* Top dropdown picker — replaces the multi-pill row so the selector always
+   fits on one line. Caption + trigger + inline brief definition + 'i'. */
+.strips-picker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 4px 12px;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+.strips-picker__caption {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #4a5568);
+  flex-shrink: 0;
+}
+
+.strips-picker__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 10px 4px 12px;
+  border: 1px solid var(--color-border, #cbd5e1);
+  background: white;
+  color: var(--color-text, #1e293b);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.strips-picker__trigger:hover {
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-picker__trigger:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.strips-picker__emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.strips-picker__current {
+  display: inline-block;
+}
+
+.strips-picker__chevron {
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #94a3b8);
+  margin-left: 2px;
+}
+
+/* Inline brief definition / count next to the trigger — single line,
+   truncated with ellipsis when there's not enough room. (Used by the bottom
+   Mythos-Kategorie picker for the live myth count.) */
+.strips-picker__inline {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.74rem;
+  color: var(--color-text-secondary, #4a5568);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Bottom variant — sits below the chart with extra top breathing room. */
+.strips-picker--bottom {
+  margin: 14px 4px 4px;
+}
+
+/* Dropup variant — menu anchors to the trigger's TOP edge instead of bottom,
+   so it always opens upward (avoids viewport clipping at the page bottom). */
+.strips-picker--dropup .strips-picker__menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+  /* Subtle direction-of-travel cue: stronger upward shadow. */
+  box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.18);
+}
+
+/* Per-row container in the menu — wraps the tappable button + an 'i' button
+   on the right. When expanded, the full definition renders inline below. */
+.strips-picker__row {
+  display: flex;
+  flex-direction: column;
+}
+
+.strips-picker__row-line {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.strips-picker__row .strips-picker__item-btn {
+  flex: 1 1 auto;
+  /* Drop the right-padding meant for the absolute 'i' icon — the i is now a
+     sibling button, not absolutely positioned. */
+  padding: 6px 8px 6px 10px;
+}
+
+.strips-picker__row-info {
+  flex-shrink: 0;
+  width: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  font-family: serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.strips-picker__row-info:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-picker__row-info.active {
+  background: var(--color-accent-light, #e8f5ef);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-picker__row-info:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 1px;
+}
+
+/* Inline-expanded definition area — appears below the row inside the
+   dropdown menu, never floats outside it. */
+.strips-picker__row-def {
+  margin: 2px 4px 6px;
+  padding: 8px 10px 10px;
+  background: var(--color-bg-subtle, #eeeee8);
+  border-left: 3px solid var(--color-accent, #2d6a4f);
+  border-radius: 6px;
+}
+
+.strips-picker__row-def-title {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text, #1e293b);
+  line-height: 1.3;
+}
+
+.strips-picker__row-def-sample {
+  display: inline-block;
+  margin: 0 0 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-accent, #2d6a4f);
+  background: var(--color-accent-light, #e8f5ef);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.strips-picker__row-def-text {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--color-text-secondary, #4a5568);
+  line-height: 1.45;
+}
+
+.strips-picker__row-def-scale {
+  margin: 6px 0 0;
+  padding-top: 5px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+  font-size: 0.68rem;
+  color: var(--color-text-muted, #94a3b8);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dropdown menu */
+.strips-picker__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: auto;
+  /* Anchor menu to the trigger horizontally — caption sits BEFORE the trigger
+     in the flex flow, so a left:0 would offset by the caption. Using right:0
+     keeps the menu's right edge aligned with the trigger's right edge. */
+  right: 0;
+  min-width: 220px;
+  max-width: 320px;
+  z-index: 60;
+  background: white;
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.strips-picker__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.strips-picker__item-btn {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 36px 6px 10px; /* extra right pad for the i */
+  border: 0;
+  background: transparent;
+  color: var(--color-text, #1e293b);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.strips-picker__item-btn:hover {
+  background: var(--color-accent-light, #e8f5ef);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-picker__item.active .strips-picker__item-btn {
+  background: var(--color-accent, #2d6a4f);
+  color: white;
+  font-weight: 600;
+}
+
+.strips-picker__item-btn:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 1px;
+}
+
+.strips-picker__item-label {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.strips-picker__item-info {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  line-height: 0;
+  pointer-events: auto;
+}
+
+.strips-picker__item-info .info-tooltip-trigger {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.strips-picker__item.active .strips-picker__item-info .info-tooltip-trigger {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.strips-picker__item-info .info-tooltip-trigger:hover,
+.strips-picker__item-info .info-tooltip-trigger:focus-visible {
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-picker__item.active .strips-picker__item-info .info-tooltip-trigger:hover,
+.strips-picker__item.active .strips-picker__item-info .info-tooltip-trigger:focus-visible {
+  color: white;
+}
+
+@media (max-width: 640px) {
+  .strips-picker__caption {
+    font-size: 0.74rem;
+  }
+  .strips-picker__trigger {
+    font-size: 0.78rem;
+    min-height: 30px;
+  }
+}
+
+/* Top pill bar — legacy; replaced by .strips-picker above. */
+.strips-pill-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+  padding: 6px 4px 4px;
+}
+
+.strips-pill-bar__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #4a5568);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.strips-pill-bar__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+  /* Allow the pills to flow on multiple lines on narrow screens. */
+}
+
+.strips-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.strips-pill__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 4px 26px 4px 10px; /* extra right pad for the i icon */
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: white;
+  color: var(--color-text-secondary, #4a5568);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.strips-pill__btn:hover {
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-pill.active .strips-pill__btn {
+  background: var(--color-accent, #2d6a4f);
+  border-color: var(--color-accent, #2d6a4f);
+  color: white;
+  font-weight: 600;
+}
+
+.strips-pill__btn:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.strips-pill__emoji {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.strips-pill__label {
+  display: inline-block;
+}
+
+.strips-pill__info {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  line-height: 0;
+}
+
+.strips-pill__info .info-tooltip-trigger {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+.strips-pill.active .strips-pill__info .info-tooltip-trigger {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-pill__info .info-tooltip-trigger:hover,
+.strips-pill__info .info-tooltip-trigger:focus-visible {
+  color: var(--color-accent, #2d6a4f);
+}
+
+@media (max-width: 640px) {
+  .strips-pill-bar__label {
+    font-size: 0.74rem;
+  }
+  .strips-pill__btn {
+    font-size: 0.7rem;
+    padding: 3px 22px 3px 8px;
+    min-height: 28px;
+  }
+  .strips-pill__info .info-tooltip-trigger {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Categories pill filter below the SVG */
+.strips-cat-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 4px 4px;
+  margin-top: 6px;
+  align-items: center;
+}
+
+.strips-cat-pill {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 4px 12px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: white;
+  color: var(--color-text-secondary, #4a5568);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.strips-cat-pill:hover {
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-cat-pill.active {
+  background: var(--color-accent, #2d6a4f);
+  border-color: var(--color-accent, #2d6a4f);
+  color: white;
+  font-weight: 600;
+}
+
+.strips-cat-pill:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .strips-cat-pill {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    min-height: 28px;
+  }
+}
+
+.strips-block-btn:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.strips-block-label {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  width: 100%;
+  font-size: 0.66rem;
+}
+
+.strips-block-emoji {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.strips-block-info {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  line-height: 0;
+  pointer-events: auto;
+}
+
+.strips-block-info .info-tooltip-trigger {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+.strips-block.active .strips-block-info .info-tooltip-trigger {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-block-info .info-tooltip-trigger:hover,
+.strips-block-info .info-tooltip-trigger:focus-visible {
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-svg-v3 {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  font-family: var(--font-sans, system-ui);
+  touch-action: manipulation;
+}
+
+/* Myth card — appears below the SVG (above the categories pills) when a
+   myth is selected. × close button at the top-right. */
+.strips-myth-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0 4px;
+  padding: 12px 44px 14px 16px; /* extra right padding to clear the × */
+  background: white;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+}
+
+.strips-myth-card__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: white;
+  color: var(--color-text-secondary, #4a5568);
+  border-radius: 50%;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.strips-myth-card__close:hover {
+  background: var(--color-accent-light, #e8f5ef);
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-myth-card__close:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.strips-myth-card__bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 2px 10px 3px;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: white;
+}
+
+/* Verdict bar colors — reuse the dashboard correctness palette. */
+.strips-myth-card__bar.classification--richtig { background: #047857; }
+.strips-myth-card__bar.classification--eher_richtig { background: #4d7c0f; }
+.strips-myth-card__bar.classification--eher_falsch { background: #b45309; }
+.strips-myth-card__bar.classification--falsch { background: #be123c; }
+.strips-myth-card__bar.classification--no_classification { background: #6b7280; }
+
+.strips-myth-card__bar-icon {
+  font-size: 0.86rem;
+  line-height: 1;
+}
+
+.strips-myth-card__statement {
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--color-text, #1e293b);
+  line-height: 1.3;
+}
+
+.strips-myth-card__summary {
+  margin: 0 0 10px;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary, #4a5568);
+}
+
+.strips-myth-card__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.strips-myth-card__more {
+  min-height: 36px;
+  padding: 6px 16px;
+  border: 0;
+  background: var(--color-accent, #2d6a4f);
+  color: white;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.strips-myth-card__more:hover {
+  background: var(--color-accent-dark, #1f5239);
+}
+
+.strips-myth-card__more:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+/* Hover statement label — pure HTML, absolutely positioned over the SVG
+   wrapper so it can paint above the strip-svg-headers + 'i' tooltip
+   triggers via z-index. Auto-sizing to the full myth text across multiple
+   lines without clipping. */
+.strips-hover-statement {
+  display: inline-block;
+  max-width: 260px;
+  padding: 6px 10px;
+  background: rgba(15, 23, 42, 0.94);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  font-family: var(--font-sans, system-ui);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.28);
+  pointer-events: none;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.strips-hover-statement--abs {
+  position: absolute;
+  /* Higher than .strips-svg-headers (default stacking) so the card always
+     paints over the icons / 'i' tooltip triggers when their boxes overlap. */
+  z-index: 50;
+}
+
+@media (max-width: 640px) {
+  .strips-pivot-pill {
+    width: 22px;
+    min-width: 22px;
+    padding: 6px 0;
+  }
+
+  .strips-pivot-text {
+    font-size: 0.66rem;
+  }
+
+  .strips-block-btn {
+    min-height: 52px;
+    padding: 6px 4px;
+    font-size: 0.62rem;
+  }
+
+  .strips-block-label {
+    font-size: 0.62rem;
+  }
+
+  .strips-myth-card__statement {
+    font-size: 0.94rem;
+  }
+
+  .strips-myth-card__summary {
+    font-size: 0.78rem;
+  }
+}
+
 /* ==================== REDUCED MOTION ==================== */
 @media (prefers-reduced-motion: reduce) {
   .carm-explorer *,
@@ -1708,4 +3023,568 @@ main:has(.carm-explorer) {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ==================== ONBOARDING ==================== */
+/* First-visit welcome card, mini-map, persistent help button, and
+   Driver.js theme overrides. The card is rendered as a centered modal
+   overlay (portalled to document.body), so the .carm-onboarding-overlay
+   and the body-scroll-lock class are intentionally GLOBAL — the rest of
+   the onboarding rules stay scoped under .carm-explorer. */
+
+/* Backdrop — fixed full-viewport dim layer that centers the card. */
+.carm-onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 99990; /* under Driver.js (100000+) so the tour overlays cleanly */
+  animation: carm-overlay-in 200ms ease;
+}
+
+@keyframes carm-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Locks page scroll while a modal is open. */
+body.carm-modal-open {
+  overflow: hidden;
+}
+
+.carm-onboarding-card {
+  /* Re-declare the design tokens on the card itself so children resolve
+     them whether we're inside .carm-explorer (in-flow) OR portalled to
+     <body> (modal). Otherwise var(--color-primary) etc. silently fall
+     back to "" and the primary button becomes invisible. */
+  --color-primary: #2d6a4f;
+  --color-primary-hover: #1f4f3a;
+  --color-primary-light: #e8f5ef;
+  --color-text: #1a1a2e;
+  --color-text-secondary: #4a5568;
+  --color-text-muted: #718096;
+  --color-surface: #f8fafc;
+  --color-surface-raised: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-bg: #ffffff;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-full: 9999px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --transition: 150ms ease;
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px 20px;
+  margin: 0 0 16px;
+  animation: carm-onboarding-in 250ms var(--ease-out);
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+/* Element resets — the card may be portalled outside .carm-explorer (modal
+   mode), so we can't rely on the explorer's global resets reaching it. */
+.carm-onboarding-card h3,
+.carm-onboarding-card p,
+.carm-onboarding-card ol,
+.carm-onboarding-card li {
+  margin: 0;
+  padding: 0;
+  color: inherit;
+}
+.carm-onboarding-card ol { list-style: none; }
+.carm-onboarding-card * { box-sizing: border-box; }
+
+/* Overlay variant — used by the portalled modal. Drops the bottom margin,
+   bumps shadow, allows internal scroll if content exceeds the viewport,
+   and centers via the backdrop's flex layout. The selector intentionally
+   omits .carm-explorer because the portal mounts to <body>. */
+.carm-onboarding-card--overlay {
+  margin: 0;
+  width: 100%;
+  /* Wider on overlay so the 3 action buttons fit comfortably in one row. */
+  max-width: 620px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25), 0 6px 14px rgba(15, 23, 42, 0.12);
+  position: relative;
+  animation: carm-onboarding-in 220ms var(--ease-out);
+}
+
+.carm-onboarding-card--minimap {
+  border-left-color: var(--color-primary-muted);
+}
+
+@keyframes carm-onboarding-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.carm-onboarding-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+.carm-onboarding-close:hover,
+.carm-onboarding-close:focus-visible {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  outline: none;
+}
+
+.carm-onboarding-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  margin: 0 0 4px;
+}
+
+.carm-onboarding-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+  color: var(--color-text);
+  padding-right: 36px;
+}
+
+.carm-onboarding-lede {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  margin: 0 0 14px;
+}
+
+/* Three action buttons in a single row by default — icon stacked above
+   the label so each button reads as a vertical "choice tile" and stays
+   legible in a narrow column. Mobile (<= 640 px) collapses to 1 column,
+   handled in the media query below. */
+.carm-onboarding-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* The mini-map's "Lieber doch eine geführte Tour / Schließen" pair stays
+   stacked even on overlay because there are only two and they're closing
+   actions, not primary choices. */
+.carm-onboarding-actions--inline {
+  grid-template-columns: 1fr;
+  margin-top: 14px;
+  gap: 6px;
+}
+
+.carm-onboarding-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 14px 10px 12px;
+  text-align: center;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+  /* Even row heights — so the three buttons line up regardless of label
+     length. */
+  min-height: 100px;
+}
+
+.carm-onboarding-action:hover,
+.carm-onboarding-action:focus-visible {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  outline: none;
+}
+
+.carm-onboarding-action:active {
+  transform: translateY(1px);
+}
+
+.carm-onboarding-action svg {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.carm-onboarding-action span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.3;
+  align-items: center;
+}
+
+.carm-onboarding-action strong {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.25;
+}
+
+.carm-onboarding-action small {
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* Inline actions (mini-map closing pair) keep the original horizontal
+   layout — they're not primary choices and look odd as tiles. */
+.carm-onboarding-actions--inline .carm-onboarding-action {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  text-align: left;
+  min-height: 0;
+  padding: 9px 12px;
+  gap: 8px;
+}
+.carm-onboarding-actions--inline .carm-onboarding-action span {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.carm-onboarding-action--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.carm-onboarding-action--primary:hover,
+.carm-onboarding-action--primary:focus-visible {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+.carm-onboarding-action--primary svg,
+.carm-onboarding-action--primary strong,
+.carm-onboarding-action--primary small {
+  color: #fff;
+}
+.carm-onboarding-action--primary small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.carm-onboarding-action--ghost {
+  background: transparent;
+  border-style: dashed;
+}
+
+/* Mini-map list — six numbered hints, one per dashboard zone. */
+.carm-onboarding-minimap {
+  list-style: none;
+  counter-reset: minimap;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.carm-onboarding-minimap li {
+  counter-increment: minimap;
+  position: relative;
+  padding: 10px 12px 10px 36px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+.carm-onboarding-minimap li::before {
+  content: counter(minimap);
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.72rem;
+  border-radius: var(--radius-full);
+}
+
+.carm-onboarding-minimap strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+/* Persistent "Rundgang" pill — portalled into .tabs-bar so it sits on
+   the same flex row as the visualization tabs. margin-left:auto pushes
+   it to the right end; position:sticky keeps it visible on mobile when
+   the tabs scroll horizontally. */
+.carm-explorer .carm-help-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+}
+.carm-explorer .carm-help-fab:hover,
+.carm-explorer .carm-help-fab:focus-visible {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  outline: none;
+}
+.carm-explorer .carm-help-fab svg { color: currentColor; }
+
+/* Inline variant — used when the pill is portalled into .tabs-bar.
+   Sits as a normal flex item at the right end (margin-left:auto), no
+   sticky positioning so it doesn't float over scrolled tabs. */
+.carm-explorer .tabs-bar .carm-help-fab--inline {
+  margin-left: auto;
+  align-self: center;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+/* Driver.js popover theme — pull it into the dashboard's design language.
+   Driver.js renders OUTSIDE .carm-explorer, so these selectors are
+   intentionally global but namespaced via the popoverClass. */
+.carm-tour-popover.driver-popover {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.08);
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  color: #1a1a2e;
+  max-width: 360px;
+  padding: 18px 20px;
+}
+/* Reserve room on the right of the title so the close X never overlaps. */
+.carm-tour-popover .driver-popover-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  padding-right: 36px;
+  background: transparent;
+}
+.carm-tour-popover .driver-popover-description {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #4a5568;
+}
+.carm-tour-popover .driver-popover-description strong { color: #1a1a2e; }
+.carm-tour-popover .driver-popover-progress-text {
+  font-size: 0.74rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+/* Footer buttons (Zurück / Weiter / Fertig). */
+.carm-tour-popover .driver-popover-footer button {
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 6px 12px;
+  text-shadow: none;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+.carm-tour-popover .driver-popover-prev-btn {
+  background: transparent;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+}
+.carm-tour-popover .driver-popover-prev-btn:hover,
+.carm-tour-popover .driver-popover-prev-btn:focus-visible {
+  background: #f1f5f9;
+  color: #1a1a2e;
+  outline: none;
+}
+.carm-tour-popover .driver-popover-next-btn {
+  background: #2d6a4f;
+  color: #fff;
+  border: 1px solid #2d6a4f;
+}
+.carm-tour-popover .driver-popover-next-btn:hover,
+.carm-tour-popover .driver-popover-next-btn:focus-visible {
+  background: #1f4f3a;
+  border-color: #1f4f3a;
+  outline: none;
+}
+
+/* The close X — highest priority. Driver.js positions it absolute in the
+   top-right; we override default text-only styling so it reads as a real
+   button against the white popover, never blending in. */
+.carm-tour-popover .driver-popover-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #ffffff;
+  color: #1a1a2e;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 500;
+  opacity: 1;
+  text-shadow: none;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+.carm-tour-popover .driver-popover-close-btn:hover,
+.carm-tour-popover .driver-popover-close-btn:focus-visible {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #be123c; /* warm rose on hover so the dismiss intent is unmistakable */
+  outline: none;
+}
+
+/* Soften the page-darkening overlay so the dashboard stays partly readable. */
+.driver-overlay { opacity: 0.55 !important; }
+/* Ensure the popover sits above the overlay on every browser. */
+.carm-tour-popover.driver-popover { z-index: 100002; }
+
+/* ---------- Mobile tweaks ---------- */
+@media (max-width: 640px) {
+  .carm-onboarding-card {
+    padding: 14px 14px 14px;
+    /* Slightly shorter line so headlines never collide with the X. */
+  }
+  .carm-onboarding-title {
+    font-size: 1rem;
+    padding-right: 32px;
+  }
+  .carm-onboarding-lede {
+    font-size: 0.86rem;
+  }
+  .carm-onboarding-actions {
+    grid-template-columns: 1fr;
+  }
+  /* Single-column mobile layout looks awkward as vertical tiles —
+     restore the icon-left row layout for the welcome buttons. */
+  .carm-onboarding-action {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    min-height: 0;
+    padding: 11px 13px;
+    gap: 10px;
+  }
+  .carm-onboarding-action span {
+    align-items: flex-start;
+  }
+  .carm-onboarding-minimap {
+    grid-template-columns: 1fr;
+  }
+  .carm-explorer .carm-help-fab {
+    padding: 5px 9px;
+    font-size: 0.74rem;
+  }
+  .carm-tour-popover.driver-popover {
+    max-width: calc(100vw - 24px);
+    padding: 16px 16px;
+  }
+  .carm-tour-popover .driver-popover-title {
+    font-size: 0.92rem;
+    padding-right: 36px;
+  }
+  .carm-tour-popover .driver-popover-description {
+    font-size: 0.84rem;
+  }
+
+  /* ---- Bottom-sheet treatment for the modal on phones ---- */
+  /* Anchor the backdrop's flex layout to the bottom edge so the card
+     slides up from there. Padding goes to zero so the card spans the full
+     width, and the card itself becomes a rounded-top sheet. */
+  .carm-onboarding-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .carm-onboarding-card--overlay {
+    max-width: none;
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 16px 16px 0 0;
+    border: none;
+    border-top: 3px solid #2d6a4f;
+    padding: 16px 16px 22px;
+    /* Replace the desktop fade with a slide-up animation. */
+    animation: carm-bottom-sheet-in 280ms var(--ease-out);
+  }
+  /* Tiny grab-handle so the affordance reads as a sheet. */
+  .carm-onboarding-card--overlay::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    margin: 0 auto 10px;
+    background: #cbd5e1;
+    border-radius: 999px;
+  }
+}
+
+@keyframes carm-bottom-sheet-in {
+  from { transform: translateY(100%); opacity: 0.6; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Very narrow phones (<= 380 px): tighten further to keep tap targets ≥40 px. */
+@media (max-width: 380px) {
+  .carm-onboarding-card {
+    padding: 12px 12px;
+  }
+  .carm-onboarding-eyebrow {
+    font-size: 0.68rem;
+  }
+  .carm-onboarding-action strong { font-size: 0.85rem; }
+  .carm-onboarding-action small { font-size: 0.72rem; }
 }

@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "cannabismythen" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - link "Fakten-Karten" [ref=e5] [cursor=pointer]:
+        - /url: /fakten-karten/
+      - link "Daten-Explorer" [ref=e6] [cursor=pointer]:
+        - /url: /zahlen-und-fakten/
+      - link "Ihre Fragen" [ref=e7] [cursor=pointer]:
+        - /url: /haeufige-fragen/
+      - link "Selbsttest" [ref=e8] [cursor=pointer]:
+        - /url: /selbsttest/
+      - link "Über das Projekt" [ref=e9] [cursor=pointer]:
+        - /url: /ueber-uns/
+  - main [ref=e10]:
+    - article [ref=e11]:
+      - generic [ref=e13]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: Gefährlichkeit
+          - progressbar [ref=e17]
+          - generic [ref=e19]: 0 von 6 beantwortet
+        - generic [ref=e20]:
+          - region "Aussage 1 von 6" [ref=e21]:
+            - generic [ref=e24] [cursor=pointer]:
+              - generic [ref=e25]: 1 / 6
+              - paragraph [ref=e26]: Cannabis ist weniger schädlich als Alkohol.
+              - group "Einordnung wählen":
+                - button "Falsch — Cannabis ist weniger schädlich als Alkohol." [ref=e27]: Falsch
+                - button "Eher falsch — Cannabis ist weniger schädlich als Alkohol." [ref=e28]: Eher falsch
+                - button "Eher richtig — Cannabis ist weniger schädlich als Alkohol." [ref=e29]: Eher richtig
+                - button "Richtig — Cannabis ist weniger schädlich als Alkohol." [ref=e30]: Richtig
+          - region "Aussage 2 von 6" [ref=e32]:
+            - generic [ref=e35] [cursor=pointer]:
+              - generic [ref=e36]: 2 / 6
+              - paragraph [ref=e37]: Cannabiskonsum ist harmlos.
+              - group "Einordnung wählen":
+                - button "Falsch — Cannabiskonsum ist harmlos." [ref=e38]: Falsch
+                - button "Eher falsch — Cannabiskonsum ist harmlos." [ref=e39]: Eher falsch
+                - button "Eher richtig — Cannabiskonsum ist harmlos." [ref=e40]: Eher richtig
+                - button "Richtig — Cannabiskonsum ist harmlos." [ref=e41]: Richtig
+          - region "Aussage 3 von 6" [ref=e43]:
+            - generic [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: 3 / 6
+              - paragraph [ref=e48]: Eine Überdosierung von Cannabis führt nicht zum Tod.
+              - group "Einordnung wählen":
+                - button "Falsch — Eine Überdosierung von Cannabis führt nicht zum Tod." [ref=e49]: Falsch
+                - button "Eher falsch — Eine Überdosierung von Cannabis führt nicht zum Tod." [ref=e50]: Eher falsch
+                - button "Eher richtig — Eine Überdosierung von Cannabis führt nicht zum Tod." [ref=e51]: Eher richtig
+                - button "Richtig — Eine Überdosierung von Cannabis führt nicht zum Tod." [ref=e52]: Richtig
+          - region "Aussage 4 von 6" [ref=e54]:
+            - generic [ref=e57] [cursor=pointer]:
+              - generic [ref=e58]: 4 / 6
+              - paragraph [ref=e59]: Cannabis ist schwierig zu dosieren.
+              - group "Einordnung wählen":
+                - button "Falsch — Cannabis ist schwierig zu dosieren." [ref=e60]: Falsch
+                - button "Eher falsch — Cannabis ist schwierig zu dosieren." [ref=e61]: Eher falsch
+                - button "Eher richtig — Cannabis ist schwierig zu dosieren." [ref=e62]: Eher richtig
+                - button "Richtig — Cannabis ist schwierig zu dosieren." [ref=e63]: Richtig
+          - region "Aussage 5 von 6" [ref=e65]:
+            - generic [ref=e68] [cursor=pointer]:
+              - generic [ref=e69]: 5 / 6
+              - paragraph [ref=e70]: Mischkonsum ist besonders risikoreich.
+              - group "Einordnung wählen":
+                - button "Falsch — Mischkonsum ist besonders risikoreich." [ref=e71]: Falsch
+                - button "Eher falsch — Mischkonsum ist besonders risikoreich." [ref=e72]: Eher falsch
+                - button "Eher richtig — Mischkonsum ist besonders risikoreich." [ref=e73]: Eher richtig
+                - button "Richtig — Mischkonsum ist besonders risikoreich." [ref=e74]: Richtig
+          - region "Aussage 6 von 6" [ref=e76]:
+            - generic [ref=e79] [cursor=pointer]:
+              - generic [ref=e80]: 6 / 6
+              - paragraph [ref=e81]: Zusätze führen zu erhöhten Gesundheitsrisiken.
+              - group "Einordnung wählen":
+                - button "Falsch — Zusätze führen zu erhöhten Gesundheitsrisiken." [ref=e82]: Falsch
+                - button "Eher falsch — Zusätze führen zu erhöhten Gesundheitsrisiken." [ref=e83]: Eher falsch
+                - button "Eher richtig — Zusätze führen zu erhöhten Gesundheitsrisiken." [ref=e84]: Eher richtig
+                - button "Richtig — Zusätze führen zu erhöhten Gesundheitsrisiken." [ref=e85]: Richtig
+      - link "← Alle Quiz-Module" [ref=e88] [cursor=pointer]:
+        - /url: /selbsttest/
+  - contentinfo [ref=e89]:
+    - paragraph [ref=e90]: © 2026 CaRM-Projekt

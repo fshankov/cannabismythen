@@ -98,8 +98,8 @@ export function buildTooltipHtml(opts: {
     ? ({ richtig: 'Fakt', eher_richtig: 'Eher Fakt', eher_falsch: 'Eher Mythos', falsch: 'Mythos', no_classification: 'Keine Aussage möglich' }[myth.correctness_class])
     : ({ richtig: 'Fact', eher_richtig: 'Tends to be Fact', eher_falsch: 'Tends to be Myth', falsch: 'Myth', no_classification: 'No classification' }[myth.correctness_class]);
   const indLabel = lang === 'de'
-    ? ({ awareness: 'Kenntnis', significance: 'Bedeutung', correctness: 'Richtigkeit', prevention_significance: 'Prävention' }[indicator])
-    : ({ awareness: 'Awareness', significance: 'Significance', correctness: 'Correctness', prevention_significance: 'Prevention' }[indicator]);
+    ? ({ awareness: 'Kenntnis', significance: 'Bedeutung', correctness: 'Richtigkeit', prevention_significance: 'Prävention', population_relevance: 'Bev. Relevanz' }[indicator])
+    : ({ awareness: 'Awareness', significance: 'Significance', correctness: 'Correctness', prevention_significance: 'Prevention', population_relevance: 'Pop. Relevance' }[indicator]);
   const val = formatValue(value, indicator);
 
   let html = `<div style="max-width:360px;line-height:1.5">`;
@@ -135,6 +135,7 @@ export function exportCSV(
     lang === 'de' ? 'Bedeutung' : 'Significance',
     lang === 'de' ? 'Richtigkeit' : 'Correctness',
     lang === 'de' ? 'Präventionsbedeutung' : 'Prevention Significance',
+    lang === 'de' ? 'Bevölkerungsrelevanz' : 'Population Relevance',
   ];
 
   const rows = myths.map((m) => {
@@ -148,6 +149,7 @@ export function exportCSV(
       metric?.significance ?? '',
       metric?.correctness ?? '',
       metric?.prevention_significance ?? '',
+      metric?.population_relevance ?? '',
     ].join(',');
   });
 

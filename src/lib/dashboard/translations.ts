@@ -25,12 +25,17 @@ const translations = {
     de: 'Präventionsbedeutung (Punkte)',
     en: 'Prevention Significance (points)',
   },
+  'indicator.population_relevance': {
+    de: 'Bevölkerungsrelevanz (Punkte)',
+    en: 'Population Relevance (points)',
+  },
 
   // Short indicator names
   'indicator.awareness.short': { de: 'Kenntnis %', en: 'Awareness %' },
   'indicator.significance.short': { de: 'Bedeutung', en: 'Significance' },
   'indicator.correctness.short': { de: 'Richtigkeit', en: 'Correctness' },
   'indicator.prevention_significance.short': { de: 'Prävention', en: 'Prevention' },
+  'indicator.population_relevance.short': { de: 'Bev. Relevanz', en: 'Pop. Relevance' },
 
   // Indicator descriptions
   'indicator.awareness.description': {
@@ -48,6 +53,10 @@ const translations = {
   'indicator.prevention_significance.description': {
     de: 'Kombination aus Bedeutung und Fehleinschätzung (0–100). Höher = größerer Präventionsbedarf.',
     en: 'Combination of significance and misassessment (0–100). Higher = greater prevention need.',
+  },
+  'indicator.population_relevance.description': {
+    de: 'Bevölkerungsbezogene Risikobedeutung — kombiniert die individuelle Präventionsbedeutung mit dem Verbreitungsgrad des Mythos. Nur für Volljährige (18–70) und Minderjährige (16–17) erhoben.',
+    en: 'Population-related risk significance — combines individual prevention significance with the spread of the myth. Measured only for adults (18–70) and minors (16–17).',
   },
 
   // Source metric descriptions
@@ -76,7 +85,8 @@ const translations = {
   'view.overview': { de: 'Übersicht', en: 'Overview' },
   'view.circular': { de: 'Circular', en: 'Circular' },
   'view.ladder': { de: 'Indikator-Leiter', en: 'Indicator Ladder' },
-  'view.strips': { de: 'Streifen', en: 'Strips' },
+  'view.strips': { de: 'Indikatoren', en: 'Indicators' },
+  'view.strips_groups': { de: 'Gruppen', en: 'Groups' },
 
   // Table
   'table.myth': { de: 'Mythos', en: 'Myth' },
@@ -178,9 +188,34 @@ const translations = {
     en: 'Four vertical axes, one per indicator (0–100). Each myth is one dot per axis, color = verdict. Tap a population and a dot to highlight; tap again for details.',
   },
   'howto.strips': {
-    de: 'Vier horizontale Streifen, einer pro Indikator. Jeder Punkt ist ein Mythos. Tippen Sie eine Bevölkerungsgruppe und einen Punkt zum Hervorheben; nochmals tippen für Details.',
-    en: 'Four horizontal strips, one per indicator. Each dot is one myth. Tap a population and a dot to highlight; tap again for details.',
+    de: 'Wählen Sie links die aktive Achse (Indikatoren / Gruppen / Themen). Tippen Sie ein Icon oben, um auszuwählen oder zu filtern. Tippen Sie einen Punkt zum Hervorheben — die Werte erscheinen direkt neben dem Punkt. Tippen Sie „Mehr" für das Factsheet.',
+    en: 'Choose the active axis on the left (Indicators / Groups / Themes). Tap an icon at the top to select or filter. Tap a dot to highlight — values appear right next to the dot. Tap "More" for the factsheet.',
   },
+
+  // Strips view (vertical) — pivot is set by the active top tab (Indikatoren / Gruppen)
+  'strips.mode.indicator': { de: 'Indikatoren', en: 'Indicators' },
+  'strips.mode.group': { de: 'Gruppen', en: 'Groups' },
+  'strips.mode.label': { de: 'Ansicht', en: 'View' },
+  'strips.pivot.label': { de: 'Aktive Achse', en: 'Active axis' },
+  'strips.switch.indicators': { de: 'Indikator', en: 'Indicator' },
+  'strips.switch.groups': { de: 'Bevölkerungsgruppe', en: 'Population group' },
+  'strips.switch.themes': { de: 'Selbsttest-Themen', en: 'Selbsttest themes' },
+  'strips.sort.label': { de: 'Sortieren nach', en: 'Sort by' },
+  'strips.sort.asc': { de: 'Aufsteigend', en: 'Ascending' },
+  'strips.sort.desc': { de: 'Absteigend', en: 'Descending' },
+  'strips.values.label': { de: 'Werte', en: 'Values' },
+  'strips.more': { de: 'Mehr', en: 'More' },
+  'strips.na': { de: 'k. A.', en: 'n/a' },
+  'strips.theme.gefaehrlichkeit': { de: 'Gefährlichkeit', en: 'Dangerousness' },
+  'strips.theme.gesellschaft': { de: 'Gesellschaft', en: 'Society' },
+  'strips.theme.medizin': { de: 'Medizin', en: 'Medicine' },
+  'strips.theme.risiken': { de: 'Risiken', en: 'Risks' },
+  'strips.theme.stimmung': { de: 'Stimmung', en: 'Mood' },
+  'strips.theme.gefaehrlichkeit.short': { de: 'Gef.', en: 'Dang.' },
+  'strips.theme.gesellschaft.short': { de: 'Ges.', en: 'Soc.' },
+  'strips.theme.medizin.short': { de: 'Med.', en: 'Med.' },
+  'strips.theme.risiken.short': { de: 'Ris.', en: 'Risks' },
+  'strips.theme.stimmung.short': { de: 'Stim.', en: 'Mood' },
   'misc.population': { de: 'Bevölkerungsgruppe', en: 'Population' },
   'misc.viewDetails': { de: 'Details anzeigen', en: 'View details' },
   'misc.deselect': { de: 'Auswahl aufheben', en: 'Deselect' },

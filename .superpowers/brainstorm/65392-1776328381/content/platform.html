@@ -1,0 +1,55 @@
+<h2>How should you share your design with the designer?</h2>
+<p class="subtitle">Each option has different trade-offs for visual richness, collaboration, and effort to set up. Pick the one that fits best — or ask about any of them.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="figma" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(135deg,#6b57ff 0%,#a78bfa 100%);display:flex;align-items:center;justify-content:center;height:80px;">
+      <span style="font-size:2rem;">🎨</span>
+    </div>
+    <div class="card-body">
+      <h3>A — Figma Design Spec</h3>
+      <p>Claude creates a Figma file using the Figma MCP: color swatches, type scale, icon previews, spacing, and annotated screenshots of the live site. Designer opens it in her native tool and leaves comments inline.</p>
+      <div class="pros-cons" style="margin-top:0.75rem">
+        <div class="pros"><h4>Pros</h4><ul><li>Designer's native environment</li><li>Inline comments on specific elements</li><li>Can export to PDF/share link</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Requires Figma account (free is fine)</li><li>Figma write access must be connected to Claude</li><li>Moderate setup effort</li></ul></div>
+      </div>
+      <p style="margin-top:0.5rem;font-size:0.8rem;color:#666"><strong>Model:</strong> Sonnet (sufficient) · <strong>Context:</strong> Claude Code (repo access)</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="html" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(135deg,#2d6a4f 0%,#52b788 100%);display:flex;align-items:center;justify-content:center;height:80px;">
+      <span style="font-size:2rem;">🌐</span>
+    </div>
+    <div class="card-body">
+      <h3>B — Living HTML Design Brief</h3>
+      <p>Claude adds a <code>/design-brief/</code> page to your Astro site — deployed on Netlify. Shows actual rendered colors, real Lucide icons, type scale, and live links. Always up-to-date with the codebase.</p>
+      <div class="pros-cons" style="margin-top:0.75rem">
+        <div class="pros"><h4>Pros</h4><ul><li>No extra accounts needed</li><li>Shows <em>actual</em> design tokens (real CSS)</li><li>Accessible at a URL — easy to share</li><li>Fastest to build</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Designer must annotate via screenshots + notes (no inline comments)</li><li>Less "native" designer workflow</li></ul></div>
+      </div>
+      <p style="margin-top:0.5rem;font-size:0.8rem;color:#666"><strong>Model:</strong> Sonnet · <strong>Context:</strong> Claude Code (repo access)</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="pdf" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(135deg,#b45309 0%,#fbbf24 100%);display:flex;align-items:center;justify-content:center;height:80px;">
+      <span style="font-size:2rem;">📄</span>
+    </div>
+    <div class="card-body">
+      <h3>C — PDF / DOCX Document</h3>
+      <p>Claude generates a rich PDF or Word document from your design.md — with color swatches, type examples, Lucide icon previews, and screenshots. Designer annotates it with Acrobat or Word track changes.</p>
+      <div class="pros-cons" style="margin-top:0.75rem">
+        <div class="pros"><h4>Pros</h4><ul><li>Universal — works for everyone</li><li>Easy to email/share</li><li>No setup required</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Static — won't update with code changes</li><li>Icons/fonts may not render perfectly</li><li>Less visual than Figma or live HTML</li></ul></div>
+      </div>
+      <p style="margin-top:0.5rem;font-size:0.8rem;color:#666"><strong>Model:</strong> Sonnet · <strong>Context:</strong> Claude Code or any</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:1.5rem;padding:1rem;background:#f8f8f6;border-radius:8px;border-left:3px solid #2d6a4f">
+  <p style="margin:0;font-size:0.9rem"><strong>My lean:</strong> Option B (HTML Design Brief) is the fastest, most accurate, and lets the designer see <em>exactly</em> what's in the code — real colors, real icons, real type scale. If she's comfortable in Figma and you want native inline comments, Option A is the gold standard. Option C is the fallback if simplicity matters most.</p>
+</div>

@@ -19,6 +19,23 @@ const COMBINED_MYTHS: Record<number, number> = {
   42: 41, // m41-m42-anstieg-konsum
 };
 
+// Build mythId → Selbsttest theme slug map. Each Selbsttest quiz mdoc lists
+// the myth IDs it covers via questions[].mythId (format "m04"). We map the
+// numeric myth_id ("m04" → 4) to the theme slug ("quiz-gefaehrlichkeit").
+// The Streifen view uses this for the Themen filter / Themen pivot mode.
+const selbsttestEntries = await getPublishedEntries("selbsttest");
+const mythIdToTheme: Record<number, string> = {};
+for (const [slug, entry] of selbsttestEntries) {
+  if (slug === "feedback-texte") continue;
+  const e = entry as any;
+  const questions = (e.questions || []) as Array<{ mythId?: string }>;
+  for (const q of questions) {
+    if (!q.mythId) continue;
+    const num = parseInt(q.mythId.replace(/[^\d]/g, ""), 10);
+    if (Number.isFinite(num)) mythIdToTheme[num] = slug;
+  }
+}
+
 // Build myth ID → factsheet slug mapping
 const factsheetEntries = await getPublishedEntries("zahlenUndFakten");
 const mythSlugs: Record<number, string> = {};
@@ -93,5 +110,6 @@ for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
     mythSlugs={mythSlugs}
     mythContent={JSON.stringify(mythContentMap)}
     definitions={JSON.stringify(definitionsData)}
+    mythThemes={JSON.stringify(mythIdToTheme)}
   />
 </BaseLayout>

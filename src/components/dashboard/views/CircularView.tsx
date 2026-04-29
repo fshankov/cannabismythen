@@ -1,25 +1,32 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import type { Myth, Metric, AppState, Group, Indicator } from '../../../lib/dashboard/types';
+import type { Myth, Metric, AppState, Group } from '../../../lib/dashboard/types';
 import { getMythMetric, getMythShortText } from '../../../lib/dashboard/data';
 
 /* ── Indicator config ──────────────────────────────────────────── */
 
-const INDICATORS: Indicator[] = [
+/**
+ * The circular ring uses only the 4 individual-response indicators —
+ * Bev. Relevanz (population_relevance) is a population-level metric and
+ * intentionally not displayed as a segment here.
+ */
+type CircularIndicator = 'awareness' | 'significance' | 'correctness' | 'prevention_significance';
+
+const INDICATORS: CircularIndicator[] = [
   'awareness',
   'significance',
   'correctness',
   'prevention_significance',
 ];
 
-const INDICATOR_COLORS: Record<Indicator, string> = {
+const INDICATOR_COLORS: Record<CircularIndicator, string> = {
   awareness: '#3B82F6',             // Blue-500
   significance: '#2d6a4f',          // Forest Green (site accent)
   correctness: '#D97706',           // Amber-600
   prevention_significance: '#8B5CF6', // Violet-500
 };
 
-const INDICATOR_LABELS: Record<Indicator, { de: string; en: string }> = {
+const INDICATOR_LABELS: Record<CircularIndicator, { de: string; en: string }> = {
   awareness:                { de: 'Kenntnis',    en: 'Awareness' },
   significance:             { de: 'Bedeutung',   en: 'Significance' },
   correctness:              { de: 'Richtigkeit', en: 'Correctness' },
@@ -92,8 +99,8 @@ interface Props {
 interface MythDatum {
   myth: Myth;
   categoryIdx: number;
-  values: Record<Indicator, number>;
-  rawValues: Record<Indicator, number | null>;
+  values: Record<CircularIndicator, number>;
+  rawValues: Record<CircularIndicator, number | null>;
   total: number;
 }
 
@@ -142,13 +149,13 @@ export default function CircularView({
         const myth = mythMap.get(mythId);
         if (!myth) continue;
         const metric = getMythMetric(metrics, mythId, selectedGroup);
-        const rawValues: Record<Indicator, number | null> = {
+        const rawValues: Record<CircularIndicator, number | null> = {
           awareness: metric?.awareness ?? null,
           significance: metric?.significance ?? null,
           correctness: metric?.correctness ?? null,
           prevention_significance: metric?.prevention_significance ?? null,
         };
-        const values: Record<Indicator, number> = {
+        const values: Record<CircularIndicator, number> = {
           awareness: rawValues.awareness ?? 0,
           significance: rawValues.significance ?? 0,
           correctness: rawValues.correctness ?? 0,
@@ -206,7 +213,7 @@ export default function CircularView({
       const midAngle = (startAngle + endAngle) / 2;
 
       let cum = 0;
-      const segments: Array<{ indicator: Indicator; path: string }> = [];
+      const segments: Array<{ indicator: CircularIndicator; path: string }> = [];
       for (const ind of INDICATORS) {
         const val = d.values[ind];
         if (val <= 0) continue;
@@ -476,7 +483,7 @@ export default function CircularView({
 /* ── Local helper types ──────────────────────────────────────── */
 
 interface BarArc {
-  segments: Array<{ indicator: Indicator; path: string }>;
+  segments: Array<{ indicator: CircularIndicator; path: string }>;
   midAngle: number;
   labelRadius: number;
 }

@@ -44,6 +44,9 @@ import {
 import { t } from "./i18n";
 import {
   trackAnswerSubmitted,
+  trackConfidenceChosen,
+  trackDeckOverviewOpened,
+  trackKeyboardShortcutUsed,
   trackQuizCompleted,
   trackQuizStarted,
 } from "./matomo";
@@ -52,6 +55,8 @@ import TitleCard from "./TitleCard";
 import ProgressBar from "./ProgressBar";
 import ResultScreen from "./ResultScreen";
 import FactsheetPanel from "./FactsheetPanel";
+import DeckOverview from "./DeckOverview";
+import ShortcutHelp from "./ShortcutHelp";
 import type { MythContentEntry } from "./FactsheetPanel";
 
 export type { MythContentEntry };
@@ -71,6 +76,11 @@ interface QuizPlayerProps {
   quizText?: string;
   /** Optional Keystatic summary used in the intro card */
   quizSummary?: string;
+  /** When true, the confidence-input panel slides up over the front face
+   *  after answering and the card flip is gated on the confidence pick.
+   *  Off by default — opt in per quiz from the Astro [slug] page so the
+   *  research team can enable it on selected modules. */
+  confidenceEnabled?: boolean;
 }
 
 // ── Scoring: distance from evidence-based classification ─────────────────────
@@ -146,6 +156,27 @@ const QUIZ_ACCENT: Record<string, string> = {
   "quiz-gesellschaft": "var(--color-accent)",
 };
 
+/** Count of consecutive `isCorrect` answers ending at index `idx`. Walks
+ *  backward; stops at the first wrong or unanswered card. Used by the
+ *  StreakChip on the front face. */
+function streakAt(
+  answers: Record<string, CardAnswer>,
+  myths: QuizTheme["myths"],
+  idx: number
+): number {
+  let streak = 0;
+  for (let i = idx; i >= 0; i--) {
+    const a = answers[myths[i].id];
+    if (!a || !a.isCorrect) break;
+    streak++;
+  }
+  return streak;
+}
+
+/** Ordered list of all theme slugs — used to compute the "Nächstes Modul"
+ *  link on the result screen. Matches Object.keys(QUIZ_THEMES) order. */
+const THEME_ORDER: string[] = Object.keys(QUIZ_THEMES);
+
 export default function QuizPlayer(props: QuizPlayerProps) {
   const theme = QUIZ_THEMES[props.quizSlug];
   if (!theme) {
@@ -168,6 +199,7 @@ function QuizPlayerInner({
   quizText,
   quizSummary,
   theme,
+  confidenceEnabled = false,
 }: QuizPlayerInnerProps) {
   const totalQuestions = theme.myths.length;
   const accent = QUIZ_ACCENT[quizSlug] ?? "var(--color-accent)";
@@ -204,6 +236,8 @@ function QuizPlayerInner({
   });
 
   const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
+  const [overviewOpen, setOverviewOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [lastScoreDelta, setLastScoreDelta] = useState(0);
   const [restoredNotice, setRestoredNotice] = useState<boolean>(() => {
     const saved = loadProgress(quizSlug);
@@ -334,6 +368,24 @@ function QuizPlayerInner({
     [theme.myths, theme.titleKey, answers, totalQuestions]
   );
 
+  /** Records the user's confidence pick after a verdict, then unlocks the
+   *  card flip. No-op if the answer doesn't exist or already has a
+   *  confidence value. */
+  const handleConfidenceSet = useCallback(
+    (mythId: string, confidence: "sure" | "unsure") => {
+      setAnswers((prev) => {
+        const existing = prev[mythId];
+        if (!existing || existing.confidence) return prev;
+        trackConfidenceChosen(mythId, confidence);
+        return {
+          ...prev,
+          [mythId]: { ...existing, confidence },
+        };
+      });
+    },
+    []
+  );
+
   const handleNext = useCallback(() => {
     if (currentIndex < totalQuestions - 1) {
       setCurrentIndex((i) => i + 1);
@@ -386,6 +438,140 @@ function QuizPlayerInner({
     ? Math.min(2, totalQuestions - 1)
     : Math.min(2, totalQuestions - safeIndex - 1);
 
+  // ── Streak count for the front-face StreakChip. Computed from the
+  //    current question's answer state so the chip updates when the user
+  //    navigates back/forward through the deck. ──────────────────────────
+  const streakCount = useMemo(
+    () => streakAt(answers, theme.myths, safeIndex),
+    [answers, theme.myths, safeIndex]
+  );
+
+  // ── Keyboard shortcuts (Phase C §3.12) ──────────────────────────────
+  // Document-level keydown listener. Skips when an editable field has
+  // focus, when modifier keys are held, when the result screen is shown,
+  // or when no question is in flow.
+  const VERDICT_BY_KEY: Record<string, Classification> = {
+    "1": "falsch",
+    "2": "eher_falsch",
+    "3": "eher_richtig",
+    "4": "richtig",
+  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      // Don't hijack typing in inputs / editable elements.
+      const target = e.target as HTMLElement | null;
+      if (target) {
+        const tag = target.tagName?.toLowerCase();
+        if (
+          tag === "input" ||
+          tag === "textarea" ||
+          tag === "select" ||
+          target.isContentEditable
+        ) {
+          return;
+        }
+      }
+      // Skip combos with Ctrl/Cmd/Alt — those are app shortcuts.
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      // Esc closes the topmost overlay (priority order).
+      if (e.key === "Escape") {
+        if (helpOpen) {
+          setHelpOpen(false);
+          trackKeyboardShortcutUsed("close_help");
+          e.preventDefault();
+          return;
+        }
+        if (overviewOpen) {
+          setOverviewOpen(false);
+          trackKeyboardShortcutUsed("close_overview");
+          e.preventDefault();
+          return;
+        }
+        if (factsheetMyth) {
+          setFactsheetMyth(null);
+          trackKeyboardShortcutUsed("close_factsheet");
+          e.preventDefault();
+          return;
+        }
+        return;
+      }
+
+      // While any overlay is open, only Esc above is wired.
+      if (helpOpen || overviewOpen || factsheetMyth) return;
+
+      // Don't operate before the user dismisses the title card or after
+      // the result screen has taken over.
+      if (showTitleCard || showResults || !currentMyth) return;
+
+      // 1–4: pick a verdict (only if not already answered).
+      const verdict = VERDICT_BY_KEY[e.key];
+      if (verdict !== undefined) {
+        if (!currentAnswer) {
+          handleAnswer(currentMyth.id, verdict);
+          trackKeyboardShortcutUsed(`answer:${verdict}`);
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // ←/→: navigate.
+      if (e.key === "ArrowRight") {
+        handleNext();
+        trackKeyboardShortcutUsed("next");
+        e.preventDefault();
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        handlePrev();
+        trackKeyboardShortcutUsed("prev");
+        e.preventDefault();
+        return;
+      }
+
+      // Enter: if answered, advance to next question.
+      if (e.key === "Enter") {
+        if (currentAnswer) {
+          handleNext();
+          trackKeyboardShortcutUsed("advance");
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // D: open the factsheet panel for the current myth.
+      if (e.key === "d" || e.key === "D") {
+        setFactsheetMyth(currentMyth);
+        trackKeyboardShortcutUsed("open_factsheet");
+        e.preventDefault();
+        return;
+      }
+
+      // ?: toggle the shortcut-help popover. (Browsers fire this with
+      // Shift+/; we accept either ? or / to be lenient.)
+      if (e.key === "?" || (e.key === "/" && e.shiftKey)) {
+        setHelpOpen((v) => !v);
+        trackKeyboardShortcutUsed("toggle_help");
+        e.preventDefault();
+        return;
+      }
+    };
+
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [
+    helpOpen,
+    overviewOpen,
+    factsheetMyth,
+    showTitleCard,
+    showResults,
+    currentMyth,
+    currentAnswer,
+    handleAnswer,
+    handleNext,
+    handlePrev,
+  ]);
+
   const progressBarContent = (
     <ProgressBar
       answered={answeredCount}
@@ -428,13 +614,39 @@ function QuizPlayerInner({
               answer={currentAnswer}
               onAnswer={handleAnswer}
               onNext={handleNext}
+              onPrev={handlePrev}
               onShowFactsheet={handleShowFactsheet}
               isLastQuestion={safeIndex === totalQuestions - 1}
               statementText={quizTextMap[currentMyth.id]?.statement}
               explanationText={quizTextMap[currentMyth.id]?.explanation}
               deckBehind={cardsRemainingBehind}
+              categoryLabel={t(theme.titleKey)}
+              streakCount={streakCount}
+              confidenceEnabled={confidenceEnabled}
+              onConfidenceSet={handleConfidenceSet}
             />
           )}
+
+          <div className="quiz-player__overview-row">
+            <button
+              type="button"
+              className="quiz-player__overview-btn"
+              onClick={() => {
+                setOverviewOpen(true);
+                trackDeckOverviewOpened(t(theme.titleKey));
+              }}
+              aria-haspopup="dialog"
+              aria-expanded={overviewOpen}
+            >
+              <span
+                className="quiz-player__overview-btn-glyph"
+                aria-hidden="true"
+              >
+                ▦
+              </span>
+              {t("ui.deckOverview.cta", { n: totalQuestions })}
+            </button>
+          </div>
 
           <nav
             className="quiz-player__nav"
@@ -542,6 +754,31 @@ function QuizPlayerInner({
           explanationText={quizTextMap[factsheetMyth.id]?.explanation}
         />
       )}
+
+      {overviewOpen && (
+        <DeckOverview
+          myths={theme.myths}
+          answers={answers}
+          currentIndex={safeIndex}
+          onJump={handleJumpTo}
+          onClose={() => setOverviewOpen(false)}
+          statementText={(id) =>
+            quizTextMap[id]?.statement ??
+            t(theme.myths.find((m) => m.id === id)!.statementKey)
+          }
+          distanceOf={(id) => {
+            const a = answers[id];
+            if (!a) return null;
+            const m = theme.myths.find((x) => x.id === id)!;
+            return Math.abs(
+              CLASS_POS[a.chosenClassification] -
+                CLASS_POS[m.correctClassification]
+            );
+          }}
+        />
+      )}
+
+      {helpOpen && <ShortcutHelp onClose={() => setHelpOpen(false)} />}
     </div>
   );
 }

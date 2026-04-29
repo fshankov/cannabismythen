@@ -47,7 +47,14 @@ export interface CardAnswer {
   mythId: string;
   chosenClassification: Classification;
   isCorrect: boolean;
+  /** Optional self-rated confidence captured AFTER the verdict pick.
+   *  Only populated when QuizPlayer is mounted with `confidenceEnabled`.
+   *  Older saved progress records are forward-compatible (undefined). */
+  confidence?: "sure" | "unsure";
 }
+
+/** Direction of a swipe / keyboard nav commit. */
+export type Direction = "next" | "prev";
 
 /** Result tier (0–3, lowest to highest). */
 export type ResultTierIndex = 0 | 1 | 2 | 3;
@@ -82,7 +89,12 @@ export type MatomoEventAction =
   | "completed"
   | "result_card_viewed"
   | "result_card_shared"
-  | "myth_link_clicked";
+  | "myth_link_clicked"
+  // ── Phase C/D additions ──────────────────────────────────────────
+  | "deck_overview_opened"
+  | "card_swiped"
+  | "confidence_chosen"
+  | "keyboard_shortcut_used";
 
 export interface MatomoEvent {
   category: MatomoEventCategory;

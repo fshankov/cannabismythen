@@ -1,0 +1,2 @@
+[     392ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://cannabismythen.netlify.app/login:0
+[    4346ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://matomo_url/matomo.js:0

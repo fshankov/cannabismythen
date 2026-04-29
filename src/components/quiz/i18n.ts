@@ -251,7 +251,51 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.feedback.correct": "Das ist korrekt.",
     "ui.feedback.near": "Du warst nah dran.",
     "ui.feedback.far": "Das ist leider nicht korrekt.",
-    "ui.mythVerdict": "Die Aussage \u201e{statement}\u201c ist {verdict}.",
+    "ui.mythVerdict": "Der Mythos \u201e{statement}\u201c ist {verdict}.",
+    "ui.populationCorrectShort": "haben richtig eingesch\u00e4tzt",
+    "ui.verdictScale.label": "Antwort w\u00e4hlen",
+
+    // \u2500\u2500 Deck overview (Phase C \u00a73.11) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    "ui.deckOverview.title": "\u00dcbersicht \u2014 {n} Fragen",
+    "ui.deckOverview.cta": "\u00dcbersicht aller {n} Fragen",
+    "ui.feedback.correctShort": "korrekt",
+    "ui.feedback.nearShort": "nah dran",
+    "ui.feedback.farShort": "nicht korrekt",
+    "ui.close": "Schlie\u00dfen",
+
+    // \u2500\u2500 Keyboard shortcuts (Phase C \u00a73.12) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    "ui.shortcutsHelp":
+      "Tasten: 1\u20134 w\u00e4hlt eine Antwort, \u2192 weiter, \u2190 zur\u00fcck, D Details, ? Hilfe",
+    "ui.shortcuts.title": "Tastenk\u00fcrzel",
+    "ui.shortcuts.row.answer": "1 \u2013 4: Antwort w\u00e4hlen",
+    "ui.shortcuts.row.next": "\u2192: N\u00e4chste Frage",
+    "ui.shortcuts.row.prev": "\u2190: Vorherige Frage",
+    "ui.shortcuts.row.advance": "Enter: Weiter",
+    "ui.shortcuts.row.factsheet": "D: Details \u00f6ffnen",
+    "ui.shortcuts.row.help": "?: Diese Hilfe",
+    "ui.shortcuts.row.close": "Esc: Schlie\u00dfen",
+
+    // \u2500\u2500 Streak chip (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    "ui.streak.label": "{n} richtig in Folge",
+
+    // \u2500\u2500 Confidence input (Phase D \u00a73.8) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    "ui.confidence.label": "Wie sicher bist du?",
+    "ui.confidence.sure": "Sehr sicher",
+    "ui.confidence.unsure": "Eher unsicher",
+
+    // \u2500\u2500 Micro-copy table (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    "ui.microCopy.farMiss":
+      "Daneben \u2014 {pct} % der Befragten haben es korrekt eingesch\u00e4tzt.",
+    "ui.microCopy.nearMiss":
+      "Mehr als die H\u00e4lfte der Befragten lag falsch \u2014 du warst nah dran.",
+    "ui.microCopy.correct":
+      "Genau richtig \u2014 {missPct} % der Befragten lagen daneben.",
+    "ui.microCopy.streak": "{n} richtig in Folge \u2014 bleib dran.",
+    "ui.microCopy.popular":
+      "{pct} % der Befragten teilten deine Einsch\u00e4tzung.",
+
+    // \u2500\u2500 Result screen \u2014 N\u00e4chstes Modul (Phase C \u00a73.14) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    "ui.nextModule.cta": "N\u00e4chstes Modul: {title} \u2192",
     "ui.classificationPhrase.richtig": "richtig",
     "ui.classificationPhrase.eher_richtig": "eher richtig",
     "ui.classificationPhrase.eher_falsch": "eher falsch",

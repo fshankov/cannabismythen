@@ -102,6 +102,11 @@ const zahlenUndFakten = collection({
       multiline: true,
       description: "2–3 prägnante Sätze für die Rückseite der Fakten-Karte. Faktenbasiert, allgemeinverständlich, zum Weiterlesen einladend. Maximal ~250 Zeichen. Wird ausschließlich auf den Fakten-Karten angezeigt.",
     }),
+    trueStatement: fields.text({
+      label: "✅ Wahre Aussage (reformuliert)",
+      description:
+        "Die evidenzbasierte Wahrheit der Aussage – ein Satz. Erscheint auf Fakten-Karten und im Dashboard. Nicht im Quiz (dort bleibt die Original-Aussage). Maximal ~120 Zeichen.",
+    }),
     relatedMyths: fields.array(fields.text({ label: "Myth ID" }), {
       label: "Related Myths",
       itemLabel: (props) => props.value,
@@ -679,6 +684,167 @@ const dashboardDefinitionen = singleton({
   },
 });
 
+// ─── Homepage editorial sections ───────────────────────────────────────────
+
+const credibilityBlock = singleton({
+  label: "🛡️ Credibility-Block – Startseite",
+  path: "src/content/credibility-block",
+  format: { data: "yaml" },
+  schema: {
+    eyebrow: fields.text({
+      label: "Eyebrow",
+      description: "Kleines Kapitälchen-Label über der Überschrift.",
+      defaultValue: "Woher die Zahlen kommen",
+    }),
+    headline: fields.text({
+      label: "Überschrift",
+      description: "Serifen-Überschrift (DM Serif Display, kursiv).",
+      defaultValue: "Eine Bevölkerungs­befragung, wissenschaftlich eingeordnet.",
+    }),
+    lede: fields.text({
+      label: "Einleitender Absatz",
+      multiline: true,
+      description: "Kurzer Text unter der Überschrift (2–3 Sätze).",
+      defaultValue:
+        "Unsere 42 Aussagen stammen aus einer repräsentativen Befragung in Deutschland. Jede wird von Wissenschaftler:innen auf Basis der aktuellen Evidenz eingeordnet — transparent, nachvollziehbar, aktualisiert.",
+    }),
+    row1Label: fields.text({ label: "Zeile 1 – Label", defaultValue: "ISD Hamburg" }),
+    row1Value: fields.text({
+      label: "Zeile 1 – Wert",
+      defaultValue: "Institut für Interdisziplinäre Sucht- und Drogenforschung",
+    }),
+    row1Link: fields.text({ label: "Zeile 1 – Link (optional)", defaultValue: "https://isd-hamburg.de" }),
+    row2Label: fields.text({ label: "Zeile 2 – Label", defaultValue: "Bevölkerungsbefragung" }),
+    row2Value: fields.text({
+      label: "Zeile 2 – Wert",
+      defaultValue: "n = 2.097 Erwachsene · Deutschland 2024 · gewichtet nach Geschlecht, Alter, Bildung",
+    }),
+    row2Link: fields.text({ label: "Zeile 2 – Link (optional)", defaultValue: "/ueber-uns/" }),
+    row3Label: fields.text({ label: "Zeile 3 – Label", defaultValue: "Wissenschaftlich geprüft" }),
+    row3Value: fields.text({
+      label: "Zeile 3 – Wert",
+      defaultValue: "Letzte Prüfung der Einordnungen: April 2026",
+    }),
+    row3Link: fields.text({ label: "Zeile 3 – Link (optional)", defaultValue: "/ueber-uns/" }),
+  },
+});
+
+const headlineFinding = singleton({
+  label: "📢 Schlüsselbefund – Startseite",
+  path: "src/content/headline-finding",
+  format: { data: "yaml" },
+  schema: {
+    eyebrow: fields.text({
+      label: "Eyebrow",
+      defaultValue: "Ein Schlüsselbefund",
+    }),
+    leadClause: fields.text({
+      label: "Lead-Satzteil (Serifen-Kursiv)",
+      multiline: true,
+      description: "Der erste, einleitende Teil des Zitat-Satzes (Salbei-Grün, DM Serif Italic).",
+      defaultValue: "„3 von 4 Befragten glaubten, Cannabis sei weniger schädlich als Alkohol —",
+    }),
+    counterClause: fields.text({
+      label: "Gegen-Satzteil (Fett)",
+      multiline: true,
+      description: "Der zweite, kontrastierende Teil (Inter Bold, fast-schwarz).",
+      defaultValue: "die wissenschaftliche Evidenz zeigt das Gegenteil.\u201c",
+    }),
+    counterClassification: fields.select({
+      label: "Farbakzent für Gegen-Satzteil",
+      description: "Welche Klassifikations-Farbe wird als kleiner Akzent neben dem Gegen-Satzteil gesetzt?",
+      options: [
+        { label: "Richtig (Emerald)", value: "richtig" },
+        { label: "Eher richtig (Lime)", value: "eher_richtig" },
+        { label: "Eher falsch (Amber)", value: "eher_falsch" },
+        { label: "Falsch (Rose)", value: "falsch" },
+        { label: "Keine Aussage (Grau)", value: "no_classification" },
+      ],
+      defaultValue: "falsch",
+    }),
+    dashboardCardTitle: fields.text({
+      label: "Karte A – Titel",
+      defaultValue: "Alle 42 Mythen im Überblick",
+    }),
+    dashboardCardBody: fields.text({
+      label: "Karte A – Beschreibung",
+      multiline: true,
+      defaultValue:
+        "Filtere nach Zielgruppe, sortiere nach Evidenz, entdecke, welche Annahmen die größte Diskrepanz zur Forschung zeigen.",
+    }),
+    dashboardCtaLabel: fields.text({
+      label: "Karte A – CTA",
+      defaultValue: "Zum Daten-Explorer",
+    }),
+    faktenKartenCardTitle: fields.text({
+      label: "Karte B – Titel",
+      defaultValue: "Die Fakten-Karten",
+    }),
+    faktenKartenCardBody: fields.text({
+      label: "Karte B – Beschreibung",
+      multiline: true,
+      defaultValue:
+        "Jede Aussage als umdrehbare Karte — vorne der Mythos, hinten die wissenschaftliche Einordnung in einem Satz.",
+    }),
+    faktenKartenCtaLabel: fields.text({
+      label: "Karte B – CTA",
+      defaultValue: "Zu den Fakten-Karten",
+    }),
+  },
+});
+
+const quizHookBlock = singleton({
+  label: "🧪 Quiz-Hook – Startseite",
+  path: "src/content/quiz-hook-block",
+  format: { data: "yaml" },
+  schema: {
+    eyebrow: fields.text({
+      label: "Eyebrow",
+      defaultValue: "10 Fragen · ca. 3 Minuten · wissenschaftlich eingeordnet",
+    }),
+    headline: fields.text({
+      label: "Überschrift",
+      defaultValue: "Wie viele Mythen erkennst du?",
+    }),
+    subhead: fields.text({
+      label: "Unterzeile",
+      multiline: true,
+      defaultValue:
+        "Teste dein Bauchgefühl gegen die Evidenz. Am Ende erfährst du, welche Mythen dich überrascht haben.",
+    }),
+    sampleMythText: fields.text({
+      label: "Beispielmythos (auf der Vorschau-Karte)",
+      defaultValue: "Cannabis ist weniger schädlich als Alkohol.",
+    }),
+    sampleMythClassification: fields.select({
+      label: "Klassifikation des Beispielmythos",
+      options: [
+        { label: "Richtig", value: "richtig" },
+        { label: "Eher richtig", value: "eher_richtig" },
+        { label: "Eher falsch", value: "eher_falsch" },
+        { label: "Falsch", value: "falsch" },
+      ],
+      defaultValue: "eher_falsch",
+    }),
+    primaryCtaLabel: fields.text({
+      label: "Primärer CTA",
+      defaultValue: "Quiz starten",
+    }),
+    primaryCtaUrl: fields.text({
+      label: "Primärer CTA – Link",
+      defaultValue: "/selbsttest/",
+    }),
+    secondaryCtaLabel: fields.text({
+      label: "Sekundärer CTA",
+      defaultValue: "Zur Dashboard-Analyse",
+    }),
+    secondaryCtaUrl: fields.text({
+      label: "Sekundärer CTA – Link",
+      defaultValue: "/zahlen-und-fakten/",
+    }),
+  },
+});
+
 // ─── Config export ──────────────────────────────────────────────────────────
 
 export default config({
@@ -704,6 +870,9 @@ export default config({
   },
   singletons: {
     heroBlock,
+    credibilityBlock,
+    headlineFinding,
+    quizHookBlock,
     dashboardDefinitionen,
   },
 });

@@ -554,7 +554,8 @@
       "awareness": 12.55,
       "significance": 52.7,
       "correctness": 49.05,
-      "prevention_significance": 41.39
+      "prevention_significance": 41.39,
+      "population_relevance": null
     },
     {
       "myth_id": 2,
@@ -562,7 +563,8 @@
       "awareness": 18.11,
       "significance": 52.66,
       "correctness": 63.86,
-      "prevention_significance": 31.79
+      "prevention_significance": 31.79,
+      "population_relevance": null
     },
     {
       "myth_id": 3,
@@ -570,7 +572,8 @@
       "awareness": 48.57,
       "significance": 76.81,
       "correctness": 77.84,
-      "prevention_significance": 30.5
+      "prevention_significance": 30.5,
+      "population_relevance": null
     },
     {
       "myth_id": 4,
@@ -578,7 +581,8 @@
       "awareness": 35.14,
       "significance": 62.09,
       "correctness": 69.42,
-      "prevention_significance": 27.51
+      "prevention_significance": 27.51,
+      "population_relevance": null
     },
     {
       "myth_id": 5,
@@ -586,7 +590,8 @@
       "awareness": 16.66,
       "significance": 68.48,
       "correctness": 76.17,
-      "prevention_significance": 26.5
+      "prevention_significance": 26.5,
+      "population_relevance": null
     },
     {
       "myth_id": 6,
@@ -594,7 +599,8 @@
       "awareness": 43.9,
       "significance": 77.05,
       "correctness": 88.95,
-      "prevention_significance": 21.96
+      "prevention_significance": 21.96,
+      "population_relevance": null
     },
     {
       "myth_id": 7,
@@ -602,7 +608,8 @@
       "awareness": 35.28,
       "significance": 76.47,
       "correctness": 85.59,
-      "prevention_significance": 24.09
+      "prevention_significance": 24.09,
+      "population_relevance": null
     },
     {
       "myth_id": 8,
@@ -610,7 +617,8 @@
       "awareness": 42.34,
       "significance": 76.4,
       "correctness": 89.74,
-      "prevention_significance": 21.19
+      "prevention_significance": 21.19,
+      "population_relevance": null
     },
     {
       "myth_id": 9,
@@ -618,7 +626,8 @@
       "awareness": 20.87,
       "significance": 66.47,
       "correctness": 74.08,
-      "prevention_significance": 27.66
+      "prevention_significance": 27.66,
+      "population_relevance": null
     },
     {
       "myth_id": 10,
@@ -626,7 +635,8 @@
       "awareness": 67.72,
       "significance": 69.98,
       "correctness": 49.92,
-      "prevention_significance": 46.35
+      "prevention_significance": 46.35,
+      "population_relevance": null
     },
     {
       "myth_id": 11,
@@ -634,7 +644,8 @@
       "awareness": 18.48,
       "significance": 60.2,
       "correctness": 71.92,
-      "prevention_significance": 25.79
+      "prevention_significance": 25.79,
+      "population_relevance": null
     },
     {
       "myth_id": 12,
@@ -642,7 +653,8 @@
       "awareness": 23.11,
       "significance": 69.05,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 13,
@@ -650,7 +662,8 @@
       "awareness": 28.32,
       "significance": 59.61,
       "correctness": 78.06,
-      "prevention_significance": 22.89
+      "prevention_significance": 22.89,
+      "population_relevance": null
     },
     {
       "myth_id": 14,
@@ -658,7 +671,8 @@
       "awareness": 15.51,
       "significance": 75.87,
       "correctness": 76.2,
-      "prevention_significance": 29.88
+      "prevention_significance": 29.88,
+      "population_relevance": null
     },
     {
       "myth_id": 15,
@@ -666,7 +680,8 @@
       "awareness": 16.4,
       "significance": 69.81,
       "correctness": 78.66,
-      "prevention_significance": 25.84
+      "prevention_significance": 25.84,
+      "population_relevance": null
     },
     {
       "myth_id": 16,
@@ -674,7 +689,8 @@
       "awareness": 10.64,
       "significance": 72.53,
       "correctness": 73.7,
-      "prevention_significance": 29.94
+      "prevention_significance": 29.94,
+      "population_relevance": null
     },
     {
       "myth_id": 17,
@@ -682,7 +698,8 @@
       "awareness": 5.78,
       "significance": 48.84,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 18,
@@ -690,7 +707,8 @@
       "awareness": 38.4,
       "significance": 61.69,
       "correctness": 56.47,
-      "prevention_significance": 39.2
+      "prevention_significance": 39.2,
+      "population_relevance": null
     },
     {
       "myth_id": 19,
@@ -698,7 +716,8 @@
       "awareness": 60.44,
       "significance": 71.78,
       "correctness": 87.57,
-      "prevention_significance": 21.43
+      "prevention_significance": 21.43,
+      "population_relevance": null
     },
     {
       "myth_id": 20,
@@ -706,7 +725,8 @@
       "awareness": 44.32,
       "significance": 71.43,
       "correctness": 83.24,
-      "prevention_significance": 23.93
+      "prevention_significance": 23.93,
+      "population_relevance": null
     },
     {
       "myth_id": 21,
@@ -714,7 +734,8 @@
       "awareness": 64.13,
       "significance": 82.83,
       "correctness": 91.64,
-      "prevention_significance": 21.45
+      "prevention_significance": 21.45,
+      "population_relevance": null
     },
     {
       "myth_id": 22,
@@ -722,7 +743,8 @@
       "awareness": 57.91,
       "significance": 66.6,
       "correctness": 51.75,
-      "prevention_significance": 44.21
+      "prevention_significance": 44.21,
+      "population_relevance": null
     },
     {
       "myth_id": 23,
@@ -730,7 +752,8 @@
       "awareness": 16.47,
       "significance": 58.5,
       "correctness": 63.73,
-      "prevention_significance": 33.73
+      "prevention_significance": 33.73,
+      "population_relevance": null
     },
     {
       "myth_id": 24,
@@ -738,7 +761,8 @@
       "awareness": 39.12,
       "significance": 69.66,
       "correctness": 74.3,
-      "prevention_significance": 28.47
+      "prevention_significance": 28.47,
+      "population_relevance": null
     },
     {
       "myth_id": 25,
@@ -746,7 +770,8 @@
       "awareness": 32.27,
       "significance": 60.47,
       "correctness": 60.74,
-      "prevention_significance": 35.77
+      "prevention_significance": 35.77,
+      "population_relevance": null
     },
     {
       "myth_id": 26,
@@ -754,7 +779,8 @@
       "awareness": 31.22,
       "significance": 62.39,
       "correctness": 30.39,
-      "prevention_significance": 54.44
+      "prevention_significance": 54.44,
+      "population_relevance": null
     },
     {
       "myth_id": 27,
@@ -762,7 +788,8 @@
       "awareness": 30.47,
       "significance": 60.32,
       "correctness": 56.05,
-      "prevention_significance": 38.14
+      "prevention_significance": 38.14,
+      "population_relevance": null
     },
     {
       "myth_id": 28,
@@ -770,7 +797,8 @@
       "awareness": 26.33,
       "significance": 66.79,
       "correctness": 25.24,
-      "prevention_significance": 60.15
+      "prevention_significance": 60.15,
+      "population_relevance": null
     },
     {
       "myth_id": 29,
@@ -778,7 +806,8 @@
       "awareness": 32.92,
       "significance": 59.15,
       "correctness": 84.4,
-      "prevention_significance": 21.21
+      "prevention_significance": 21.21,
+      "population_relevance": null
     },
     {
       "myth_id": 30,
@@ -786,7 +815,8 @@
       "awareness": 14.39,
       "significance": 73.2,
       "correctness": 82.99,
-      "prevention_significance": 25.82
+      "prevention_significance": 25.82,
+      "population_relevance": null
     },
     {
       "myth_id": 31,
@@ -794,15 +824,17 @@
       "awareness": 57.11,
       "significance": 61.95,
       "correctness": 81.98,
-      "prevention_significance": 23.63
+      "prevention_significance": 23.63,
+      "population_relevance": null
     },
     {
       "myth_id": 32,
       "group_id": "general_population",
-      "awareness": 24.0,
+      "awareness": 24,
       "significance": 62.13,
       "correctness": 57.98,
-      "prevention_significance": 38.34
+      "prevention_significance": 38.34,
+      "population_relevance": null
     },
     {
       "myth_id": 33,
@@ -810,7 +842,8 @@
       "awareness": 19.01,
       "significance": 51.37,
       "correctness": 60.99,
-      "prevention_significance": 31.97
+      "prevention_significance": 31.97,
+      "population_relevance": null
     },
     {
       "myth_id": 34,
@@ -818,7 +851,8 @@
       "awareness": 30.62,
       "significance": 71.14,
       "correctness": 54.22,
-      "prevention_significance": 44.26
+      "prevention_significance": 44.26,
+      "population_relevance": null
     },
     {
       "myth_id": 35,
@@ -826,7 +860,8 @@
       "awareness": 14.23,
       "significance": 66.64,
       "correctness": 63.47,
-      "prevention_significance": 36.83
+      "prevention_significance": 36.83,
+      "population_relevance": null
     },
     {
       "myth_id": 36,
@@ -834,7 +869,8 @@
       "awareness": 27.94,
       "significance": 69.32,
       "correctness": 55.41,
-      "prevention_significance": 42.86
+      "prevention_significance": 42.86,
+      "population_relevance": null
     },
     {
       "myth_id": 37,
@@ -842,7 +878,8 @@
       "awareness": 12.7,
       "significance": 55.56,
       "correctness": 35.76,
-      "prevention_significance": 48.3
+      "prevention_significance": 48.3,
+      "population_relevance": null
     },
     {
       "myth_id": 38,
@@ -850,7 +887,8 @@
       "awareness": 14.24,
       "significance": 31.03,
       "correctness": 61.81,
-      "prevention_significance": 23.86
+      "prevention_significance": 23.86,
+      "population_relevance": null
     },
     {
       "myth_id": 39,
@@ -858,7 +896,8 @@
       "awareness": 18.8,
       "significance": 54.9,
       "correctness": 25.63,
-      "prevention_significance": 51.33
+      "prevention_significance": 51.33,
+      "population_relevance": null
     },
     {
       "myth_id": 40,
@@ -866,7 +905,8 @@
       "awareness": 17.89,
       "significance": 52.26,
       "correctness": 36.09,
-      "prevention_significance": 44.31
+      "prevention_significance": 44.31,
+      "population_relevance": null
     },
     {
       "myth_id": 41,
@@ -874,7 +914,8 @@
       "awareness": 47.58,
       "significance": 66.39,
       "correctness": 79.23,
-      "prevention_significance": 23.44
+      "prevention_significance": 23.44,
+      "population_relevance": null
     },
     {
       "myth_id": 42,
@@ -882,7 +923,8 @@
       "awareness": 42.37,
       "significance": 71.79,
       "correctness": 53.12,
-      "prevention_significance": 45.65
+      "prevention_significance": 45.65,
+      "population_relevance": null
     },
     {
       "myth_id": 1,
@@ -890,7 +932,8 @@
       "awareness": 12.32,
       "significance": 52.82,
       "correctness": 49.1,
-      "prevention_significance": 41.49
+      "prevention_significance": 41.49,
+      "population_relevance": 5.6
     },
     {
       "myth_id": 2,
@@ -898,7 +941,8 @@
       "awareness": 18.02,
       "significance": 52.63,
       "correctness": 63.77,
-      "prevention_significance": 31.78
+      "prevention_significance": 31.78,
+      "population_relevance": 6.5
     },
     {
       "myth_id": 3,
@@ -906,7 +950,8 @@
       "awareness": 48.64,
       "significance": 76.78,
       "correctness": 77.93,
-      "prevention_significance": 30.43
+      "prevention_significance": 30.43,
+      "population_relevance": 16.9
     },
     {
       "myth_id": 4,
@@ -914,7 +959,8 @@
       "awareness": 35.16,
       "significance": 62.1,
       "correctness": 69.66,
-      "prevention_significance": 27.37
+      "prevention_significance": 27.37,
+      "population_relevance": 11.2
     },
     {
       "myth_id": 5,
@@ -922,7 +968,8 @@
       "awareness": 16.33,
       "significance": 68.51,
       "correctness": 76.43,
-      "prevention_significance": 26.37
+      "prevention_significance": 26.37,
+      "population_relevance": 5.1
     },
     {
       "myth_id": 6,
@@ -930,7 +977,8 @@
       "awareness": 43.75,
       "significance": 77.02,
       "correctness": 88.97,
-      "prevention_significance": 21.93
+      "prevention_significance": 21.93,
+      "population_relevance": 11.7
     },
     {
       "myth_id": 7,
@@ -938,7 +986,8 @@
       "awareness": 35.06,
       "significance": 76.49,
       "correctness": 85.7,
-      "prevention_significance": 24.05
+      "prevention_significance": 24.05,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 8,
@@ -946,7 +995,8 @@
       "awareness": 42.35,
       "significance": 76.49,
       "correctness": 89.87,
-      "prevention_significance": 21.16
+      "prevention_significance": 21.16,
+      "population_relevance": 11
     },
     {
       "myth_id": 9,
@@ -954,7 +1004,8 @@
       "awareness": 20.71,
       "significance": 66.53,
       "correctness": 74.3,
-      "prevention_significance": 27.58
+      "prevention_significance": 27.58,
+      "population_relevance": 6.6
     },
     {
       "myth_id": 10,
@@ -962,7 +1013,8 @@
       "awareness": 68.28,
       "significance": 70.26,
       "correctness": 49.74,
-      "prevention_significance": 46.58
+      "prevention_significance": 46.58,
+      "population_relevance": 34.1
     },
     {
       "myth_id": 11,
@@ -970,7 +1022,8 @@
       "awareness": 17.95,
       "significance": 60.15,
       "correctness": 71.89,
-      "prevention_significance": 25.78
+      "prevention_significance": 25.78,
+      "population_relevance": 5.5
     },
     {
       "myth_id": 12,
@@ -978,7 +1031,8 @@
       "awareness": 23.28,
       "significance": 69.36,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 13,
@@ -986,7 +1040,8 @@
       "awareness": 28.64,
       "significance": 59.71,
       "correctness": 78.32,
-      "prevention_significance": 22.81
+      "prevention_significance": 22.81,
+      "population_relevance": 7.9
     },
     {
       "myth_id": 14,
@@ -994,7 +1049,8 @@
       "awareness": 14.96,
       "significance": 75.94,
       "correctness": 76.21,
-      "prevention_significance": 29.92
+      "prevention_significance": 29.92,
+      "population_relevance": 5.1
     },
     {
       "myth_id": 15,
@@ -1002,7 +1058,8 @@
       "awareness": 16.03,
       "significance": 69.73,
       "correctness": 78.8,
-      "prevention_significance": 25.72
+      "prevention_significance": 25.72,
+      "population_relevance": 4.9
     },
     {
       "myth_id": 16,
@@ -1010,7 +1067,8 @@
       "awareness": 10.12,
       "significance": 72.33,
       "correctness": 73.59,
-      "prevention_significance": 29.95
+      "prevention_significance": 29.95,
+      "population_relevance": 3.5
     },
     {
       "myth_id": 17,
@@ -1018,7 +1076,8 @@
       "awareness": 5.55,
       "significance": 48.94,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 18,
@@ -1026,7 +1085,8 @@
       "awareness": 38.63,
       "significance": 61.87,
       "correctness": 56.37,
-      "prevention_significance": 39.33
+      "prevention_significance": 39.33,
+      "population_relevance": 16.7
     },
     {
       "myth_id": 19,
@@ -1034,7 +1094,8 @@
       "awareness": 60.56,
       "significance": 71.83,
       "correctness": 87.56,
-      "prevention_significance": 21.45
+      "prevention_significance": 21.45,
+      "population_relevance": 16
     },
     {
       "myth_id": 20,
@@ -1042,7 +1103,8 @@
       "awareness": 44.28,
       "significance": 71.41,
       "correctness": 83.34,
-      "prevention_significance": 23.88
+      "prevention_significance": 23.88,
+      "population_relevance": 12.7
     },
     {
       "myth_id": 21,
@@ -1050,7 +1112,8 @@
       "awareness": 64.45,
       "significance": 82.84,
       "correctness": 91.71,
-      "prevention_significance": 21.4
+      "prevention_significance": 21.4,
+      "population_relevance": 17
     },
     {
       "myth_id": 22,
@@ -1058,7 +1121,8 @@
       "awareness": 58.07,
       "significance": 66.83,
       "correctness": 51.65,
-      "prevention_significance": 44.41
+      "prevention_significance": 44.41,
+      "population_relevance": 27.8
     },
     {
       "myth_id": 23,
@@ -1066,7 +1130,8 @@
       "awareness": 16.43,
       "significance": 58.35,
       "correctness": 63.75,
-      "prevention_significance": 33.68
+      "prevention_significance": 33.68,
+      "population_relevance": 6.2
     },
     {
       "myth_id": 24,
@@ -1074,7 +1139,8 @@
       "awareness": 39.06,
       "significance": 69.6,
       "correctness": 74.25,
-      "prevention_significance": 28.48
+      "prevention_significance": 28.48,
+      "population_relevance": 12.9
     },
     {
       "myth_id": 25,
@@ -1082,7 +1148,8 @@
       "awareness": 32.18,
       "significance": 60.49,
       "correctness": 60.6,
-      "prevention_significance": 35.85
+      "prevention_significance": 35.85,
+      "population_relevance": 12.8
     },
     {
       "myth_id": 26,
@@ -1090,7 +1157,8 @@
       "awareness": 31.26,
       "significance": 62.58,
       "correctness": 30.18,
-      "prevention_significance": 54.67
+      "prevention_significance": 54.67,
+      "population_relevance": 18
     },
     {
       "myth_id": 27,
@@ -1098,7 +1166,8 @@
       "awareness": 30.37,
       "significance": 60.45,
       "correctness": 55.93,
-      "prevention_significance": 38.24
+      "prevention_significance": 38.24,
+      "population_relevance": 12.8
     },
     {
       "myth_id": 28,
@@ -1106,7 +1175,8 @@
       "awareness": 26.29,
       "significance": 66.83,
       "correctness": 25.05,
-      "prevention_significance": 60.32
+      "prevention_significance": 60.32,
+      "population_relevance": 16.5
     },
     {
       "myth_id": 29,
@@ -1114,7 +1184,8 @@
       "awareness": 32.89,
       "significance": 59.2,
       "correctness": 84.4,
-      "prevention_significance": 21.23
+      "prevention_significance": 21.23,
+      "population_relevance": 8.6
     },
     {
       "myth_id": 30,
@@ -1122,7 +1193,8 @@
       "awareness": 14.09,
       "significance": 73.29,
       "correctness": 83.02,
-      "prevention_significance": 25.83
+      "prevention_significance": 25.83,
+      "population_relevance": 4.3
     },
     {
       "myth_id": 31,
@@ -1130,7 +1202,8 @@
       "awareness": 57.16,
       "significance": 62.08,
       "correctness": 82.01,
-      "prevention_significance": 23.67
+      "prevention_significance": 23.67,
+      "population_relevance": 16.3
     },
     {
       "myth_id": 32,
@@ -1138,7 +1211,8 @@
       "awareness": 23.96,
       "significance": 62.13,
       "correctness": 57.86,
-      "prevention_significance": 38.42
+      "prevention_significance": 38.42,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 33,
@@ -1146,7 +1220,8 @@
       "awareness": 18.75,
       "significance": 51.36,
       "correctness": 60.97,
-      "prevention_significance": 31.97
+      "prevention_significance": 31.97,
+      "population_relevance": 6.8
     },
     {
       "myth_id": 34,
@@ -1154,7 +1229,8 @@
       "awareness": 30.33,
       "significance": 71.08,
       "correctness": 54.17,
-      "prevention_significance": 44.25
+      "prevention_significance": 44.25,
+      "population_relevance": 14.5
     },
     {
       "myth_id": 35,
@@ -1162,7 +1238,8 @@
       "awareness": 13.89,
       "significance": 66.75,
       "correctness": 63.33,
-      "prevention_significance": 36.99
+      "prevention_significance": 36.99,
+      "population_relevance": 5.7
     },
     {
       "myth_id": 36,
@@ -1170,7 +1247,8 @@
       "awareness": 27.8,
       "significance": 69.36,
       "correctness": 55.28,
-      "prevention_significance": 42.95
+      "prevention_significance": 42.95,
+      "population_relevance": 12.9
     },
     {
       "myth_id": 37,
@@ -1178,7 +1256,8 @@
       "awareness": 12.48,
       "significance": 55.44,
       "correctness": 35.85,
-      "prevention_significance": 48.16
+      "prevention_significance": 48.16,
+      "population_relevance": 6.4
     },
     {
       "myth_id": 38,
@@ -1186,7 +1265,8 @@
       "awareness": 13.91,
       "significance": 30.78,
       "correctness": 61.8,
-      "prevention_significance": 23.73
+      "prevention_significance": 23.73,
+      "population_relevance": 4
     },
     {
       "myth_id": 39,
@@ -1194,7 +1274,8 @@
       "awareness": 18.44,
       "significance": 54.83,
       "correctness": 25.5,
-      "prevention_significance": 51.36
+      "prevention_significance": 51.36,
+      "population_relevance": 10
     },
     {
       "myth_id": 40,
@@ -1202,7 +1283,8 @@
       "awareness": 17.85,
       "significance": 52.1,
       "correctness": 35.76,
-      "prevention_significance": 44.39
+      "prevention_significance": 44.39,
+      "population_relevance": 8.5
     },
     {
       "myth_id": 41,
@@ -1210,7 +1292,8 @@
       "awareness": 47.56,
       "significance": 66.33,
       "correctness": 79.26,
-      "prevention_significance": 23.37
+      "prevention_significance": 23.37,
+      "population_relevance": 13.4
     },
     {
       "myth_id": 42,
@@ -1218,7 +1301,8 @@
       "awareness": 42.19,
       "significance": 71.88,
       "correctness": 53.06,
-      "prevention_significance": 45.73
+      "prevention_significance": 45.73,
+      "population_relevance": 20.7
     },
     {
       "myth_id": 2,
@@ -1226,7 +1310,8 @@
       "awareness": 21.26,
       "significance": 53.61,
       "correctness": 66.76,
-      "prevention_significance": 32.06
+      "prevention_significance": 32.06,
+      "population_relevance": 7.7
     },
     {
       "myth_id": 3,
@@ -1234,7 +1319,8 @@
       "awareness": 46.36,
       "significance": 78.02,
       "correctness": 74.75,
-      "prevention_significance": 32.92
+      "prevention_significance": 32.92,
+      "population_relevance": 17.2
     },
     {
       "myth_id": 23,
@@ -1242,7 +1328,8 @@
       "awareness": 17.81,
       "significance": 63.48,
       "correctness": 63.19,
-      "prevention_significance": 35.36
+      "prevention_significance": 35.36,
+      "population_relevance": 7
     },
     {
       "myth_id": 24,
@@ -1250,7 +1337,8 @@
       "awareness": 40.89,
       "significance": 71.74,
       "correctness": 75.67,
-      "prevention_significance": 28.08
+      "prevention_significance": 28.08,
+      "population_relevance": 13.3
     },
     {
       "myth_id": 40,
@@ -1258,7 +1346,8 @@
       "awareness": 19.18,
       "significance": 57.62,
       "correctness": 47.26,
-      "prevention_significance": 41.77
+      "prevention_significance": 41.77,
+      "population_relevance": 8.7
     },
     {
       "myth_id": 19,
@@ -1266,7 +1355,8 @@
       "awareness": 56.52,
       "significance": 69.99,
       "correctness": 88.1,
-      "prevention_significance": 20.67
+      "prevention_significance": 20.67,
+      "population_relevance": 14.5
     },
     {
       "myth_id": 20,
@@ -1274,7 +1364,8 @@
       "awareness": 45.64,
       "significance": 72.08,
       "correctness": 79.63,
-      "prevention_significance": 25.92
+      "prevention_significance": 25.92,
+      "population_relevance": 13.9
     },
     {
       "myth_id": 21,
@@ -1282,7 +1373,8 @@
       "awareness": 53.18,
       "significance": 82.66,
       "correctness": 89.26,
-      "prevention_significance": 22.83
+      "prevention_significance": 22.83,
+      "population_relevance": 14.7
     },
     {
       "myth_id": 6,
@@ -1290,7 +1382,8 @@
       "awareness": 48.83,
       "significance": 77.89,
       "correctness": 88.2,
-      "prevention_significance": 22.91
+      "prevention_significance": 22.91,
+      "population_relevance": 13.5
     },
     {
       "myth_id": 14,
@@ -1298,7 +1391,8 @@
       "awareness": 33.97,
       "significance": 73.64,
       "correctness": 75.93,
-      "prevention_significance": 28.67
+      "prevention_significance": 28.67,
+      "population_relevance": 11.3
     },
     {
       "myth_id": 26,
@@ -1306,7 +1400,8 @@
       "awareness": 30.03,
       "significance": 56.06,
       "correctness": 37.46,
-      "prevention_significance": 46.77
+      "prevention_significance": 46.77,
+      "population_relevance": 15
     },
     {
       "myth_id": 27,
@@ -1314,7 +1409,8 @@
       "awareness": 33.82,
       "significance": 56.18,
       "correctness": 59.99,
-      "prevention_significance": 34.79
+      "prevention_significance": 34.79,
+      "population_relevance": 13.1
     },
     {
       "myth_id": 39,
@@ -1322,7 +1418,8 @@
       "awareness": 30.98,
       "significance": 57.23,
       "correctness": 29.9,
-      "prevention_significance": 50.34
+      "prevention_significance": 50.34,
+      "population_relevance": 16.6
     },
     {
       "myth_id": 41,
@@ -1330,7 +1427,8 @@
       "awareness": 48.15,
       "significance": 68.37,
       "correctness": 78.19,
-      "prevention_significance": 25.75
+      "prevention_significance": 25.75,
+      "population_relevance": 14.6
     },
     {
       "myth_id": 7,
@@ -1338,7 +1436,8 @@
       "awareness": 42.85,
       "significance": 75.75,
       "correctness": 81.81,
-      "prevention_significance": 25.4
+      "prevention_significance": 25.4,
+      "population_relevance": 12.9
     },
     {
       "myth_id": 18,
@@ -1346,7 +1445,8 @@
       "awareness": 30.93,
       "significance": 55.78,
       "correctness": 59.87,
-      "prevention_significance": 34.82
+      "prevention_significance": 34.82,
+      "population_relevance": 12
     },
     {
       "myth_id": 25,
@@ -1354,7 +1454,8 @@
       "awareness": 35.37,
       "significance": 59.76,
       "correctness": 65.17,
-      "prevention_significance": 33.05
+      "prevention_significance": 33.05,
+      "population_relevance": 13.2
     },
     {
       "myth_id": 4,
@@ -1362,7 +1463,8 @@
       "awareness": 34.58,
       "significance": 61.8,
       "correctness": 61.47,
-      "prevention_significance": 32.04
+      "prevention_significance": 32.04,
+      "population_relevance": 12.5
     },
     {
       "myth_id": 15,
@@ -1370,7 +1472,8 @@
       "awareness": 28.9,
       "significance": 72.47,
       "correctness": 73.91,
-      "prevention_significance": 29.8
+      "prevention_significance": 29.8,
+      "population_relevance": 9.9
     },
     {
       "myth_id": 16,
@@ -1378,7 +1481,8 @@
       "awareness": 27.89,
       "significance": 79.08,
       "correctness": 77.26,
-      "prevention_significance": 29.64
+      "prevention_significance": 29.64,
+      "population_relevance": 9.5
     },
     {
       "myth_id": 28,
@@ -1386,7 +1490,8 @@
       "awareness": 27.47,
       "significance": 65.4,
       "correctness": 31.64,
-      "prevention_significance": 54.62
+      "prevention_significance": 54.62,
+      "population_relevance": 15.8
     },
     {
       "myth_id": 32,
@@ -1394,7 +1499,8 @@
       "awareness": 25.4,
       "significance": 62.21,
       "correctness": 62.13,
-      "prevention_significance": 35.66
+      "prevention_significance": 35.66,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 34,
@@ -1402,7 +1508,8 @@
       "awareness": 40.6,
       "significance": 73.4,
       "correctness": 55.99,
-      "prevention_significance": 44.52
+      "prevention_significance": 44.52,
+      "population_relevance": 19.5
     },
     {
       "myth_id": 38,
@@ -1410,7 +1517,8 @@
       "awareness": 25.26,
       "significance": 39.55,
       "correctness": 62.01,
-      "prevention_significance": 28.45
+      "prevention_significance": 28.45,
+      "population_relevance": 8.3
     },
     {
       "myth_id": 42,
@@ -1418,7 +1526,8 @@
       "awareness": 48.42,
       "significance": 68.82,
       "correctness": 55.41,
-      "prevention_significance": 43.0
+      "prevention_significance": 43,
+      "population_relevance": 22.5
     },
     {
       "myth_id": 1,
@@ -1426,7 +1535,8 @@
       "awareness": 20.29,
       "significance": 48.72,
       "correctness": 47.29,
-      "prevention_significance": 38.2
+      "prevention_significance": 38.2,
+      "population_relevance": 8.5
     },
     {
       "myth_id": 5,
@@ -1434,7 +1544,8 @@
       "awareness": 27.68,
       "significance": 67.58,
       "correctness": 67.47,
-      "prevention_significance": 31.01
+      "prevention_significance": 31.01,
+      "population_relevance": 9.8
     },
     {
       "myth_id": 9,
@@ -1442,7 +1553,8 @@
       "awareness": 26.28,
       "significance": 64.33,
       "correctness": 66.75,
-      "prevention_significance": 30.38
+      "prevention_significance": 30.38,
+      "population_relevance": 9.1
     },
     {
       "myth_id": 10,
@@ -1450,7 +1562,8 @@
       "awareness": 49.01,
       "significance": 60.65,
       "correctness": 55.97,
-      "prevention_significance": 38.66
+      "prevention_significance": 38.66,
+      "population_relevance": 20.8
     },
     {
       "myth_id": 11,
@@ -1458,7 +1571,8 @@
       "awareness": 36.43,
       "significance": 61.73,
       "correctness": 72.85,
-      "prevention_significance": 26.06
+      "prevention_significance": 26.06,
+      "population_relevance": 11.2
     },
     {
       "myth_id": 29,
@@ -1466,7 +1580,8 @@
       "awareness": 33.94,
       "significance": 57.47,
       "correctness": 84.43,
-      "prevention_significance": 20.32
+      "prevention_significance": 20.32,
+      "population_relevance": 8.6
     },
     {
       "myth_id": 30,
@@ -1474,7 +1589,8 @@
       "awareness": 24.29,
       "significance": 70.05,
       "correctness": 82.14,
-      "prevention_significance": 25.22
+      "prevention_significance": 25.22,
+      "population_relevance": 7.3
     },
     {
       "myth_id": 36,
@@ -1482,7 +1598,8 @@
       "awareness": 32.91,
       "significance": 67.88,
       "correctness": 59.7,
-      "prevention_significance": 39.82
+      "prevention_significance": 39.82,
+      "population_relevance": 14.3
     },
     {
       "myth_id": 8,
@@ -1490,7 +1607,8 @@
       "awareness": 41.83,
       "significance": 73.37,
       "correctness": 85.42,
-      "prevention_significance": 22.21
+      "prevention_significance": 22.21,
+      "population_relevance": 11.3
     },
     {
       "myth_id": 17,
@@ -1498,7 +1616,8 @@
       "awareness": 13.47,
       "significance": 45.48,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 22,
@@ -1506,7 +1625,8 @@
       "awareness": 52.34,
       "significance": 58.75,
       "correctness": 55.28,
-      "prevention_significance": 37.69
+      "prevention_significance": 37.69,
+      "population_relevance": 21.8
     },
     {
       "myth_id": 31,
@@ -1514,7 +1634,8 @@
       "awareness": 55.34,
       "significance": 57.41,
       "correctness": 81.13,
-      "prevention_significance": 22.23
+      "prevention_significance": 22.23,
+      "population_relevance": 15
     },
     {
       "myth_id": 33,
@@ -1522,7 +1643,8 @@
       "awareness": 27.74,
       "significance": 51.6,
       "correctness": 61.67,
-      "prevention_significance": 32.03
+      "prevention_significance": 32.03,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 37,
@@ -1530,7 +1652,8 @@
       "awareness": 19.87,
       "significance": 59.67,
       "correctness": 32.67,
-      "prevention_significance": 52.76
+      "prevention_significance": 52.76,
+      "population_relevance": 11.1
     },
     {
       "myth_id": 12,
@@ -1538,7 +1661,8 @@
       "awareness": 17.24,
       "significance": 58.67,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 13,
@@ -1546,7 +1670,8 @@
       "awareness": 17.7,
       "significance": 56.4,
       "correctness": 69.46,
-      "prevention_significance": 25.72
+      "prevention_significance": 25.72,
+      "population_relevance": 5.4
     },
     {
       "myth_id": 35,
@@ -1554,7 +1679,8 @@
       "awareness": 25.61,
       "significance": 62.99,
       "correctness": 68.13,
-      "prevention_significance": 31.41
+      "prevention_significance": 31.41,
+      "population_relevance": 9.1
     },
     {
       "myth_id": 23,
@@ -1562,7 +1688,8 @@
       "awareness": 31.44,
       "significance": 70.87,
       "correctness": 45.67,
-      "prevention_significance": 49.92
+      "prevention_significance": 49.92,
+      "population_relevance": 6.2
     },
     {
       "myth_id": 2,
@@ -1570,23 +1697,26 @@
       "awareness": 33.42,
       "significance": 61.15,
       "correctness": 45.68,
-      "prevention_significance": 45.96
+      "prevention_significance": 45.96,
+      "population_relevance": 6.5
     },
     {
       "myth_id": 24,
       "group_id": "consumers",
-      "awareness": 50.0,
+      "awareness": 50,
       "significance": 50.33,
       "correctness": 56.27,
-      "prevention_significance": 30.8
+      "prevention_significance": 30.8,
+      "population_relevance": 12.9
     },
     {
       "myth_id": 40,
       "group_id": "consumers",
       "awareness": 12.87,
       "significance": 54.49,
-      "correctness": 50.0,
-      "prevention_significance": 42.05
+      "correctness": 50,
+      "prevention_significance": 42.05,
+      "population_relevance": 8.5
     },
     {
       "myth_id": 19,
@@ -1594,7 +1724,8 @@
       "awareness": 59.65,
       "significance": 67.08,
       "correctness": 84.37,
-      "prevention_significance": 22.16
+      "prevention_significance": 22.16,
+      "population_relevance": 16
     },
     {
       "myth_id": 20,
@@ -1602,7 +1733,8 @@
       "awareness": 46.78,
       "significance": 57.75,
       "correctness": 73.02,
-      "prevention_significance": 25.53
+      "prevention_significance": 25.53,
+      "population_relevance": 12.7
     },
     {
       "myth_id": 26,
@@ -1610,7 +1742,8 @@
       "awareness": 50.74,
       "significance": 68.79,
       "correctness": 25.53,
-      "prevention_significance": 61.9
+      "prevention_significance": 61.9,
+      "population_relevance": 18
     },
     {
       "myth_id": 27,
@@ -1618,7 +1751,8 @@
       "awareness": 55.94,
       "significance": 65.18,
       "correctness": 49.85,
-      "prevention_significance": 43.99
+      "prevention_significance": 43.99,
+      "population_relevance": 12.8
     },
     {
       "myth_id": 1,
@@ -1626,7 +1760,8 @@
       "awareness": 22.03,
       "significance": 54.17,
       "correctness": 43.07,
-      "prevention_significance": 46.36
+      "prevention_significance": 46.36,
+      "population_relevance": 5.6
     },
     {
       "myth_id": 6,
@@ -1634,7 +1769,8 @@
       "awareness": 52.23,
       "significance": 67.61,
       "correctness": 84.52,
-      "prevention_significance": 21.17
+      "prevention_significance": 21.17,
+      "population_relevance": 11.7
     },
     {
       "myth_id": 7,
@@ -1642,7 +1778,8 @@
       "awareness": 45.3,
       "significance": 77.66,
       "correctness": 86.52,
-      "prevention_significance": 23.66
+      "prevention_significance": 23.66,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 14,
@@ -1650,7 +1787,8 @@
       "awareness": 18.32,
       "significance": 63.06,
       "correctness": 63.96,
-      "prevention_significance": 31.53
+      "prevention_significance": 31.53,
+      "population_relevance": 5.1
     },
     {
       "myth_id": 18,
@@ -1658,7 +1796,8 @@
       "awareness": 70.54,
       "significance": 74.88,
       "correctness": 46.08,
-      "prevention_significance": 51.06
+      "prevention_significance": 51.06,
+      "population_relevance": 16.7
     },
     {
       "myth_id": 21,
@@ -1666,7 +1805,8 @@
       "awareness": 58.42,
       "significance": 74.01,
       "correctness": 81.92,
-      "prevention_significance": 24.6
+      "prevention_significance": 24.6,
+      "population_relevance": 17
     },
     {
       "myth_id": 25,
@@ -1674,7 +1814,8 @@
       "awareness": 44.31,
       "significance": 65.73,
       "correctness": 54.93,
-      "prevention_significance": 41.76
+      "prevention_significance": 41.76,
+      "population_relevance": 12.8
     },
     {
       "myth_id": 41,
@@ -1682,7 +1823,8 @@
       "awareness": 40.59,
       "significance": 39.02,
       "correctness": 48.58,
-      "prevention_significance": 27.32
+      "prevention_significance": 27.32,
+      "population_relevance": 13.4
     },
     {
       "myth_id": 15,
@@ -1690,15 +1832,17 @@
       "awareness": 30.45,
       "significance": 59.35,
       "correctness": 72.09,
-      "prevention_significance": 26.45
+      "prevention_significance": 26.45,
+      "population_relevance": 4.9
     },
     {
       "myth_id": 16,
       "group_id": "consumers",
       "awareness": 14.85,
       "significance": 65.56,
-      "correctness": 65.0,
-      "prevention_significance": 32.89
+      "correctness": 65,
+      "prevention_significance": 32.89,
+      "population_relevance": 3.5
     },
     {
       "myth_id": 33,
@@ -1706,7 +1850,8 @@
       "awareness": 54.7,
       "significance": 63.03,
       "correctness": 52.64,
-      "prevention_significance": 41.91
+      "prevention_significance": 41.91,
+      "population_relevance": 6.8
     },
     {
       "myth_id": 3,
@@ -1714,7 +1859,8 @@
       "awareness": 59.41,
       "significance": 69.58,
       "correctness": 78.33,
-      "prevention_significance": 27.67
+      "prevention_significance": 27.67,
+      "population_relevance": 16.9
     },
     {
       "myth_id": 8,
@@ -1722,7 +1868,8 @@
       "awareness": 34.65,
       "significance": 68.81,
       "correctness": 84.76,
-      "prevention_significance": 21.95
+      "prevention_significance": 21.95,
+      "population_relevance": 11
     },
     {
       "myth_id": 10,
@@ -1730,7 +1877,8 @@
       "awareness": 77.48,
       "significance": 71.79,
       "correctness": 45.69,
-      "prevention_significance": 49.64
+      "prevention_significance": 49.64,
+      "population_relevance": 34.1
     },
     {
       "myth_id": 29,
@@ -1738,7 +1886,8 @@
       "awareness": 56.44,
       "significance": 76.75,
       "correctness": 82.16,
-      "prevention_significance": 27.75
+      "prevention_significance": 27.75,
+      "population_relevance": 8.6
     },
     {
       "myth_id": 30,
@@ -1746,7 +1895,8 @@
       "awareness": 10.64,
       "significance": 44.96,
       "correctness": 71.32,
-      "prevention_significance": 20.62
+      "prevention_significance": 20.62,
+      "population_relevance": 4.3
     },
     {
       "myth_id": 32,
@@ -1754,7 +1904,8 @@
       "awareness": 58.17,
       "significance": 71.65,
       "correctness": 46.1,
-      "prevention_significance": 49.17
+      "prevention_significance": 49.17,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 39,
@@ -1762,7 +1913,8 @@
       "awareness": 40.1,
       "significance": 47.12,
       "correctness": 22.22,
-      "prevention_significance": 48.77
+      "prevention_significance": 48.77,
+      "population_relevance": 10
     },
     {
       "myth_id": 4,
@@ -1770,7 +1922,8 @@
       "awareness": 72.52,
       "significance": 75.09,
       "correctness": 87.49,
-      "prevention_significance": 21.98
+      "prevention_significance": 21.98,
+      "population_relevance": 11.2
     },
     {
       "myth_id": 9,
@@ -1778,7 +1931,8 @@
       "awareness": 55.94,
       "significance": 77.43,
       "correctness": 88.35,
-      "prevention_significance": 22.04
+      "prevention_significance": 22.04,
+      "population_relevance": 6.6
     },
     {
       "myth_id": 12,
@@ -1786,7 +1940,8 @@
       "awareness": 43.07,
       "significance": 70.31,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 28,
@@ -1794,7 +1949,8 @@
       "awareness": 38.37,
       "significance": 47.31,
       "correctness": 47.96,
-      "prevention_significance": 36.52
+      "prevention_significance": 36.52,
+      "population_relevance": 16.5
     },
     {
       "myth_id": 31,
@@ -1802,7 +1958,8 @@
       "awareness": 80.45,
       "significance": 84.16,
       "correctness": 74.77,
-      "prevention_significance": 35.14
+      "prevention_significance": 35.14,
+      "population_relevance": 16.3
     },
     {
       "myth_id": 34,
@@ -1810,7 +1967,8 @@
       "awareness": 24.26,
       "significance": 52.04,
       "correctness": 77.21,
-      "prevention_significance": 23.2
+      "prevention_significance": 23.2,
+      "population_relevance": 14.5
     },
     {
       "myth_id": 36,
@@ -1818,7 +1976,8 @@
       "awareness": 33.91,
       "significance": 47.69,
       "correctness": 73.24,
-      "prevention_significance": 23.99
+      "prevention_significance": 23.99,
+      "population_relevance": 12.9
     },
     {
       "myth_id": 38,
@@ -1826,7 +1985,8 @@
       "awareness": 25.5,
       "significance": 33.01,
       "correctness": 45.31,
-      "prevention_significance": 33.59
+      "prevention_significance": 33.59,
+      "population_relevance": 4
     },
     {
       "myth_id": 42,
@@ -1834,7 +1994,8 @@
       "awareness": 35.64,
       "significance": 47.22,
       "correctness": 71.76,
-      "prevention_significance": 25.0
+      "prevention_significance": 25,
+      "population_relevance": 20.7
     },
     {
       "myth_id": 5,
@@ -1842,7 +2003,8 @@
       "awareness": 17.82,
       "significance": 54.17,
       "correctness": 56.94,
-      "prevention_significance": 30.83
+      "prevention_significance": 30.83,
+      "population_relevance": 5.1
     },
     {
       "myth_id": 11,
@@ -1850,7 +2012,8 @@
       "awareness": 18.56,
       "significance": 43.11,
       "correctness": 53.33,
-      "prevention_significance": 29.16
+      "prevention_significance": 29.16,
+      "population_relevance": 5.5
     },
     {
       "myth_id": 13,
@@ -1858,7 +2021,8 @@
       "awareness": 48.02,
       "significance": 60.79,
       "correctness": 88.14,
-      "prevention_significance": 17.72
+      "prevention_significance": 17.72,
+      "population_relevance": 7.9
     },
     {
       "myth_id": 17,
@@ -1866,7 +2030,8 @@
       "awareness": 11.39,
       "significance": 52.9,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 22,
@@ -1874,7 +2039,8 @@
       "awareness": 51.98,
       "significance": 37.3,
       "correctness": 69.84,
-      "prevention_significance": 21.87
+      "prevention_significance": 21.87,
+      "population_relevance": 27.8
     },
     {
       "myth_id": 37,
@@ -1882,7 +2048,8 @@
       "awareness": 13.12,
       "significance": 40.38,
       "correctness": 62.89,
-      "prevention_significance": 26.54
+      "prevention_significance": 26.54,
+      "population_relevance": 6.4
     },
     {
       "myth_id": 35,
@@ -1890,7 +2057,8 @@
       "awareness": 14.11,
       "significance": 47.95,
       "correctness": 70.76,
-      "prevention_significance": 25.38
+      "prevention_significance": 25.38,
+      "population_relevance": 5.7
     },
     {
       "myth_id": 2,
@@ -1898,7 +2066,8 @@
       "awareness": 21.24,
       "significance": 60.94,
       "correctness": 52.82,
-      "prevention_significance": 41.04
+      "prevention_significance": 41.04,
+      "population_relevance": 6.5
     },
     {
       "myth_id": 23,
@@ -1906,7 +2075,8 @@
       "awareness": 16.99,
       "significance": 62.18,
       "correctness": 64.1,
-      "prevention_significance": 36.03
+      "prevention_significance": 36.03,
+      "population_relevance": 6.2
     },
     {
       "myth_id": 40,
@@ -1914,15 +2084,17 @@
       "awareness": 16.01,
       "significance": 57.82,
       "correctness": 50.34,
-      "prevention_significance": 38.23
+      "prevention_significance": 38.23,
+      "population_relevance": 8.5
     },
     {
       "myth_id": 24,
       "group_id": "young_adults",
-      "awareness": 50.0,
+      "awareness": 50,
       "significance": 71.9,
       "correctness": 71.9,
-      "prevention_significance": 30.72
+      "prevention_significance": 30.72,
+      "population_relevance": 12.9
     },
     {
       "myth_id": 27,
@@ -1930,7 +2102,8 @@
       "awareness": 47.06,
       "significance": 57.11,
       "correctness": 55.56,
-      "prevention_significance": 37.02
+      "prevention_significance": 37.02,
+      "population_relevance": 12.8
     },
     {
       "myth_id": 20,
@@ -1938,7 +2111,8 @@
       "awareness": 50.33,
       "significance": 71.86,
       "correctness": 81.39,
-      "prevention_significance": 25.28
+      "prevention_significance": 25.28,
+      "population_relevance": 12.7
     },
     {
       "myth_id": 41,
@@ -1946,7 +2120,8 @@
       "awareness": 42.48,
       "significance": 58.21,
       "correctness": 73.08,
-      "prevention_significance": 23.95
+      "prevention_significance": 23.95,
+      "population_relevance": 13.4
     },
     {
       "myth_id": 19,
@@ -1954,7 +2129,8 @@
       "awareness": 62.42,
       "significance": 71.2,
       "correctness": 87.43,
-      "prevention_significance": 21.08
+      "prevention_significance": 21.08,
+      "population_relevance": 16
     },
     {
       "myth_id": 26,
@@ -1962,15 +2138,17 @@
       "awareness": 34.97,
       "significance": 65.11,
       "correctness": 30.53,
-      "prevention_significance": 55.95
+      "prevention_significance": 55.95,
+      "population_relevance": 18
     },
     {
       "myth_id": 14,
       "group_id": "young_adults",
       "awareness": 18.3,
-      "significance": 75.0,
+      "significance": 75,
       "correctness": 69.64,
-      "prevention_significance": 33.81
+      "prevention_significance": 33.81,
+      "population_relevance": 5.1
     },
     {
       "myth_id": 3,
@@ -1978,7 +2156,8 @@
       "awareness": 49.35,
       "significance": 69.76,
       "correctness": 78.59,
-      "prevention_significance": 27.59
+      "prevention_significance": 27.59,
+      "population_relevance": 16.9
     },
     {
       "myth_id": 7,
@@ -1986,7 +2165,8 @@
       "awareness": 43.46,
       "significance": 76.01,
       "correctness": 86.22,
-      "prevention_significance": 23.28
+      "prevention_significance": 23.28,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 6,
@@ -1994,7 +2174,8 @@
       "awareness": 51.96,
       "significance": 75.26,
       "correctness": 88.47,
-      "prevention_significance": 21.3
+      "prevention_significance": 21.3,
+      "population_relevance": 11.7
     },
     {
       "myth_id": 21,
@@ -2002,7 +2183,8 @@
       "awareness": 57.52,
       "significance": 77.65,
       "correctness": 88.64,
-      "prevention_significance": 21.25
+      "prevention_significance": 21.25,
+      "population_relevance": 17
     },
     {
       "myth_id": 28,
@@ -2010,7 +2192,8 @@
       "awareness": 32.35,
       "significance": 65.66,
       "correctness": 30.64,
-      "prevention_significance": 56.5
+      "prevention_significance": 56.5,
+      "population_relevance": 16.5
     },
     {
       "myth_id": 39,
@@ -2018,7 +2201,8 @@
       "awareness": 29.41,
       "significance": 52.96,
       "correctness": 25.56,
-      "prevention_significance": 50.52
+      "prevention_significance": 50.52,
+      "population_relevance": 10
     },
     {
       "myth_id": 18,
@@ -2026,7 +2210,8 @@
       "awareness": 54.25,
       "significance": 61.65,
       "correctness": 55.42,
-      "prevention_significance": 39.48
+      "prevention_significance": 39.48,
+      "population_relevance": 16.7
     },
     {
       "myth_id": 25,
@@ -2034,7 +2219,8 @@
       "awareness": 44.44,
       "significance": 59.56,
       "correctness": 59.31,
-      "prevention_significance": 35.49
+      "prevention_significance": 35.49,
+      "population_relevance": 12.8
     },
     {
       "myth_id": 16,
@@ -2042,7 +2228,8 @@
       "awareness": 15.36,
       "significance": 68.79,
       "correctness": 70.21,
-      "prevention_significance": 30.78
+      "prevention_significance": 30.78,
+      "population_relevance": 3.5
     },
     {
       "myth_id": 15,
@@ -2050,7 +2237,8 @@
       "awareness": 21.24,
       "significance": 71.28,
       "correctness": 76.92,
-      "prevention_significance": 27.38
+      "prevention_significance": 27.38,
+      "population_relevance": 4.9
     },
     {
       "myth_id": 8,
@@ -2058,7 +2246,8 @@
       "awareness": 44.44,
       "significance": 72.06,
       "correctness": 87.25,
-      "prevention_significance": 21.23
+      "prevention_significance": 21.23,
+      "population_relevance": 11
     },
     {
       "myth_id": 10,
@@ -2066,7 +2255,8 @@
       "awareness": 66.99,
       "significance": 66.99,
       "correctness": 49.27,
-      "prevention_significance": 44.85
+      "prevention_significance": 44.85,
+      "population_relevance": 34.1
     },
     {
       "myth_id": 34,
@@ -2074,7 +2264,8 @@
       "awareness": 34.31,
       "significance": 70.16,
       "correctness": 57.46,
-      "prevention_significance": 41.78
+      "prevention_significance": 41.78,
+      "population_relevance": 14.5
     },
     {
       "myth_id": 42,
@@ -2082,7 +2273,8 @@
       "awareness": 39.87,
       "significance": 64.48,
       "correctness": 57.38,
-      "prevention_significance": 40.16
+      "prevention_significance": 40.16,
+      "population_relevance": 20.7
     },
     {
       "myth_id": 32,
@@ -2090,7 +2282,8 @@
       "awareness": 35.62,
       "significance": 63.3,
       "correctness": 55.35,
-      "prevention_significance": 39.51
+      "prevention_significance": 39.51,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 33,
@@ -2098,7 +2291,8 @@
       "awareness": 34.64,
       "significance": 54.09,
       "correctness": 61.32,
-      "prevention_significance": 32.83
+      "prevention_significance": 32.83,
+      "population_relevance": 6.8
     },
     {
       "myth_id": 38,
@@ -2106,7 +2300,8 @@
       "awareness": 24.51,
       "significance": 29.78,
       "correctness": 54.67,
-      "prevention_significance": 25.42
+      "prevention_significance": 25.42,
+      "population_relevance": 4
     },
     {
       "myth_id": 4,
@@ -2114,7 +2309,8 @@
       "awareness": 53.92,
       "significance": 67.07,
       "correctness": 78.38,
-      "prevention_significance": 24.48
+      "prevention_significance": 24.48,
+      "population_relevance": 11.2
     },
     {
       "myth_id": 1,
@@ -2122,15 +2318,17 @@
       "awareness": 16.01,
       "significance": 53.47,
       "correctness": 46.94,
-      "prevention_significance": 43.19
+      "prevention_significance": 43.19,
+      "population_relevance": 5.6
     },
     {
       "myth_id": 36,
       "group_id": "young_adults",
       "awareness": 32.68,
-      "significance": 66.0,
+      "significance": 66,
       "correctness": 59.67,
-      "prevention_significance": 38.73
+      "prevention_significance": 38.73,
+      "population_relevance": 12.9
     },
     {
       "myth_id": 5,
@@ -2138,7 +2336,8 @@
       "awareness": 16.67,
       "significance": 67.32,
       "correctness": 73.86,
-      "prevention_significance": 28.1
+      "prevention_significance": 28.1,
+      "population_relevance": 5.1
     },
     {
       "myth_id": 11,
@@ -2146,7 +2345,8 @@
       "awareness": 32.68,
       "significance": 58.33,
       "correctness": 67.33,
-      "prevention_significance": 28.07
+      "prevention_significance": 28.07,
+      "population_relevance": 5.5
     },
     {
       "myth_id": 30,
@@ -2154,7 +2354,8 @@
       "awareness": 15.36,
       "significance": 69.5,
       "correctness": 79.43,
-      "prevention_significance": 26.24
+      "prevention_significance": 26.24,
+      "population_relevance": 4.3
     },
     {
       "myth_id": 9,
@@ -2162,7 +2363,8 @@
       "awareness": 34.64,
       "significance": 70.75,
       "correctness": 78.62,
-      "prevention_significance": 25.22
+      "prevention_significance": 25.22,
+      "population_relevance": 6.6
     },
     {
       "myth_id": 29,
@@ -2170,7 +2372,8 @@
       "awareness": 39.22,
       "significance": 64.72,
       "correctness": 85.83,
-      "prevention_significance": 22.33
+      "prevention_significance": 22.33,
+      "population_relevance": 8.6
     },
     {
       "myth_id": 37,
@@ -2178,7 +2381,8 @@
       "awareness": 16.99,
       "significance": 52.56,
       "correctness": 37.82,
-      "prevention_significance": 44.49
+      "prevention_significance": 44.49,
+      "population_relevance": 6.4
     },
     {
       "myth_id": 22,
@@ -2186,7 +2390,8 @@
       "awareness": 56.21,
       "significance": 55.81,
       "correctness": 62.6,
-      "prevention_significance": 33.99
+      "prevention_significance": 33.99,
+      "population_relevance": 27.8
     },
     {
       "myth_id": 31,
@@ -2194,7 +2399,8 @@
       "awareness": 68.3,
       "significance": 67.78,
       "correctness": 81.18,
-      "prevention_significance": 26.12
+      "prevention_significance": 26.12,
+      "population_relevance": 16.3
     },
     {
       "myth_id": 13,
@@ -2202,7 +2408,8 @@
       "awareness": 33.66,
       "significance": 47.25,
       "correctness": 78.32,
-      "prevention_significance": 18.96
+      "prevention_significance": 18.96,
+      "population_relevance": 7.9
     },
     {
       "myth_id": 12,
@@ -2210,7 +2417,8 @@
       "awareness": 24.51,
       "significance": 62.22,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 17,
@@ -2218,7 +2426,8 @@
       "awareness": 5.56,
       "significance": 58.82,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 35,
@@ -2226,7 +2435,8 @@
       "awareness": 12.75,
       "significance": 56.41,
       "correctness": 70.94,
-      "prevention_significance": 28.72
+      "prevention_significance": 28.72,
+      "population_relevance": 5.7
     },
     {
       "myth_id": 40,
@@ -2234,7 +2444,8 @@
       "awareness": 17.83,
       "significance": 55.19,
       "correctness": 37.68,
-      "prevention_significance": 45.41
+      "prevention_significance": 45.41,
+      "population_relevance": 8.5
     },
     {
       "myth_id": 23,
@@ -2242,7 +2453,8 @@
       "awareness": 16.47,
       "significance": 69.02,
       "correctness": 61.18,
-      "prevention_significance": 38.75
+      "prevention_significance": 38.75,
+      "population_relevance": 6.2
     },
     {
       "myth_id": 24,
@@ -2250,7 +2462,8 @@
       "awareness": 40.89,
       "significance": 65.87,
       "correctness": 71.09,
-      "prevention_significance": 28.57
+      "prevention_significance": 28.57,
+      "population_relevance": 12.9
     },
     {
       "myth_id": 2,
@@ -2258,7 +2471,8 @@
       "awareness": 21.12,
       "significance": 49.24,
       "correctness": 68.5,
-      "prevention_significance": 27.83
+      "prevention_significance": 27.83,
+      "population_relevance": 6.5
     },
     {
       "myth_id": 3,
@@ -2266,7 +2480,8 @@
       "awareness": 50.97,
       "significance": 80.41,
       "correctness": 76.93,
-      "prevention_significance": 32.19
+      "prevention_significance": 32.19,
+      "population_relevance": 16.9
     },
     {
       "myth_id": 20,
@@ -2274,7 +2489,8 @@
       "awareness": 46.71,
       "significance": 71.81,
       "correctness": 84.37,
-      "prevention_significance": 23.11
+      "prevention_significance": 23.11,
+      "population_relevance": 12.7
     },
     {
       "myth_id": 28,
@@ -2282,7 +2498,8 @@
       "awareness": 28.88,
       "significance": 60.18,
       "correctness": 27.74,
-      "prevention_significance": 55.53
+      "prevention_significance": 55.53,
+      "population_relevance": 16.5
     },
     {
       "myth_id": 26,
@@ -2290,7 +2507,8 @@
       "awareness": 35.27,
       "significance": 61.51,
       "correctness": 31.5,
-      "prevention_significance": 53.26
+      "prevention_significance": 53.26,
+      "population_relevance": 18
     },
     {
       "myth_id": 14,
@@ -2298,7 +2516,8 @@
       "awareness": 16.67,
       "significance": 74.81,
       "correctness": 71.32,
-      "prevention_significance": 32.25
+      "prevention_significance": 32.25,
+      "population_relevance": 5.1
     },
     {
       "myth_id": 41,
@@ -2306,15 +2525,17 @@
       "awareness": 48.26,
       "significance": 64.12,
       "correctness": 75.5,
-      "prevention_significance": 24.18
+      "prevention_significance": 24.18,
+      "population_relevance": 13.4
     },
     {
       "myth_id": 21,
       "group_id": "parents",
       "awareness": 65.89,
-      "significance": 85.0,
+      "significance": 85,
       "correctness": 91.18,
-      "prevention_significance": 22.31
+      "prevention_significance": 22.31,
+      "population_relevance": 17
     },
     {
       "myth_id": 6,
@@ -2322,7 +2543,8 @@
       "awareness": 44.77,
       "significance": 76.19,
       "correctness": 88.02,
-      "prevention_significance": 22.08
+      "prevention_significance": 22.08,
+      "population_relevance": 11.7
     },
     {
       "myth_id": 19,
@@ -2330,7 +2552,8 @@
       "awareness": 64.15,
       "significance": 71.7,
       "correctness": 89.63,
-      "prevention_significance": 20.26
+      "prevention_significance": 20.26,
+      "population_relevance": 16
     },
     {
       "myth_id": 39,
@@ -2338,7 +2561,8 @@
       "awareness": 16.67,
       "significance": 51.16,
       "correctness": 25.58,
-      "prevention_significance": 49.22
+      "prevention_significance": 49.22,
+      "population_relevance": 10
     },
     {
       "myth_id": 42,
@@ -2346,7 +2570,8 @@
       "awareness": 40.5,
       "significance": 71.29,
       "correctness": 55.18,
-      "prevention_significance": 45.1
+      "prevention_significance": 45.1,
+      "population_relevance": 20.7
     },
     {
       "myth_id": 27,
@@ -2354,7 +2579,8 @@
       "awareness": 32.95,
       "significance": 61.76,
       "correctness": 55.29,
-      "prevention_significance": 38.98
+      "prevention_significance": 38.98,
+      "population_relevance": 12.8
     },
     {
       "myth_id": 25,
@@ -2362,7 +2588,8 @@
       "awareness": 33.14,
       "significance": 56.73,
       "correctness": 60.62,
-      "prevention_significance": 34.74
+      "prevention_significance": 34.74,
+      "population_relevance": 12.8
     },
     {
       "myth_id": 7,
@@ -2370,7 +2597,8 @@
       "awareness": 36.24,
       "significance": 80.75,
       "correctness": 84.67,
-      "prevention_significance": 26.13
+      "prevention_significance": 26.13,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 10,
@@ -2378,7 +2606,8 @@
       "awareness": 68.99,
       "significance": 69.85,
       "correctness": 47.85,
-      "prevention_significance": 47.47
+      "prevention_significance": 47.47,
+      "population_relevance": 34.1
     },
     {
       "myth_id": 22,
@@ -2386,7 +2615,8 @@
       "awareness": 63.57,
       "significance": 65.34,
       "correctness": 51.32,
-      "prevention_significance": 44.14
+      "prevention_significance": 44.14,
+      "population_relevance": 27.8
     },
     {
       "myth_id": 36,
@@ -2394,7 +2624,8 @@
       "awareness": 30.81,
       "significance": 65.2,
       "correctness": 55.35,
-      "prevention_significance": 41.26
+      "prevention_significance": 41.26,
+      "population_relevance": 12.9
     },
     {
       "myth_id": 18,
@@ -2402,7 +2633,8 @@
       "awareness": 44.57,
       "significance": 62.9,
       "correctness": 53.48,
-      "prevention_significance": 41.19
+      "prevention_significance": 41.19,
+      "population_relevance": 16.7
     },
     {
       "myth_id": 32,
@@ -2410,7 +2642,8 @@
       "awareness": 29.65,
       "significance": 63.4,
       "correctness": 55.34,
-      "prevention_significance": 40.39
+      "prevention_significance": 40.39,
+      "population_relevance": 10.1
     },
     {
       "myth_id": 16,
@@ -2418,7 +2651,8 @@
       "awareness": 12.6,
       "significance": 73.33,
       "correctness": 68.21,
-      "prevention_significance": 33.95
+      "prevention_significance": 33.95,
+      "population_relevance": 3.5
     },
     {
       "myth_id": 4,
@@ -2426,7 +2660,8 @@
       "awareness": 40.12,
       "significance": 65.06,
       "correctness": 72.14,
-      "prevention_significance": 27.18
+      "prevention_significance": 27.18,
+      "population_relevance": 11.2
     },
     {
       "myth_id": 15,
@@ -2434,7 +2669,8 @@
       "awareness": 18.22,
       "significance": 67.73,
       "correctness": 76.6,
-      "prevention_significance": 27.09
+      "prevention_significance": 27.09,
+      "population_relevance": 4.9
     },
     {
       "myth_id": 9,
@@ -2442,7 +2678,8 @@
       "awareness": 20.93,
       "significance": 64.8,
       "correctness": 75.31,
-      "prevention_significance": 26.48
+      "prevention_significance": 26.48,
+      "population_relevance": 6.6
     },
     {
       "myth_id": 30,
@@ -2450,7 +2687,8 @@
       "awareness": 13.37,
       "significance": 70.53,
       "correctness": 82.61,
-      "prevention_significance": 25.02
+      "prevention_significance": 25.02,
+      "population_relevance": 4.3
     },
     {
       "myth_id": 29,
@@ -2458,7 +2696,8 @@
       "awareness": 35.85,
       "significance": 57.3,
       "correctness": 85.05,
-      "prevention_significance": 20.25
+      "prevention_significance": 20.25,
+      "population_relevance": 8.6
     },
     {
       "myth_id": 37,
@@ -2466,7 +2705,8 @@
       "awareness": 12.02,
       "significance": 61.83,
       "correctness": 37.63,
-      "prevention_significance": 51.4
+      "prevention_significance": 51.4,
+      "population_relevance": 6.4
     },
     {
       "myth_id": 34,
@@ -2474,7 +2714,8 @@
       "awareness": 30.43,
       "significance": 72.86,
       "correctness": 53.72,
-      "prevention_significance": 45.13
+      "prevention_significance": 45.13,
+      "population_relevance": 14.5
     },
     {
       "myth_id": 1,
@@ -2482,7 +2723,8 @@
       "awareness": 11.82,
       "significance": 52.46,
       "correctness": 45.9,
-      "prevention_significance": 42.62
+      "prevention_significance": 42.62,
+      "population_relevance": 5.6
     },
     {
       "myth_id": 38,
@@ -2490,7 +2732,8 @@
       "awareness": 15.31,
       "significance": 29.96,
       "correctness": 59.49,
-      "prevention_significance": 25.82
+      "prevention_significance": 25.82,
+      "population_relevance": 4
     },
     {
       "myth_id": 5,
@@ -2498,7 +2741,8 @@
       "awareness": 18.8,
       "significance": 64.26,
       "correctness": 75.26,
-      "prevention_significance": 25.36
+      "prevention_significance": 25.36,
+      "population_relevance": 5.1
     },
     {
       "myth_id": 31,
@@ -2506,7 +2750,8 @@
       "awareness": 62.02,
       "significance": 62.5,
       "correctness": 80.52,
-      "prevention_significance": 24.81
+      "prevention_significance": 24.81,
+      "population_relevance": 16.3
     },
     {
       "myth_id": 11,
@@ -2514,7 +2759,8 @@
       "awareness": 18.6,
       "significance": 55.21,
       "correctness": 71.87,
-      "prevention_significance": 23.47
+      "prevention_significance": 23.47,
+      "population_relevance": 5.5
     },
     {
       "myth_id": 8,
@@ -2522,7 +2768,8 @@
       "awareness": 48.45,
       "significance": 81.2,
       "correctness": 91.6,
-      "prevention_significance": 21.33
+      "prevention_significance": 21.33,
+      "population_relevance": 11
     },
     {
       "myth_id": 35,
@@ -2530,7 +2777,8 @@
       "awareness": 15.89,
       "significance": 63.82,
       "correctness": 62.6,
-      "prevention_significance": 36.75
+      "prevention_significance": 36.75,
+      "population_relevance": 5.7
     },
     {
       "myth_id": 13,
@@ -2538,7 +2786,8 @@
       "awareness": 32.56,
       "significance": 56.35,
       "correctness": 81.55,
-      "prevention_significance": 20.24
+      "prevention_significance": 20.24,
+      "population_relevance": 7.9
     },
     {
       "myth_id": 12,
@@ -2546,7 +2795,8 @@
       "awareness": 26.74,
       "significance": 69.57,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     },
     {
       "myth_id": 33,
@@ -2554,15 +2804,17 @@
       "awareness": 22.29,
       "significance": 53.62,
       "correctness": 56.81,
-      "prevention_significance": 35.3
+      "prevention_significance": 35.3,
+      "population_relevance": 6.8
     },
     {
       "myth_id": 17,
       "group_id": "parents",
       "awareness": 6.59,
-      "significance": 50.0,
+      "significance": 50,
       "correctness": null,
-      "prevention_significance": null
+      "prevention_significance": null,
+      "population_relevance": null
     }
   ],
   "groups": [

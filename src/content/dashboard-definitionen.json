@@ -50,6 +50,11 @@
       "label": "Präventionsbedeutung (Punkte)",
       "definition": "Kombination aus Bedeutung und Fehleinschätzung. Höher = größerer Präventionsbedarf.",
       "scale": "0–100 Punkte"
+    },
+    "population_relevance": {
+      "label": "Bevölkerungsrelevanz (Punkte)",
+      "definition": "Bevölkerungsbezogene Risikobedeutung — kombiniert die individuelle Präventionsbedeutung mit dem Verbreitungsgrad des Mythos. Nur für Volljährige (18–70) und Minderjährige (16–17) erhoben.",
+      "scale": "0–100 Punkte"
     }
   },
   "sourcesIndicators": {

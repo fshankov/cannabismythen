@@ -21,6 +21,7 @@
     "@keystatic/core": "^0.5.0",
     "astro": "^6.0.8",
     "d3": "^7.9.0",
+    "driver.js": "^1.4.0",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.6",
     "lucide-react": "^1.7.0",

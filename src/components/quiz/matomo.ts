@@ -124,3 +124,48 @@ export function trackMythLinkClicked(mythId: string): void {
     name: mythId,
   });
 }
+
+// ─── Phase C / D event wrappers ──────────────────────────────────────────
+
+/** Fires when the user opens the Übersicht (deck overview) sheet. */
+export function trackDeckOverviewOpened(themeName: string): void {
+  trackQuizEvent({
+    category: "Quiz",
+    action: "deck_overview_opened",
+    name: themeName,
+  });
+}
+
+/** Fires when a horizontal swipe commits, advancing or going back. */
+export function trackCardSwiped(direction: "next" | "prev"): void {
+  trackQuizEvent({
+    category: "Quiz",
+    action: "card_swiped",
+    name: direction,
+  });
+}
+
+/** Fires when the user picks a confidence value after answering. */
+export function trackConfidenceChosen(
+  mythId: string,
+  confidence: "sure" | "unsure"
+): void {
+  trackQuizEvent({
+    category: "Quiz",
+    action: "confidence_chosen",
+    name: mythId,
+    customDimensions: {
+      chosen_answer: confidence.toUpperCase(),
+    },
+  });
+}
+
+/** Fires when a keyboard shortcut triggers an action. `name` is the action
+ *  name (e.g. "next", "prev", "answer:richtig", "open_factsheet"). */
+export function trackKeyboardShortcutUsed(action: string): void {
+  trackQuizEvent({
+    category: "Quiz",
+    action: "keyboard_shortcut_used",
+    name: action,
+  });
+}

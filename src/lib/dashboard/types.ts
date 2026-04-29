@@ -7,7 +7,7 @@ export type CorrectnessClass =
 
 export type GroupId = 'general_population' | 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
 
-export type Indicator = 'awareness' | 'significance' | 'correctness' | 'prevention_significance';
+export type Indicator = 'awareness' | 'significance' | 'correctness' | 'prevention_significance' | 'population_relevance';
 
 export interface Myth {
   id: number;
@@ -30,6 +30,9 @@ export interface Metric {
   significance: number | null;
   correctness: number | null;
   prevention_significance: number | null;
+  /** Bevölkerungsrelevanz / population-related risk significance.
+   *  Only available for adults + minors; null for consumers/young_adults/parents. */
+  population_relevance: number | null;
 }
 
 export interface Group {
@@ -60,10 +63,25 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'sources' | 'sources_v2';
+export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'strips_groups' | 'sources' | 'sources_v2';
 
 export type SourcesV2Mode = 'dumbbell' | 'multiples' | 'matrix';
 export type SourcesV2Sort = 'prevention' | 'gap';
+
+/** "Streifen" (strips) tab — which dimension forms the columns ("pivot").
+ *  Themen is intentionally NOT a pivot: in both modes the Themen row is a
+ *  multi-select filter inside the view. */
+export type StripsMode = 'indicator' | 'group';
+export type StripsSortAxis = Indicator | GroupId;
+export type StripsSortDir = 'asc' | 'desc';
+
+/** Selbsttest quiz theme slugs — the 5 Themen blocks shown in StripsView */
+export type SelbsttestTheme =
+  | 'quiz-gefaehrlichkeit'
+  | 'quiz-gesellschaft'
+  | 'quiz-medizin'
+  | 'quiz-risiken'
+  | 'quiz-stimmung';
 
 export type Lang = 'de' | 'en';
 
@@ -135,4 +153,16 @@ export interface AppState {
   sourcesV2Sort: SourcesV2Sort;
   sourcesV2Group: SourceGroupId;
   sourcesV2Expanded: number[];
+  /** "Streifen" view — columns by indicator or by population group */
+  stripsMode: StripsMode;
+  /** Sort anchor: an Indicator id when stripsMode='indicator', a GroupId when 'group' */
+  stripsSortAxis: StripsSortAxis | null;
+  /** Sort direction for the anchor strip */
+  stripsSortDir: StripsSortDir;
+  /** Myth whose factsheet panel should be open. Decoupled from selectedMythId so views
+   *  (e.g. Streifen) can highlight without auto-opening the factsheet. */
+  factsheetMythId: number | null;
+  /** "Streifen" view — Selbsttest themes to filter by (multi-select).
+   *  Empty array = no filter (show all myths). */
+  stripsThemeFilter: SelbsttestTheme[];
 }

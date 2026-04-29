@@ -14,7 +14,7 @@ interface Props {
   onSelectMyth: (id: number) => void;
 }
 
-type SortKey = 'myth' | 'verdict' | 'awareness' | 'significance' | 'correctness' | 'prevention_significance';
+type SortKey = 'myth' | 'verdict' | 'awareness' | 'significance' | 'correctness' | 'prevention_significance' | 'population_relevance';
 type SortDir = 'asc' | 'desc';
 
 const INDICATOR_COLS: { key: Indicator; Icon: LucideIcon }[] = [

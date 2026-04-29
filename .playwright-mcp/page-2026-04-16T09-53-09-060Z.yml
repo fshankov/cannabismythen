@@ -1,0 +1,6 @@
+- generic [ref=e2]:
+  - 'heading "Cannabis: Mythen & Evidenz" [level=1] [ref=e3]'
+  - paragraph [ref=e4]: Bitte geben Sie das Zugangspasswort ein.
+  - generic [ref=e5]:
+    - textbox "Passwort" [active] [ref=e6]
+    - button "Einloggen" [ref=e7] [cursor=pointer]
