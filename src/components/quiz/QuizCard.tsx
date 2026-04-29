@@ -3,17 +3,31 @@
  *
  * Used in the one-question-at-a-time flow inside QuizPlayer.
  * Front face: myth statement + 4 answer buttons (always visible).
- * Back face (after answering): three-tier feedback message, the myth statement
- * with the evidence-based verdict, a 2-sentence explanation, the population
- * comparison line, and a "Nächste Frage" CTA.
+ * Back face (after answering): three-tier feedback message, the user's
+ * answer chip plus (when wrong) the correct answer chip, the explanation,
+ * a population comparison bar, and a "Nächste Frage" CTA.
  *
- * Answer button order is randomized per myth (deterministic by myth.id) so
- * users cannot pattern-match "Richtig" → correct for true myths.
+ * Per-card details:
+ * - Answer button order is deterministically randomized by myth.id.
+ * - Each card carries a deterministic idle tilt (≤1.5°) so consecutive
+ *   cards feel like a hand-shuffled stack.
+ * - On mobile coarse pointers (and outside `prefers-reduced-motion`),
+ *   the back face supports a horizontal swipe-to-advance gesture.
  */
 
-import { useEffect, useMemo, useRef } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  type CSSProperties,
+} from "react";
 import type { QuizMyth, Classification, CardAnswer } from "./types";
 import { t } from "./i18n";
+import {
+  usePointerSwipe,
+  useIsCoarsePointer,
+  usePrefersReducedMotion,
+} from "./usePointerSwipe";
 
 const ALL_OPTIONS: Classification[] = [
   "falsch",
@@ -42,6 +56,12 @@ function shuffleStable<T>(arr: readonly T[], seed: number): T[] {
     [out[i], out[j]] = [out[j], out[i]];
   }
   return out;
+}
+
+/** Map a hash to a tilt in (-1.5°, +1.5°). */
+function tiltFromHash(hash: number): number {
+  const range = 3; // -1.5 .. +1.5
+  return ((hash % 1000) / 1000) * range - range / 2;
 }
 
 /** Ordinal scale used for distance-based feedback. */
@@ -73,6 +93,8 @@ interface QuizCardProps {
   statementText?: string;
   /** Explanation text from Keystatic content (overrides i18n key) */
   explanationText?: string;
+  /** How many phantom cards are stacked behind this one (0–2). */
+  deckBehind?: number;
 }
 
 export default function QuizCard({
@@ -86,20 +108,34 @@ export default function QuizCard({
   isLastQuestion,
   statementText,
   explanationText,
+  deckBehind = 0,
 }: QuizCardProps) {
   const isAnswered = answer !== null;
   const flipped = isAnswered;
+  const cardRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const liveRef = useRef<HTMLDivElement>(null);
 
   const statement = statementText || t(myth.statementKey);
   const explanation = explanationText || t(myth.explanationKey);
 
+  const isCoarsePointer = useIsCoarsePointer();
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  // Drag-to-advance is only useful once the user has answered (back face).
+  usePointerSwipe(cardRef, {
+    enabled: isAnswered && isCoarsePointer && !prefersReducedMotion,
+    onCommit: onNext,
+  });
+
   // Stable per-myth answer order (deterministic so reload doesn't shuffle)
   const orderedOptions = useMemo(
     () => shuffleStable(ALL_OPTIONS, hashCode(myth.id)),
     [myth.id]
   );
+
+  // Idle tilt (deterministic per myth). Falls back to 0 for SSR sanity.
+  const tilt = useMemo(() => tiltFromHash(hashCode(myth.id)), [myth.id]);
 
   // Focus the back when the user answers (announces feedback).
   useEffect(() => {
@@ -136,13 +172,21 @@ export default function QuizCard({
     ? t("ui.populationLine", { pct: popPct })
     : t("ui.populationUnavailable");
 
+  const cellStyle: CSSProperties = {
+    ["--card-tilt" as string]: `${tilt.toFixed(2)}deg`,
+  };
+
   return (
     <div
       className="quiz-card__cell quiz-card__cell--flow"
       role="region"
       aria-label={t("ui.questionLabel", { n: index + 1, total })}
+      data-deck={Math.max(0, Math.min(2, deckBehind))}
+      data-answered={isAnswered ? "true" : "false"}
+      style={cellStyle}
     >
       <div
+        ref={cardRef}
         className={[
           "quiz-card",
           "quiz-card--flow",
@@ -207,19 +251,34 @@ export default function QuizCard({
 
                 <p className="quiz-card__verdict-line">{mythVerdict}</p>
 
-                {/* Show user's choice next to the correct one if they differ */}
-                {!answer.isCorrect && (
-                  <p className="quiz-card__your-answer">
-                    <span className="quiz-card__your-answer-label">
-                      {t("ui.yourAnswerLabel")}:
-                    </span>{" "}
-                    <span
-                      className={`classification classification--${answer.chosenClassification}`}
-                    >
-                      {t(`classification.${answer.chosenClassification}`)}
-                    </span>
-                  </p>
-                )}
+                {/* Two-chip layout: user's answer (always) + correct answer (if wrong). */}
+                <dl
+                  className="quiz-card__answer-chips"
+                  data-correct={answer.isCorrect ? "true" : "false"}
+                >
+                  <div>
+                    <dt>{t("ui.yourAnswerLabel")}</dt>
+                    <dd>
+                      <span
+                        className={`classification classification--${answer.chosenClassification}`}
+                      >
+                        {t(`classification.${answer.chosenClassification}`)}
+                      </span>
+                    </dd>
+                  </div>
+                  {!answer.isCorrect && (
+                    <div>
+                      <dt>{t("ui.correctAnswerLabel")}</dt>
+                      <dd>
+                        <span
+                          className={`classification classification--${myth.correctClassification}`}
+                        >
+                          {t(`classification.${myth.correctClassification}`)}
+                        </span>
+                      </dd>
+                    </div>
+                  )}
+                </dl>
 
                 <p className="quiz-card__explanation">{explanation}</p>
 
@@ -236,7 +295,7 @@ export default function QuizCard({
                       />
                     </div>
                     <span className="quiz-card__pop-bar-value">
-                      {popPct} %
+                      {popPct} %
                     </span>
                   </div>
                 )}
@@ -265,6 +324,10 @@ export default function QuizCard({
                     →
                   </button>
                 </div>
+
+                <p className="quiz-card__swipe-hint" aria-hidden="true">
+                  {t("ui.swipeHint")}
+                </p>
 
                 {/* SR-only live region announcing the feedback */}
                 <div

@@ -48,6 +48,7 @@ import {
   trackQuizStarted,
 } from "./matomo";
 import QuizCard from "./QuizCard";
+import TitleCard from "./TitleCard";
 import ProgressBar from "./ProgressBar";
 import ResultScreen from "./ResultScreen";
 import FactsheetPanel from "./FactsheetPanel";
@@ -93,6 +94,9 @@ interface PersistedState {
   answers: Record<string, CardAnswer>;
   currentIndex: number;
   finished: boolean;
+  /** True once the user has tapped "Los geht's" on the title card. Optional
+   *  for backwards-compatibility with older v1 records. */
+  introDismissed?: boolean;
 }
 
 function storageKey(slug: string): string {
@@ -191,6 +195,14 @@ function QuizPlayerInner({
     return Boolean(saved?.finished);
   });
 
+  // Title card is dismissed once the user starts (or has any saved answers).
+  const [introDismissed, setIntroDismissed] = useState<boolean>(() => {
+    const saved = loadProgress(quizSlug);
+    if (!saved) return false;
+    if (saved.introDismissed) return true;
+    return Object.keys(saved.answers ?? {}).length > 0;
+  });
+
   const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
   const [lastScoreDelta, setLastScoreDelta] = useState(0);
   const [restoredNotice, setRestoredNotice] = useState<boolean>(() => {
@@ -211,8 +223,14 @@ function QuizPlayerInner({
   // ── Persist on every state change. The lazy initializers mean the first
   //    write is identical to what was already on disk → safe no-op.
   useEffect(() => {
-    saveProgress(quizSlug, { v: 1, answers, currentIndex, finished });
-  }, [quizSlug, answers, currentIndex, finished]);
+    saveProgress(quizSlug, {
+      v: 1,
+      answers,
+      currentIndex,
+      finished,
+      introDismissed,
+    });
+  }, [quizSlug, answers, currentIndex, finished, introDismissed]);
 
   // ── Find the portal target inside the site <header>.
   useEffect(() => {
@@ -342,6 +360,7 @@ function QuizPlayerInner({
     setCurrentIndex(0);
     setFinished(false);
     setRestoredNotice(false);
+    setIntroDismissed(false);
     clearProgress(quizSlug);
   }, [quizSlug]);
 
@@ -362,7 +381,10 @@ function QuizPlayerInner({
   const currentAnswer = currentMyth ? answers[currentMyth.id] || null : null;
 
   const showResults = finished && result !== null;
-  const showIntro = !showResults && answeredCount === 0;
+  const showTitleCard = !showResults && !introDismissed;
+  const cardsRemainingBehind = showTitleCard
+    ? Math.min(2, totalQuestions - 1)
+    : Math.min(2, totalQuestions - safeIndex - 1);
 
   const progressBarContent = (
     <ProgressBar
@@ -373,8 +395,6 @@ function QuizPlayerInner({
       quizTitle={t(theme.titleKey)}
     />
   );
-
-  const estimatedMinutes = Math.max(1, Math.round(totalQuestions * 0.5));
 
   return (
     <div
@@ -391,38 +411,30 @@ function QuizPlayerInner({
 
       {!showResults && currentMyth && (
         <div className="quiz-player__flow">
-          {showIntro && (
-            <header className="quiz-player__intro">
-              <p className="quiz-player__intro-eyebrow">Selbsttest</p>
-              <h1 className="quiz-player__intro-title">
-                {t(theme.titleKey)}
-              </h1>
-              <p className="quiz-player__intro-subtitle">
-                {t(theme.subtitleKey)}
-              </p>
-              {quizSummary && (
-                <p className="quiz-player__intro-summary">{quizSummary}</p>
-              )}
-              <p className="quiz-player__intro-meta">
-                {t("ui.questionsCount", { n: totalQuestions })} · ca.{" "}
-                {estimatedMinutes} Min.
-              </p>
-            </header>
+          {showTitleCard ? (
+            <TitleCard
+              title={t(theme.titleKey)}
+              subtitle={t(theme.subtitleKey)}
+              summary={quizSummary}
+              questionCount={totalQuestions}
+              onStart={() => setIntroDismissed(true)}
+            />
+          ) : (
+            <QuizCard
+              key={currentMyth.id}
+              myth={currentMyth}
+              index={safeIndex}
+              total={totalQuestions}
+              answer={currentAnswer}
+              onAnswer={handleAnswer}
+              onNext={handleNext}
+              onShowFactsheet={handleShowFactsheet}
+              isLastQuestion={safeIndex === totalQuestions - 1}
+              statementText={quizTextMap[currentMyth.id]?.statement}
+              explanationText={quizTextMap[currentMyth.id]?.explanation}
+              deckBehind={cardsRemainingBehind}
+            />
           )}
-
-          <QuizCard
-            key={currentMyth.id}
-            myth={currentMyth}
-            index={safeIndex}
-            total={totalQuestions}
-            answer={currentAnswer}
-            onAnswer={handleAnswer}
-            onNext={handleNext}
-            onShowFactsheet={handleShowFactsheet}
-            isLastQuestion={safeIndex === totalQuestions - 1}
-            statementText={quizTextMap[currentMyth.id]?.statement}
-            explanationText={quizTextMap[currentMyth.id]?.explanation}
-          />
 
           <nav
             className="quiz-player__nav"
