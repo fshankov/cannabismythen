@@ -78,6 +78,12 @@
   /* Transitions */
   --transition-fast: 0.15s ease;
   --transition: 0.25s ease;
+
+  /* Motion — used by the quiz card flip / slide / lift */
+  --ease-card: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-flip: 600ms;
+  --dur-slide: 320ms;
+  --lift-md: 6px;
 }
 
 
