@@ -49,7 +49,7 @@ interface Props {
   /** JSON-serialised DashboardDefinitions from dashboard-definitionen.json */
   definitions?: string;
   /** JSON-serialised Record<mythId, themeSlug> mapping each myth to its
-   *  Selbsttest theme (quiz-medizin / quiz-risiken / etc). Used by the
+   *  Quiz theme (quiz-medizin / quiz-risiken / etc). Used by the
    *  Streifen view for the Themen filter / Themen pivot mode. */
   mythThemes?: string;
 }
@@ -113,7 +113,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     }
   }, [definitions]);
 
-  // Parse mythId → Selbsttest theme slug map
+  // Parse mythId → Quiz theme slug map
   const mythThemeMap: Record<number, string> = useMemo(() => {
     if (!mythThemes) return {};
     try {

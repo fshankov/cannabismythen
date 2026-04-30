@@ -6,7 +6,7 @@
  *     Indikatoren), text rotated 90°. The active pill marks which row's items
  *     become the SVG strips (the chart's X-axis).
  *   - Three rows of icon-blocks above the chart:
- *       Row 1: 5 Selbsttest themes
+ *       Row 1: 5 Quiz themes
  *       Row 2: 5 population groups
  *       Row 3: 5 indicators
  *     One row corresponds to the active pivot — its blocks visually align with
@@ -35,7 +35,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import type {
   Myth, Metric, Group, GroupId, AppState, Indicator,
-  StripsMode, SelbsttestTheme, DashboardDefinitions, Category,
+  StripsMode, QuizThemeSlug, DashboardDefinitions, Category,
 } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, getMythText } from '../../../lib/dashboard/data';
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
@@ -55,7 +55,7 @@ interface Props {
   /** Stage 2 — opens the factsheet. */
   onSelectMyth: (id: number) => void;
   definitions?: DashboardDefinitions | null;
-  /** mythId → Selbsttest theme slug (kept for future use — unused in current UI). */
+  /** mythId → Quiz theme slug (kept for future use — unused in current UI). */
   mythThemes?: Record<number, string>;
   /** Pre-rendered factsheet HTML, keyed by myth id. Used here to pull the
    *  fakten-karten-style summary for the in-view myth card. */
@@ -64,7 +64,7 @@ interface Props {
 
 const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
 const STRIP_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
-const STRIP_THEMES: SelbsttestTheme[] = ['quiz-gefaehrlichkeit', 'quiz-gesellschaft', 'quiz-medizin', 'quiz-risiken', 'quiz-stimmung'];
+const STRIP_THEMES: QuizThemeSlug[] = ['quiz-gefaehrlichkeit', 'quiz-gesellschaft', 'quiz-medizin', 'quiz-risiken', 'quiz-stimmung'];
 
 const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
   awareness: Eye,
@@ -82,8 +82,8 @@ const GROUP_ICONS: Record<GroupId, LucideIcon> = {
   parents: UsersRound,
 };
 
-/** Selbsttest theme emoji — same set used on the Selbsttest landing page. */
-const THEME_EMOJI: Record<SelbsttestTheme, string> = {
+/** Quiz theme emoji — same set used on the Quiz landing page. */
+const THEME_EMOJI: Record<QuizThemeSlug, string> = {
   'quiz-gefaehrlichkeit': '⚖️', // ⚖️
   'quiz-gesellschaft': '🏛️', // 🏛️
   'quiz-medizin': '💊', // 💊
@@ -91,7 +91,7 @@ const THEME_EMOJI: Record<SelbsttestTheme, string> = {
   'quiz-stimmung': '🧠', // 🧠
 };
 
-const THEME_LABELS: Record<SelbsttestTheme, { full: string; short: string; defKey: string }> = {
+const THEME_LABELS: Record<QuizThemeSlug, { full: string; short: string; defKey: string }> = {
   'quiz-gefaehrlichkeit': { full: 'strips.theme.gefaehrlichkeit', short: 'strips.theme.gefaehrlichkeit.short', defKey: 'strips.theme.gefaehrlichkeit' },
   'quiz-gesellschaft': { full: 'strips.theme.gesellschaft', short: 'strips.theme.gesellschaft.short', defKey: 'strips.theme.gesellschaft' },
   'quiz-medizin': { full: 'strips.theme.medizin', short: 'strips.theme.medizin.short', defKey: 'strips.theme.medizin' },
@@ -115,7 +115,7 @@ const GROUP_SHORT_EN: Record<GroupId, string> = {
   parents: 'Parents',
 };
 
-type ColumnId = Indicator | GroupId | SelbsttestTheme;
+type ColumnId = Indicator | GroupId | QuizThemeSlug;
 
 interface BeeswarmNode {
   mythId: number;

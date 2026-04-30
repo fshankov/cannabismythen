@@ -24,7 +24,7 @@ const quiz = question.relatedQuiz
   .map((slug) => ({
     slug,
     title: quizTitles[slug] ?? slug.replace(/^quiz-/, "").replace(/-/g, " "),
-    url: `/selbsttest/${slug}/`,
+    url: `/quiz/${slug}/`,
   }));
 
 const dashboard = question.relatedDashboard.map((url) => ({

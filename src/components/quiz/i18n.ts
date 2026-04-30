@@ -242,7 +242,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.copiedToClipboard": "Link kopiert! \u2713",
     "ui.shareTitle": "Mein Cannabis-Quiz Ergebnis",
     "ui.shareText":
-      "Ich habe {correct} von {total} Cannabis-Mythen richtig eingesch\u00E4tzt und wei\u00DF mehr als {pct}\u00A0% der Bev\u00F6lkerung in Deutschland. Teste dich selbst: https://cannabismythen.de/selbsttest/",
+      "Ich habe {correct} von {total} Cannabis-Mythen richtig eingesch\u00E4tzt und wei\u00DF mehr als {pct}\u00A0% der Bev\u00F6lkerung in Deutschland. Teste dich selbst: https://cannabismythen.de/quiz/",
     "ui.backToQuizzes": "Alle Quiz-Module",
     "ui.restartQuiz": "Quiz wiederholen",
     "ui.zahlenUndFakten": "Zahlen & Fakten entdecken",

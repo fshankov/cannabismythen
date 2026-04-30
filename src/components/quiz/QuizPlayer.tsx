@@ -72,7 +72,7 @@ interface QuizPlayerProps {
   quizSlug: string;
   /** JSON-serialized Record<mythId, MythContentEntry> from Astro build */
   mythContent?: string;
-  /** JSON-serialized Record<mythId, QuizTextEntry> from Keystatic selbsttest content */
+  /** JSON-serialized Record<mythId, QuizTextEntry> from Keystatic quiz content */
   quizText?: string;
   /** Optional Keystatic summary used in the intro card */
   quizSummary?: string;

@@ -196,7 +196,7 @@ const translations = {
   'strips.value.label': { de: 'Wert für', en: 'Value for' },
   'strips.switch.indicators': { de: 'Indikator', en: 'Indicator' },
   'strips.switch.groups': { de: 'Bevölkerungsgruppe', en: 'Population group' },
-  'strips.switch.themes': { de: 'Selbsttest-Themen', en: 'Selbsttest themes' },
+  'strips.switch.themes': { de: 'Quiz-Themen', en: 'Quiz themes' },
   'strips.sort.label': { de: 'Sortieren nach', en: 'Sort by' },
   'strips.sort.asc': { de: 'Aufsteigend', en: 'Ascending' },
   'strips.sort.desc': { de: 'Absteigend', en: 'Descending' },

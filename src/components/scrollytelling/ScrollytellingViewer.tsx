@@ -289,7 +289,7 @@ function VizColorReveal({ active }: { active: boolean }) {
         ))}
       </div>
       <div className="viz-cta-cards">
-        <a href="/selbsttest/" className="viz-cta-card viz-cta-card--quiz">
+        <a href="/quiz/" className="viz-cta-card viz-cta-card--quiz">
           🎯 Quiz starten →
           <span>Teste dich selbst gegen den Wissenschaftsstand</span>
         </a>

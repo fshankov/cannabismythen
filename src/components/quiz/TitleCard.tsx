@@ -51,7 +51,7 @@ export default function TitleCard({
       >
         <div className="quiz-card__inner">
           <div className="quiz-card__face quiz-card__front">
-            <p className="quiz-card__title-eyebrow">Selbsttest</p>
+            <p className="quiz-card__title-eyebrow">Quiz</p>
             <h2 className="quiz-card__title-heading">{title}</h2>
             <p className="quiz-card__title-subtitle">{subtitle}</p>
             {summary && (

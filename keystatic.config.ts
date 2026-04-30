@@ -260,7 +260,7 @@ const faqQuestions = collection({
       label: "Verwandte Quiz-Module",
       itemLabel: (p) => p.value,
       description:
-        "Slugs aus selbsttest-Sammlung, z. B. quiz-bevoelkerung-gesetzgebung.",
+        "Slugs aus der quiz-Sammlung, z. B. quiz-bevoelkerung-gesetzgebung.",
     }),
     relatedDashboard: fields.array(
       fields.select({
@@ -365,10 +365,10 @@ const faqAudiences = singleton({
   },
 });
 
-const selbsttest = collection({
-  label: "🧪 Selbsttest – Quiz-Module",
+const quiz = collection({
+  label: "🧪 Quiz – Module",
   slugField: "title",
-  path: "src/content/selbsttest/*",
+  path: "src/content/quiz/*",
   format: { contentField: "content" },
   schema: {
     title: fields.slug({ name: { label: "Title" } }),
@@ -1013,7 +1013,7 @@ const quizHookBlock = singleton({
     }),
     primaryCtaUrl: fields.text({
       label: "Primärer CTA – Link",
-      defaultValue: "/selbsttest/",
+      defaultValue: "/quiz/",
     }),
     secondaryCtaLabel: fields.text({
       label: "Sekundärer CTA",
@@ -1042,7 +1042,7 @@ export default config({
     zahlenUndFakten,        // 🃏 Fakten-Karten  →  /fakten-karten/ + /zahlen-und-fakten/[slug]
     zahlenUndFaktenDashboard, // 📊 Daten-Explorer  →  /zahlen-und-fakten/
     faqQuestions,           // ❓ FAQ – Einzelne Fragen (audience-first)
-    selbsttest,             // 🧪 Selbsttest  →  /selbsttest/
+    quiz,                   // 🧪 Quiz  →  /quiz/
     startseite,             // 🏠 Startseite  →  / (homepage scrollytelling)
     ueberUns,               // ℹ️ Über das Projekt  →  /ueber-uns/
     // ── Internal ────────────────────────────────────────────────────────────

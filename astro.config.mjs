@@ -12,10 +12,17 @@ export default defineConfig({
     includeFiles: ["./src/content/**"],
     edgeMiddleware: true,
   }),
-  // Legacy theme-based FAQ slugs → audience-first restructure.
-  // The eight legacy `src/content/haeufige-fragen/*.mdoc` files were dropped
-  // in favour of the docx-driven faq/questions/ collection on 2026-04-30.
+  // Legacy redirects:
+  //  - FAQ theme-based slugs → audience-first restructure (2026-04-30).
+  //  - Selbsttest section renamed to Quiz (2026-04-30).
   redirects: {
+    // Selbsttest → Quiz
+    "/selbsttest": "/quiz",
+    "/selbsttest/": "/quiz/",
+    "/selbsttest/[slug]": "/quiz/[slug]",
+    "/selbsttest/[slug]/": "/quiz/[slug]/",
+
+    // FAQ legacy slugs
     "/haeufige-fragen/abhaengigkeit-risiko":
       "/haeufige-fragen/konsumierende/#faq-kann-cannabis-abhaengig-machen",
     "/haeufige-fragen/abhaengigkeit-risiko/":

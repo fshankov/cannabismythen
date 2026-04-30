@@ -19,13 +19,13 @@ const COMBINED_MYTHS: Record<number, number> = {
   42: 41, // m41-m42-anstieg-konsum
 };
 
-// Build mythId → Selbsttest theme slug map. Each Selbsttest quiz mdoc lists
+// Build mythId → Quiz theme slug map. Each quiz module mdoc lists
 // the myth IDs it covers via questions[].mythId (format "m04"). We map the
 // numeric myth_id ("m04" → 4) to the theme slug ("quiz-gefaehrlichkeit").
 // The Streifen view uses this for the Themen filter / Themen pivot mode.
-const selbsttestEntries = await getPublishedEntries("selbsttest");
+const quizEntries = await getPublishedEntries("quiz");
 const mythIdToTheme: Record<number, string> = {};
-for (const [slug, entry] of selbsttestEntries) {
+for (const [slug, entry] of quizEntries) {
   if (slug === "feedback-texte") continue;
   const e = entry as any;
   const questions = (e.questions || []) as Array<{ mythId?: string }>;

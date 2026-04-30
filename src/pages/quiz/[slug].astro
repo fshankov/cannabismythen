@@ -9,11 +9,11 @@ import { QUIZ_THEMES } from "@components/quiz/quizData";
 import "../../styles/quiz.css";
 
 export async function getStaticPaths() {
-  const slugs = await reader.collections.selbsttest.list();
+  const slugs = await reader.collections.quiz.list();
   const paths = [];
 
   for (const slug of slugs) {
-    const entry = await reader.collections.selbsttest.read(slug);
+    const entry = await reader.collections.quiz.read(slug);
     if (entry && entry.status === "published" && slug !== "feedback-texte") {
       paths.push({ params: { slug } });
     }
@@ -23,10 +23,10 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const entry = await reader.collections.selbsttest.read(slug!);
+const entry = await reader.collections.quiz.read(slug!);
 
 if (!entry || entry.status !== "published") {
-  return Astro.redirect("/selbsttest/");
+  return Astro.redirect("/quiz/");
 }
 
 // Build quiz text map from Keystatic-editable questions (statement + explanation)
@@ -84,7 +84,7 @@ if (theme) {
     />
 
     <footer>
-      <a href="/selbsttest/">&larr; Alle Quiz-Module</a>
+      <a href="/quiz/">&larr; Alle Quiz-Module</a>
     </footer>
   </article>
 </BaseLayout>
