@@ -85,8 +85,7 @@ const translations = {
   'view.overview': { de: 'Übersicht', en: 'Overview' },
   'view.circular': { de: 'Circular', en: 'Circular' },
   'view.ladder': { de: 'Indikator-Leiter', en: 'Indicator Ladder' },
-  'view.strips': { de: 'Indikatoren', en: 'Indicators' },
-  'view.strips_groups': { de: 'Gruppen', en: 'Groups' },
+  'view.strips': { de: 'Streifen', en: 'Strips' },
 
   // Table
   'table.myth': { de: 'Mythos', en: 'Myth' },
@@ -120,28 +119,24 @@ const translations = {
   // Lollipop
   'lollipop.title': { de: 'Gruppenvergleich', en: 'Group Comparison' },
 
-  // Sources tab
+  // Sources tab — single Streifen view replacing legacy V1 + V2 source tabs.
   'view.sources': { de: 'Informationsquellen', en: 'Information Sources' },
-  'howto.sources': {
-    de: 'Informationswege zur Beschaffung und Wahrnehmung von Gesundheitsinformationen. Wählen Sie Metrik und Bevölkerungsgruppe. Eingerückte Einträge = Unterkategorien.',
-    en: 'Information pathways for seeking and perceiving health information. Select metric and population group. Indented entries = subcategories.',
-  },
   'sources.metric.search': { de: 'Suche', en: 'Search' },
   'sources.metric.perception': { de: 'Wahrnehmung', en: 'Perception' },
   'sources.metric.trust': { de: 'Vertrauen', en: 'Trust' },
   'sources.metric.prevention': { de: 'Präventionspotential', en: 'Prevention Potential' },
 
-  // Sources V2
-  'view.sources_v2': { de: 'Informationsquellen V2', en: 'Information Sources V2' },
-  'howto.sources_v2': {
-    de: 'Alle vier Metriken pro Quelle in einem Diagramm. Wechseln Sie zwischen Hantel-Diagramm, kleinen Diagrammen und Strategie-Matrix. Klicken Sie auf eine Zeile, um Unterkategorien anzuzeigen.',
-    en: 'All four metrics per source in one chart. Switch between dumbbell, small multiples, and strategy matrix. Click a row to reveal subcategories.',
-  },
-  'sources_v2.mode.dumbbell': { de: 'Hantel-Diagramm', en: 'Dumbbell' },
-  'sources_v2.mode.multiples': { de: 'Kleine Diagramme', en: 'Small Multiples' },
-  'sources_v2.mode.matrix': { de: 'Strategie-Matrix', en: 'Strategy Matrix' },
-  'sources_v2.sort.prevention': { de: 'Nach Prävention', en: 'By Prevention' },
-  'sources_v2.sort.gap': { de: 'Nach Lücke (Vertrauen−Suche)', en: 'By Gap (Trust−Search)' },
+  // Sources Streifen view — keys feed the in-view labels and pivot pills.
+  'sources_strips.pivot.label': { de: 'Spalten', en: 'Columns' },
+  'sources_strips.pivot.metric': { de: 'Indikatoren', en: 'Indicators' },
+  'sources_strips.pivot.group': { de: 'Gruppen', en: 'Groups' },
+  'sources_strips.picker.group': { de: 'Bevölkerungsgruppe', en: 'Population group' },
+  'sources_strips.picker.metric': { de: 'Indikator', en: 'Indicator' },
+  'sources_strips.children.show': { de: 'Unterkategorien einblenden', en: 'Show subcategories' },
+  'sources_strips.category.all': { de: 'Alle Quellen', en: 'All sources' },
+  'sources_strips.count': { de: '{n} Quellen', en: '{n} sources' },
+  'sources_strips.action.showChildren': { de: 'Unterkategorien zeigen', en: 'Show subcategories' },
+  'sources_strips.action.gotoParent': { de: 'Zum Hauptthema', en: 'Go to parent' },
 
   // Verdict tags
   'verdict.all': { de: 'Alle Mythen', en: 'All Myths' },
@@ -192,11 +187,13 @@ const translations = {
     en: 'Choose the active axis on the left (Indicators / Groups / Themes). Tap an icon at the top to select or filter. Tap a dot to highlight — values appear right next to the dot. Tap "More" for the factsheet.',
   },
 
-  // Strips view (vertical) — pivot is set by the active top tab (Indikatoren / Gruppen)
+  // Strips view (vertical) — pivot is set by an in-view 'Vergleichen nach:' toggle
   'strips.mode.indicator': { de: 'Indikatoren', en: 'Indicators' },
   'strips.mode.group': { de: 'Gruppen', en: 'Groups' },
   'strips.mode.label': { de: 'Ansicht', en: 'View' },
   'strips.pivot.label': { de: 'Aktive Achse', en: 'Active axis' },
+  'strips.compare.label': { de: 'Vergleichen nach', en: 'Compare by' },
+  'strips.value.label': { de: 'Wert für', en: 'Value for' },
   'strips.switch.indicators': { de: 'Indikator', en: 'Indicator' },
   'strips.switch.groups': { de: 'Bevölkerungsgruppe', en: 'Population group' },
   'strips.switch.themes': { de: 'Selbsttest-Themen', en: 'Selbsttest themes' },

@@ -2789,6 +2789,184 @@ main:has(.carm-explorer) {
   }
 }
 
+/* Inline colour swatch inside a category pill — used by SourcesStripsView so
+   each pill carries its category colour even when not selected (the pill row
+   doubles as the chart legend). */
+.strips-cat-pill__swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Live "{n} Quellen" caption that sits next to the category pills. */
+.strips-cat-pills__count {
+  margin-left: auto;
+  font-size: 0.74rem;
+  color: var(--color-text-muted, #94a3b8);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Two-pill pivot toggle ("Indikatoren" / "Gruppen") used in the
+   Informationsquellen Streifen view. Lives in a `.strips-picker` row so
+   alignment matches the existing trigger pills. */
+.strips-pivot-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-bg-subtle, #f1f5f9);
+  border-radius: 999px;
+}
+
+.strips-pivot-toggle__btn {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-secondary, #4a5568);
+  padding: 4px 12px;
+  min-height: 28px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.strips-pivot-toggle__btn:hover {
+  color: var(--color-accent, #2d6a4f);
+}
+
+.strips-pivot-toggle__btn.active {
+  background: white;
+  color: var(--color-text, #1e293b);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+}
+
+.strips-pivot-toggle__btn:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 1px;
+}
+
+/* Row that wraps the in-view pivot toggle ("Vergleichen nach: …") inside
+   the Streifen tab. Sits above the dropdown picker. */
+.strips-pivot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 4px 8px;
+  flex-wrap: wrap;
+}
+
+/* Two-row top controls of the Streifen view.
+   Row 1: pivot toggle alone (no caption).
+   Row 2: 'Wert für:' dropdown + 'Mythos-Kategorie:' dropdown side-by-side. */
+.strips-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 0 4px;
+}
+
+.strips-controls-row--toggle {
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+.strips-controls-row--dropdowns {
+  margin-bottom: 10px;
+}
+
+/* When a .strips-picker is nested inside .strips-controls-row, override its
+   default block-level full-width sizing so it sits inline with neighbours
+   (it still positions its menu via the ref). */
+.strips-controls-row .strips-picker {
+  display: inline-flex;
+  width: auto;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+/* Tight viewports: drop the dropdown captions on row 2 so both triggers
+   still fit on one line on mobile. */
+@media (max-width: 720px) {
+  .strips-controls-row--dropdowns .strips-picker__caption {
+    display: none;
+  }
+  /* Tighten the gap between the two triggers when captions are gone. */
+  .strips-controls-row--dropdowns {
+    gap: 6px 10px;
+  }
+}
+
+/* Single-row controls bar for the SourcesStripsView. Three logical groups
+   (Spalten / Bevölkerungsgruppe / Detail) sit on one flex row with sensible
+   gaps and wrap on narrow viewports. */
+.sources-strips-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 6px 4px 12px;
+}
+
+.sources-strips-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Children toggle — icon + label inside the existing pill style. The icon
+   carries the on/off state so the button is glanceable even before reading
+   the label. */
+.strips-children-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.strips-children-toggle svg {
+  flex-shrink: 0;
+}
+
+/* Card values grid — appears inside .strips-myth-card on selection. Shows
+   every strip's value in a compact wrap so users can read all four (or five)
+   numbers without hovering the dots. */
+.strips-myth-card__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 8px 10px;
+  margin: 0 0 10px;
+  background: var(--color-bg-subtle, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.strips-myth-card__value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 0.78rem;
+}
+
+.strips-myth-card__value-label {
+  color: var(--color-text-muted, #64748b);
+  font-weight: 500;
+}
+
+.strips-myth-card__value-num {
+  color: var(--color-text, #1e293b);
+  font-weight: 700;
+}
+
 .strips-block-btn:focus-visible {
   outline: 3px solid var(--color-accent, #2d6a4f);
   outline-offset: 2px;

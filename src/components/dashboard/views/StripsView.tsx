@@ -523,17 +523,50 @@ export default function StripsView({
   return (
     <div className="strips-v3" ref={containerRef}>
       <div className={`strips-grid3 ${selectedMyth ? 'has-selection' : ''}`}>
-        {/* Single content column — pivot is now driven by the top tab. */}
+        {/* Single content column. Pivot is now driven by the in-view
+            'Vergleichen nach:' toggle below — same pattern as the
+            Informationsquellen tab's 'Spalten:' switch. */}
         <div className="strips-grid3__content" ref={contentRef}>
+          {/* Two-row top controls.
+              Row 1: pivot toggle alone (no caption — the [Indikatoren | Gruppen]
+              labels are self-explanatory).
+              Row 2: 'Wert für: …' dropdown + 'Mythos-Kategorie: …' dropdown
+              side-by-side. On mobile (<720px) captions hide so triggers fit. */}
+          <div className="strips-controls-row strips-controls-row--toggle">
+            <div className="strips-pivot-toggle" role="tablist" aria-label={t('strips.compare.label', state.lang)}>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === 'indicator'}
+                className={`strips-pivot-toggle__btn ${mode === 'indicator' ? 'active' : ''}`}
+                onClick={() => update('stripsMode', 'indicator')}
+              >
+                {t('strips.mode.indicator', state.lang)}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === 'group'}
+                className={`strips-pivot-toggle__btn ${mode === 'group' ? 'active' : ''}`}
+                onClick={() => update('stripsMode', 'group')}
+              >
+                {t('strips.mode.group', state.lang)}
+              </button>
+            </div>
+          </div>
+
+          <div className="strips-controls-row strips-controls-row--dropdowns">
+
           {/* Top selector — single dropdown trigger that doubles as label.
               No inline definition, no separate tooltip popover. Each menu
               item has an 'i' that expands the definition INLINE below the
               row (inside the same dropdown). */}
           {(() => {
             const activeItem = topRow.items.find((it) => it.active) || topRow.items[0];
-            const pickerLabel = mode === 'indicator'
-              ? (state.lang === 'de' ? 'Bevölkerungsgruppe' : 'Population group')
-              : (state.lang === 'de' ? 'Indikator' : 'Indicator');
+            // Unified caption — stable regardless of pivot. Reads as
+            // "Wert für: [Erwachsene]" when pivot=Indikatoren, or
+            // "Wert für: [Kenntnis %]" when pivot=Gruppen.
+            const pickerLabel = t('strips.value.label', state.lang);
             return (
               <div className="strips-picker" ref={topPickerRef}>
                 <span className="strips-picker__caption">{pickerLabel}:</span>
@@ -617,6 +650,75 @@ export default function StripsView({
               </div>
             );
           })()}
+
+          {/* Mythos-Kategorie dropdown — same row as the controls above. */}
+          {(() => {
+            const isAll = state.categoryIds.length === 0;
+            const activeCat = !isAll
+              ? categories.find((c) => c.id === state.categoryIds[0]) ?? null
+              : null;
+            const activeLabel = activeCat
+              ? (state.lang === 'de' ? activeCat.name_de : activeCat.name_en)
+              : (state.lang === 'de' ? 'Alle Mythen' : 'All myths');
+            return (
+              <div className="strips-picker" ref={catPickerRef}>
+                <span className="strips-picker__caption">
+                  {state.lang === 'de' ? 'Mythos-Kategorie' : 'Myth category'}:
+                </span>
+                <button
+                  type="button"
+                  className="strips-picker__trigger"
+                  aria-haspopup="listbox"
+                  aria-expanded={catPickerOpen}
+                  onClick={() => setCatPickerOpen((v) => !v)}
+                >
+                  <Layers size={15} strokeWidth={1.75} aria-hidden="true" />
+                  <span className="strips-picker__current">{activeLabel}</span>
+                  <span className="strips-picker__chevron" aria-hidden="true">▾</span>
+                </button>
+                {catPickerOpen && (
+                  <div className="strips-picker__menu" role="listbox">
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isAll}
+                      className={`strips-picker__item-btn ${isAll ? 'active' : ''}`}
+                      onClick={() => {
+                        update('categoryIds', []);
+                        setCatPickerOpen(false);
+                      }}
+                    >
+                      <Layers size={15} strokeWidth={1.75} aria-hidden="true" />
+                      <span className="strips-picker__item-label">
+                        {state.lang === 'de' ? 'Alle Mythen' : 'All myths'}
+                      </span>
+                    </button>
+                    {categories.map((cat) => {
+                      const isSel = !isAll && state.categoryIds[0] === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          role="option"
+                          aria-selected={isSel}
+                          className={`strips-picker__item-btn ${isSel ? 'active' : ''}`}
+                          onClick={() => {
+                            update('categoryIds', [cat.id]);
+                            setCatPickerOpen(false);
+                          }}
+                        >
+                          <span className="strips-picker__item-label">
+                            {state.lang === 'de' ? cat.name_de : cat.name_en}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+          </div> {/* /.strips-controls-row */}
 
           {/* SVG chart wrapper — relative-positioned so HTML strip headers
               can be absolutely positioned over the in-SVG header area for
@@ -929,82 +1031,7 @@ export default function StripsView({
             </div>
           )}
 
-          {/* Categories filter — mirrors the top dropdown. Trigger on the
-              left, inline myth-count next to it. Default is 'Alle Mythen';
-              menu lists Alle + the 7 carm-data categories. */}
-          {(() => {
-            const isAll = state.categoryIds.length === 0;
-            const activeCat = !isAll
-              ? categories.find((c) => c.id === state.categoryIds[0]) ?? null
-              : null;
-            const activeLabel = activeCat
-              ? (state.lang === 'de' ? activeCat.name_de : activeCat.name_en)
-              : (state.lang === 'de' ? 'Alle Mythen' : 'All myths');
-            const myCount = visibleMyths.length;
-            const countLabel = state.lang === 'de'
-              ? `${myCount} Mythen`
-              : `${myCount} myths`;
-            return (
-              <div className="strips-picker strips-picker--bottom strips-picker--dropup" ref={catPickerRef}>
-                <span className="strips-picker__caption">
-                  {state.lang === 'de' ? 'Mythos-Kategorie' : 'Myth category'}:
-                </span>
-                <button
-                  type="button"
-                  className="strips-picker__trigger"
-                  aria-haspopup="listbox"
-                  aria-expanded={catPickerOpen}
-                  onClick={() => setCatPickerOpen((v) => !v)}
-                >
-                  <Layers size={15} strokeWidth={1.75} aria-hidden="true" />
-                  <span className="strips-picker__current">{activeLabel}</span>
-                  <span className="strips-picker__chevron" aria-hidden="true">▾</span>
-                </button>
-                <span className="strips-picker__inline" title={countLabel}>
-                  {countLabel}
-                </span>
-                {catPickerOpen && (
-                  <div className="strips-picker__menu" role="listbox">
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={isAll}
-                      className={`strips-picker__item-btn ${isAll ? 'active' : ''}`}
-                      onClick={() => {
-                        update('categoryIds', []);
-                        setCatPickerOpen(false);
-                      }}
-                    >
-                      <Layers size={15} strokeWidth={1.75} aria-hidden="true" />
-                      <span className="strips-picker__item-label">
-                        {state.lang === 'de' ? 'Alle Mythen' : 'All myths'}
-                      </span>
-                    </button>
-                    {categories.map((cat) => {
-                      const isSel = !isAll && state.categoryIds[0] === cat.id;
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          role="option"
-                          aria-selected={isSel}
-                          className={`strips-picker__item-btn ${isSel ? 'active' : ''}`}
-                          onClick={() => {
-                            update('categoryIds', [cat.id]);
-                            setCatPickerOpen(false);
-                          }}
-                        >
-                          <span className="strips-picker__item-label">
-                            {state.lang === 'de' ? cat.name_de : cat.name_en}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
+          {/* (Mythos-Kategorie dropdown moved to the top controls row.) */}
         </div>
       </div>
     </div>

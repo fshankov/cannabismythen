@@ -8,7 +8,7 @@
  *   3. Einordnung (open)
  *   4. Synthese (open)
  *   5. Zentrale Erkenntnisse (collapsible)
- *   6. Referenzen (collapsible, shows count)
+ *   6. Referenzen (collapsible)
  *   7. Daten nach Zielgruppen table (at bottom)
  *   8. Link to full factsheet page
  *
@@ -181,11 +181,6 @@ export default function FactsheetPanel({
     const isExpanded = expandedSections.has(section.title);
 
     if (isCollapsible) {
-      const countLabel =
-        section.title === 'Referenzen'
-          ? `${mythContentEntry?.refCount || 0} Quellen`
-          : '';
-
       return (
         <div key={i} className="factsheet-panel__section factsheet-panel__section--collapsible">
           <button
@@ -196,9 +191,6 @@ export default function FactsheetPanel({
           >
             <span className="factsheet-panel__section-title">
               {section.title}
-              {countLabel && (
-                <span className="factsheet-panel__section-count">({countLabel})</span>
-              )}
             </span>
             <span
               className={`factsheet-panel__chevron ${isExpanded ? 'factsheet-panel__chevron--open' : ''}`}

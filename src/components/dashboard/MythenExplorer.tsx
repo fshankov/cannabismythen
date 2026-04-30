@@ -22,8 +22,7 @@ import OverviewView from './views/OverviewView';
 import CircularView from './views/CircularView';
 import LadderView from './views/LadderView';
 import StripsView from './views/StripsView';
-import InformationSourcesView from './views/InformationSourcesView';
-import InformationSourcesV2View from './views/InformationSourcesV2View';
+import SourcesStripsView from './views/SourcesStripsView';
 import FactsheetPanel from './FactsheetPanel';
 import DashboardOnboarding from './DashboardOnboarding';
 import type { MythContentEntry } from './FactsheetPanel';
@@ -99,16 +98,8 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     pushState(state);
   }, [state]);
 
-  // Keep stripsMode synced with the active view tab — the pivot is now driven
-  // by tab choice (view='strips' → indicator pivot, view='strips_groups' →
-  // group pivot) rather than an in-view toggle.
-  useEffect(() => {
-    if (state.view === 'strips' && state.stripsMode !== 'indicator') {
-      setState((prev) => ({ ...prev, stripsMode: 'indicator' }));
-    } else if (state.view === 'strips_groups' && state.stripsMode !== 'group') {
-      setState((prev) => ({ ...prev, stripsMode: 'group' }));
-    }
-  }, [state.view, state.stripsMode]);
+  // (Pivot is now driven by an in-view 'Vergleichen nach:' toggle inside
+  // the Streifen tab — no view↔mode auto-sync needed.)
 
   const update = useCallback(<K extends keyof AppState>(key: K, value: AppState[K]) => {
     setState((prev) => ({ ...prev, [key]: value }));
@@ -199,25 +190,24 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           onChange={(v: ViewTab) => update('view', v)}
         />
 
-        {state.view !== 'sources' && state.view !== 'sources_v2' && (
+        {state.view !== 'sources' && (
           <FilterBar
             state={state}
             data={data}
             update={update}
             definitions={defs}
-            // Streifen tabs (Indikatoren / Gruppen) ship their own switchers
-            // AND their own categories pill row, so collapse the FilterBar's
-            // indicator + group + categories sections for both tabs.
-            hideIndicators={state.view === 'strips' || state.view === 'strips_groups'}
-            hideGroups={state.view === 'strips' || state.view === 'strips_groups'}
-            hideCategories={state.view === 'strips' || state.view === 'strips_groups'}
+            // Streifen tab ships its own pivot toggle + selectors + categories
+            // dropdown, so collapse the FilterBar's redundant sections.
+            hideIndicators={state.view === 'strips'}
+            hideGroups={state.view === 'strips'}
+            hideCategories={state.view === 'strips'}
           />
         )}
 
-        {/* On strips tabs (Indikatoren / Gruppen) the utility buttons render
-            BELOW the chart + categories pills with a clear gap; everywhere
-            else they stay at the top as today. */}
-        {state.view !== 'strips' && state.view !== 'strips_groups' && (
+        {/* On strips tabs (Indikatoren / Gruppen / Informationsquellen) the
+            utility buttons render BELOW the chart + categories pills with a
+            clear gap; everywhere else they stay at the top as today. */}
+        {state.view !== 'strips' && state.view !== 'sources' && (
           <div className="utility-bar">
             <div className="utility-buttons">
               <button className="util-btn" onClick={handleShareLink}>
@@ -239,17 +229,16 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           </div>
         )}
 
-        {/* Howto microcopy hidden on the strips tabs (Indikatoren / Gruppen):
-            the in-view rows + categories pills are self-explanatory. */}
-        {state.view !== 'strips' && state.view !== 'strips_groups' && (
+        {/* Howto microcopy hidden on the strips tabs (Indikatoren / Gruppen)
+            and the Informationsquellen Streifen tab: their in-view pickers +
+            category pills are self-explanatory. */}
+        {state.view !== 'strips' && state.view !== 'sources' && (
           <p className="howto-microcopy">{t(`howto.${state.view}` as any, 'de')}</p>
         )}
 
         <div className={`chart-area${isFullscreen ? ' fullscreen' : ''}`} ref={chartRef}>
           {state.view === 'sources' ? (
-            <InformationSourcesView state={state} update={update} definitions={defs} />
-          ) : state.view === 'sources_v2' ? (
-            <InformationSourcesV2View state={state} update={update} definitions={defs} />
+            <SourcesStripsView state={state} update={update} definitions={defs} />
           ) : filteredMyths.length === 0 ? (
             <div className="no-results">{t('misc.noResults', 'de')}</div>
           ) : (
@@ -275,7 +264,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
               {state.view === 'ladder' && (
                 <LadderView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
               )}
-              {(state.view === 'strips' || state.view === 'strips_groups') && (
+              {state.view === 'strips' && (
                 <StripsView
                   myths={filteredMyths}
                   metrics={data.metrics}
@@ -293,12 +282,13 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           )}
         </div>
 
-        {state.view !== 'sources' && state.view !== 'sources_v2' && state.view !== 'strips' && state.view !== 'strips_groups' && (
+        {state.view !== 'sources' && state.view !== 'strips' && (
           <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
         )}
 
-        {/* Utility buttons after the chart area on strips tabs, with a gap. */}
-        {(state.view === 'strips' || state.view === 'strips_groups') && (
+        {/* Utility buttons after the chart area on strips tabs and the
+            Informationsquellen tab, with a gap above. */}
+        {(state.view === 'strips' || state.view === 'sources') && (
           <div className="utility-bar utility-bar--bottom">
             <div className="utility-buttons">
               <button className="util-btn" onClick={handleShareLink}>

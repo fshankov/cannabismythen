@@ -1,13 +1,13 @@
-import type { AppState, ViewTab, GroupId, Indicator, Lang, VerdictFilter, CorrectnessClass, SourceMetricType, SourceGroupId, SourcesV2Mode, SourcesV2Sort, StripsMode, StripsSortAxis, StripsSortDir, SelbsttestTheme } from './types';
+import type { AppState, ViewTab, GroupId, Indicator, Lang, VerdictFilter, CorrectnessClass, SourceMetricType, SourceGroupId, SourcesStripsMode, StripsMode, StripsSortAxis, StripsSortDir, SelbsttestTheme } from './types';
 
 const ALL_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 const ALL_INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
-const ALL_VIEWS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'strips_groups', 'sources', 'sources_v2'];
-const ALL_V2_MODES: SourcesV2Mode[] = ['dumbbell', 'multiples', 'matrix'];
-const ALL_V2_SORTS: SourcesV2Sort[] = ['prevention', 'gap'];
+const ALL_VIEWS: ViewTab[] = ['table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'sources'];
 const ALL_VERDICTS: CorrectnessClass[] = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
 const ALL_SOURCE_METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
 const ALL_SOURCE_GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
+const ALL_SOURCES_STRIPS_MODES: SourcesStripsMode[] = ['metric', 'group'];
+const ALL_SOURCE_CATEGORIES = ['institutional', 'internet', 'social_media', 'traditional_media', 'print_physical', 'personal'];
 const ALL_STRIPS_MODES: StripsMode[] = ['indicator', 'group'];
 const ALL_SELBSTTEST_THEMES: SelbsttestTheme[] = ['quiz-gefaehrlichkeit', 'quiz-gesellschaft', 'quiz-medizin', 'quiz-risiken', 'quiz-stimmung'];
 const ALL_STRIPS_SORT_AXES: StripsSortAxis[] = [...ALL_INDICATORS, ...ALL_GROUP_IDS] as StripsSortAxis[];
@@ -26,10 +26,9 @@ const DEFAULTS: AppState = {
   scatterY: 'prevention_significance',
   sourceMetric: 'prevention',
   sourceGroup: 'adults',
-  sourcesV2Mode: 'dumbbell',
-  sourcesV2Sort: 'prevention',
-  sourcesV2Group: 'adults',
-  sourcesV2Expanded: [],
+  sourcesStripsMode: 'metric',
+  sourcesShowChildren: false,
+  sourceCategoryFilter: [],
   stripsMode: 'indicator',
   stripsSortAxis: 'awareness',
   stripsSortDir: 'desc',
@@ -57,14 +56,11 @@ export function stateToUrl(state: Partial<AppState>): string {
     params.set('sm', state.sourceMetric);
   if (state.sourceGroup && state.sourceGroup !== DEFAULTS.sourceGroup)
     params.set('sg', state.sourceGroup);
-  if (state.sourcesV2Mode && state.sourcesV2Mode !== DEFAULTS.sourcesV2Mode)
-    params.set('v2m', state.sourcesV2Mode);
-  if (state.sourcesV2Sort && state.sourcesV2Sort !== DEFAULTS.sourcesV2Sort)
-    params.set('v2s', state.sourcesV2Sort);
-  if (state.sourcesV2Group && state.sourcesV2Group !== DEFAULTS.sourcesV2Group)
-    params.set('v2g', state.sourcesV2Group);
-  if (state.sourcesV2Expanded && state.sourcesV2Expanded.length > 0)
-    params.set('v2x', state.sourcesV2Expanded.join(','));
+  if (state.sourcesStripsMode && state.sourcesStripsMode !== DEFAULTS.sourcesStripsMode)
+    params.set('ssm', state.sourcesStripsMode);
+  if (state.sourcesShowChildren) params.set('ssc', '1');
+  if (state.sourceCategoryFilter && state.sourceCategoryFilter.length > 0)
+    params.set('scf', state.sourceCategoryFilter.join(','));
   if (state.stripsMode && state.stripsMode !== DEFAULTS.stripsMode)
     params.set('stm', state.stripsMode);
   if (state.stripsSortAxis && state.stripsSortAxis !== DEFAULTS.stripsSortAxis)
@@ -85,8 +81,15 @@ export function urlToState(): Partial<AppState> {
   const lang = params.get('lang');
   if (lang === 'de' || lang === 'en') state.lang = lang as Lang;
 
+  // Backward compatibility: old share-links pointed at view=sources_v2.
+  // Both V1 and V2 source tabs are now collapsed into a single 'sources' tab,
+  // so redirect any sources_v2 link to sources without a console error.
   const view = params.get('view');
-  if (ALL_VIEWS.includes(view as ViewTab)) state.view = view as ViewTab;
+  if (view === 'sources_v2') {
+    state.view = 'sources' as ViewTab;
+  } else if (ALL_VIEWS.includes(view as ViewTab)) {
+    state.view = view as ViewTab;
+  }
 
   const q = params.get('q');
   if (q) state.search = q;
@@ -121,17 +124,19 @@ export function urlToState(): Partial<AppState> {
   const sg = params.get('sg');
   if (ALL_SOURCE_GROUPS.includes(sg as SourceGroupId)) state.sourceGroup = sg as SourceGroupId;
 
-  const v2m = params.get('v2m');
-  if (ALL_V2_MODES.includes(v2m as SourcesV2Mode)) state.sourcesV2Mode = v2m as SourcesV2Mode;
+  const ssm = params.get('ssm');
+  if (ALL_SOURCES_STRIPS_MODES.includes(ssm as SourcesStripsMode))
+    state.sourcesStripsMode = ssm as SourcesStripsMode;
 
-  const v2s = params.get('v2s');
-  if (ALL_V2_SORTS.includes(v2s as SourcesV2Sort)) state.sourcesV2Sort = v2s as SourcesV2Sort;
+  const ssc = params.get('ssc');
+  if (ssc === '1' || ssc === 'true') state.sourcesShowChildren = true;
 
-  const v2g = params.get('v2g');
-  if (ALL_SOURCE_GROUPS.includes(v2g as SourceGroupId)) state.sourcesV2Group = v2g as SourceGroupId;
-
-  const v2x = params.get('v2x');
-  if (v2x) state.sourcesV2Expanded = v2x.split(',').map(Number).filter((n) => !isNaN(n));
+  const scf = params.get('scf');
+  if (scf) {
+    state.sourceCategoryFilter = scf
+      .split(',')
+      .filter((c) => ALL_SOURCE_CATEGORIES.includes(c));
+  }
 
   const stm = params.get('stm');
   if (ALL_STRIPS_MODES.includes(stm as StripsMode)) state.stripsMode = stm as StripsMode;

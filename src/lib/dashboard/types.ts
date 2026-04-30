@@ -63,10 +63,14 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'strips_groups' | 'sources' | 'sources_v2';
+export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'sources';
 
-export type SourcesV2Mode = 'dumbbell' | 'multiples' | 'matrix';
-export type SourcesV2Sort = 'prevention' | 'gap';
+/** Information-sources Streifen view — pivot mirrors the Mythen-Streifen idiom.
+ *  - 'metric' → 4 strips (Suche / Wahrnehmung / Vertrauen / Prävention),
+ *               picker selects a Bevölkerungsgruppe.
+ *  - 'group'  → 5 strips (Volljährige / Minderjährige / Konsument:innen /
+ *               Junge Erwachsene / Eltern), picker selects an Indikator. */
+export type SourcesStripsMode = 'metric' | 'group';
 
 /** "Streifen" (strips) tab — which dimension forms the columns ("pivot").
  *  Themen is intentionally NOT a pivot: in both modes the Themen row is a
@@ -149,10 +153,14 @@ export interface AppState {
   scatterY: Indicator;
   sourceMetric: SourceMetricType;
   sourceGroup: SourceGroupId;
-  sourcesV2Mode: SourcesV2Mode;
-  sourcesV2Sort: SourcesV2Sort;
-  sourcesV2Group: SourceGroupId;
-  sourcesV2Expanded: number[];
+  /** Information-sources Streifen view — pivot ('metric' or 'group'). */
+  sourcesStripsMode: SourcesStripsMode;
+  /** Information-sources Streifen view — when true, child sub-categories
+   *  render as smaller, lower-opacity dots alongside their parents. */
+  sourcesShowChildren: boolean;
+  /** Information-sources Streifen view — categories included in the chart.
+   *  Empty array = include all categories (default). */
+  sourceCategoryFilter: string[];
   /** "Streifen" view — columns by indicator or by population group */
   stripsMode: StripsMode;
   /** Sort anchor: an Indicator id when stripsMode='indicator', a GroupId when 'group' */
