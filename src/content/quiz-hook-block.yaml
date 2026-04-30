@@ -4,6 +4,6 @@ subhead: 'Teste dein Bauchgefühl gegen die Evidenz. Am Ende erfährst du, welch
 sampleMythText: 'Cannabis ist weniger schädlich als Alkohol.'
 sampleMythClassification: 'eher_falsch'
 primaryCtaLabel: 'Quiz starten'
-primaryCtaUrl: '/selbsttest/'
+primaryCtaUrl: '/quiz/'
 secondaryCtaLabel: 'Zur Dashboard-Analyse'
 secondaryCtaUrl: '/zahlen-und-fakten/'

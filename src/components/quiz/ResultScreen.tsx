@@ -60,8 +60,8 @@ export default function ResultScreen({
 
   const quizUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/selbsttest/${result.themeSlug}/`
-      : `/selbsttest/${result.themeSlug}/`;
+      ? `${window.location.origin}/quiz/${result.themeSlug}/`
+      : `/quiz/${result.themeSlug}/`;
 
   // ── Next module computation (Phase C §3.14) ──────────────────────────
   // Walks the QUIZ_THEMES order and picks the next slug after the current
@@ -183,7 +183,7 @@ export default function ResultScreen({
       <div className="quiz-result__actions">
         {nextSlug && nextThemeTitle && nextSlug !== result.themeSlug && (
           <a
-            href={`/selbsttest/${nextSlug}/`}
+            href={`/quiz/${nextSlug}/`}
             className="quiz-result__next-module"
           >
             {t("ui.nextModule.cta", { title: nextThemeTitle })}
@@ -199,7 +199,7 @@ export default function ResultScreen({
         <a href="/zahlen-und-fakten/" className="quiz-modal__nav-link">
           {t("ui.exploreData")} →
         </a>
-        <a href="/selbsttest/" className="quiz-modal__nav-link">
+        <a href="/quiz/" className="quiz-modal__nav-link">
           ← {t("ui.backToQuizzes")}
         </a>
       </div>

@@ -77,7 +77,7 @@ interface FaqQuestionRaw {
   answer: () => Promise<{ node: unknown }>;
 }
 
-const VALID_AUDIENCES: FaqAudienceId[] = [
+export const VALID_AUDIENCES: FaqAudienceId[] = [
   "eltern",
   "jugendliche",
   "konsumierende",

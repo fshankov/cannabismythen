@@ -12,7 +12,7 @@ import type {
   StripsMode,
   StripsSortAxis,
   StripsSortDir,
-  SelbsttestTheme,
+  QuizThemeSlug,
   BalkenSort,
 } from './types';
 
@@ -25,7 +25,7 @@ const ALL_SOURCE_GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'yo
 const ALL_SOURCES_STRIPS_MODES: SourcesStripsMode[] = ['metric', 'group'];
 const ALL_SOURCE_CATEGORIES = ['institutional', 'internet', 'social_media', 'traditional_media', 'print_physical', 'personal'];
 const ALL_STRIPS_MODES: StripsMode[] = ['indicator', 'group'];
-const ALL_SELBSTTEST_THEMES: SelbsttestTheme[] = ['quiz-gefaehrlichkeit', 'quiz-gesellschaft', 'quiz-medizin', 'quiz-risiken', 'quiz-stimmung'];
+const ALL_QUIZ_THEME_SLUGS: QuizThemeSlug[] = ['quiz-gefaehrlichkeit', 'quiz-gesellschaft', 'quiz-medizin', 'quiz-risiken', 'quiz-stimmung'];
 const ALL_STRIPS_SORT_AXES: StripsSortAxis[] = [...ALL_INDICATORS, ...ALL_GROUP_IDS] as StripsSortAxis[];
 const ALL_STRIPS_DIRS: StripsSortDir[] = ['asc', 'desc'];
 const ALL_BALKEN_SORTS: BalkenSort[] = ['value-desc', 'value-asc', 'category'];
@@ -245,7 +245,7 @@ export function urlToState(): Partial<AppState> {
   if (stt) {
     state.stripsThemeFilter = stt
       .split(',')
-      .filter((s) => ALL_SELBSTTEST_THEMES.includes(s as SelbsttestTheme)) as SelbsttestTheme[];
+      .filter((s) => ALL_QUIZ_THEME_SLUGS.includes(s as QuizThemeSlug)) as QuizThemeSlug[];
   }
 
   return state;

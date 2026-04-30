@@ -82,8 +82,8 @@ export type StripsSortDir = 'asc' | 'desc';
 /** Balken (ranking bar) view sort options. */
 export type BalkenSort = 'value-desc' | 'value-asc' | 'category';
 
-/** Selbsttest quiz theme slugs — the 5 Themen blocks shown in StripsView */
-export type SelbsttestTheme =
+/** Quiz module slugs — the 5 Themen blocks shown in StripsView */
+export type QuizThemeSlug =
   | 'quiz-gefaehrlichkeit'
   | 'quiz-gesellschaft'
   | 'quiz-medizin'
@@ -173,9 +173,9 @@ export interface AppState {
   /** Myth whose factsheet panel should be open. Decoupled from selectedMythId so views
    *  (e.g. Streifen) can highlight without auto-opening the factsheet. */
   factsheetMythId: number | null;
-  /** "Streifen" view — Selbsttest themes to filter by (multi-select).
+  /** "Streifen" view — Quiz themes to filter by (multi-select).
    *  Empty array = no filter (show all myths). */
-  stripsThemeFilter: SelbsttestTheme[];
+  stripsThemeFilter: QuizThemeSlug[];
   /** Balken (ranking bar) view sort key. */
   balkenSort: BalkenSort;
 }

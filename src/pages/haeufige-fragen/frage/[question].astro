@@ -20,9 +20,9 @@ const { question: slug } = Astro.params;
 const q = await getQuestionBySlug(slug!);
 if (!q) return Astro.redirect("/haeufige-fragen/");
 
-// Pre-compute selbsttest titles for the related rail.
+// Pre-compute quiz titles for the related rail.
 const quizTitles: Record<string, string> = {};
-const quizEntries = await getPublishedEntries("selbsttest");
+const quizEntries = await getPublishedEntries("quiz");
 for (const [qSlug, e] of quizEntries) {
   const title = (e as { title?: string }).title;
   if (title) quizTitles[qSlug] = title;

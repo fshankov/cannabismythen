@@ -1,5 +1,5 @@
 ---
-import Markdoc from "@markdoc/markdoc";
+import Markdoc, { type Node } from "@markdoc/markdoc";
 import { faqMarkdocConfig } from "@lib/markdoc/faq-nodes";
 import type { FaqQuestion } from "@lib/faq";
 import FaqVerdictPill from "./FaqVerdictPill.astro";
@@ -12,7 +12,7 @@ interface Props {
   open?: boolean;
   /** Index in the audience listing, used for the visible numbering. */
   index: number;
-  /** Slug → display title for selbsttest quiz modules. */
+  /** Slug → display title for quiz modules. */
   quizTitles?: Record<string, string>;
 }
 
@@ -20,7 +20,7 @@ const { question, open = false, index, quizTitles = {} } = Astro.props;
 
 const { node } = await question.answer();
 const html = Markdoc.renderers.html(
-  Markdoc.transform(node, faqMarkdocConfig as any),
+  Markdoc.transform(node as Node, faqMarkdocConfig as any),
 );
 
 const id = `faq-${question.slug}`;
