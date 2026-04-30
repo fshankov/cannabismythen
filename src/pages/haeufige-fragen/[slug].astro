@@ -1,78 +1,120 @@
 ---
 export const prerender = true;
 
-import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { reader } from "@lib/content";
+import { getPublishedEntries } from "@lib/content";
+import {
+  getAudience,
+  getQuestionsByAudience,
+  type FaqAudienceId,
+} from "@lib/faq";
+import AudienceHeader from "@components/faq/AudienceHeader.astro";
+import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
+import HelplineBox from "@components/faq/HelplineBox.astro";
+import WeiterfuehrendList from "@components/faq/WeiterfuehrendList.astro";
+
+const AUDIENCE_IDS: FaqAudienceId[] = [
+  "eltern",
+  "jugendliche",
+  "konsumierende",
+  "lehrkraefte",
+  "fachkraefte",
+];
+
+// Legacy theme slugs (`/haeufige-fragen/gesundheit/`, etc.) are redirected to
+// the appropriate audience page via `astro.config.mjs#redirects`.
 
 export async function getStaticPaths() {
-  const slugs = await reader.collections.haeufigeFragen.list();
-  const paths = [];
-
-  for (const slug of slugs) {
-    const entry = await reader.collections.haeufigeFragen.read(slug);
-    if (entry && entry.status === "published") {
-      paths.push({ params: { slug } });
-    }
-  }
-
-  return paths;
+  return AUDIENCE_IDS.map((id) => ({ params: { slug: id } }));
 }
 
 const { slug } = Astro.params;
-const entry = await reader.collections.haeufigeFragen.read(slug!);
 
-if (!entry || entry.status !== "published") {
+if (!AUDIENCE_IDS.includes(slug as FaqAudienceId)) {
   return Astro.redirect("/haeufige-fragen/");
 }
 
-const { content, internalNotes, ...meta } = entry;
-const { node } = await content();
-let html = Markdoc.renderers.html(Markdoc.transform(node));
+const audience = await getAudience(slug as FaqAudienceId);
+if (!audience) return Astro.redirect("/haeufige-fragen/");
 
-/**
- * Decision F: Hybrid FAQ — jump links + full rendering.
- * Extract all <h2> headings, add id attributes for anchoring,
- * and build a TOC nav at the top.
- */
-interface FaqHeading {
-  id: string;
-  text: string;
+const questions = await getQuestionsByAudience(slug as FaqAudienceId);
+
+// Pre-compute selbsttest titles for the related rail.
+const quizTitles: Record<string, string> = {};
+const quizEntries = await getPublishedEntries("selbsttest");
+for (const [qSlug, e] of quizEntries) {
+  const title = (e as { title?: string }).title;
+  if (title) quizTitles[qSlug] = title;
 }
 
-const headings: FaqHeading[] = [];
-let headingIndex = 0;
-
-html = html.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (match, attrs, inner) => {
-  const text = inner.replace(/<[^>]+>/g, '').trim();
-  const id = `faq-${++headingIndex}-${text.toLowerCase().replace(/[^a-zäöüß0-9]+/g, '-').replace(/-+$/, '')}`;
-  headings.push({ id, text });
-  return `<h2${attrs} id="${id}">${inner}</h2>`;
-});
+const pageTitle = audience.title;
+const pageDescription = audience.description;
 ---
 
-<BaseLayout title={meta.title} description={meta.summary || undefined}>
-  <article class="faq-page">
-    <header>
-      <h1>{meta.title}</h1>
-      {meta.theme && <p class="theme-label">{meta.theme}</p>}
-    </header>
+<BaseLayout title={pageTitle} description={pageDescription || undefined}>
+  <article class="faq-audience-page" data-audience={audience.id}>
+    <AudienceHeader audience={audience} questionCount={questions.length} />
 
-    {headings.length > 1 && (
+    {questions.length > 1 && (
       <nav class="faq-toc" aria-label="Inhaltsübersicht">
-        <p class="faq-toc__label">Auf dieser Seite:</p>
+        <p class="faq-toc__label">Auf dieser Seite ({questions.length}):</p>
         <ul class="faq-toc__list">
-          {headings.map((h) => (
-            <li><a href={`#${h.id}`}>{h.text}</a></li>
+          {questions.map((q, i) => (
+            <li>
+              <a href={`#faq-${q.slug}`}>
+                <span class="faq-toc__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                {q.questionLong}
+              </a>
+            </li>
           ))}
         </ul>
       </nav>
     )}
 
-    <div class="faq-content" set:html={html} />
+    <div class="faq-audience-questions">
+      {questions.map((q, i) => (
+        <FaqQuestionComponent
+          question={q}
+          index={i + 1}
+          open={i === 0}
+          quizTitles={quizTitles}
+        />
+      ))}
+    </div>
 
-    <footer>
-      <a href="/haeufige-fragen/">&larr; Alle Themen</a>
+    {audience.helplines.length > 0 && (
+      <div class="faq-audience-helplines">
+        <h2 class="faq-audience-helplines__heading">Hilfeangebote</h2>
+        <div class="faq-audience-helplines__list">
+          {audience.helplines.map((h) => (
+            <HelplineBox helpline={h} variant="footer" />
+          ))}
+        </div>
+      </div>
+    )}
+
+    <WeiterfuehrendList items={audience.weiterfuehrend} />
+
+    <footer class="faq-audience-page__footer">
+      <a href="/haeufige-fragen/">← Alle Zielgruppen</a>
     </footer>
   </article>
 </BaseLayout>
+
+<script is:inline>
+  // Open the <details> matching the URL hash on first paint.
+  (function () {
+    function openByHash() {
+      var hash = window.location.hash.replace(/^#/, "");
+      if (!hash) return;
+      var el = document.getElementById(hash);
+      if (el && el.tagName === "ARTICLE") {
+        var d = el.querySelector("details");
+        if (d) d.open = true;
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+    openByHash();
+    window.addEventListener("hashchange", openByHash);
+  })();
+</script>

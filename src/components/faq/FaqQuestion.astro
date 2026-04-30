@@ -1,0 +1,62 @@
+---
+import Markdoc from "@markdoc/markdoc";
+import { faqMarkdocConfig } from "@lib/markdoc/faq-nodes";
+import type { FaqQuestion } from "@lib/faq";
+import FaqVerdictPill from "./FaqVerdictPill.astro";
+import FaqRelatedRail from "./FaqRelatedRail.astro";
+import HelplineBox from "./HelplineBox.astro";
+
+interface Props {
+  question: FaqQuestion;
+  /** Whether this <details> should default to open. */
+  open?: boolean;
+  /** Index in the audience listing, used for the visible numbering. */
+  index: number;
+  /** Slug → display title for selbsttest quiz modules. */
+  quizTitles?: Record<string, string>;
+}
+
+const { question, open = false, index, quizTitles = {} } = Astro.props;
+
+const { node } = await question.answer();
+const html = Markdoc.renderers.html(
+  Markdoc.transform(node, faqMarkdocConfig as any),
+);
+
+const id = `faq-${question.slug}`;
+---
+
+<article id={id} class="faq-question" data-classification={question.classification}>
+  <details class="faq-question__details" open={open}>
+    <summary class="faq-question__summary">
+      <span class="faq-question__index" aria-hidden="true">{String(index).padStart(2, "0")}</span>
+      <h3 class="faq-question__heading">{question.questionLong}</h3>
+      {question.classification !== "n_a" && (
+        <FaqVerdictPill
+          classification={question.classification}
+          customLabel={question.classificationLabel || undefined}
+          size="sm"
+        />
+      )}
+      <span class="faq-question__chevron" aria-hidden="true">▾</span>
+    </summary>
+
+    <div class="faq-question__body">
+      {question.leadAnswer && (
+        <p class="faq-question__lead">{question.leadAnswer}</p>
+      )}
+
+      <div class="faq-question__answer" set:html={html} />
+
+      <FaqRelatedRail question={question} quizTitles={quizTitles} />
+
+      {question.helpline && question.helpline.url && (
+        <HelplineBox helpline={question.helpline} variant="inline" />
+      )}
+
+      <a href={`#${id}`} class="faq-question__permalink" aria-label="Direktlink zu dieser Frage">
+        Permalink
+      </a>
+    </div>
+  </details>
+</article>

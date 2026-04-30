@@ -1,0 +1,22 @@
+---
+import { CLASSIFICATION_LABEL, type FaqClassification } from "@lib/faq";
+
+interface Props {
+  classification: FaqClassification;
+  customLabel?: string;
+  size?: "sm" | "md";
+}
+
+const { classification, customLabel, size = "md" } = Astro.props;
+
+const label = customLabel?.trim() || CLASSIFICATION_LABEL[classification];
+
+// Reuse the existing global .classification--<value> styles. The "n_a" value
+// is FAQ-only (meta questions); falls back to keine_aussage styling.
+const styleKey = classification === "n_a" ? "keine_aussage" : classification;
+const className = `classification classification--${styleKey} faq-verdict faq-verdict--${size}`;
+---
+
+<span class={className} aria-label={`Wissenschaftliche Einordnung: ${label}`}>
+  {label}
+</span>

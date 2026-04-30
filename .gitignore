@@ -30,3 +30,7 @@ yarn-error.log*
 # Local reference materials (source docs, design specs, AI workflow guides)
 # Not part of the website — safe to exclude from version control
 _local/
+
+# Claude Code local tooling — per-machine settings and worktree scratch space
+.claude/settings.local.json
+.claude/worktrees/

@@ -1,0 +1,95 @@
+---
+import {
+  resolveMythLinks,
+  dashboardLinkLabel,
+  type FaqQuestion,
+} from "@lib/faq";
+
+interface Props {
+  question: FaqQuestion;
+  /** Optional override of quiz titles by slug, looked up at the page level. */
+  quizTitles?: Record<string, string>;
+}
+
+const { question, quizTitles = {} } = Astro.props;
+
+// Resolve myth IDs to actual factsheet slugs. Skip unknowns (don't 404).
+const primary = question.primaryMyth
+  ? (await resolveMythLinks([question.primaryMyth]))[0] ?? null
+  : null;
+const related = await resolveMythLinks(question.relatedMyths);
+
+const quiz = question.relatedQuiz
+  .filter((slug) => Boolean(slug))
+  .map((slug) => ({
+    slug,
+    title: quizTitles[slug] ?? slug.replace(/^quiz-/, "").replace(/-/g, " "),
+    url: `/selbsttest/${slug}/`,
+  }));
+
+const dashboard = question.relatedDashboard.map((url) => ({
+  url,
+  label: dashboardLinkLabel(url),
+}));
+
+const hasRail = primary || related.length > 0 || quiz.length > 0 || dashboard.length > 0;
+---
+
+{hasRail && (
+  <div class="faq-related-rail">
+    {primary && (
+      <div class="faq-related-rail__group faq-related-rail__group--primary">
+        <span class="faq-related-rail__heading">Mythen-Factsheet</span>
+        <a href={primary.url} class="faq-related-rail__link faq-related-rail__link--primary">
+          <span class="faq-related-rail__icon" aria-hidden="true">▸</span>
+          {primary.id.toUpperCase()}
+        </a>
+      </div>
+    )}
+
+    {related.length > 0 && (
+      <div class="faq-related-rail__group">
+        <span class="faq-related-rail__heading">Verwandte Mythen</span>
+        <ul class="faq-related-rail__list">
+          {related.map((m) => (
+            <li>
+              <a href={m.url} class="faq-related-rail__link">
+                #{m.id.replace(/^m/, "")}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {quiz.length > 0 && (
+      <div class="faq-related-rail__group">
+        <span class="faq-related-rail__heading">Quiz</span>
+        <ul class="faq-related-rail__list">
+          {quiz.map((q) => (
+            <li>
+              <a href={q.url} class="faq-related-rail__link">
+                {q.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {dashboard.length > 0 && (
+      <div class="faq-related-rail__group">
+        <span class="faq-related-rail__heading">Daten</span>
+        <ul class="faq-related-rail__list">
+          {dashboard.map((d) => (
+            <li>
+              <a href={d.url} class="faq-related-rail__link">
+                {d.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+)}

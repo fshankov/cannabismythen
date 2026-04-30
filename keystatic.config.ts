@@ -151,36 +151,217 @@ const zahlenUndFaktenDashboard = collection({
   },
 });
 
-const haeufigeFragen = collection({
-  label: "❓ Ihre Fragen – FAQ",
+// ─── FAQ – audience-first restructure ───────────────────────────────────────
+// (The legacy `haeufigeFragen` theme-based collection has been removed; the
+// audience-first model below is the single source of truth. Source content
+// is `_local/team/FAQ/cannabismythen_FAQ_HL_2026 04 29.docx`, generated into
+// .mdoc files via `_local/team/FAQ/scripts/build_faq.py`.)
+// One question per file (faqQuestions). A question may belong to multiple
+// audiences (e.g. "Ist Cannabis eine Einstiegsdroge?" lives under both Eltern
+// and Jugendliche). Per-audience sort order lets the same question be 1.2
+// for one group and 2.11 for another.
+
+const FAQ_AUDIENCE_OPTIONS = [
+  { label: "Eltern minderjähriger Kinder", value: "eltern" },
+  { label: "Jugendliche", value: "jugendliche" },
+  { label: "Konsumierende", value: "konsumierende" },
+  { label: "Lehrkräfte", value: "lehrkraefte" },
+  { label: "Fachkräfte", value: "fachkraefte" },
+];
+
+const FAQ_DASHBOARD_OPTIONS = [
+  { label: "Zahlen & Fakten (Übersicht)", value: "/zahlen-und-fakten/" },
+  { label: "Dashboard: Informationswege", value: "/zahlen-und-fakten/informationswege/" },
+  { label: "Dashboard: Präventionsbedeutung", value: "/zahlen-und-fakten/praeventionsbedeutung/" },
+  { label: "Dashboard: Präventionspotential", value: "/zahlen-und-fakten/praeventionspotential/" },
+  { label: "Dashboard: Bevölkerungsrelevanz", value: "/zahlen-und-fakten/bevoelkerungsrelevanz/" },
+  { label: "Dashboard: Zielgruppenvergleich", value: "/zahlen-und-fakten/zielgruppen/" },
+  { label: "Dashboard: Minderjährige", value: "/zahlen-und-fakten/minderjaehrige/" },
+];
+
+const faqQuestions = collection({
+  label: "❓ FAQ – Einzelne Fragen",
   slugField: "title",
-  path: "src/content/haeufige-fragen/*",
-  format: { contentField: "content" },
+  path: "src/content/faq/questions/*",
+  format: { contentField: "answer" },
   schema: {
-    title: fields.slug({ name: { label: "Title" } }),
-    theme: fields.text({
-      label: "Theme",
-      description: "Thematic group, e.g. Gesundheit, Psyche & Kognition",
+    title: fields.slug({
+      name: {
+        label: "Frage (Slug)",
+        description:
+          "Kurze, prägnante Form der Frage. Wird nur intern und als URL-Slug verwendet.",
+      },
     }),
-    audience: fields.multiselect({
-      label: "Target Audiences",
+    questionLong: fields.text({
+      label: "Vollständige Frage",
+      description: "Wird als Überschrift auf der FAQ-Seite angezeigt.",
+    }),
+    audiences: fields.multiselect({
+      label: "Zielgruppen",
+      options: FAQ_AUDIENCE_OPTIONS,
+      description:
+        "Eine Frage kann mehreren Zielgruppen zugeordnet sein (z. B. erscheint 'Ist Cannabis eine Einstiegsdroge?' bei Eltern und Jugendlichen).",
+    }),
+    sortByAudience: fields.array(
+      fields.object({
+        audience: fields.select({
+          label: "Zielgruppe",
+          options: FAQ_AUDIENCE_OPTIONS,
+          defaultValue: "eltern",
+        }),
+        order: fields.integer({
+          label: "Reihenfolge",
+          description: "Position auf der Audience-Seite (1, 2, 3, …).",
+        }),
+      }),
+      {
+        label: "Reihenfolge je Zielgruppe",
+        description:
+          "Pro Zielgruppe individuell sortierbar. Nicht angegebene Zielgruppen werden alphabetisch angehängt.",
+        itemLabel: (props) =>
+          `${props.fields.audience.value}: ${props.fields.order.value ?? "?"}`,
+      }
+    ),
+    classification: fields.select({
+      label: "Wissenschaftliche Einordnung",
       options: [
-        { label: "Allgemein (18–70)", value: "allgemein" },
-        { label: "Jugendliche (16–17)", value: "jugendliche" },
-        { label: "Konsumierende", value: "konsumierende" },
-        { label: "Junge Erwachsene (18–26)", value: "junge_erwachsene" },
-        { label: "Eltern", value: "eltern" },
+        { label: "Richtig", value: "richtig" },
+        { label: "Eher richtig", value: "eher_richtig" },
+        { label: "Eher falsch", value: "eher_falsch" },
+        { label: "Falsch", value: "falsch" },
+        { label: "Keine Aussage möglich", value: "keine_aussage" },
+        { label: "Nicht zutreffend (Meta-Frage)", value: "n_a" },
       ],
+      defaultValue: "n_a",
     }),
-    sortOrder: fields.integer({
-      label: "Sort Order",
-      description: "Display order on the FAQ index page.",
+    classificationLabel: fields.text({
+      label: "Einordnung – Kurzformel",
+      description:
+        'Optional, z. B. "Das stimmt nicht." Fällt auf den Default-Text der Klassifikation zurück.',
+    }),
+    leadAnswer: fields.text({
+      label: "Kurzantwort (1–2 Sätze)",
+      multiline: true,
+      description:
+        "Wird oberhalb der ausführlichen Antwort hervorgehoben gezeigt. Sollte die Frage in einem Zug beantworten.",
+    }),
+    primaryMyth: fields.text({
+      label: "Primärer Mythos (z. B. m22)",
+      description:
+        "Hauptbezugs-Factsheet. Erscheint im Related-Rail mit Pfeil. Format: m01 – m42.",
+    }),
+    relatedMyths: fields.array(fields.text({ label: "Mythos-ID" }), {
+      label: "Verwandte Mythen",
+      itemLabel: (p) => p.value,
+      description:
+        "z. B. m6, m20. Erscheinen als 'Verwandt: …'. Maximal 4 empfohlen.",
+    }),
+    relatedQuiz: fields.array(fields.text({ label: "Quiz-Slug" }), {
+      label: "Verwandte Quiz-Module",
+      itemLabel: (p) => p.value,
+      description:
+        "Slugs aus selbsttest-Sammlung, z. B. quiz-bevoelkerung-gesetzgebung.",
+    }),
+    relatedDashboard: fields.array(
+      fields.select({
+        label: "Dashboard-Verweis",
+        options: FAQ_DASHBOARD_OPTIONS,
+        defaultValue: "/zahlen-und-fakten/",
+      }),
+      {
+        label: "Dashboard-Verweise",
+        itemLabel: (p) => p.value,
+      }
+    ),
+    helplineLabel: fields.text({
+      label: "Helpline – Anlass-Text",
+      description:
+        'z. B. "Suchen Sie Hilfe wegen Depressionen?". Leer lassen = keine Helpline.',
+    }),
+    helplineTitle: fields.text({
+      label: "Helpline – Anbieter-Name",
+      description: 'z. B. "Deutsche Depressionshilfe".',
+    }),
+    helplineUrl: fields.url({
+      label: "Helpline – Link",
+      description: "Vollständige URL inkl. https://",
     }),
     ...metaFields,
-    content: fields.markdoc({
-      label: "Content",
-      description: "FAQ body with questions and answers (German).",
+    answer: fields.markdoc({
+      label: "Ausführliche Antwort",
+      description:
+        'Mehrere Absätze. Custom Markdoc-Tags verfügbar: {% factsheet-link id="m22" /%}, {% data-callout label="…" value="10,0 %" /%}, {% top-myths-bars groupA="minors" topN=5 /%} u.a.',
     }),
+  },
+});
+
+const faqAudiences = singleton({
+  label: "❓ FAQ – Zielgruppen-Einstellungen",
+  path: "src/content/faq/audiences",
+  format: { data: "yaml" },
+  schema: {
+    audiences: fields.array(
+      fields.object({
+        id: fields.select({
+          label: "Zielgruppen-ID",
+          options: FAQ_AUDIENCE_OPTIONS,
+          defaultValue: "eltern",
+        }),
+        title: fields.text({
+          label: "Seitentitel",
+          description: 'z. B. "Fragen für Eltern minderjähriger Kinder"',
+        }),
+        cardLabel: fields.text({
+          label: "Hub-Karten-Label",
+          description: 'Kurzform für die Hub-Karte, z. B. "Eltern".',
+        }),
+        emoji: fields.text({
+          label: "Emoji für Hub-Karte",
+          description: "Single emoji oder Lucide-Icon-Name (Phase 2).",
+        }),
+        accentColor: fields.text({
+          label: "Akzentfarbe (CSS hex)",
+          description: 'z. B. "#4f46e5"',
+        }),
+        description: fields.text({
+          label: "Audience-Beschreibung",
+          multiline: true,
+          description:
+            "Erscheint unter dem H1 auf der Audience-Seite und als Teaser auf der Hub-Karte.",
+        }),
+        introNote: fields.text({
+          label: "Optionaler Einleitungs-Callout",
+          multiline: true,
+          description:
+            "Markdown unterstützt. Wird als Hinweis-Box oberhalb der Fragen gezeigt.",
+        }),
+        weiterfuehrend: fields.array(
+          fields.object({
+            label: fields.text({ label: "Beschreibung" }),
+            url: fields.url({ label: "Link" }),
+          }),
+          {
+            label: "Weiterführende Informationen",
+            itemLabel: (p) => p.fields.label.value || "…",
+          }
+        ),
+        helplines: fields.array(
+          fields.object({
+            label: fields.text({ label: "Anlass-Text" }),
+            title: fields.text({ label: "Anbieter-Name" }),
+            url: fields.url({ label: "Link" }),
+          }),
+          {
+            label: "Standard-Helplines (Audience-weit)",
+            itemLabel: (p) => p.fields.title.value || "…",
+          }
+        ),
+      }),
+      {
+        label: "Zielgruppen",
+        itemLabel: (p) => p.fields.cardLabel.value || p.fields.id.value,
+      }
+    ),
   },
 });
 
@@ -860,7 +1041,7 @@ export default config({
     // ── Public sections — in nav order ──────────────────────────────────────
     zahlenUndFakten,        // 🃏 Fakten-Karten  →  /fakten-karten/ + /zahlen-und-fakten/[slug]
     zahlenUndFaktenDashboard, // 📊 Daten-Explorer  →  /zahlen-und-fakten/
-    haeufigeFragen,         // ❓ Ihre Fragen  →  /haeufige-fragen/
+    faqQuestions,           // ❓ FAQ – Einzelne Fragen (audience-first)
     selbsttest,             // 🧪 Selbsttest  →  /selbsttest/
     startseite,             // 🏠 Startseite  →  / (homepage scrollytelling)
     ueberUns,               // ℹ️ Über das Projekt  →  /ueber-uns/
@@ -874,5 +1055,6 @@ export default config({
     headlineFinding,
     quizHookBlock,
     dashboardDefinitionen,
+    faqAudiences,
   },
 });

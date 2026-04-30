@@ -1,0 +1,29 @@
+---
+interface Item {
+  label: string;
+  url: string;
+}
+
+interface Props {
+  heading?: string;
+  items: Item[];
+}
+
+const { heading = "Weiterführende Informationen", items } = Astro.props;
+---
+
+{items.length > 0 && (
+  <section class="faq-weiterfuehrend" aria-labelledby="faq-weiterfuehrend-heading">
+    <h2 id="faq-weiterfuehrend-heading" class="faq-weiterfuehrend__heading">{heading}</h2>
+    <ul class="faq-weiterfuehrend__list">
+      {items.map((item) => (
+        <li>
+          <a href={item.url} rel="noopener noreferrer" target="_blank">
+            {item.label}
+            <span class="faq-weiterfuehrend__hint" aria-hidden="true">↗</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

@@ -2,34 +2,56 @@
 export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { getPublishedEntries } from "@lib/content";
+import AudienceHubGrid from "@components/faq/AudienceHubGrid.astro";
+import {
+  getAllAudiences,
+  getQuestionsByAudience,
+  type FaqAudienceMeta,
+  type FaqQuestion,
+} from "@lib/faq";
 
-const entries = await getPublishedEntries("haeufigeFragen");
+const audiences = await getAllAudiences();
 
-// Sort by sortOrder
-entries.sort((a, b) => {
-  const orderA = (a[1] as any).sortOrder ?? 99;
-  const orderB = (b[1] as any).sortOrder ?? 99;
-  return orderA - orderB;
-});
+const items: { audience: FaqAudienceMeta; count: number; topQuestion: FaqQuestion | null }[] =
+  [];
+
+for (const audience of audiences) {
+  const questions = await getQuestionsByAudience(audience.id);
+  items.push({
+    audience,
+    count: questions.length,
+    topQuestion: questions[0] ?? null,
+  });
+}
 ---
 
-<BaseLayout title="Ihre Fragen" description="Ihre Fragen zu Cannabis — thematisch geordnet und wissenschaftlich fundiert">
-  <h1>Ihre Fragen</h1>
-  <p>
-    Antworten auf die wichtigsten Fragen rund um Cannabis — thematisch geordnet
-    und wissenschaftlich fundiert.
-  </p>
+<BaseLayout
+  title="Ihre Fragen"
+  description="Antworten zugeschnitten auf Ihre Lebenssituation — Eltern, Jugendliche, Konsumierende, Lehrkräfte, Fachkräfte."
+>
+  <section class="faq-hub">
+    <header class="faq-hub__header">
+      <p class="faq-hub__kicker">Häufige Fragen</p>
+      <h1 class="faq-hub__headline">Ihre Fragen — zugeschnitten auf Ihre Lebenssituation.</h1>
+      <p class="faq-hub__lead">
+        Was wissen wir aus der CaRM-Studie wirklich über Cannabis? Wählen Sie eine Zielgruppe,
+        die zu Ihrer Situation passt. Jede Antwort verlinkt zum vollständigen Mythen-Factsheet
+        und zu den Daten, auf denen sie basiert.
+      </p>
+    </header>
 
-  <nav class="faq-nav">
-    {entries.map(([slug, entry]) => {
-      const e = entry as any;
-      return (
-        <a href={`/haeufige-fragen/${slug}/`} class="faq-theme-card">
-          <h2>{e.title}</h2>
-          {e.summary && <p>{e.summary}</p>}
-        </a>
-      );
-    })}
-  </nav>
+    <AudienceHubGrid items={items} />
+
+    <details class="faq-hub__methode">
+      <summary>Methodische Anmerkung</summary>
+      <p>
+        Die FAQ-Antworten basieren auf den Daten der CaRM-Studie (Cannabis-bezogene
+        Auffassungen und Risikowahrnehmung in Deutschland), durchgeführt 2022–2023.
+        Befragt wurden 2.097 Volljährige (18–70 J.), 555 Minderjährige (16–17 J.) und
+        143 aktuelle Cannabis-Konsumierende. Alle Mythen wurden durch eine systematische
+        Literaturanalyse wissenschaftlich klassifiziert (richtig · eher richtig · eher falsch
+        · falsch). Alle Prozentzahlen und Punktewerte entstammen direkt den Studiendaten.
+      </p>
+    </details>
+  </section>
 </BaseLayout>

@@ -1,0 +1,50 @@
+---
+import type { FaqAudienceMeta, FaqQuestion } from "@lib/faq";
+
+interface AudienceHubItem {
+  audience: FaqAudienceMeta;
+  count: number;
+  topQuestion: FaqQuestion | null;
+}
+
+interface Props {
+  items: AudienceHubItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="faq-hub-grid">
+  {items.map((item) => {
+    const teaser = item.topQuestion?.leadAnswer
+      ? item.topQuestion.leadAnswer.length > 110
+        ? item.topQuestion.leadAnswer.slice(0, 107).replace(/\s+\S*$/, "") + "…"
+        : item.topQuestion.leadAnswer
+      : "";
+    return (
+      <a
+        class="faq-hub-card"
+        href={`/haeufige-fragen/${item.audience.id}/`}
+        style={`--audience-accent: ${item.audience.accentColor}`}
+      >
+        <div class="faq-hub-card__top">
+          <span class="faq-hub-card__emoji" aria-hidden="true">{item.audience.emoji}</span>
+          <h2 class="faq-hub-card__title">{item.audience.cardLabel}</h2>
+        </div>
+        <p class="faq-hub-card__count">{item.count} Fragen</p>
+        {item.audience.description && (
+          <p class="faq-hub-card__description">{item.audience.description}</p>
+        )}
+        {item.topQuestion && (
+          <div class="faq-hub-card__top-question">
+            <p class="faq-hub-card__top-q">{item.topQuestion.questionLong}</p>
+            {teaser && <p class="faq-hub-card__top-teaser">{teaser}</p>}
+          </div>
+        )}
+        <span class="faq-hub-card__cta" aria-hidden="true">
+          Fragen ansehen →
+        </span>
+      </a>
+    );
+  })}
+</div>

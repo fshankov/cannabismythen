@@ -1,0 +1,26 @@
+---
+interface Helpline {
+  label: string;
+  title: string;
+  url: string;
+}
+
+interface Props {
+  helpline: Helpline;
+  variant?: "inline" | "footer";
+}
+
+const { helpline, variant = "inline" } = Astro.props;
+const { label, title, url } = helpline;
+const className = `helpline-box helpline-box--${variant}`;
+---
+
+<aside class={className} aria-label={`Hilfeangebot: ${title}`}>
+  <span class="helpline-box__icon" aria-hidden="true">⌇</span>
+  <div class="helpline-box__body">
+    {label && <p class="helpline-box__lead">{label}</p>}
+    <a href={url} class="helpline-box__link" rel="noopener noreferrer" target="_blank">
+      {title}
+    </a>
+  </div>
+</aside>

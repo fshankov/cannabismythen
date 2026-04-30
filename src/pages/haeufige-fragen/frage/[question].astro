@@ -1,0 +1,75 @@
+---
+export const prerender = true;
+
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getPublishedEntries } from "@lib/content";
+import {
+  loadAllQuestions,
+  getQuestionBySlug,
+  getAudience,
+  type FaqQuestion,
+} from "@lib/faq";
+import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
+
+export async function getStaticPaths() {
+  const all = await loadAllQuestions();
+  return all.map((q) => ({ params: { question: q.slug } }));
+}
+
+const { question: slug } = Astro.params;
+const q = await getQuestionBySlug(slug!);
+if (!q) return Astro.redirect("/haeufige-fragen/");
+
+// Pre-compute selbsttest titles for the related rail.
+const quizTitles: Record<string, string> = {};
+const quizEntries = await getPublishedEntries("selbsttest");
+for (const [qSlug, e] of quizEntries) {
+  const title = (e as { title?: string }).title;
+  if (title) quizTitles[qSlug] = title;
+}
+
+// Resolve audience labels for the "auch unter" hint.
+const audienceMetas = await Promise.all(q.audiences.map((a) => getAudience(a)));
+const audiencesForLinks = audienceMetas.filter(
+  (a): a is NonNullable<typeof a> => a !== null,
+);
+
+const description =
+  q.leadAnswer.slice(0, 160) || `Antwort zu: ${q.questionLong}`;
+---
+
+<BaseLayout title={q.questionLong} description={description}>
+  <article class="faq-single-question">
+    <nav class="faq-audience-header__crumbs" aria-label="Brotkrumen">
+      <a href="/haeufige-fragen/">Ihre Fragen</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">Einzelne Frage</span>
+    </nav>
+
+    <FaqQuestionComponent
+      question={q}
+      index={1}
+      open={true}
+      quizTitles={quizTitles}
+    />
+
+    {audiencesForLinks.length > 0 && (
+      <aside class="faq-also-see">
+        <h2 class="faq-also-see__heading">Diese Frage erscheint auch unter:</h2>
+        <ul class="faq-also-see__list">
+          {audiencesForLinks.map((a) => (
+            <li>
+              <a href={`/haeufige-fragen/${a.id}/#faq-${q.slug}`} style={`--audience-accent: ${a.accentColor}`}>
+                <span aria-hidden="true">{a.emoji}</span> {a.cardLabel}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
+    <footer class="faq-audience-page__footer">
+      <a href="/haeufige-fragen/">← Alle Zielgruppen</a>
+    </footer>
+  </article>
+</BaseLayout>

@@ -4,6 +4,7 @@ export const prerender = true;
 import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
+import { getQuestionsForMyth, getAudience } from "@lib/faq";
 
 export async function getStaticPaths() {
   const slugs = await reader.collections.zahlenUndFakten.list();
@@ -49,6 +50,37 @@ for (const heading of FACHEBENE_HEADINGS) {
     return `<details class="fachebene-section"><summary class="fachebene-summary">${heading}</summary><div class="fachebene-content">${body}</div></details>`;
   });
 }
+
+// FAQ backlink rail — find any FAQ question whose primaryMyth or relatedMyths
+// references this myth, then group by audience for display.
+const faqMatches = meta.mythId ? await getQuestionsForMyth(meta.mythId) : [];
+type FaqBacklink = {
+  audienceId: string;
+  audienceLabel: string;
+  audienceColor: string;
+  audienceEmoji: string;
+  url: string;
+  questionLong: string;
+};
+const faqBacklinks: FaqBacklink[] = [];
+const seen = new Set<string>();
+for (const q of faqMatches) {
+  for (const audId of q.audiences) {
+    const key = `${audId}::${q.slug}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const audienceMeta = await getAudience(audId);
+    if (!audienceMeta) continue;
+    faqBacklinks.push({
+      audienceId: audId,
+      audienceLabel: audienceMeta.cardLabel,
+      audienceColor: audienceMeta.accentColor,
+      audienceEmoji: audienceMeta.emoji,
+      url: `/haeufige-fragen/${audId}/#faq-${q.slug}`,
+      questionLong: q.questionLong,
+    });
+  }
+}
 ---
 
 <BaseLayout title={meta.title} description={meta.summary || undefined}>
@@ -76,6 +108,24 @@ for (const heading of FACHEBENE_HEADINGS) {
         <ul>
           {meta.relatedMyths.map((id: string) => (
             <li><a href={`/zahlen-und-fakten/${id}/`}>{id}</a></li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
+    {faqBacklinks.length > 0 && (
+      <aside class="faq-backlinks">
+        <h2>Diese Frage in unseren FAQ</h2>
+        <ul class="faq-backlinks__list">
+          {faqBacklinks.map((b) => (
+            <li>
+              <a href={b.url} class="faq-backlinks__link" style={`--audience-accent: ${b.audienceColor}`}>
+                <span class="faq-backlinks__audience">
+                  <span aria-hidden="true">{b.audienceEmoji}</span> {b.audienceLabel}
+                </span>
+                <span class="faq-backlinks__question">{b.questionLong}</span>
+              </a>
+            </li>
           ))}
         </ul>
       </aside>

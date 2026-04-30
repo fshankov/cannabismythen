@@ -1,0 +1,98 @@
+audiences:
+- id: eltern
+  title: Fragen für Eltern minderjähriger Kinder
+  cardLabel: Eltern
+  emoji: 👨‍👧
+  accentColor: '#4f46e5'
+  description: Welchen Einfluss haben Sie auf Ihr Kind? Was sagen die aktuellen Studien zu Risiken, Recht und Hilfsangeboten?
+    Antworten auf die Fragen, die Eltern minderjähriger Kinder am häufigsten beschäftigen.
+  introNote: ''
+  weiterfuehrend:
+  - label: Elternratgeber „Elterninfo Cannabis"
+    url: https://shop.bioeg.de/elterninfo-cannabis/
+  - label: Informationen und Tipps für Eltern
+    url: https://www.cannabispraevention.de/eltern/
+  - label: Online-Kurs zur Cannabisprävention für Eltern
+    url: https://www.zpg-bayern.de/online-kurs-cannabispraevention.html
+  - label: Kommunikationstipps und Beispielvideos
+    url: https://www.cannabiselternabend.de/videos/
+  - label: Suchthilfeangebote in der Nähe
+    url: https://www.dhs.de/service/suchthilfeverzeichnis
+  helplines:
+  - label: Suchen Sie Hilfe wegen Problemen mit Cannabis?
+    title: Suchthilfeverzeichnis der DHS
+    url: https://www.suchthilfeverzeichnis.de/
+- id: jugendliche
+  title: Deine Fragen rund um Cannabis
+  cardLabel: Jugendliche
+  emoji: 🧑
+  accentColor: '#f97316'
+  description: Was stimmt eigentlich, was ist nur ein Mythos? Antworten auf die Fragen, die Jugendliche am häufigsten zu Cannabis
+    stellen — kurz, faktenbasiert und ohne erhobenen Zeigefinger.
+  introNote: ''
+  weiterfuehrend:
+  - label: Informationen und Tipps für Jugendliche
+    url: https://www.cannabispraevention.de/jugendliche/
+  - label: Suchthilfeangebote in der Nähe
+    url: https://www.dhs.de/service/suchthilfeverzeichnis
+  helplines:
+  - label: Suchst Du Hilfe wegen Depressionen?
+    title: ich-bin-alles.de
+    url: https://www.ich-bin-alles.de
+- id: konsumierende
+  title: Fragen für Konsumierende
+  cardLabel: Konsumierende
+  emoji: 🌿
+  accentColor: '#16a34a'
+  description: Was sagt die aktuelle Forschung zu den Wirkungen, Risiken und gesetzlichen Rahmenbedingungen von Cannabis?
+    Hier finden Sie die Antworten, die für Konsumierende besonders relevant sind.
+  introNote: ''
+  weiterfuehrend:
+  - label: Informationen zu Cannabis und anderen Substanzen (drugcom)
+    url: https://www.drugcom.de/
+  - label: Safer-Use-Informationen für Cannabis-Konsumierende
+    url: https://shop.bioeg.de/care-instructions-fuer-einen-bewussten-umgang-mit-cannabis/
+  - label: Suchthilfeangebote in der Nähe
+    url: https://www.dhs.de/service/suchthilfeverzeichnis
+  helplines:
+  - label: Suchen Sie Hilfe wegen Problemen mit Cannabis oder anderen Substanzen?
+    title: Suchthilfeverzeichnis der DHS
+    url: https://www.suchthilfeverzeichnis.de/
+- id: lehrkraefte
+  title: Fragen für Lehrkräfte
+  cardLabel: Lehrkräfte
+  emoji: 🧑‍🏫
+  accentColor: '#0891b2'
+  description: Welche Cannabismythen sind für Schüler:innen besonders relevant — und welche Fakten sind im Klassenzimmer wirklich
+    glaubwürdig? Daten und Praxis-Hinweise für Lehrkräfte.
+  introNote: ''
+  weiterfuehrend:
+  - label: Elternratgeber „Elterninfo Cannabis"
+    url: https://shop.bioeg.de/elterninfo-cannabis/
+  - label: Informationen und Tipps für Lehr- und Fachkräfte
+    url: https://www.cannabispraevention.de/lehrkraefte/
+  - label: Online-Kurs zur Cannabisprävention für Lehr- und Fachkräfte
+    url: https://www.zpg-bayern.de/online-kurs-cannabispraevention.html
+  - label: Evidenzregister wirksamkeitsgeprüfter Präventionsprogramme
+    url: https://www.gruene-liste-praevention.de
+  - label: Elternabende zum Thema Cannabis
+    url: https://www.cannabiselternabend.de
+  - label: Suchthilfeangebote in der Nähe
+    url: https://www.dhs.de/service/suchthilfeverzeichnis
+  helplines: []
+- id: fachkraefte
+  title: Fragen für Fachkräfte
+  cardLabel: Fachkräfte
+  emoji: 🔬
+  accentColor: '#7c3aed'
+  description: 'Präventionsfachkräfte, Suchtberatung, öffentliche Gesundheit: Welche Mythen priorisieren? Welche Zielgruppen
+    haben die größten Lücken? Welche Kanäle wirken? Aufbereitete CaRM-Indikatoren für die professionelle Praxis.'
+  introNote: 'Hinweis: Schulkontext-spezifische Fragen finden Sie unter [Lehrkräfte](/haeufige-fragen/lehrkraefte/).'
+  weiterfuehrend:
+  - label: Informationen und Tipps für Lehr- und Fachkräfte
+    url: https://www.cannabispraevention.de/lehrkraefte/
+  - label: Online-Kurs zur Cannabisprävention für Lehr- und Fachkräfte
+    url: https://www.zpg-bayern.de/online-kurs-cannabispraevention.html
+  - label: Evidenzregister wirksamkeitsgeprüfter Präventionsprogramme
+    url: https://www.gruene-liste-praevention.de
+  helplines: []

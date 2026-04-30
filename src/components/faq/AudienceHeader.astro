@@ -1,0 +1,47 @@
+---
+import Markdoc from "@markdoc/markdoc";
+import type { FaqAudienceMeta } from "@lib/faq";
+
+interface Props {
+  audience: FaqAudienceMeta;
+  questionCount: number;
+}
+
+const { audience, questionCount } = Astro.props;
+
+// Render the optional intro note as Markdown for inline links.
+let introNoteHtml = "";
+if (audience.introNote) {
+  introNoteHtml = Markdoc.renderers.html(
+    Markdoc.transform(Markdoc.parse(audience.introNote)),
+  );
+}
+
+const accent = audience.accentColor;
+---
+
+<header class="faq-audience-header" style={`--audience-accent: ${accent}`}>
+  <nav class="faq-audience-header__crumbs" aria-label="Brotkrumen">
+    <a href="/haeufige-fragen/">Ihre Fragen</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{audience.cardLabel}</span>
+  </nav>
+
+  <div class="faq-audience-header__top">
+    <span class="faq-audience-header__emoji" aria-hidden="true">{audience.emoji}</span>
+    <div>
+      <h1 class="faq-audience-header__title">{audience.title}</h1>
+      <p class="faq-audience-header__count">
+        {questionCount} {questionCount === 1 ? "Frage" : "Fragen"}
+      </p>
+    </div>
+  </div>
+
+  {audience.description && (
+    <p class="faq-audience-header__description">{audience.description}</p>
+  )}
+
+  {introNoteHtml && (
+    <aside class="faq-audience-header__note" set:html={introNoteHtml} />
+  )}
+</header>
