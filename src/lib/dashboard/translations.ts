@@ -224,6 +224,84 @@ const translations = {
   'misc.myths': { de: 'Mythen', en: 'Myths' },
   'misc.of': { de: 'von', en: 'of' },
   'misc.noResults': { de: 'Keine Ergebnisse gefunden', en: 'No results found' },
+
+  // Balken view + new dashboard chrome (refactor)
+  'view.balken': { de: 'Balken', en: 'Bars' },
+  'view.streifen': { de: 'Streifen', en: 'Strips' },
+  'view.tabelle': { de: 'Tabelle', en: 'Table' },
+  'view.quellen': { de: 'Informationsquellen', en: 'Information Sources' },
+  'igs.indicator.legend': { de: 'Indikator', en: 'Indicator' },
+  'igs.group.legend': { de: 'Bevölkerungsgruppe', en: 'Population group' },
+  'igs.group.adults': { de: 'Volljährige (18–70)', en: 'Adults (18–70)' },
+  'igs.group.minors': { de: 'Minderjährige (16–17)', en: 'Minors (16–17)' },
+  'igs.group.consumers': { de: 'Konsumierende', en: 'Consumers' },
+  'igs.group.young_adults': { de: 'Junge Erwachsene (18–26)', en: 'Young adults (18–26)' },
+  'igs.group.parents': { de: 'Eltern', en: 'Parents' },
+  'igs.disabled.popRel': {
+    de: 'Dieser Indikator wurde nur für Volljährige (18–70) und Minderjährige (16–17) erhoben.',
+    en: 'This indicator was only collected for adults (18–70) and minors (16–17).',
+  },
+  'igs.disabled.snackbar': {
+    de: 'Bevölkerungsrelevanz nur für Volljährige verfügbar — Gruppe wurde umgestellt.',
+    en: 'Population Relevance only available for adults — group switched automatically.',
+  },
+  'sort.label': { de: 'Sortierung', en: 'Sort' },
+  'sort.value-desc': { de: 'Wert absteigend', en: 'Value descending' },
+  'sort.value-asc': { de: 'Wert aufsteigend', en: 'Value ascending' },
+  'sort.category': { de: 'Nach Kategorie', en: 'By category' },
+  'filter.button': { de: 'Filter', en: 'Filter' },
+  'filter.title': { de: 'Filter & Sortierung', en: 'Filter & sort' },
+  'filter.reset': { de: 'Alle Filter zurücksetzen', en: 'Reset all filters' },
+  'filter.apply': { de: 'Anwenden', en: 'Apply' },
+  'filter.search.label': { de: 'Mythos suchen', en: 'Search myth' },
+  'filter.search.placeholder': { de: 'Mythos suchen…', en: 'Search myth…' },
+  'filter.categories.label': { de: 'Mythos-Kategorien', en: 'Myth categories' },
+  'filter.empty.title': { de: 'Keine Treffer', en: 'No matches' },
+  'filter.empty.body': {
+    de: 'Mit den aktuellen Filtern wurden keine Mythen gefunden.',
+    en: 'No myths match the current filters.',
+  },
+  'export.button': { de: 'Exportieren', en: 'Export' },
+  'export.title': { de: 'Daten exportieren', en: 'Export data' },
+  'export.csv.title': { de: 'CSV (Tabelle)', en: 'CSV (table)' },
+  'export.csv.desc': {
+    de: 'Komplette Daten als Tabelle, Excel-kompatibel.',
+    en: 'Full dataset as a table, Excel-compatible.',
+  },
+  'export.png.title': { de: 'PNG (Bild)', en: 'PNG (image)' },
+  'export.png.desc': {
+    de: 'Für Präsentationen, hochauflösend (2×).',
+    en: 'For presentations, high resolution (2×).',
+  },
+  'export.svg.title': { de: 'SVG (Vektor)', en: 'SVG (vector)' },
+  'export.svg.desc': {
+    de: 'Druckqualität, vektorbasiert.',
+    en: 'Print quality, vector-based.',
+  },
+  'rundgang.label': { de: 'Rundgang', en: 'Tour' },
+  'verdict.legend.title': { de: 'Wissenschaftliches Urteil', en: 'Scientific verdict' },
+  'verdict.legend.info.richtig': {
+    de: 'Der Mythos entspricht dem aktuellen wissenschaftlichen Kenntnisstand.',
+    en: 'The myth aligns with the current scientific evidence.',
+  },
+  'verdict.legend.info.eher_richtig': {
+    de: 'Der Mythos ist tendenziell zutreffend, aber mit Einschränkungen.',
+    en: 'The myth tends to be correct, with caveats.',
+  },
+  'verdict.legend.info.eher_falsch': {
+    de: 'Der Mythos ist tendenziell nicht zutreffend, enthält aber Teilwahrheiten.',
+    en: 'The myth tends to be incorrect, with partial truths.',
+  },
+  'verdict.legend.info.falsch': {
+    de: 'Der Mythos widerspricht dem wissenschaftlichen Kenntnisstand.',
+    en: 'The myth contradicts the current scientific evidence.',
+  },
+  'howto.balken': {
+    de: 'Mythen sortiert nach gewähltem Indikator. Farbe = wissenschaftliches Urteil. Klick öffnet das Factsheet.',
+    en: 'Myths ranked by the selected indicator. Color = scientific verdict. Click for the factsheet.',
+  },
+  'balken.title': { de: 'Mythen-Ranking', en: 'Myth ranking' },
+  'balken.subtitle': { de: '{indicator} · {group}', en: '{indicator} · {group}' },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

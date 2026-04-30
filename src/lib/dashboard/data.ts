@@ -2,11 +2,24 @@ import type { CarmData, Myth, Metric, Indicator, GroupId, Lang, VerdictFilter } 
 
 let cachedData: CarmData | null = null;
 
+/** Group ids that exist in carm-data.json but are intentionally excluded from
+ *  the dashboard. `general_population` mixes minors and adults and produces
+ *  scores that don't match the published per-group analysis. */
+const EXCLUDED_GROUP_IDS = new Set(['general_population']);
+
 export async function loadData(): Promise<CarmData> {
   if (cachedData) return cachedData;
   const res = await fetch('/data/carm-data.json');
-  cachedData = await res.json();
-  return cachedData!;
+  const raw = (await res.json()) as CarmData & {
+    metrics: Array<Metric & { group_id: string }>;
+    groups: Array<{ id: string }>;
+  };
+  cachedData = {
+    ...raw,
+    metrics: raw.metrics.filter((m) => !EXCLUDED_GROUP_IDS.has(m.group_id)) as Metric[],
+    groups: raw.groups.filter((g) => !EXCLUDED_GROUP_IDS.has(g.id)) as CarmData['groups'],
+  };
+  return cachedData;
 }
 
 export function getMythMetric(
@@ -68,6 +81,33 @@ export function filterMyths(
   }
 
   return filtered;
+}
+
+/** Population_relevance was only collected for these two groups; values for
+ *  the other three are null in carm-data.json. */
+const POP_REL_VALID_GROUPS: GroupId[] = ['adults', 'minors'];
+
+/** Group ids that should be greyed-out in the IndicatorGroupSelector for the
+ *  given indicator. Currently only `population_relevance` has a restriction. */
+export function getDisabledGroupsForIndicator(indicator: Indicator): GroupId[] {
+  if (indicator === 'population_relevance') {
+    return ['consumers', 'young_adults', 'parents'];
+  }
+  return [];
+}
+
+/** Auto-correct an invalid (indicator, groupIds) combination. Returns the
+ *  same array reference when no correction is needed so callers can compare
+ *  identity to detect a change. */
+export function correctGroupsForIndicator(
+  indicator: Indicator,
+  groupIds: GroupId[],
+): GroupId[] {
+  if (indicator !== 'population_relevance' || groupIds.length === 0) return groupIds;
+  const valid = groupIds.filter((g) => POP_REL_VALID_GROUPS.includes(g));
+  if (valid.length === groupIds.length) return groupIds;
+  if (valid.length === 0) return ['adults'];
+  return valid;
 }
 
 /** Get the first available group's metric for a myth (for multi-group) */

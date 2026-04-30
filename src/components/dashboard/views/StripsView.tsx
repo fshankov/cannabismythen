@@ -75,7 +75,6 @@ const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
 };
 
 const GROUP_ICONS: Record<GroupId, LucideIcon> = {
-  general_population: Users,
   adults: Users,
   minors: Baby,
   consumers: Cannabis,
@@ -102,7 +101,6 @@ const THEME_LABELS: Record<SelbsttestTheme, { full: string; short: string; defKe
 
 /** Short aliases for population groups on narrow viewports. */
 const GROUP_SHORT_DE: Record<GroupId, string> = {
-  general_population: 'Alle',
   adults: 'Erw.',
   minors: 'Minderj.',
   consumers: 'Konsum.',
@@ -110,7 +108,6 @@ const GROUP_SHORT_DE: Record<GroupId, string> = {
   parents: 'Eltern',
 };
 const GROUP_SHORT_EN: Record<GroupId, string> = {
-  general_population: 'All',
   adults: 'Adults',
   minors: 'Minors',
   consumers: 'Cons.',
@@ -828,7 +825,12 @@ export default function StripsView({
               </g>
             )}
 
-            {/* Dots — focused dot rendered last so its hit-area overlays neighbors */}
+            {/* Dots — focused dot rendered last so its hit-area overlays neighbors.
+                Streifen colour-encodes by *Verdict* via getCorrectnessColor below.
+                Note: this differs intentionally from BalkenView, where the bar
+                colour also encodes Verdict. Streifen used to colour by Mythos
+                category; both views now share the Verdict palette so the legend
+                works site-wide. */}
             {columns.map((col, i) => {
               const cx = colCenterX(i);
               const sortedNodes = focusMythId === null
@@ -852,7 +854,9 @@ export default function StripsView({
                           cy={dotY}
                           r={r}
                           fill={getCorrectnessColor(n.myth.correctness_class)}
-                          fillOpacity={dimmed ? 0.15 : isSel ? 1 : isHov ? 1 : 0.85}
+                          // Ghost non-highlighted dots at 10 % when something is focused;
+                          // highlighted dot + connecting polyline stay full opacity.
+                          fillOpacity={dimmed ? 0.1 : isSel ? 1 : isHov ? 1 : 0.85}
                           stroke={isSel ? '#0f172a' : isHov ? '#475569' : 'none'}
                           strokeWidth={isSel ? 1.5 : isHov ? 1 : 0}
                         />

@@ -5,7 +5,7 @@ export type CorrectnessClass =
   | 'falsch'
   | 'no_classification';
 
-export type GroupId = 'general_population' | 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
+export type GroupId = 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
 
 export type Indicator = 'awareness' | 'significance' | 'correctness' | 'prevention_significance' | 'population_relevance';
 
@@ -63,7 +63,7 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'sources';
+export type ViewTab = 'balken' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'sources';
 
 /** Information-sources Streifen view — pivot mirrors the Mythen-Streifen idiom.
  *  - 'metric' → 4 strips (Suche / Wahrnehmung / Vertrauen / Prävention),
@@ -78,6 +78,9 @@ export type SourcesStripsMode = 'metric' | 'group';
 export type StripsMode = 'indicator' | 'group';
 export type StripsSortAxis = Indicator | GroupId;
 export type StripsSortDir = 'asc' | 'desc';
+
+/** Balken (ranking bar) view sort options. */
+export type BalkenSort = 'value-desc' | 'value-asc' | 'category';
 
 /** Selbsttest quiz theme slugs — the 5 Themen blocks shown in StripsView */
 export type SelbsttestTheme =
@@ -173,4 +176,6 @@ export interface AppState {
   /** "Streifen" view — Selbsttest themes to filter by (multi-select).
    *  Empty array = no filter (show all myths). */
   stripsThemeFilter: SelbsttestTheme[];
+  /** Balken (ranking bar) view sort key. */
+  balkenSort: BalkenSort;
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Share2, Download, Maximize2, Minimize2 } from 'lucide-react';
+import { Share2, Download, Filter, Maximize2, Minimize2, MapPin } from 'lucide-react';
 import type {
   CarmData,
   AppState,
@@ -8,14 +8,19 @@ import type {
   VerdictFilter,
   DashboardDefinitions,
 } from '../../lib/dashboard/types';
-import { loadData, filterMyths, exportCSV } from '../../lib/dashboard/data';
+import {
+  loadData,
+  filterMyths,
+  exportCSV,
+  correctGroupsForIndicator,
+  getDisabledGroupsForIndicator,
+} from '../../lib/dashboard/data';
 import { t } from '../../lib/dashboard/translations';
 import { urlToState, getDefaultState, pushState } from '../../lib/dashboard/url-state';
 import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
 import VerdictTags from './VerdictTags';
 import TableView from './views/TableView';
-import BarView from './views/BarView';
 import ScatterView from './views/ScatterView';
 import LollipopView from './views/LollipopView';
 import OverviewView from './views/OverviewView';
@@ -23,6 +28,13 @@ import CircularView from './views/CircularView';
 import LadderView from './views/LadderView';
 import StripsView from './views/StripsView';
 import SourcesStripsView from './views/SourcesStripsView';
+import BalkenView, { type BalkenViewHandle } from './views/BalkenView';
+import IndicatorGroupSelector from './controls/IndicatorGroupSelector';
+import StickyToolbar from './controls/StickyToolbar';
+import VerdictLegend from './controls/VerdictLegend';
+import FilterDrawer from './controls/FilterDrawer';
+import ExportDrawer from './controls/ExportDrawer';
+import Fab from './controls/Fab';
 import FactsheetPanel from './FactsheetPanel';
 import DashboardOnboarding from './DashboardOnboarding';
 import type { MythContentEntry } from './FactsheetPanel';
@@ -48,11 +60,38 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     const defaults = getDefaultState();
     defaults.lang = 'de';
     const fromUrl = urlToState();
-    return { ...defaults, ...fromUrl, lang: 'de' };
+    const merged = { ...defaults, ...fromUrl, lang: 'de' as const };
+    // Apply the population_relevance group constraint up-front so deep-links
+    // like ?indicator=bevoelkerungsrelevanz&group=eltern don't flicker.
+    merged.groupIds = correctGroupsForIndicator(merged.indicator, merged.groupIds);
+    return merged;
   });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [snackbar, setSnackbar] = useState<string | null>(null);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [exportDrawerOpen, setExportDrawerOpen] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
+  const balkenRef = useRef<BalkenViewHandle>(null);
+
+  /** Active count of non-default filters (Mythos category + verdict + search +
+   *  non-default sort). Drives the badge on the Filter button. */
+  const activeFilterCount = useMemo(() => {
+    let n = 0;
+    if (state.categoryIds.length > 0) n += 1;
+    if (state.verdictFilter !== 'all') n += 1;
+    if (state.search.trim().length > 0) n += 1;
+    if (state.balkenSort !== 'value-desc') n += 1;
+    return n;
+  }, [state.categoryIds, state.verdictFilter, state.search, state.balkenSort]);
+
+  const disabledGroups = useMemo(
+    () => getDisabledGroupsForIndicator(state.indicator),
+    [state.indicator],
+  );
+
+  /** Views that share the new sticky toolbar + verdict legend chrome. */
+  const isModernView = state.view === 'balken' || state.view === 'table';
 
   // Parse pre-rendered myth content passed as JSON from Astro
   const mythContentMap: Record<number, MythContentEntry> = useMemo(() => {
@@ -97,6 +136,23 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   useEffect(() => {
     pushState(state);
   }, [state]);
+
+  // Population_relevance is null for consumers/young_adults/parents. If the
+  // user (or a deep-link) lands on an invalid combination, snap groupIds back
+  // to a valid set and surface a German snackbar.
+  useEffect(() => {
+    const corrected = correctGroupsForIndicator(state.indicator, state.groupIds);
+    if (corrected !== state.groupIds) {
+      setState((prev) => ({ ...prev, groupIds: corrected }));
+      setSnackbar(t('igs.disabled.snackbar', 'de'));
+    }
+  }, [state.indicator, state.groupIds]);
+
+  useEffect(() => {
+    if (!snackbar) return;
+    const id = setTimeout(() => setSnackbar(null), 4000);
+    return () => clearTimeout(id);
+  }, [snackbar]);
 
   // (Pivot is now driven by an in-view 'Vergleichen nach:' toggle inside
   // the Streifen tab — no view↔mode auto-sync needed.)
@@ -190,7 +246,61 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           onChange={(v: ViewTab) => update('view', v)}
         />
 
-        {state.view !== 'sources' && (
+        {isModernView && (
+          <StickyToolbar
+            start={
+              <IndicatorGroupSelector
+                state={state}
+                update={update}
+                disabledGroups={disabledGroups}
+                disabledGroupReason={t('igs.disabled.popRel', 'de')}
+              />
+            }
+            end={
+              <>
+                <button
+                  type="button"
+                  className="carm-btn carm-btn--ghost"
+                  onClick={() => setFilterDrawerOpen(true)}
+                  aria-label={t('filter.button', 'de')}
+                >
+                  <Filter size={14} strokeWidth={2} aria-hidden="true" />
+                  {t('filter.button', 'de')}
+                  {activeFilterCount > 0 && (
+                    <span className="carm-btn__badge" aria-label={`${activeFilterCount} aktiv`}>
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="carm-btn carm-btn--ghost"
+                  onClick={() => setExportDrawerOpen(true)}
+                  aria-label={t('export.button', 'de')}
+                >
+                  <Download size={14} strokeWidth={2} aria-hidden="true" />
+                  {t('export.button', 'de')}
+                </button>
+                <button
+                  type="button"
+                  className="carm-btn carm-btn--ghost carm-rundgang-trigger"
+                  onClick={() => {
+                    // Placeholder until tour is wired across all views.
+                    // Existing Streifen tour is reachable via DashboardOnboarding.
+                    // eslint-disable-next-line no-console
+                    console.info('Rundgang TBD');
+                  }}
+                  aria-label={t('rundgang.label', 'de')}
+                >
+                  <MapPin size={14} strokeWidth={2} aria-hidden="true" />
+                  {t('rundgang.label', 'de')}
+                </button>
+              </>
+            }
+          />
+        )}
+
+        {state.view !== 'sources' && !isModernView && (
           <FilterBar
             state={state}
             data={data}
@@ -204,10 +314,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           />
         )}
 
-        {/* On strips tabs (Indikatoren / Gruppen / Informationsquellen) the
-            utility buttons render BELOW the chart + categories pills with a
-            clear gap; everywhere else they stay at the top as today. */}
-        {state.view !== 'strips' && state.view !== 'sources' && (
+        {/* Legacy utility bar (share/CSV/fullscreen) for the older views.
+            Modern views (balken, table) use the StickyToolbar + ExportDrawer. */}
+        {!isModernView && state.view !== 'strips' && state.view !== 'sources' && (
           <div className="utility-bar">
             <div className="utility-buttons">
               <button className="util-btn" onClick={handleShareLink}>
@@ -229,60 +338,82 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           </div>
         )}
 
-        {/* Howto microcopy hidden on the strips tabs (Indikatoren / Gruppen)
-            and the Informationsquellen Streifen tab: their in-view pickers +
-            category pills are self-explanatory. */}
         {state.view !== 'strips' && state.view !== 'sources' && (
-          <p className="howto-microcopy">{t(`howto.${state.view}` as any, 'de')}</p>
+          <p className="howto-microcopy">{t(`howto.${state.view}` as never, 'de')}</p>
         )}
 
-        <div className={`chart-area${isFullscreen ? ' fullscreen' : ''}`} ref={chartRef}>
-          {state.view === 'sources' ? (
-            <SourcesStripsView state={state} update={update} definitions={defs} />
-          ) : filteredMyths.length === 0 ? (
-            <div className="no-results">{t('misc.noResults', 'de')}</div>
-          ) : (
-            <>
-              {state.view === 'table' && (
-                <TableView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
-              )}
-              {state.view === 'bar' && (
-                <BarView myths={filteredMyths} metrics={data.metrics} state={state} onSelectMyth={selectMyth} />
-              )}
-              {state.view === 'scatter' && (
-                <ScatterView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
-              )}
-              {state.view === 'lollipop' && (
-                <LollipopView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
-              )}
-              {state.view === 'overview' && (
-                <OverviewView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} categories={data.categories} />
-              )}
-              {state.view === 'circular' && (
-                <CircularView myths={filteredMyths} metrics={data.metrics} state={state} groups={data.groups} onSelectMyth={selectMyth} />
-              )}
-              {state.view === 'ladder' && (
-                <LadderView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
-              )}
-              {state.view === 'strips' && (
-                <StripsView
-                  myths={filteredMyths}
-                  metrics={data.metrics}
-                  groups={data.groups}
-                  categories={data.categories}
-                  state={state}
-                  update={update}
-                  onSelectMyth={selectMyth}
-                  definitions={defs}
-                  mythThemes={mythThemeMap}
-                  mythContentMap={mythContentMap}
-                />
-              )}
-            </>
+        <div
+          className={`chart-area${isFullscreen ? ' fullscreen' : ''}${isModernView ? ' chart-area--with-legend' : ''}`}
+          ref={chartRef}
+        >
+          {/* Mobile verdict legend strip — modern views only. */}
+          {isModernView && (
+            <div className="chart-area__legend chart-area__legend--mobile">
+              <VerdictLegend variant="strip" />
+            </div>
+          )}
+
+          <div className="chart-area__chart">
+            {state.view === 'sources' ? (
+              <SourcesStripsView state={state} update={update} definitions={defs} />
+            ) : filteredMyths.length === 0 ? (
+              <div className="no-results">{t('misc.noResults', 'de')}</div>
+            ) : (
+              <>
+                {state.view === 'balken' && (
+                  <BalkenView
+                    ref={balkenRef}
+                    myths={filteredMyths}
+                    metrics={data.metrics}
+                    state={state}
+                    onSelectMyth={selectMyth}
+                  />
+                )}
+                {state.view === 'table' && (
+                  <TableView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
+                )}
+                {state.view === 'scatter' && (
+                  <ScatterView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
+                )}
+                {state.view === 'lollipop' && (
+                  <LollipopView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
+                )}
+                {state.view === 'overview' && (
+                  <OverviewView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} categories={data.categories} />
+                )}
+                {state.view === 'circular' && (
+                  <CircularView myths={filteredMyths} metrics={data.metrics} state={state} groups={data.groups} onSelectMyth={selectMyth} />
+                )}
+                {state.view === 'ladder' && (
+                  <LadderView myths={filteredMyths} metrics={data.metrics} groups={data.groups} state={state} update={update} onSelectMyth={selectMyth} />
+                )}
+                {state.view === 'strips' && (
+                  <StripsView
+                    myths={filteredMyths}
+                    metrics={data.metrics}
+                    groups={data.groups}
+                    categories={data.categories}
+                    state={state}
+                    update={update}
+                    onSelectMyth={selectMyth}
+                    definitions={defs}
+                    mythThemes={mythThemeMap}
+                    mythContentMap={mythContentMap}
+                  />
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Desktop verdict legend sidebar — modern views only. */}
+          {isModernView && (
+            <aside className="chart-area__legend chart-area__legend--sidebar" aria-label={t('verdict.legend.title', 'de')}>
+              <VerdictLegend variant="sidebar" />
+            </aside>
           )}
         </div>
 
-        {state.view !== 'sources' && state.view !== 'strips' && (
+        {!isModernView && state.view !== 'sources' && state.view !== 'strips' && (
           <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
         )}
 
@@ -318,6 +449,52 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           factsheetSlug={mythSlugMap?.get(factsheetMyth.id)}
           onClose={closeFactsheet}
         />
+      )}
+
+      {isModernView && (
+        <FilterDrawer
+          open={filterDrawerOpen}
+          onClose={() => setFilterDrawerOpen(false)}
+          state={state}
+          update={update}
+          myths={data.myths}
+          categories={data.categories}
+          onSelectMyth={selectMyth}
+        />
+      )}
+
+      {isModernView && (
+        <ExportDrawer
+          open={exportDrawerOpen}
+          onClose={() => setExportDrawerOpen(false)}
+          myths={filteredMyths}
+          metrics={data.metrics}
+          groupIds={state.groupIds}
+          indicator={state.indicator}
+          view={state.view}
+          getChart={() => balkenRef.current?.getEchartsInstance() ?? null}
+          chartChrome={() => ({
+            title: t('balken.title', 'de'),
+            subtitle: `${t(`indicator.${state.indicator}`, 'de')} · ${t(`igs.group.${state.groupIds[0] ?? 'adults'}`, 'de')}`,
+          })}
+        />
+      )}
+
+      {isModernView && (
+        <Fab
+          onClick={() => {
+            // eslint-disable-next-line no-console
+            console.info('Rundgang TBD');
+          }}
+          label={t('rundgang.label', 'de')}
+          icon={<MapPin size={20} strokeWidth={2} />}
+        />
+      )}
+
+      {snackbar && (
+        <div className="carm-snackbar" role="status" aria-live="polite">
+          {snackbar}
+        </div>
       )}
     </div>
   );
