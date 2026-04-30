@@ -395,7 +395,6 @@ const quiz = collection({
             { label: "Eher richtig", value: "eher_richtig" },
             { label: "Eher falsch", value: "eher_falsch" },
             { label: "Falsch", value: "falsch" },
-            { label: "Keine Aussage möglich", value: "keine_aussage" },
           ],
           defaultValue: "falsch",
         }),
@@ -422,40 +421,63 @@ const quiz = collection({
           `${props.fields.mythId.value || "?"}: ${props.fields.statement.value?.slice(0, 50) || "…"}`,
       }
     ),
-    resultTiers: fields.array(
-      fields.object({
-        title: fields.text({
-          label: "Tier Title (DE)",
-          description: "e.g. Gut informiert, Cannabis-Experte",
-        }),
-        message: fields.text({
-          label: "Motivational Message (DE)",
-          multiline: true,
-        }),
-        minScore: fields.integer({
-          label: "Min Score",
-          description: "Minimum score for this tier (inclusive).",
-        }),
-        maxScore: fields.integer({
-          label: "Max Score",
-          description: "Maximum score for this tier (inclusive).",
-        }),
-        recommendedSlugs: fields.array(
-          fields.text({ label: "Factsheet Slug" }),
+    verdicts: fields.object(
+      {
+        profi: fields.object(
           {
-            label: "Recommended Factsheets",
-            itemLabel: (props) => props.value,
-            description:
-              "2–3 factsheet slugs to recommend for this tier.",
+            title: fields.text({ label: "Titel" }),
+            body: fields.text({ label: "Text", multiline: true }),
+          },
+          {
+            label: "Mythen-Profi (80–100 %)",
           }
         ),
-      }),
+        guterweg: fields.object(
+          {
+            title: fields.text({ label: "Titel" }),
+            body: fields.text({ label: "Text", multiline: true }),
+          },
+          {
+            label: "Auf dem richtigen Weg (60–79 %)",
+          }
+        ),
+        gehtnoch: fields.object(
+          {
+            title: fields.text({ label: "Titel" }),
+            body: fields.text({ label: "Text", multiline: true }),
+          },
+          {
+            label: "Da geht noch was (40–59 %)",
+          }
+        ),
+        erwischt: fields.object(
+          {
+            title: fields.text({ label: "Titel" }),
+            body: fields.text({ label: "Text", multiline: true }),
+          },
+          {
+            label: "Mythen haben dich erwischt (0–39 %)",
+          }
+        ),
+      },
       {
-        label: "Result Tiers",
-        itemLabel: (props) =>
-          `${props.fields.minScore.value}–${props.fields.maxScore.value}: ${props.fields.title.value || "…"}`,
+        label: "Ergebnis-Verdikt nach Punktzahl",
+        description:
+          "Verdikt-Texte für die vier Ergebnis-Bänder. Werden auf der Ergebnisseite gezeigt — passend zur erreichten Punktzahl.",
       }
     ),
+    weakSpotIntro: fields.text({
+      label: "Einleitung über Mythen-Liste, wenn Schwachstellen vorhanden",
+      multiline: true,
+      description:
+        "Wird über der Mythos-Übersicht angezeigt, wenn ≥1 Mythos 2+ Schritte daneben war.",
+    }),
+    strongPerformanceIntro: fields.text({
+      label: "Einleitung über Mythen-Liste bei starker Leistung",
+      multiline: true,
+      description:
+        "Wird angezeigt, wenn alle Mythen ≤1 Schritt daneben waren.",
+    }),
     ...metaFields,
     content: fields.markdoc({
       label: "Content",
