@@ -18,16 +18,7 @@ import WeiterfuehrendList from "@components/faq/WeiterfuehrendList.astro";
 // the appropriate audience page via `astro.config.mjs#redirects`.
 
 export async function getStaticPaths() {
-  // Inline list intentional: Astro hoists getStaticPaths into a separate
-  // scope where module-level frontmatter constants are not available.
-  const ids: FaqAudienceId[] = [
-    "eltern",
-    "jugendliche",
-    "konsumierende",
-    "lehrkraefte",
-    "fachkraefte",
-  ];
-  return ids.map((id) => ({ params: { slug: id } }));
+  return VALID_AUDIENCES.map((id) => ({ params: { slug: id } }));
 }
 
 const { slug } = Astro.params;

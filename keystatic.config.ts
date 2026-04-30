@@ -260,7 +260,7 @@ const faqQuestions = collection({
       label: "Verwandte Quiz-Module",
       itemLabel: (p) => p.value,
       description:
-        "Slugs aus der quiz-Sammlung, z. B. quiz-bevoelkerung-gesetzgebung.",
+        "Slugs aus der quiz-Sammlung, z. B. quiz-medizin oder quiz-risiken.",
     }),
     relatedDashboard: fields.array(
       fields.select({
