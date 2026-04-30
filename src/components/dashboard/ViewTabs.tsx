@@ -1,14 +1,27 @@
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
-import { t } from '../../lib/dashboard/translations';
+import { t, type TranslationKey } from '../../lib/dashboard/translations';
 
-// Tab order: Lollipop / Indikatoren / Gruppen / Tabelle / Informationsquellen.
-// Bar/Scatter/Übersicht/Circular/Indikator-Leiter were removed from the public
-// nav per UX feedback. The view components stay registered in MythenExplorer so
-// existing share-links (?view=bar etc.) keep resolving — only the tab buttons
-// are gone, not the views themselves.
-// Informationsquellen V1 + V2 collapsed into the single 'sources' Streifen tab
-// — old ?view=sources_v2 share-links are redirected by url-state.ts.
-const TABS: ViewTab[] = ['lollipop', 'strips', 'table', 'sources'];
+// Public tab order — Balken / Streifen / Tabelle ╎ Informationsquellen.
+// The visual divider before `sources` signals the IA shift from
+// "visualisation type" to "content type". Old views (bar/scatter/lollipop/
+// overview/circular/ladder) stay registered in MythenExplorer so legacy
+// share-links keep resolving; url-state.ts redirects retired ones to balken.
+const TABS: ViewTab[] = ['balken', 'strips', 'table', 'sources'];
+
+const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
+  balken: 'view.balken',
+  strips: 'view.streifen',
+  table: 'view.tabelle',
+  sources: 'view.quellen',
+  // Retired views — never shown in the tab bar; keys present so the type
+  // remains exhaustive and url-state redirects don't crash on lookup.
+  bar: null,
+  scatter: null,
+  lollipop: null,
+  overview: null,
+  circular: null,
+  ladder: null,
+};
 
 interface Props {
   view: ViewTab;
@@ -19,17 +32,22 @@ interface Props {
 export default function ViewTabs({ view, lang, onChange }: Props) {
   return (
     <nav className="tabs-bar" role="tablist" aria-label="Visualization type">
-      {TABS.map((tab) => (
-        <button
-          key={tab}
-          className={`tab-btn ${view === tab ? 'active' : ''}`}
-          role="tab"
-          aria-selected={view === tab}
-          onClick={() => onChange(tab)}
-        >
-          {t(`view.${tab}` as any, lang)}
-        </button>
-      ))}
+      {TABS.map((tab) => {
+        const key = TAB_LABEL_KEY[tab];
+        const label = key ? t(key, lang) : tab;
+        const isLast = tab === 'sources';
+        return (
+          <button
+            key={tab}
+            className={`tab-btn ${view === tab ? 'active' : ''}${isLast ? ' tab-btn--after-divider' : ''}`}
+            role="tab"
+            aria-selected={view === tab}
+            onClick={() => onChange(tab)}
+          >
+            {label}
+          </button>
+        );
+      })}
     </nav>
   );
 }

@@ -24,7 +24,7 @@ function jitter(mythId: number): number {
 export default function LadderView({ myths, metrics, groups, state, update, onSelectMyth }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(360);
-  const selectedGroup: GroupId = state.groupIds[0] || 'general_population';
+  const selectedGroup: GroupId = state.groupIds[0] || 'adults';
   const selectedMythId = state.selectedMythId;
 
   useEffect(() => {
