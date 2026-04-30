@@ -6,6 +6,7 @@ import { getPublishedEntries } from "@lib/content";
 import {
   getAudience,
   getQuestionsByAudience,
+  VALID_AUDIENCES,
   type FaqAudienceId,
 } from "@lib/faq";
 import AudienceHeader from "@components/faq/AudienceHeader.astro";
@@ -13,24 +14,25 @@ import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
 import HelplineBox from "@components/faq/HelplineBox.astro";
 import WeiterfuehrendList from "@components/faq/WeiterfuehrendList.astro";
 
-const AUDIENCE_IDS: FaqAudienceId[] = [
-  "eltern",
-  "jugendliche",
-  "konsumierende",
-  "lehrkraefte",
-  "fachkraefte",
-];
-
 // Legacy theme slugs (`/haeufige-fragen/gesundheit/`, etc.) are redirected to
 // the appropriate audience page via `astro.config.mjs#redirects`.
 
 export async function getStaticPaths() {
-  return AUDIENCE_IDS.map((id) => ({ params: { slug: id } }));
+  // Inline list intentional: Astro hoists getStaticPaths into a separate
+  // scope where module-level frontmatter constants are not available.
+  const ids: FaqAudienceId[] = [
+    "eltern",
+    "jugendliche",
+    "konsumierende",
+    "lehrkraefte",
+    "fachkraefte",
+  ];
+  return ids.map((id) => ({ params: { slug: id } }));
 }
 
 const { slug } = Astro.params;
 
-if (!AUDIENCE_IDS.includes(slug as FaqAudienceId)) {
+if (!VALID_AUDIENCES.includes(slug as FaqAudienceId)) {
   return Astro.redirect("/haeufige-fragen/");
 }
 
