@@ -28,11 +28,12 @@
  */
 
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from 'react';
+import type { ReactNode } from 'react';
 import * as d3 from 'd3';
 import {
   Search, Eye, ShieldCheck, Sparkles,
   Users, Baby, Cannabis, GraduationCap, UsersRound,
-  Layers, Download,
+  Layers,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type {
@@ -54,10 +55,10 @@ interface Props {
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
   definitions?: DashboardDefinitions | null;
-  /** Stage 3 — open the shared ExportDrawer. The chip lives in this
-   *  view's ToolbarRow `actions` slot so every chart-bearing tab
-   *  surfaces the same Exportieren control. */
-  onOpenExport?: () => void;
+  /** Shared toolbar actions (Mythos-Suche, Filter, Exportieren) rendered
+   *  on the right of every tab's toolbar so the bar stays consistent
+   *  across views. */
+  sharedActions?: ReactNode;
 }
 
 /** Order matters — drives strip order in 'metric' pivot. */
@@ -168,7 +169,7 @@ export interface SourcesStripsViewHandle {
 }
 
 const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
-  function SourcesStripsView({ state, update, definitions, onOpenExport }, ref) {
+  function SourcesStripsView({ state, update, definitions, sharedActions }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -529,16 +530,12 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
         */}
         <div className="strips-grid3__content" ref={contentRef}>
 
-          {/*
-            Three controls used to live on three separate rows. Collapsing
-            them into a single flex-wrap row recovers ~80px of vertical space
-            without compromising clarity — the labels keep the grouping
-            obvious. On narrow viewports the row wraps naturally.
-          */}
-          {/* Stage 2 — toolbar via shared primitives. The "Detail:
-              Unterkategorien" toggle stays as a custom action button
-              for now; Stage 4 of the Daten-Explorer refactor removes
-              it entirely (subcategories will always render). */}
+          {/* Unified toolbar — pivot, the per-mode value picker, AND a
+              "Quellen-Kategorie" picker that filters the chart. The
+              Kategorie strip + legend that used to live below the SVG
+              were removed in the toolbar-consolidation pass; the
+              category info is surfaced inline on each dot via a native
+              SVG <title> tooltip ("Quelle · Kategorie · Wert"). */}
           {(() => {
             const activeId = topRow.items.find((it) => it.active)?.id
               ?? topRow.items[0]?.id
@@ -559,6 +556,24 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                     : undefined,
               }),
             );
+
+            // Quellen-Kategorie picker — single-select with an "Alle Quellen"
+            // sentinel. State lives in `state.sourceCategoryFilter` (multi-
+            // select array preserved for URL back-compat); we collapse to
+            // a single value here.
+            const ALL = '__all__';
+            const catOptions: DataPickerOption<string>[] = sourceData
+              ? [
+                  { value: ALL, label: 'Alle Quellen', Icon: Layers },
+                  ...sourceData.sourceCategories.map((c) => ({
+                    value: c.id,
+                    label: c.name,
+                  })),
+                ]
+              : [{ value: ALL, label: 'Alle Quellen', Icon: Layers }];
+            const catValue =
+              categoryFilter.length === 0 ? ALL : categoryFilter[0];
+
             return (
               <ToolbarRow
                 aria-label="Informationsquellen-Steuerung"
@@ -586,20 +601,22 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                     aria-label={topRow.caption}
                     lang="de"
                   />,
+                  <DataPicker<string>
+                    key="quellen-kategorie"
+                    caption="Quellen-Kategorie"
+                    value={catValue}
+                    options={catOptions}
+                    onChange={(next) => {
+                      if (next === ALL) update('sourceCategoryFilter', []);
+                      else update('sourceCategoryFilter', [next]);
+                    }}
+                    aria-label="Quellen-Kategorie"
+                    searchable
+                    searchPlaceholder="Kategorie suchen…"
+                    lang="de"
+                  />,
                 ]}
-                actions={
-                  onOpenExport ? (
-                    <button
-                      type="button"
-                      className="carm-btn carm-btn--ghost"
-                      onClick={onOpenExport}
-                      aria-label="Exportieren"
-                    >
-                      <Download size={14} strokeWidth={2} aria-hidden="true" />
-                      Exportieren
-                    </button>
-                  ) : undefined
-                }
+                actions={sharedActions}
               />
             );
           })()}
@@ -737,6 +754,16 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                       const fill = categoryColorMap.get(n.source.category) || '#6B7280';
                       // Children: dimmer baseline opacity. Selection/hover always 1.
                       const baseOpacity = n.isChild ? 0.55 : 0.85;
+                      // Native SVG <title> takes over the role of the
+                      // bottom-of-chart legend that used to label every
+                      // category swatch — hovering a dot reveals the
+                      // source name, its category, and the value on the
+                      // current strip without a separate legend row.
+                      const catName =
+                        sourceData.sourceCategories.find(
+                          (c) => c.id === n.source.category,
+                        )?.name ?? n.source.category;
+                      const dotTitle = `${cleanName(n.source.name)} · ${catName} · ${formatPillValue(n.value)}`;
                       return (
                         <g key={`${col.id}-${n.sourceId}`}>
                           <circle
@@ -760,7 +787,9 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                               setHoverPos({ x: dotX, y: dotY + margin.top });
                             }}
                             onMouseLeave={() => setHoveredSourceId(null)}
-                          />
+                          >
+                            <title>{dotTitle}</title>
+                          </circle>
                         </g>
                       );
                     })}
@@ -950,58 +979,13 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
             </div>
           )}
 
-          {/* Stage 4 — bottom category-pill row replaced by a
-              searchable <DataPicker>. The picker still doubles as a
-              filter, but the legend role moved to the small swatch
-              row directly below (so the colour map remains visible
-              without a dropdown). */}
-          {(() => {
-            const allValue = '__all__';
-            const pickerOptions: DataPickerOption<string>[] = [
-              { value: allValue, label: 'Alle Quellen', Icon: Layers },
-              ...sourceData.sourceCategories.map((cat) => ({
-                value: cat.id,
-                label: cat.name,
-              })),
-            ];
-            const pickerValue =
-              categoryFilter.length === 0 ? allValue : categoryFilter[0];
-            return (
-              <div className="strips-cat-picker">
-                <DataPicker<string>
-                  caption="Kategorie"
-                  value={pickerValue}
-                  options={pickerOptions}
-                  onChange={(next) => {
-                    if (next === allValue) update('sourceCategoryFilter', []);
-                    else update('sourceCategoryFilter', [next]);
-                  }}
-                  aria-label="Quellen-Kategorie"
-                  searchable
-                  searchPlaceholder="Kategorie suchen…"
-                  lang="de"
-                />
-                <span className="strips-cat-pills__count" aria-live="polite">
-                  {parentCount} Quellen
-                </span>
-              </div>
-            );
-          })()}
-
-          {/* Compact legend row beneath the picker — preserves the
-              colour-map signal that the old pill row carried. Pure
-              decoration, not interactive. */}
-          <div className="strips-cat-legend" aria-hidden="true">
-            {sourceData.sourceCategories.map((cat) => (
-              <span key={cat.id} className="strips-cat-legend__item">
-                <span
-                  className="strips-cat-legend__swatch"
-                  style={{ background: cat.color }}
-                />
-                {cat.name}
-              </span>
-            ))}
-          </div>
+          {/* Live "n Quellen" caption stays — the toolbar picker
+              already drives the filter, but users still want a quick
+              read on how many parent sources are visible after
+              filtering. */}
+          <p className="strips-cat-pills__count" aria-live="polite">
+            {parentCount} Quellen
+          </p>
 
           </> /* /sourceData loaded */ )}
 

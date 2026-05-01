@@ -69,11 +69,19 @@ export function filterMyths(
   myths: Myth[],
   categoryIds: number[],
   verdictFilter: VerdictFilter,
+  mythIds: number[] = [],
 ): Myth[] {
   let filtered = myths;
 
-  if (categoryIds.length > 0) {
-    filtered = filtered.filter((m) => m.category_id !== null && categoryIds.includes(m.category_id));
+  // Unified Filter drawer: a myth is included if its category_id is in the
+  // selected categories OR its id is in the explicitly-selected myth list.
+  // When BOTH lists are empty the filter is a no-op (show all myths).
+  if (categoryIds.length > 0 || mythIds.length > 0) {
+    filtered = filtered.filter(
+      (m) =>
+        (m.category_id !== null && categoryIds.includes(m.category_id)) ||
+        mythIds.includes(m.id),
+    );
   }
 
   if (verdictFilter !== 'all') {

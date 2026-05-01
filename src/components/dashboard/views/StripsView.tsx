@@ -26,16 +26,16 @@
  */
 
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from 'react';
+import type { ReactNode } from 'react';
 import * as d3 from 'd3';
 import {
   Eye, TrendingUp, Target, Shield, Globe,
   Users, Baby, Cannabis, GraduationCap, UsersRound,
-  Layers, Download,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type {
   Myth, Metric, Group, GroupId, AppState, Indicator,
-  StripsMode, QuizThemeSlug, DashboardDefinitions, Category,
+  StripsMode, QuizThemeSlug, DashboardDefinitions,
 } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, getMythText } from '../../../lib/dashboard/data';
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
@@ -52,12 +52,9 @@ interface Props {
   myths: Myth[];
   metrics: Metric[];
   groups: Group[];
-  /** All myth categories (carm-data.json) — drives the category pill filter
-   *  rendered below the SVG. */
-  categories: Category[];
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
-  /** Stage 2 — opens the factsheet. */
+  /** Opens the factsheet panel. */
   onSelectMyth: (id: number) => void;
   definitions?: DashboardDefinitions | null;
   /** mythId → Quiz theme slug (kept for future use — unused in current UI). */
@@ -65,15 +62,14 @@ interface Props {
   /** Pre-rendered factsheet HTML, keyed by myth id. Used here to pull the
    *  fakten-karten-style summary for the in-view myth card. */
   mythContentMap?: Record<number, MythContentEntry>;
-  /** Stage 3 — open the shared ExportDrawer. The chip lives in this
-   *  view's ToolbarRow `actions` slot so every chart-bearing tab
-   *  surfaces the same Exportieren control. */
-  onOpenExport?: () => void;
+  /** Shared toolbar actions (Mythos-Suche, Filter, Exportieren) rendered
+   *  on the right of every tab's toolbar so the bar reads identically
+   *  across views. */
+  sharedActions?: ReactNode;
 }
 
 const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
 const STRIP_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
-const STRIP_THEMES: QuizThemeSlug[] = ['quiz-gefaehrlichkeit', 'quiz-gesellschaft', 'quiz-medizin', 'quiz-risiken', 'quiz-stimmung'];
 
 const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
   awareness: Eye,
@@ -89,23 +85,6 @@ const GROUP_ICONS: Record<GroupId, LucideIcon> = {
   consumers: Cannabis,
   young_adults: GraduationCap,
   parents: UsersRound,
-};
-
-/** Quiz theme emoji — same set used on the Quiz landing page. */
-const THEME_EMOJI: Record<QuizThemeSlug, string> = {
-  'quiz-gefaehrlichkeit': '⚖️', // ⚖️
-  'quiz-gesellschaft': '🏛️', // 🏛️
-  'quiz-medizin': '💊', // 💊
-  'quiz-risiken': '⚠️', // ⚠️
-  'quiz-stimmung': '🧠', // 🧠
-};
-
-const THEME_LABELS: Record<QuizThemeSlug, { full: string; short: string; defKey: string }> = {
-  'quiz-gefaehrlichkeit': { full: 'strips.theme.gefaehrlichkeit', short: 'strips.theme.gefaehrlichkeit.short', defKey: 'strips.theme.gefaehrlichkeit' },
-  'quiz-gesellschaft': { full: 'strips.theme.gesellschaft', short: 'strips.theme.gesellschaft.short', defKey: 'strips.theme.gesellschaft' },
-  'quiz-medizin': { full: 'strips.theme.medizin', short: 'strips.theme.medizin.short', defKey: 'strips.theme.medizin' },
-  'quiz-risiken': { full: 'strips.theme.risiken', short: 'strips.theme.risiken.short', defKey: 'strips.theme.risiken' },
-  'quiz-stimmung': { full: 'strips.theme.stimmung', short: 'strips.theme.stimmung.short', defKey: 'strips.theme.stimmung' },
 };
 
 /** Short aliases for population groups on narrow viewports. */
@@ -168,7 +147,7 @@ export interface StripsViewHandle {
 }
 
 const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
-  { myths, metrics, groups, categories, state, update, onSelectMyth, definitions, mythContentMap, onOpenExport },
+  { myths, metrics, groups, state, update, onSelectMyth, definitions, mythContentMap, sharedActions },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -444,53 +423,10 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
     return { key: 'indicator', items: indicatorRow };
   }, [mode, indicatorRow, groupRow]);
 
-  /** The active row — used to render the strip headers inside the SVG. */
-  const activeRow: RowItem[] = useMemo(() => {
-    if (mode === 'indicator') return indicatorRow;
-    return groupRow;
-  }, [mode, indicatorRow, groupRow]);
-
-  // ── Render row of icon-blocks ─────────────────────────────────────
-  const renderRow = (row: RowItem[], isPivot: boolean) => (
-    <div
-      className={`strips-row ${isPivot ? 'is-pivot' : ''}`}
-      style={{ paddingLeft: margin.left, paddingRight: margin.right, gap: colGap }}
-      role="group"
-    >
-      {row.map((item, i) => (
-        <div
-          key={item.id}
-          className={`strips-block ${item.active ? 'active' : ''} ${isPivot ? 'pivot-block' : ''}`}
-          style={{ width: colW }}
-        >
-          <button
-            className="strips-block-btn"
-            onClick={item.onActivate}
-            title={item.label}
-            aria-pressed={item.active}
-            disabled={isPivot}
-          >
-            {item.emoji ? (
-              <span className="strips-block-emoji" aria-hidden="true">{item.emoji}</span>
-            ) : item.Icon ? (
-              <item.Icon size={isNarrow ? 16 : 18} strokeWidth={1.75} aria-hidden="true" />
-            ) : null}
-            <span className="strips-block-label">{isMobile ? item.shortLabel : item.label}</span>
-          </button>
-          {item.defLabel && item.defText && (
-            <span className="strips-block-info">
-              <InfoTooltip
-                title={item.defLabel}
-                definition={item.defText}
-                scale={item.scale}
-                sampleSize={item.sampleSize}
-              />
-            </span>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+  // The earlier `renderRow` / `activeRow` helpers rendered the
+  // top-of-chart filter rows that lived above the SVG. The toolbar
+  // consolidation moved that affordance into the shared ToolbarRow
+  // (the "Wert für" picker), so the helpers are gone.
 
   // ── Myth card content (selected state) ────────────────────────────
   const selectedMythContent = selectedMyth ? mythContentMap?.[selectedMyth.id] : null;
@@ -512,27 +448,12 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
             'Vergleichen nach:' toggle below — same pattern as the
             Informationsquellen tab's 'Spalten:' switch. */}
         <div className="strips-grid3__content" ref={contentRef}>
-          {/* Stage 2 — toolbar via shared primitives.
-              Row 1: <PivotToggle> alone.
-              Row 2: <DataPicker> "Wert für" + <DataPicker> "Mythos-Kategorie".
-              Behaviour mirrors the previous .strips-controls-row markup;
-              styling lives in .carm-pivot-toggle / .carm-picker /
-              .carm-toolbar-row in dashboard.css. */}
-          <ToolbarRow
-            aria-label={t('strips.compare.label', state.lang)}
-            pivot={
-              <PivotToggle<typeof mode>
-                aria-label={t('strips.compare.label', state.lang)}
-                value={mode}
-                onChange={(v) => update('stripsMode', v)}
-                options={[
-                  { value: 'indicator', label: t('strips.mode.indicator', state.lang) },
-                  { value: 'group', label: t('strips.mode.group', state.lang) },
-                ]}
-              />
-            }
-          />
-
+          {/* Unified toolbar — pivot + "Wert für" picker on the left,
+              shared actions (Mythos-Suche, Filter, Exportieren) on the
+              right so the bar reads identically across all four tabs.
+              The "Mythos-Kategorie" dropdown that used to live here was
+              removed in the toolbar-consolidation pass — its job is now
+              done by the unified Filter drawer. */}
           {(() => {
             const activeId = topRow.items.find((it) => it.active)?.id
               ?? topRow.items[0]?.id
@@ -554,27 +475,20 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                     : undefined,
               }),
             );
-
-            // Categories use number ids in the data model; the DataPicker
-            // is generic over `string`, so we stringify at the boundary
-            // and parse back in onChange.
-            const isAllCats = state.categoryIds.length === 0;
-            const allMythsLabel =
-              state.lang === 'de' ? 'Alle Mythen' : 'All myths';
-            const categoryOptions: DataPickerOption<string>[] = [
-              { value: '__all__', label: allMythsLabel, Icon: Layers },
-              ...categories.map((cat) => ({
-                value: String(cat.id),
-                label: state.lang === 'de' ? cat.name_de : cat.name_en,
-              })),
-            ];
-            const categoryValue = isAllCats
-              ? '__all__'
-              : String(state.categoryIds[0]);
-
             return (
               <ToolbarRow
-                aria-label={t('strips.value.label', state.lang)}
+                aria-label={t('strips.compare.label', state.lang)}
+                pivot={
+                  <PivotToggle<typeof mode>
+                    aria-label={t('strips.compare.label', state.lang)}
+                    value={mode}
+                    onChange={(v) => update('stripsMode', v)}
+                    options={[
+                      { value: 'indicator', label: t('strips.mode.indicator', state.lang) },
+                      { value: 'group', label: t('strips.mode.group', state.lang) },
+                    ]}
+                  />
+                }
                 pickers={[
                   <DataPicker<string>
                     key="value"
@@ -588,36 +502,8 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                     aria-label={t('strips.value.label', state.lang)}
                     lang={state.lang}
                   />,
-                  <DataPicker<string>
-                    key="category"
-                    caption={
-                      state.lang === 'de' ? 'Mythos-Kategorie' : 'Myth category'
-                    }
-                    value={categoryValue}
-                    options={categoryOptions}
-                    onChange={(next) => {
-                      if (next === '__all__') update('categoryIds', []);
-                      else update('categoryIds', [Number(next)]);
-                    }}
-                    aria-label={
-                      state.lang === 'de' ? 'Mythos-Kategorie' : 'Myth category'
-                    }
-                    lang={state.lang}
-                  />,
                 ]}
-                actions={
-                  onOpenExport ? (
-                    <button
-                      type="button"
-                      className="carm-btn carm-btn--ghost"
-                      onClick={onOpenExport}
-                      aria-label={t('export.button', state.lang)}
-                    >
-                      <Download size={14} strokeWidth={2} aria-hidden="true" />
-                      {t('export.button', state.lang)}
-                    </button>
-                  ) : undefined
-                }
+                actions={sharedActions}
               />
             );
           })()}
