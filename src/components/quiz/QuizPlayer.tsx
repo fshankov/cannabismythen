@@ -38,14 +38,17 @@ import type {
 } from "./types";
 import {
   QUIZ_THEMES,
+  breakdownCounts,
   computePercentile,
   getTierIndex,
+  moduleScore as computeModuleScore,
+  pointsForSchritte,
+  schritte,
+  scoreBand,
 } from "./quizData";
 import { t } from "./i18n";
 import {
   trackAnswerSubmitted,
-  trackConfidenceChosen,
-  trackDeckOverviewOpened,
   trackKeyboardShortcutUsed,
   trackQuizCompleted,
   trackQuizStarted,
@@ -55,7 +58,6 @@ import TitleCard from "./TitleCard";
 import ProgressBar from "./ProgressBar";
 import ResultScreen from "./ResultScreen";
 import FactsheetPanel from "./FactsheetPanel";
-import DeckOverview from "./DeckOverview";
 import ShortcutHelp from "./ShortcutHelp";
 import type { MythContentEntry } from "./FactsheetPanel";
 
@@ -67,6 +69,22 @@ export interface QuizTextEntry {
   explanation: string;
 }
 
+/** Shape of editable per-band verdict + intro copy from Keystatic.
+ *  Mirrors the `verdicts` + `weakSpotIntro` + `strongPerformanceIntro`
+ *  fields on each quiz module .mdoc. */
+export interface QuizVerdictsEntry {
+  profi?: { title?: string; body?: string };
+  guterweg?: { title?: string; body?: string };
+  gehtnoch?: { title?: string; body?: string };
+  erwischt?: { title?: string; body?: string };
+}
+
+/** Module-level intro copy shown above the result-page myth review. */
+export interface QuizIntrosEntry {
+  weakSpotIntro?: string;
+  strongPerformanceIntro?: string;
+}
+
 interface QuizPlayerProps {
   /** Quiz slug, e.g. "quiz-risiken" */
   quizSlug: string;
@@ -74,43 +92,57 @@ interface QuizPlayerProps {
   mythContent?: string;
   /** JSON-serialized Record<mythId, QuizTextEntry> from Keystatic quiz content */
   quizText?: string;
+  /** JSON-serialized QuizVerdictsEntry from Keystatic content. Stage 5
+   *  consumes this on the ResultScreen. Stage 1 only plumbs it through. */
+  verdicts?: string;
+  /** JSON-serialized QuizIntrosEntry from Keystatic content. Same plumbing
+   *  contract as `verdicts` — Stage 5 owns rendering. */
+  intros?: string;
   /** Optional Keystatic summary used in the intro card */
   quizSummary?: string;
-  /** When true, the confidence-input panel slides up over the front face
-   *  after answering and the card flip is gated on the confidence pick.
-   *  Off by default — opt in per quiz from the Astro [slug] page so the
-   *  research team can enable it on selected modules. */
-  confidenceEnabled?: boolean;
 }
 
-// ── Scoring: distance from evidence-based classification ─────────────────────
-const CLASS_POS: Record<Classification, number> = {
-  richtig: 1,
-  eher_richtig: 2,
-  eher_falsch: 3,
-  falsch: 4,
-};
-
-function answerScore(chosen: Classification, correct: Classification): number {
-  const d = Math.abs(CLASS_POS[chosen] - CLASS_POS[correct]);
-  if (d === 0) return 2;
-  if (d === 1) return 1;
-  if (d === 2) return -1;
-  return -2;
-}
-
+// ── Persisted progress shape ────────────────────────────────────────────────
+//
+// v3 bump (Stage 1): drop the optional `confidence` field from each answer
+// (ConfidenceInput was deleted), and reserve an optional `order: string[]`
+// field that Stage 2 will populate when randomized question order ships.
+// Older v1 records are upgraded on read by stripping unknown fields and
+// re-saving as v3 on the next state mutation.
 interface PersistedState {
-  v: 1;
+  v: 3;
   answers: Record<string, CardAnswer>;
   currentIndex: number;
   finished: boolean;
-  /** True once the user has tapped "Los geht's" on the title card. Optional
-   *  for backwards-compatibility with older v1 records. */
+  /** True once the user has tapped "Los geht's" on the title card. */
   introDismissed?: boolean;
+  /** Reserved for Stage 2 (random-per-visit question order). When absent,
+   *  the deck renders in `theme.myths` natural order. */
+  order?: string[];
 }
 
 function storageKey(slug: string): string {
   return `cm-quiz-progress::${slug}`;
+}
+
+/** Strip unknown / dead fields off any persisted answer record. Older
+ *  shapes carried a `confidence?: "sure"|"unsure"` field that no longer
+ *  exists; this normalises everything onto the current `CardAnswer` shape. */
+function normaliseAnswer(raw: unknown): CardAnswer | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  if (
+    typeof r.mythId !== "string" ||
+    typeof r.chosenClassification !== "string" ||
+    typeof r.isCorrect !== "boolean"
+  ) {
+    return null;
+  }
+  return {
+    mythId: r.mythId,
+    chosenClassification: r.chosenClassification as CardAnswer["chosenClassification"],
+    isCorrect: r.isCorrect,
+  };
 }
 
 function loadProgress(slug: string): PersistedState | null {
@@ -118,10 +150,42 @@ function loadProgress(slug: string): PersistedState | null {
   try {
     const raw = window.localStorage.getItem(storageKey(slug));
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as PersistedState;
-    if (parsed && parsed.v === 1 && typeof parsed.answers === "object") {
-      return parsed;
+    const parsed = JSON.parse(raw) as {
+      v?: number;
+      answers?: Record<string, unknown>;
+      currentIndex?: number;
+      finished?: boolean;
+      introDismissed?: boolean;
+      order?: unknown;
+    };
+    // Accept v1, v2 (transient pre-Stage-1 schema), and v3.
+    // Older records get migrated to v3 by stripping dead fields below.
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      typeof parsed.answers !== "object" ||
+      parsed.answers === null
+    ) {
+      return null;
     }
+    const version = parsed.v;
+    if (version !== 1 && version !== 2 && version !== 3) return null;
+    const answers: Record<string, CardAnswer> = {};
+    for (const [k, v] of Object.entries(parsed.answers)) {
+      const a = normaliseAnswer(v);
+      if (a) answers[k] = a;
+    }
+    return {
+      v: 3,
+      answers,
+      currentIndex:
+        typeof parsed.currentIndex === "number" ? parsed.currentIndex : 0,
+      finished: Boolean(parsed.finished),
+      introDismissed: Boolean(parsed.introDismissed),
+      order: Array.isArray(parsed.order)
+        ? parsed.order.filter((x): x is string => typeof x === "string")
+        : undefined,
+    };
   } catch {
     // ignore
   }
@@ -199,7 +263,6 @@ function QuizPlayerInner({
   quizText,
   quizSummary,
   theme,
-  confidenceEnabled = false,
 }: QuizPlayerInnerProps) {
   const totalQuestions = theme.myths.length;
   const accent = QUIZ_ACCENT[quizSlug] ?? "var(--color-accent)";
@@ -236,7 +299,6 @@ function QuizPlayerInner({
   });
 
   const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
-  const [overviewOpen, setOverviewOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [lastScoreDelta, setLastScoreDelta] = useState(0);
   const [restoredNotice, setRestoredNotice] = useState<boolean>(() => {
@@ -256,9 +318,10 @@ function QuizPlayerInner({
 
   // ── Persist on every state change. The lazy initializers mean the first
   //    write is identical to what was already on disk → safe no-op.
+  //    NOTE: `order` is reserved for Stage 2's random-per-visit rollout.
   useEffect(() => {
     saveProgress(quizSlug, {
-      v: 1,
+      v: 3,
       answers,
       currentIndex,
       finished,
@@ -308,29 +371,34 @@ function QuizPlayerInner({
   const answeredCount = Object.keys(answers).length;
   const allAnswered = answeredCount === totalQuestions;
 
+  /** Live module score expressed as the Schritte-based percentage. Equal
+   *  to the final `moduleScore` once every question has been answered;
+   *  scales linearly with answered questions before that. The header
+   *  pill renders this as a percent. */
   const totalScore = useMemo(() => {
-    let s = 0;
-    for (const a of Object.values(answers)) {
-      const myth = theme.myths.find((m) => m.id === a.mythId);
-      if (myth) s += answerScore(a.chosenClassification, myth.correctClassification);
-    }
-    return s;
+    return computeModuleScore(Object.values(answers), theme.myths);
   }, [answers, theme.myths]);
 
   const result: QuizResult | null = useMemo(() => {
     if (!allAnswered) return null;
     const answersList = Object.values(answers);
     const correctCount = answersList.filter((a) => a.isCorrect).length;
-    const correctPct = Math.round((correctCount / totalQuestions) * 100);
+    const score = computeModuleScore(answersList, theme.myths);
+    const breakdown = breakdownCounts(answersList, theme.myths);
+    const band = scoreBand(score);
     const percentile = computePercentile(theme.myths, answersList);
-    const tierIndex = getTierIndex(correctCount, totalQuestions);
     return {
       themeSlug: quizSlug,
       totalQuestions,
       correctCount,
-      correctPct,
+      moduleScore: score,
+      breakdown,
+      band,
       percentile,
-      tierIndex,
+      // Legacy fields retained for the still-running ResultScreen path.
+      // Stage 5 rebuilds the result page and removes both.
+      correctPct: Math.round((correctCount / totalQuestions) * 100),
+      tierIndex: getTierIndex(correctCount, totalQuestions),
       answers: theme.myths
         .map((m) => answersList.find((a) => a.mythId === m.id)!)
         .filter(Boolean),
@@ -343,8 +411,12 @@ function QuizPlayerInner({
       if (!myth || answers[mythId]) return;
 
       const isCorrect = chosen === myth.correctClassification;
-      const delta = answerScore(chosen, myth.correctClassification);
-      setLastScoreDelta(delta);
+      // Score delta = points awarded for THIS answer, on the same 0–100
+      // scale as the running total. Drives the brief flash animation.
+      const points = pointsForSchritte(
+        schritte(chosen, myth.correctClassification)
+      );
+      setLastScoreDelta(Math.round(points * 100));
 
       const newAnswer: CardAnswer = {
         mythId,
@@ -366,24 +438,6 @@ function QuizPlayerInner({
       });
     },
     [theme.myths, theme.titleKey, answers, totalQuestions]
-  );
-
-  /** Records the user's confidence pick after a verdict, then unlocks the
-   *  card flip. No-op if the answer doesn't exist or already has a
-   *  confidence value. */
-  const handleConfidenceSet = useCallback(
-    (mythId: string, confidence: "sure" | "unsure") => {
-      setAnswers((prev) => {
-        const existing = prev[mythId];
-        if (!existing || existing.confidence) return prev;
-        trackConfidenceChosen(mythId, confidence);
-        return {
-          ...prev,
-          [mythId]: { ...existing, confidence },
-        };
-      });
-    },
-    []
   );
 
   const handleNext = useCallback(() => {
@@ -482,12 +536,6 @@ function QuizPlayerInner({
           e.preventDefault();
           return;
         }
-        if (overviewOpen) {
-          setOverviewOpen(false);
-          trackKeyboardShortcutUsed("close_overview");
-          e.preventDefault();
-          return;
-        }
         if (factsheetMyth) {
           setFactsheetMyth(null);
           trackKeyboardShortcutUsed("close_factsheet");
@@ -498,7 +546,7 @@ function QuizPlayerInner({
       }
 
       // While any overlay is open, only Esc above is wired.
-      if (helpOpen || overviewOpen || factsheetMyth) return;
+      if (helpOpen || factsheetMyth) return;
 
       // Don't operate before the user dismisses the title card or after
       // the result screen has taken over.
@@ -561,7 +609,6 @@ function QuizPlayerInner({
     return () => document.removeEventListener("keydown", onKey);
   }, [
     helpOpen,
-    overviewOpen,
     factsheetMyth,
     showTitleCard,
     showResults,
@@ -622,31 +669,8 @@ function QuizPlayerInner({
               deckBehind={cardsRemainingBehind}
               categoryLabel={t(theme.titleKey)}
               streakCount={streakCount}
-              confidenceEnabled={confidenceEnabled}
-              onConfidenceSet={handleConfidenceSet}
             />
           )}
-
-          <div className="quiz-player__overview-row">
-            <button
-              type="button"
-              className="quiz-player__overview-btn"
-              onClick={() => {
-                setOverviewOpen(true);
-                trackDeckOverviewOpened(t(theme.titleKey));
-              }}
-              aria-haspopup="dialog"
-              aria-expanded={overviewOpen}
-            >
-              <span
-                className="quiz-player__overview-btn-glyph"
-                aria-hidden="true"
-              >
-                ▦
-              </span>
-              {t("ui.deckOverview.cta", { n: totalQuestions })}
-            </button>
-          </div>
 
           <nav
             className="quiz-player__nav"
@@ -752,29 +776,6 @@ function QuizPlayerInner({
           onClose={handleCloseFactsheet}
           statementText={quizTextMap[factsheetMyth.id]?.statement}
           explanationText={quizTextMap[factsheetMyth.id]?.explanation}
-        />
-      )}
-
-      {overviewOpen && (
-        <DeckOverview
-          myths={theme.myths}
-          answers={answers}
-          currentIndex={safeIndex}
-          onJump={handleJumpTo}
-          onClose={() => setOverviewOpen(false)}
-          statementText={(id) =>
-            quizTextMap[id]?.statement ??
-            t(theme.myths.find((m) => m.id === id)!.statementKey)
-          }
-          distanceOf={(id) => {
-            const a = answers[id];
-            if (!a) return null;
-            const m = theme.myths.find((x) => x.id === id)!;
-            return Math.abs(
-              CLASS_POS[a.chosenClassification] -
-                CLASS_POS[m.correctClassification]
-            );
-          }}
         />
       )}
 

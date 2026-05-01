@@ -3,10 +3,14 @@
  *
  * Renders: [Quiz Title] [═══════ bar ═══════] [score pill] [count]
  *
- * Score system (distance from evidence-based classification):
- *   exact match → +2, 1 step → +1, 2 steps → −1, 3 steps → −2
+ * Score system (Stage 1 — Schritte / CaRM "Richtigkeit"):
+ *   exact match → 1.00 pt, 1 step → 0.66 pt, 2 steps → 0.33 pt, 3 steps → 0.
+ *   The pill displays the running module-score percentage (rounded), not a
+ *   ±delta. The flash class still keys off `lastScoreDelta` so a great
+ *   answer flashes brighter than a far-off one.
  *
- * The score pill flashes green/red on each new answer.
+ * NOTE: Stage 4 of the overhaul replaces this component with a Schritte-
+ * coloured pill row. This file is intentionally low-touch in Stage 1.
  */
 
 import { useState, useEffect, useRef } from "react";
@@ -31,15 +35,17 @@ export default function ProgressBar({
   const [flashClass, setFlashClass] = useState("");
   const prevAnswered = useRef(answered);
 
-  // Flash animation when a new answer comes in
+  // Flash animation when a new answer comes in. `lastScoreDelta` is the
+  // points awarded for the most recent answer on a 0–100 scale (100 = exact,
+  // 66 = 1 step, 33 = 2 steps, 0 = 3 steps).
   useEffect(() => {
     if (answered > prevAnswered.current && answered > 0) {
       const cls =
-        lastScoreDelta >= 2
+        lastScoreDelta >= 90
           ? "quiz-score--flash-great"
-          : lastScoreDelta > 0
+          : lastScoreDelta >= 60
             ? "quiz-score--flash-good"
-            : lastScoreDelta <= -2
+            : lastScoreDelta <= 0
               ? "quiz-score--flash-bad"
               : "quiz-score--flash-warn";
       setFlashClass(cls);
@@ -54,13 +60,13 @@ export default function ProgressBar({
     prevAnswered.current = answered;
   }, [answered]);
 
-  const scoreSign = score > 0 ? "+" : "";
+  // Score is now a 0–100 percentage; the colour ramps from neutral up.
   const scoreColorClass =
-    score > 0
+    score >= 80
       ? "quiz-score__value--positive"
-      : score < 0
-        ? "quiz-score__value--negative"
-        : "quiz-score__value--neutral";
+      : score >= 40
+        ? "quiz-score__value--neutral"
+        : "quiz-score__value--negative";
 
   return (
     <div className="quiz-header-bar">
@@ -74,9 +80,15 @@ export default function ProgressBar({
         aria-valuemax={total}
       >
         <div className="quiz-progress__bar">
+          {/* SSR sees no saved progress so the bar starts at 0 % on the
+              server; hydration fills it in with the localStorage-restored
+              value. Suppressing the inevitable mismatch is intentional —
+              Stage 4 of the overhaul replaces this component with the new
+              Schritte pill row, so this is a deliberately short-lived hack. */}
           <div
             className="quiz-progress__fill"
             style={{ width: `${pct}%` }}
+            suppressHydrationWarning
           />
         </div>
       </div>
@@ -84,7 +96,7 @@ export default function ProgressBar({
       {answered > 0 && (
         <span className={`quiz-score ${flashClass}`}>
           <span className={`quiz-score__value ${scoreColorClass}`}>
-            {scoreSign}{score}
+            {score}&nbsp;%
           </span>
         </span>
       )}

@@ -42,6 +42,25 @@ if (entry.questions) {
   }
 }
 
+// ── Editorial verdicts + intros (Keystatic source of truth, see CLAUDE.md
+// "Quiz content source of truth" section). Stage 5 consumes these on the
+// ResultScreen; Stage 1 only plumbs them through the React boundary.
+const entryAny = entry as unknown as {
+  verdicts?: {
+    profi?: { title?: string; body?: string };
+    guterweg?: { title?: string; body?: string };
+    gehtnoch?: { title?: string; body?: string };
+    erwischt?: { title?: string; body?: string };
+  };
+  weakSpotIntro?: string;
+  strongPerformanceIntro?: string;
+};
+const verdictsPayload = entryAny.verdicts ?? {};
+const introsPayload = {
+  weakSpotIntro: entryAny.weakSpotIntro ?? "",
+  strongPerformanceIntro: entryAny.strongPerformanceIntro ?? "",
+};
+
 // Pre-render myth page content for the factsheet panel
 const theme = QUIZ_THEMES[slug!];
 const mythContentMap: Record<string, { html: string; title: string; classification: string; classificationLabel: string; refCount: number }> = {};
@@ -80,6 +99,8 @@ if (theme) {
       quizSlug={slug!}
       mythContent={JSON.stringify(mythContentMap)}
       quizText={JSON.stringify(quizTextMap)}
+      verdicts={JSON.stringify(verdictsPayload)}
+      intros={JSON.stringify(introsPayload)}
       quizSummary={(entry as any).summary || undefined}
     />
 

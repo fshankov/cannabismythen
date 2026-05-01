@@ -92,6 +92,34 @@ Universal entry fields: `status: "draft" | "published"`, `tags`, `internalNotes`
    `quizIds[]`, and dashboards. Add new myths with the next sequential ID; don't
    reshuffle existing ones.
 
+## Quiz content source of truth
+
+The quiz lives across two stores by design. Both must reach the runtime,
+and editors must be able to trust that their changes are reflected on the
+live site without a code change.
+
+- **Editorial text** — statements, explanations, per-band verdicts
+  (`verdicts.{profi,guterweg,gehtnoch,erwischt}`), the
+  `weakSpotIntro` / `strongPerformanceIntro` lines, and (Stage 7+) per-module
+  share copy → **`src/content/quiz/*.mdoc`** is the source of truth. The
+  Keystatic admin UI is the editorial surface; commits land in git.
+- **Data integrity** — `mythId`, `correctClassification`, `populationCorrectPct`
+  (Erwachsene 18–70 reference table) → **`src/components/quiz/quizData.ts`**
+  is the source of truth. Code reviewers gate changes; the runtime trusts
+  these values when computing scores. Never edit these in `.mdoc`; never
+  duplicate them across the boundary.
+- **The join point** — `src/pages/quiz/[slug].astro` reads both stores and
+  passes them as JSON props (`quizText`, `verdicts`, `intros`, …) into
+  `<QuizPlayer>`. If you add a new editorial field to the Keystatic schema,
+  extend the Astro page to forward it — otherwise edits silently no-op.
+- **Scoring is Schritte, never binary.** All per-question math routes
+  through `schritte()` / `pointsForSchritte()` / `moduleScore()` /
+  `breakdownCounts()` / `scoreBand()` in `quizData.ts`. If you find another
+  scorer anywhere in the quiz codebase, that's a bug.
+- **Population framing is honest.** Compare against "Erwachsene (18–70) in
+  der CaRM-Studie" only. Never reference "Bevölkerung in Deutschland" or
+  "Gesamtbevölkerung 16–70" on the public site.
+
 ## Routing patterns
 
 Pages live in `src/pages/`. Dynamic routes (`[slug].astro`) follow a single pattern:

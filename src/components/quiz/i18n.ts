@@ -278,10 +278,14 @@ const translations: Record<Lang, Record<string, string>> = {
     // \u2500\u2500 Streak chip (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     "ui.streak.label": "{n} richtig in Folge",
 
-    // \u2500\u2500 Confidence input (Phase D \u00a73.8) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-    "ui.confidence.label": "Wie sicher bist du?",
-    "ui.confidence.sure": "Sehr sicher",
-    "ui.confidence.unsure": "Eher unsicher",
+    // \u2500\u2500 Schritte band labels (Stage 1 \u2014 CaRM Schritte model) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    "schritte.exact": "Genau richtig",
+    "schritte.near": "Nah dran",
+    "schritte.off": "Daneben",
+    "schritte.far": "Komplett daneben",
+    // {schritte} Schritt(e), {points} Punkte. Use commas for German decimals.
+    "schritte.points":
+      "{schritte}\u00a0Schritt(e) daneben \u2192 {points}\u00a0Punkte",
 
     // \u2500\u2500 Micro-copy table (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     "ui.microCopy.farMiss":
@@ -302,7 +306,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.classificationPhrase.falsch": "falsch",
     "ui.correctAnswer": "Evidenzbasierte Bewertung:",
     "ui.yourAnswer": "Deine Antwort:",
-    "ui.yourAnswerLabel": "Ihre Antwort",
+    "ui.yourAnswerLabel": "Deine Antwort",
     "ui.correctAnswerLabel": "Richtige Antwort",
     "ui.swipeHint": "oder nach links wischen",
     "ui.startQuiz": "Los geht's",
@@ -320,13 +324,13 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.populationUnavailable":
       "F\u00fcr diese Aussage liegen keine vergleichenden Daten vor.",
     "ui.persistenceNotice":
-      "Wir speichern Ihren Fortschritt nur in diesem Browser.",
+      "Wir speichern deinen Fortschritt nur in diesem Browser.",
     "ui.progressRestored":
       "Fortschritt wiederhergestellt.",
     "ui.resetProgress": "Quiz zur\u00fccksetzen",
-    "ui.retrospectiveTitle": "Ihre Antworten im \u00dcberblick",
+    "ui.retrospectiveTitle": "Deine Antworten im \u00dcberblick",
     "ui.scoreHeadlineCompare":
-      "Sie wussten {correct}\u202f/\u202f{total} \u2014 besser als {pct}\u202f% der Befragten.",
+      "Du hast {pct}\u202f% erreicht \u2014 besser als ca. {pop}\u202f% der Erwachsenen (18\u201370) in der CaRM-Studie.",
     "ui.exploreData": "Daten-Explorer \u00f6ffnen",
     "ui.shareResultHeading": "Ergebnis teilen",
     "ui.openMythDetail": "Details zu dieser Aussage \u2192",

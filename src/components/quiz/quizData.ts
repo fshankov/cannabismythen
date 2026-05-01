@@ -1,14 +1,36 @@
 /**
- * Quiz data — structured myth entries for all 4 quiz themes.
+ * Quiz data — structured myth entries for all 5 quiz themes + Schritte
+ * scoring helpers.
+ *
+ * Editorial vs data split (mirrored in CLAUDE.md):
+ *   - This file is the source of truth for **data integrity** — mythId,
+ *     correctClassification, populationCorrectPct, mythPageSlug. Code
+ *     reviewers gate changes here; the runtime trusts these values when
+ *     computing scores.
+ *   - Editorial text (statements, explanations, verdicts, intros, share
+ *     copy) lives in `src/content/quiz/*.mdoc` and reaches the runtime
+ *     through `src/pages/quiz/[slug].astro` → React props. The
+ *     `statementKey` / `explanationKey` fields below are fallback i18n
+ *     references only.
  *
  * Data sourced from:
- *   - CaRM survey: "Ergebnisse CaRM Tab sort 1.xlsx", sheets "Volljährige" + "Minderjährige"
- *     (Richtigkeit d. Beurteilung — population-weighted Gesamtbevölkerung 16–70,
- *      weights: 97.1% adults 18–70, 2.9% minors 16–17, based on German demographics)
- *   - /src/content/zahlen-und-fakten/*.mdoc (myth page slugs, classifications)
+ *   - `src/content/quiz/feedback-texte.mdoc` — Erwachsene (18–70) reference
+ *     table from the CaRM-Studie. This is the source of truth for
+ *     populationCorrectPct.
+ *   - `src/content/zahlen-und-fakten/*.mdoc` — myth page slugs and
+ *     scientific classifications.
  */
 
-import type { QuizTheme, QuizMyth, ResultTier, ResultTierIndex, Classification, CardAnswer } from "./types";
+import type {
+  QuizTheme,
+  QuizMyth,
+  ResultTier,
+  ResultTierIndex,
+  Classification,
+  CardAnswer,
+  Schritte,
+  ScoreBand,
+} from "./types";
 
 // ─── Result Tiers (percentage-based) ────────────────────────────────────────────
 
@@ -44,26 +66,102 @@ export function getTierIndex(correctCount: number, total: number): ResultTierInd
   return 3;
 }
 
-// ─── Distance-based scoring (matches CaRM "Richtigkeit d. Beurteilung") ──────
+// ─── Schritte scoring (matches CaRM "Richtigkeit d. Beurteilung") ──────
+//
+// Single source of truth for everything score-related. The legacy
+// `+2/+1/-1/-2` scorer used in QuizPlayer was replaced by this module in
+// the Stage 1 overhaul; if you find another scorer anywhere in the quiz
+// codebase, that's a bug — route it through here instead.
 
-/** Ordinal position of each classification on the 4-point scale. */
-const CLASS_POS: Record<Classification, number> = {
-  richtig: 1,
+/** Likert position of each classification on the 4-point scale.
+ *  `falsch:0 … richtig:3` ascending matches CaRM's reporting. */
+export const LIKERT_VALUES: Record<Classification, 0 | 1 | 2 | 3> = {
+  falsch: 0,
+  eher_falsch: 1,
   eher_richtig: 2,
-  eher_falsch: 3,
-  falsch: 4,
+  richtig: 3,
 };
+
+/** Per-question Schritte — distance between the user's pick and the
+ *  scientific verdict on the 4-point scale. `0` is exact, `3` is opposite. */
+export function schritte(
+  chosen: Classification,
+  correct: Classification
+): Schritte {
+  const d = Math.abs(LIKERT_VALUES[chosen] - LIKERT_VALUES[correct]);
+  return d as Schritte;
+}
+
+/** CaRM "Richtigkeit" point value for a single answer's Schritte. */
+export function pointsForSchritte(s: Schritte): 1 | 0.66 | 0.33 | 0 {
+  if (s === 0) return 1;
+  if (s === 1) return 0.66;
+  if (s === 2) return 0.33;
+  return 0;
+}
+
+/** Module score as an integer percentage. Sum of per-question points
+ *  divided by question count, scaled to 0–100. Only includes questions
+ *  the user actually answered — partial runs return a partial score. */
+export function moduleScore(
+  answers: CardAnswer[],
+  myths: QuizMyth[]
+): number {
+  if (myths.length === 0) return 0;
+  let sumPoints = 0;
+  for (const a of answers) {
+    const myth = myths.find((m) => m.id === a.mythId);
+    if (!myth) continue;
+    sumPoints += pointsForSchritte(
+      schritte(a.chosenClassification, myth.correctClassification)
+    );
+  }
+  return Math.round((sumPoints / myths.length) * 100);
+}
+
+/** Per-band counts derived from the user's Schritte per question. The
+ *  result page uses this for the "X exact · Y near · Z off · W far"
+ *  breakdown line. */
+export function breakdownCounts(
+  answers: CardAnswer[],
+  myths: QuizMyth[]
+): { exact: number; near: number; off: number; far: number } {
+  const out = { exact: 0, near: 0, off: 0, far: 0 };
+  for (const a of answers) {
+    const myth = myths.find((m) => m.id === a.mythId);
+    if (!myth) continue;
+    const s = schritte(a.chosenClassification, myth.correctClassification);
+    if (s === 0) out.exact++;
+    else if (s === 1) out.near++;
+    else if (s === 2) out.off++;
+    else out.far++;
+  }
+  return out;
+}
+
+/** Map a module-score percentage to its named band. Bands match the
+ *  Keystatic `verdicts.{band}` field labels (80–100 / 60–79 / 40–59 / 0–39). */
+export function scoreBand(pct: number): ScoreBand {
+  if (pct >= 80) return "profi";
+  if (pct >= 60) return "guterweg";
+  if (pct >= 40) return "gehtnoch";
+  return "erwischt";
+}
 
 /**
  * Score a single answer on the same 0–100 "Richtigkeit" scale used by CaRM.
  * 0 steps from correct → 100, 1 step → 66.67, 2 steps → 33.33, 3 steps → 0.
+ *
+ * Implemented via `schritte()` so there's exactly one Schritte source of
+ * truth in the codebase. Used by `computePercentile()` below for the
+ * mean-based percentile estimate against the Erwachsene (18–70) sample.
  */
 export function distanceScore(
   chosen: Classification,
   correct: Classification
 ): number {
-  const d = Math.abs(CLASS_POS[chosen] - CLASS_POS[correct]);
-  return ((3 - d) / 3) * 100;
+  const s = schritte(chosen, correct);
+  return ((3 - s) / 3) * 100;
 }
 
 // ─── Percentile Computation ────────────────────────────────────────────────────

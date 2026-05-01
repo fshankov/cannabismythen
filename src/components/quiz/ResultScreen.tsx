@@ -88,9 +88,11 @@ export default function ResultScreen({
         <h1 className="quiz-result__title">{t("ui.resultTitle")}</h1>
         <p className="quiz-result__headline">
           {t("ui.scoreHeadlineCompare", {
-            correct: result.correctCount,
-            total: result.totalQuestions,
-            pct: result.percentile,
+            // pct = user's Schritte-based module score (0–100).
+            // pop = mean-based percentile vs. Erwachsene 18–70 in CaRM.
+            // Stage 5 rebuilds this header into a hero number + breakdown.
+            pct: result.moduleScore,
+            pop: result.percentile,
           })}
         </p>
       </header>

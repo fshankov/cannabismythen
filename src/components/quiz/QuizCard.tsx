@@ -30,7 +30,6 @@ import {
 } from "./usePointerSwipe";
 import VerdictScale from "./VerdictScale";
 import StreakChip from "./StreakChip";
-import ConfidenceInput from "./ConfidenceInput";
 import { trackCardSwiped } from "./matomo";
 
 /** Stable hash for deterministic randomization. */
@@ -103,10 +102,6 @@ interface QuizCardProps {
   categoryLabel?: string;
   /** When ≥ 2, render a 🔥 streak chip pinned to the front face top-right. */
   streakCount?: number;
-  /** When true, the confidence-input panel slides up after the answer pick. */
-  confidenceEnabled?: boolean;
-  /** Called once the user picks a confidence level. */
-  onConfidenceSet?: (mythId: string, c: "sure" | "unsure") => void;
   /** Population pct of the *general population* — used in micro-copy table. */
   populationCorrectPct?: number;
 }
@@ -126,15 +121,9 @@ export default function QuizCard({
   deckBehind = 0,
   categoryLabel,
   streakCount = 0,
-  confidenceEnabled = false,
-  onConfidenceSet,
 }: QuizCardProps) {
   const isAnswered = answer !== null;
-  // Card flip is gated on confidence pick when the feature is enabled,
-  // so the user gets a chance to self-rate before seeing the verdict.
-  const awaitingConfidence =
-    isAnswered && confidenceEnabled && !answer?.confidence;
-  const flipped = isAnswered && !awaitingConfidence;
+  const flipped = isAnswered;
   const cardRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const liveRef = useRef<HTMLDivElement>(null);
@@ -300,12 +289,6 @@ export default function QuizCard({
               disabled={isAnswered}
               onChoose={handleAnswerClick}
             />
-
-            {awaitingConfidence && onConfidenceSet && (
-              <ConfidenceInput
-                onChoose={(c) => onConfidenceSet(myth.id, c)}
-              />
-            )}
           </div>
 
           {/* ── BACK FACE ───────────────────────────────────────── */}
