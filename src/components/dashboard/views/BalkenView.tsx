@@ -9,7 +9,7 @@ import {
   getMythMetric,
   getMythShortText,
 } from '../../../lib/dashboard/data';
-import { getCorrectnessColor } from '../../../lib/dashboard/colors';
+import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
 import { t } from '../../../lib/dashboard/translations';
 
 interface Props {
@@ -123,25 +123,47 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
       return `{${cls}|${glyph}${trimmed}}`;
     });
 
+    // Each y-axis label renders as a verdict-tinted pill: subtle bg
+    // (Emerald-50 / Lime-50 / Amber-50 / Rose-50), verdict-colored
+    // bold text, leading arrow glyph, and a small left padding so the
+    // text doesn't touch the pill edge. Matches the row treatment of
+    // Tabelle myth cells so a Balken row and a Tabelle row read as
+    // the same thing.
+    const pillPadding: [number, number, number, number] = [3, 8, 3, 8];
     const richStyles = {
       richtig: {
         color: getCorrectnessColor('richtig'),
+        backgroundColor: getCorrectnessBgColor('richtig'),
+        padding: pillPadding,
+        borderRadius: 4,
         fontWeight: 600,
       },
       eher_richtig: {
         color: getCorrectnessColor('eher_richtig'),
+        backgroundColor: getCorrectnessBgColor('eher_richtig'),
+        padding: pillPadding,
+        borderRadius: 4,
         fontWeight: 600,
       },
       eher_falsch: {
         color: getCorrectnessColor('eher_falsch'),
+        backgroundColor: getCorrectnessBgColor('eher_falsch'),
+        padding: pillPadding,
+        borderRadius: 4,
         fontWeight: 600,
       },
       falsch: {
         color: getCorrectnessColor('falsch'),
+        backgroundColor: getCorrectnessBgColor('falsch'),
+        padding: pillPadding,
+        borderRadius: 4,
         fontWeight: 600,
       },
       no_classification: {
         color: '#1e293b',
+        backgroundColor: getCorrectnessBgColor('no_classification'),
+        padding: pillPadding,
+        borderRadius: 4,
         fontWeight: 500,
       },
     };
@@ -167,7 +189,10 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
         },
       },
       grid: {
-        left: 240,
+        // 248 leaves an 8px gap between the verdict-tinted y-axis
+        // label pills (width 232 below) and the chart's left axis
+        // line so the pills don't visually butt against the bars.
+        left: 248,
         right: 64,
         top: 16,
         bottom: 40,
@@ -188,7 +213,8 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
         type: 'category' as const,
         data: yLabels,
         axisLabel: {
-          width: 240,
+          // 232 = grid.left (248) − 16 pill horizontal padding.
+          width: 232,
           overflow: 'truncate' as const,
           fontSize: 12,
           color: '#1e293b',

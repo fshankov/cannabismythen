@@ -3,8 +3,8 @@ import { Eye, TrendingUp, Target, Shield } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Myth, Metric, AppState, Indicator } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, formatValue } from '../../../lib/dashboard/data';
-import { getCorrectnessColor } from '../../../lib/dashboard/colors';
-import VerdictArrow from '../../shared/VerdictArrow';
+import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
+import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
 import { t } from '../../../lib/dashboard/translations';
 
 interface Props {
@@ -33,15 +33,13 @@ const INDICATOR_COLS: { key: Indicator; Icon: LucideIcon }[] = [
 // into MythenExplorer's <ToolbarRow> in Stage 2.
 
 export default function TableView({ myths, metrics, state, update, onSelectMyth }: Props) {
-  // The Tabelle still owns its own column-click sort affordance —
-  // header clicks override the toolbar SortToggle for that single tab
-  // (each click toggles the column's direction). The toolbar's
-  // SortToggle initialises the default sort: indicator-column +
-  // direction tracked in `state.balkenSort`.
+  // Default sort: verdict ascending (richtig → falsch). Restoring the
+  // pre-refactor behaviour after PR #14 inadvertently changed it. The
+  // toolbar SortToggle still applies — clicking it switches the active
+  // direction whenever the active column is an indicator.
   void update;
-  const initialDir: SortDir = state.balkenSort === 'value-asc' ? 'asc' : 'desc';
-  const [sortKey, setSortKey] = useState<SortKey>(state.indicator as SortKey);
-  const [sortDir, setSortDir] = useState<SortDir>(initialDir);
+  const [sortKey, setSortKey] = useState<SortKey>('verdict');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
   const groupId = state.groupIds[0] || 'adults';
 
   const toggleSort = (key: SortKey) => {
@@ -122,6 +120,7 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
         <tbody>
           {sortedMyths.map((myth) => {
             const metric = getMythMetric(metrics, myth.id, groupId);
+            const bgColor = getCorrectnessBgColor(myth.correctness_class);
             const textColor = getCorrectnessColor(myth.correctness_class);
 
             return (
@@ -134,14 +133,14 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
               >
                 <td
                   className={`myth-cell statement--${myth.correctness_class}`}
-                  style={{ color: textColor, fontWeight: 600 }}
+                  style={{ backgroundColor: bgColor, color: textColor, fontWeight: 600 }}
                 >
                   <span
-                    className={`carm-myth-label__arrow classification--${myth.correctness_class}`}
-                    aria-hidden="true"
+                    className="carm-myth-label__arrow"
                     style={{ marginRight: 6, verticalAlign: 'middle' }}
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <VerdictArrow
+                    <VerdictArrowWithInfo
                       verdict={myth.correctness_class}
                       size={13}
                       strokeWidth={2.25}
