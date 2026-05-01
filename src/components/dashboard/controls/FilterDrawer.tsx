@@ -28,7 +28,7 @@ import type { AppState, Category, Myth } from '../../../lib/dashboard/types';
 import Drawer from '../../shared/Drawer';
 import { t } from '../../../lib/dashboard/translations';
 import { getMythText, getMythShortText } from '../../../lib/dashboard/data';
-import VerdictArrow from '../../shared/VerdictArrow';
+import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
 import type { MythContentEntry } from '../FactsheetPanel';
 
 interface Props {
@@ -36,6 +36,11 @@ interface Props {
   onClose: () => void;
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
+  /** Multi-key state patch. Lets `toggleCategory` and `toggleMyth`
+   *  update both `categoryIds` and `mythIds` in a single render —
+   *  avoids the stale-closure race that two sequential `update` calls
+   *  would create. */
+  updateMany: (patch: Partial<AppState>) => void;
   myths: Myth[];
   categories: Category[];
   /** Map of myth ID → pre-rendered factsheet content. The drawer reads
@@ -56,6 +61,7 @@ export default function FilterDrawer({
   onClose,
   state,
   update,
+  updateMany,
   myths,
   categories,
   mythContent,
@@ -114,26 +120,26 @@ export default function FilterDrawer({
     const current = categoryState(id);
     const myths = mythsByCategory.get(id) ?? [];
     if (current === 'all') {
-      // Was fully selected → clear it. categoryIds loses the id; any
-      // myths from this category in mythIds are dropped too (they were
-      // redundant before, and dropping them keeps the state clean).
-      update(
-        'categoryIds',
-        state.categoryIds.filter((c) => c !== id),
-      );
-      update(
-        'mythIds',
-        state.mythIds.filter((mid) => !myths.some((mm) => mm.id === mid)),
-      );
+      // Was fully selected → clear it. Drop the id from `categoryIds`
+      // AND drop any individual myth ids of this category from
+      // `mythIds` (they were redundant before, and dropping them
+      // keeps the state clean).
+      updateMany({
+        categoryIds: state.categoryIds.filter((c) => c !== id),
+        mythIds: state.mythIds.filter(
+          (mid) => !myths.some((mm) => mm.id === mid),
+        ),
+      });
     } else {
-      // Was partial / none → fully select. Add to categoryIds and drop
-      // any individual myth ids of this category from mythIds (now
-      // redundant).
-      update('categoryIds', [...state.categoryIds, id]);
-      update(
-        'mythIds',
-        state.mythIds.filter((mid) => !myths.some((mm) => mm.id === mid)),
-      );
+      // Was partial / none → fully select. Add to categoryIds and
+      // drop any individual myth ids of this category from mythIds
+      // (now redundant).
+      updateMany({
+        categoryIds: [...state.categoryIds, id],
+        mythIds: state.mythIds.filter(
+          (mid) => !myths.some((mm) => mm.id === mid),
+        ),
+      });
     }
   };
 
@@ -142,18 +148,18 @@ export default function FilterDrawer({
     if (m.category_id !== null && state.categoryIds.includes(m.category_id)) {
       // Currently included via a fully-selected category → expand the
       // group: remove the category, add every other sibling individually,
-      // skip this one (which is the implicit toggle-off).
+      // skip this one (which is the implicit toggle-off). Single
+      // updateMany so categoryIds and mythIds change in one render.
       const sibs = (mythsByCategory.get(m.category_id) ?? []).filter(
         (sm) => sm.id !== m.id,
-      );
-      update(
-        'categoryIds',
-        state.categoryIds.filter((c) => c !== m.category_id),
       );
       const merged = new Set(state.mythIds);
       for (const sm of sibs) merged.add(sm.id);
       merged.delete(m.id);
-      update('mythIds', Array.from(merged));
+      updateMany({
+        categoryIds: state.categoryIds.filter((c) => c !== m.category_id),
+        mythIds: Array.from(merged),
+      });
       return;
     }
     if (included) {
@@ -162,29 +168,33 @@ export default function FilterDrawer({
         state.mythIds.filter((mid) => mid !== m.id),
       );
     } else {
-      update('mythIds', [...state.mythIds, m.id]);
-      // If this completes a category, promote it to categoryIds for cleanliness.
+      const nextMythIds = [...state.mythIds, m.id];
+      // If this completes a category, promote it to categoryIds for
+      // cleanliness — single updateMany handles both fields.
       if (m.category_id !== null) {
         const siblings = mythsByCategory.get(m.category_id) ?? [];
-        const after = new Set([...state.mythIds, m.id]);
+        const after = new Set(nextMythIds);
         const allCovered = siblings.every((sm) => after.has(sm.id));
         if (allCovered && !state.categoryIds.includes(m.category_id)) {
-          update('categoryIds', [...state.categoryIds, m.category_id]);
-          update(
-            'mythIds',
-            [...state.mythIds, m.id].filter(
+          updateMany({
+            categoryIds: [...state.categoryIds, m.category_id],
+            mythIds: nextMythIds.filter(
               (mid) => !siblings.some((sm) => sm.id === mid),
             ),
-          );
+          });
+          return;
         }
       }
+      update('mythIds', nextMythIds);
     }
   };
 
   const reset = () => {
-    update('categoryIds', []);
-    update('mythIds', []);
-    update('verdictFilter', 'all');
+    updateMany({
+      categoryIds: [],
+      mythIds: [],
+      verdictFilter: 'all',
+    });
     setQuery('');
   };
 
@@ -346,9 +356,9 @@ export default function FilterDrawer({
           />
           <span
             className={`carm-checkbox__verdict classification--${m.correctness_class}`}
-            aria-hidden="true"
+            onClick={(e) => e.stopPropagation()}
           >
-            <VerdictArrow
+            <VerdictArrowWithInfo
               verdict={m.correctness_class}
               size={12}
               strokeWidth={2.25}

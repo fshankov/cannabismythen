@@ -29,7 +29,7 @@ import {
   getCategoryName,
 } from '../../../lib/dashboard/data';
 import { t } from '../../../lib/dashboard/translations';
-import VerdictArrow from '../../shared/VerdictArrow';
+import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
 import type { MythContentEntry } from '../FactsheetPanel';
 
 interface Props {
@@ -242,8 +242,10 @@ export default function MythosSearchChip({
                   >
                     <span
                       className={`carm-search-chip__item-arrow classification--${m.correctness_class}`}
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
                     >
-                      <VerdictArrow
+                      <VerdictArrowWithInfo
                         verdict={m.correctness_class as CorrectnessClass}
                         size={14}
                         strokeWidth={2.25}

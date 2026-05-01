@@ -41,7 +41,7 @@ import { getMythMetric, getIndicatorValue, getMythShortText, getMythText } from 
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
 import { t, type TranslationKey } from '../../../lib/dashboard/translations';
 import InfoTooltip from '../InfoTooltip';
-import VerdictArrow from '../../shared/VerdictArrow';
+import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
 import PivotToggle from '../controls/PivotToggle';
 import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
 import ToolbarRow from '../controls/ToolbarRow';
@@ -806,8 +806,11 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 ×
               </button>
               <div className={`strips-myth-card__bar classification--${selectedMyth.correctness_class}`}>
-                <span className="strips-myth-card__bar-icon" aria-hidden="true">
-                  <VerdictArrow
+                <span
+                  className="strips-myth-card__bar-icon"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <VerdictArrowWithInfo
                     verdict={selectedMyth.correctness_class as CorrectnessClass}
                     size={14}
                     strokeWidth={2.5}

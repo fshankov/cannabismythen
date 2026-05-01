@@ -51,13 +51,16 @@ interface Props {
  * Tour stops are anchored to existing class names in the dashboard so we
  * don't need to inject extra DOM. If a future refactor renames any of
  * these, update both here AND in the StripsView component.
+ *
+ * `filterButton` matches the Filter chip rendered in the unified toolbar
+ * (`MythenExplorer.tsx` `sharedActions`). Driver.js looks up the selector
+ * lazily, so this works on every tab — not just Punktwolke.
  */
 const TOUR_SELECTORS = {
   tabs: '.tabs-bar',
-  pivotRows: '.strips-row-wrap',
+  toolbar: '.carm-toolbar-row',
   chart: '.strips-svg-v3',
-  catPills: '.strips-cat-pills',
-  utilityBar: '.utility-bar--bottom',
+  filterButton: '.carm-toolbar-row__actions button[aria-label="Filter"]',
 } as const;
 
 function safeQuery(selector: string): Element | null {
@@ -190,33 +193,33 @@ export default function DashboardOnboarding({ active, openTrigger }: Props) {
         {
           element: TOUR_SELECTORS.tabs,
           popover: {
-            title: '1 / 4 — Visualisierungen wechseln',
+            title: '1 / 4 — Vier Sichten auf dieselben Daten',
             description:
-              'Hier oben wählen Sie zwischen sechs Sichten auf dieselben Daten — Lollipop, Indikatoren, Gruppen, Tabelle und zwei Quellen-Sichten. Aktiv ist gerade <strong>Indikatoren</strong>: fünf vertikale Streifen.',
+              'Hier oben wählen Sie zwischen <strong>Balken</strong> (sortierte Rangliste), <strong>Punktwolke</strong> (vertikale Streifen mit Punktwolken pro Indikator/Gruppe), <strong>Tabelle</strong> (alle Werte sortierbar) und <strong>Informationsquellen</strong> (Suche, Vertrauen, Wahrnehmung). Aktiv ist gerade die Punktwolke.',
           },
         },
         {
-          element: TOUR_SELECTORS.pivotRows,
+          element: TOUR_SELECTORS.toolbar,
           popover: {
-            title: '2 / 4 — Drei Filter-Reihen',
+            title: '2 / 4 — Steuerung im Toolbar',
             description:
-              '<strong>Themen</strong> (Quiz-Bereiche), <strong>Gruppen</strong> (Bevölkerungssegmente) und <strong>Indikatoren</strong> (Messgrößen). Eine Reihe ist die Pivot-Achse — sie bestimmt, was die fünf Streifen darstellen. Klicken Sie eine Kachel, um zu filtern. Mit dem ⓘ neben dem Label öffnen Sie die Definition.',
+              'Links wählen Sie das <strong>Vergleichen-Pivot</strong> (Indikatoren oder Gruppen), daneben den <strong>Wert</strong> dafür. Mit dem ⓘ neben jedem Label öffnen Sie die Definition mit Skala und Stichprobengröße. Rechts liegen Mythos-Suche, Filter und Export — auf jeder Sicht gleich.',
           },
         },
         {
           element: TOUR_SELECTORS.chart,
           popover: {
-            title: '3 / 4 — 42 Mythen, fünf Streifen',
+            title: '3 / 4 — 42 Mythen pro Streifen',
             description:
-              'Jeder <strong>Punkt</strong> ist ein Mythos. Die <strong>Farbe</strong> zeigt die wissenschaftliche Einordnung (richtig → falsch). Die <strong>Höhe</strong> ist der Wert auf einer 0–100-Skala. Tippen Sie auf einen Punkt für eine Zusammenfassung — danach „Mehr" für den vollen Faktencheck mit Quellen.',
+              'Jeder <strong>Punkt</strong> ist ein Mythos. Die <strong>Farbe</strong> zeigt das wissenschaftliche Urteil (richtig → falsch). Die <strong>Höhe</strong> ist der Wert auf einer 0–100-Skala. Tippen Sie auf einen Punkt für eine Zusammenfassung — danach „Mehr" für den vollen Faktencheck mit Quellen.',
           },
         },
         {
-          element: TOUR_SELECTORS.catPills,
+          element: TOUR_SELECTORS.filterButton,
           popover: {
-            title: '4 / 4 — Nach Themengebiet filtern',
+            title: '4 / 4 — Filter & Mythen-Auswahl',
             description:
-              'Diese Pills filtern auf eine der sieben Mythen-Kategorien — Medizin, Risiken, Stimmung, Dosierung, Verbreitung, Gefährlichkeit. Direkt darunter finden Sie <em>Teilen / CSV / Vollbild</em>. Der gefilterte Stand ist im URL hinterlegt — Link kopieren reicht zum Teilen.',
+              'Über <strong>Filter</strong> öffnen Sie die Mehrfach­auswahl: ganze Mythos-Kategorien oder einzelne Aussagen. Die Filter gelten auf allen Sichten — bleiben beim Tabwechsel erhalten und werden im URL gespeichert, damit Sie die gefilterte Sicht teilen können.',
           },
         },
       ],
@@ -244,34 +247,34 @@ export default function DashboardOnboarding({ active, openTrigger }: Props) {
   const miniMap = useMemo(
     () => [
       {
-        title: 'Oben — sechs Visualisierungs-Tabs',
+        title: 'Oben — vier Sichten',
         body:
-          'Lollipop, Indikatoren (aktiv), Gruppen, Tabelle, Informationsquellen und Quellen V2 — alle stellen dieselben Daten anders dar. „Rundgang" rechts in der Tab-Leiste öffnet diese Hilfe wieder.',
+          '<strong>Balken</strong> (Rangliste), <strong>Punktwolke</strong> (Streifen-Diagramm), <strong>Tabelle</strong> (alle Werte) und <strong>Informationsquellen</strong> (Suche / Vertrauen / Wahrnehmung). „Rundgang" rechts in der Tab-Leiste öffnet diese Hilfe wieder.',
       },
       {
-        title: 'Über dem Diagramm — drei Filter-Reihen',
+        title: 'Toolbar — Indikator, Gruppe, Pivot',
         body:
-          'Themen (5 Quiz-Bereiche), Gruppen (5 Bevölkerungssegmente), Indikatoren (5 Messgrößen). Eine Reihe ist Pivot, die anderen filtern.',
+          'Auf jeder Sicht gleich: links das Pivot (auf Punktwolke und Quellen), daneben Indikator und Bevölkerungs­gruppe. Rechts: Mythos-Suche, Filter, Exportieren.',
       },
       {
-        title: 'Im Diagramm — 5 vertikale Streifen',
+        title: 'Im Diagramm — Mythen mit Urteil',
         body:
-          '42 Punkte = 42 Mythen. Farbe = Einordnung (richtig / eher richtig / eher falsch / falsch). Höhe = Wert 0–100. Hover zeigt eine Verbindungslinie durch alle Streifen.',
+          '<strong>Farbe</strong> = wissenschaftliches Urteil (richtig / eher richtig / eher falsch / falsch). Der <strong>Pfeil</strong> nebenan zeigt dasselbe Urteil als Symbol — beim Drüberfahren erscheint die Erklärung.',
       },
       {
-        title: 'Unter dem Diagramm — Kategorien-Pills',
+        title: 'Filter — Kategorien & einzelne Mythen',
         body:
-          'Filter auf eine der sieben Mythen-Kategorien (Medizin, Risiken, Stimmung, Dosierung, Verbreitung, Gefährlichkeit, Allgemeine Einschätzung).',
+          'Über <strong>Filter</strong> wählen Sie ganze Mythos-Kategorien (Medizin, Risiken, Stimmung, Dosierung, Verbreitung, Gefährlichkeit, Allgemeine Einschätzung) oder einzelne Aussagen. Auswahl gilt auf allen Sichten gleichzeitig.',
       },
       {
-        title: 'Ganz unten — Teilen / CSV / Vollbild',
+        title: 'Suche — auf jeder Sicht',
         body:
-          'Die gefilterte Sicht steckt im URL — Link kopieren teilt sie 1:1. CSV exportiert die aktuell sichtbaren Werte. Vollbild für Beamer / Präsentation.',
+          'Mit <strong>Mythos suchen</strong> finden Sie eine Aussage am Volltext. Klick öffnet das vollständige Factsheet mit Synthese, Belegen und Daten nach Zielgruppen.',
       },
       {
         title: 'Die kleinen ⓘ-Symbole',
         body:
-          'Jedes ⓘ neben einer Kachel oder einem Strip-Header öffnet die wissenschaftliche Definition mit Skala und Stichprobengröße.',
+          'Jedes ⓘ neben einer Kachel oder einem Strip-Header öffnet die wissenschaftliche Definition mit Skala und Stichprobengröße. Beim Pfeil neben einem Mythos öffnet sich die Erklärung des Urteils.',
       },
     ],
     [],
@@ -390,7 +393,7 @@ export default function DashboardOnboarding({ active, openTrigger }: Props) {
                     {miniMap.map((item) => (
                       <li key={item.title}>
                         <strong>{item.title}</strong>
-                        <span>{item.body}</span>
+                        <span dangerouslySetInnerHTML={{ __html: item.body }} />
                       </li>
                     ))}
                   </ol>

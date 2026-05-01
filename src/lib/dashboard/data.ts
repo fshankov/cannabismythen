@@ -147,6 +147,29 @@ export function buildTooltipHtml(opts: {
   const verdict = lang === 'de'
     ? ({ richtig: 'Richtig', eher_richtig: 'Eher richtig', eher_falsch: 'Eher falsch', falsch: 'Falsch', no_classification: 'Keine Aussage möglich' }[myth.correctness_class])
     : ({ richtig: 'Correct', eher_richtig: 'Tends to be correct', eher_falsch: 'Tends to be incorrect', falsch: 'Incorrect', no_classification: 'No classification' }[myth.correctness_class]);
+  // Verdict explanation paragraph — re-homes the copy that used to
+  // live in the deleted right-hand `VerdictLegend` sidebar so the
+  // chart tooltip can carry the same definition that the inline
+  // VerdictArrowWithInfo popover surfaces on every other tab.
+  const verdictInfo: Partial<Record<typeof myth.correctness_class, { de: string; en: string }>> = {
+    richtig: {
+      de: 'Der Mythos entspricht dem aktuellen wissenschaftlichen Kenntnisstand.',
+      en: 'The myth aligns with the current scientific evidence.',
+    },
+    eher_richtig: {
+      de: 'Der Mythos ist tendenziell zutreffend, aber mit Einschränkungen.',
+      en: 'The myth tends to be correct, with caveats.',
+    },
+    eher_falsch: {
+      de: 'Der Mythos ist tendenziell nicht zutreffend, enthält aber Teilwahrheiten.',
+      en: 'The myth tends to be incorrect, with partial truths.',
+    },
+    falsch: {
+      de: 'Der Mythos widerspricht dem wissenschaftlichen Kenntnisstand.',
+      en: 'The myth contradicts the current scientific evidence.',
+    },
+  };
+  const verdictCopy = verdictInfo[myth.correctness_class]?.[lang];
   const indLabel = lang === 'de'
     ? ({ awareness: 'Kenntnis', significance: 'Bedeutung', correctness: 'Richtigkeit', prevention_significance: 'Prävention', population_relevance: 'Bev. Relevanz' }[indicator])
     : ({ awareness: 'Awareness', significance: 'Significance', correctness: 'Correctness', prevention_significance: 'Prevention', population_relevance: 'Pop. Relevance' }[indicator]);
@@ -160,6 +183,9 @@ export function buildTooltipHtml(opts: {
   }
   html += `${indLabel}: <strong>${val}</strong><br/>`;
   html += `${lang === 'de' ? 'Urteil' : 'Verdict'}: ${verdict}`;
+  if (verdictCopy) {
+    html += `<br/><span style="color:#475569;font-size:11px;font-style:italic">${verdictCopy}</span>`;
+  }
   if (extraLines) {
     for (const line of extraLines) {
       html += `<br/>${line}`;
