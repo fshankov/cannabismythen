@@ -21,25 +21,21 @@ const accent = audience.accentColor;
 ---
 
 <header class="faq-audience-header" style={`--audience-accent: ${accent}`}>
-  <nav class="faq-audience-header__crumbs" aria-label="Brotkrumen">
-    <a href="/haeufige-fragen/">Ihre Fragen</a>
-    <span aria-hidden="true">›</span>
-    <span aria-current="page">{audience.cardLabel}</span>
-  </nav>
-
-  <div class="faq-audience-header__top">
-    <span class="faq-audience-header__emoji" aria-hidden="true">{audience.emoji}</span>
-    <div>
-      <h1 class="faq-audience-header__title">{audience.title}</h1>
-      <p class="faq-audience-header__count">
-        {questionCount} {questionCount === 1 ? "Frage" : "Fragen"}
-      </p>
-    </div>
+  <div class="faq-audience-header__bar">
+    <nav class="faq-audience-header__crumbs" aria-label="Brotkrumen">
+      <a href="/haeufige-fragen/">Ihre Fragen</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">{audience.cardLabel}</span>
+    </nav>
+    <span class="faq-audience-header__count" aria-label={`${questionCount} ${questionCount === 1 ? "Frage" : "Fragen"}`}>
+      {questionCount} {questionCount === 1 ? "Frage" : "Fragen"}
+    </span>
   </div>
 
-  {audience.description && (
-    <p class="faq-audience-header__description">{audience.description}</p>
-  )}
+  <h1 class="faq-audience-header__title">
+    <span class="faq-audience-header__emoji" aria-hidden="true">{audience.emoji}</span>
+    {audience.title}
+  </h1>
 
   {introNoteHtml && (
     <aside class="faq-audience-header__note" set:html={introNoteHtml} />

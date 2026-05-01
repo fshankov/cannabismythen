@@ -4,6 +4,23 @@ Guidance for AI assistants working in this repository. Read `README.md` first fo
 project intro and structure; this file captures conventions, patterns, and gotchas that
 aren't obvious from the source.
 
+## Working with Fedor — process rule (HARD)
+
+**Ask before implementing.** When the user asks for a change that touches
+copy, layout, scoring, content shape, navigation, or any user-visible decision:
+
+1. State your understanding of the change in plain language.
+2. Spell out the trade-offs and your recommendation (with rationale).
+3. Use the AskUserQuestion tool to confirm before writing code.
+4. Only then implement.
+
+This applies even when the request feels obvious. Visual taste, copy tone,
+data thresholds, and where new copy lands (per-card vs. per-page vs. global)
+are decisions, not implementation details. Verify, don't assume.
+
+Pure technical decisions with no user-visible effect (file naming inside a
+folder, type names, refactor patterns) don't need confirmation.
+
 ## What this project is
 
 Cannabis: Mythen & Evidenz — an evidence-based, German-language site that debunks 42
@@ -123,9 +140,12 @@ live site without a code change.
   through `schritte()` / `pointsForSchritte()` / `moduleScore()` /
   `breakdownCounts()` / `scoreBand()` in `quizData.ts`. If you find another
   scorer anywhere in the quiz codebase, that's a bug.
-- **Population framing is honest.** Compare against "Erwachsene (18–70) in
-  der CaRM-Studie" only. Never reference "Bevölkerung in Deutschland" or
-  "Gesamtbevölkerung 16–70" on the public site.
+- **Population framing is honest.** Compare against
+  "Erwachsene (18–70) in einer repräsentativen Stichprobe in Deutschland".
+  CaRM IS that sample, so the data is unchanged — just framed for a
+  general reader. Never reference "Bevölkerung in Deutschland" alone
+  (implies all 80M), "Gesamtbevölkerung 16–70" (different cohort), or
+  "Befragten" without qualifier (loses the population context).
 
 ## Routing patterns
 

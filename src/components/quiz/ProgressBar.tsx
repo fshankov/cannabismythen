@@ -1,104 +1,105 @@
 /**
- * ProgressBar — Schritte-colored pill row in the site header.
+ * ProgressBar — quiet single-line header bar.
  *
- * Stage 4 of the quiz overhaul replaced the original linear progress bar
- * + score chip with a row of one pill per question. Each pill carries the
- * Schritte band of the user's answer (or "open" if not answered yet),
- * doubles as a jump-to-question control, and is keyboard-navigable.
- *
- * The component is mounted via a portal into a slot in the site header
- * (id="quiz-progress-slot"), so it travels with the page chrome rather
- * than the quiz body. Stays horizontal at every breakpoint per DESIGN.md
- * mobile spec; overflows horizontally on narrow phones.
- *
- * Note: the file name is still "ProgressBar.tsx" because the sandbox
- * could not rename. Stage 9 of the overhaul lists this file for `git mv`
- * to ProgressPills.tsx alongside the remaining cleanup.
+ * Restored to the original visual language after the Stage 4 pill-row
+ * experiment was rolled back: title + thin progress fill + small score
+ * chip showing the live Schritte percentage + "X von Y beantwortet" label.
+ * Mounted via portal into the site header.
  */
 
-import type { CardAnswer, QuizMyth, Schritte } from "./types";
-import { schritte } from "./quizData";
+import { useEffect, useRef, useState } from "react";
 import { t } from "./i18n";
 
-interface ProgressPillsProps {
-  /** Module title shown to the left of the pill row. */
+interface ProgressBarProps {
   quizTitle: string;
-  /** The visible deck order (Stage 2 random shuffle); pills render 1:1. */
-  myths: QuizMyth[];
-  /** Map of mythId → user's answer. Missing entries → unanswered. */
-  answers: Record<string, CardAnswer>;
-  /** Index into `myths` of the currently-active question. */
-  currentIndex: number;
-  /** Click-to-jump handler. */
-  onJump: (idx: number) => void;
-}
-
-/** Stage 4 — Schritte band → CSS modifier on the pill. */
-function bandClass(s: Schritte | "open"): string {
-  if (s === "open") return "quiz-pill--open";
-  if (s === 0) return "quiz-pill--exact";
-  if (s === 1) return "quiz-pill--near";
-  if (s === 2) return "quiz-pill--off";
-  return "quiz-pill--far";
-}
-
-function bandLabel(s: Schritte | "open"): string {
-  if (s === "open") return "noch offen";
-  if (s === 0) return t("schritte.exact");
-  if (s === 1) return t("schritte.near");
-  if (s === 2) return t("schritte.off");
-  return t("schritte.far");
+  /** Number of questions answered so far. */
+  answered: number;
+  /** Total questions in this module. */
+  total: number;
+  /** Live module score (0–100, Schritte-based). */
+  score: number;
+  /** Points awarded for the just-submitted answer (0–100), drives the
+   *  brief flash animation on the chip. */
+  lastScoreDelta: number;
 }
 
 export default function ProgressBar({
   quizTitle,
-  myths,
-  answers,
-  currentIndex,
-  onJump,
-}: ProgressPillsProps) {
+  answered,
+  total,
+  score,
+  lastScoreDelta,
+}: ProgressBarProps) {
+  const pct = total > 0 ? (answered / total) * 100 : 0;
+  const [flashClass, setFlashClass] = useState("");
+  const prevAnswered = useRef(answered);
+
+  // Flash on each new answer. Delta is the points (0–100) just earned.
+  useEffect(() => {
+    if (answered > prevAnswered.current && answered > 0) {
+      const cls =
+        lastScoreDelta >= 90
+          ? "quiz-score--flash-great"
+          : lastScoreDelta >= 60
+            ? "quiz-score--flash-good"
+            : lastScoreDelta <= 0
+              ? "quiz-score--flash-bad"
+              : "quiz-score--flash-warn";
+      setFlashClass(cls);
+      const timer = setTimeout(() => setFlashClass(""), 600);
+      return () => clearTimeout(timer);
+    }
+    prevAnswered.current = answered;
+  }, [answered, lastScoreDelta]);
+
+  useEffect(() => {
+    prevAnswered.current = answered;
+  }, [answered]);
+
+  const scoreColorClass =
+    score >= 80
+      ? "quiz-score__value--positive"
+      : score >= 40
+        ? "quiz-score__value--neutral"
+        : "quiz-score__value--negative";
+
   return (
     <div className="quiz-header-bar">
       <span className="quiz-header-bar__title">{quizTitle}</span>
 
-      <ol
-        className="quiz-pill-row"
-        role="list"
-        aria-label={t("ui.progress", {
-          answered: Object.keys(answers).length,
-          total: myths.length,
-        })}
+      <div
+        className="quiz-progress"
+        role="progressbar"
+        aria-valuenow={answered}
+        aria-valuemin={0}
+        aria-valuemax={total}
       >
-        {myths.map((m, i) => {
-          const a = answers[m.id];
-          const band: Schritte | "open" = a
-            ? schritte(a.chosenClassification, m.correctClassification)
-            : "open";
-          const isCurrent = i === currentIndex;
-          return (
-            <li key={m.id}>
-              <button
-                type="button"
-                className={[
-                  "quiz-pill",
-                  bandClass(band),
-                  isCurrent ? "quiz-pill--current" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                aria-label={`${t("ui.questionLabel", {
-                  n: i + 1,
-                  total: myths.length,
-                })}, ${bandLabel(band)} — zur Übersicht`}
-                aria-current={isCurrent ? "step" : undefined}
-                onClick={() => onJump(i)}
-              >
-                {i + 1}
-              </button>
-            </li>
-          );
-        })}
-      </ol>
+        <div className="quiz-progress__bar">
+          {/* Bar fill is restored from local state to the actual answered
+              fraction; suppressHydrationWarning because the lazy localStorage
+              restore inside QuizPlayer creates a one-frame SSR/client diff. */}
+          <div
+            className="quiz-progress__fill"
+            style={{ width: `${pct}%` }}
+            suppressHydrationWarning
+          />
+        </div>
+      </div>
+
+      {answered > 0 && (
+        <span className={`quiz-score ${flashClass}`}>
+          <span
+            className={`quiz-score__value ${scoreColorClass}`}
+            suppressHydrationWarning
+          >
+            {score}&nbsp;%
+          </span>
+        </span>
+      )}
+
+      <span className="quiz-progress__label" suppressHydrationWarning>
+        {t("ui.progress", { answered, total })}
+      </span>
     </div>
   );
 }

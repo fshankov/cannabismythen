@@ -76,19 +76,26 @@ function bandedPopulationLine(
   percentile: number,
   shareCopy: QuizShareCopyEntry
 ): string {
-  const template = (shareCopy[band] ?? "").trim() || HARDCODED_FALLBACK[band];
-  return template.replace(/\{pct\}/g, String(percentile));
+  const override = (shareCopy[band] ?? "").trim();
+  // Reject editorial PLACEHOLDER markers — they shouldn't reach the page.
+  const usable =
+    override && !/^PLACEHOLDER\b/i.test(override)
+      ? override
+      : HARDCODED_FALLBACK[band];
+  return usable.replace(/\{pct\}/g, String(percentile));
 }
 
 /** Final-defence fallback in case both the per-module override AND the
- *  global singleton are empty. Should never render in practice. */
+ *  global singleton are empty. New wording: CaRM IS a representative
+ *  German sample, so the data is unchanged — just framed for a general
+ *  reader. */
 const HARDCODED_FALLBACK: Record<ScoreBand, string> = {
   profi:
-    "Du liegst klar über dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie (ca. {pct} %).",
+    "Du liegst klar über dem Schnitt der Erwachsenen (18–70) in einer repräsentativen Stichprobe in Deutschland (ca. {pct} %).",
   guterweg:
-    "Du liegst leicht über dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie (ca. {pct} %).",
+    "Du liegst leicht über dem Schnitt der Erwachsenen (18–70) in einer repräsentativen Stichprobe in Deutschland (ca. {pct} %).",
   gehtnoch:
-    "Du liegst etwa im Schnitt der Erwachsenen (18–70) in der CaRM-Studie (ca. {pct} %).",
+    "Du liegst etwa im Schnitt der Erwachsenen (18–70) in einer repräsentativen Stichprobe in Deutschland (ca. {pct} %).",
   erwischt:
     "Hier saßen noch viele Mythen. Die Fakten-Karten räumen das in zehn Minuten auf.",
 };
@@ -99,6 +106,16 @@ function schritteLabel(s: 0 | 1 | 2 | 3): string {
   if (s === 1) return t("schritte.near");
   if (s === 2) return t("schritte.off");
   return t("schritte.far");
+}
+
+/** Treat copy that begins with "PLACEHOLDER" (or is empty) as missing,
+ *  so it falls back to the hardcoded sentence rather than rendering the
+ *  editorial marker on the public page. */
+function realCopy(s: string | undefined): string {
+  const trimmed = (s ?? "").trim();
+  if (!trimmed) return "";
+  if (/^PLACEHOLDER\b/i.test(trimmed)) return "";
+  return trimmed;
 }
 
 export default function ResultScreen({
@@ -116,8 +133,8 @@ export default function ResultScreen({
   const panelRef = useRef<HTMLDivElement>(null);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
   const verdict = verdicts[band] ?? {};
-  const verdictTitle = verdict.title?.trim() || VERDICT_FALLBACK[band].title;
-  const verdictBody = verdict.body?.trim() || VERDICT_FALLBACK[band].body;
+  const verdictTitle = realCopy(verdict.title) || VERDICT_FALLBACK[band].title;
+  const verdictBody = realCopy(verdict.body) || VERDICT_FALLBACK[band].body;
 
   useEffect(() => {
     trackResultCardViewed(verdictTitle);
@@ -177,10 +194,10 @@ export default function ResultScreen({
   //    any answer is 2+ Schritte off. Falls back to a quiet generic line.
   const hasWeakSpot = reviewRows.some((r) => r.schritte >= 2);
   const reviewIntro = hasWeakSpot
-    ? intros.weakSpotIntro?.trim() ||
-      "Hier sind die Aussagen, bei denen es knapp wurde — sortiert nach Abstand zur Wissenschaft."
-    : intros.strongPerformanceIntro?.trim() ||
-      "Du lagst bei jeder Aussage nah dran. Hier zur Erinnerung der Stand der Forschung zu jedem Mythos.";
+    ? realCopy(intros.weakSpotIntro) ||
+      "Hier sind deine Antworten — sortiert nach Abstand zur Wissenschaft."
+    : realCopy(intros.strongPerformanceIntro) ||
+      "Du lagst bei jeder Aussage nah dran. Hier zur Erinnerung der Stand der Forschung.";
 
   // ── Breakdown line (only bands with count > 0).
   const breakdownParts: string[] = [];
@@ -201,44 +218,29 @@ export default function ResultScreen({
       tabIndex={-1}
       aria-label={t("ui.resultTitle")}
     >
-      {/* 1 — Header */}
+      {/* Header */}
       <header className="quiz-result__header">
         <h1 className="quiz-result__title">
           {t("ui.resultTitle")} — {t(theme.titleKey)}
         </h1>
       </header>
 
-      {/* 2 — Hero number */}
-      <div className={`quiz-result__hero quiz-result__hero--${band}`}>
-        <span
-          className="quiz-result__hero-num"
-          aria-label={`${result.moduleScore} Prozent`}
-        >
-          {result.moduleScore}
-          <span className="quiz-result__hero-pct">&nbsp;%</span>
-        </span>
-        {/* 3 — Breakdown line */}
-        {breakdownLine && (
-          <p className="quiz-result__breakdown">{breakdownLine}</p>
-        )}
-      </div>
+      {/* Remediation 3 — single hero card. Combines the percentage,
+          band verdict (Keystatic), banded population sentence, and the
+          share button. Replaces the old "verdict box + green ShareCard"
+          duplication. The card is colored by band so the user reads
+          their result at a glance. */}
+      <ShareCard
+        result={result}
+        quizUrl={quizUrl}
+        moduleTitle={t(theme.titleKey)}
+        verdictTitle={verdictTitle}
+        verdictBody={verdictBody}
+        breakdownLine={breakdownLine}
+        populationLine={bandedPopulationLine(band, result.percentile, shareCopy)}
+      />
 
-      {/* 4 — Verdict block (Keystatic) */}
-      <div className={`quiz-result__verdict quiz-result__verdict--${band}`}>
-        <h2 className="quiz-result__verdict-title">{verdictTitle}</h2>
-        <p className="quiz-result__verdict-body">{verdictBody}</p>
-      </div>
-
-      {/* 5 — Population comparison (honest, banded) */}
-      <p className="quiz-result__population">
-        {bandedPopulationLine(band, result.percentile, shareCopy)}
-      </p>
-      <p className="quiz-result__population-source">
-        Vergleichswert: Mittelwert pro Mythos bei Erwachsenen (18–70) in
-        der CaRM-Studie.
-      </p>
-
-      {/* 6 — Module review, worst-first */}
+      {/* Module review, worst-first */}
       <div className="quiz-result__retrospective">
         <h2 className="quiz-result__retrospective-title">
           {t("ui.retrospectiveTitle")}
@@ -308,45 +310,37 @@ export default function ResultScreen({
         </ol>
       </div>
 
-      {/* 7 — Share section */}
-      <div className="quiz-result__share">
-        <h2 className="quiz-result__share-heading">
-          {t("ui.shareResultHeading")}
-        </h2>
-        <ShareCard
-          result={result}
-          quizUrl={quizUrl}
-          moduleTitle={t(theme.titleKey)}
-          verdictTitle={verdictTitle}
-          populationLine={bandedPopulationLine(band, result.percentile, shareCopy)}
-        />
-      </div>
-
-      {/* 8 — CTAs */}
+      {/* Action buttons — exactly two primary actions in matching size,
+          plus two same-sized text links beneath. */}
       <div className="quiz-result__actions">
-        <a
-          href="/fakten-karten/"
-          className="quiz-result__cta quiz-result__cta--primary"
-        >
-          Lies mehr in den Fakten-Karten →
-        </a>
-        {nextSlug && nextThemeTitle && nextSlug !== result.themeSlug && (
+        <div className="quiz-result__actions-primary">
           <a
-            href={`/quiz/${nextSlug}/`}
-            className="quiz-result__cta quiz-result__cta--secondary"
+            href="/fakten-karten/"
+            className="quiz-result__cta quiz-result__cta--primary"
           >
-            {t("ui.nextModule.cta", { title: nextThemeTitle })}
+            Lies mehr in den Fakten-Karten →
           </a>
-        )}
-        <div className="quiz-result__actions-secondary">
+          {nextSlug && nextThemeTitle && nextSlug !== result.themeSlug && (
+            <a
+              href={`/quiz/${nextSlug}/`}
+              className="quiz-result__cta quiz-result__cta--secondary"
+            >
+              {t("ui.nextModule.cta", { title: nextThemeTitle })}
+            </a>
+          )}
+        </div>
+        <div className="quiz-result__actions-tertiary">
           <button
             type="button"
-            className="quiz-modal__restart-btn"
+            className="quiz-result__textlink"
             onClick={onRestart}
           >
             {t("ui.restartQuiz")}
           </button>
-          <a href="/quiz/" className="quiz-modal__nav-link">
+          <span className="quiz-result__textlink-sep" aria-hidden="true">
+            ·
+          </span>
+          <a href="/quiz/" className="quiz-result__textlink">
             ← {t("ui.backToQuizzes")}
           </a>
         </div>

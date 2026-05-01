@@ -1078,19 +1078,19 @@ const shareCopy = singleton({
       label: "80–100 % – Profi-Band",
       multiline: true,
       defaultValue:
-        "Du liegst klar über dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie (ca. {pct} %). Stark gemacht.",
+        "Du liegst klar über dem Schnitt der Erwachsenen (18–70) in einer repräsentativen Stichprobe in Deutschland (ca. {pct} %). Stark gemacht.",
     }),
     guterweg: fields.text({
       label: "60–79 % – Guter-Weg-Band",
       multiline: true,
       defaultValue:
-        "Du liegst leicht über dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie (ca. {pct} %).",
+        "Du liegst leicht über dem Schnitt der Erwachsenen (18–70) in einer repräsentativen Stichprobe in Deutschland (ca. {pct} %).",
     }),
     gehtnoch: fields.text({
       label: "40–59 % – Geht-noch-Band",
       multiline: true,
       defaultValue:
-        "Du liegst etwa im Schnitt der Erwachsenen (18–70) in der CaRM-Studie (ca. {pct} %).",
+        "Du liegst etwa im Schnitt der Erwachsenen (18–70) in einer repräsentativen Stichprobe in Deutschland (ca. {pct} %).",
     }),
     erwischt: fields.text({
       label: "0–39 % – Erwischt-Band",

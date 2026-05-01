@@ -132,8 +132,8 @@ if (theme) {
       quizSummary={(entry as any).summary || undefined}
     />
 
-    <footer>
-      <a href="/quiz/">&larr; Alle Quiz-Module</a>
-    </footer>
+    {/* Page footer "Alle Quiz-Module" link removed; the ResultScreen
+        already shows it in its actions row, and the quiz flow itself
+        doesn't need a redundant escape hatch in the page chrome. */}
   </article>
 </BaseLayout>

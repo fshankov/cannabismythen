@@ -267,6 +267,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.correctAnswer": "Evidenzbasierte Bewertung:",
     "ui.yourAnswer": "Deine Antwort:",
     "ui.yourAnswerLabel": "Deine Antwort",
+    "classification.scientific": "Wissenschaftlich",
     "ui.correctAnswerLabel": "Richtige Antwort",
     "ui.swipeHint": "oder nach links wischen",
     "ui.startQuiz": "Los geht's",

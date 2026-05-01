@@ -789,16 +789,16 @@ function QuizPlayerInner({
     handlePrev,
   ]);
 
-  // Stage 4: ProgressBar is now a Schritte-coloured pill row + module
-  // title. Receives the visible deck (orderedMyths) and the answers map;
-  // the pill colours derive from schritte() at render time.
+  // Quiet single-line header bar — module title + thin progress fill +
+  // small score chip + "X von Y beantwortet" label. Restored from the
+  // briefly-tried Stage 4 pill row (rolled back on user feedback).
   const progressBarContent = (
     <ProgressBar
       quizTitle={t(theme.titleKey)}
-      myths={orderedMyths}
-      answers={answers}
-      currentIndex={safeIndex}
-      onJump={handleJumpTo}
+      answered={answeredCount}
+      total={totalQuestions}
+      score={totalScore}
+      lastScoreDelta={lastScoreDelta}
     />
   );
 

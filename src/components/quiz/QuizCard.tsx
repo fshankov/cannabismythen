@@ -321,16 +321,25 @@ export default function QuizCard({
                   </span>
                 </div>
 
-                {/* Stage 3 (D5) — back-face copy stack, top to bottom:
-                    1) Always-shown "Deine Antwort: X" chip in user-answer color
-                    2) Schritte verdict (no period), colored by Schritte band
-                    3) Myth-line: "Der Mythos „..." ist X" — verdict word
-                       bolded, line tinted by scientific verdict
-                    4) Explanation
-                    5) Population stat (Erwachsene 18–70 in der CaRM-Studie)
-                    6) Action buttons */}
+                {/* Remediation 5 — back-face copy stack, top to bottom,
+                    all left-aligned:
+                    1) Myth statement (left, tinted by scientific verdict).
+                    2) Chip pair: Deine Antwort + Wissenschaftlich.
+                    3) Schritte verdict line (large, colored by Schritte).
+                    4) Sub-line: "n Schritt(e) daneben → x,xx Punkte".
+                    5) Explanation paragraph.
+                    6) Population stat (always shown, new wording).
+                    7) Action buttons. */}
 
-                {/* 1 — User-answer chip — ALWAYS shown, even when correct. */}
+                {/* 1 — Statement, left-aligned, tinted by scientific verdict. */}
+                <p
+                  className={`quiz-card__statement quiz-card__statement--back statement--${myth.correctClassification}`}
+                >
+                  {displayStatement(statement)}
+                </p>
+
+                {/* 2 — Chip pair: user's answer + scientific verdict on
+                    one line. Wraps on narrow screens. */}
                 <p className="quiz-card__answer-note">
                   <span className="quiz-card__answer-label">
                     {t("ui.yourAnswerLabel")}:
@@ -340,33 +349,30 @@ export default function QuizCard({
                   >
                     {t(`classification.${answer.chosenClassification}`)}
                   </span>
+                  <span className="quiz-card__answer-vs"> · </span>
+                  <span className="quiz-card__answer-label">
+                    {t("classification.scientific")}:
+                  </span>{" "}
+                  <span
+                    className={`quiz-card__answer-chip classification classification--${myth.correctClassification}`}
+                  >
+                    {t(`classification.${myth.correctClassification}`)}
+                  </span>
                 </p>
 
-                {/* 2 — Schritte verdict line — large, no period, colored. */}
+                {/* 3 — Schritte verdict — large, colored by Schritte band. */}
                 <p
                   className={`quiz-card__verdict-line ${schritteVerdictColorClass}`}
                 >
                   {schritteVerdictText}
                 </p>
 
-                {/* Points sub-line under the verdict (German decimal comma). */}
+                {/* 4 — Points sub-line (German decimal comma). */}
                 <p className="quiz-card__verdict-points">
                   {t("schritte.points", {
                     schritte: userSchritte ?? 0,
                     points: formatPoints(userPoints),
                   })}
-                </p>
-
-                {/* 3 — Myth-line: "Der Mythos „X" ist Y" — verdict word
-                    bolded, whole line tinted by the scientific verdict color
-                    via the site-wide `statement--{verdict}` class. NO trailing
-                    period (D5). */}
-                <p
-                  className={`quiz-card__myth-line statement--${myth.correctClassification}`}
-                >
-                  {mythVerdictPrefix[0]}
-                  <strong>{verdictPhrase}</strong>
-                  {mythVerdictPrefix[1]}
                 </p>
 
                 {/* 4 — Explanation. Scrollable inside its own region only when
@@ -377,17 +383,20 @@ export default function QuizCard({
                   </div>
                 </div>
 
-                {/* 5 — Population stat (Erwachsene 18–70, CaRM-Studie). */}
+                {/* 6 — Population stat (always shown). New wording:
+                    "repräsentative Stichprobe in Deutschland" — same data
+                    (CaRM IS that sample), more relatable framing. */}
                 {hasPopData && (
                   <div
                     className="quiz-card__pop-bar"
                     role="img"
-                    aria-label={`${popPct} Prozent der Erwachsenen 18 bis 70 in der CaRM-Studie haben diesen Mythos genau richtig eingeschätzt`}
+                    aria-label={`${popPct} Prozent der Erwachsenen 18 bis 70 in einer repräsentativen Stichprobe in Deutschland haben diesen Mythos genau richtig eingeschätzt`}
                   >
                     <p className="quiz-card__pop-bar-text">
                       <strong>{popPct}&nbsp;%</strong> der Erwachsenen
-                      (18–70) in der CaRM-Studie haben diesen Mythos genau
-                      richtig eingeschätzt.
+                      (18–70) in einer repräsentativen Stichprobe in
+                      Deutschland haben diesen Mythos genau richtig
+                      eingeschätzt.
                     </p>
                     <div className="quiz-card__pop-bar-track">
                       <div

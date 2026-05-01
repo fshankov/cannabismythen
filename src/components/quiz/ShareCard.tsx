@@ -1,15 +1,19 @@
 /**
- * ShareCard — Stage 5 refresh.
+ * ShareCard — unified result hero (Remediation 3).
  *
- * Visual style: deep forest green (--color-richtig) background, white text,
- * lightbulb mark. Replaces the old "X / Y" + "Bevölkerung in Deutschland"
- * framing with the Schritte percentage hero + the honest banded population
- * sentence the result page already shows. The share text passed to
- * navigator.share / clipboard stays short — comparison number lives on
- * the page, not in the blurb.
+ * Replaces the old "verdict box + separate green share card" duplication
+ * with one card that:
+ *   • shows the band-coloured percentage hero
+ *   • carries the breakdown line (X genau richtig · …)
+ *   • renders the Keystatic verdict title + body inside a translucent
+ *     band so editors keep their voice
+ *   • shows the honest banded population sentence
+ *   • carries a single share button (Web Share API + clipboard fallback)
+ *
+ * Visually it's still the green forest card but now it earns its place.
  */
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import type { QuizResult, ScoreBand } from "./types";
 import { scoreBand } from "./quizData";
 import { t } from "./i18n";
@@ -19,25 +23,21 @@ interface ShareCardProps {
   result: QuizResult;
   quizUrl: string;
   moduleTitle: string;
-  /** Verdict band title from Keystatic (or fallback). Subhead under the
-   *  lightbulb. */
   verdictTitle: string;
-  /** Honest population sentence (e.g. "Du liegst leicht über dem Schnitt
-   *  der Erwachsenen 18–70 in der CaRM-Studie."). Drives the share blurb
-   *  on the card itself; share-text for navigator.share stays short. */
+  verdictBody: string;
+  /** "X genau richtig · Y nah dran · …" — only bands with count > 0. */
+  breakdownLine: string;
+  /** Honest banded population sentence (already interpolated). */
   populationLine: string;
-  /** Stage 8 will use `variant: "vertical"` for 1080×1350 OG. Stage 5
-   *  ships only the in-app square preview. */
   variant?: "square" | "vertical";
 }
 
-/** Per-band emoji on the medal — mirrors the scientific verdict emoji
- *  language used elsewhere on the site (lightbulb-anchored). */
+/** Band → emoji for the medal. */
 const BAND_EMOJI: Record<ScoreBand, string> = {
-  profi: "\u{1F3C6}", // 🏆
-  guterweg: "\u{2B50}", // ⭐
-  gehtnoch: "\u{1F4A1}", // 💡
-  erwischt: "\u{1F331}", // 🌱
+  profi: "\u{1F3C6}",
+  guterweg: "\u{2B50}",
+  gehtnoch: "\u{1F4A1}",
+  erwischt: "\u{1F331}",
 };
 
 export default function ShareCard({
@@ -45,6 +45,8 @@ export default function ShareCard({
   quizUrl,
   moduleTitle,
   verdictTitle,
+  verdictBody,
+  breakdownLine,
   populationLine,
   variant = "square",
 }: ShareCardProps) {
@@ -52,8 +54,6 @@ export default function ShareCard({
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
   const emoji = BAND_EMOJI[band];
 
-  // Stage 5: share blurb is intentionally short — comparison lives on
-  // the page, not in the message. Keeps WhatsApp/Twitter previews tidy.
   const shareText = `Ich habe ${result.moduleScore} % beim Quiz „${moduleTitle}" auf cannabismythen.de erreicht.`;
   const fullShareText = `${shareText} ${quizUrl}`;
 
@@ -92,7 +92,7 @@ export default function ShareCard({
   }, [shareText, fullShareText, quizUrl, moduleTitle]);
 
   return (
-    <div className={`share-card share-card--${variant}`}>
+    <div className={`share-card share-card--${variant} share-card--${band}`}>
       <div className="share-card__visual">
         <div className="share-card__medal">
           <span className="share-card__emoji" aria-hidden="true">
@@ -100,11 +100,21 @@ export default function ShareCard({
           </span>
         </div>
 
-        <div className="share-card__tier-title">{verdictTitle}</div>
-
-        <div className="share-card__score">
+        <div
+          className="share-card__score"
+          aria-label={`${result.moduleScore} Prozent`}
+        >
           {result.moduleScore}
           <span className="share-card__score-unit">&nbsp;%</span>
+        </div>
+
+        {breakdownLine && (
+          <p className="share-card__breakdown">{breakdownLine}</p>
+        )}
+
+        <div className="share-card__verdict">
+          <h2 className="share-card__verdict-title">{verdictTitle}</h2>
+          <p className="share-card__verdict-body">{verdictBody}</p>
         </div>
 
         <p className="share-card__pop-line">{populationLine}</p>
