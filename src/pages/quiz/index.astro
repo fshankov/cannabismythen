@@ -11,24 +11,30 @@ const entries = await getPublishedEntries("quiz");
 const quizzes = entries.filter(([slug]) => slug !== "feedback-texte");
 
 // Quiz card data: emoji + question count
-const quizMeta: Record<string, { emoji: string; count: number }> = {
+const quizMeta: Record<string, { emoji: string; count: number; featured?: boolean }> = {
   "quiz-medizin":         { emoji: "\uD83D\uDC8A", count: 7  },
   "quiz-risiken":         { emoji: "\u26A0\uFE0F",  count: 11 },
   "quiz-stimmung":        { emoji: "\uD83E\uDDE0", count: 6  },
   "quiz-gesellschaft":    { emoji: "\uD83C\uDFDB\uFE0F", count: 10 },
   "quiz-gefaehrlichkeit": { emoji: "\u2696\uFE0F",  count: 6  },
+  // Stage 6 \u2014 Schnellcheck. Dynamic 7-myth deck, re-rolled per visit.
+  "quiz-schnellcheck":    { emoji: "\uD83C\uDFB2", count: 7, featured: true },
 };
 ---
 
-<BaseLayout title="Quiz" description="Testen Sie Ihr Wissen über Cannabis-Mythen">
+<BaseLayout
+  title="Quiz"
+  description="Testen Sie Ihr Wissen über Cannabis-Mythen"
+  ogImage="/og/quiz/index.png"
+>
   <h1>Quiz: Was wissen Sie über Cannabis?</h1>
 
   <div class="quiz-index__intro">
     <p>
-      Testen Sie Ihr Wissen in fünf thematischen Quiz-Modulen.
-      Jedes Quiz enthält Fragen zu verbreiteten Cannabis-Mythen mit
-      wissenschaftlich fundierten Erklärungen. Vergleichen Sie Ihre
-      Einschätzungen mit denen der deutschen Bevölkerung.
+      Teste dein Wissen in fünf thematischen Quiz-Modulen oder im
+      Schnellcheck mit zufälligen Aussagen aus allen Themen. Jede Aussage
+      ist mit dem Stand der Forschung erklärt; deine Einschätzungen
+      vergleichen wir mit denen der Erwachsenen (18–70) in der CaRM-Studie.
     </p>
   </div>
 
@@ -36,13 +42,17 @@ const quizMeta: Record<string, { emoji: string; count: number }> = {
     {quizzes.map(([slug, entry]) => {
       const e = entry as any;
       const meta = quizMeta[slug as string];
+      const featured = meta?.featured ? "quiz-select-card--featured" : "";
       return (
-        <a href={`/quiz/${slug}/`} class="quiz-select-card">
+        <a href={`/quiz/${slug}/`} class={`quiz-select-card ${featured}`}>
           <span class="quiz-select-card__emoji">{meta?.emoji || "\uD83D\uDCCB"}</span>
           <h2 class="quiz-select-card__title">{e.title}</h2>
           <span class="quiz-select-card__count">
             {meta?.count || e.questionCount || "?"} Fragen
           </span>
+          {meta?.featured && (
+            <span class="quiz-select-card__chip">Mix</span>
+          )}
         </a>
       );
     })}

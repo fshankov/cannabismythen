@@ -4,6 +4,23 @@ Guidance for AI assistants working in this repository. Read `README.md` first fo
 project intro and structure; this file captures conventions, patterns, and gotchas that
 aren't obvious from the source.
 
+## Working with Fedor — process rule (HARD)
+
+**Ask before implementing.** When the user asks for a change that touches
+copy, layout, scoring, content shape, navigation, or any user-visible decision:
+
+1. State your understanding of the change in plain language.
+2. Spell out the trade-offs and your recommendation (with rationale).
+3. Use the AskUserQuestion tool to confirm before writing code.
+4. Only then implement.
+
+This applies even when the request feels obvious. Visual taste, copy tone,
+data thresholds, and where new copy lands (per-card vs. per-page vs. global)
+are decisions, not implementation details. Verify, don't assume.
+
+Pure technical decisions with no user-visible effect (file naming inside a
+folder, type names, refactor patterns) don't need confirmation.
+
 ## What this project is
 
 Cannabis: Mythen & Evidenz — an evidence-based, German-language site that debunks 42
@@ -91,6 +108,44 @@ Universal entry fields: `status: "draft" | "published"`, `tags`, `internalNotes`
 3. **Don't renumber myths.** `mythId` (`m01`..`m42`) is referenced by `relatedMyths[]`,
    `quizIds[]`, and dashboards. Add new myths with the next sequential ID; don't
    reshuffle existing ones.
+
+## Quiz content source of truth
+
+The quiz lives across two stores by design. Both must reach the runtime,
+and editors must be able to trust that their changes are reflected on the
+live site without a code change.
+
+- **Editorial text** — statements, explanations, per-band verdicts
+  (`verdicts.{profi,guterweg,gehtnoch,erwischt}`), the
+  `weakSpotIntro` / `strongPerformanceIntro` lines, and (Stage 7+) per-module
+  share copy → **`src/content/quiz/*.mdoc`** is the source of truth. The
+  Keystatic admin UI is the editorial surface; commits land in git.
+- **Data integrity** — `mythId`, `correctClassification`, `populationCorrectPct`
+  (Erwachsene 18–70 reference table) → **`src/components/quiz/quizData.ts`**
+  is the source of truth. Code reviewers gate changes; the runtime trusts
+  these values when computing scores. Never edit these in `.mdoc`; never
+  duplicate them across the boundary.
+- **The join point** — `src/pages/quiz/[slug].astro` reads both stores and
+  passes them as JSON props (`quizText`, `verdicts`, `intros`, `shareCopy`,
+  …) into `<QuizPlayer>`. If you add a new editorial field to the
+  Keystatic schema, extend the Astro page to forward it — otherwise edits
+  silently no-op.
+- **Share-card copy fallback chain (Stage 7):** per-module
+  `shareCopy.{band}` override > `share-copy.yaml` singleton default >
+  hardcoded final fallback in `ResultScreen.tsx`. The Astro page does
+  the merge so the React player sees a single resolved object.
+  Editing either Keystatic surface reflects on the live result page +
+  ShareCard after the next deploy.
+- **Scoring is Schritte, never binary.** All per-question math routes
+  through `schritte()` / `pointsForSchritte()` / `moduleScore()` /
+  `breakdownCounts()` / `scoreBand()` in `quizData.ts`. If you find another
+  scorer anywhere in the quiz codebase, that's a bug.
+- **Population framing is honest.** Compare against
+  "Erwachsene (18–70) in einer repräsentativen Stichprobe in Deutschland".
+  CaRM IS that sample, so the data is unchanged — just framed for a
+  general reader. Never reference "Bevölkerung in Deutschland" alone
+  (implies all 80M), "Gesamtbevölkerung 16–70" (different cohort), or
+  "Befragten" without qualifier (loses the population context).
 
 ## Routing patterns
 
@@ -209,8 +264,12 @@ build doesn't flag them.
 | Task | Start here |
 |---|---|
 | Add a new myth | New `src/content/zahlen-und-fakten/mNN-slug.mdoc` matching `zahlenUndFakten` schema in `keystatic.config.ts` |
-| Tweak quiz behaviour | `src/components/quiz/QuizPlayer.tsx` + `quizData.ts` |
-| Change quiz copy/labels | `src/components/quiz/i18n.ts` |
+| Tweak quiz behaviour | `src/components/quiz/QuizPlayer.tsx` + `quizData.ts` (Schritte scoring lives in `schritte()` / `pointsForSchritte()` / `moduleScore()` / `scoreBand()`) |
+| Change quiz statements / explanations / verdicts | `src/content/quiz/*.mdoc` (Keystatic). The Astro page `src/pages/quiz/[slug].astro` is the join point. |
+| Add a quiz module | New `src/content/quiz/quiz-<slug>.mdoc` matching the schema, plus a static theme entry in `quizData.ts` (or `dynamic: true` for runtime-picked decks like Schnellcheck), plus a tile in `src/pages/quiz/index.astro`. |
+| Change global share copy / verdict fallbacks | `src/content/share-copy.yaml` (singleton) — per-module override is in each module's `shareCopy.{band}` field. |
+| Generate OG share images | `npm run og:generate` (or `npm run build` — runs as prebuild). Script: `scripts/generate-quiz-og.ts`. |
+| Change quiz UI copy / labels | `src/components/quiz/i18n.ts` |
 | Tweak the dashboard | `src/components/dashboard/MythenExplorer.tsx` and `src/lib/dashboard/` |
 | Adjust verdict colors / typography | `src/styles/global.css` (CSS custom properties) |
 | Add a new dynamic route | Mirror the `getStaticPaths()` + published filter pattern from any existing `[slug].astro` |

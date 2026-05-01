@@ -7,13 +7,33 @@ interface Props {
   title: string;
   description?: string;
   heroMode?: boolean;
+  /** Stage 8: per-page OG image URL (absolute or root-relative). When
+   *  set, emits og:image + twitter:card meta. og:title/description
+   *  derive from `title`/`description`; og:url from the current request. */
+  ogImage?: string;
 }
 
 const {
   title,
   description = "Evidenzbasierte Informationen zu Cannabis-Mythen",
   heroMode = false,
+  ogImage,
 } = Astro.props;
+
+// Stage 8 — resolve absolute OG URL once for og:image + og:url. `Astro.site`
+// is set in astro.config when the production origin is known. Falls back to
+// the current request origin so dev + preview builds emit usable absolute
+// URLs anyway.
+const siteUrl =
+  Astro.site?.toString().replace(/\/$/, "") ??
+  `${Astro.url.protocol}//${Astro.url.host}`;
+const ogImageAbs = ogImage
+  ? ogImage.startsWith("http")
+    ? ogImage
+    : `${siteUrl}${ogImage}`
+  : null;
+const ogUrl = `${siteUrl}${Astro.url.pathname}`;
+const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
 ---
 
 <!doctype html>
@@ -23,7 +43,22 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} | Cannabis: Mythen & Evidenz</title>
+    <title>{fullTitle}</title>
+
+    {/* Stage 8 — OG / Twitter card meta */}
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={ogUrl} />
+    {ogImageAbs && (
+      <Fragment>
+        <meta property="og:image" content={ogImageAbs} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={ogImageAbs} />
+      </Fragment>
+    )}
 
     {/* Matomo Analytics — cookieless mode (no GDPR banner needed) */}
     {/* TODO: Replace MATOMO_URL and SITE_ID with real values before production */}

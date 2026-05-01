@@ -12,5 +12,6 @@
       "@content/*": ["src/content/*"],
       "@layouts/*": ["src/layouts/*"]
     }
-  }
+  },
+  "exclude": ["scripts", "_local", "dist", ".netlify"]
 }

@@ -29,16 +29,10 @@ for (const audience of audiences) {
   title="Ihre Fragen"
   description="Antworten zugeschnitten auf Ihre Lebenssituation — Eltern, Jugendliche, Konsumierende, Lehrkräfte, Fachkräfte."
 >
-  <section class="faq-hub">
-    <header class="faq-hub__header">
-      <p class="faq-hub__kicker">Häufige Fragen</p>
-      <h1 class="faq-hub__headline">Ihre Fragen — zugeschnitten auf Ihre Lebenssituation.</h1>
-      <p class="faq-hub__lead">
-        Was wissen wir aus der CaRM-Studie wirklich über Cannabis? Wählen Sie eine Zielgruppe,
-        die zu Ihrer Situation passt. Jede Antwort verlinkt zum vollständigen Mythen-Factsheet
-        und zu den Daten, auf denen sie basiert.
-      </p>
-    </header>
+  <section class="faq-hub" aria-labelledby="faq-hub-h1">
+    {/* Heading is rendered for accessibility but visually hidden — the
+        audience cards themselves communicate the page's purpose. */}
+    <h1 id="faq-hub-h1" class="sr-only">Ihre Fragen</h1>
 
     <AudienceHubGrid items={items} />
 

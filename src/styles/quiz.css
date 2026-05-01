@@ -49,7 +49,7 @@
   gap: var(--space-md);
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 7px var(--space-lg);
+  padding: 8px var(--space-lg);
 }
 
 .quiz-header-bar__title {
@@ -59,6 +59,85 @@
   white-space: nowrap;
   letter-spacing: -0.01em;
   flex-shrink: 0;
+}
+
+/* ── Stage 4 — Schritte pill row ──────────────────────────────────
+   One pill per question, colour-coded by the user's Schritte after
+   they answer; "open" pills (unanswered) read as a quiet placeholder.
+   Stays horizontal at every breakpoint (DESIGN.md §1.4 / §4.4). On
+   narrow screens the row scrolls horizontally rather than wrapping. */
+.quiz-pill-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.quiz-pill-row::-webkit-scrollbar {
+  display: none;
+}
+
+.quiz-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.quiz-pill:hover:not(.quiz-pill--current) {
+  transform: translateY(-1px);
+}
+
+.quiz-pill:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Schritte band tints (background = -bg token, foreground = full token). */
+.quiz-pill--exact {
+  background: var(--color-richtig-bg);
+  border-color: var(--color-richtig);
+  color: var(--color-richtig);
+}
+.quiz-pill--near {
+  background: var(--color-eher-richtig-bg);
+  border-color: var(--color-eher-richtig);
+  color: var(--color-eher-richtig);
+}
+.quiz-pill--off {
+  background: var(--color-eher-falsch-bg);
+  border-color: var(--color-eher-falsch);
+  color: var(--color-eher-falsch);
+}
+.quiz-pill--far {
+  background: var(--color-falsch-bg);
+  border-color: var(--color-falsch);
+  color: var(--color-falsch);
+}
+
+.quiz-pill--current {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  font-weight: 800;
 }
 
 /* ── Progress Bar ──────────────────────────────────────────────── */
@@ -200,9 +279,88 @@
   isolation: isolate;
   perspective: 1600px;
   width: 100%;
-  max-width: 480px;
+  /* Stage 2: shared card dimensions across TitleCard + QuizCard so the
+     deck illusion stays consistent. The forced 3/4 aspect-ratio created
+     huge dead space below short content; replace with a CSS Grid layout
+     whose single row uses min-height. Grid `1fr` propagates a definite
+     height into the inner .quiz-card chain (which `min-height` alone does
+     not — percentage heights need a definite parent). */
+  max-width: min(560px, calc(100vw - 32px));
   margin: 0 auto;
-  aspect-ratio: 3 / 4;
+  min-height: clamp(360px, 60vh, 540px);
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+/* Stage 4 — edge nav arrows. Sit on the left/right edges of the card,
+   anchored to the cell so they don't rotate with the card's swipe
+   transform. Hover = slight nudge inward. On narrow viewports they tuck
+   inside the card a bit so they don't fall off the screen. */
+.quiz-card__edge-arrow {
+  position: absolute;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translateY(-50%);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.quiz-card__edge-arrow:hover {
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-md);
+}
+
+.quiz-card__edge-arrow:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.quiz-card__edge-arrow--prev {
+  left: -22px;
+}
+.quiz-card__edge-arrow--next {
+  right: -22px;
+}
+
+@media (max-width: 640px) {
+  /* Tuck edge arrows just inside the card edge on phones so they don't
+     fall off the viewport. Smaller hit-box too. */
+  .quiz-card__edge-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  .quiz-card__edge-arrow--prev {
+    left: 4px;
+  }
+  .quiz-card__edge-arrow--next {
+    right: 4px;
+  }
+}
+
+/* Stage 4 — "Ergebnis ansehen" finish-row, only shown after all
+   questions are answered (and the deck hasn't auto-flipped to results). */
+.quiz-player__finish-row {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-md);
 }
 
 /* Two pseudo-elements that look like the next cards in the deck.
@@ -281,16 +439,40 @@
 .quiz-card--flow .quiz-card__statement {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(20px, 3.2vw, 26px);
-  line-height: 1.25;
-  letter-spacing: -0.005em;
-  /* Vertically center the statement between the topbar and the verdict
-     scale. The scale itself uses margin-top: auto to anchor to the bottom;
-     statement uses margin: auto 0 so the slack distributes evenly above
-     and below it. */
-  margin: auto 0;
+  /* Stage 2 size ramp per DESIGN.md §3.2: 24 / 28 / 32 / 36 px across
+     480 / 768 / 1024 breakpoints. Statement is the dominant element on
+     the card; the verdict-scale anchors to the bottom. */
+  font-size: clamp(1.5rem, 4.5vw, 2.25rem);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  /* Top-aligned with generous breathing room — DESIGN.md asks the
+     statement to read like a slogan, not a centred caption. Padding-top
+     scales: 32 px mobile, 48 px tablet+. */
+  margin: var(--space-md) 0 0;
+  padding-top: clamp(16px, 4vw, 32px);
   flex: 0 0 auto;
+  text-align: center;
   hyphens: auto;
+}
+
+/* Remediation 5 — back-face statement: left-aligned (not centered like
+   the front), slightly smaller so the verdict + chips + explanation +
+   pop stat all fit. Tinted by the scientific verdict via the site-wide
+   `statement--{verdict}` class. */
+.quiz-card--flow .quiz-card__statement--back {
+  font-size: clamp(1.15rem, 3.2vw, 1.55rem);
+  line-height: 1.25;
+  font-weight: 700;
+  text-align: left;
+  padding-top: 4px;
+  margin: 0 0 var(--space-md);
+}
+
+/* Chip pair: "Deine Antwort: [chip] · Wissenschaftlich: [chip]" on one
+   line, wraps naturally on narrow widths. */
+.quiz-card--flow .quiz-card__answer-vs {
+  color: var(--color-text-muted);
+  margin: 0 4px;
 }
 
 /* Always-visible answer buttons in flow mode */
@@ -350,10 +532,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 11px 4px;
-  min-height: 56px;
+  /* Stage 2: bigger touch targets per DESIGN.md mobile spec (≥48 px). */
+  padding: 12px 4px 10px;
+  min-height: 64px;
   font: inherit;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-text-secondary);
   background: transparent;
@@ -390,20 +573,24 @@
   line-height: 1.15;
 }
 
+/* Stage 2: kbd hint moves UNDER the label as a small "Taste N" line.
+   Only relevant on devices with a real keyboard, so it's hidden on touch.
+   Renders inline so it sits on its own line below the label, never
+   absolutely positioned over the segment any more. */
 .verdict-scale__kbd {
-  position: absolute;
-  top: 3px;
-  right: 5px;
-  font-size: 0.55rem;
+  display: block;
+  margin-top: 2px;
+  font-size: 0.6rem;
   font-family: var(--font-mono, monospace);
-  background: rgba(0, 0, 0, 0.05);
-  padding: 1px 4px;
-  border-radius: 3px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   color: var(--color-text-muted);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
 }
 
-/* Hide the keyboard hints on touch-only devices — irrelevant noise there. */
-@media (hover: none) {
+@media (hover: none), (pointer: coarse) {
   .verdict-scale__kbd {
     display: none;
   }
@@ -535,65 +722,95 @@
   white-space: nowrap;
 }
 
-/* 2 — Verdict banner. The colleague's three-tier headline lives here. */
-.quiz-card--flow .quiz-card__verdict-banner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1.125rem;
-  line-height: 1.2;
+/* Stage 3 — Back-face copy stack (D5 order, top to bottom):
+   1) Always-shown "Deine Antwort: X" chip (.quiz-card__answer-note)
+   2) Schritte verdict line, large, no period, colored
+      (.quiz-card__verdict-line + colour modifier)
+   3) Schritte points sub-line (.quiz-card__verdict-points)
+   4) Myth-line (.quiz-card__myth-line) tinted by scientific verdict
+   5) Explanation
+   6) Population stat
+   7) Buttons */
+
+/* Remediation 5 — back-face hierarchy:
+   Statement (large, left-aligned, tinted) → chip pair → verdict (large,
+   colored) → sub-line → explanation → pop stat → buttons.
+   Aim: 4 visual levels, not 7. The chip pair sits between statement and
+   verdict because that's the comparative beat the user wants to read
+   first ("I said X · the science says Y → so my Schritte verdict is Z").
+*/
+
+/* Chip pair: "Deine Antwort: [chip] · Wissenschaftlich: [chip]". Wraps
+   on narrow widths; uses inline-block chips so they sit on the line. */
+.quiz-card--flow .quiz-card__answer-note {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-sm);
+  font-weight: 500;
   flex-shrink: 0;
-  margin-top: var(--space-sm);
+  line-height: 1.7;
 }
 
-.quiz-card--flow .quiz-card__verdict-glyph {
-  font-size: 1.4rem;
-  line-height: 1;
+.quiz-card--flow .quiz-card__answer-label {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.7rem;
+  margin-right: 4px;
 }
 
-.quiz-card--flow.is-correct .quiz-card__verdict-banner {
-  background: var(--color-richtig-bg);
+.quiz-card--flow .quiz-card__answer-chip {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 1px 9px;
+  border-radius: 999px;
+  vertical-align: baseline;
+}
+
+/* Schritte verdict line — large, no period, colored by Schritte. */
+.quiz-card--flow .quiz-card__verdict-line {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.35rem, 3.8vw, 1.85rem);
+  line-height: 1.15;
+  margin: var(--space-sm) 0 2px;
+  flex-shrink: 0;
+  letter-spacing: -0.01em;
+}
+
+.quiz-card--flow .quiz-card__verdict-line--richtig {
   color: var(--color-richtig);
 }
-
-.quiz-card--flow.is-near .quiz-card__verdict-banner {
-  background: var(--color-eher-falsch-bg);
+.quiz-card--flow .quiz-card__verdict-line--eher_richtig {
+  color: var(--color-eher-richtig);
+}
+.quiz-card--flow .quiz-card__verdict-line--eher_falsch {
   color: var(--color-eher-falsch);
 }
-
-.quiz-card--flow.is-far .quiz-card__verdict-banner {
-  background: var(--color-falsch-bg);
+.quiz-card--flow .quiz-card__verdict-line--falsch {
   color: var(--color-falsch);
 }
 
-/* Tier-tinted background gradient on the back face only. Overrides the
-   legacy .quiz-card--correct/--incorrect tinting that lives further down
-   in this file (which only handled the binary case). */
-.quiz-card--flow.is-correct .quiz-card__back {
-  border-color: var(--color-richtig);
-  background: linear-gradient(180deg, var(--color-richtig-bg), var(--color-surface) 40%);
+/* 3 — Points sub-line under the verdict. Muted, monospace numerals for
+   alignment stability. */
+.quiz-card--flow .quiz-card__verdict-points {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  margin: 2px 0 0;
+  flex-shrink: 0;
 }
 
-.quiz-card--flow.is-near .quiz-card__back {
-  border-color: var(--color-eher-falsch);
-  background: linear-gradient(180deg, var(--color-eher-falsch-bg), var(--color-surface) 40%);
-}
-
-.quiz-card--flow.is-far .quiz-card__back {
-  border-color: var(--color-falsch);
-  background: linear-gradient(180deg, var(--color-falsch-bg), var(--color-surface) 40%);
-}
-
-/* 3 — Myth-line. Smaller than the verdict banner; the verdict word is
-   bolded for scannability. */
+/* 4 — Myth-line. The verdict word is bolded; the line carries the
+   site-wide statement tint via the `statement--{verdict}` class which is
+   defined in global.css. */
 .quiz-card--flow .quiz-card__myth-line {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 0.94rem;
+  font-size: 0.95rem;
   line-height: 1.45;
   margin: var(--space-sm) 0 0;
   color: var(--color-text);
@@ -602,24 +819,6 @@
 
 .quiz-card--flow .quiz-card__myth-line strong {
   font-weight: 700;
-}
-
-/* 4 — Optional answer-note (only rendered when the user was wrong). */
-.quiz-card--flow .quiz-card__answer-note {
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-  margin: 6px 0 0;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.quiz-card--flow .quiz-card__answer-chip {
-  display: inline-block;
-  margin-left: 4px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 1px 7px;
-  border-radius: 999px;
 }
 
 /* 5 — Explanation. Wraps in a flex: 1 container so it absorbs whatever
@@ -778,12 +977,29 @@
    margin-top: auto (which would steal vertical space from the
    scrollable explanation above them). They sit naturally below the
    explanation-wrap which has flex: 1 1 auto. */
+/* Stage 3: pop-bar restructured as "honest text above mini bar". The
+   sentence names the comparison group explicitly (Erwachsene 18–70 in der
+   CaRM-Studie); the bar is just the visual anchor below it. */
 .quiz-card--flow .quiz-card__pop-bar {
   margin-top: 10px;
   margin-bottom: 0;
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   flex-shrink: 0;
+}
+
+.quiz-card--flow .quiz-card__pop-bar-text {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.quiz-card--flow .quiz-card__pop-bar-text strong {
+  color: var(--color-text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .quiz-card--flow .quiz-card__pop-bar-track {
@@ -796,14 +1012,6 @@
     var(--quiz-accent, var(--color-accent)),
     #40916c
   );
-}
-
-.quiz-card--flow .quiz-card__pop-bar-value {
-  font-weight: 700;
-  color: var(--color-text);
-  white-space: nowrap;
-  text-align: left;
-  min-width: 0;
 }
 
 .quiz-card--flow .quiz-card__back-actions {
@@ -1105,11 +1313,13 @@
   min-height: 340px;
 }
 
-/* v2: the flow cell uses aspect-ratio (declared in the redesign block above),
-   not min-height. Explicitly null out the inherited min-height: 340px from
-   the generic .quiz-card__cell so it doesn't fight the aspect ratio. */
+/* Stage 2 (overhaul): the flow cell now uses an explicit min-height in the
+   redesign block above (line ~198). The generic .quiz-card__cell rule still
+   sets min-height: 340px, which is fine — but we promote the flow cell's
+   min-height to a clamp via this dual-class override so the bigger
+   responsive minimum wins. */
 .quiz-card__cell.quiz-card__cell--flow {
-  min-height: 0;
+  min-height: clamp(360px, 60vh, 540px);
 }
 
 /* ── Card (outer clickable wrapper) ───────────────────────────── */
@@ -1117,6 +1327,9 @@
 .quiz-card {
   position: relative;
   width: 100%;
+  /* Stage 2: parent cell uses CSS Grid (`grid-template-rows: 1fr`) which
+     stretches this card to a definite height. Restoring `height: 100%`
+     on top so the inner / face chain still computes percentages cleanly. */
   height: 100%;
   cursor: pointer;
   outline: none;
@@ -1228,30 +1441,12 @@
   flex-direction: column;
 }
 
-/* Correct/incorrect border colours on the back face */
-.quiz-card--correct .quiz-card__back {
-  border-color: var(--color-richtig);
-  background: var(--color-richtig-bg);
-}
-
-.quiz-card--incorrect .quiz-card__back {
-  border-color: var(--color-eher-falsch);
-  background: var(--color-eher-falsch-bg);
-}
-
-/* Correct/incorrect on front when in read-only mode */
+/* Stage 3: dropped the binary correct/incorrect background tinting on
+   the back face. The Schritte verdict line + colored chips do the
+   diagnostic work; the card body stays neutral so the card itself
+   doesn't shout. (Plan D5 + the back-face rebuild.) */
 .quiz-card--answered:not(.quiz-card--flipped) .quiz-card__front {
   border-color: var(--color-border);
-}
-
-.quiz-card--correct:not(.quiz-card--flipped) .quiz-card__front {
-  border-color: var(--color-richtig);
-  background: var(--color-richtig-bg);
-}
-
-.quiz-card--incorrect:not(.quiz-card--flipped) .quiz-card__front {
-  border-color: var(--color-eher-falsch);
-  background: var(--color-eher-falsch-bg);
 }
 
 
@@ -1951,6 +2146,348 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Stage 5 — Result page (Schritte hero + banded verdict + worst-first
+   review). The legacy `.quiz-result__tier`, `__headline`, `__item--correct`,
+   `__item-mark`, `__item-num` styles above remain in the file as dead
+   rules; Stage 9 cleans them up. The selectors below take over rendering.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* 2 — Hero number (clamp 60 / 80 / 96 px). Colour comes from the band. */
+.quiz-result__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  margin: var(--space-md) 0 var(--space-lg);
+}
+
+.quiz-result__hero-num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3.75rem, 12vw, 6rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.quiz-result__hero-pct {
+  font-size: 0.45em;
+  font-weight: 700;
+  vertical-align: 0.25em;
+  margin-left: 0.05em;
+  color: inherit;
+  opacity: 0.9;
+}
+
+.quiz-result__hero--profi .quiz-result__hero-num {
+  color: var(--color-richtig);
+}
+.quiz-result__hero--guterweg .quiz-result__hero-num {
+  color: var(--color-eher-richtig);
+}
+.quiz-result__hero--gehtnoch .quiz-result__hero-num {
+  color: var(--color-eher-falsch);
+}
+.quiz-result__hero--erwischt .quiz-result__hero-num {
+  color: var(--color-falsch);
+}
+
+/* 3 — Breakdown line under the hero. */
+.quiz-result__breakdown {
+  font-size: 0.92rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 4 — Verdict block (Keystatic) */
+.quiz-result__verdict {
+  background: var(--color-accent-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  border-left: 4px solid var(--color-accent);
+  margin-bottom: var(--space-lg);
+}
+
+.quiz-result__verdict--profi {
+  border-left-color: var(--color-richtig);
+}
+.quiz-result__verdict--guterweg {
+  border-left-color: var(--color-eher-richtig);
+}
+.quiz-result__verdict--gehtnoch {
+  border-left-color: var(--color-eher-falsch);
+}
+.quiz-result__verdict--erwischt {
+  border-left-color: var(--color-falsch);
+}
+
+.quiz-result__verdict-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 var(--space-xs);
+  color: var(--color-text);
+}
+
+.quiz-result__verdict-body {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 5 — Population comparison (honest, banded) */
+.quiz-result__population {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  margin: 0 0 var(--space-xs);
+  text-align: center;
+}
+
+.quiz-result__population-source {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-xl);
+  text-align: center;
+  font-style: italic;
+}
+
+/* 6 — Module review */
+.quiz-result__retrospective-intro {
+  font-size: 0.92rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-md);
+  line-height: 1.55;
+}
+
+/* Schritte chip on each row (replaces the binary ✓/✗ mark). */
+.quiz-result__item-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.quiz-result__item-chip--exact {
+  background: var(--color-richtig-bg);
+  color: var(--color-richtig);
+  border: 1px solid var(--color-richtig);
+}
+.quiz-result__item-chip--near {
+  background: var(--color-eher-richtig-bg);
+  color: var(--color-eher-richtig);
+  border: 1px solid var(--color-eher-richtig);
+}
+.quiz-result__item-chip--off {
+  background: var(--color-eher-falsch-bg);
+  color: var(--color-eher-falsch);
+  border: 1px solid var(--color-eher-falsch);
+}
+.quiz-result__item-chip--far {
+  background: var(--color-falsch-bg);
+  color: var(--color-falsch);
+  border: 1px solid var(--color-falsch);
+}
+
+/* Override the legacy left-border by Schritte band, so the worst rows
+   read as red and the best rows quietly green. Legacy --correct/--incorrect
+   rules above only matched .quiz-card--{correct,incorrect} (still applied
+   when the new code re-uses the .quiz-result__item base). */
+.quiz-result__item--exact {
+  border-left-color: var(--color-richtig);
+  background: rgba(236, 253, 245, 0.5);
+}
+.quiz-result__item--near {
+  border-left-color: var(--color-eher-richtig);
+}
+.quiz-result__item--off {
+  border-left-color: var(--color-eher-falsch);
+}
+.quiz-result__item--far {
+  border-left-color: var(--color-falsch);
+}
+
+/* De-emphasise correct rows (Schritte 0) at the bottom of the worst-first
+   list — smaller statement font + lighter background. */
+.quiz-result__item--exact .quiz-result__item-statement {
+  font-size: 0.92rem;
+  color: var(--color-text-secondary);
+}
+
+.quiz-result__item-meta-label {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.quiz-result__item-pair {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+/* 8 — CTAs */
+.quiz-result__cta {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 600;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.quiz-result__cta--primary {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-accent);
+}
+.quiz-result__cta--primary:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.quiz-result__cta--secondary {
+  background: var(--color-surface);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}
+.quiz-result__cta--secondary:hover {
+  background: var(--color-accent-light);
+}
+
+.quiz-result__actions-secondary {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-sm);
+}
+
+/* Remediation 3 — unified ShareCard hero (verdict + percentage + share). */
+.share-card__score-unit {
+  font-size: 0.55em;
+  font-weight: 700;
+  vertical-align: 0.25em;
+  margin-left: 0.04em;
+  opacity: 0.9;
+}
+
+.share-card__breakdown {
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 4px 0 var(--space-md);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.share-card__verdict {
+  margin: var(--space-md) auto 0;
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: var(--radius-md);
+  max-width: 44ch;
+  text-align: center;
+}
+
+.share-card__verdict-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--color-text-inverse);
+}
+
+.share-card__verdict-body {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+}
+
+.share-card__pop-line {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+  margin: var(--space-md) auto 0;
+  text-align: center;
+  max-width: 44ch;
+}
+
+/* Per-band tint of the hero card so the colour matches the user's
+   actual result rather than always being green. */
+.share-card--profi .share-card__visual {
+  background: linear-gradient(145deg, var(--color-richtig) 0%, #035c43 100%);
+}
+.share-card--guterweg .share-card__visual {
+  background: linear-gradient(145deg, var(--color-eher-richtig) 0%, #3a5e0a 100%);
+}
+.share-card--gehtnoch .share-card__visual {
+  background: linear-gradient(145deg, var(--color-eher-falsch) 0%, #8c4007 100%);
+}
+.share-card--erwischt .share-card__visual {
+  background: linear-gradient(145deg, var(--color-falsch) 0%, #870d2c 100%);
+}
+
+/* Result-page action stack — two equally-sized primary buttons, two
+   matching text links beneath, all centred. Replaces the previous
+   four-different-sizes mess. */
+.quiz-result__actions-primary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.quiz-result__cta {
+  font-size: 1rem;
+  padding: 12px 22px;
+  min-width: 240px;
+  text-align: center;
+}
+
+.quiz-result__actions-tertiary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.quiz-result__textlink {
+  background: none;
+  border: 0;
+  padding: 4px 8px;
+  font: inherit;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.quiz-result__textlink:hover {
+  color: var(--color-accent-hover);
+}
+
+.quiz-result__textlink-sep {
+  color: var(--color-text-muted);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Share Card — Dark forest green (#2d6a4f) background
    ═══════════════════════════════════════════════════════════════ */
@@ -2410,11 +2947,12 @@
     min-height: 300px;
   }
 
-  /* v2: card stays 3:4 on mobile too. The max-height cap leaves room for
-     the dot strip + nav + persistence notice on shorter phones. Dropped
-     the legacy min-height: 600px which conflicted with aspect-ratio. */
+  /* Stage 2: mobile cap so the deck still leaves room for the pill row +
+     nav + persistence notice on shorter phones. The min-height also
+     scales down via the clamp() in the desktop block above. */
   .quiz-card__cell--flow {
     max-height: min(640px, calc(100svh - 240px));
+    min-height: clamp(320px, 55vh, 480px);
   }
 
   .quiz-player__flow {
@@ -2427,7 +2965,10 @@
   }
 
   .quiz-card--flow .quiz-card__statement {
-    font-size: clamp(1rem, 4.5vw, 1.2rem);
+    /* Stage 2: keep the dominant-statement size ramp on mobile too.
+       Caps at 28 px on phones; desktop ramp lifts up to 36 px. */
+    font-size: clamp(1.25rem, 5.5vw, 1.75rem);
+    padding-top: clamp(12px, 3vw, 24px);
   }
 
   .quiz-card--flow .quiz-card__buttons {
@@ -2549,6 +3090,29 @@
   padding: 0.2em 0.7em;
   border-radius: var(--radius-full);
   letter-spacing: 0.02em;
+}
+
+/* Stage 6 — Featured Schnellcheck tile. Subtle dotted border + "Mix"
+   chip in the top-right corner so it reads as the cross-thematic
+   wildcard without out-shouting the editorial modules. */
+.quiz-select-card--featured {
+  position: relative;
+  border-style: dashed;
+  border-color: var(--color-accent-muted);
+}
+
+.quiz-select-card__chip {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
 }
 
 /* Mobile: snap-carousel instead of a vertical wall of tall tiles. */

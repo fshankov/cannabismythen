@@ -1,66 +1,81 @@
 /**
- * ShareCard — Bold, dark shareable result card.
+ * ShareCard — unified result hero (Remediation 3).
  *
- * Visual style: deep forest green (#2d6a4f) background, white text,
- * CSS medal/badge shape, achievement style.
+ * Replaces the old "verdict box + separate green share card" duplication
+ * with one card that:
+ *   • shows the band-coloured percentage hero
+ *   • carries the breakdown line (X genau richtig · …)
+ *   • renders the Keystatic verdict title + body inside a translucent
+ *     band so editors keep their voice
+ *   • shows the honest banded population sentence
+ *   • carries a single share button (Web Share API + clipboard fallback)
  *
- * "Ergebnis teilen" button uses native Web Share API with clipboard fallback.
+ * Visually it's still the green forest card but now it earns its place.
  */
 
-import { useState, useCallback } from "react";
-import type { QuizResult, ResultTierIndex } from "./types";
-import { RESULT_TIERS } from "./quizData";
+import { useCallback, useState } from "react";
+import type { QuizResult, ScoreBand } from "./types";
+import { scoreBand } from "./quizData";
 import { t } from "./i18n";
 import { trackResultCardShared } from "./matomo";
 
 interface ShareCardProps {
   result: QuizResult;
   quizUrl: string;
+  moduleTitle: string;
+  verdictTitle: string;
+  verdictBody: string;
+  /** "X genau richtig · Y nah dran · …" — only bands with count > 0. */
+  breakdownLine: string;
+  /** Honest banded population sentence (already interpolated). */
+  populationLine: string;
+  variant?: "square" | "vertical";
 }
 
-/** Emoji for each tier */
-const TIER_EMOJI: Record<ResultTierIndex, string> = {
-  0: "\u{1F331}", // 🌱
-  1: "\u{1F4A1}", // 💡
-  2: "\u{2B50}",  // ⭐
-  3: "\u{1F3C6}", // 🏆
+/** Band → emoji for the medal. */
+const BAND_EMOJI: Record<ScoreBand, string> = {
+  profi: "\u{1F3C6}",
+  guterweg: "\u{2B50}",
+  gehtnoch: "\u{1F4A1}",
+  erwischt: "\u{1F331}",
 };
 
-export default function ShareCard({ result, quizUrl }: ShareCardProps) {
+export default function ShareCard({
+  result,
+  quizUrl,
+  moduleTitle,
+  verdictTitle,
+  verdictBody,
+  breakdownLine,
+  populationLine,
+  variant = "square",
+}: ShareCardProps) {
   const [copied, setCopied] = useState(false);
+  const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
+  const emoji = BAND_EMOJI[band];
 
-  const tier = RESULT_TIERS[result.tierIndex];
-  const tierTitle = t(tier.titleKey);
-  const emoji = TIER_EMOJI[result.tierIndex];
-
-  const shareText = t("ui.shareText", {
-    correct: result.correctCount,
-    total: result.totalQuestions,
-    pct: result.percentile,
-  });
+  const shareText = `Ich habe ${result.moduleScore} % beim Quiz „${moduleTitle}" auf cannabismythen.de erreicht.`;
   const fullShareText = `${shareText} ${quizUrl}`;
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: t("ui.shareTitle"),
+          title: `Mein Ergebnis: ${moduleTitle}`,
           text: shareText,
           url: quizUrl,
         });
         trackResultCardShared("native");
       } catch {
-        // User cancelled — not an error
+        // user cancelled — not an error
       }
     } else {
-      // Clipboard fallback
       try {
         await navigator.clipboard.writeText(fullShareText);
         setCopied(true);
         trackResultCardShared("clipboard");
         setTimeout(() => setCopied(false), 2500);
       } catch {
-        // Fallback for older browsers
         const textArea = document.createElement("textarea");
         textArea.value = fullShareText;
         textArea.style.position = "fixed";
@@ -74,33 +89,37 @@ export default function ShareCard({ result, quizUrl }: ShareCardProps) {
         setTimeout(() => setCopied(false), 2500);
       }
     }
-  }, [shareText, fullShareText, quizUrl]);
+  }, [shareText, fullShareText, quizUrl, moduleTitle]);
 
   return (
-    <div className="share-card">
+    <div className={`share-card share-card--${variant} share-card--${band}`}>
       <div className="share-card__visual">
-        {/* CSS medal badge */}
         <div className="share-card__medal">
-          <span className="share-card__emoji">{emoji}</span>
+          <span className="share-card__emoji" aria-hidden="true">
+            {emoji}
+          </span>
         </div>
 
-        <div className="share-card__tier-title">{tierTitle}</div>
-
-        <div className="share-card__score">
-          {result.correctCount} / {result.totalQuestions}
+        <div
+          className="share-card__score"
+          aria-label={`${result.moduleScore} Prozent`}
+        >
+          {result.moduleScore}
+          <span className="share-card__score-unit">&nbsp;%</span>
         </div>
 
-        <p className="share-card__pct">
-          {t("ui.correctPctLine", { pct: result.correctPct })}
-        </p>
+        {breakdownLine && (
+          <p className="share-card__breakdown">{breakdownLine}</p>
+        )}
 
-        <p className="share-card__percentile">
-          {t("ui.percentileLine", { pct: result.percentile })}
-        </p>
-
-        <div className="share-card__branding">
-          {t("ui.siteUrl")}
+        <div className="share-card__verdict">
+          <h2 className="share-card__verdict-title">{verdictTitle}</h2>
+          <p className="share-card__verdict-body">{verdictBody}</p>
         </div>
+
+        <p className="share-card__pop-line">{populationLine}</p>
+
+        <div className="share-card__branding">{t("ui.siteUrl")}</div>
       </div>
 
       <button

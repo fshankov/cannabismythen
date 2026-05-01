@@ -1,69 +1,131 @@
 /**
- * Quiz data — structured myth entries for all 4 quiz themes.
+ * Quiz data — structured myth entries for all 5 quiz themes + Schritte
+ * scoring helpers.
+ *
+ * Editorial vs data split (mirrored in CLAUDE.md):
+ *   - This file is the source of truth for **data integrity** — mythId,
+ *     correctClassification, populationCorrectPct, mythPageSlug. Code
+ *     reviewers gate changes here; the runtime trusts these values when
+ *     computing scores.
+ *   - Editorial text (statements, explanations, verdicts, intros, share
+ *     copy) lives in `src/content/quiz/*.mdoc` and reaches the runtime
+ *     through `src/pages/quiz/[slug].astro` → React props. The
+ *     `statementKey` / `explanationKey` fields below are fallback i18n
+ *     references only.
  *
  * Data sourced from:
- *   - CaRM survey: "Ergebnisse CaRM Tab sort 1.xlsx", sheets "Volljährige" + "Minderjährige"
- *     (Richtigkeit d. Beurteilung — population-weighted Gesamtbevölkerung 16–70,
- *      weights: 97.1% adults 18–70, 2.9% minors 16–17, based on German demographics)
- *   - /src/content/zahlen-und-fakten/*.mdoc (myth page slugs, classifications)
+ *   - `src/content/quiz/feedback-texte.mdoc` — Erwachsene (18–70) reference
+ *     table from the CaRM-Studie. This is the source of truth for
+ *     populationCorrectPct.
+ *   - `src/content/zahlen-und-fakten/*.mdoc` — myth page slugs and
+ *     scientific classifications.
  */
 
-import type { QuizTheme, QuizMyth, ResultTier, ResultTierIndex, Classification, CardAnswer } from "./types";
+import type {
+  QuizTheme,
+  QuizMyth,
+  Classification,
+  CardAnswer,
+  Schritte,
+  ScoreBand,
+} from "./types";
 
-// ─── Result Tiers (percentage-based) ────────────────────────────────────────────
+// ─── Schritte scoring (matches CaRM "Richtigkeit d. Beurteilung") ──────
+//
+// Single source of truth for everything score-related. The legacy
+// `+2/+1/-1/-2` scorer used in QuizPlayer was replaced by this module in
+// the Stage 1 overhaul; if you find another scorer anywhere in the quiz
+// codebase, that's a bug — route it through here instead.
 
-export const RESULT_TIERS: ResultTier[] = [
-  {
-    titleKey: "tier.0.title",
-    messageKey: "tier.0.message",
-    rangePct: [0, 30],
-  },
-  {
-    titleKey: "tier.1.title",
-    messageKey: "tier.1.message",
-    rangePct: [31, 55],
-  },
-  {
-    titleKey: "tier.2.title",
-    messageKey: "tier.2.message",
-    rangePct: [56, 80],
-  },
-  {
-    titleKey: "tier.3.title",
-    messageKey: "tier.3.message",
-    rangePct: [81, 100],
-  },
-];
+/** Likert position of each classification on the 4-point scale.
+ *  `falsch:0 … richtig:3` ascending matches CaRM's reporting. */
+export const LIKERT_VALUES: Record<Classification, 0 | 1 | 2 | 3> = {
+  falsch: 0,
+  eher_falsch: 1,
+  eher_richtig: 2,
+  richtig: 3,
+};
 
-/** Get the tier index for a given score as percentage of total. */
-export function getTierIndex(correctCount: number, total: number): ResultTierIndex {
-  const pct = (correctCount / total) * 100;
-  if (pct <= 30) return 0;
-  if (pct <= 55) return 1;
-  if (pct <= 80) return 2;
-  return 3;
+/** Per-question Schritte — distance between the user's pick and the
+ *  scientific verdict on the 4-point scale. `0` is exact, `3` is opposite. */
+export function schritte(
+  chosen: Classification,
+  correct: Classification
+): Schritte {
+  const d = Math.abs(LIKERT_VALUES[chosen] - LIKERT_VALUES[correct]);
+  return d as Schritte;
 }
 
-// ─── Distance-based scoring (matches CaRM "Richtigkeit d. Beurteilung") ──────
+/** CaRM "Richtigkeit" point value for a single answer's Schritte. */
+export function pointsForSchritte(s: Schritte): 1 | 0.66 | 0.33 | 0 {
+  if (s === 0) return 1;
+  if (s === 1) return 0.66;
+  if (s === 2) return 0.33;
+  return 0;
+}
 
-/** Ordinal position of each classification on the 4-point scale. */
-const CLASS_POS: Record<Classification, number> = {
-  richtig: 1,
-  eher_richtig: 2,
-  eher_falsch: 3,
-  falsch: 4,
-};
+/** Module score as an integer percentage. Sum of per-question points
+ *  divided by question count, scaled to 0–100. Only includes questions
+ *  the user actually answered — partial runs return a partial score. */
+export function moduleScore(
+  answers: CardAnswer[],
+  myths: QuizMyth[]
+): number {
+  if (myths.length === 0) return 0;
+  let sumPoints = 0;
+  for (const a of answers) {
+    const myth = myths.find((m) => m.id === a.mythId);
+    if (!myth) continue;
+    sumPoints += pointsForSchritte(
+      schritte(a.chosenClassification, myth.correctClassification)
+    );
+  }
+  return Math.round((sumPoints / myths.length) * 100);
+}
+
+/** Per-band counts derived from the user's Schritte per question. The
+ *  result page uses this for the "X exact · Y near · Z off · W far"
+ *  breakdown line. */
+export function breakdownCounts(
+  answers: CardAnswer[],
+  myths: QuizMyth[]
+): { exact: number; near: number; off: number; far: number } {
+  const out = { exact: 0, near: 0, off: 0, far: 0 };
+  for (const a of answers) {
+    const myth = myths.find((m) => m.id === a.mythId);
+    if (!myth) continue;
+    const s = schritte(a.chosenClassification, myth.correctClassification);
+    if (s === 0) out.exact++;
+    else if (s === 1) out.near++;
+    else if (s === 2) out.off++;
+    else out.far++;
+  }
+  return out;
+}
+
+/** Map a module-score percentage to its named band. Bands match the
+ *  Keystatic `verdicts.{band}` field labels (80–100 / 60–79 / 40–59 / 0–39). */
+export function scoreBand(pct: number): ScoreBand {
+  if (pct >= 80) return "profi";
+  if (pct >= 60) return "guterweg";
+  if (pct >= 40) return "gehtnoch";
+  return "erwischt";
+}
 
 /**
  * Score a single answer on the same 0–100 "Richtigkeit" scale used by CaRM.
  * 0 steps from correct → 100, 1 step → 66.67, 2 steps → 33.33, 3 steps → 0.
+ *
+ * Implemented via `schritte()` so there's exactly one Schritte source of
+ * truth in the codebase. Used by `computePercentile()` below for the
+ * mean-based percentile estimate against the Erwachsene (18–70) sample.
  */
 export function distanceScore(
   chosen: Classification,
   correct: Classification
 ): number {
-  const d = Math.abs(CLASS_POS[chosen] - CLASS_POS[correct]);
-  return ((3 - d) / 3) * 100;
+  const s = schritte(chosen, correct);
+  return ((3 - s) / 3) * 100;
 }
 
 // ─── Percentile Computation ────────────────────────────────────────────────────
@@ -518,13 +580,98 @@ export const QUIZ_THEMES: Record<string, QuizTheme> = {
     descriptionKey: "quiz.gefaehrlichkeit.description",
     myths: mythsGefaehrlichkeit,
   },
+  // Stage 6: Schnellcheck — dynamic 7-myth deck balanced across the five
+  // theme buckets. Empty `myths` here; the player calls
+  // `pickSchnellcheckMyths()` at mount time and persists the selection
+  // for the session.
+  "quiz-schnellcheck": {
+    slug: "quiz-schnellcheck",
+    titleKey: "quiz.schnellcheck.title",
+    subtitleKey: "quiz.schnellcheck.subtitle",
+    descriptionKey: "quiz.schnellcheck.description",
+    myths: [],
+    dynamic: true,
+  },
 };
 
-/** All quiz slugs in display order. */
+/** All five static quiz slugs that group the 40 used myths by theme.
+ *  m12 + m17 are `keine_aussage` and not included in any module. */
+const STATIC_THEME_BUCKETS: Array<{ slug: string; myths: QuizMyth[] }> = [
+  { slug: "quiz-medizin", myths: mythsMedizin },
+  { slug: "quiz-risiken", myths: mythsRisiken },
+  { slug: "quiz-stimmung", myths: mythsStimmung },
+  { slug: "quiz-gesellschaft", myths: mythsGesellschaft },
+  { slug: "quiz-gefaehrlichkeit", myths: mythsGefaehrlichkeit },
+];
+
+/** Global mythId → QuizMyth lookup across every static theme. Used by
+ *  the Schnellcheck deck (Stage 6) to rehydrate persisted picks: the
+ *  saved `order` field in localStorage stores mythIds; this map resolves
+ *  them back to full QuizMyth objects. */
+export const ALL_MYTHS_BY_ID: Record<string, QuizMyth> = (() => {
+  const out: Record<string, QuizMyth> = {};
+  for (const bucket of STATIC_THEME_BUCKETS) {
+    for (const m of bucket.myths) out[m.id] = m;
+  }
+  return out;
+})();
+
+/**
+ * Stage 6 — pick 7 myths balanced across the five theme buckets.
+ *
+ * Strategy: take 1 random myth from each of the 5 buckets, then fill the
+ * remaining 2 slots from the union of not-yet-picked myths (also random).
+ * Returns a freshly shuffled array each call; pass `seed`-style behaviour
+ * by injecting a custom rng for tests.
+ *
+ * Why not pure-random across all 40? A pure sample frequently produces
+ * runs heavily weighted toward one theme, which makes the Schnellcheck
+ * feel less like a cross-section. The balanced strategy guarantees
+ * thematic variety while still feeling random.
+ */
+export function pickSchnellcheckMyths(
+  rng: () => number = Math.random
+): QuizMyth[] {
+  const picked: QuizMyth[] = [];
+
+  // 1) one from each bucket
+  for (const bucket of STATIC_THEME_BUCKETS) {
+    if (bucket.myths.length === 0) continue;
+    const idx = Math.floor(rng() * bucket.myths.length);
+    picked.push(bucket.myths[idx]);
+  }
+
+  // 2) fill remaining slots (up to 7) from the union of remaining myths
+  const pickedIds = new Set(picked.map((m) => m.id));
+  const pool: QuizMyth[] = [];
+  for (const bucket of STATIC_THEME_BUCKETS) {
+    for (const m of bucket.myths) {
+      if (!pickedIds.has(m.id)) pool.push(m);
+    }
+  }
+  while (picked.length < 7 && pool.length > 0) {
+    const idx = Math.floor(rng() * pool.length);
+    picked.push(pool[idx]);
+    pool.splice(idx, 1);
+  }
+
+  // 3) final shuffle so the "balanced" pick doesn't always start medizin →
+  //    risiken → stimmung → gesellschaft → gefaehrlichkeit.
+  for (let i = picked.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [picked[i], picked[j]] = [picked[j], picked[i]];
+  }
+
+  return picked;
+}
+
+/** All quiz slugs in display order. Schnellcheck sits last so editorial
+ *  modules remain the primary entry points. */
 export const QUIZ_SLUGS = [
   "quiz-medizin",
   "quiz-risiken",
   "quiz-stimmung",
   "quiz-gesellschaft",
   "quiz-gefaehrlichkeit",
+  "quiz-schnellcheck",
 ] as const;
