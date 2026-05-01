@@ -7,7 +7,7 @@
  *
  * Tags:
  *   {% factsheet-link id="m22" /%}
- *     → inline pill linking to /zahlen-und-fakten/<slug>
+ *     → inline pill linking to /daten-explorer/<slug>
  *   {% data-callout label="… der Volljährigen" value="10,0 %" /%}
  *     → big-number callout for inline statistics
  *   {% top-myths-bars groupA="minors" topN=5 /%}
@@ -43,7 +43,7 @@ const factsheetLink: Schema = {
       {
         class: "faq-inline-myth",
         "data-faq-myth": id,
-        href: `/zahlen-und-fakten/?myth=${id}`,
+        href: `/daten-explorer/?myth=${id}`,
       },
       [label],
     );

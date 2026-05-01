@@ -5,3 +5,28 @@
 [build.environment]
   NODE_VERSION = "22"
   SECRETS_SCAN_OMIT_KEYS = "SITE_PASSWORD,KEYSTATIC_GITHUB_CLIENT_ID,KEYSTATIC_GITHUB_CLIENT_SECRET,KEYSTATIC_SECRET"
+
+# ---------------------------------------------------------------------------
+# Stage 5 of the Daten-Explorer refactor — `/zahlen-und-fakten/*` renamed
+# to `/daten-explorer/*`. Belt-and-braces with the edge middleware in
+# `src/middleware.ts`: middleware handles the request flow, these rules
+# cover any path that bypasses it (static asset prefetch, CDN edge cache).
+# ---------------------------------------------------------------------------
+
+[[redirects]]
+  from = "/zahlen-und-fakten"
+  to = "/daten-explorer/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/zahlen-und-fakten/daten/*"
+  to = "/daten-explorer/daten/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/zahlen-und-fakten/*"
+  to = "/daten-explorer/:splat"
+  status = 301
+  force = true

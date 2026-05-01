@@ -28,10 +28,12 @@ interface Props {
   categories: Category[];
 }
 
+// Canonical verdict labels (in sync with translations.ts verdict.*).
+// OverviewView is a legacy view but the labels still surface in tooltips.
 const VERDICT_LABELS: Record<string, string> = {
-  richtig: 'Fakt',
-  eher_richtig: 'Eher Fakt',
-  eher_falsch: 'Eher Falsch',
+  richtig: 'Richtig',
+  eher_richtig: 'Eher richtig',
+  eher_falsch: 'Eher falsch',
   falsch: 'Falsch',
   no_classification: 'Keine Aussage',
 };

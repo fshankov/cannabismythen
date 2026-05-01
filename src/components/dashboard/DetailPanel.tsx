@@ -114,7 +114,7 @@ export default function DetailPanel({ myth, metrics, groups, state, onClose, myt
         {factsheetSlug && (
           <div className="detail-section" style={{ marginTop: 16 }}>
             <a
-              href={`/zahlen-und-fakten/${factsheetSlug}/`}
+              href={`/daten-explorer/${factsheetSlug}/`}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',

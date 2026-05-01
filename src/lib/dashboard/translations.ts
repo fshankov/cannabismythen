@@ -138,12 +138,14 @@ const translations = {
   'sources_strips.action.showChildren': { de: 'Unterkategorien zeigen', en: 'Show subcategories' },
   'sources_strips.action.gotoParent': { de: 'Zum Hauptthema', en: 'Go to parent' },
 
-  // Verdict tags
+  // Verdict tags — canonical labels matching the report's authoritative wording
+  // (klassifikation.mdoc). Keep in sync with quiz `answer.*` and `classification.*`
+  // strings in src/components/quiz/i18n.ts.
   'verdict.all': { de: 'Alle Mythen', en: 'All Myths' },
-  'verdict.richtig': { de: 'Fakt', en: 'Fact' },
-  'verdict.eher_richtig': { de: 'Eher Fakt', en: 'Tends to be Fact' },
-  'verdict.eher_falsch': { de: 'Eher Falsch', en: 'Tends to be False' },
-  'verdict.falsch': { de: 'Falsch', en: 'False' },
+  'verdict.richtig': { de: 'Richtig', en: 'Correct' },
+  'verdict.eher_richtig': { de: 'Eher richtig', en: 'Tends to be correct' },
+  'verdict.eher_falsch': { de: 'Eher falsch', en: 'Tends to be incorrect' },
+  'verdict.falsch': { de: 'Falsch', en: 'Incorrect' },
   'verdict.no_classification': { de: 'Keine Aussage möglich', en: 'No classification possible' },
 
   // Utility buttons
@@ -261,6 +263,10 @@ const translations = {
     de: 'Mit den aktuellen Filtern wurden keine Mythen gefunden.',
     en: 'No myths match the current filters.',
   },
+  'filter.empty.cta': {
+    de: 'Filter zurücksetzen',
+    en: 'Reset filters',
+  },
   'export.button': { de: 'Exportieren', en: 'Export' },
   'export.title': { de: 'Daten exportieren', en: 'Export data' },
   'export.csv.title': { de: 'CSV (Tabelle)', en: 'CSV (table)' },
@@ -277,6 +283,23 @@ const translations = {
   'export.svg.desc': {
     de: 'Druckqualität, vektorbasiert.',
     en: 'Print quality, vector-based.',
+  },
+  'export.json.title': { de: 'JSON (Rohdaten)', en: 'JSON (raw data)' },
+  'export.json.desc': {
+    de: 'Strukturierte Daten für Forschung & Programme.',
+    en: 'Structured data for research and integrations.',
+  },
+  // Tabs in the OWID-style export dialog (Stage 3 of the Daten-Explorer refactor).
+  'export.tab.visualization': { de: 'Visualisierung', en: 'Visualization' },
+  'export.tab.data': { de: 'Daten', en: 'Data' },
+  // Disabled-row copy when the active tab has no chart (Tabelle).
+  'export.unavailable.table': {
+    de: 'Tabellenansicht hat keine Visualisierung — wechsle zu Balken, Streifen oder Informationsquellen, um Bilder zu exportieren.',
+    en: 'The table view has no visualization — switch to Bars, Strips, or Information Sources to export images.',
+  },
+  'export.preview.label': {
+    de: 'Vorschau der aktuellen Visualisierung',
+    en: 'Preview of the current visualization',
   },
   'rundgang.label': { de: 'Rundgang', en: 'Tour' },
   'verdict.legend.title': { de: 'Wissenschaftliches Urteil', en: 'Scientific verdict' },

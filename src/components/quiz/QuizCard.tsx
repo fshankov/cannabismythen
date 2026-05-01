@@ -338,8 +338,12 @@ export default function QuizCard({
                 </div>
 
                 {/* 2 — The myth-line: "Der Mythos „X" ist Y." with the verdict
-                    word bolded. */}
-                <p className="quiz-card__myth-line">
+                    word bolded. The `statement--{verdict}` class applies the
+                    subtle verdict tint that's used across the site (factsheet
+                    H1, FaktenCard title, Streifen card statement). */}
+                <p
+                  className={`quiz-card__myth-line statement--${myth.correctClassification}`}
+                >
                   {mythVerdictPrefix[0]}
                   <strong>{verdictPhrase}</strong>
                   {mythVerdictPrefix[1]}

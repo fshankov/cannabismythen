@@ -32,6 +32,80 @@ export function downloadFullCSV(
   downloadBlob(blob, filename);
 }
 
+/**
+ * JSON: full filtered dataset as a structured array of records, useful for
+ * researchers and integrations.
+ *
+ * Each row is one myth × group × indicator combination so the file can be
+ * loaded into pandas / R / a database without further reshaping.
+ *
+ * Stage 3 of the Daten-Explorer refactor added this so the OWID-style
+ * export dialog has a "JSON (Rohdaten)" companion to the CSV row.
+ */
+export function downloadFullJSON(
+  myths: Myth[],
+  metrics: CarmData['metrics'],
+  groupIds: GroupId[],
+  filename = 'cannabismythen-carm-daten.json',
+) {
+  const indicators: Indicator[] = [
+    'awareness',
+    'significance',
+    'correctness',
+    'prevention_significance',
+    'population_relevance',
+  ];
+  type Row = {
+    mythId: number;
+    statement_de: string;
+    category_de: string;
+    classification: string;
+    classificationLabel_de: string;
+    group: GroupId;
+    indicator: Indicator;
+    value: number | null;
+  };
+  const VERDICT_DE: Record<string, string> = {
+    richtig: 'Richtig',
+    eher_richtig: 'Eher richtig',
+    eher_falsch: 'Eher falsch',
+    falsch: 'Falsch',
+    no_classification: 'Keine Aussage möglich',
+  };
+  const rows: Row[] = [];
+  for (const m of myths) {
+    for (const g of groupIds) {
+      const metric = metrics.find(
+        (mm) => mm.myth_id === m.id && mm.group_id === g,
+      );
+      if (!metric) continue;
+      for (const ind of indicators) {
+        const v = metric[ind];
+        rows.push({
+          mythId: m.id,
+          statement_de: m.text_de,
+          category_de: m.category_de,
+          classification: m.correctness_class,
+          classificationLabel_de: VERDICT_DE[m.correctness_class] ?? '',
+          group: g,
+          indicator: ind,
+          value: typeof v === 'number' ? v : null,
+        });
+      }
+    }
+  }
+  const payload = {
+    source: SOURCE_LINE,
+    exportedAt: new Date().toISOString(),
+    rowCount: rows.length,
+    rows,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: 'application/json;charset=utf-8;',
+  });
+  downloadBlob(blob, filename);
+}
+
 interface ExportChrome {
   title: string;
   subtitle: string;
@@ -39,8 +113,10 @@ interface ExportChrome {
   legend: { color: string; label: string }[];
 }
 
+export type ChartHandle = ECharts | SVGElement;
+
 interface ChartExportOpts extends ExportChrome {
-  chart: ECharts;
+  chart: ChartHandle;
   view: string;
   indicator: Indicator;
   group: GroupId;
@@ -52,100 +128,192 @@ const SUBTITLE_HEIGHT = 20;
 const LEGEND_HEIGHT = 28;
 const SOURCE_HEIGHT = 18;
 
+/** Type guard distinguishing the ECharts instance from a raw SVGElement. */
+function isEcharts(chart: ChartHandle): chart is ECharts {
+  return (
+    typeof (chart as ECharts).getDataURL === 'function' &&
+    typeof (chart as { tagName?: string }).tagName !== 'string'
+  );
+}
+
+/**
+ * Get a PNG data URL for either an ECharts instance or a raw SVG element.
+ *
+ * The SVG path serialises the element, draws it onto an offscreen
+ * canvas via an Image, and returns a 2× pixelRatio data URL so the
+ * resulting PNG is retina-sharp.
+ */
+function chartToPngDataUrl(chart: ChartHandle): Promise<{ dataUrl: string; width: number; height: number }> {
+  if (isEcharts(chart)) {
+    const dataUrl = chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' });
+    // Echarts already accounts for pixelRatio; we still need to know the
+    // pixel dimensions so the outer canvas can size correctly.
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve({ dataUrl, width: img.width, height: img.height });
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+  }
+  // Raw SVG path (StripsView / SourcesStripsView).
+  const svgEl = chart;
+  const w = Number(svgEl.getAttribute('width')) || svgEl.clientWidth || 800;
+  const h = Number(svgEl.getAttribute('height')) || svgEl.clientHeight || 500;
+  // Clone + add xmlns so the serialised SVG is self-contained.
+  const clone = svgEl.cloneNode(true) as SVGElement;
+  if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', String(w));
+  clone.setAttribute('height', String(h));
+  const xml = new XMLSerializer().serializeToString(clone);
+  const svg64 = btoa(unescape(encodeURIComponent(xml)));
+  const svgDataUrl = `data:image/svg+xml;base64,${svg64}`;
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = w * scale;
+      canvas.height = h * scale;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas 2D context unavailable'));
+        return;
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve({
+        dataUrl: canvas.toDataURL('image/png'),
+        width: canvas.width,
+        height: canvas.height,
+      });
+    };
+    img.onerror = reject;
+    img.src = svgDataUrl;
+  });
+}
+
 /** PNG export with title, subtitle, legend, and source baked in. The chart
  *  itself is captured at 2× pixelRatio for retina screens. */
-export function downloadChartPng(opts: ChartExportOpts) {
+export async function downloadChartPng(opts: ChartExportOpts) {
   const { chart, title, subtitle, legend, view, indicator, group } = opts;
-  const dataUrl = chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' });
+  const { dataUrl, width: chartW, height: chartH } = await chartToPngDataUrl(chart);
 
   const img = new Image();
-  img.onload = () => {
-    const W = img.width;
-    const headerH = (TITLE_HEIGHT + SUBTITLE_HEIGHT) * 2; // *2 because pixelRatio is 2
-    const footerH = (LEGEND_HEIGHT + SOURCE_HEIGHT) * 2;
-    const totalW = W;
-    const totalH = headerH + img.height + footerH + CANVAS_PADDING * 4;
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
 
-    const canvas = document.createElement('canvas');
-    canvas.width = totalW;
-    canvas.height = totalH;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const W = chartW;
+  const headerH = (TITLE_HEIGHT + SUBTITLE_HEIGHT) * 2; // *2 because pixelRatio is 2
+  const footerH = (LEGEND_HEIGHT + SOURCE_HEIGHT) * 2;
+  const totalW = W;
+  const totalH = headerH + chartH + footerH + CANVAS_PADDING * 4;
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, totalW, totalH);
+  const canvas = document.createElement('canvas');
+  canvas.width = totalW;
+  canvas.height = totalH;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
 
-    // Title
-    let y = CANVAS_PADDING * 2;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, totalW, totalH);
+
+  // Title
+  let y = CANVAS_PADDING * 2;
+  ctx.fillStyle = '#1a1a2e';
+  ctx.font = 'bold 32px "Segoe UI", system-ui, sans-serif';
+  ctx.textBaseline = 'top';
+  ctx.fillText(title, CANVAS_PADDING * 2, y);
+  y += TITLE_HEIGHT * 2;
+
+  // Subtitle
+  ctx.fillStyle = '#4a5568';
+  ctx.font = '24px "Segoe UI", system-ui, sans-serif';
+  ctx.fillText(subtitle, CANVAS_PADDING * 2, y);
+  y += SUBTITLE_HEIGHT * 2 + CANVAS_PADDING;
+
+  // Chart
+  ctx.drawImage(img, 0, y);
+  y += chartH + CANVAS_PADDING;
+
+  // Legend swatches + labels
+  let lx = CANVAS_PADDING * 2;
+  ctx.font = '22px "Segoe UI", system-ui, sans-serif';
+  for (const item of legend) {
+    ctx.fillStyle = item.color;
+    ctx.fillRect(lx, y + 4, 24, 24);
     ctx.fillStyle = '#1a1a2e';
-    ctx.font = 'bold 32px "Segoe UI", system-ui, sans-serif';
-    ctx.textBaseline = 'top';
-    ctx.fillText(title, CANVAS_PADDING * 2, y);
-    y += TITLE_HEIGHT * 2;
+    const labelX = lx + 32;
+    ctx.fillText(item.label, labelX, y + 4);
+    const w = ctx.measureText(item.label).width;
+    lx = labelX + w + 32;
+  }
+  y += LEGEND_HEIGHT * 2;
 
-    // Subtitle
-    ctx.fillStyle = '#4a5568';
-    ctx.font = '24px "Segoe UI", system-ui, sans-serif';
-    ctx.fillText(subtitle, CANVAS_PADDING * 2, y);
-    y += SUBTITLE_HEIGHT * 2 + CANVAS_PADDING;
+  // Source line
+  ctx.fillStyle = '#718096';
+  ctx.font = '20px "Segoe UI", system-ui, sans-serif';
+  ctx.fillText(SOURCE_LINE, CANVAS_PADDING * 2, y);
 
-    // Chart
-    ctx.drawImage(img, 0, y);
-    y += img.height + CANVAS_PADDING;
-
-    // Legend swatches + labels
-    let lx = CANVAS_PADDING * 2;
-    ctx.font = '22px "Segoe UI", system-ui, sans-serif';
-    for (const item of legend) {
-      ctx.fillStyle = item.color;
-      ctx.fillRect(lx, y + 4, 24, 24);
-      ctx.fillStyle = '#1a1a2e';
-      const labelX = lx + 32;
-      ctx.fillText(item.label, labelX, y + 4);
-      const w = ctx.measureText(item.label).width;
-      lx = labelX + w + 32;
-    }
-    y += LEGEND_HEIGHT * 2;
-
-    // Source line
-    ctx.fillStyle = '#718096';
-    ctx.font = '20px "Segoe UI", system-ui, sans-serif';
-    ctx.fillText(SOURCE_LINE, CANVAS_PADDING * 2, y);
-
+  await new Promise<void>((resolve) => {
     canvas.toBlob((blob) => {
-      if (!blob) return;
+      if (!blob) {
+        resolve();
+        return;
+      }
       const filename = `cannabismythen-${view}-${indicator}-${group}.png`;
       downloadBlob(blob, filename);
+      resolve();
     }, 'image/png');
-  };
-  img.src = dataUrl;
+  });
+}
+
+/** Get a self-contained SVG string for either an ECharts instance or a
+ *  raw SVG element. The Streifen / Sources views render with D3, so we
+ *  serialise their live `<svg>` directly. */
+function chartToSvgString(chart: ChartHandle): { svg: string; width: number; height: number } {
+  if (isEcharts(chart)) {
+    const renderToSvg = (chart as unknown as { renderToSVGString?: () => string }).renderToSVGString;
+    const inner =
+      typeof renderToSvg === 'function'
+        ? renderToSvg.call(chart)
+        : chart.getDataURL({ type: 'svg' });
+    const innerSvg = inner.startsWith('data:')
+      ? decodeURIComponent(inner.replace(/^data:image\/svg\+xml(;base64)?,/, ''))
+      : inner;
+    const widthMatch = innerSvg.match(/width="(\d+)"/);
+    const heightMatch = innerSvg.match(/height="(\d+)"/);
+    return {
+      svg: innerSvg,
+      width: widthMatch ? Number(widthMatch[1]) : 800,
+      height: heightMatch ? Number(heightMatch[1]) : 500,
+    };
+  }
+  // Raw SVGElement — clone and ensure xmlns + dimensions are present.
+  const svgEl = chart;
+  const w = Number(svgEl.getAttribute('width')) || svgEl.clientWidth || 800;
+  const h = Number(svgEl.getAttribute('height')) || svgEl.clientHeight || 500;
+  const clone = svgEl.cloneNode(true) as SVGElement;
+  if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', String(w));
+  clone.setAttribute('height', String(h));
+  return { svg: new XMLSerializer().serializeToString(clone), width: w, height: h };
 }
 
 /** SVG export — the chart itself plus header/footer text wrapped into one SVG. */
 export function downloadChartSvg(opts: ChartExportOpts) {
   const { chart, title, subtitle, legend, view, indicator, group } = opts;
-  const renderToSvg = (chart as unknown as { renderToSVGString?: () => string }).renderToSVGString;
-  const inner =
-    typeof renderToSvg === 'function'
-      ? renderToSvg.call(chart)
-      : chart.getDataURL({ type: 'svg' });
-
-  // Wrap into an outer SVG with title / subtitle / legend / source.
-  const innerSvg = inner.startsWith('data:')
-    ? decodeURIComponent(inner.replace(/^data:image\/svg\+xml(;base64)?,/, ''))
-    : inner;
+  const { svg: innerSvg, width: innerW, height: innerH } = chartToSvgString(chart);
 
   const padding = 24;
   const titleH = 28;
   const subtitleH = 20;
   const legendH = 28;
   const sourceH = 18;
-
-  // Pull width/height from the inner svg root attributes, fall back to 800x500.
-  const widthMatch = innerSvg.match(/width="(\d+)"/);
-  const heightMatch = innerSvg.match(/height="(\d+)"/);
-  const innerW = widthMatch ? Number(widthMatch[1]) : 800;
-  const innerH = heightMatch ? Number(heightMatch[1]) : 500;
 
   const totalW = innerW;
   const totalH = padding * 4 + titleH + subtitleH + innerH + legendH + sourceH;
@@ -180,6 +348,52 @@ export function downloadChartSvg(opts: ChartExportOpts) {
   const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
   const filename = `cannabismythen-${view}-${indicator}-${group}.svg`;
   downloadBlob(blob, filename);
+}
+
+/**
+ * Generate a PNG data-URL preview thumbnail for the export dialog.
+ * Same source as downloadChartPng but without baked title / legend /
+ * source — those would be illegible at 120×80 anyway. Resolution is
+ * intentionally low (1× pixelRatio) since the thumb is rendered at
+ * roughly that size in the dialog.
+ */
+export async function chartPreviewDataUrl(chart: ChartHandle): Promise<string | null> {
+  try {
+    if (isEcharts(chart)) {
+      return chart.getDataURL({ type: 'png', pixelRatio: 1, backgroundColor: '#ffffff' });
+    }
+    const svgEl = chart;
+    const w = Number(svgEl.getAttribute('width')) || svgEl.clientWidth || 600;
+    const h = Number(svgEl.getAttribute('height')) || svgEl.clientHeight || 400;
+    const clone = svgEl.cloneNode(true) as SVGElement;
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', String(w));
+    clone.setAttribute('height', String(h));
+    const xml = new XMLSerializer().serializeToString(clone);
+    const svg64 = btoa(unescape(encodeURIComponent(xml)));
+    const svgDataUrl = `data:image/svg+xml;base64,${svg64}`;
+    return await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(null);
+          return;
+        }
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(null);
+      img.src = svgDataUrl;
+    });
+  } catch {
+    return null;
+  }
 }
 
 function escapeXml(s: string): string {

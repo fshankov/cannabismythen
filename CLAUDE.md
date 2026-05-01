@@ -110,12 +110,33 @@ export async function getStaticPaths() {
 }
 ```
 
-URLs are German and slugs are kebab-case: `/zahlen-und-fakten/`, `/haeufige-fragen/`,
+URLs are German and slugs are kebab-case: `/daten-explorer/`, `/haeufige-fragen/`,
 `/selbsttest/`, `/ueber-uns/`, `/fakten-karten/`, `/startseite/`. Don't introduce
 English route segments.
 
+### URL conventions
+
+- The dashboard route is `/daten-explorer/` (and `/daten-explorer/{slug}/` for
+  factsheet detail pages). The previous public path `/zahlen-und-fakten/` was
+  renamed in Stage 5 of the Daten-Explorer refactor and is now permanently
+  301-redirected to the new path. Three layers handle the redirect (defense
+  in depth): edge middleware in `src/middleware.ts`, page-level
+  `Astro.redirect(..., 301)` stubs at `src/pages/zahlen-und-fakten/*.astro`,
+  and `[[redirects]]` rules in `netlify.toml`.
+- The Keystatic collection name (`zahlenUndFakten`) and the on-disk content
+  folder (`src/content/zahlen-und-fakten/`) intentionally still use the
+  old slug. Per CLAUDE.md's content-path stickiness rule, only the public
+  URL moves — content paths stay so editor history + git references don't
+  reshuffle.
+- Don't introduce new code that links to `/zahlen-und-fakten/...` — use
+  `/daten-explorer/...` everywhere. The `dashboardLinkLabel()` helper in
+  `src/lib/faq.ts` keeps legacy editor entries with old URLs gracefully
+  resolving to the same German captions.
+
 `src/middleware.ts` enforces a `SITE_PASSWORD` cookie at the edge when the env var is
-set; `/login` and Keystatic's `/api/*` routes are exempt.
+set; `/login` and Keystatic's `/api/*` routes are exempt. The Stage 5
+`/zahlen-und-fakten/*` → `/daten-explorer/*` 301 redirects fire BEFORE the
+password gate so external backlinks resolve for unauthenticated traffic too.
 
 ## Component organization
 

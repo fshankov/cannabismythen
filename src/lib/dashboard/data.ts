@@ -134,9 +134,11 @@ export function buildTooltipHtml(opts: {
   const { myth, lang, groupName, indicator, value, extraLines } = opts;
   const text = getMythText(myth, lang);
   const category = getCategoryName(myth, lang);
+  // Canonical verdict labels (matches verdict.* in translations.ts and
+  // classification.* in quiz i18n). Don't reintroduce "Fakt" / "Mythos".
   const verdict = lang === 'de'
-    ? ({ richtig: 'Fakt', eher_richtig: 'Eher Fakt', eher_falsch: 'Eher Mythos', falsch: 'Mythos', no_classification: 'Keine Aussage möglich' }[myth.correctness_class])
-    : ({ richtig: 'Fact', eher_richtig: 'Tends to be Fact', eher_falsch: 'Tends to be Myth', falsch: 'Myth', no_classification: 'No classification' }[myth.correctness_class]);
+    ? ({ richtig: 'Richtig', eher_richtig: 'Eher richtig', eher_falsch: 'Eher falsch', falsch: 'Falsch', no_classification: 'Keine Aussage möglich' }[myth.correctness_class])
+    : ({ richtig: 'Correct', eher_richtig: 'Tends to be correct', eher_falsch: 'Tends to be incorrect', falsch: 'Incorrect', no_classification: 'No classification' }[myth.correctness_class]);
   const indLabel = lang === 'de'
     ? ({ awareness: 'Kenntnis', significance: 'Bedeutung', correctness: 'Richtigkeit', prevention_significance: 'Prävention', population_relevance: 'Bev. Relevanz' }[indicator])
     : ({ awareness: 'Awareness', significance: 'Significance', correctness: 'Correctness', prevention_significance: 'Prevention', population_relevance: 'Pop. Relevance' }[indicator]);

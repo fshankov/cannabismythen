@@ -1,3 +1,4 @@
+import { MapPin } from 'lucide-react';
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 
@@ -27,9 +28,14 @@ interface Props {
   view: ViewTab;
   lang: Lang;
   onChange: (v: ViewTab) => void;
+  /** Click handler for the Rundgang chip on the right of the tabs row.
+   *  Stage 1 of the Daten-Explorer refactor moved the Rundgang trigger
+   *  out of the floating <Fab> and the StickyToolbar's end slot into
+   *  here so all tab-level affordances live in one row. */
+  onRundgang?: () => void;
 }
 
-export default function ViewTabs({ view, lang, onChange }: Props) {
+export default function ViewTabs({ view, lang, onChange, onRundgang }: Props) {
   return (
     <nav className="tabs-bar" role="tablist" aria-label="Visualization type">
       {TABS.map((tab) => {
@@ -48,6 +54,19 @@ export default function ViewTabs({ view, lang, onChange }: Props) {
           </button>
         );
       })}
+      {onRundgang && (
+        <button
+          type="button"
+          className="tabs-bar__rundgang"
+          onClick={onRundgang}
+          aria-label={t('rundgang.label', lang)}
+        >
+          <MapPin size={14} strokeWidth={2} aria-hidden="true" />
+          <span className="tabs-bar__rundgang-label">
+            {t('rundgang.label', lang)}
+          </span>
+        </button>
+      )}
     </nav>
   );
 }

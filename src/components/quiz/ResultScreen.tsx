@@ -196,7 +196,7 @@ export default function ResultScreen({
         >
           {t("ui.restartQuiz")}
         </button>
-        <a href="/zahlen-und-fakten/" className="quiz-modal__nav-link">
+        <a href="/daten-explorer/" className="quiz-modal__nav-link">
           {t("ui.exploreData")} →
         </a>
         <a href="/quiz/" className="quiz-modal__nav-link">

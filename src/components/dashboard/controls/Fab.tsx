@@ -1,26 +1,10 @@
-import type { ReactNode } from 'react';
-
-interface Props {
-  onClick: () => void;
-  /** Accessible label and visible text on hover. */
-  label: string;
-  icon: ReactNode;
-}
-
-/** Mobile-only floating action button anchored to the bottom-right, above
- *  the bottom tab bar. Hidden on desktop via CSS (≥1024px). */
-export default function Fab({ onClick, label, icon }: Props) {
-  return (
-    <button
-      type="button"
-      className="carm-fab"
-      onClick={onClick}
-      aria-label={label}
-    >
-      <span className="carm-fab__icon" aria-hidden="true">
-        {icon}
-      </span>
-      <span className="carm-fab__label">{label}</span>
-    </button>
-  );
-}
+/**
+ * @deprecated Removed in Stage 1 of the Daten-Explorer refactor.
+ *
+ * The Rundgang trigger now lives in the tabs row (right end of
+ * `.tabs-bar`, see `src/components/dashboard/ViewTabs.tsx`). This
+ * file is intentionally empty so any stray import surfaces as a
+ * TypeScript error at build time. Delete the file in a follow-up
+ * cleanup commit.
+ */
+export {};

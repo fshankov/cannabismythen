@@ -25,12 +25,12 @@
  *   - Tap anywhere outside dot/card → deselect.
  */
 
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from 'react';
 import * as d3 from 'd3';
 import {
   Eye, TrendingUp, Target, Shield, Globe,
   Users, Baby, Cannabis, GraduationCap, UsersRound,
-  Layers,
+  Layers, Download,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type {
@@ -39,8 +39,13 @@ import type {
 } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, getMythText } from '../../../lib/dashboard/data';
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
-import { t } from '../../../lib/dashboard/translations';
+import { t, type TranslationKey } from '../../../lib/dashboard/translations';
 import InfoTooltip from '../InfoTooltip';
+import VerdictArrow from '../../shared/VerdictArrow';
+import PivotToggle from '../controls/PivotToggle';
+import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
+import ToolbarRow from '../controls/ToolbarRow';
+import type { CorrectnessClass } from '../../../lib/dashboard/types';
 import type { MythContentEntry } from '../FactsheetPanel';
 
 interface Props {
@@ -60,6 +65,10 @@ interface Props {
   /** Pre-rendered factsheet HTML, keyed by myth id. Used here to pull the
    *  fakten-karten-style summary for the in-view myth card. */
   mythContentMap?: Record<number, MythContentEntry>;
+  /** Stage 3 — open the shared ExportDrawer. The chip lives in this
+   *  view's ToolbarRow `actions` slot so every chart-bearing tab
+   *  surfaces the same Exportieren control. */
+  onOpenExport?: () => void;
 }
 
 const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
@@ -148,11 +157,26 @@ function formatPillValue(value: number | null, isAwareness: boolean, lang: 'de' 
   return `${value.toFixed(1)}${isAwareness ? '%' : ''}`;
 }
 
-export default function StripsView({
-  myths, metrics, groups, categories, state, update, onSelectMyth, definitions, mythContentMap,
-}: Props) {
+/** Imperative handle exposed via forwardRef so MythenExplorer's
+ *  ExportDrawer can grab the live `<svg>` for PNG / SVG export.
+ *  Stage 3 of the Daten-Explorer refactor wires this ref through every
+ *  chart-bearing tab (Balken uses the BalkenView ECharts handle, the
+ *  D3-rendered Streifen + Sources views expose their raw SVG via
+ *  this interface). */
+export interface StripsViewHandle {
+  getSvgElement: () => SVGSVGElement | null;
+}
+
+const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
+  { myths, metrics, groups, categories, state, update, onSelectMyth, definitions, mythContentMap, onOpenExport },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  useImperativeHandle(ref, () => ({
+    getSvgElement: () => svgRef.current,
+  }));
   const [width, setWidth] = useState(360);
   /** Available viewport height — drives the SVG's strip-rectangle height so
    *  the grey boxes always fill the chart area regardless of screen size. */
@@ -160,16 +184,10 @@ export default function StripsView({
   /** Hover state — separate from selection. Drives the polyline + statement label. */
   const [hoveredMythId, setHoveredMythId] = useState<number | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
-  /** Dropdown open state for the top selector ('Bevölkerungsgruppe wählen'). */
-  const [topPickerOpen, setTopPickerOpen] = useState(false);
-  const topPickerRef = useRef<HTMLDivElement>(null);
-  /** Which menu item (by id) currently has its inline definition expanded.
-   *  null means no row is expanded. Tapping the same row's 'i' again
-   *  collapses; tapping a different row's 'i' switches. */
-  const [topExpandedInfo, setTopExpandedInfo] = useState<string | null>(null);
-  /** Dropdown open state for the bottom Mythos-Kategorie selector. */
-  const [catPickerOpen, setCatPickerOpen] = useState(false);
-  const catPickerRef = useRef<HTMLDivElement>(null);
+  // Open/close + inline-definition expansion is encapsulated by
+  // <DataPicker> in Stage 2 of the Daten-Explorer refactor — we no
+  // longer need topPickerOpen / catPickerOpen / topExpandedInfo /
+  // ref<HTMLDivElement> here.
 
   const selectedMythId = state.selectedMythId;
   const mode: StripsMode = state.stripsMode;
@@ -195,43 +213,8 @@ export default function StripsView({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Close the top dropdown on outside click + Escape.
-  useEffect(() => {
-    if (!topPickerOpen) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (topPickerRef.current && !topPickerRef.current.contains(e.target as Node)) {
-        setTopPickerOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setTopPickerOpen(false);
-    };
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [topPickerOpen]);
-
-  // Same for the bottom categories dropdown.
-  useEffect(() => {
-    if (!catPickerOpen) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (catPickerRef.current && !catPickerRef.current.contains(e.target as Node)) {
-        setCatPickerOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setCatPickerOpen(false);
-    };
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [catPickerOpen]);
+  // (Outside-click + Escape close handlers were moved into <DataPicker>
+  //  during Stage 2 — each picker manages its own state internally.)
 
   const isMobile = width < 640;
   const isNarrow = width < 480;
@@ -515,7 +498,12 @@ export default function StripsView({
     ? (selectedMythContent?.title || getMythText(selectedMyth, state.lang))
     : '';
   const cardSummary = selectedMyth ? extractCardSummary(selectedMythContent, selectedMyth, state.lang) : '';
-  const cardClassification = selectedMythContent?.classificationLabel || selectedMyth?.classification_de || '';
+  // Canonical verdict label (matches verdict.* in translations.ts) — the
+  // conversational classificationLabel from `.mdoc` is intentionally bypassed
+  // so the Streifen card matches the rest of the verdict surfaces.
+  const cardClassification = selectedMyth
+    ? t(`verdict.${selectedMyth.correctness_class}` as TranslationKey, state.lang)
+    : '';
 
   return (
     <div className="strips-v3" ref={containerRef}>
@@ -524,204 +512,122 @@ export default function StripsView({
             'Vergleichen nach:' toggle below — same pattern as the
             Informationsquellen tab's 'Spalten:' switch. */}
         <div className="strips-grid3__content" ref={contentRef}>
-          {/* Two-row top controls.
-              Row 1: pivot toggle alone (no caption — the [Indikatoren | Gruppen]
-              labels are self-explanatory).
-              Row 2: 'Wert für: …' dropdown + 'Mythos-Kategorie: …' dropdown
-              side-by-side. On mobile (<720px) captions hide so triggers fit. */}
-          <div className="strips-controls-row strips-controls-row--toggle">
-            <div className="strips-pivot-toggle" role="tablist" aria-label={t('strips.compare.label', state.lang)}>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={mode === 'indicator'}
-                className={`strips-pivot-toggle__btn ${mode === 'indicator' ? 'active' : ''}`}
-                onClick={() => update('stripsMode', 'indicator')}
-              >
-                {t('strips.mode.indicator', state.lang)}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={mode === 'group'}
-                className={`strips-pivot-toggle__btn ${mode === 'group' ? 'active' : ''}`}
-                onClick={() => update('stripsMode', 'group')}
-              >
-                {t('strips.mode.group', state.lang)}
-              </button>
-            </div>
-          </div>
+          {/* Stage 2 — toolbar via shared primitives.
+              Row 1: <PivotToggle> alone.
+              Row 2: <DataPicker> "Wert für" + <DataPicker> "Mythos-Kategorie".
+              Behaviour mirrors the previous .strips-controls-row markup;
+              styling lives in .carm-pivot-toggle / .carm-picker /
+              .carm-toolbar-row in dashboard.css. */}
+          <ToolbarRow
+            aria-label={t('strips.compare.label', state.lang)}
+            pivot={
+              <PivotToggle<typeof mode>
+                aria-label={t('strips.compare.label', state.lang)}
+                value={mode}
+                onChange={(v) => update('stripsMode', v)}
+                options={[
+                  { value: 'indicator', label: t('strips.mode.indicator', state.lang) },
+                  { value: 'group', label: t('strips.mode.group', state.lang) },
+                ]}
+              />
+            }
+          />
 
-          <div className="strips-controls-row strips-controls-row--dropdowns">
-
-          {/* Top selector — single dropdown trigger that doubles as label.
-              No inline definition, no separate tooltip popover. Each menu
-              item has an 'i' that expands the definition INLINE below the
-              row (inside the same dropdown). */}
           {(() => {
-            const activeItem = topRow.items.find((it) => it.active) || topRow.items[0];
-            // Unified caption — stable regardless of pivot. Reads as
-            // "Wert für: [Erwachsene]" when pivot=Indikatoren, or
-            // "Wert für: [Kenntnis %]" when pivot=Gruppen.
-            const pickerLabel = t('strips.value.label', state.lang);
-            return (
-              <div className="strips-picker" ref={topPickerRef}>
-                <span className="strips-picker__caption">{pickerLabel}:</span>
-                <button
-                  type="button"
-                  className="strips-picker__trigger"
-                  aria-haspopup="listbox"
-                  aria-expanded={topPickerOpen}
-                  onClick={() => {
-                    setTopPickerOpen((v) => !v);
-                    setTopExpandedInfo(null);
-                  }}
-                >
-                  {activeItem?.emoji ? (
-                    <span className="strips-picker__emoji" aria-hidden="true">{activeItem.emoji}</span>
-                  ) : activeItem?.Icon ? (
-                    <activeItem.Icon size={15} strokeWidth={1.75} aria-hidden="true" />
-                  ) : null}
-                  <span className="strips-picker__current">{activeItem?.label}</span>
-                  <span className="strips-picker__chevron" aria-hidden="true">▾</span>
-                </button>
-                {topPickerOpen && (
-                  <div className="strips-picker__menu" role="listbox">
-                    {topRow.items.map((item) => {
-                      const expanded = topExpandedInfo === item.id;
-                      return (
-                        <div key={item.id} className={`strips-picker__row ${expanded ? 'expanded' : ''}`}>
-                          <div className="strips-picker__row-line">
-                            <button
-                              type="button"
-                              role="option"
-                              aria-selected={item.active}
-                              className={`strips-picker__item-btn ${item.active ? 'active' : ''}`}
-                              onClick={() => {
-                                item.onActivate();
-                                setTopPickerOpen(false);
-                                setTopExpandedInfo(null);
-                              }}
-                            >
-                              {item.emoji ? (
-                                <span className="strips-picker__emoji" aria-hidden="true">{item.emoji}</span>
-                              ) : item.Icon ? (
-                                <item.Icon size={15} strokeWidth={1.75} aria-hidden="true" />
-                              ) : null}
-                              <span className="strips-picker__item-label">{item.label}</span>
-                            </button>
-                            {item.defLabel && item.defText && (
-                              <button
-                                type="button"
-                                className={`strips-picker__row-info ${expanded ? 'active' : ''}`}
-                                aria-expanded={expanded}
-                                aria-label={state.lang === 'de' ? 'Definition anzeigen' : 'Show definition'}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setTopExpandedInfo(expanded ? null : item.id);
-                                }}
-                              >
-                                <span aria-hidden="true">i</span>
-                              </button>
-                            )}
-                          </div>
-                          {expanded && item.defText && (
-                            <div className="strips-picker__row-def">
-                              <p className="strips-picker__row-def-title">{item.defLabel}</p>
-                              {item.sampleSize && (
-                                <p className="strips-picker__row-def-sample">{item.sampleSize}</p>
-                              )}
-                              <p className="strips-picker__row-def-text">{item.defText}</p>
-                              {item.scale && (
-                                <p className="strips-picker__row-def-scale">
-                                  {state.lang === 'de' ? 'Skala' : 'Scale'}: {item.scale}
-                                </p>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+            const activeId = topRow.items.find((it) => it.active)?.id
+              ?? topRow.items[0]?.id
+              ?? '';
+            const valuePickerOptions: DataPickerOption<string>[] = topRow.items.map(
+              (item) => ({
+                value: item.id,
+                label: item.label,
+                Icon: item.Icon,
+                emoji: item.emoji,
+                definition:
+                  item.defLabel && item.defText
+                    ? {
+                        title: item.defLabel,
+                        text: item.defText,
+                        scale: item.scale,
+                        sampleSize: item.sampleSize,
+                      }
+                    : undefined,
+              }),
             );
-          })()}
 
-          {/* Mythos-Kategorie dropdown — same row as the controls above. */}
-          {(() => {
-            const isAll = state.categoryIds.length === 0;
-            const activeCat = !isAll
-              ? categories.find((c) => c.id === state.categoryIds[0]) ?? null
-              : null;
-            const activeLabel = activeCat
-              ? (state.lang === 'de' ? activeCat.name_de : activeCat.name_en)
-              : (state.lang === 'de' ? 'Alle Mythen' : 'All myths');
+            // Categories use number ids in the data model; the DataPicker
+            // is generic over `string`, so we stringify at the boundary
+            // and parse back in onChange.
+            const isAllCats = state.categoryIds.length === 0;
+            const allMythsLabel =
+              state.lang === 'de' ? 'Alle Mythen' : 'All myths';
+            const categoryOptions: DataPickerOption<string>[] = [
+              { value: '__all__', label: allMythsLabel, Icon: Layers },
+              ...categories.map((cat) => ({
+                value: String(cat.id),
+                label: state.lang === 'de' ? cat.name_de : cat.name_en,
+              })),
+            ];
+            const categoryValue = isAllCats
+              ? '__all__'
+              : String(state.categoryIds[0]);
+
             return (
-              <div className="strips-picker" ref={catPickerRef}>
-                <span className="strips-picker__caption">
-                  {state.lang === 'de' ? 'Mythos-Kategorie' : 'Myth category'}:
-                </span>
-                <button
-                  type="button"
-                  className="strips-picker__trigger"
-                  aria-haspopup="listbox"
-                  aria-expanded={catPickerOpen}
-                  onClick={() => setCatPickerOpen((v) => !v)}
-                >
-                  <Layers size={15} strokeWidth={1.75} aria-hidden="true" />
-                  <span className="strips-picker__current">{activeLabel}</span>
-                  <span className="strips-picker__chevron" aria-hidden="true">▾</span>
-                </button>
-                {catPickerOpen && (
-                  <div className="strips-picker__menu" role="listbox">
+              <ToolbarRow
+                aria-label={t('strips.value.label', state.lang)}
+                pickers={[
+                  <DataPicker<string>
+                    key="value"
+                    caption={t('strips.value.label', state.lang)}
+                    value={activeId}
+                    options={valuePickerOptions}
+                    onChange={(next) => {
+                      const item = topRow.items.find((it) => it.id === next);
+                      item?.onActivate();
+                    }}
+                    aria-label={t('strips.value.label', state.lang)}
+                    lang={state.lang}
+                  />,
+                  <DataPicker<string>
+                    key="category"
+                    caption={
+                      state.lang === 'de' ? 'Mythos-Kategorie' : 'Myth category'
+                    }
+                    value={categoryValue}
+                    options={categoryOptions}
+                    onChange={(next) => {
+                      if (next === '__all__') update('categoryIds', []);
+                      else update('categoryIds', [Number(next)]);
+                    }}
+                    aria-label={
+                      state.lang === 'de' ? 'Mythos-Kategorie' : 'Myth category'
+                    }
+                    lang={state.lang}
+                  />,
+                ]}
+                actions={
+                  onOpenExport ? (
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={isAll}
-                      className={`strips-picker__item-btn ${isAll ? 'active' : ''}`}
-                      onClick={() => {
-                        update('categoryIds', []);
-                        setCatPickerOpen(false);
-                      }}
+                      className="carm-btn carm-btn--ghost"
+                      onClick={onOpenExport}
+                      aria-label={t('export.button', state.lang)}
                     >
-                      <Layers size={15} strokeWidth={1.75} aria-hidden="true" />
-                      <span className="strips-picker__item-label">
-                        {state.lang === 'de' ? 'Alle Mythen' : 'All myths'}
-                      </span>
+                      <Download size={14} strokeWidth={2} aria-hidden="true" />
+                      {t('export.button', state.lang)}
                     </button>
-                    {categories.map((cat) => {
-                      const isSel = !isAll && state.categoryIds[0] === cat.id;
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          role="option"
-                          aria-selected={isSel}
-                          className={`strips-picker__item-btn ${isSel ? 'active' : ''}`}
-                          onClick={() => {
-                            update('categoryIds', [cat.id]);
-                            setCatPickerOpen(false);
-                          }}
-                        >
-                          <span className="strips-picker__item-label">
-                            {state.lang === 'de' ? cat.name_de : cat.name_en}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                  ) : undefined
+                }
+              />
             );
           })()}
-          </div> {/* /.strips-controls-row */}
 
           {/* SVG chart wrapper — relative-positioned so HTML strip headers
               can be absolutely positioned over the in-SVG header area for
               each column, giving us a single unified box per strip. */}
           <div className="strips-svg-wrap" style={{ position: 'relative', width }}>
           <svg
+            ref={svgRef}
             className="strips-svg-v3"
             width={width}
             height={height}
@@ -1015,11 +921,19 @@ export default function StripsView({
               </button>
               <div className={`strips-myth-card__bar classification--${selectedMyth.correctness_class}`}>
                 <span className="strips-myth-card__bar-icon" aria-hidden="true">
-                  {classificationIcon(selectedMyth.correctness_class)}
+                  <VerdictArrow
+                    verdict={selectedMyth.correctness_class as CorrectnessClass}
+                    size={14}
+                    strokeWidth={2.5}
+                  />
                 </span>
                 <span className="strips-myth-card__bar-label">{cardClassification}</span>
               </div>
-              <p className="strips-myth-card__statement">{cardTitle}</p>
+              <p
+                className={`strips-myth-card__statement statement--${selectedMyth.correctness_class}`}
+              >
+                {cardTitle}
+              </p>
               {cardSummary && <p className="strips-myth-card__summary">{cardSummary}</p>}
               <div className="strips-myth-card__actions">
                 <button
@@ -1040,15 +954,14 @@ export default function StripsView({
       </div>
     </div>
   );
-}
+});
+
+export default StripsView;
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
 
-function classificationIcon(cls: string): string {
-  if (cls === 'richtig' || cls === 'eher_richtig') return '✓';
-  if (cls === 'falsch' || cls === 'eher_falsch') return '✗';
-  return '~';
-}
+// (`classificationIcon` was removed in Stage 1 of the Daten-Explorer
+//  refactor — the strips myth card now renders <VerdictArrow /> inline.)
 
 /**
  * Pull the cardSummary (fakten-karten short text) from the rendered factsheet HTML.

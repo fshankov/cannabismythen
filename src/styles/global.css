@@ -22,19 +22,34 @@
   --color-accent-light: #e8f5ef;
 
   /* Classification verdicts — Unified Emerald/Lime/Amber/Rose palette
-     (Decision A: deuteranopia-safe, avoids traffic-light associations) */
-  --color-richtig: #047857;          /* Emerald-700 */
-  --color-eher-richtig: #4d7c0f;     /* Lime-700 */
-  --color-eher-falsch: #b45309;      /* Amber-700 */
-  --color-falsch: #be123c;           /* Rose-700 */
-  --color-keine-aussage: #6b7280;    /* Gray-500 */
+     (Decision A: deuteranopia-safe, avoids traffic-light associations).
+     The canonical token names use the `--classification-` prefix; the
+     `--color-…` names below are kept as legacy aliases until the rest
+     of the codebase is migrated. ALL hex values must live here — no
+     literal hex anywhere else. */
+  --classification-richtig: #047857;          /* Emerald-700 */
+  --classification-eher-richtig: #4d7c0f;     /* Lime-700 */
+  --classification-eher-falsch: #b45309;      /* Amber-700 */
+  --classification-falsch: #be123c;           /* Rose-700 */
+  --classification-keine-aussage: #6b7280;    /* Gray-500 */
+  --classification-richtig-bg: #ecfdf5;       /* Emerald-50 */
+  --classification-eher-richtig-bg: #f7fee7;  /* Lime-50 */
+  --classification-eher-falsch-bg: #fffbeb;   /* Amber-50 */
+  --classification-falsch-bg: #fff1f2;        /* Rose-50 */
+  --classification-keine-aussage-bg: #f3f4f6; /* Gray-100 */
 
-  /* Classification backgrounds */
-  --color-richtig-bg: #ecfdf5;       /* Emerald-50 */
-  --color-eher-richtig-bg: #f7fee7;  /* Lime-50 */
-  --color-eher-falsch-bg: #fffbeb;   /* Amber-50 */
-  --color-falsch-bg: #fff1f2;        /* Rose-50 */
-  --color-keine-aussage-bg: #f3f4f6; /* Gray-100 */
+  /* Legacy aliases — kept so existing `var(--color-richtig)` references
+     keep working. Prefer the `--classification-…` tokens in new code. */
+  --color-richtig: var(--classification-richtig);
+  --color-eher-richtig: var(--classification-eher-richtig);
+  --color-eher-falsch: var(--classification-eher-falsch);
+  --color-falsch: var(--classification-falsch);
+  --color-keine-aussage: var(--classification-keine-aussage);
+  --color-richtig-bg: var(--classification-richtig-bg);
+  --color-eher-richtig-bg: var(--classification-eher-richtig-bg);
+  --color-eher-falsch-bg: var(--classification-eher-falsch-bg);
+  --color-falsch-bg: var(--classification-falsch-bg);
+  --color-keine-aussage-bg: var(--classification-keine-aussage-bg);
 
   /* Additional missing tokens */
   --color-bg-subtle: #eeeee8;        /* Section dividers, alternate rows */
@@ -462,6 +477,23 @@ a.version-card:hover {
   background: var(--color-keine-aussage-bg);
   color: var(--color-keine-aussage);
 }
+
+
+/* ── Myth-statement verdict tint ─────────────────────────────
+   Subtle text-color tint applied to the *statement* itself — the
+   factsheet H1, the Streifen / FaktenCard / Quiz card titles. Pairs
+   with the verdict arrow + canonical label so the statement reads
+   the same on every surface. NEVER strikethrough or background-fill
+   the statement: the visual treatment is intentionally subtle. */
+
+.statement--richtig          { color: var(--classification-richtig); }
+.statement--eher-richtig,
+.statement--eher_richtig     { color: var(--classification-eher-richtig); }
+.statement--eher-falsch,
+.statement--eher_falsch      { color: var(--classification-eher-falsch); }
+.statement--falsch           { color: var(--classification-falsch); }
+.statement--no-classification,
+.statement--no_classification { color: var(--color-text); }
 
 
 /* ── Version Label (Scrollytelling) ─────────────────────────── */

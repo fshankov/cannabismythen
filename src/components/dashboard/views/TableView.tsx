@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Eye, TrendingUp, Target, Shield } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { Myth, Metric, AppState, Indicator, VerdictFilter, CorrectnessClass } from '../../../lib/dashboard/types';
+import type { Myth, Metric, AppState, Indicator, CorrectnessClass } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, formatValue } from '../../../lib/dashboard/data';
 import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
 import { t } from '../../../lib/dashboard/translations';
@@ -10,6 +10,10 @@ interface Props {
   myths: Myth[];
   metrics: Metric[];
   state: AppState;
+  /** Kept for parent-API compatibility; the verdict-filter dropdown
+   *  inside this component was removed in Stage 2 of the
+   *  Daten-Explorer refactor — the filter now lives in the shared
+   *  toolbar above the chart. */
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
   onSelectMyth: (id: number) => void;
 }
@@ -24,16 +28,14 @@ const INDICATOR_COLS: { key: Indicator; Icon: LucideIcon }[] = [
   { key: 'prevention_significance', Icon: Shield },
 ];
 
-const VERDICT_OPTIONS: { key: VerdictFilter; tKey: string }[] = [
-  { key: 'all', tKey: 'verdict.all' },
-  { key: 'richtig', tKey: 'verdict.richtig' },
-  { key: 'eher_richtig', tKey: 'verdict.eher_richtig' },
-  { key: 'eher_falsch', tKey: 'verdict.eher_falsch' },
-  { key: 'falsch', tKey: 'verdict.falsch' },
-  { key: 'no_classification', tKey: 'verdict.no_classification' },
-];
+// VERDICT_OPTIONS lived here for the inline header `<select>` — moved
+// into MythenExplorer's <ToolbarRow> in Stage 2.
 
 export default function TableView({ myths, metrics, state, update, onSelectMyth }: Props) {
+  // `update` is intentionally part of the prop signature even though
+  // no body call uses it — Stage 4 will reuse the prop for inline
+  // sort-state mutations.
+  void update;
   const [sortKey, setSortKey] = useState<SortKey>('verdict');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const groupId = state.groupIds[0] || 'adults';
@@ -91,21 +93,15 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
         <thead>
           <tr>
             <th style={{ minWidth: 160 }}>
-              <div className="myth-header-row">
-                <span className="myth-header-label" onClick={() => toggleSort('myth')}>
-                  {t('table.myth', state.lang)} {renderSortArrow('myth')}
-                </span>
-                <select
-                  className="verdict-header-select"
-                  value={state.verdictFilter}
-                  onChange={(e) => update('verdictFilter', e.target.value as VerdictFilter)}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {VERDICT_OPTIONS.map((v) => (
-                    <option key={v.key} value={v.key}>{t(v.tKey as any, state.lang)}</option>
-                  ))}
-                </select>
-              </div>
+              {/* Stage 2 — verdict filter moved out of the table header
+                  into the shared <ToolbarRow> above. The header is now
+                  just a sort affordance. */}
+              <span
+                className="myth-header-label"
+                onClick={() => toggleSort('myth')}
+              >
+                {t('table.myth', state.lang)} {renderSortArrow('myth')}
+              </span>
             </th>
             {INDICATOR_COLS.map((col) => (
               <th

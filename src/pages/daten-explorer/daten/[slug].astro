@@ -1,0 +1,28 @@
+---
+export const prerender = true;
+
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader } from "@lib/content";
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.zahlenUndFaktenDashboard.list();
+  const paths = [];
+
+  for (const slug of slugs) {
+    const entry = await reader.collections.zahlenUndFaktenDashboard.read(slug);
+    if (entry && entry.status === "published") {
+      paths.push({ params: { slug } });
+    }
+  }
+
+  return paths;
+}
+---
+
+<BaseLayout title="Weiterleitung" description="Diese Seite wurde in den interaktiven Daten-Explorer integriert.">
+  <p>
+    Diese Seite wurde in den neuen interaktiven
+    <a href="/daten-explorer/">Daten-Explorer</a> integriert.
+  </p>
+  <script is:inline>window.location.replace('/daten-explorer/');</script>
+</BaseLayout>

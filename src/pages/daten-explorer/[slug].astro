@@ -1,0 +1,156 @@
+---
+export const prerender = true;
+
+import Markdoc from "@markdoc/markdoc";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader } from "@lib/content";
+import { getQuestionsForMyth, getAudience } from "@lib/faq";
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.zahlenUndFakten.list();
+  const paths = [];
+
+  for (const slug of slugs) {
+    const entry = await reader.collections.zahlenUndFakten.read(slug);
+    if (entry && entry.status === "published") {
+      paths.push({ params: { slug } });
+    }
+  }
+
+  return paths;
+}
+
+const { slug } = Astro.params;
+const entry = await reader.collections.zahlenUndFakten.read(slug!);
+
+if (!entry || entry.status !== "published") {
+  return Astro.redirect("/daten-explorer/");
+}
+
+const { content, internalNotes, ...meta } = entry;
+
+/**
+ * Canonical verdict labels — keep in sync with `verdict.*` keys in
+ * `src/lib/dashboard/translations.ts` and `classification.*` in
+ * `src/components/quiz/i18n.ts`. The conversational
+ * `meta.classificationLabel` from each `.mdoc` (e.g. "Das stimmt nicht.")
+ * is intentionally bypassed so the factsheet header matches every other
+ * verdict surface on the site (Stage 1 of the Daten-Explorer refactor).
+ */
+const VERDICT_LABEL: Record<string, string> = {
+  richtig: 'Richtig',
+  eher_richtig: 'Eher richtig',
+  eher_falsch: 'Eher falsch',
+  falsch: 'Falsch',
+  no_classification: 'Keine Aussage möglich',
+};
+const verdictLabel =
+  VERDICT_LABEL[meta.classification ?? ''] ?? meta.classificationLabel ?? '';
+// Render Markdoc content: AST node → renderable tree → HTML string
+const { node } = await content();
+let html = Markdoc.renderers.html(Markdoc.transform(node));
+
+/**
+ * Decision E: Section-level <details> for Fachebene content.
+ * Wraps "Zentrale Erkenntnisse" and "Referenzen" sections in collapsible
+ * <details> elements. "Einordnung" and "Synthese" remain always visible
+ * as the Grundlagen layer.
+ */
+const FACHEBENE_HEADINGS = ['Zentrale Erkenntnisse', 'Referenzen'];
+
+for (const heading of FACHEBENE_HEADINGS) {
+  // Match <h2>Heading</h2> and everything after it until the next <h2> or end
+  const regex = new RegExp(
+    `(<h2[^>]*>\\s*${heading}\\s*</h2>)([\\s\\S]*?)(?=<h2[^>]*>|$)`,
+    'i'
+  );
+  html = html.replace(regex, (_, h2Tag, body) => {
+    return `<details class="fachebene-section"><summary class="fachebene-summary">${heading}</summary><div class="fachebene-content">${body}</div></details>`;
+  });
+}
+
+// FAQ backlink rail — find any FAQ question whose primaryMyth or relatedMyths
+// references this myth, then group by audience for display.
+const faqMatches = meta.mythId ? await getQuestionsForMyth(meta.mythId) : [];
+type FaqBacklink = {
+  audienceId: string;
+  audienceLabel: string;
+  audienceColor: string;
+  audienceEmoji: string;
+  url: string;
+  questionLong: string;
+};
+const faqBacklinks: FaqBacklink[] = [];
+const seen = new Set<string>();
+for (const q of faqMatches) {
+  for (const audId of q.audiences) {
+    const key = `${audId}::${q.slug}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const audienceMeta = await getAudience(audId);
+    if (!audienceMeta) continue;
+    faqBacklinks.push({
+      audienceId: audId,
+      audienceLabel: audienceMeta.cardLabel,
+      audienceColor: audienceMeta.accentColor,
+      audienceEmoji: audienceMeta.emoji,
+      url: `/haeufige-fragen/${audId}/#faq-${q.slug}`,
+      questionLong: q.questionLong,
+    });
+  }
+}
+---
+
+<BaseLayout title={meta.title} description={meta.summary || undefined}>
+  <article class="factsheet">
+    <header>
+      <span class="myth-id">{meta.mythId}</span>
+      <h1 class={`statement--${meta.classification}`}>{meta.title}</h1>
+      <p class={`classification classification--${meta.classification}`}>
+        {verdictLabel}
+      </p>
+      {meta.tags && meta.tags.length > 0 && (
+        <div class="tags">
+          {meta.tags.map((tag: string) => (
+            <span class="tag">{tag}</span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <div class="factsheet-content" set:html={html} />
+
+    {meta.relatedMyths && meta.relatedMyths.length > 0 && (
+      <aside class="related-myths">
+        <h2>Verwandte Mythen</h2>
+        <ul>
+          {meta.relatedMyths.map((id: string) => (
+            <li><a href={`/daten-explorer/${id}/`}>{id}</a></li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
+    {faqBacklinks.length > 0 && (
+      <aside class="faq-backlinks">
+        <h2>Diese Frage in unseren FAQ</h2>
+        <ul class="faq-backlinks__list">
+          {faqBacklinks.map((b) => (
+            <li>
+              <a href={b.url} class="faq-backlinks__link" style={`--audience-accent: ${b.audienceColor}`}>
+                <span class="faq-backlinks__audience">
+                  <span aria-hidden="true">{b.audienceEmoji}</span> {b.audienceLabel}
+                </span>
+                <span class="faq-backlinks__question">{b.questionLong}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
+    <footer>
+      <a href="/fakten-karten/">&larr; Fakten-Karten</a>
+    </footer>
+  </article>
+</BaseLayout>

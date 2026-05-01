@@ -78,7 +78,6 @@ const DEFAULTS: AppState = {
   sourceMetric: 'prevention',
   sourceGroup: 'adults',
   sourcesStripsMode: 'metric',
-  sourcesShowChildren: false,
   sourceCategoryFilter: [],
   stripsMode: 'indicator',
   stripsSortAxis: 'awareness',
@@ -128,7 +127,7 @@ export function stateToUrl(state: Partial<AppState>): string {
     params.set('sg', state.sourceGroup);
   if (state.sourcesStripsMode && state.sourcesStripsMode !== DEFAULTS.sourcesStripsMode)
     params.set('ssm', state.sourcesStripsMode);
-  if (state.sourcesShowChildren) params.set('ssc', '1');
+  // (`ssc` URL param dropped in Stage 4 — subcategories always render now.)
   if (state.sourceCategoryFilter && state.sourceCategoryFilter.length > 0)
     params.set('scf', state.sourceCategoryFilter.join(','));
   if (state.stripsMode && state.stripsMode !== DEFAULTS.stripsMode)
@@ -221,8 +220,9 @@ export function urlToState(): Partial<AppState> {
   if (ALL_SOURCES_STRIPS_MODES.includes(ssm as SourcesStripsMode))
     state.sourcesStripsMode = ssm as SourcesStripsMode;
 
-  const ssc = params.get('ssc');
-  if (ssc === '1' || ssc === 'true') state.sourcesShowChildren = true;
+  // (`ssc` URL param dropped in Stage 4 of the Daten-Explorer refactor —
+  //  subcategories always render now. We swallow legacy URLs by simply
+  //  not parsing the param, so existing links don't 404.)
 
   const scf = params.get('scf');
   if (scf) {

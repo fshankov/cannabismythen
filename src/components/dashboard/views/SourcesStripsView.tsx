@@ -27,12 +27,12 @@
  *     "Unterkategorien zeigen" / "Zum Hauptthema" actions instead of "Mehr →".
  */
 
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from 'react';
 import * as d3 from 'd3';
 import {
-  Search, Eye, EyeOff, Shield, Sparkles,
+  Search, Eye, ShieldCheck, Sparkles,
   Users, Baby, Cannabis, GraduationCap, UsersRound,
-  Layers,
+  Layers, Download,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type {
@@ -46,11 +46,18 @@ import type {
   SourcesStripsMode,
 } from '../../../lib/dashboard/types';
 import InfoTooltip from '../InfoTooltip';
+import PivotToggle from '../controls/PivotToggle';
+import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
+import ToolbarRow from '../controls/ToolbarRow';
 
 interface Props {
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
   definitions?: DashboardDefinitions | null;
+  /** Stage 3 — open the shared ExportDrawer. The chip lives in this
+   *  view's ToolbarRow `actions` slot so every chart-bearing tab
+   *  surfaces the same Exportieren control. */
+  onOpenExport?: () => void;
 }
 
 /** Order matters — drives strip order in 'metric' pivot. */
@@ -73,10 +80,28 @@ const METRIC_SHORT: Record<SourceMetricType, string> = {
   prevention: 'Präv.',
 };
 
+/**
+ * Information-source metric icons. Chosen so they read as "rhymes" of
+ * the Mythen `INDICATOR_ICONS` (`StripsView.tsx`) without colliding —
+ * a Sources strip and a Mythen strip never share the same glyph.
+ *
+ *   search     → Search       — "the user actively searches"
+ *   perception → Eye          — "the user passively perceives"
+ *                              (Mythen's `awareness` also uses Eye, but
+ *                               those tabs never co-render and the verb
+ *                               relationship is intentional)
+ *   trust      → ShieldCheck  — replaces the older `Shield` so it
+ *                              doesn't collide with Mythen's
+ *                              `prevention_significance` = `Shield`
+ *   prevention → Sparkles     — Mythen's `prevention_significance` is
+ *                              Shield; Sources' synthetic prevention
+ *                              metric uses Sparkles to read as "spark
+ *                              of insight" rather than "armoured"
+ */
 const METRIC_ICONS: Record<SourceMetricType, LucideIcon> = {
   search: Search,
   perception: Eye,
-  trust: Shield,
+  trust: ShieldCheck,
   prevention: Sparkles,
 };
 
@@ -136,9 +161,20 @@ function formatPillValue(value: number | null): string {
   return `${value.toFixed(1)}%`;
 }
 
-export default function SourcesStripsView({ state, update, definitions }: Props) {
+/** Imperative handle so MythenExplorer's ExportDrawer can grab the
+ *  live `<svg>` for image export. Mirrors `StripsViewHandle`. */
+export interface SourcesStripsViewHandle {
+  getSvgElement: () => SVGSVGElement | null;
+}
+
+const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
+  function SourcesStripsView({ state, update, definitions, onOpenExport }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  useImperativeHandle(ref, () => ({
+    getSvgElement: () => svgRef.current,
+  }));
   const [width, setWidth] = useState(360);
   const [viewportH, setViewportH] = useState(typeof window !== 'undefined' ? window.innerHeight : 720);
 
@@ -157,14 +193,14 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
   const [hoveredSourceId, setHoveredSourceId] = useState<number | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
 
-  // Top picker (population group | indicator depending on pivot) — same
-  // markup/state pattern as StripsView's top dropdown.
-  const [topPickerOpen, setTopPickerOpen] = useState(false);
-  const topPickerRef = useRef<HTMLDivElement>(null);
-  const [topExpandedInfo, setTopExpandedInfo] = useState<string | null>(null);
+  // (Stage 2 — top-picker open/close state lives inside <DataPicker>
+  //  now; the previous topPickerOpen / topPickerRef / topExpandedInfo
+  //  hooks were dropped along with the inline .strips-picker JSX.)
 
   const mode: SourcesStripsMode = state.sourcesStripsMode;
-  const showChildren = state.sourcesShowChildren;
+  // (`sourcesShowChildren` was dropped in Stage 4 — subcategories
+  // always render as smaller, lower-opacity dots beneath their
+  // parents. The dimming is handled per-dot in the SVG below.)
   const categoryFilter = state.sourceCategoryFilter;
   const selectedGroup: SourceGroupId = state.sourceGroup;
   const selectedMetric: SourceMetricType = state.sourceMetric;
@@ -188,24 +224,7 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Close the top dropdown on outside click + Escape.
-  useEffect(() => {
-    if (!topPickerOpen) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (topPickerRef.current && !topPickerRef.current.contains(e.target as Node)) {
-        setTopPickerOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setTopPickerOpen(false);
-    };
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [topPickerOpen]);
+  // (Outside-click / Escape close handlers moved into <DataPicker>.)
 
   // Click-anywhere-outside-the-card to deselect (matches StripsView behaviour).
   useEffect(() => {
@@ -259,16 +278,16 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
     return new Map(sourceData.sourceCategories.map((c) => [c.id, c.color]));
   }, [sourceData]);
 
-  /** Filter sources by the active category-pill filter AND the show-children
-   *  toggle. Returns parents (always) + children (only when toggle is on AND
-   *  the parent passes the category filter). Returning an array preserves the
-   *  display order from the JSON, which is alphabetised + grouped sensibly. */
+  /** Filter sources by the active category-pill filter. Subcategories
+   *  always render alongside their parents (Stage 4 of the
+   *  Daten-Explorer refactor removed the user-facing toggle — the
+   *  subcategories are always present, rendered as smaller, dimmer
+   *  dots so the parent stripe stays the dominant signal). */
   const visibleSources = useMemo(() => {
     if (!sourceData) return [] as InformationSource[];
     const filterByCat = (s: InformationSource) =>
       categoryFilter.length === 0 || categoryFilter.includes(s.category);
     const parents = sourceData.sources.filter((s) => s.parentId === null && filterByCat(s));
-    if (!showChildren) return parents;
     const result: InformationSource[] = [];
     const parentIds = new Set(parents.map((p) => p.id));
     for (const s of sourceData.sources) {
@@ -279,7 +298,7 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
       }
     }
     return result;
-  }, [sourceData, categoryFilter, showChildren]);
+  }, [sourceData, categoryFilter]);
 
   /** Live count for the bottom-of-chart caption. Counts parents only — that
    *  is what users mean by "Quellen" (sub-categories are toggleable detail). */
@@ -479,9 +498,9 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
   const selectedCategory: SourceCategory | undefined = selectedSource && sourceData
     ? sourceData.sourceCategories.find((c) => c.id === selectedSource.category)
     : undefined;
-  const selectedHasChildren = selectedSource && sourceData
-    ? sourceData.sources.some((s) => s.parentId === selectedSource.id)
-    : false;
+  // (`selectedHasChildren` removed in Stage 4 — the "Unterkategorien
+  //  zeigen" button it gated is gone now that subcategories always
+  //  render.)
   const selectedParent: InformationSource | null = selectedSource && sourceData && selectedSource.parentId !== null
     ? sourceData.sources.find((s) => s.id === selectedSource.parentId) ?? null
     : null;
@@ -516,133 +535,74 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
             without compromising clarity — the labels keep the grouping
             obvious. On narrow viewports the row wraps naturally.
           */}
-          <div className="sources-strips-controls">
-            <div className="sources-strips-control">
-              <span className="strips-picker__caption">Spalten:</span>
-              <div className="strips-pivot-toggle" role="tablist" aria-label="Pivot wählen">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={mode === 'metric'}
-                  className={`strips-pivot-toggle__btn ${mode === 'metric' ? 'active' : ''}`}
-                  onClick={() => update('sourcesStripsMode', 'metric')}
-                >
-                  Indikatoren
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={mode === 'group'}
-                  className={`strips-pivot-toggle__btn ${mode === 'group' ? 'active' : ''}`}
-                  onClick={() => update('sourcesStripsMode', 'group')}
-                >
-                  Gruppen
-                </button>
-              </div>
-            </div>
-
-            {/* Top selector — same dropdown markup as StripsView so styling
-                is reused verbatim. */}
-            {(() => {
-              const activeItem = topRow.items.find((it) => it.active) || topRow.items[0];
-              return (
-                <div className="sources-strips-control" ref={topPickerRef} style={{ position: 'relative' }}>
-                  <span className="strips-picker__caption">{topRow.caption}:</span>
-                  <button
-                    type="button"
-                    className="strips-picker__trigger"
-                    aria-haspopup="listbox"
-                    aria-expanded={topPickerOpen}
-                    onClick={() => {
-                      setTopPickerOpen((v) => !v);
-                      setTopExpandedInfo(null);
+          {/* Stage 2 — toolbar via shared primitives. The "Detail:
+              Unterkategorien" toggle stays as a custom action button
+              for now; Stage 4 of the Daten-Explorer refactor removes
+              it entirely (subcategories will always render). */}
+          {(() => {
+            const activeId = topRow.items.find((it) => it.active)?.id
+              ?? topRow.items[0]?.id
+              ?? '';
+            const valuePickerOptions: DataPickerOption<string>[] = topRow.items.map(
+              (item) => ({
+                value: item.id,
+                label: item.label,
+                Icon: item.Icon,
+                definition:
+                  item.defLabel && item.defText
+                    ? {
+                        title: item.defLabel,
+                        text: item.defText,
+                        scale: item.scale,
+                        sampleSize: item.sampleSize,
+                      }
+                    : undefined,
+              }),
+            );
+            return (
+              <ToolbarRow
+                aria-label="Informationsquellen-Steuerung"
+                pivot={
+                  <PivotToggle<SourcesStripsMode>
+                    aria-label="Pivot wählen"
+                    value={mode}
+                    onChange={(v) => update('sourcesStripsMode', v)}
+                    options={[
+                      { value: 'metric', label: 'Indikatoren' },
+                      { value: 'group', label: 'Gruppen' },
+                    ]}
+                  />
+                }
+                pickers={[
+                  <DataPicker<string>
+                    key="value"
+                    caption={topRow.caption}
+                    value={activeId}
+                    options={valuePickerOptions}
+                    onChange={(next) => {
+                      const item = topRow.items.find((it) => it.id === next);
+                      item?.onActivate();
                     }}
-                  >
-                    {activeItem?.Icon ? (
-                      <activeItem.Icon size={15} strokeWidth={1.75} aria-hidden="true" />
-                    ) : null}
-                    <span className="strips-picker__current">{activeItem?.label}</span>
-                    <span className="strips-picker__chevron" aria-hidden="true">▾</span>
-                  </button>
-                  {topPickerOpen && (
-                    <div className="strips-picker__menu" role="listbox">
-                      {topRow.items.map((item) => {
-                        const expanded = topExpandedInfo === item.id;
-                        return (
-                          <div key={item.id} className={`strips-picker__row ${expanded ? 'expanded' : ''}`}>
-                            <div className="strips-picker__row-line">
-                              <button
-                                type="button"
-                                role="option"
-                                aria-selected={item.active}
-                                className={`strips-picker__item-btn ${item.active ? 'active' : ''}`}
-                                onClick={() => {
-                                  item.onActivate();
-                                  setTopPickerOpen(false);
-                                  setTopExpandedInfo(null);
-                                }}
-                              >
-                                {item.Icon ? (
-                                  <item.Icon size={15} strokeWidth={1.75} aria-hidden="true" />
-                                ) : null}
-                                <span className="strips-picker__item-label">{item.label}</span>
-                              </button>
-                              {item.defLabel && item.defText && (
-                                <button
-                                  type="button"
-                                  className={`strips-picker__row-info ${expanded ? 'active' : ''}`}
-                                  aria-expanded={expanded}
-                                  aria-label="Definition anzeigen"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTopExpandedInfo(expanded ? null : item.id);
-                                  }}
-                                >
-                                  <span aria-hidden="true">i</span>
-                                </button>
-                              )}
-                            </div>
-                            {expanded && item.defText && (
-                              <div className="strips-picker__row-def">
-                                <p className="strips-picker__row-def-title">{item.defLabel}</p>
-                                {item.sampleSize && (
-                                  <p className="strips-picker__row-def-sample">{item.sampleSize}</p>
-                                )}
-                                <p className="strips-picker__row-def-text">{item.defText}</p>
-                                {item.scale && (
-                                  <p className="strips-picker__row-def-scale">Skala: {item.scale}</p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-
-            {/* Children toggle — Eye / EyeOff makes the binary state visible
-                at a glance instead of hiding behind the same flat pill style
-                as the active "Indikatoren" tab. */}
-            <div className="sources-strips-control">
-              <span className="strips-picker__caption">Detail:</span>
-              <button
-                type="button"
-                className={`strips-pivot-toggle__btn strips-children-toggle ${showChildren ? 'active' : ''}`}
-                aria-pressed={showChildren}
-                onClick={() => update('sourcesShowChildren', !showChildren)}
-              >
-                {showChildren ? (
-                  <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
-                ) : (
-                  <EyeOff size={14} strokeWidth={1.75} aria-hidden="true" />
-                )}
-                <span>Unterkategorien</span>
-              </button>
-            </div>
-          </div>
+                    aria-label={topRow.caption}
+                    lang="de"
+                  />,
+                ]}
+                actions={
+                  onOpenExport ? (
+                    <button
+                      type="button"
+                      className="carm-btn carm-btn--ghost"
+                      onClick={onOpenExport}
+                      aria-label="Exportieren"
+                    >
+                      <Download size={14} strokeWidth={2} aria-hidden="true" />
+                      Exportieren
+                    </button>
+                  ) : undefined
+                }
+              />
+            );
+          })()}
 
           {/* When the data hasn't arrived yet we still want contentRef bound
               (its width drives the SVG sizing), so the loading state takes
@@ -656,6 +616,7 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
               header overlay sits on top of the SVG strip rectangles. */}
           <div className="strips-svg-wrap" style={{ position: 'relative', width }}>
             <svg
+              ref={svgRef}
               className="strips-svg-v3"
               width={width}
               height={height}
@@ -971,17 +932,9 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
               </div>
 
               <div className="strips-myth-card__actions">
-                {selectedHasChildren && !showChildren && (
-                  <button
-                    className="strips-myth-card__more"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      update('sourcesShowChildren', true);
-                    }}
-                  >
-                    Unterkategorien zeigen
-                  </button>
-                )}
+                {/* Stage 4 — "Unterkategorien zeigen" button removed.
+                    Subcategories now render unconditionally, so the
+                    affordance has no work to do. */}
                 {selectedParent && (
                   <button
                     className="strips-myth-card__more"
@@ -997,55 +950,57 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
             </div>
           )}
 
-          {/* Category-pill row — doubles as legend AND filter. There are only
-              6 categories so pills are clearer than a dropdown (and each
-              pill carries its own swatch, so users learn the colour map by
-              looking at the same row that filters the chart). */}
-          <div className="strips-cat-pills" role="group" aria-label="Quellen-Kategorien filtern">
-            <button
-              type="button"
-              className={`strips-cat-pill ${categoryFilter.length === 0 ? 'active' : ''}`}
-              onClick={() => update('sourceCategoryFilter', [])}
-              aria-pressed={categoryFilter.length === 0}
-            >
-              <Layers size={13} strokeWidth={1.75} aria-hidden="true" />
-              <span>Alle Quellen</span>
-            </button>
-            {sourceData.sourceCategories.map((cat) => {
-              const active = categoryFilter.includes(cat.id);
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  className={`strips-cat-pill ${active ? 'active' : ''}`}
-                  onClick={() => {
-                    // Single-select-style toggle: clicking a pill replaces the
-                    // filter with just that category, clicking it again clears
-                    // the filter. (Multi-select would need shift-click — not
-                    // worth the complexity for a 6-item list.)
-                    if (active) update('sourceCategoryFilter', []);
-                    else update('sourceCategoryFilter', [cat.id]);
+          {/* Stage 4 — bottom category-pill row replaced by a
+              searchable <DataPicker>. The picker still doubles as a
+              filter, but the legend role moved to the small swatch
+              row directly below (so the colour map remains visible
+              without a dropdown). */}
+          {(() => {
+            const allValue = '__all__';
+            const pickerOptions: DataPickerOption<string>[] = [
+              { value: allValue, label: 'Alle Quellen', Icon: Layers },
+              ...sourceData.sourceCategories.map((cat) => ({
+                value: cat.id,
+                label: cat.name,
+              })),
+            ];
+            const pickerValue =
+              categoryFilter.length === 0 ? allValue : categoryFilter[0];
+            return (
+              <div className="strips-cat-picker">
+                <DataPicker<string>
+                  caption="Kategorie"
+                  value={pickerValue}
+                  options={pickerOptions}
+                  onChange={(next) => {
+                    if (next === allValue) update('sourceCategoryFilter', []);
+                    else update('sourceCategoryFilter', [next]);
                   }}
-                  aria-pressed={active}
-                  style={{
-                    // Accent each pill with its category colour so the legend
-                    // role is unambiguous even when the pill isn't selected.
-                    borderColor: active ? cat.color : undefined,
-                    color: active ? cat.color : undefined,
-                  }}
-                >
-                  <span
-                    className="strips-cat-pill__swatch"
-                    style={{ background: cat.color }}
-                    aria-hidden="true"
-                  />
-                  <span>{cat.name}</span>
-                </button>
-              );
-            })}
-            <span className="strips-cat-pills__count" aria-live="polite">
-              {parentCount} Quellen
-            </span>
+                  aria-label="Quellen-Kategorie"
+                  searchable
+                  searchPlaceholder="Kategorie suchen…"
+                  lang="de"
+                />
+                <span className="strips-cat-pills__count" aria-live="polite">
+                  {parentCount} Quellen
+                </span>
+              </div>
+            );
+          })()}
+
+          {/* Compact legend row beneath the picker — preserves the
+              colour-map signal that the old pill row carried. Pure
+              decoration, not interactive. */}
+          <div className="strips-cat-legend" aria-hidden="true">
+            {sourceData.sourceCategories.map((cat) => (
+              <span key={cat.id} className="strips-cat-legend__item">
+                <span
+                  className="strips-cat-legend__swatch"
+                  style={{ background: cat.color }}
+                />
+                {cat.name}
+              </span>
+            ))}
           </div>
 
           </> /* /sourceData loaded */ )}
@@ -1054,4 +1009,6 @@ export default function SourcesStripsView({ state, update, definitions }: Props)
       </div>
     </div>
   );
-}
+});
+
+export default SourcesStripsView;

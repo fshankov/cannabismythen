@@ -158,9 +158,6 @@ export interface AppState {
   sourceGroup: SourceGroupId;
   /** Information-sources Streifen view — pivot ('metric' or 'group'). */
   sourcesStripsMode: SourcesStripsMode;
-  /** Information-sources Streifen view — when true, child sub-categories
-   *  render as smaller, lower-opacity dots alongside their parents. */
-  sourcesShowChildren: boolean;
   /** Information-sources Streifen view — categories included in the chart.
    *  Empty array = include all categories (default). */
   sourceCategoryFilter: string[];

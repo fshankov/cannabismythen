@@ -170,13 +170,13 @@ const FAQ_AUDIENCE_OPTIONS = [
 ];
 
 const FAQ_DASHBOARD_OPTIONS = [
-  { label: "Zahlen & Fakten (Übersicht)", value: "/zahlen-und-fakten/" },
-  { label: "Dashboard: Informationswege", value: "/zahlen-und-fakten/informationswege/" },
-  { label: "Dashboard: Präventionsbedeutung", value: "/zahlen-und-fakten/praeventionsbedeutung/" },
-  { label: "Dashboard: Präventionspotential", value: "/zahlen-und-fakten/praeventionspotential/" },
-  { label: "Dashboard: Bevölkerungsrelevanz", value: "/zahlen-und-fakten/bevoelkerungsrelevanz/" },
-  { label: "Dashboard: Zielgruppenvergleich", value: "/zahlen-und-fakten/zielgruppen/" },
-  { label: "Dashboard: Minderjährige", value: "/zahlen-und-fakten/minderjaehrige/" },
+  { label: "Daten-Explorer (Übersicht)", value: "/daten-explorer/" },
+  { label: "Dashboard: Informationswege", value: "/daten-explorer/informationswege/" },
+  { label: "Dashboard: Präventionsbedeutung", value: "/daten-explorer/praeventionsbedeutung/" },
+  { label: "Dashboard: Präventionspotential", value: "/daten-explorer/praeventionspotential/" },
+  { label: "Dashboard: Bevölkerungsrelevanz", value: "/daten-explorer/bevoelkerungsrelevanz/" },
+  { label: "Dashboard: Zielgruppenvergleich", value: "/daten-explorer/zielgruppen/" },
+  { label: "Dashboard: Minderjährige", value: "/daten-explorer/minderjaehrige/" },
 ];
 
 const faqQuestions = collection({
@@ -266,7 +266,7 @@ const faqQuestions = collection({
       fields.select({
         label: "Dashboard-Verweis",
         options: FAQ_DASHBOARD_OPTIONS,
-        defaultValue: "/zahlen-und-fakten/",
+        defaultValue: "/daten-explorer/",
       }),
       {
         label: "Dashboard-Verweise",
@@ -1043,7 +1043,7 @@ const quizHookBlock = singleton({
     }),
     secondaryCtaUrl: fields.text({
       label: "Sekundärer CTA – Link",
-      defaultValue: "/zahlen-und-fakten/",
+      defaultValue: "/daten-explorer/",
     }),
   },
 });
@@ -1061,8 +1061,11 @@ export default config({
   },
   collections: {
     // ── Public sections — in nav order ──────────────────────────────────────
-    zahlenUndFakten,        // 🃏 Fakten-Karten  →  /fakten-karten/ + /zahlen-und-fakten/[slug]
-    zahlenUndFaktenDashboard, // 📊 Daten-Explorer  →  /zahlen-und-fakten/
+    zahlenUndFakten,        // 🃏 Fakten-Karten  →  /fakten-karten/ + /daten-explorer/[slug]
+                            //   (collection name + on-disk path stay
+                            //    under `zahlen-und-fakten/` per Stage 5
+                            //    constraint — only the public URL moves.)
+    zahlenUndFaktenDashboard, // 📊 Daten-Explorer  →  /daten-explorer/
     faqQuestions,           // ❓ FAQ – Einzelne Fragen (audience-first)
     quiz,                   // 🧪 Quiz  →  /quiz/
     startseite,             // 🏠 Startseite  →  / (homepage scrollytelling)

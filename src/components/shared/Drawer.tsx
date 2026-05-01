@@ -7,9 +7,20 @@ export interface DrawerProps {
   open: boolean;
   /** Called when the user dismisses the drawer (X button, backdrop click, Escape). */
   onClose: () => void;
-  /** Side of the desktop slide-out. Ignored on mobile (always bottom-sheet). */
+  /**
+   * Layout variant.
+   *  - `'side'` (default): slides in from the right/left on desktop,
+   *    bottom-sheet on mobile (<1024px). Used by FilterDrawer.
+   *  - `'modal'`: centered modal on desktop (max-width 720px),
+   *    bottom-sheet on mobile. Used by ExportDrawer (Stage 3 of the
+   *    Daten-Explorer refactor matched the OWID grapher dialog).
+   *  - `'bottom-sheet'`: forced bottom-sheet at every breakpoint.
+   */
+  variant?: 'side' | 'modal' | 'bottom-sheet';
+  /** Side of the desktop slide-out. Ignored on mobile or when
+   *  `variant !== 'side'`. */
   side?: 'right' | 'left';
-  /** Width on desktop. */
+  /** Width on desktop. Applies to `variant: 'side'`. */
   size?: 'sm' | 'md' | 'lg';
   /** Title rendered in the header and used as the dialog's accessible label. */
   title: string;
@@ -27,6 +38,7 @@ export interface DrawerProps {
 export default function Drawer({
   open,
   onClose,
+  variant = 'side',
   side = 'right',
   size = 'md',
   title,
@@ -52,9 +64,26 @@ export default function Drawer({
 
   if (!open) return null;
 
+  // Variant flags drive the root layout (centered modal vs side
+  // slide-out vs bottom-sheet). The same .carm-drawer__header / body /
+  // footer markup is reused so child components don't need to know
+  // which variant rendered them.
+  const variantClass =
+    variant === 'modal'
+      ? 'carm-drawer-root--modal'
+      : variant === 'bottom-sheet'
+        ? 'carm-drawer-root--bottom-sheet'
+        : '';
+  const panelVariantClass =
+    variant === 'modal'
+      ? 'carm-drawer--modal'
+      : variant === 'bottom-sheet'
+        ? 'carm-drawer--bottom-sheet'
+        : `carm-drawer--${side} carm-drawer--${size}`;
+
   return (
     <div
-      className="carm-drawer-root"
+      className={`carm-drawer-root ${variantClass}`}
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -63,7 +92,7 @@ export default function Drawer({
       <div className="carm-drawer-backdrop" aria-hidden="true" />
       <div
         ref={panelRef}
-        className={`carm-drawer carm-drawer--${side} carm-drawer--${size}`}
+        className={`carm-drawer ${panelVariantClass}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

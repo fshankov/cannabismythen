@@ -10,7 +10,37 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  const { pathname } = context.url;
+  const { pathname, search } = context.url;
+
+  /**
+   * Stage 5 of the Daten-Explorer refactor — `/zahlen-und-fakten/*`
+   * was renamed to `/daten-explorer/*`. We 301 the old paths BEFORE
+   * the SITE_PASSWORD gate so external backlinks resolve even for
+   * unauthenticated traffic. Three patterns:
+   *   1. bare `/zahlen-und-fakten` (with or without trailing slash)
+   *   2. legacy dashboard pages: `/zahlen-und-fakten/daten/{slug}`
+   *      → collapse to the new explorer index
+   *   3. factsheet detail: `/zahlen-und-fakten/{slug}` → `/daten-explorer/{slug}`
+   * Order matters: the bare match must run FIRST so the factsheet
+   * regex doesn't try to redirect `''` as a slug.
+   */
+  if (pathname === "/zahlen-und-fakten" || pathname === "/zahlen-und-fakten/") {
+    return Response.redirect(new URL(`/daten-explorer/${search}`, context.url), 301);
+  }
+  const datenMatch = pathname.match(/^\/zahlen-und-fakten\/daten\/([^/]+)\/?$/);
+  if (datenMatch) {
+    return Response.redirect(
+      new URL(`/daten-explorer/daten/${datenMatch[1]}/${search}`, context.url),
+      301,
+    );
+  }
+  const factsheetMatch = pathname.match(/^\/zahlen-und-fakten\/([^/]+)\/?$/);
+  if (factsheetMatch) {
+    return Response.redirect(
+      new URL(`/daten-explorer/${factsheetMatch[1]}/${search}`, context.url),
+      301,
+    );
+  }
 
   // Never block: login page, keystatic CMS, API routes, static assets
   if (

@@ -32,10 +32,10 @@ export default function FactsheetPanel({
       context="quiz"
       mythText={statementText || t(myth.statementKey)}
       classificationKey={myth.correctClassification}
-      classificationLabel={
-        mythContentEntry?.classificationLabel ||
-        t(`classification.${myth.correctClassification}`)
-      }
+      // Canonical verdict label only — the .mdoc conversational label
+      // ("Das stimmt nicht.") is intentionally bypassed so the panel
+      // reads identically across quiz, dashboard, and fakten-karten.
+      classificationLabel={t(`classification.${myth.correctClassification}`)}
       mythContentEntry={mythContentEntry}
       factsheetSlug={myth.mythPageSlug}
       verdictLabel={t('ui.correctAnswer')}

@@ -86,32 +86,10 @@ main:has(.carm-explorer) {
   color: #64748b;
 }
 
-/* ==================== EXPLORER HEADER ==================== */
-.carm-explorer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.carm-explorer-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--color-text);
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-.carm-explorer-subtitle {
-  font-size: 0.82rem;
-  color: var(--color-text-secondary);
-  margin-top: 1px;
-  margin-bottom: 0;
-}
+/* (The .carm-explorer-header block was removed in Stage 1 of the
+   Daten-Explorer refactor — the redundant "Cannabis Mythen Explorer"
+   title is gone. Lang switcher styles below stay scoped to .carm-explorer
+   so they can be re-attached if the language picker comes back.) */
 
 .carm-explorer .lang-switcher {
   display: flex;
@@ -150,15 +128,24 @@ main:has(.carm-explorer) {
   min-width: 0;
 }
 
-/* ==================== TABS ==================== */
+/* ==================== TABS ====================
+   Chrome-browser style: connected rounded-top tabs that visually merge
+   into the chart container below. The tab-bar's bottom border doubles
+   as the chart container's top border, so the active tab "lifts" by 1px
+   to break that line on its own segment.
+   --------------------------------------------- */
 .carm-explorer .tabs-bar {
   display: flex;
+  align-items: flex-end;
   gap: 2px;
-  border-bottom: 2px solid var(--color-border);
-  margin-bottom: 12px;
+  margin-bottom: 0;
+  padding-right: 4px;
+  border-bottom: 1px solid var(--color-border);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  position: relative;
+  z-index: 1;
 }
 
 .carm-explorer .tabs-bar::-webkit-scrollbar {
@@ -166,42 +153,99 @@ main:has(.carm-explorer) {
 }
 
 .carm-explorer .tab-btn {
-  padding: 10px 16px;
-  border: none;
-  background: transparent;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: 10px 10px 0 0;
+  background: var(--color-bg-subtle, #eeeee8);
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: color var(--duration-fast) var(--ease-out),
+  margin-bottom: -1px; /* sits flush on the chart-area top border */
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
               border-color var(--duration-fast) var(--ease-out);
   white-space: nowrap;
+  font-family: var(--font-sans);
 }
 
 .carm-explorer .tab-btn:hover {
+  background: var(--color-surface-raised, #f8fafc);
   color: var(--color-text);
 }
 
 .carm-explorer .tab-btn.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  background: white;
+  color: var(--color-text);
+  border-color: var(--color-border);
+  border-bottom-color: white; /* break the bottom strip on the active tab */
+  position: relative;
+  z-index: 2;
 }
 
 .carm-explorer .tab-btn:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
-/* Divider before the Informationsquellen tab — signals IA shift from
-   visualisation type → content type. Rendered as a left border + extra
-   padding rather than a separate element so the tab row stays scrollable. */
+/* Divider before the Informationsquellen tab — replaces the previous
+   left-border+padding combo with a flat 24px gap so the new tab shape
+   reads cleanly. */
 .carm-explorer .tab-btn--after-divider {
-  margin-left: 8px;
-  padding-left: 24px;
-  border-left: 1px solid var(--color-border, #e2e8f0);
+  margin-left: 24px;
+}
+
+/* Rundgang chip on the right of the tabs row (Stage 1 of the
+   Daten-Explorer refactor — the floating <Fab> was deleted and the
+   StickyToolbar Rundgang button was relocated here). Uses .carm-btn--ghost
+   geometry but lives in the tab row to keep all tab-level affordances
+   in one place. */
+.carm-explorer .tabs-bar__rundgang {
+  margin-left: auto;
+  align-self: center;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full, 9999px);
+  background: white;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.carm-explorer .tabs-bar__rundgang:hover {
+  background: var(--color-surface-raised, #f8fafc);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+}
+
+.carm-explorer .tabs-bar__rundgang:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Mobile: keep the chip square (icon-only) so the tab row can still
+   scroll horizontally without the chip eating tab width. The label is
+   hidden via this CSS so the React layer can keep the same JSX. */
+@media (max-width: 639px) {
+  .carm-explorer .tabs-bar__rundgang {
+    padding: 8px 10px;
+    min-width: 40px;
+  }
+  .carm-explorer .tabs-bar__rundgang-label {
+    display: none;
+  }
 }
 
 /* ==================== UTILITY BAR ==================== */
@@ -270,12 +314,17 @@ main:has(.carm-explorer) {
   padding: 0 2px;
 }
 
-/* ==================== CHART AREA ==================== */
+/* ==================== CHART AREA ====================
+   Top edge intentionally has 0 radius so the active Chrome-style tab
+   visually merges with the chart container (the active tab's white
+   background continues as the chart-area's white background).
+   ----------------------------------------------------- */
 .carm-explorer .chart-area {
   position: relative;
   min-height: 400px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
   background: white;
   overflow: hidden;
 }
@@ -689,23 +738,9 @@ main:has(.carm-explorer) {
   flex-shrink: 0;
 }
 
-.carm-explorer .verdict-header-select {
-  height: 24px;
-  padding: 0 4px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 0.68rem;
-  color: var(--color-text-secondary);
-  background: white;
-  font-family: var(--font-sans);
-  cursor: pointer;
-  max-width: 120px;
-}
-
-.carm-explorer .verdict-header-select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
+/* (Legacy `.verdict-header-select` rules removed in Stage 2 of the
+   Daten-Explorer refactor — the inline header `<select>` was lifted
+   into the shared <ToolbarRow> as a third <DataPicker>.) */
 
 .carm-explorer .data-table th .th-icon {
   display: inline-flex;
@@ -1463,11 +1498,6 @@ main:has(.carm-explorer) {
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
-  .carm-explorer-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .carm-explorer .tab-btn {
     padding: 10px 12px;
     font-size: 0.78rem;
@@ -2330,6 +2360,17 @@ main:has(.carm-explorer) {
   color: var(--color-accent, #2d6a4f);
 }
 
+/* DEAD CODE WARNING — every rule from here through line ~2675 is
+   superseded by `.carm-picker*` further down this file (Stage 2 of
+   the Daten-Explorer refactor). Every Streifen / Sources / Balken /
+   Tabelle consumer migrated to `<DataPicker>`. Kept in place to keep
+   the diff focused; safe to delete in a follow-up cleanup pass.
+   Same applies to `.strips-pivot-toggle*`, `.strips-controls-row*`,
+   `.sources-strips-controls`, `.sources-strips-control` blocks
+   below, and to `.carm-igs*`, `.carm-pill*`, `.carm-native-select*`,
+   `.carm-sticky-toolbar*` blocks further down (those backed
+   IndicatorGroupSelector + StickyToolbar, both now @deprecated). */
+
 /* Top dropdown picker — replaces the multi-pill row so the selector always
    fits on one line. Caption + trigger + inline brief definition + 'i'. */
 .strips-picker {
@@ -2817,6 +2858,41 @@ main:has(.carm-explorer) {
   font-size: 0.74rem;
   color: var(--color-text-muted, #94a3b8);
   font-variant-numeric: tabular-nums;
+}
+
+/* Stage 4 — the category-pill row was replaced by a searchable
+   <DataPicker>. The wrapper holds the picker on the left and the
+   live "{n} Quellen" count on the right. */
+.strips-cat-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 14px 4px 8px;
+}
+
+/* Compact legend strip that replaces the colour-map signal the old
+   pills carried. Non-interactive — purely a colour key. */
+.strips-cat-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0 4px 12px;
+  font-size: 0.74rem;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.strips-cat-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.strips-cat-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
 }
 
 /* Two-pill pivot toggle ("Indikatoren" / "Gruppen") used in the
@@ -3841,6 +3917,43 @@ body.carm-modal-open {
   }
 }
 
+/* Modal variant — centered on desktop (≥1024px), bottom-sheet below.
+   Stage 3 of the Daten-Explorer refactor used this for the OWID-style
+   ExportDrawer dialog. */
+@media (min-width: 1024px) {
+  .carm-drawer-root--modal {
+    align-items: center;
+    justify-content: center;
+  }
+  .carm-drawer--modal {
+    width: 100%;
+    max-width: 720px;
+    max-height: calc(100vh - 96px);
+    height: auto;
+    margin: 0;
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+    animation: carm-modal-rise 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+/* Forced bottom-sheet variant (every breakpoint). */
+.carm-drawer-root--bottom-sheet {
+  align-items: flex-end;
+}
+.carm-drawer--bottom-sheet {
+  width: 100%;
+  max-height: calc(100vh - 56px - env(safe-area-inset-top, 0px));
+  border-top-left-radius: var(--radius-lg, 12px);
+  border-top-right-radius: var(--radius-lg, 12px);
+  animation: carm-bottom-sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes carm-modal-rise {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
 .carm-drawer__header {
   display: flex;
   align-items: flex-start;
@@ -3924,7 +4037,6 @@ body.carm-modal-open {
 .carm-explorer {
   --carm-sticky-top-desktop: calc(var(--nav-height, 56px) + var(--space-sm, 8px));
   --carm-sticky-top-mobile: var(--space-sm, 8px);
-  --carm-fab-bottom: calc(56px + var(--space-md, 16px));
 }
 
 .carm-sticky-toolbar {
@@ -3961,45 +4073,9 @@ body.carm-modal-open {
 .carm-sticky-toolbar__start { flex: 1 1 auto; min-width: 0; }
 .carm-sticky-toolbar__end { flex: 0 0 auto; }
 
-/* FAB — mobile-only floating Rundgang trigger. */
-.carm-fab {
-  position: fixed;
-  right: var(--space-md, 16px);
-  bottom: var(--carm-fab-bottom);
-  z-index: 60;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  min-height: 48px;
-  min-width: 48px;
-  border: none;
-  border-radius: var(--radius-full, 9999px);
-  background: var(--color-accent, #2d6a4f);
-  color: var(--color-text-inverse, #ffffff);
-  font-family: var(--font-display, inherit);
-  font-size: 0.9rem;
-  font-weight: 600;
-  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));
-  cursor: pointer;
-  transition: transform var(--transition-fast, 0.15s ease), background var(--transition-fast, 0.15s ease);
-}
-
-.carm-fab:hover { background: var(--color-accent-hover, #1f4f3a); }
-.carm-fab:active { transform: translateY(1px); }
-.carm-fab:focus-visible {
-  outline: 2px solid var(--color-text-inverse, #ffffff);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px var(--color-accent, #2d6a4f), var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));
-}
-
-.carm-fab__icon { display: inline-flex; align-items: center; }
-.carm-fab__label { font-weight: 600; }
-
-@media (min-width: 1024px) {
-  /* On desktop, the Rundgang trigger lives in the sticky toolbar instead. */
-  .carm-fab { display: none; }
-}
+/* (FAB removed in Stage 1 of the Daten-Explorer refactor — Rundgang
+   now lives in the tabs row. The `.tabs-bar__rundgang` styles up top
+   in this file own that chip's geometry.) */
 
 /* ===========================================================================
    IndicatorGroupSelector — pills on desktop, native dropdowns on mobile.
@@ -4431,6 +4507,50 @@ body.carm-modal-open {
 
 .carm-balken-view { width: 100%; }
 
+/* Stage 4 — inline sort chips above the Balken chart, synced with
+   `state.balkenSort`. Mirrors the FilterDrawer's radio group so the
+   two surfaces stay in lockstep. */
+.carm-balken-sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.carm-balken-sort__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 999px;
+  background: white;
+  color: var(--color-text-secondary, #4a5568);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast, 150ms) var(--ease-out, ease),
+              color var(--duration-fast, 150ms) var(--ease-out, ease),
+              border-color var(--duration-fast, 150ms) var(--ease-out, ease);
+}
+
+.carm-balken-sort__chip:hover {
+  background: var(--color-surface-raised, #f8fafc);
+  color: var(--color-text, #1a1a2e);
+}
+
+.carm-balken-sort__chip.is-active {
+  background: var(--color-accent-light, #e8f5ef);
+  color: var(--color-accent, #2d6a4f);
+  border-color: var(--color-accent, #2d6a4f);
+}
+
+.carm-balken-sort__chip:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
 .carm-balken-empty {
   padding: var(--space-2xl, 48px) var(--space-md, 16px);
   text-align: center;
@@ -4443,7 +4563,137 @@ body.carm-modal-open {
   color: var(--color-text, #1a1a2e);
 }
 
-.carm-balken-empty__body { margin: 0; font-size: 0.92rem; }
+.carm-balken-empty__body { margin: 0 0 14px; font-size: 0.92rem; }
+
+.carm-balken-empty__cta {
+  /* Slight visual lift so the CTA reads as the recovery action,
+     not just another option. */
+  margin-top: 4px;
+}
+
+/* Stage 4 — search chip in the modern toolbar's actions slot.
+   Collapsed: a Search-icon ghost button. Expanded: an inline input
+   with an autocomplete listbox below. Outside-click + Escape collapse. */
+.carm-search-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.carm-search-chip__trigger {
+  /* Inherits .carm-btn .carm-btn--ghost — no extra styling needed. */
+}
+
+.carm-search-chip__expanded {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 28px;
+  min-height: 38px;
+  border: 1px solid var(--color-accent, #2d6a4f);
+  border-radius: 999px;
+  background: white;
+  width: 280px;
+}
+
+.carm-search-chip__icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted, #94a3b8);
+  pointer-events: none;
+}
+
+.carm-search-chip__input {
+  flex: 1 1 auto;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--color-text, #1a1a2e);
+  padding: 0;
+}
+
+.carm-search-chip__input:focus {
+  outline: none;
+}
+
+.carm-search-chip__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: white;
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.carm-search-chip__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  font: inherit;
+  color: var(--color-text, #1a1a2e);
+  transition: background var(--duration-fast, 150ms) var(--ease-out, ease);
+}
+
+.carm-search-chip__item:hover,
+.carm-search-chip__item.is-active {
+  background: var(--color-accent-light, #e8f5ef);
+}
+
+.carm-search-chip__item-arrow {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--color-text-secondary, #4a5568);
+}
+
+.carm-search-chip__item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.carm-search-chip__item-title {
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carm-search-chip__item-meta {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #718096);
+}
+
+@media (max-width: 640px) {
+  .carm-search-chip__expanded {
+    width: 220px;
+  }
+}
 
 /* Modern chart-area layout: chart in flex-grow column with optional desktop
    verdict-legend sidebar to the right. Mobile renders the legend as a strip
@@ -4544,6 +4794,82 @@ body.carm-modal-open {
 
 .carm-export-row__cta { color: var(--color-text-muted, #718096); }
 
+/* OWID-style tab strip at the top of the export dialog
+   (Stage 3 of the Daten-Explorer refactor). */
+.carm-export-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-md, 16px);
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+  margin-bottom: var(--space-md, 16px);
+}
+
+.carm-export-tabs__tab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 10px 4px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--color-text-secondary, #4a5568);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--transition-fast, 0.15s ease),
+              border-color var(--transition-fast, 0.15s ease);
+}
+
+.carm-export-tabs__tab:hover {
+  color: var(--color-text, #1a1a2e);
+}
+
+.carm-export-tabs__tab.active {
+  color: var(--color-accent, #2d6a4f);
+  border-bottom-color: var(--color-accent, #2d6a4f);
+}
+
+.carm-export-tabs__tab:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* Thumbnail preview cell on PNG / SVG rows — replaces the icon when
+   the live chart can produce a snapshot. */
+.carm-export-row__thumb {
+  flex: 0 0 auto;
+  width: 120px;
+  height: 80px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-bg-subtle, #eeeee8);
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carm-export-row__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* "No chart available" notice on the Visualisierung tab when Tabelle
+   is the active view. */
+.carm-export-empty {
+  list-style: none;
+  padding: var(--space-md, 16px);
+  border: 1px dashed var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  color: var(--color-text-secondary, #4a5568);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background: var(--color-bg-subtle, #eeeee8);
+}
+
 /* Filter button badge — shown next to "Filter" when active filter count > 0. */
 .carm-btn__badge {
   display: inline-flex;
@@ -4558,4 +4884,415 @@ body.carm-modal-open {
   color: var(--color-text-inverse, #ffffff);
   font-size: 0.72rem;
   font-weight: 700;
+}
+
+/* ===========================================================================
+   Stage 2 — Shared toolbar primitives.
+   `<PivotToggle>` (.carm-pivot-toggle), `<DataPicker>` (.carm-picker),
+   `<ToolbarRow>` (.carm-toolbar-row). These rules mirror the original
+   `.strips-pivot-toggle` / `.strips-picker` / `.strips-controls-row` /
+   `.sources-strips-controls` geometry exactly, so the Streifen view stays
+   pixel-identical after migration. Once every consumer is on the new
+   primitives, the legacy `.strips-*` and `.sources-strips-*` blocks above
+   in this file can be deleted (Stage 2 cleanup task).
+   =========================================================================== */
+
+/* PivotToggle — Indikatoren | Gruppen pill switch. */
+.carm-pivot-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-bg-subtle, #f1f5f9);
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.carm-pivot-toggle__btn {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-secondary, #4a5568);
+  padding: 4px 12px;
+  min-height: 28px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.carm-pivot-toggle__btn:hover {
+  color: var(--color-accent, #2d6a4f);
+}
+
+.carm-pivot-toggle__btn.active {
+  background: white;
+  color: var(--color-text, #1e293b);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+}
+
+.carm-pivot-toggle__btn:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 1px;
+}
+
+/* DataPicker — caption + dropdown trigger + menu (with inline definitions). */
+.carm-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.carm-picker__caption {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #4a5568);
+  flex-shrink: 0;
+}
+
+.carm-picker__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 10px 4px 12px;
+  border: 1px solid var(--color-border, #cbd5e1);
+  background: white;
+  color: var(--color-text, #1e293b);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.carm-picker__trigger:hover {
+  border-color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.carm-picker__trigger:focus-visible {
+  outline: 3px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.carm-picker__emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.carm-picker__current {
+  display: inline-block;
+}
+
+.carm-picker__chevron {
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #94a3b8);
+  margin-left: 2px;
+}
+
+.carm-picker__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
+  max-width: 320px;
+  z-index: 60;
+  background: white;
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Search input pinned to the top of the menu when DataPicker has
+   `searchable` (Stage 4 — Sources category picker). */
+.carm-picker__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 6px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+  margin-bottom: 4px;
+}
+
+.carm-picker__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted, #94a3b8);
+  pointer-events: none;
+}
+
+.carm-picker__search-input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 30px;
+  padding: 4px 8px 4px 28px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  color: var(--color-text, #1a1a2e);
+  background: var(--color-surface, #ffffff);
+}
+
+.carm-picker__search-input:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 1px;
+  border-color: var(--color-accent, #2d6a4f);
+}
+
+.carm-picker__row.is-highlighted .carm-picker__item-btn {
+  background: var(--color-accent-light, #e8f5ef);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.carm-picker__empty {
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #718096);
+}
+
+.carm-picker--dropup .carm-picker__menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+  box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.18);
+}
+
+.carm-picker__row {
+  display: flex;
+  flex-direction: column;
+}
+
+.carm-picker__row.is-disabled {
+  opacity: 0.55;
+}
+
+.carm-picker__row-line {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.carm-picker__item-btn {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 8px 6px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text, #1e293b);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.carm-picker__item-btn:not(:disabled):hover {
+  background: var(--color-accent-light, #e8f5ef);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.carm-picker__item-btn.active {
+  background: var(--color-accent, #2d6a4f);
+  color: white;
+  font-weight: 600;
+}
+
+.carm-picker__item-btn:disabled {
+  cursor: not-allowed;
+}
+
+.carm-picker__item-btn:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 1px;
+}
+
+.carm-picker__item-label {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carm-picker__row-info {
+  flex-shrink: 0;
+  width: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  font-family: serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.carm-picker__row-info:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.carm-picker__row-info.active {
+  background: var(--color-accent-light, #e8f5ef);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.carm-picker__row-info:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 1px;
+}
+
+.carm-picker__row-def {
+  margin: 2px 4px 6px;
+  padding: 8px 10px 10px;
+  background: var(--color-bg-subtle, #eeeee8);
+  border-left: 3px solid var(--color-accent, #2d6a4f);
+  border-radius: 6px;
+}
+
+.carm-picker__row-def-title {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text, #1e293b);
+  line-height: 1.3;
+}
+
+.carm-picker__row-def-sample {
+  display: inline-block;
+  margin: 0 0 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-accent, #2d6a4f);
+  background: var(--color-accent-light, #e8f5ef);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.carm-picker__row-def-text {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--color-text-secondary, #4a5568);
+  line-height: 1.45;
+}
+
+.carm-picker__row-def-scale {
+  margin: 6px 0 0;
+  padding-top: 5px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+  font-size: 0.68rem;
+  color: var(--color-text-muted, #94a3b8);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .carm-picker__caption {
+    font-size: 0.74rem;
+  }
+  .carm-picker__trigger {
+    font-size: 0.78rem;
+    min-height: 30px;
+  }
+}
+
+/* ToolbarRow — pivot? + pickers[] + right-aligned actions. */
+.carm-toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 6px 4px 12px;
+}
+
+.carm-toolbar-row__pivot {
+  flex: 0 0 auto;
+}
+
+.carm-toolbar-row__pickers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.carm-toolbar-row__picker {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.carm-toolbar-row__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* Tight viewports: drop dropdown captions so two triggers still fit on
+   a single line. Mirrors the previous `.strips-controls-row--dropdowns
+   .strips-picker__caption` rule. */
+@media (max-width: 720px) {
+  .carm-toolbar-row__pickers .carm-picker__caption {
+    display: none;
+  }
+}
+
+/* Mobile compact mode (≤640): stack vertically with full-width pickers
+   and let actions wrap below. */
+@media (max-width: 640px) {
+  .carm-toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .carm-toolbar-row__pickers {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .carm-toolbar-row__picker {
+    width: 100%;
+  }
+  .carm-toolbar-row__picker .carm-picker {
+    width: 100%;
+  }
+  .carm-toolbar-row__picker .carm-picker__trigger {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .carm-toolbar-row__actions {
+    margin-left: 0;
+    justify-content: flex-end;
+    width: 100%;
+  }
 }

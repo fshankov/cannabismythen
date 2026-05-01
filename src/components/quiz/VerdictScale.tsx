@@ -15,6 +15,13 @@
  * - Compact mode hides the labels for use inside narrow review rows.
  */
 
+import {
+  ArrowUp,
+  ArrowUpRight,
+  ArrowDownLeft,
+  ArrowDown,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { Classification } from "./types";
 import { t } from "./i18n";
 
@@ -25,12 +32,16 @@ const ORDER: Classification[] = [
   "richtig",
 ];
 
-/** Colour-blind-safe shape glyph paired with each verdict. */
-const GLYPH: Record<Classification, string> = {
-  falsch: "↓",
-  eher_falsch: "◣",
-  eher_richtig: "◤",
-  richtig: "↑",
+/** Canonical site-wide verdict iconography — same Lucide arrows used by
+ *  the dashboard's `<VerdictArrow>` and the FaktenCard. The earlier
+ *  ◣/◤ unicode glyphs were swapped out in Stage 1 of the
+ *  Daten-Explorer refactor to give every verdict surface one shared
+ *  visual language. */
+const GLYPH: Record<Classification, LucideIcon> = {
+  falsch: ArrowDown,
+  eher_falsch: ArrowDownLeft,
+  eher_richtig: ArrowUpRight,
+  richtig: ArrowUp,
 };
 
 interface VerdictScaleProps {
@@ -94,7 +105,10 @@ export default function VerdictScale({
               onClick={() => !disabled && onChoose(c)}
             >
               <span className="verdict-scale__glyph" aria-hidden="true">
-                {GLYPH[c]}
+                {(() => {
+                  const Icon = GLYPH[c];
+                  return <Icon size={20} strokeWidth={2.25} />;
+                })()}
               </span>
               {!compact && (
                 <span className="verdict-scale__label">

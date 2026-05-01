@@ -289,7 +289,7 @@ export async function resolveMythLinks(
     if (!id) continue;
     const slug = map.get(id);
     if (!slug) continue;
-    out.push({ id, slug, url: `/zahlen-und-fakten/${slug}/` });
+    out.push({ id, slug, url: `/daten-explorer/${slug}/` });
   }
   return out;
 }
@@ -330,10 +330,29 @@ export const CLASSIFICATION_VAR: Record<FaqClassification, string> = {
   n_a: "--classification-keine-aussage",
 };
 
-/** Default URL label for a Dashboard-Verweis dropdown value. */
+/**
+ * Default URL label for a Dashboard-Verweis dropdown value.
+ *
+ * Stage 5 of the Daten-Explorer refactor renamed the public route
+ * to `/daten-explorer/`. The map below is keyed by the NEW URLs.
+ * Editor entries written against the old URLs (`/zahlen-und-fakten/`)
+ * still resolve to the same label via the legacy aliases — both keys
+ * fall back to the same German label so old Keystatic content keeps
+ * rendering its caption correctly.
+ */
 export function dashboardLinkLabel(url: string): string {
   const map: Record<string, string> = {
-    "/zahlen-und-fakten/": "Zahlen & Fakten",
+    "/daten-explorer/": "Daten-Explorer",
+    "/daten-explorer/informationswege/": "Dashboard: Informationswege",
+    "/daten-explorer/praeventionsbedeutung/": "Dashboard: Präventionsbedeutung",
+    "/daten-explorer/praeventionspotential/": "Dashboard: Präventionspotential",
+    "/daten-explorer/bevoelkerungsrelevanz/": "Dashboard: Bevölkerungsrelevanz",
+    "/daten-explorer/zielgruppen/": "Dashboard: Zielgruppenvergleich",
+    "/daten-explorer/minderjaehrige/": "Dashboard: Minderjährige",
+    // Legacy keys — keep so editor content authored before Stage 5
+    // doesn't lose its caption when an old URL is still in a CMS
+    // record. The middleware 301-redirects the URL itself anyway.
+    "/zahlen-und-fakten/": "Daten-Explorer",
     "/zahlen-und-fakten/informationswege/": "Dashboard: Informationswege",
     "/zahlen-und-fakten/praeventionsbedeutung/": "Dashboard: Präventionsbedeutung",
     "/zahlen-und-fakten/praeventionspotential/": "Dashboard: Präventionspotential",

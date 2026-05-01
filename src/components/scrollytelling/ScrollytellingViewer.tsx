@@ -293,7 +293,7 @@ function VizColorReveal({ active }: { active: boolean }) {
           🎯 Quiz starten →
           <span>Teste dich selbst gegen den Wissenschaftsstand</span>
         </a>
-        <a href="/zahlen-und-fakten/" className="viz-cta-card viz-cta-card--myths">
+        <a href="/daten-explorer/" className="viz-cta-card viz-cta-card--myths">
           🔍 Alle 42 Mythen erkunden →
           <span>Filtern · Vergleichen · Factsheets lesen</span>
         </a>

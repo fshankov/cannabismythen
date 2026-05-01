@@ -1,28 +1,12 @@
 ---
-export const prerender = true;
+/**
+ * Stage 5 of the Daten-Explorer refactor — these legacy "daten/"
+ * dashboard pages now redirect into the Daten-Explorer entry while
+ * preserving any query string. SSR-mode (no `prerender = true`) so
+ * we can read the incoming URL.
+ */
+export const prerender = false;
 
-import BaseLayout from "@layouts/BaseLayout.astro";
-import { reader } from "@lib/content";
-
-export async function getStaticPaths() {
-  const slugs = await reader.collections.zahlenUndFaktenDashboard.list();
-  const paths = [];
-
-  for (const slug of slugs) {
-    const entry = await reader.collections.zahlenUndFaktenDashboard.read(slug);
-    if (entry && entry.status === "published") {
-      paths.push({ params: { slug } });
-    }
-  }
-
-  return paths;
-}
+const search = Astro.url.search;
+return Astro.redirect(`/daten-explorer/${search}`, 301);
 ---
-
-<BaseLayout title="Weiterleitung" description="Diese Seite wurde in den interaktiven Dashboard-Explorer integriert.">
-  <p>
-    Diese Seite wurde in den neuen interaktiven
-    <a href="/zahlen-und-fakten/">Mythen Explorer</a> integriert.
-  </p>
-  <script is:inline>window.location.replace('/zahlen-und-fakten/');</script>
-</BaseLayout>

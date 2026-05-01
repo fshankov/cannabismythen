@@ -1,11 +1,18 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Share2, Download, Filter, Maximize2, Minimize2, MapPin } from 'lucide-react';
+import {
+  Share2, Download, Filter, Maximize2, Minimize2,
+  Eye, TrendingUp, Target, Shield, Globe,
+  Users, Baby, Cannabis, GraduationCap, UsersRound,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type {
   CarmData,
   AppState,
   ViewTab,
   Myth,
   VerdictFilter,
+  GroupId,
+  Indicator,
   DashboardDefinitions,
 } from '../../lib/dashboard/types';
 import {
@@ -15,7 +22,7 @@ import {
   correctGroupsForIndicator,
   getDisabledGroupsForIndicator,
 } from '../../lib/dashboard/data';
-import { t } from '../../lib/dashboard/translations';
+import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import { urlToState, getDefaultState, pushState } from '../../lib/dashboard/url-state';
 import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
@@ -26,18 +33,54 @@ import LollipopView from './views/LollipopView';
 import OverviewView from './views/OverviewView';
 import CircularView from './views/CircularView';
 import LadderView from './views/LadderView';
-import StripsView from './views/StripsView';
-import SourcesStripsView from './views/SourcesStripsView';
+import StripsView, { type StripsViewHandle } from './views/StripsView';
+import SourcesStripsView, { type SourcesStripsViewHandle } from './views/SourcesStripsView';
 import BalkenView, { type BalkenViewHandle } from './views/BalkenView';
-import IndicatorGroupSelector from './controls/IndicatorGroupSelector';
-import StickyToolbar from './controls/StickyToolbar';
+import type { ChartHandle } from '../../lib/dashboard/export';
 import VerdictLegend from './controls/VerdictLegend';
 import FilterDrawer from './controls/FilterDrawer';
 import ExportDrawer from './controls/ExportDrawer';
-import Fab from './controls/Fab';
+import DataPicker, { type DataPickerOption } from './controls/DataPicker';
+import MythosSearchChip from './controls/MythosSearchChip';
+import ToolbarRow from './controls/ToolbarRow';
 import FactsheetPanel from './FactsheetPanel';
 import DashboardOnboarding from './DashboardOnboarding';
 import type { MythContentEntry } from './FactsheetPanel';
+
+const INDICATORS: Indicator[] = [
+  'awareness',
+  'significance',
+  'correctness',
+  'prevention_significance',
+  'population_relevance',
+];
+
+const GROUPS: GroupId[] = [
+  'adults',
+  'minors',
+  'consumers',
+  'young_adults',
+  'parents',
+];
+
+/** Icons mirror the Streifen view's INDICATOR_ICONS / GROUP_ICONS so
+ *  the same indicator/group reads identically across every dashboard
+ *  tab. */
+const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
+  awareness: Eye,
+  significance: TrendingUp,
+  correctness: Target,
+  prevention_significance: Shield,
+  population_relevance: Globe,
+};
+
+const GROUP_ICONS: Record<GroupId, LucideIcon> = {
+  adults: Users,
+  minors: Baby,
+  consumers: Cannabis,
+  young_adults: GraduationCap,
+  parents: UsersRound,
+};
 
 export type { MythContentEntry };
 
@@ -73,6 +116,30 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   const [exportDrawerOpen, setExportDrawerOpen] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
   const balkenRef = useRef<BalkenViewHandle>(null);
+  const stripsRef = useRef<StripsViewHandle>(null);
+  const sourcesRef = useRef<SourcesStripsViewHandle>(null);
+
+  /**
+   * `getActiveChart()` — the canonical lookup the ExportDrawer uses to
+   * grab a chart handle for image export. Returns:
+   *   - balken  → ECharts instance via BalkenView's imperative handle
+   *   - strips  → live `<svg>` from StripsView (D3-rendered)
+   *   - sources → live `<svg>` from SourcesStripsView (D3-rendered)
+   *   - table   → null (Tabelle has no visualisation)
+   */
+  const getActiveChart = useCallback((): ChartHandle | null => {
+    switch (state.view) {
+      case 'balken':
+        return balkenRef.current?.getEchartsInstance() ?? null;
+      case 'strips':
+        return stripsRef.current?.getSvgElement() ?? null;
+      case 'sources':
+        return sourcesRef.current?.getSvgElement() ?? null;
+      case 'table':
+      default:
+        return null;
+    }
+  }, [state.view]);
 
   /** Active count of non-default filters (Mythos category + verdict + search +
    *  non-default sort). Drives the badge on the Filter button. */
@@ -226,13 +293,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
 
   return (
     <div className="carm-explorer">
-      <div className="carm-explorer-header">
-        <div className="carm-explorer-header-left">
-          <h2 className="carm-explorer-title">{t('app.title', 'de')}</h2>
-          <p className="carm-explorer-subtitle">{t('app.subtitle', 'de')}</p>
-        </div>
-      </div>
-
+      {/* The redundant "Cannabis Mythen Explorer" header was removed in
+          Stage 1 of the Daten-Explorer refactor — the global nav already
+          labels the page, and the tab bar communicates view state. */}
       <div className="app-layout">
         {/* First-visit guidance for the Streifen view: welcome card +
             opt-in 4-step Driver.js tour + persistent "Hilfe" button.
@@ -244,61 +307,156 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           view={state.view}
           lang={'de'}
           onChange={(v: ViewTab) => update('view', v)}
+          onRundgang={() => {
+            // Placeholder until the cross-view Driver.js tour is wired.
+            // The Streifen tour stays reachable via DashboardOnboarding.
+            // eslint-disable-next-line no-console
+            console.info('Rundgang TBD');
+          }}
         />
 
-        {isModernView && (
-          <StickyToolbar
-            start={
-              <IndicatorGroupSelector
-                state={state}
-                update={update}
-                disabledGroups={disabledGroups}
-                disabledGroupReason={t('igs.disabled.popRel', 'de')}
-              />
-            }
-            end={
-              <>
-                <button
-                  type="button"
-                  className="carm-btn carm-btn--ghost"
-                  onClick={() => setFilterDrawerOpen(true)}
-                  aria-label={t('filter.button', 'de')}
-                >
-                  <Filter size={14} strokeWidth={2} aria-hidden="true" />
-                  {t('filter.button', 'de')}
-                  {activeFilterCount > 0 && (
-                    <span className="carm-btn__badge" aria-label={`${activeFilterCount} aktiv`}>
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className="carm-btn carm-btn--ghost"
-                  onClick={() => setExportDrawerOpen(true)}
-                  aria-label={t('export.button', 'de')}
-                >
-                  <Download size={14} strokeWidth={2} aria-hidden="true" />
-                  {t('export.button', 'de')}
-                </button>
-                <button
-                  type="button"
-                  className="carm-btn carm-btn--ghost carm-rundgang-trigger"
-                  onClick={() => {
-                    // Placeholder until tour is wired across all views.
-                    // Existing Streifen tour is reachable via DashboardOnboarding.
-                    // eslint-disable-next-line no-console
-                    console.info('Rundgang TBD');
-                  }}
-                  aria-label={t('rundgang.label', 'de')}
-                >
-                  <MapPin size={14} strokeWidth={2} aria-hidden="true" />
-                  {t('rundgang.label', 'de')}
-                </button>
-              </>
-            }
-          />
-        )}
+        {isModernView && (() => {
+          // Stage 2 — every modern tab (Balken, Tabelle) renders the
+          // shared `<ToolbarRow>` chrome built from `<DataPicker>` and
+          // `<PivotToggle>`. Streifen and Sources own their own
+          // toolbars and render them inside the chart-area.
+          const indicatorOptions: DataPickerOption<Indicator>[] = INDICATORS.map(
+            (ind) => {
+              const def = defs?.mythIndicators?.[ind];
+              return {
+                value: ind,
+                label: t(`indicator.${ind}.short` as TranslationKey, 'de'),
+                Icon: INDICATOR_ICONS[ind],
+                definition: def
+                  ? {
+                      title: def.label,
+                      text: def.definition,
+                      scale: def.scale,
+                      sampleSize: def.sampleSize,
+                    }
+                  : undefined,
+              };
+            },
+          );
+
+          const groupOptions: DataPickerOption<GroupId>[] = GROUPS.map((g) => {
+            const def = defs?.groups?.[g];
+            return {
+              value: g,
+              label: t(`igs.group.${g}` as TranslationKey, 'de'),
+              Icon: GROUP_ICONS[g],
+              disabled: disabledGroups.includes(g),
+              disabledReason: t('igs.disabled.popRel', 'de'),
+              definition: def
+                ? {
+                    title: def.label,
+                    text: def.definition,
+                    sampleSize: def.sampleSize,
+                  }
+                : undefined,
+            };
+          });
+
+          // Tabelle gets a 3rd picker for the science-verdict filter —
+          // the inline `<select className="verdict-header-select">`
+          // inside the table header is replaced by this so the column
+          // header stays clean (Stage 2, issue #13 in the plan).
+          const VERDICTS: VerdictFilter[] = [
+            'all',
+            'richtig',
+            'eher_richtig',
+            'eher_falsch',
+            'falsch',
+            'no_classification',
+          ];
+          const verdictOptions: DataPickerOption<VerdictFilter>[] = VERDICTS.map(
+            (v) => ({
+              value: v,
+              label:
+                v === 'all'
+                  ? t('verdict.all', 'de')
+                  : t(`verdict.${v}` as TranslationKey, 'de'),
+            }),
+          );
+
+          const groupValue: GroupId = state.groupIds[0] ?? 'adults';
+
+          return (
+            <ToolbarRow
+              aria-label={t('filter.title', 'de')}
+              pickers={[
+                <DataPicker<Indicator>
+                  key="indicator"
+                  caption={t('igs.indicator.legend', 'de')}
+                  value={state.indicator}
+                  options={indicatorOptions}
+                  onChange={(v) => update('indicator', v)}
+                  aria-label={t('igs.indicator.legend', 'de')}
+                  lang="de"
+                />,
+                <DataPicker<GroupId>
+                  key="group"
+                  caption={t('igs.group.legend', 'de')}
+                  value={groupValue}
+                  options={groupOptions}
+                  onChange={(v) => update('groupIds', [v])}
+                  aria-label={t('igs.group.legend', 'de')}
+                  lang="de"
+                />,
+                ...(state.view === 'table'
+                  ? [
+                      <DataPicker<VerdictFilter>
+                        key="verdict"
+                        caption={t('detail.verdict', 'de')}
+                        value={state.verdictFilter}
+                        options={verdictOptions}
+                        onChange={(v) => update('verdictFilter', v)}
+                        aria-label={t('detail.verdict', 'de')}
+                        lang="de"
+                      />,
+                    ]
+                  : []),
+              ]}
+              actions={
+                <>
+                  {/* Stage 4 — search chip surfaces only on Balken +
+                      Tabelle. Streifen has its own dot-driven search;
+                      Sources operates on a different data set. */}
+                  <MythosSearchChip
+                    myths={data.myths}
+                    onSelectMyth={selectMyth}
+                  />
+                  <button
+                    type="button"
+                    className="carm-btn carm-btn--ghost"
+                    onClick={() => setFilterDrawerOpen(true)}
+                    aria-label={t('filter.button', 'de')}
+                  >
+                    <Filter size={14} strokeWidth={2} aria-hidden="true" />
+                    {t('filter.button', 'de')}
+                    {activeFilterCount > 0 && (
+                      <span
+                        className="carm-btn__badge"
+                        aria-label={`${activeFilterCount} aktiv`}
+                      >
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="carm-btn carm-btn--ghost"
+                    onClick={() => setExportDrawerOpen(true)}
+                    aria-label={t('export.button', 'de')}
+                  >
+                    <Download size={14} strokeWidth={2} aria-hidden="true" />
+                    {t('export.button', 'de')}
+                  </button>
+                </>
+              }
+            />
+          );
+        })()}
 
         {state.view !== 'sources' && !isModernView && (
           <FilterBar
@@ -355,7 +513,13 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
 
           <div className="chart-area__chart">
             {state.view === 'sources' ? (
-              <SourcesStripsView state={state} update={update} definitions={defs} />
+              <SourcesStripsView
+                ref={sourcesRef}
+                state={state}
+                update={update}
+                definitions={defs}
+                onOpenExport={() => setExportDrawerOpen(true)}
+              />
             ) : filteredMyths.length === 0 ? (
               <div className="no-results">{t('misc.noResults', 'de')}</div>
             ) : (
@@ -366,7 +530,21 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                     myths={filteredMyths}
                     metrics={data.metrics}
                     state={state}
+                    update={update}
                     onSelectMyth={selectMyth}
+                    onResetFilters={() => {
+                      // Stage 4 — single-shot recovery: clear every
+                      // filter slot the active filter count tracks
+                      // so the empty-state CTA always exits the
+                      // "over-filtered to nothing" trap.
+                      setState((prev) => ({
+                        ...prev,
+                        categoryIds: [],
+                        verdictFilter: 'all',
+                        search: '',
+                        balkenSort: 'value-desc',
+                      }));
+                    }}
                   />
                 )}
                 {state.view === 'table' && (
@@ -389,6 +567,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 )}
                 {state.view === 'strips' && (
                   <StripsView
+                    ref={stripsRef}
                     myths={filteredMyths}
                     metrics={data.metrics}
                     groups={data.groups}
@@ -399,6 +578,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                     definitions={defs}
                     mythThemes={mythThemeMap}
                     mythContentMap={mythContentMap}
+                    onOpenExport={() => setExportDrawerOpen(true)}
                   />
                 )}
               </>
@@ -463,33 +643,45 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         />
       )}
 
-      {isModernView && (
-        <ExportDrawer
-          open={exportDrawerOpen}
-          onClose={() => setExportDrawerOpen(false)}
-          myths={filteredMyths}
-          metrics={data.metrics}
-          groupIds={state.groupIds}
-          indicator={state.indicator}
-          view={state.view}
-          getChart={() => balkenRef.current?.getEchartsInstance() ?? null}
-          chartChrome={() => ({
+      {/* ExportDrawer renders on every tab in Stage 3 — Tabelle still
+          opens it (Daten tab works), Visualisierung disables there. */}
+      <ExportDrawer
+        open={exportDrawerOpen}
+        onClose={() => setExportDrawerOpen(false)}
+        myths={filteredMyths}
+        metrics={data.metrics}
+        groupIds={state.groupIds}
+        indicator={state.indicator}
+        view={state.view}
+        getChart={getActiveChart}
+        chartChrome={() => {
+          // Per-tab chart chrome. Streifen + Sources have their own
+          // titles; Balken keeps the existing label; Tabelle never
+          // calls this (no visualisation), but we return something
+          // sensible to satisfy the type.
+          const indicatorLabel = t(`indicator.${state.indicator}`, 'de');
+          const groupLabel = t(
+            `igs.group.${state.groupIds[0] ?? 'adults'}` as TranslationKey,
+            'de',
+          );
+          if (state.view === 'strips') {
+            return {
+              title: 'Mythen-Streifen',
+              subtitle: `${indicatorLabel} · ${groupLabel}`,
+            };
+          }
+          if (state.view === 'sources') {
+            return {
+              title: 'Informationsquellen',
+              subtitle: '',
+            };
+          }
+          return {
             title: t('balken.title', 'de'),
-            subtitle: `${t(`indicator.${state.indicator}`, 'de')} · ${t(`igs.group.${state.groupIds[0] ?? 'adults'}`, 'de')}`,
-          })}
-        />
-      )}
-
-      {isModernView && (
-        <Fab
-          onClick={() => {
-            // eslint-disable-next-line no-console
-            console.info('Rundgang TBD');
-          }}
-          label={t('rundgang.label', 'de')}
-          icon={<MapPin size={20} strokeWidth={2} />}
-        />
-      )}
+            subtitle: `${indicatorLabel} · ${groupLabel}`,
+          };
+        }}
+      />
 
       {snackbar && (
         <div className="carm-snackbar" role="status" aria-live="polite">

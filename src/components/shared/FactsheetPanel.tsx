@@ -221,7 +221,7 @@ export default function FactsheetPanel({
   };
 
   const pageSlug = factsheetSlug
-    ? `/zahlen-und-fakten/${factsheetSlug}/`
+    ? `/daten-explorer/${factsheetSlug}/`
     : undefined;
 
   return (
@@ -248,7 +248,7 @@ export default function FactsheetPanel({
           {mythContentEntry ? (
             <>
               {/* 1. Myth statement */}
-              <p className="factsheet-panel__statement">{mythContentEntry.title}</p>
+              <p className={`factsheet-panel__statement statement--${classificationKey}`}>{mythContentEntry.title}</p>
 
               {/* 2. Evidence-based verdict */}
               <div className="factsheet-panel__classification">
@@ -271,7 +271,7 @@ export default function FactsheetPanel({
           ) : (
             <>
               {/* Fallback if no pre-rendered content */}
-              <p className="factsheet-panel__statement">{mythText}</p>
+              <p className={`factsheet-panel__statement statement--${classificationKey}`}>{mythText}</p>
 
               <div className="factsheet-panel__classification">
                 <span className="factsheet-panel__label">{verdictLabel}</span>

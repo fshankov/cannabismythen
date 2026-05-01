@@ -1,0 +1,115 @@
+---
+export const prerender = true;
+
+import Markdoc from "@markdoc/markdoc";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import MythenExplorer from "@components/dashboard/MythenExplorer";
+import { reader, getPublishedEntries } from "@lib/content";
+// Dashboard definitions — loaded at build time from Keystatic singleton.
+// Edit via /keystatic (Dashboard – Definitionen & Glossar) → commit to
+// content/ branch → Netlify rebuilds → tooltips show updated text.
+import definitionsData from "../../content/dashboard-definitionen.json";
+import "../../styles/dashboard.css";
+
+// Combined myth factsheets: one .mdoc covers two CaRM myth IDs.
+// Map the secondary myth ID to the same slug and content.
+const COMBINED_MYTHS: Record<number, number> = {
+  32: 31, // m31-m32-entspannt-aggressiv
+  37: 36, // m36-m37-leistungen-niveau
+  42: 41, // m41-m42-anstieg-konsum
+};
+
+// Build mythId → Quiz theme slug map. Each quiz module mdoc lists
+// the myth IDs it covers via questions[].mythId (format "m04"). We map the
+// numeric myth_id ("m04" → 4) to the theme slug ("quiz-gefaehrlichkeit").
+// The Streifen view uses this for the Themen filter / Themen pivot mode.
+const quizEntries = await getPublishedEntries("quiz");
+const mythIdToTheme: Record<number, string> = {};
+for (const [slug, entry] of quizEntries) {
+  if (slug === "feedback-texte") continue;
+  const e = entry as any;
+  const questions = (e.questions || []) as Array<{ mythId?: string }>;
+  for (const q of questions) {
+    if (!q.mythId) continue;
+    const num = parseInt(q.mythId.replace(/[^\d]/g, ""), 10);
+    if (Number.isFinite(num)) mythIdToTheme[num] = slug;
+  }
+}
+
+// Build myth ID → factsheet slug mapping
+const factsheetEntries = await getPublishedEntries("zahlenUndFakten");
+const mythSlugs: Record<number, string> = {};
+
+for (const [slug, entry] of factsheetEntries) {
+  const e = entry as any;
+  if (e.mythNumber) {
+    mythSlugs[e.mythNumber] = slug;
+  }
+}
+// Add secondary IDs for combined myths
+for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
+  if (mythSlugs[Number(primary)]) {
+    mythSlugs[Number(secondary)] = mythSlugs[Number(primary)];
+  }
+}
+
+// Pre-render factsheet HTML for the detail panel (same approach as Quiz pages)
+const mythContentMap: Record<
+  number,
+  {
+    html: string;
+    title: string;
+    classification: string;
+    classificationLabel: string;
+    refCount: number;
+  }
+> = {};
+
+for (const [slug, entry] of factsheetEntries) {
+  const e = entry as any;
+  if (!e.mythNumber) continue;
+
+  try {
+    const fullEntry = await reader.collections.zahlenUndFakten.read(slug);
+    if (fullEntry && fullEntry.content) {
+      const { node } = await fullEntry.content();
+      const fullHtml = Markdoc.renderers.html(Markdoc.transform(node));
+
+      const refMatch = fullHtml.match(/<li>/g);
+      const refCount = refMatch ? refMatch.length : 0;
+
+      // Strip "Mythos XX:" or "Mythos XX/YY:" prefix from the display title
+      const rawTitle = fullEntry.title as string;
+      const cleanTitle = rawTitle.replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "");
+
+      mythContentMap[e.mythNumber] = {
+        html: fullHtml,
+        title: cleanTitle,
+        classification: (fullEntry as any).classification || "",
+        classificationLabel: (fullEntry as any).classificationLabel || "",
+        refCount,
+      };
+    }
+  } catch {
+    // If a factsheet fails to render, skip it
+  }
+}
+
+// Copy content entries for secondary combined myth IDs
+for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
+  const p = Number(primary);
+  if (mythContentMap[p]) {
+    mythContentMap[Number(secondary)] = mythContentMap[p];
+  }
+}
+---
+
+<BaseLayout title="Daten-Explorer" description="Interaktive Datenvisualisierung zu 42 Cannabis-Mythen — Erkunden Sie wissenschaftliche Einordnungen, Bevölkerungsdaten und Indikatoren.">
+  <MythenExplorer
+    client:load
+    mythSlugs={mythSlugs}
+    mythContent={JSON.stringify(mythContentMap)}
+    definitions={JSON.stringify(definitionsData)}
+    mythThemes={JSON.stringify(mythIdToTheme)}
+  />
+</BaseLayout>
