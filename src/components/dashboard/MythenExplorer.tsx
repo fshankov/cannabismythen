@@ -246,6 +246,16 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     setState((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  /** Multi-key state patch — needed by FilterDrawer's `toggleCategory` /
+   *  `toggleMyth` so two related fields (categoryIds + mythIds) update
+   *  in one render. Two sequential `update` calls compute their `value`
+   *  from the same closure-snapshot of `state`, which makes the
+   *  category-myth promotion/expansion logic fragile; one `updateMany`
+   *  call avoids the race entirely. */
+  const updateMany = useCallback((patch: Partial<AppState>) => {
+    setState((prev) => ({ ...prev, ...patch }));
+  }, []);
+
   const filteredMyths = useMemo(() => {
     if (!data) return [];
     return filterMyths(
@@ -658,6 +668,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         onClose={() => setFilterDrawerOpen(false)}
         state={state}
         update={update}
+        updateMany={updateMany}
         myths={data.myths}
         categories={data.categories}
         mythContent={mythContentMap}
