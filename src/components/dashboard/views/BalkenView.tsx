@@ -1,12 +1,10 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { ECharts } from 'echarts';
-import { ArrowDownAZ, ArrowDownZA, Layers as LayersIcon } from 'lucide-react';
 import type { Myth, Metric, AppState, BalkenSort } from '../../../lib/dashboard/types';
 import {
   buildTooltipHtml,
   formatValue,
-  getCategoryName,
   getIndicatorValue,
   getMythMetric,
   getMythShortText,
@@ -19,13 +17,9 @@ interface Props {
   metrics: Metric[];
   state: AppState;
   onSelectMyth: (id: number) => void;
-  /** Stage 4 — three sort chips above the chart need to mutate
-   *  `state.balkenSort` so the FilterDrawer's radio group stays
-   *  synced with the inline chips. */
-  update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
-  /** Stage 4 — empty-state CTA resets categoryIds + verdictFilter +
-   *  search + balkenSort so the user can recover from an "over-filtered
-   *  to nothing" state in one click. */
+  /** Empty-state CTA resets categoryIds + mythIds + verdictFilter +
+   *  search + balkenSort so the user can recover from an
+   *  "over-filtered to nothing" state in one click. */
   onResetFilters?: () => void;
 }
 
@@ -50,23 +44,12 @@ const GROUP_LABELS: Record<string, string> = {
 
 function sortData(data: Datum[], sort: BalkenSort): Datum[] {
   const copy = data.slice();
-  if (sort === 'value-desc') return copy.sort((a, b) => b.value - a.value);
   if (sort === 'value-asc') return copy.sort((a, b) => a.value - b.value);
-  // 'category': group by category, sort by value desc within
-  return copy.sort((a, b) => {
-    if (a.category !== b.category) return a.category.localeCompare(b.category, 'de');
-    return b.value - a.value;
-  });
+  return copy.sort((a, b) => b.value - a.value);
 }
 
-const SORT_CHIPS: { value: BalkenSort; label: string; icon: 'asc' | 'desc' | 'cat' }[] = [
-  { value: 'value-desc', label: '↓ nach Wert', icon: 'desc' },
-  { value: 'value-asc', label: '↑ nach Wert', icon: 'asc' },
-  { value: 'category', label: 'Nach Kategorie', icon: 'cat' },
-];
-
 const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
-  { myths, metrics, state, onSelectMyth, update, onResetFilters },
+  { myths, metrics, state, onSelectMyth, onResetFilters },
   ref,
 ) {
   const chartRef = useRef<ReactECharts>(null);
@@ -104,7 +87,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
       const metric = getMythMetric(metrics, myth.id, groupId);
       const value = getIndicatorValue(metric, state.indicator);
       if (value === null) continue;
-      out.push({ myth, value, category: getCategoryName(myth, 'de') });
+      out.push({ myth, value, category: myth.category_de });
     }
     return sortData(out, state.balkenSort);
   }, [myths, metrics, groupId, state.indicator, state.balkenSort]);
@@ -119,10 +102,49 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     // room (≥25% of axis), otherwise just past the bar end.
     const insideThreshold = max * 0.25;
 
+    // Verdict-coloured y-axis labels — replaces the separate
+    // VerdictLegend sidebar that used to live to the right of the chart.
+    // Each label is rendered with an ECharts `rich` style keyed by the
+    // myth's correctness_class, so the text picks up the verdict colour
+    // and a leading verdict arrow glyph (↑ ↗ ↙ ↓ —) before the label.
+    // Truncation rule unchanged.
+    const VERDICT_GLYPH: Record<string, string> = {
+      richtig: '↑ ',
+      eher_richtig: '↗ ',
+      eher_falsch: '↙ ',
+      falsch: '↓ ',
+      no_classification: '— ',
+    };
     const yLabels = ordered.map((d) => {
       const txt = getMythShortText(d.myth, 'de');
-      return txt.length > 64 ? txt.slice(0, 62) + '…' : txt;
+      const trimmed = txt.length > 60 ? txt.slice(0, 58) + '…' : txt;
+      const cls = d.myth.correctness_class;
+      const glyph = VERDICT_GLYPH[cls] ?? '';
+      return `{${cls}|${glyph}${trimmed}}`;
     });
+
+    const richStyles = {
+      richtig: {
+        color: getCorrectnessColor('richtig'),
+        fontWeight: 600,
+      },
+      eher_richtig: {
+        color: getCorrectnessColor('eher_richtig'),
+        fontWeight: 600,
+      },
+      eher_falsch: {
+        color: getCorrectnessColor('eher_falsch'),
+        fontWeight: 600,
+      },
+      falsch: {
+        color: getCorrectnessColor('falsch'),
+        fontWeight: 600,
+      },
+      no_classification: {
+        color: '#1e293b',
+        fontWeight: 500,
+      },
+    };
 
     return {
       animation: false,
@@ -166,13 +188,14 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
         type: 'category' as const,
         data: yLabels,
         axisLabel: {
-          width: 220,
+          width: 240,
           overflow: 'truncate' as const,
           fontSize: 12,
           color: '#1e293b',
-          // Stage 4 — widen the click target so tapping the y-axis
-          // myth label opens the factsheet, not just the bar itself.
+          // Widen the click target so tapping the y-axis myth label
+          // opens the factsheet, not just the bar itself.
           triggerEvent: true,
+          rich: richStyles,
         },
         axisTick: { show: false },
         axisLine: { lineStyle: { color: '#e2e8f0' } },
@@ -223,43 +246,13 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     };
   }, [data, state.indicator, groupName]);
 
-  // Sort chips above the chart (Stage 4 — synced with state.balkenSort
-  // so the FilterDrawer's radio group and the inline chips stay in
-  // lockstep).
-  const renderSortChips = () => (
-    <div
-      className="carm-balken-sort"
-      role="group"
-      aria-label={t('sort.label', 'de')}
-    >
-      {SORT_CHIPS.map((chip) => {
-        const active = state.balkenSort === chip.value;
-        const Icon =
-          chip.icon === 'desc'
-            ? ArrowDownZA
-            : chip.icon === 'asc'
-              ? ArrowDownAZ
-              : LayersIcon;
-        return (
-          <button
-            key={chip.value}
-            type="button"
-            className={`carm-balken-sort__chip ${active ? 'is-active' : ''}`}
-            aria-pressed={active}
-            onClick={() => update('balkenSort', chip.value)}
-          >
-            <Icon size={14} strokeWidth={2} aria-hidden="true" />
-            {chip.label}
-          </button>
-        );
-      })}
-    </div>
-  );
+  // Sort UI now lives in the shared dashboard toolbar (`<SortToggle>`);
+  // the inline chips that used to render here were removed when the
+  // toolbar consolidated.
 
   if (data.length === 0) {
     return (
       <div className="carm-balken-view" ref={wrapperRef}>
-        {renderSortChips()}
         <div className="carm-balken-empty" role="status">
           <p className="carm-balken-empty__title">
             {t('filter.empty.title', 'de')}
@@ -306,7 +299,6 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
 
   return (
     <div className="carm-balken-view" ref={wrapperRef}>
-      {renderSortChips()}
       <ReactECharts
         ref={chartRef}
         option={option}

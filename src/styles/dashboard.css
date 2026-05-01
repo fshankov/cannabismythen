@@ -4594,7 +4594,35 @@ body.carm-modal-open {
   border: 1px solid var(--color-accent, #2d6a4f);
   border-radius: 999px;
   background: white;
-  width: 280px;
+  /* Grow into the available toolbar space rather than forcing the
+     toolbar to wrap when 280px doesn't fit. The chip stays inline; on
+     narrow viewports it shrinks down to its readable minimum. */
+  flex: 1 1 220px;
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.carm-search-chip__clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+}
+
+.carm-search-chip__clear:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-text, #1a1a2e);
 }
 
 .carm-search-chip__icon {
@@ -4691,7 +4719,9 @@ body.carm-modal-open {
 
 @media (max-width: 640px) {
   .carm-search-chip__expanded {
-    width: 220px;
+    min-width: 0;
+    max-width: 100%;
+    flex-basis: 100%;
   }
 }
 
@@ -5295,4 +5325,169 @@ body.carm-modal-open {
     justify-content: flex-end;
     width: 100%;
   }
+}
+
+/* ===========================================================================
+   SortToggle — single-button sort direction (Balken / Tabelle)
+   =========================================================================== */
+
+.carm-sort-toggle {
+  white-space: nowrap;
+}
+
+/* ===========================================================================
+   FilterDrawer (unified search + Kategorien + einzelne Mythen)
+   =========================================================================== */
+
+.carm-filter-search-row {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 4px;
+  margin: 0 0 8px;
+  background: var(--color-surface, #ffffff);
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.carm-filter-search-row__icon {
+  flex: 0 0 auto;
+  color: var(--color-text-muted, #94a3b8);
+  margin-left: 4px;
+}
+
+.carm-filter-search-row__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 999px;
+  background: white;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.carm-filter-search-row__input:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.carm-filter-search-row__clear {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+}
+
+.carm-filter-search-row__clear:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-text, #1a1a2e);
+}
+
+.carm-filter-summary {
+  margin: 0 4px 12px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #718096);
+}
+
+.carm-filter-empty {
+  margin: 8px 4px;
+  color: var(--color-text-muted, #718096);
+  font-size: 0.9rem;
+}
+
+.carm-filter-myth-groups {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.carm-filter-myth-group {
+  margin-bottom: 14px;
+}
+
+.carm-filter-myth-group__heading {
+  margin: 6px 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted, #718096);
+}
+
+.carm-filter-myth-list {
+  margin: 0;
+  padding: 0;
+}
+
+.carm-checkbox--myth {
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 4px;
+  border-radius: 6px;
+}
+
+.carm-checkbox--myth:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+}
+
+.carm-checkbox__verdict {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.carm-checkbox__count {
+  margin-left: 6px;
+  font-weight: 400;
+  color: var(--color-text-muted, #718096);
+  font-size: 0.78rem;
+}
+
+.carm-checkbox__label {
+  flex: 1 1 auto;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+/* MythosSearchChip — color autocomplete row by verdict (parallel to drawer rows). */
+.carm-search-chip__item-arrow.classification--richtig          { color: var(--classification-richtig); }
+.carm-search-chip__item-arrow.classification--eher_richtig     { color: var(--classification-eher-richtig); }
+.carm-search-chip__item-arrow.classification--eher_falsch      { color: var(--classification-eher-falsch); }
+.carm-search-chip__item-arrow.classification--falsch           { color: var(--classification-falsch); }
+.carm-search-chip__item-arrow.classification--no_classification { color: var(--color-text); }
+
+/* ===========================================================================
+   Inline verdict cues on myth labels (Stage X — replaces the separate
+   "Wissenschaftliches Urteil" sidebar legend across Balken / Tabelle /
+   Streifen views).
+   =========================================================================== */
+
+.carm-myth-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.carm-myth-label__arrow {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

@@ -24,7 +24,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Compass, MapPin, PlayCircle, X } from 'lucide-react';
+import { MapPin, PlayCircle, X } from 'lucide-react';
 import { driver, type Driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 
@@ -32,9 +32,19 @@ const STORAGE_KEY = 'carm-onboarding-strips-v1';
 
 type Mode = 'closed' | 'welcome' | 'minimap';
 
+export interface DashboardOnboardingHandle {
+  /** Open the welcome card. Used by the always-visible Rundgang button in
+   *  the tabs row, regardless of the currently active view. */
+  open: () => void;
+}
+
 interface Props {
   /** Only render the onboarding affordances when the Streifen view is active. */
   active: boolean;
+  /** Bumping this counter opens the welcome card. The parent owns the
+   *  trigger (so the Rundgang button in the tabs row can live on every
+   *  tab) and just needs to increment to invoke us. */
+  openTrigger?: number;
 }
 
 /**
@@ -58,15 +68,9 @@ function safeQuery(selector: string): Element | null {
   }
 }
 
-export default function DashboardOnboarding({ active }: Props) {
+export default function DashboardOnboarding({ active, openTrigger }: Props) {
   const [mode, setMode] = useState<Mode>('closed');
   const [hasSeen, setHasSeen] = useState<boolean>(true); // start true to avoid SSR flash
-  /** DOM node we'll portal the inline "Rundgang" pill into so it appears
-   *  on the same flex row as the visualization tabs. We can't render it
-   *  as a child of <ViewTabs/> without coupling the components, and we
-   *  don't want a separate help-bar above the tabs (the tabs row is the
-   *  natural anchor). */
-  const [tabsBarEl, setTabsBarEl] = useState<HTMLElement | null>(null);
   /** Modal a11y refs — restore focus to the trigger on close, and focus
    *  the close button on open. */
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -87,26 +91,9 @@ export default function DashboardOnboarding({ active }: Props) {
     }
   }, [active]);
 
-  // Locate .tabs-bar once it's in the DOM so we can portal the pill into it.
-  // ViewTabs renders later in the same Astro island, so on first hydration
-  // the node may not exist yet — poll briefly (50 ms × 40 = 2 s) then give up.
-  useEffect(() => {
-    if (!active || typeof window === 'undefined') return;
-    const find = () => {
-      const el = document.querySelector('.tabs-bar') as HTMLElement | null;
-      if (el) {
-        setTabsBarEl(el);
-        return true;
-      }
-      return false;
-    };
-    if (find()) return;
-    let attempts = 0;
-    const id = window.setInterval(() => {
-      if (find() || ++attempts > 40) window.clearInterval(id);
-    }, 50);
-    return () => window.clearInterval(id);
-  }, [active]);
+  // The persistent "Rundgang" affordance now lives directly in <ViewTabs>
+  // (always rendered, not portalled) so the previous tabs-bar lookup is
+  // unnecessary. Parent calls open() via the openTrigger prop.
 
   const persistDismiss = useCallback(() => {
     try {
@@ -122,9 +109,15 @@ export default function DashboardOnboarding({ active }: Props) {
     persistDismiss();
   }, [persistDismiss]);
 
-  const reopen = useCallback(() => {
+  // Parent triggers the welcome card by bumping `openTrigger`. Skip the
+  // initial mount value (no auto-open until the user clicks Rundgang).
+  const lastTrigger = useRef<number | undefined>(openTrigger);
+  useEffect(() => {
+    if (openTrigger === undefined) return;
+    if (lastTrigger.current === openTrigger) return;
+    lastTrigger.current = openTrigger;
     setMode('welcome');
-  }, []);
+  }, [openTrigger]);
 
   // ---- Modal lifecycle: Esc, body scroll lock, focus management. ----
   // When the overlay opens we (a) lock body scroll so the page underneath
@@ -284,26 +277,16 @@ export default function DashboardOnboarding({ active }: Props) {
     [],
   );
 
-  if (!active) return null;
+  // The welcome modal is reachable from any tab via the always-visible
+  // Rundgang button (`openTrigger`). The Driver.js tour itself only makes
+  // sense on the Streifen view (its selectors anchor there), so we still
+  // gate `active` for first-load auto-open. When triggered from another
+  // tab, the parent should switch to Streifen first; the modal is
+  // tab-agnostic and renders regardless.
+  if (!active && mode === 'closed') return null;
 
   return (
     <>
-      {/* Persistent re-entry into the guidance. Portalled into the .tabs-bar
-          flex row so it sits on the same line as the tab buttons (right end,
-          sticky on mobile when tabs overflow horizontally). */}
-      {mode === 'closed' && tabsBarEl && createPortal(
-        <button
-          type="button"
-          className="carm-help-fab carm-help-fab--inline"
-          aria-label="Rundgang & Einführung öffnen"
-          onClick={reopen}
-        >
-          <Compass size={14} strokeWidth={2} aria-hidden="true" />
-          <span>Rundgang</span>
-        </button>,
-        tabsBarEl,
-      )}
-
       {/* Centered modal overlay — portalled to <body> so it floats above
           the dashboard regardless of stacking context. Backdrop click +
           Esc both close. Click events inside the card are stopped from

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import {
   Share2, Download, Filter, Maximize2, Minimize2,
   Eye, TrendingUp, Target, Shield, Globe,
@@ -37,11 +38,11 @@ import StripsView, { type StripsViewHandle } from './views/StripsView';
 import SourcesStripsView, { type SourcesStripsViewHandle } from './views/SourcesStripsView';
 import BalkenView, { type BalkenViewHandle } from './views/BalkenView';
 import type { ChartHandle } from '../../lib/dashboard/export';
-import VerdictLegend from './controls/VerdictLegend';
 import FilterDrawer from './controls/FilterDrawer';
 import ExportDrawer from './controls/ExportDrawer';
 import DataPicker, { type DataPickerOption } from './controls/DataPicker';
 import MythosSearchChip from './controls/MythosSearchChip';
+import SortToggle from './controls/SortToggle';
 import ToolbarRow from './controls/ToolbarRow';
 import FactsheetPanel from './FactsheetPanel';
 import DashboardOnboarding from './DashboardOnboarding';
@@ -141,24 +142,41 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     }
   }, [state.view]);
 
-  /** Active count of non-default filters (Mythos category + verdict + search +
-   *  non-default sort). Drives the badge on the Filter button. */
+  /** Active count of non-default filters (Mythos categories + individual
+   *  myths + verdict). Drives the badge on the Filter button. Search and
+   *  sort are surfaced as their own first-class toolbar controls and are
+   *  intentionally NOT counted here. */
   const activeFilterCount = useMemo(() => {
     let n = 0;
     if (state.categoryIds.length > 0) n += 1;
+    if (state.mythIds.length > 0) n += 1;
     if (state.verdictFilter !== 'all') n += 1;
-    if (state.search.trim().length > 0) n += 1;
-    if (state.balkenSort !== 'value-desc') n += 1;
     return n;
-  }, [state.categoryIds, state.verdictFilter, state.search, state.balkenSort]);
+  }, [state.categoryIds, state.mythIds, state.verdictFilter]);
 
   const disabledGroups = useMemo(
     () => getDisabledGroupsForIndicator(state.indicator),
     [state.indicator],
   );
 
-  /** Views that share the new sticky toolbar + verdict legend chrome. */
+  /** Views that share the unified dashboard toolbar (SortToggle +
+   *  Indikator + Bevölkerungsgruppe + Suche + Filter + Export). The
+   *  other two tabs (`strips`, `sources`) own their own pivot/picker
+   *  setup but receive the shared `actions` (Suche / Filter / Export)
+   *  from this component. */
   const isModernView = state.view === 'balken' || state.view === 'table';
+
+  /** Counter that, when bumped, opens the DashboardOnboarding modal. */
+  const [rundgangSignal, setRundgangSignal] = useState(0);
+  const handleRundgang = useCallback(() => {
+    // The Driver.js tour anchors to Streifen DOM; switch to that tab
+    // first so the modal's tour option lands on a working layout when
+    // the user starts it.
+    setState((prev) =>
+      prev.view === 'strips' ? prev : { ...prev, view: 'strips' as const },
+    );
+    setRundgangSignal((n) => n + 1);
+  }, []);
 
   // Parse pre-rendered myth content passed as JSON from Astro
   const mythContentMap: Record<number, MythContentEntry> = useMemo(() => {
@@ -230,8 +248,13 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
 
   const filteredMyths = useMemo(() => {
     if (!data) return [];
-    return filterMyths(data.myths, state.categoryIds, state.verdictFilter);
-  }, [data, state.categoryIds, state.verdictFilter]);
+    return filterMyths(
+      data.myths,
+      state.categoryIds,
+      state.verdictFilter,
+      state.mythIds,
+    );
+  }, [data, state.categoryIds, state.mythIds, state.verdictFilter]);
 
   const handleShareLink = useCallback(() => {
     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -291,6 +314,48 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     return <div className="carm-loading">Daten werden geladen…</div>;
   }
 
+  /** Shared right-aligned toolbar block surfaced on every tab.
+   *  Modern views (Balken, Tabelle) embed it directly in the ToolbarRow
+   *  below; Streifen + Sources accept it as a prop and slot it next to
+   *  their own pivot toggle so the bar stays in lockstep across tabs. */
+  const sharedActions: ReactNode = (
+    <>
+      <MythosSearchChip
+        myths={data.myths}
+        value={state.search}
+        onChange={(q) => update('search', q)}
+        onSelectMyth={selectMyth}
+        mythContent={mythContentMap}
+      />
+      <button
+        type="button"
+        className="carm-btn carm-btn--ghost"
+        onClick={() => setFilterDrawerOpen(true)}
+        aria-label={t('filter.button', 'de')}
+      >
+        <Filter size={14} strokeWidth={2} aria-hidden="true" />
+        {t('filter.button', 'de')}
+        {activeFilterCount > 0 && (
+          <span
+            className="carm-btn__badge"
+            aria-label={`${activeFilterCount} aktiv`}
+          >
+            {activeFilterCount}
+          </span>
+        )}
+      </button>
+      <button
+        type="button"
+        className="carm-btn carm-btn--ghost"
+        onClick={() => setExportDrawerOpen(true)}
+        aria-label={t('export.button', 'de')}
+      >
+        <Download size={14} strokeWidth={2} aria-hidden="true" />
+        {t('export.button', 'de')}
+      </button>
+    </>
+  );
+
   return (
     <div className="carm-explorer">
       {/* The redundant "Cannabis Mythen Explorer" header was removed in
@@ -298,21 +363,20 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           labels the page, and the tab bar communicates view state. */}
       <div className="app-layout">
         {/* First-visit guidance for the Streifen view: welcome card +
-            opt-in 4-step Driver.js tour + persistent "Hilfe" button.
-            Mounts only when view='strips' so it doesn't interfere with
-            the other 10 visualizations. */}
-        <DashboardOnboarding active={state.view === 'strips'} />
+            opt-in 4-step Driver.js tour. The persistent Rundgang
+            button moved to the ViewTabs bar so it's visible on every
+            tab — `rundgangSignal` opens the modal regardless of the
+            active view. */}
+        <DashboardOnboarding
+          active={state.view === 'strips'}
+          openTrigger={rundgangSignal}
+        />
 
         <ViewTabs
           view={state.view}
           lang={'de'}
           onChange={(v: ViewTab) => update('view', v)}
-          onRundgang={() => {
-            // Placeholder until the cross-view Driver.js tour is wired.
-            // The Streifen tour stays reachable via DashboardOnboarding.
-            // eslint-disable-next-line no-console
-            console.info('Rundgang TBD');
-          }}
+          onRundgang={handleRundgang}
         />
 
         {isModernView && (() => {
@@ -384,6 +448,12 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           return (
             <ToolbarRow
               aria-label={t('filter.title', 'de')}
+              pivot={
+                <SortToggle
+                  value={state.balkenSort}
+                  onChange={(v) => update('balkenSort', v)}
+                />
+              }
               pickers={[
                 <DataPicker<Indicator>
                   key="indicator"
@@ -417,60 +487,25 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                     ]
                   : []),
               ]}
-              actions={
-                <>
-                  {/* Stage 4 — search chip surfaces only on Balken +
-                      Tabelle. Streifen has its own dot-driven search;
-                      Sources operates on a different data set. */}
-                  <MythosSearchChip
-                    myths={data.myths}
-                    onSelectMyth={selectMyth}
-                  />
-                  <button
-                    type="button"
-                    className="carm-btn carm-btn--ghost"
-                    onClick={() => setFilterDrawerOpen(true)}
-                    aria-label={t('filter.button', 'de')}
-                  >
-                    <Filter size={14} strokeWidth={2} aria-hidden="true" />
-                    {t('filter.button', 'de')}
-                    {activeFilterCount > 0 && (
-                      <span
-                        className="carm-btn__badge"
-                        aria-label={`${activeFilterCount} aktiv`}
-                      >
-                        {activeFilterCount}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    className="carm-btn carm-btn--ghost"
-                    onClick={() => setExportDrawerOpen(true)}
-                    aria-label={t('export.button', 'de')}
-                  >
-                    <Download size={14} strokeWidth={2} aria-hidden="true" />
-                    {t('export.button', 'de')}
-                  </button>
-                </>
-              }
+              actions={sharedActions}
             />
           );
         })()}
 
-        {state.view !== 'sources' && !isModernView && (
-          <FilterBar
-            state={state}
-            data={data}
-            update={update}
-            definitions={defs}
-            // Streifen tab ships its own pivot toggle + selectors + categories
-            // dropdown, so collapse the FilterBar's redundant sections.
-            hideIndicators={state.view === 'strips'}
-            hideGroups={state.view === 'strips'}
-            hideCategories={state.view === 'strips'}
-          />
-        )}
+        {/* Legacy <FilterBar /> rendered for the retired views
+         *  (scatter / lollipop / overview / circular / ladder) so
+         *  share-links still resolve. The four public tabs no longer
+         *  use it — they pick up the unified Filter drawer instead. */}
+        {state.view !== 'sources' &&
+          state.view !== 'strips' &&
+          !isModernView && (
+            <FilterBar
+              state={state}
+              data={data}
+              update={update}
+              definitions={defs}
+            />
+          )}
 
         {/* Legacy utility bar (share/CSV/fullscreen) for the older views.
             Modern views (balken, table) use the StickyToolbar + ExportDrawer. */}
@@ -501,16 +536,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         )}
 
         <div
-          className={`chart-area${isFullscreen ? ' fullscreen' : ''}${isModernView ? ' chart-area--with-legend' : ''}`}
+          className={`chart-area${isFullscreen ? ' fullscreen' : ''}`}
           ref={chartRef}
         >
-          {/* Mobile verdict legend strip — modern views only. */}
-          {isModernView && (
-            <div className="chart-area__legend chart-area__legend--mobile">
-              <VerdictLegend variant="strip" />
-            </div>
-          )}
-
           <div className="chart-area__chart">
             {state.view === 'sources' ? (
               <SourcesStripsView
@@ -518,7 +546,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 state={state}
                 update={update}
                 definitions={defs}
-                onOpenExport={() => setExportDrawerOpen(true)}
+                sharedActions={sharedActions}
               />
             ) : filteredMyths.length === 0 ? (
               <div className="no-results">{t('misc.noResults', 'de')}</div>
@@ -530,16 +558,16 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                     myths={filteredMyths}
                     metrics={data.metrics}
                     state={state}
-                    update={update}
                     onSelectMyth={selectMyth}
                     onResetFilters={() => {
-                      // Stage 4 — single-shot recovery: clear every
-                      // filter slot the active filter count tracks
-                      // so the empty-state CTA always exits the
-                      // "over-filtered to nothing" trap.
+                      // Single-shot recovery: clear every filter slot
+                      // the active filter count tracks so the empty
+                      // state CTA always exits the "over-filtered to
+                      // nothing" trap.
                       setState((prev) => ({
                         ...prev,
                         categoryIds: [],
+                        mythIds: [],
                         verdictFilter: 'all',
                         search: '',
                         balkenSort: 'value-desc',
@@ -571,26 +599,18 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                     myths={filteredMyths}
                     metrics={data.metrics}
                     groups={data.groups}
-                    categories={data.categories}
                     state={state}
                     update={update}
                     onSelectMyth={selectMyth}
                     definitions={defs}
                     mythThemes={mythThemeMap}
                     mythContentMap={mythContentMap}
-                    onOpenExport={() => setExportDrawerOpen(true)}
+                    sharedActions={sharedActions}
                   />
                 )}
               </>
             )}
           </div>
-
-          {/* Desktop verdict legend sidebar — modern views only. */}
-          {isModernView && (
-            <aside className="chart-area__legend chart-area__legend--sidebar" aria-label={t('verdict.legend.title', 'de')}>
-              <VerdictLegend variant="sidebar" />
-            </aside>
-          )}
         </div>
 
         {!isModernView && state.view !== 'sources' && state.view !== 'strips' && (
@@ -631,17 +651,17 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         />
       )}
 
-      {isModernView && (
-        <FilterDrawer
-          open={filterDrawerOpen}
-          onClose={() => setFilterDrawerOpen(false)}
-          state={state}
-          update={update}
-          myths={data.myths}
-          categories={data.categories}
-          onSelectMyth={selectMyth}
-        />
-      )}
+      {/* The unified Filter drawer is reachable from every tab — the
+       *  Filter button in `sharedActions` toggles it. */}
+      <FilterDrawer
+        open={filterDrawerOpen}
+        onClose={() => setFilterDrawerOpen(false)}
+        state={state}
+        update={update}
+        myths={data.myths}
+        categories={data.categories}
+        mythContent={mythContentMap}
+      />
 
       {/* ExportDrawer renders on every tab in Stage 3 — Tabelle still
           opens it (Daten tab works), Visualisierung disables there. */}

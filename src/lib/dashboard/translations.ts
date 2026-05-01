@@ -185,8 +185,8 @@ const translations = {
     en: 'Four vertical axes, one per indicator (0–100). Each myth is one dot per axis, color = verdict. Tap a population and a dot to highlight; tap again for details.',
   },
   'howto.strips': {
-    de: 'Wählen Sie links die aktive Achse (Indikatoren / Gruppen / Themen). Tippen Sie ein Icon oben, um auszuwählen oder zu filtern. Tippen Sie einen Punkt zum Hervorheben — die Werte erscheinen direkt neben dem Punkt. Tippen Sie „Mehr" für das Factsheet.',
-    en: 'Choose the active axis on the left (Indicators / Groups / Themes). Tap an icon at the top to select or filter. Tap a dot to highlight — values appear right next to the dot. Tap "More" for the factsheet.',
+    de: 'Jeder Punkt ist ein Mythos. Wählen Sie oben den Vergleich und den Wert. Tippen Sie einen Punkt zum Hervorheben — die Werte erscheinen direkt neben dem Punkt. Tippen Sie „Mehr" für das Factsheet.',
+    en: 'Each dot is one myth. Pick the comparison and the value at the top. Tap a dot to highlight — values appear right next to the dot. Tap "More" for the factsheet.',
   },
 
   // Strips view (vertical) — pivot is set by an in-view 'Vergleichen nach:' toggle
@@ -229,7 +229,7 @@ const translations = {
 
   // Balken view + new dashboard chrome (refactor)
   'view.balken': { de: 'Balken', en: 'Bars' },
-  'view.streifen': { de: 'Streifen', en: 'Strips' },
+  'view.streifen': { de: 'Punktwolke', en: 'Point Cloud' },
   'view.tabelle': { de: 'Tabelle', en: 'Table' },
   'view.quellen': { de: 'Informationsquellen', en: 'Information Sources' },
   'igs.indicator.legend': { de: 'Indikator', en: 'Indicator' },
@@ -250,7 +250,12 @@ const translations = {
   'sort.label': { de: 'Sortierung', en: 'Sort' },
   'sort.value-desc': { de: 'Wert absteigend', en: 'Value descending' },
   'sort.value-asc': { de: 'Wert aufsteigend', en: 'Value ascending' },
-  'sort.category': { de: 'Nach Kategorie', en: 'By category' },
+  'sort.toggle.aria': {
+    de: 'Sortierung umschalten — aktuell: {dir}',
+    en: 'Toggle sort — currently: {dir}',
+  },
+  'sort.toggle.label.desc': { de: 'Wert ↓', en: 'Value ↓' },
+  'sort.toggle.label.asc': { de: 'Wert ↑', en: 'Value ↑' },
   'filter.button': { de: 'Filter', en: 'Filter' },
   'filter.title': { de: 'Filter & Sortierung', en: 'Filter & sort' },
   'filter.reset': { de: 'Alle Filter zurücksetzen', en: 'Reset all filters' },
@@ -258,6 +263,15 @@ const translations = {
   'filter.search.label': { de: 'Mythos suchen', en: 'Search myth' },
   'filter.search.placeholder': { de: 'Mythos suchen…', en: 'Search myth…' },
   'filter.categories.label': { de: 'Mythos-Kategorien', en: 'Myth categories' },
+  'filter.myths.label': { de: 'Einzelne Mythen', en: 'Individual myths' },
+  'filter.myths.empty': {
+    de: 'Keine Mythen passen zur Suche.',
+    en: 'No myths match the search.',
+  },
+  'filter.myths.searchPlaceholder': {
+    de: 'Mythen durchsuchen…',
+    en: 'Search myths…',
+  },
   'filter.empty.title': { de: 'Keine Treffer', en: 'No matches' },
   'filter.empty.body': {
     de: 'Mit den aktuellen Filtern wurden keine Mythen gefunden.',

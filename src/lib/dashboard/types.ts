@@ -79,8 +79,10 @@ export type StripsMode = 'indicator' | 'group';
 export type StripsSortAxis = Indicator | GroupId;
 export type StripsSortDir = 'asc' | 'desc';
 
-/** Balken (ranking bar) view sort options. */
-export type BalkenSort = 'value-desc' | 'value-asc' | 'category';
+/** Balken (ranking bar) view sort options. The legacy 'category' option was
+ *  retired in the unified-toolbar refactor — sort is now a simple direction
+ *  toggle exposed by `<SortToggle>` in the shared dashboard toolbar. */
+export type BalkenSort = 'value-desc' | 'value-asc';
 
 /** Quiz module slugs — the 5 Themen blocks shown in StripsView */
 export type QuizThemeSlug =
@@ -175,4 +177,9 @@ export interface AppState {
   stripsThemeFilter: QuizThemeSlug[];
   /** Balken (ranking bar) view sort key. */
   balkenSort: BalkenSort;
+  /** Individually selected myth IDs from the unified Filter drawer.
+   *  When non-empty (alone or together with `categoryIds`), the dashboard
+   *  shows only the union of "myths in selected categories" + "myths in
+   *  this list". Empty array = no individual-myth restriction. */
+  mythIds: number[];
 }

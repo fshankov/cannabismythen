@@ -28,7 +28,7 @@ const ALL_STRIPS_MODES: StripsMode[] = ['indicator', 'group'];
 const ALL_QUIZ_THEME_SLUGS: QuizThemeSlug[] = ['quiz-gefaehrlichkeit', 'quiz-gesellschaft', 'quiz-medizin', 'quiz-risiken', 'quiz-stimmung'];
 const ALL_STRIPS_SORT_AXES: StripsSortAxis[] = [...ALL_INDICATORS, ...ALL_GROUP_IDS] as StripsSortAxis[];
 const ALL_STRIPS_DIRS: StripsSortDir[] = ['asc', 'desc'];
-const ALL_BALKEN_SORTS: BalkenSort[] = ['value-desc', 'value-asc', 'category'];
+const ALL_BALKEN_SORTS: BalkenSort[] = ['value-desc', 'value-asc'];
 
 /** Public view aliases. The four published tabs use German URL keys; legacy/internal
  *  views keep their English name (and emit it back on round-trip). */
@@ -85,6 +85,7 @@ const DEFAULTS: AppState = {
   factsheetMythId: null,
   stripsThemeFilter: [],
   balkenSort: 'value-desc',
+  mythIds: [],
 };
 
 export function stateToUrl(state: Partial<AppState>): string {
@@ -118,6 +119,9 @@ export function stateToUrl(state: Partial<AppState>): string {
 
   if (state.balkenSort && state.balkenSort !== DEFAULTS.balkenSort)
     params.set('sort', state.balkenSort);
+
+  if (state.mythIds && state.mythIds.length > 0)
+    params.set('myths', state.mythIds.join(','));
 
   if (state.scatterX && state.scatterX !== DEFAULTS.scatterX) params.set('sx', state.scatterX);
   if (state.scatterY && state.scatterY !== DEFAULTS.scatterY) params.set('sy', state.scatterY);
@@ -201,8 +205,21 @@ export function urlToState(): Partial<AppState> {
   if (myth) state.selectedMythId = Number(myth) || null;
 
   const sort = params.get('sort');
-  if (sort && ALL_BALKEN_SORTS.includes(sort as BalkenSort))
+  if (sort && ALL_BALKEN_SORTS.includes(sort as BalkenSort)) {
     state.balkenSort = sort as BalkenSort;
+  } else if (sort === 'category') {
+    // Legacy URLs that still encode 'category' (retired sort option) snap
+    // to the default value-descending sort so existing share links resolve.
+    state.balkenSort = 'value-desc';
+  }
+
+  const myths = params.get('myths');
+  if (myths) {
+    state.mythIds = myths
+      .split(',')
+      .map(Number)
+      .filter((n) => !isNaN(n) && n > 0);
+  }
 
   const sx = params.get('sx');
   if (ALL_INDICATORS.includes(sx as Indicator)) state.scatterX = sx as Indicator;
