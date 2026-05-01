@@ -19,7 +19,7 @@
  * CSS classes use the .factsheet-panel__* namespace (from quiz.css).
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
 
 /** Pre-rendered factsheet content from Keystatic (passed from Astro at build time). */
 export interface MythContentEntry {
@@ -69,6 +69,12 @@ interface FactsheetPanelProps {
 
   /** Optional fallback explanation (quiz only — shown when no pre-rendered content) */
   fallbackExplanation?: string;
+
+  /** Optional accessory rendered next to the verdict label — used by the
+   *  dashboard wrapper to slot a `<VerdictArrowWithInfo>` so the verdict
+   *  explanation popover shows on hover. Other surfaces leave it
+   *  undefined and render the existing label-only treatment. */
+  verdictAccessory?: ReactNode;
 }
 
 /**
@@ -120,6 +126,7 @@ export default function FactsheetPanel({
   verdictLabel = 'Wissenschaftliches Urteil:',
   onClose,
   fallbackExplanation,
+  verdictAccessory,
 }: FactsheetPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -256,6 +263,7 @@ export default function FactsheetPanel({
                 <span className={`classification classification--${classificationKey}`}>
                   {classificationLabel}
                 </span>
+                {verdictAccessory}
               </div>
 
               {/* 3-7. Ordered sections */}
@@ -278,6 +286,7 @@ export default function FactsheetPanel({
                 <span className={`classification classification--${classificationKey}`}>
                   {classificationLabel}
                 </span>
+                {verdictAccessory}
               </div>
 
               {fallbackExplanation && (

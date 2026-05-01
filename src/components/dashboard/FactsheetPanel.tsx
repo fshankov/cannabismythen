@@ -7,6 +7,7 @@ import SharedFactsheetPanel from '../shared/FactsheetPanel';
 import type { MythContentEntry } from '../shared/FactsheetPanel';
 import type { Myth } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
+import VerdictArrowWithInfo from './VerdictArrowWithInfo';
 
 export type { MythContentEntry };
 
@@ -40,6 +41,13 @@ export default function FactsheetPanel({
       mythContentEntry={mythContentEntry}
       factsheetSlug={factsheetSlug}
       verdictLabel="Wissenschaftliches Urteil:"
+      verdictAccessory={
+        <VerdictArrowWithInfo
+          verdict={myth.correctness_class}
+          size={14}
+          strokeWidth={2.25}
+        />
+      }
       onClose={onClose}
     />
   );

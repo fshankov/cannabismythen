@@ -5491,3 +5491,36 @@ body.carm-modal-open {
   align-items: center;
   justify-content: center;
 }
+
+/* ===========================================================================
+   VerdictArrowWithInfo — verdict arrow + hover/focus popover
+   Re-homes the explanation copy that lived in the deleted VerdictLegend.
+   The trigger inherits the verdict color via .classification--<cls>.
+   =========================================================================== */
+
+.carm-verdict-arrow-info {
+  display: inline-flex;
+  align-items: center;
+}
+
+.carm-verdict-arrow-info__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
+  border: 0;
+  background: transparent;
+  cursor: help;
+  border-radius: 3px;
+  /* color is inherited from .classification--<cls> on the same element */
+  line-height: 0;
+}
+
+.carm-verdict-arrow-info__trigger:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.carm-verdict-arrow-info__trigger:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
