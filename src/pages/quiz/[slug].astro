@@ -42,9 +42,10 @@ if (entry.questions) {
   }
 }
 
-// ── Editorial verdicts + intros (Keystatic source of truth, see CLAUDE.md
-// "Quiz content source of truth" section). Stage 5 consumes these on the
-// ResultScreen; Stage 1 only plumbs them through the React boundary.
+// ── Editorial verdicts + intros + shareCopy (Keystatic source of truth,
+// see CLAUDE.md "Quiz content source of truth" section). Stage 5 consumes
+// verdicts/intros on the ResultScreen; Stage 7 adds shareCopy with
+// per-module override → global singleton default → hardcoded fallback.
 const entryAny = entry as unknown as {
   verdicts?: {
     profi?: { title?: string; body?: string };
@@ -54,11 +55,33 @@ const entryAny = entry as unknown as {
   };
   weakSpotIntro?: string;
   strongPerformanceIntro?: string;
+  shareCopy?: {
+    profi?: string;
+    guterweg?: string;
+    gehtnoch?: string;
+    erwischt?: string;
+  };
 };
 const verdictsPayload = entryAny.verdicts ?? {};
 const introsPayload = {
   weakSpotIntro: entryAny.weakSpotIntro ?? "",
   strongPerformanceIntro: entryAny.strongPerformanceIntro ?? "",
+};
+
+// Stage 7 — merge per-module shareCopy override with the global default
+// singleton. Module's non-empty value wins; empty/missing → singleton;
+// singleton missing → hardcoded fallback in ResultScreen as final defence.
+const defaultShareCopy = await reader.singletons.shareCopy.read();
+const moduleOverrides = entryAny.shareCopy ?? {};
+const sharePayload = {
+  profi:
+    (moduleOverrides.profi || defaultShareCopy?.profi || "").trim(),
+  guterweg:
+    (moduleOverrides.guterweg || defaultShareCopy?.guterweg || "").trim(),
+  gehtnoch:
+    (moduleOverrides.gehtnoch || defaultShareCopy?.gehtnoch || "").trim(),
+  erwischt:
+    (moduleOverrides.erwischt || defaultShareCopy?.erwischt || "").trim(),
 };
 
 // Pre-render myth page content for the factsheet panel
@@ -92,7 +115,11 @@ if (theme) {
 }
 ---
 
-<BaseLayout title={entry.title} description={entry.summary || "Cannabis-Quiz: Testen Sie Ihr Wissen"}>
+<BaseLayout
+  title={entry.title}
+  description={entry.summary || "Cannabis-Quiz: Testen Sie Ihr Wissen"}
+  ogImage={`/og/quiz/${slug}.png`}
+>
   <article class="quiz-page">
     <QuizPlayer
       client:load
@@ -101,6 +128,7 @@ if (theme) {
       quizText={JSON.stringify(quizTextMap)}
       verdicts={JSON.stringify(verdictsPayload)}
       intros={JSON.stringify(introsPayload)}
+      shareCopy={JSON.stringify(sharePayload)}
       quizSummary={(entry as any).summary || undefined}
     />
 

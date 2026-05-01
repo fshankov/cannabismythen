@@ -21,8 +21,14 @@ import {
   useRef,
   type CSSProperties,
 } from "react";
-import type { QuizMyth, Classification, CardAnswer } from "./types";
+import type {
+  QuizMyth,
+  Classification,
+  CardAnswer,
+  Schritte,
+} from "./types";
 import { t } from "./i18n";
+import { schritte, pointsForSchritte } from "./quizData";
 import {
   usePointerSwipe,
   useIsCoarsePointer,
@@ -42,44 +48,43 @@ function hashCode(s: string): number {
   return Math.abs(h);
 }
 
+/** Front-face statement display: strip a single trailing `.`, `!`, or `?`
+ *  so the card reads as a slogan rather than a sentence. The .mdoc source
+ *  keeps full sentences (proper grammar in Keystatic); the result page +
+ *  FactsheetPanel render the unmodified text. Stage 2 of the overhaul. */
+function displayStatement(s: string): string {
+  return s.replace(/[.!?]\s*$/, "");
+}
+
 /** Map a hash to a tilt in (-1.5°, +1.5°). */
 function tiltFromHash(hash: number): number {
   const range = 3; // -1.5 .. +1.5
   return ((hash % 1000) / 1000) * range - range / 2;
 }
 
-/** Ordinal scale used for distance-based feedback. */
-const CLASS_POS: Record<Classification, number> = {
-  richtig: 1,
-  eher_richtig: 2,
-  eher_falsch: 3,
-  falsch: 4,
+/** Stage 3 — Schritte → editorial label key (no period). */
+const SCHRITTE_LABEL_KEY: Record<Schritte, string> = {
+  0: "schritte.exact",
+  1: "schritte.near",
+  2: "schritte.off",
+  3: "schritte.far",
 };
 
-/** Three-tier feedback by ordinal distance. */
-function feedbackKey(chosen: Classification, correct: Classification): string {
-  const d = Math.abs(CLASS_POS[chosen] - CLASS_POS[correct]);
-  if (d === 0) return "ui.feedback.correct";
-  if (d === 1) return "ui.feedback.near";
-  return "ui.feedback.far";
-}
-
-/** Tier class derived from the same ordinal distance as feedbackKey().
- *  Single source of truth for back-face background tinting + verdict-banner
- *  colour. Keep in sync with feedbackKey(). */
-function tierClass(chosen: Classification, correct: Classification): string {
-  const d = Math.abs(CLASS_POS[chosen] - CLASS_POS[correct]);
-  if (d === 0) return "is-correct";
-  if (d === 1) return "is-near";
-  return "is-far";
-}
-
-/** Glyph paired with the verdict banner — colour-blind safe shape cue. */
-const TIER_GLYPH: Record<"is-correct" | "is-near" | "is-far", string> = {
-  "is-correct": "✓",
-  "is-near": "≈",
-  "is-far": "✕",
+/** Stage 3 — classification token used for the verdict text colour on the
+ *  Schritte verdict line. Maps Schritte to the back-face colour ramp:
+ *  0 → richtig (green), 1 → eher_richtig (lime), 2 → eher_falsch (amber),
+ *  3 → falsch (rose). */
+const SCHRITTE_COLOR_CLASS: Record<Schritte, Classification> = {
+  0: "richtig",
+  1: "eher_richtig",
+  2: "eher_falsch",
+  3: "falsch",
 };
+
+/** German decimal-comma formatting for Schritte points. */
+function formatPoints(p: number): string {
+  return p.toFixed(2).replace(".", ",");
+}
 
 interface QuizCardProps {
   myth: QuizMyth;
@@ -171,13 +176,21 @@ export default function QuizCard({
       : "quiz-card--incorrect"
     : "";
 
-  const tier = answer
-    ? tierClass(answer.chosenClassification, myth.correctClassification)
+  // Stage 3: 4-band Schritte derivation. Replaces the old 3-tier
+  // `is-correct/is-near/is-far` ternary. Drives the verdict text, the
+  // colour token on the verdict line, and the points-line copy.
+  const userSchritte: Schritte | null = answer
+    ? schritte(answer.chosenClassification, myth.correctClassification)
+    : null;
+  const schritteVerdictText = userSchritte !== null
+    ? t(SCHRITTE_LABEL_KEY[userSchritte])
     : "";
-
-  const feedbackText = answer
-    ? t(feedbackKey(answer.chosenClassification, myth.correctClassification))
+  const schritteVerdictColorClass = userSchritte !== null
+    ? `quiz-card__verdict-line--${SCHRITTE_COLOR_CLASS[userSchritte]}`
     : "";
+  const userPoints = userSchritte !== null
+    ? pointsForSchritte(userSchritte)
+    : 0;
 
   const verdictPhrase = t(
     `ui.classificationPhrase.${myth.correctClassification}`
@@ -185,40 +198,18 @@ export default function QuizCard({
   // The verdict template is split into prefix + bolded verdict + suffix so
   // we can render the verdict word as a <strong> without relying on dangerouslySet
   // markup. Template shape: `Der Mythos „{statement}" ist {verdict}.`
+  // Stage 3: stripped trailing period from the template (D5 — "no period").
   const mythVerdictPrefix = t("ui.mythVerdict", {
     statement,
     verdict: "__VERDICT_PH__",
-  }).split("__VERDICT_PH__");
+  }).replace(/\.\s*$/, "").split("__VERDICT_PH__");
   const mythVerdict = t("ui.mythVerdict", {
     statement,
     verdict: verdictPhrase,
-  });
+  }).replace(/\.\s*$/, "");
 
   const hasPopData = typeof myth.populationCorrectPct === "number";
   const popPct = hasPopData ? Math.round(myth.populationCorrectPct) : 0;
-
-  // Micro-copy under the population bar — picks one short line that ties
-  // the user's answer back to their streak / the population. See plan §3.7.
-  // Only computed when there's an answer; the back face only renders when
-  // the card is flipped, which only happens after answering.
-  let microCopyText: string | null = null;
-  if (answer && hasPopData) {
-    const dist = Math.abs(
-      CLASS_POS[answer.chosenClassification] -
-        CLASS_POS[myth.correctClassification]
-    );
-    if (streakCount >= 3) {
-      microCopyText = t("ui.microCopy.streak", { n: streakCount });
-    } else if (answer.isCorrect && popPct < 50) {
-      microCopyText = t("ui.microCopy.correct", { missPct: 100 - popPct });
-    } else if (answer.isCorrect && popPct >= 50) {
-      microCopyText = t("ui.microCopy.popular", { pct: popPct });
-    } else if (dist === 1) {
-      microCopyText = t("ui.microCopy.nearMiss", { pct: popPct });
-    } else {
-      microCopyText = t("ui.microCopy.farMiss", { pct: popPct });
-    }
-  }
 
   const cellStyle: CSSProperties = {
     ["--card-tilt" as string]: `${tilt.toFixed(2)}deg`,
@@ -233,6 +224,29 @@ export default function QuizCard({
       data-answered={isAnswered ? "true" : "false"}
       style={cellStyle}
     >
+      {/* Stage 4: edge arrows for desktop nav. On mobile they shrink and
+          tuck in close — swipe + the pill row in the header are the
+          primary touch nav. */}
+      {onPrev && index > 0 && (
+        <button
+          type="button"
+          className="quiz-card__edge-arrow quiz-card__edge-arrow--prev"
+          aria-label={t("ui.previousQuestion")}
+          onClick={onPrev}
+        >
+          ←
+        </button>
+      )}
+      {(isAnswered && !isLastQuestion) && (
+        <button
+          type="button"
+          className="quiz-card__edge-arrow quiz-card__edge-arrow--next"
+          aria-label={t("ui.nextQuestion")}
+          onClick={onNext}
+        >
+          →
+        </button>
+      )}
       <div
         ref={cardRef}
         className={[
@@ -240,7 +254,6 @@ export default function QuizCard({
           "quiz-card--flow",
           isAnswered ? "quiz-card--answered" : "",
           correctClass,
-          tier,
           flipped ? "quiz-card--flipped" : "",
         ]
           .filter(Boolean)
@@ -282,7 +295,7 @@ export default function QuizCard({
               )}
             </div>
 
-            <p className="quiz-card__statement">{statement}</p>
+            <p className="quiz-card__statement">{displayStatement(statement)}</p>
 
             <VerdictScale
               selected={answer ? answer.chosenClassification : null}
@@ -308,22 +321,46 @@ export default function QuizCard({
                   </span>
                 </div>
 
-                {/* 1 — The verdict (largest text, tier-coloured banner).
-                    This is the colleague's three-tier headline. */}
-                <div className="quiz-card__verdict-banner">
-                  <span
-                    className="quiz-card__verdict-glyph"
-                    aria-hidden="true"
-                  >
-                    {TIER_GLYPH[tier as keyof typeof TIER_GLYPH]}
-                  </span>
-                  <span>{feedbackText}</span>
-                </div>
+                {/* Stage 3 (D5) — back-face copy stack, top to bottom:
+                    1) Always-shown "Deine Antwort: X" chip in user-answer color
+                    2) Schritte verdict (no period), colored by Schritte band
+                    3) Myth-line: "Der Mythos „..." ist X" — verdict word
+                       bolded, line tinted by scientific verdict
+                    4) Explanation
+                    5) Population stat (Erwachsene 18–70 in der CaRM-Studie)
+                    6) Action buttons */}
 
-                {/* 2 — The myth-line: "Der Mythos „X" ist Y." with the verdict
-                    word bolded. The `statement--{verdict}` class applies the
-                    subtle verdict tint that's used across the site (factsheet
-                    H1, FaktenCard title, Streifen card statement). */}
+                {/* 1 — User-answer chip — ALWAYS shown, even when correct. */}
+                <p className="quiz-card__answer-note">
+                  <span className="quiz-card__answer-label">
+                    {t("ui.yourAnswerLabel")}:
+                  </span>{" "}
+                  <span
+                    className={`quiz-card__answer-chip classification classification--${answer.chosenClassification}`}
+                  >
+                    {t(`classification.${answer.chosenClassification}`)}
+                  </span>
+                </p>
+
+                {/* 2 — Schritte verdict line — large, no period, colored. */}
+                <p
+                  className={`quiz-card__verdict-line ${schritteVerdictColorClass}`}
+                >
+                  {schritteVerdictText}
+                </p>
+
+                {/* Points sub-line under the verdict (German decimal comma). */}
+                <p className="quiz-card__verdict-points">
+                  {t("schritte.points", {
+                    schritte: userSchritte ?? 0,
+                    points: formatPoints(userPoints),
+                  })}
+                </p>
+
+                {/* 3 — Myth-line: "Der Mythos „X" ist Y" — verdict word
+                    bolded, whole line tinted by the scientific verdict color
+                    via the site-wide `statement--{verdict}` class. NO trailing
+                    period (D5). */}
                 <p
                   className={`quiz-card__myth-line statement--${myth.correctClassification}`}
                 >
@@ -332,54 +369,36 @@ export default function QuizCard({
                   {mythVerdictPrefix[1]}
                 </p>
 
-                {/* 3 — Optional answer chip: only when the user was wrong. */}
-                {!answer.isCorrect && (
-                  <p className="quiz-card__answer-note">
-                    {t("ui.yourAnswerLabel")}
-                    {": "}
-                    <span
-                      className={`quiz-card__answer-chip classification classification--${answer.chosenClassification}`}
-                    >
-                      {t(`classification.${answer.chosenClassification}`)}
-                    </span>
-                  </p>
-                )}
-
-                {/* 4 — Scrollable explanation. The wrap fills remaining space;
-                    inner div scrolls with overscroll-contain so page never
-                    scrolls when the inner reaches its end. */}
+                {/* 4 — Explanation. Scrollable inside its own region only when
+                    it overflows the available card height. */}
                 <div className="quiz-card__explanation-wrap">
                   <div className="quiz-card__explanation">
                     <p>{explanation}</p>
                   </div>
                 </div>
 
-                {/* 5 — Population bar pinned to the bottom. */}
+                {/* 5 — Population stat (Erwachsene 18–70, CaRM-Studie). */}
                 {hasPopData && (
                   <div
                     className="quiz-card__pop-bar"
                     role="img"
-                    aria-label={`${popPct} Prozent der Befragten antworteten korrekt`}
+                    aria-label={`${popPct} Prozent der Erwachsenen 18 bis 70 in der CaRM-Studie haben diesen Mythos genau richtig eingeschätzt`}
                   >
+                    <p className="quiz-card__pop-bar-text">
+                      <strong>{popPct}&nbsp;%</strong> der Erwachsenen
+                      (18–70) in der CaRM-Studie haben diesen Mythos genau
+                      richtig eingeschätzt.
+                    </p>
                     <div className="quiz-card__pop-bar-track">
                       <div
                         className="quiz-card__pop-bar-fill"
                         style={{ width: `${popPct}%` }}
                       />
                     </div>
-                    <span className="quiz-card__pop-bar-value">
-                      {popPct} % {t("ui.populationCorrectShort")}
-                    </span>
                   </div>
                 )}
 
-                {/* 6 — Micro-copy line. One short sentence that contextualises
-                    the user's answer against their streak / the population. */}
-                {microCopyText && (
-                  <p className="quiz-card__micro-copy">{microCopyText}</p>
-                )}
-
-                {/* 7 — Action row pinned to the very bottom. */}
+                {/* 6 — Action row pinned to the bottom. */}
                 <div className="quiz-card__back-actions">
                   {onShowFactsheet && (
                     <button
@@ -407,13 +426,16 @@ export default function QuizCard({
                   {t("ui.swipeHint")}
                 </p>
 
-                {/* SR-only live region announcing the feedback. */}
+                {/* SR-only live region announcing the feedback (Schritte
+                    label + scientific verdict). */}
                 <div
                   ref={liveRef}
                   className="sr-only"
                   aria-live="polite"
                 >
-                  {feedbackText} {mythVerdict}
+                  {t("ui.yourAnswerLabel")}:{" "}
+                  {t(`classification.${answer.chosenClassification}`)}.{" "}
+                  {schritteVerdictText}. {mythVerdict}
                 </div>
               </>
             )}

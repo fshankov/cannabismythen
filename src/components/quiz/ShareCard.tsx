@@ -1,66 +1,81 @@
 /**
- * ShareCard — Bold, dark shareable result card.
+ * ShareCard — Stage 5 refresh.
  *
- * Visual style: deep forest green (#2d6a4f) background, white text,
- * CSS medal/badge shape, achievement style.
- *
- * "Ergebnis teilen" button uses native Web Share API with clipboard fallback.
+ * Visual style: deep forest green (--color-richtig) background, white text,
+ * lightbulb mark. Replaces the old "X / Y" + "Bevölkerung in Deutschland"
+ * framing with the Schritte percentage hero + the honest banded population
+ * sentence the result page already shows. The share text passed to
+ * navigator.share / clipboard stays short — comparison number lives on
+ * the page, not in the blurb.
  */
 
 import { useState, useCallback } from "react";
-import type { QuizResult, ResultTierIndex } from "./types";
-import { RESULT_TIERS } from "./quizData";
+import type { QuizResult, ScoreBand } from "./types";
+import { scoreBand } from "./quizData";
 import { t } from "./i18n";
 import { trackResultCardShared } from "./matomo";
 
 interface ShareCardProps {
   result: QuizResult;
   quizUrl: string;
+  moduleTitle: string;
+  /** Verdict band title from Keystatic (or fallback). Subhead under the
+   *  lightbulb. */
+  verdictTitle: string;
+  /** Honest population sentence (e.g. "Du liegst leicht über dem Schnitt
+   *  der Erwachsenen 18–70 in der CaRM-Studie."). Drives the share blurb
+   *  on the card itself; share-text for navigator.share stays short. */
+  populationLine: string;
+  /** Stage 8 will use `variant: "vertical"` for 1080×1350 OG. Stage 5
+   *  ships only the in-app square preview. */
+  variant?: "square" | "vertical";
 }
 
-/** Emoji for each tier */
-const TIER_EMOJI: Record<ResultTierIndex, string> = {
-  0: "\u{1F331}", // 🌱
-  1: "\u{1F4A1}", // 💡
-  2: "\u{2B50}",  // ⭐
-  3: "\u{1F3C6}", // 🏆
+/** Per-band emoji on the medal — mirrors the scientific verdict emoji
+ *  language used elsewhere on the site (lightbulb-anchored). */
+const BAND_EMOJI: Record<ScoreBand, string> = {
+  profi: "\u{1F3C6}", // 🏆
+  guterweg: "\u{2B50}", // ⭐
+  gehtnoch: "\u{1F4A1}", // 💡
+  erwischt: "\u{1F331}", // 🌱
 };
 
-export default function ShareCard({ result, quizUrl }: ShareCardProps) {
+export default function ShareCard({
+  result,
+  quizUrl,
+  moduleTitle,
+  verdictTitle,
+  populationLine,
+  variant = "square",
+}: ShareCardProps) {
   const [copied, setCopied] = useState(false);
+  const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
+  const emoji = BAND_EMOJI[band];
 
-  const tier = RESULT_TIERS[result.tierIndex];
-  const tierTitle = t(tier.titleKey);
-  const emoji = TIER_EMOJI[result.tierIndex];
-
-  const shareText = t("ui.shareText", {
-    correct: result.correctCount,
-    total: result.totalQuestions,
-    pct: result.percentile,
-  });
+  // Stage 5: share blurb is intentionally short — comparison lives on
+  // the page, not in the message. Keeps WhatsApp/Twitter previews tidy.
+  const shareText = `Ich habe ${result.moduleScore} % beim Quiz „${moduleTitle}" auf cannabismythen.de erreicht.`;
   const fullShareText = `${shareText} ${quizUrl}`;
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: t("ui.shareTitle"),
+          title: `Mein Ergebnis: ${moduleTitle}`,
           text: shareText,
           url: quizUrl,
         });
         trackResultCardShared("native");
       } catch {
-        // User cancelled — not an error
+        // user cancelled — not an error
       }
     } else {
-      // Clipboard fallback
       try {
         await navigator.clipboard.writeText(fullShareText);
         setCopied(true);
         trackResultCardShared("clipboard");
         setTimeout(() => setCopied(false), 2500);
       } catch {
-        // Fallback for older browsers
         const textArea = document.createElement("textarea");
         textArea.value = fullShareText;
         textArea.style.position = "fixed";
@@ -74,33 +89,27 @@ export default function ShareCard({ result, quizUrl }: ShareCardProps) {
         setTimeout(() => setCopied(false), 2500);
       }
     }
-  }, [shareText, fullShareText, quizUrl]);
+  }, [shareText, fullShareText, quizUrl, moduleTitle]);
 
   return (
-    <div className="share-card">
+    <div className={`share-card share-card--${variant}`}>
       <div className="share-card__visual">
-        {/* CSS medal badge */}
         <div className="share-card__medal">
-          <span className="share-card__emoji">{emoji}</span>
+          <span className="share-card__emoji" aria-hidden="true">
+            {emoji}
+          </span>
         </div>
 
-        <div className="share-card__tier-title">{tierTitle}</div>
+        <div className="share-card__tier-title">{verdictTitle}</div>
 
         <div className="share-card__score">
-          {result.correctCount} / {result.totalQuestions}
+          {result.moduleScore}
+          <span className="share-card__score-unit">&nbsp;%</span>
         </div>
 
-        <p className="share-card__pct">
-          {t("ui.correctPctLine", { pct: result.correctPct })}
-        </p>
+        <p className="share-card__pop-line">{populationLine}</p>
 
-        <p className="share-card__percentile">
-          {t("ui.percentileLine", { pct: result.percentile })}
-        </p>
-
-        <div className="share-card__branding">
-          {t("ui.siteUrl")}
-        </div>
+        <div className="share-card__branding">{t("ui.siteUrl")}</div>
       </div>
 
       <button

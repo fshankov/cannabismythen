@@ -478,6 +478,25 @@ const quiz = collection({
       description:
         "Wird angezeigt, wenn alle Mythen ≤1 Schritt daneben waren.",
     }),
+    // Stage 7 — Per-module share-card / population-comparison copy.
+    // Each band is a short sentence shown on the result page + the
+    // green ShareCard. Empty cells fall back to the global default
+    // singleton (`share-copy.yaml`) and finally to a hardcoded sentence
+    // in ResultScreen as final defence. {pct} in the text is replaced
+    // by the user's percentile vs. Erwachsene 18–70 in der CaRM-Studie.
+    shareCopy: fields.object(
+      {
+        profi: fields.text({ label: "80–100 %", multiline: true }),
+        guterweg: fields.text({ label: "60–79 %", multiline: true }),
+        gehtnoch: fields.text({ label: "40–59 %", multiline: true }),
+        erwischt: fields.text({ label: "0–39 %", multiline: true }),
+      },
+      {
+        label: "Share-Karten-Text nach Punktzahl",
+        description:
+          "Wird auf der Share-Karte und im Vergleichsabsatz unter dem Hero gezeigt. {pct} im Text wird durch den Prozentsatz ersetzt. Leer lassen, um den globalen Default aus share-copy.yaml zu verwenden.",
+      }
+    ),
     ...metaFields,
     content: fields.markdoc({
       label: "Content",
@@ -1048,6 +1067,40 @@ const quizHookBlock = singleton({
   },
 });
 
+// Stage 7 — Global default share/comparison copy. Used when a quiz
+// module's `shareCopy.{band}` cell is empty. Per-module overrides win.
+const shareCopy = singleton({
+  label: "💬 Share-Karten – Default-Texte",
+  path: "src/content/share-copy",
+  format: { data: "yaml" },
+  schema: {
+    profi: fields.text({
+      label: "80–100 % – Profi-Band",
+      multiline: true,
+      defaultValue:
+        "Du liegst klar über dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie (ca. {pct} %). Stark gemacht.",
+    }),
+    guterweg: fields.text({
+      label: "60–79 % – Guter-Weg-Band",
+      multiline: true,
+      defaultValue:
+        "Du liegst leicht über dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie (ca. {pct} %).",
+    }),
+    gehtnoch: fields.text({
+      label: "40–59 % – Geht-noch-Band",
+      multiline: true,
+      defaultValue:
+        "Du liegst etwa im Schnitt der Erwachsenen (18–70) in der CaRM-Studie (ca. {pct} %).",
+    }),
+    erwischt: fields.text({
+      label: "0–39 % – Erwischt-Band",
+      multiline: true,
+      defaultValue:
+        "Hier saßen noch viele Mythen. Die Fakten-Karten räumen das in zehn Minuten auf.",
+    }),
+  },
+});
+
 // ─── Config export ──────────────────────────────────────────────────────────
 
 export default config({
@@ -1081,5 +1134,6 @@ export default config({
     quizHookBlock,
     dashboardDefinitionen,
     faqAudiences,
+    shareCopy,
   },
 });

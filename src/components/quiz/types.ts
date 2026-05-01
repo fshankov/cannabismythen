@@ -38,7 +38,7 @@ export type Schritte = 0 | 1 | 2 | 3;
  *  four `verdicts.{band}` cells in the Keystatic quiz schema. */
 export type ScoreBand = "profi" | "guterweg" | "gehtnoch" | "erwischt";
 
-/** One of the 4 quiz themes. */
+/** One of the quiz themes. */
 export interface QuizTheme {
   /** URL slug, e.g. "quiz-alltag" */
   slug: string;
@@ -48,8 +48,14 @@ export interface QuizTheme {
   subtitleKey: string;
   /** i18n key for a short description */
   descriptionKey: string;
-  /** The myths in this quiz */
+  /** The myths in this quiz. Empty when `dynamic: true` — the player
+   *  fills the deck via the theme's picker at mount time (Stage 6
+   *  Schnellcheck). */
   myths: QuizMyth[];
+  /** When `true`, this theme's myth list is generated at mount instead
+   *  of being statically declared. Used by the Schnellcheck module
+   *  which pulls 7 random myths balanced across the five themes. */
+  dynamic?: boolean;
 }
 
 /** Tracks the user's answer state for a single card. */
@@ -66,19 +72,6 @@ export interface CardAnswer {
 /** Direction of a swipe / keyboard nav commit. */
 export type Direction = "next" | "prev";
 
-/** Result tier (0–3, lowest to highest). */
-export type ResultTierIndex = 0 | 1 | 2 | 3;
-
-/** A result tier definition (percentage-based boundaries). */
-export interface ResultTier {
-  /** i18n key for the tier title */
-  titleKey: string;
-  /** i18n key for the motivational message */
-  messageKey: string;
-  /** Percentage range: [minPct, maxPct] inclusive */
-  rangePct: [number, number];
-}
-
 /** Complete quiz result after all questions answered. */
 export interface QuizResult {
   themeSlug: string;
@@ -87,22 +80,16 @@ export interface QuizResult {
   correctCount: number;
   /** Schritte-based module score, rounded percent (0–100). The "Richtigkeit"
    *  metric used by CaRM: each answer contributes 1.00 / 0.66 / 0.33 / 0.00
-   *  depending on its Schritte distance. Replaces the old binary
-   *  `correctCount / totalQuestions × 100` framing. */
+   *  depending on its Schritte distance. */
   moduleScore: number;
   /** Schritte breakdown: how many of each kind the user got. */
   breakdown: { exact: number; near: number; off: number; far: number };
   /** Score band derived from `moduleScore`. Used to look up Keystatic
    *  `verdicts.{band}` copy on the result page. */
   band: ScoreBand;
-  /** Percentile vs. Erwachsene (18–70) in the CaRM-Studie. Mean-based
+  /** Percentile vs. Erwachsene (18–70) in der CaRM-Studie. Mean-based
    *  approximation (see computePercentile in quizData.ts). */
   percentile: number;
-  /** @deprecated Stage 5 removes this. Kept now so ResultScreen still
-   *  compiles against the legacy RESULT_TIERS path. */
-  tierIndex: ResultTierIndex;
-  /** @deprecated Stage 5 removes this. Same rationale as tierIndex. */
-  correctPct: number;
   answers: CardAnswer[];
 }
 

@@ -5,7 +5,11 @@
  * Matomo is never called ad-hoc inline. All 6 event types are handled here.
  */
 
-import type { MatomoEvent, Classification, ResultTierIndex } from "./types";
+import type { MatomoEvent, Classification } from "./types";
+
+/** Numeric tier band sent to Matomo. Stage 9 inlined this here so the
+ *  rest of the codebase can drop the legacy MatomoTierIndex type. */
+type MatomoTierIndex = 0 | 1 | 2 | 3;
 
 // Matomo's global tracker array
 declare global {
@@ -81,9 +85,9 @@ export function trackAnswerSubmitted(
 export function trackQuizCompleted(
   themeName: string,
   score: number,
-  tierIndex: ResultTierIndex
+  tierIndex: MatomoTierIndex
 ): void {
-  const tierLabels: Record<ResultTierIndex, string> = {
+  const tierLabels: Record<MatomoTierIndex, string> = {
     0: "bottom30",
     1: "mid50",
     2: "top25",

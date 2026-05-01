@@ -115,9 +115,11 @@ export default function VerdictScale({
                   {t(`answer.${c}`)}
                 </span>
               )}
-              <kbd className="verdict-scale__kbd" aria-hidden="true">
-                {i + 1}
-              </kbd>
+              {!compact && (
+                <kbd className="verdict-scale__kbd" aria-hidden="true">
+                  Taste {i + 1}
+                </kbd>
+              )}
             </button>
           );
         })}

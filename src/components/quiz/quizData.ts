@@ -24,47 +24,11 @@
 import type {
   QuizTheme,
   QuizMyth,
-  ResultTier,
-  ResultTierIndex,
   Classification,
   CardAnswer,
   Schritte,
   ScoreBand,
 } from "./types";
-
-// ─── Result Tiers (percentage-based) ────────────────────────────────────────────
-
-export const RESULT_TIERS: ResultTier[] = [
-  {
-    titleKey: "tier.0.title",
-    messageKey: "tier.0.message",
-    rangePct: [0, 30],
-  },
-  {
-    titleKey: "tier.1.title",
-    messageKey: "tier.1.message",
-    rangePct: [31, 55],
-  },
-  {
-    titleKey: "tier.2.title",
-    messageKey: "tier.2.message",
-    rangePct: [56, 80],
-  },
-  {
-    titleKey: "tier.3.title",
-    messageKey: "tier.3.message",
-    rangePct: [81, 100],
-  },
-];
-
-/** Get the tier index for a given score as percentage of total. */
-export function getTierIndex(correctCount: number, total: number): ResultTierIndex {
-  const pct = (correctCount / total) * 100;
-  if (pct <= 30) return 0;
-  if (pct <= 55) return 1;
-  if (pct <= 80) return 2;
-  return 3;
-}
 
 // ─── Schritte scoring (matches CaRM "Richtigkeit d. Beurteilung") ──────
 //
@@ -616,13 +580,98 @@ export const QUIZ_THEMES: Record<string, QuizTheme> = {
     descriptionKey: "quiz.gefaehrlichkeit.description",
     myths: mythsGefaehrlichkeit,
   },
+  // Stage 6: Schnellcheck — dynamic 7-myth deck balanced across the five
+  // theme buckets. Empty `myths` here; the player calls
+  // `pickSchnellcheckMyths()` at mount time and persists the selection
+  // for the session.
+  "quiz-schnellcheck": {
+    slug: "quiz-schnellcheck",
+    titleKey: "quiz.schnellcheck.title",
+    subtitleKey: "quiz.schnellcheck.subtitle",
+    descriptionKey: "quiz.schnellcheck.description",
+    myths: [],
+    dynamic: true,
+  },
 };
 
-/** All quiz slugs in display order. */
+/** All five static quiz slugs that group the 40 used myths by theme.
+ *  m12 + m17 are `keine_aussage` and not included in any module. */
+const STATIC_THEME_BUCKETS: Array<{ slug: string; myths: QuizMyth[] }> = [
+  { slug: "quiz-medizin", myths: mythsMedizin },
+  { slug: "quiz-risiken", myths: mythsRisiken },
+  { slug: "quiz-stimmung", myths: mythsStimmung },
+  { slug: "quiz-gesellschaft", myths: mythsGesellschaft },
+  { slug: "quiz-gefaehrlichkeit", myths: mythsGefaehrlichkeit },
+];
+
+/** Global mythId → QuizMyth lookup across every static theme. Used by
+ *  the Schnellcheck deck (Stage 6) to rehydrate persisted picks: the
+ *  saved `order` field in localStorage stores mythIds; this map resolves
+ *  them back to full QuizMyth objects. */
+export const ALL_MYTHS_BY_ID: Record<string, QuizMyth> = (() => {
+  const out: Record<string, QuizMyth> = {};
+  for (const bucket of STATIC_THEME_BUCKETS) {
+    for (const m of bucket.myths) out[m.id] = m;
+  }
+  return out;
+})();
+
+/**
+ * Stage 6 — pick 7 myths balanced across the five theme buckets.
+ *
+ * Strategy: take 1 random myth from each of the 5 buckets, then fill the
+ * remaining 2 slots from the union of not-yet-picked myths (also random).
+ * Returns a freshly shuffled array each call; pass `seed`-style behaviour
+ * by injecting a custom rng for tests.
+ *
+ * Why not pure-random across all 40? A pure sample frequently produces
+ * runs heavily weighted toward one theme, which makes the Schnellcheck
+ * feel less like a cross-section. The balanced strategy guarantees
+ * thematic variety while still feeling random.
+ */
+export function pickSchnellcheckMyths(
+  rng: () => number = Math.random
+): QuizMyth[] {
+  const picked: QuizMyth[] = [];
+
+  // 1) one from each bucket
+  for (const bucket of STATIC_THEME_BUCKETS) {
+    if (bucket.myths.length === 0) continue;
+    const idx = Math.floor(rng() * bucket.myths.length);
+    picked.push(bucket.myths[idx]);
+  }
+
+  // 2) fill remaining slots (up to 7) from the union of remaining myths
+  const pickedIds = new Set(picked.map((m) => m.id));
+  const pool: QuizMyth[] = [];
+  for (const bucket of STATIC_THEME_BUCKETS) {
+    for (const m of bucket.myths) {
+      if (!pickedIds.has(m.id)) pool.push(m);
+    }
+  }
+  while (picked.length < 7 && pool.length > 0) {
+    const idx = Math.floor(rng() * pool.length);
+    picked.push(pool[idx]);
+    pool.splice(idx, 1);
+  }
+
+  // 3) final shuffle so the "balanced" pick doesn't always start medizin →
+  //    risiken → stimmung → gesellschaft → gefaehrlichkeit.
+  for (let i = picked.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [picked[i], picked[j]] = [picked[j], picked[i]];
+  }
+
+  return picked;
+}
+
+/** All quiz slugs in display order. Schnellcheck sits last so editorial
+ *  modules remain the primary entry points. */
 export const QUIZ_SLUGS = [
   "quiz-medizin",
   "quiz-risiken",
   "quiz-stimmung",
   "quiz-gesellschaft",
   "quiz-gefaehrlichkeit",
+  "quiz-schnellcheck",
 ] as const;

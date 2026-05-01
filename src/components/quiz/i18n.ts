@@ -53,6 +53,12 @@ const translations: Record<Lang, Record<string, string>> = {
       "Was weißt du über die allgemeine Gefährlichkeit von Cannabis?",
     "quiz.gefaehrlichkeit.description":
       "Alkohol-Vergleich, Harmlosigkeit, Dosierung und Mischkonsum.",
+    // Stage 6 — Schnellcheck (dynamic 7-myth deck across all themes)
+    "quiz.schnellcheck.title": "Schnellcheck",
+    "quiz.schnellcheck.subtitle":
+      "Sieben zufällige Aussagen aus allen Themen — jeder Besuch ist neu.",
+    "quiz.schnellcheck.description":
+      "Querschnitt durch alle Themen. Jeder Besuch zieht neue Aussagen.",
 
     // ── Myth statements ───────────────────────────────────────────────
     "myth.m01.statement": "Cannabis ist ein Allheilmittel.",
@@ -212,60 +218,24 @@ const translations: Record<Lang, Record<string, string>> = {
       "Internationale Studien zeigen bislang keinen klaren Anstieg des Konsums bei Minderjährigen nach einer Legalisierung. In einigen Regionen blieben die Raten stabil.",
 
     // ── Population comparison strings ─────────────────────────────────
-    "population.score":
-      "Gesamtbev\u00F6lkerung: {score} von 100 Punkten",
-    "population.unavailable":
-      "F\u00FCr diese Aussage liegen keine vergleichenden Daten vor.",
-
-    // ── Result tier titles & messages ─────────────────────────────────
-    "tier.0.title": "Noch viel zu entdecken",
-    "tier.0.message":
-      "Es gibt noch viel Spannendes über Cannabis zu lernen.",
-    "tier.1.title": "Auf dem richtigen Weg",
-    "tier.1.message":
-      "Du hast schon einiges richtig eingeschätzt — weiter so!",
-    "tier.2.title": "Gut informiert",
-    "tier.2.message":
-      "Du kennst dich schon gut aus. Hier sind ein paar Themen zum Vertiefen.",
-    "tier.3.title": "Cannabis-Experte:in",
-    "tier.3.message":
-      "Beeindruckend! Du hast fast alles richtig eingeschätzt.",
-
     // ── UI strings ────────────────────────────────────────────────────
     "ui.progress": "{answered} von {total} beantwortet",
     "ui.resultTitle": "Dein Ergebnis",
-    "ui.scoreHeadline": "{correct} von {total} richtig beantwortet",
-    "ui.correctPctLine": "{pct}\u00A0% richtig",
-    "ui.percentileLine":
-      "Du weißt mehr als {pct}\u00A0% der Bevölkerung in Deutschland.",
     "ui.shareButton": "Ergebnis teilen",
     "ui.copiedToClipboard": "Link kopiert! \u2713",
     "ui.shareTitle": "Mein Cannabis-Quiz Ergebnis",
-    "ui.shareText":
-      "Ich habe {correct} von {total} Cannabis-Mythen richtig eingesch\u00E4tzt und wei\u00DF mehr als {pct}\u00A0% der Bev\u00F6lkerung in Deutschland. Teste dich selbst: https://cannabismythen.de/quiz/",
     "ui.backToQuizzes": "Alle Quiz-Module",
     "ui.restartQuiz": "Quiz wiederholen",
     "ui.zahlenUndFakten": "Zahlen & Fakten entdecken",
     "ui.correct": "Richtig!",
     "ui.incorrect": "Leider falsch",
-    "ui.feedback.correct": "Das ist korrekt.",
-    "ui.feedback.near": "Du warst nah dran.",
-    "ui.feedback.far": "Das ist leider nicht korrekt.",
     "ui.mythVerdict": "Der Mythos \u201e{statement}\u201c ist {verdict}.",
-    "ui.populationCorrectShort": "haben richtig eingesch\u00e4tzt",
     "ui.verdictScale.label": "Antwort w\u00e4hlen",
 
     // \u2500\u2500 Deck overview (Phase C \u00a73.11) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-    "ui.deckOverview.title": "\u00dcbersicht \u2014 {n} Fragen",
-    "ui.deckOverview.cta": "\u00dcbersicht aller {n} Fragen",
-    "ui.feedback.correctShort": "korrekt",
-    "ui.feedback.nearShort": "nah dran",
-    "ui.feedback.farShort": "nicht korrekt",
     "ui.close": "Schlie\u00dfen",
 
     // \u2500\u2500 Keyboard shortcuts (Phase C \u00a73.12) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-    "ui.shortcutsHelp":
-      "Tasten: 1\u20134 w\u00e4hlt eine Antwort, \u2192 weiter, \u2190 zur\u00fcck, D Details, ? Hilfe",
     "ui.shortcuts.title": "Tastenk\u00fcrzel",
     "ui.shortcuts.row.answer": "1 \u2013 4: Antwort w\u00e4hlen",
     "ui.shortcuts.row.next": "\u2192: N\u00e4chste Frage",
@@ -288,16 +258,6 @@ const translations: Record<Lang, Record<string, string>> = {
       "{schritte}\u00a0Schritt(e) daneben \u2192 {points}\u00a0Punkte",
 
     // \u2500\u2500 Micro-copy table (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-    "ui.microCopy.farMiss":
-      "Daneben \u2014 {pct} % der Befragten haben es korrekt eingesch\u00e4tzt.",
-    "ui.microCopy.nearMiss":
-      "Mehr als die H\u00e4lfte der Befragten lag falsch \u2014 du warst nah dran.",
-    "ui.microCopy.correct":
-      "Genau richtig \u2014 {missPct} % der Befragten lagen daneben.",
-    "ui.microCopy.streak": "{n} richtig in Folge \u2014 bleib dran.",
-    "ui.microCopy.popular":
-      "{pct} % der Befragten teilten deine Einsch\u00e4tzung.",
-
     // \u2500\u2500 Result screen \u2014 N\u00e4chstes Modul (Phase C \u00a73.14) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     "ui.nextModule.cta": "N\u00e4chstes Modul: {title} \u2192",
     "ui.classificationPhrase.richtig": "richtig",
@@ -319,22 +279,15 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.nextQuestion": "N\u00e4chste Frage",
     "ui.previousQuestion": "Zur\u00fcck",
     "ui.finishQuiz": "Ergebnis ansehen",
-    "ui.populationLine":
-      "{pct}\u00a0% der Befragten in Deutschland haben diese Aussage korrekt eingesch\u00e4tzt.",
-    "ui.populationUnavailable":
-      "F\u00fcr diese Aussage liegen keine vergleichenden Daten vor.",
     "ui.persistenceNotice":
       "Wir speichern deinen Fortschritt nur in diesem Browser.",
     "ui.progressRestored":
       "Fortschritt wiederhergestellt.",
     "ui.resetProgress": "Quiz zur\u00fccksetzen",
     "ui.retrospectiveTitle": "Deine Antworten im \u00dcberblick",
-    "ui.scoreHeadlineCompare":
-      "Du hast {pct}\u202f% erreicht \u2014 besser als ca. {pop}\u202f% der Erwachsenen (18\u201370) in der CaRM-Studie.",
     "ui.exploreData": "Daten-Explorer \u00f6ffnen",
     "ui.shareResultHeading": "Ergebnis teilen",
     "ui.openMythDetail": "Details zu dieser Aussage \u2192",
-    "ui.skipToResult": "Direkt zum Ergebnis",
   },
 
   // ── English (placeholder — to be filled) ──────────────────────────

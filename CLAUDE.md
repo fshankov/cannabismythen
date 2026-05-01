@@ -109,9 +109,16 @@ live site without a code change.
   these values when computing scores. Never edit these in `.mdoc`; never
   duplicate them across the boundary.
 - **The join point** — `src/pages/quiz/[slug].astro` reads both stores and
-  passes them as JSON props (`quizText`, `verdicts`, `intros`, …) into
-  `<QuizPlayer>`. If you add a new editorial field to the Keystatic schema,
-  extend the Astro page to forward it — otherwise edits silently no-op.
+  passes them as JSON props (`quizText`, `verdicts`, `intros`, `shareCopy`,
+  …) into `<QuizPlayer>`. If you add a new editorial field to the
+  Keystatic schema, extend the Astro page to forward it — otherwise edits
+  silently no-op.
+- **Share-card copy fallback chain (Stage 7):** per-module
+  `shareCopy.{band}` override > `share-copy.yaml` singleton default >
+  hardcoded final fallback in `ResultScreen.tsx`. The Astro page does
+  the merge so the React player sees a single resolved object.
+  Editing either Keystatic surface reflects on the live result page +
+  ShareCard after the next deploy.
 - **Scoring is Schritte, never binary.** All per-question math routes
   through `schritte()` / `pointsForSchritte()` / `moduleScore()` /
   `breakdownCounts()` / `scoreBand()` in `quizData.ts`. If you find another
@@ -237,8 +244,12 @@ build doesn't flag them.
 | Task | Start here |
 |---|---|
 | Add a new myth | New `src/content/zahlen-und-fakten/mNN-slug.mdoc` matching `zahlenUndFakten` schema in `keystatic.config.ts` |
-| Tweak quiz behaviour | `src/components/quiz/QuizPlayer.tsx` + `quizData.ts` |
-| Change quiz copy/labels | `src/components/quiz/i18n.ts` |
+| Tweak quiz behaviour | `src/components/quiz/QuizPlayer.tsx` + `quizData.ts` (Schritte scoring lives in `schritte()` / `pointsForSchritte()` / `moduleScore()` / `scoreBand()`) |
+| Change quiz statements / explanations / verdicts | `src/content/quiz/*.mdoc` (Keystatic). The Astro page `src/pages/quiz/[slug].astro` is the join point. |
+| Add a quiz module | New `src/content/quiz/quiz-<slug>.mdoc` matching the schema, plus a static theme entry in `quizData.ts` (or `dynamic: true` for runtime-picked decks like Schnellcheck), plus a tile in `src/pages/quiz/index.astro`. |
+| Change global share copy / verdict fallbacks | `src/content/share-copy.yaml` (singleton) — per-module override is in each module's `shareCopy.{band}` field. |
+| Generate OG share images | `npm run og:generate` (or `npm run build` — runs as prebuild). Script: `scripts/generate-quiz-og.ts`. |
+| Change quiz UI copy / labels | `src/components/quiz/i18n.ts` |
 | Tweak the dashboard | `src/components/dashboard/MythenExplorer.tsx` and `src/lib/dashboard/` |
 | Adjust verdict colors / typography | `src/styles/global.css` (CSS custom properties) |
 | Add a new dynamic route | Mirror the `getStaticPaths()` + published filter pattern from any existing `[slug].astro` |
