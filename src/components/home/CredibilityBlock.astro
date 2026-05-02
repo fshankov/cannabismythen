@@ -132,6 +132,14 @@ const { eyebrow, headline, lede, rows } = Astro.props;
     align-items: baseline;
   }
 
+  @media (max-width: 480px) {
+    .credibility-row {
+      grid-template-columns: 44px 1fr;
+      gap: 0.85rem;
+      padding: 1.25rem 0;
+    }
+  }
+
   .credibility-row__marker {
     display: flex;
     align-items: baseline;
@@ -144,6 +152,10 @@ const { eyebrow, headline, lede, rows } = Astro.props;
     color: var(--color-accent-muted);
     line-height: 1;
     letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 480px) {
+    .credibility-row__index { font-size: 19px; }
   }
 
   .credibility-row__body {
@@ -177,10 +189,18 @@ const { eyebrow, headline, lede, rows } = Astro.props;
     gap: 6px;
     border-bottom: 1px solid rgba(45, 106, 79, 0.3);
     transition: border-color 0.2s ease, color 0.2s ease;
+    /* Tap-target safety on touch devices — invisible padding around link text */
+    padding: 4px 0;
   }
 
   .credibility-row__link:hover {
     color: var(--color-accent-hover);
     border-bottom-color: var(--color-accent-hover);
+  }
+
+  .credibility-row__link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
   }
 </style>

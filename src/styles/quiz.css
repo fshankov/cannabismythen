@@ -279,15 +279,15 @@
   isolation: isolate;
   perspective: 1600px;
   width: 100%;
-  /* Stage 2: shared card dimensions across TitleCard + QuizCard so the
-     deck illusion stays consistent. The forced 3/4 aspect-ratio created
-     huge dead space below short content; replace with a CSS Grid layout
-     whose single row uses min-height. Grid `1fr` propagates a definite
-     height into the inner .quiz-card chain (which `min-height` alone does
-     not — percentage heights need a definite parent). */
-  max-width: min(560px, calc(100vw - 32px));
+  /* Remediation 6 — board-game / poker card aspect (≈ 1 : 1.4). Width
+     capped at 380 px so the card reads as a single playing card on
+     wide screens; height locked to that ratio with a clamp() so it
+     stays usable at small viewports. Grid 1fr propagates a definite
+     height into the inner .quiz-card chain. */
+  max-width: min(380px, calc(100vw - 32px));
   margin: 0 auto;
-  min-height: clamp(360px, 60vh, 540px);
+  aspect-ratio: 1 / 1.4;
+  min-height: clamp(440px, 64vh, 540px);
   display: grid;
   grid-template-rows: 1fr;
 }
@@ -1319,7 +1319,9 @@
    min-height to a clamp via this dual-class override so the bigger
    responsive minimum wins. */
 .quiz-card__cell.quiz-card__cell--flow {
-  min-height: clamp(360px, 60vh, 540px);
+  /* Promoted to dual-class specificity so the bigger min-height wins
+     over the generic `.quiz-card__cell { min-height: 340px }` rule. */
+  min-height: clamp(440px, 64vh, 540px);
 }
 
 /* ── Card (outer clickable wrapper) ───────────────────────────── */
@@ -2947,12 +2949,12 @@
     min-height: 300px;
   }
 
-  /* Stage 2: mobile cap so the deck still leaves room for the pill row +
-     nav + persistence notice on shorter phones. The min-height also
-     scales down via the clamp() in the desktop block above. */
+  /* Remediation 6: mobile preserves the poker aspect-ratio. Cap on
+     short phones so the card never pushes the buttons off-screen. */
   .quiz-card__cell--flow {
-    max-height: min(640px, calc(100svh - 240px));
-    min-height: clamp(320px, 55vh, 480px);
+    max-width: min(340px, calc(100vw - 24px));
+    max-height: min(560px, calc(100svh - 200px));
+    min-height: clamp(380px, 60vh, 480px);
   }
 
   .quiz-player__flow {
@@ -3028,17 +3030,24 @@
   color: var(--color-text-secondary);
 }
 
-/* v2: tighter, content-sized tile. The legacy 340 px grid-auto-rows row
-   forced a wasteful ~200 px of empty space below the title; the new tile
-   is content-sized and sits ~200 px tall on desktop, ~140 px on mobile. */
+/* Remediation 6 — Topic tiles share the in-quiz card's poker-card
+   aspect (1 : 1.4) and idle tilt + hover lift. Each tile shows a
+   "deck" behind it whose thickness reflects the question count
+   (data-deck attribute set by the index page: 0–3, where higher =
+   more cards fanned out behind the front tile). */
 .quiz-selection {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  /* No grid-auto-rows — let the tile size to its content. */
-  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-2xl) var(--space-lg);
+  padding-top: var(--space-md);
+  padding-bottom: var(--space-2xl);
+  /* Extra row gap so the fanned cards behind don't visually touch
+     the next row of tiles. */
 }
 
 .quiz-select-card {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3050,36 +3059,91 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-lg) var(--space-md);
-  /* Content-sized tile with a sensible minimum so they share a baseline
-     when titles vary in length. */
-  min-height: 200px;
+  /* Same poker-card proportions as the in-quiz card; capped width
+     keeps the deck silhouette intact even at full-width breakpoints. */
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1.4;
   box-sizing: border-box;
+  box-shadow: var(--shadow-sm);
+  /* Reuse the in-quiz card's idle-tilt token. The index page generates
+     a per-tile deterministic tilt via inline style. */
+  transform: rotate(var(--card-tilt, 0deg));
   transition:
-    border-color var(--transition),
-    box-shadow var(--transition),
-    transform var(--transition);
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
   cursor: pointer;
 }
 
 .quiz-select-card:hover {
   border-color: var(--color-accent);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  /* Lift + un-tilt on hover so it feels like picking the card up. */
+  transform: rotate(0deg) translateY(-3px);
+}
+
+.quiz-select-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* Deck-behind pseudo-elements — up to 3 cards fanned behind the
+   front tile. Visibility is gated by the `data-deck` attribute (0..3)
+   set on the link in index.astro. */
+.quiz-select-card::before,
+.quiz-select-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.quiz-select-card[data-deck="1"]::before,
+.quiz-select-card[data-deck="2"]::before,
+.quiz-select-card[data-deck="3"]::before {
+  opacity: 1;
+  transform: translate(6px, 8px) rotate(2deg);
+  box-shadow: 0 2px 8px rgba(26, 26, 46, 0.06);
+}
+
+.quiz-select-card[data-deck="2"]::after,
+.quiz-select-card[data-deck="3"]::after {
+  opacity: 0.85;
+  transform: translate(-6px, 12px) rotate(-2.5deg);
+  box-shadow: 0 4px 14px rgba(26, 26, 46, 0.05);
+}
+
+/* The "3" depth nudges the second card further out so the deck reads
+   as deeper without adding a third pseudo (which CSS doesn't allow). */
+.quiz-select-card[data-deck="3"]::after {
+  transform: translate(-9px, 16px) rotate(-3.5deg);
+  opacity: 0.7;
 }
 
 .quiz-select-card__emoji {
-  font-size: 2rem;
-  margin-bottom: var(--space-sm);
+  font-size: 2.5rem;
+  margin-bottom: var(--space-md);
   display: block;
   line-height: 1;
 }
 
 .quiz-select-card__title {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--color-text);
-  margin: 0 0 var(--space-sm) 0;
+  margin: 0 0 var(--space-md) 0;
   line-height: 1.3;
+  hyphens: auto;
 }
 
 .quiz-select-card__count {
@@ -3087,7 +3151,7 @@
   font-weight: 600;
   color: var(--color-accent);
   background: var(--color-accent-light);
-  padding: 0.2em 0.7em;
+  padding: 0.25em 0.8em;
   border-radius: var(--radius-full);
   letter-spacing: 0.02em;
 }

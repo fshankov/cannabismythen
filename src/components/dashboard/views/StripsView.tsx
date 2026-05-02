@@ -522,6 +522,74 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
             aria-label={t('howto.strips', state.lang)}
             onMouseLeave={() => { setHoveredMythId(null); setHoverPos(null); }}
           >
+            {/* Verdict-arrow symbol library — referenced via <use> for
+                each beeswarm marker. Five symbols, one per verdict,
+                using the canonical Lucide arrow paths. Stroke uses
+                `currentColor` so we can tint per-marker via the parent
+                <g style={{ color: ... }}>. Stroke-width slightly heavier
+                than the legend's 2.25 so the arrows read clearly at
+                10–14px in the chart. */}
+            <defs>
+              <symbol id="strips-arrow-richtig" viewBox="0 0 24 24" overflow="visible">
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 5v14" />
+                  <path d="m5 12 7-7 7 7" />
+                </g>
+              </symbol>
+              <symbol id="strips-arrow-eher_richtig" viewBox="0 0 24 24" overflow="visible">
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M7 7h10v10" />
+                  <path d="M7 17 17 7" />
+                </g>
+              </symbol>
+              <symbol id="strips-arrow-eher_falsch" viewBox="0 0 24 24" overflow="visible">
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 17H7V7" />
+                  <path d="m17 7-10 10" />
+                </g>
+              </symbol>
+              <symbol id="strips-arrow-falsch" viewBox="0 0 24 24" overflow="visible">
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 5v14" />
+                  <path d="m19 12-7 7-7-7" />
+                </g>
+              </symbol>
+              <symbol id="strips-arrow-no_classification" viewBox="0 0 24 24" overflow="visible">
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12h14" />
+                </g>
+              </symbol>
+            </defs>
             {/* Strip backgrounds + gridlines.
                 Each strip is ONE fully-rounded grey rectangle that spans both
                 the header area at the top (icon + label + 'i') and the dots
@@ -554,6 +622,13 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                   />
                   {ticks.map((tk) => (
                     <g key={tk}>
+                      {/* Dashed gridline only — the per-tick text labels
+                          ("0 / 20 / 40 / …") were removed: they read as
+                          a noisy column of digits in the left margin
+                          without adding much beyond the implicit
+                          0–100 score range that the chart already
+                          communicates via dot height + value pills on
+                          hover. */}
                       <line
                         x1={stripLeft + 2}
                         x2={stripLeft + colW - 2}
@@ -562,17 +637,6 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                         stroke="#e5e7eb"
                         strokeDasharray="2 4"
                       />
-                      {i === 0 && (
-                        <text
-                          x={margin.left - 6}
-                          y={yScale(tk) + 3}
-                          textAnchor="end"
-                          fontSize={9}
-                          fill="#94a3b8"
-                        >
-                          {tk}
-                        </text>
-                      )}
                     </g>
                   ))}
                   {col.nodes.length === 0 && (
@@ -629,29 +693,58 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 ? col.nodes
                 : [...col.nodes.filter((n) => n.mythId !== focusMythId),
                    ...col.nodes.filter((n) => n.mythId === focusMythId)];
+              /**
+               * Auto-scale arrow size by column density. Sparse columns
+               * get a larger, easier-to-read arrow; crowded columns
+               * shrink so the beeswarm stays legible. Selected / hover
+               * states scale up modestly to mirror the old radius bump.
+               * Sizes were bumped from 10/12/14 → 14/16/18 in response
+               * to user feedback that the original tier was too small
+               * to read at-a-glance.
+               */
+              const density = col.nodes.length;
+              const baseSize =
+                density >= 13 ? 14 : density >= 7 ? 16 : 18;
               return (
                 <g key={`dots-${String(col.id)}`} transform={`translate(0, ${margin.top})`}>
                   {sortedNodes.map((n) => {
                     const isSel = n.mythId === selectedMythId;
                     const isHov = n.mythId === hoveredMythId && !isSel;
                     const dimmed = focusMythId !== null && !(isSel || isHov);
-                    const r = isSel ? col.radius + 2.5 : isHov ? col.radius + 1.5 : col.radius;
+                    const size = isSel ? baseSize + 6 : isHov ? baseSize + 3 : baseSize;
                     const hitR = isSel ? 22 : 14;
                     const dotX = cx + n.x;
                     const dotY = n.y;
+                    const verdict = n.myth.correctness_class;
                     return (
                       <g key={`${col.id}-${n.mythId}`}>
-                        <circle
-                          cx={dotX}
-                          cy={dotY}
-                          r={r}
-                          fill={getCorrectnessColor(n.myth.correctness_class)}
-                          // Ghost non-highlighted dots at 10 % when something is focused;
-                          // highlighted dot + connecting polyline stay full opacity.
-                          fillOpacity={dimmed ? 0.1 : isSel ? 1 : isHov ? 1 : 0.85}
-                          stroke={isSel ? '#0f172a' : isHov ? '#475569' : 'none'}
-                          strokeWidth={isSel ? 1.5 : isHov ? 1 : 0}
-                        />
+                        {/* Verdict arrow — replaces the old <circle> in
+                            Stage 6 of the Daten-Explorer refactor. The
+                            `<use>` references one of the five symbols
+                            in <defs> above. Color tints via the parent
+                            <g style={{ color: ... }}> + currentColor in
+                            the symbol's stroke. Centered by offsetting
+                            x/y by half the rendered size. */}
+                        <g
+                          style={{
+                            color: getCorrectnessColor(verdict),
+                            opacity: dimmed ? 0.18 : isSel ? 1 : isHov ? 1 : 0.92,
+                            transition: 'opacity 120ms ease',
+                          }}
+                        >
+                          <use
+                            href={`#strips-arrow-${verdict}`}
+                            x={dotX - size / 2}
+                            y={dotY - size / 2}
+                            width={size}
+                            height={size}
+                          />
+                        </g>
+                        {/* Invisible square hit area — keeps the
+                            click/hover target uniform regardless of
+                            arrow shape, matching the old dot's tap
+                            footprint. Sized to the previous radius
+                            so muscle memory survives the change. */}
                         <circle
                           cx={dotX}
                           cy={dotY}
@@ -665,9 +758,6 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                           }}
                           onMouseLeave={() => setHoveredMythId(null)}
                         />
-                        {/* Native browser tooltip <title> intentionally omitted: the
-                            custom hover label below replaces it (and prevents the
-                            two from rendering simultaneously). */}
                       </g>
                     );
                   })}

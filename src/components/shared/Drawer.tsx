@@ -33,6 +33,11 @@ export interface DrawerProps {
   children: React.ReactNode;
   /** Sticky footer slot — typically Reset / Apply buttons. */
   footer?: React.ReactNode;
+  /** Optional content rendered to the right of the title block (before
+   *  the close button). Use this for a small selection-count badge or
+   *  similar status indicator that should track the title rather than
+   *  pushing the body content around. */
+  headerEnd?: React.ReactNode;
 }
 
 export default function Drawer({
@@ -46,6 +51,7 @@ export default function Drawer({
   initialFocusRef,
   children,
   footer,
+  headerEnd,
 }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -100,7 +106,7 @@ export default function Drawer({
         tabIndex={-1}
       >
         <header className="carm-drawer__header">
-          <div>
+          <div className="carm-drawer__header-titles">
             <h2 className="carm-drawer__title" id={titleId}>
               {title}
             </h2>
@@ -110,6 +116,9 @@ export default function Drawer({
               </p>
             )}
           </div>
+          {headerEnd && (
+            <div className="carm-drawer__header-end">{headerEnd}</div>
+          )}
           <button
             type="button"
             className="carm-drawer__close"

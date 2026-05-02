@@ -1,29 +1,30 @@
 /**
- * FilterDrawer — unified search + Kategorien + einzelne Mythen multi-select.
+ * FilterDrawer — search + accordion-by-category myth filter.
  *
  * Layout (top → bottom, sticky search header):
- *   1. Search input — filters the visible myth list below it.
- *   2. Mythos-Kategorien checkboxes — selecting a category implicitly
- *      includes every myth that belongs to it. The category checkbox is
- *      derived from `state.categoryIds` (clean group selection) and the
- *      myth list is derived from `state.mythIds` (individual additions
- *      that aren't covered by a fully-selected category).
- *   3. Einzelne Mythen — checkbox per myth, grouped by category. Filtered
- *      live by the search input.
+ *   1. Search input — when non-empty, hides the accordion and shows a
+ *      flat hit list with verdict arrow + statement + category meta.
+ *   2. Per-category accordion. Each row carries:
+ *        - the category-level checkbox (all/some/none indeterminate)
+ *        - the category name + (n) count
+ *        - a chevron that toggles open/close
+ *      When opened, the body lists every myth in that category as a
+ *      checkbox row. All accordions are collapsed by default — the
+ *      user expands a category to see its myths.
  *
  * Filtering result (in `filterMyths`): a myth is shown iff
  *   - both lists are empty (no filter, default), OR
  *   - it is in a selected category, OR
  *   - its id is in `mythIds`.
  *
- * Toggling a myth that's currently included via its category expands the
- * group: the category leaves `categoryIds` and the rest of its myths
- * (minus the toggled one) move into `mythIds`. This keeps the visible
- * row count correct without surprising the user.
+ * Toggling a myth that's currently included via its category expands
+ * the group: the category leaves `categoryIds` and the rest of its
+ * myths (minus the toggled one) move into `mythIds`. This keeps the
+ * visible row count correct without surprising the user.
  */
 
 import { useMemo, useState } from 'react';
-import { Search, X } from 'lucide-react';
+import { ChevronRight, Search, X } from 'lucide-react';
 import type { AppState, Category, Myth } from '../../../lib/dashboard/types';
 import Drawer from '../../shared/Drawer';
 import { t } from '../../../lib/dashboard/translations';
@@ -67,13 +68,17 @@ export default function FilterDrawer({
   mythContent,
 }: Props) {
   const [query, setQuery] = useState('');
+  /** Set of category-ids whose accordion is currently expanded.
+   *  Default: empty (all collapsed). The user expands a category to
+   *  reveal its myths. */
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   /** Long statement (Markdoc title) when available, else the short label.
    *  This is what the drawer + autocomplete render. */
   const longText = (m: Myth): string =>
     mythContent?.[m.id]?.title?.trim() || getMythText(m, 'de');
 
-  // Group myths by category for the einzelne-Mythen list.
+  // Group myths by category for the accordion list.
   const mythsByCategory = useMemo(() => {
     const map = new Map<number, Myth[]>();
     for (const m of myths) {
@@ -189,6 +194,15 @@ export default function FilterDrawer({
     }
   };
 
+  const toggleExpanded = (id: number) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const reset = () => {
     updateMany({
       categoryIds: [],
@@ -196,6 +210,7 @@ export default function FilterDrawer({
       verdictFilter: 'all',
     });
     setQuery('');
+    setExpanded(new Set());
   };
 
   const totalSelected = useMemo(() => {
@@ -213,6 +228,21 @@ export default function FilterDrawer({
       side="right"
       size="md"
       title={t('filter.title', 'de')}
+      headerEnd={
+        // Selection count lives next to the title — `aria-live="polite"`
+        // announces changes for screen readers, the visual fade-in
+        // means it doesn't pop into existence when crossing zero.
+        totalSelected > 0 ? (
+          <span
+            className="carm-filter-count"
+            role="status"
+            aria-live="polite"
+          >
+            {totalSelected} {totalSelected === 1 ? 'Mythos' : 'Mythen'}{' '}
+            <span className="carm-filter-count__suffix">ausgewählt</span>
+          </span>
+        ) : undefined
+      }
       footer={
         <>
           <button
@@ -259,48 +289,6 @@ export default function FilterDrawer({
         )}
       </div>
 
-      {totalSelected > 0 && (
-        <p className="carm-filter-summary" role="status">
-          {totalSelected} {totalSelected === 1 ? 'Mythos' : 'Mythen'} ausgewählt
-        </p>
-      )}
-
-      {/* Categories: hidden when the user is searching — search results
-          show individual myths instead. */}
-      {filteredMyths === null && (
-        <section className="carm-filter-section">
-          <h3 className="carm-filter-section__title">
-            {t('filter.categories.label', 'de')}
-          </h3>
-          <ul className="carm-filter-section__list" role="list">
-            {categories.map((c) => {
-              const s = categoryState(c.id);
-              const count = mythsByCategory.get(c.id)?.length ?? 0;
-              return (
-                <li key={c.id}>
-                  <label className="carm-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={s === 'all'}
-                      ref={(el) => {
-                        if (el) el.indeterminate = s === 'some';
-                      }}
-                      onChange={() => toggleCategory(c.id)}
-                    />
-                    <span className="carm-checkbox__label">
-                      {c.name_de}
-                      <span className="carm-checkbox__count">
-                        ({count})
-                      </span>
-                    </span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
-
       <section className="carm-filter-section">
         <h3 className="carm-filter-section__title">
           {filteredMyths === null
@@ -313,21 +301,77 @@ export default function FilterDrawer({
           <p className="carm-filter-empty">{t('filter.myths.empty', 'de')}</p>
         )}
         {filteredMyths === null ? (
-          <ul className="carm-filter-myth-groups" role="list">
+          <ul className="carm-filter-accordion" role="list">
             {categories.map((c) => {
               const cMyths = mythsByCategory.get(c.id) ?? [];
               if (cMyths.length === 0) return null;
+              const sel = categoryState(c.id);
+              const isOpen = expanded.has(c.id);
+              const headingId = `carm-filter-acc-h-${c.id}`;
+              const panelId = `carm-filter-acc-p-${c.id}`;
               return (
-                <li key={c.id} className="carm-filter-myth-group">
-                  <p className="carm-filter-myth-group__heading">
-                    {c.name_de}
-                  </p>
-                  <ul
-                    className="carm-filter-section__list carm-filter-myth-list"
-                    role="list"
+                <li key={c.id} className="carm-filter-accordion__item">
+                  <div className="carm-filter-accordion__heading">
+                    {/* The category-level checkbox is its own focusable
+                        label so it stays a clean checkbox affordance —
+                        the chevron next to it controls open/close
+                        independently. Two distinct hit areas matches
+                        the GitHub / Notion accordion-with-multiselect
+                        pattern. */}
+                    <label className="carm-checkbox carm-checkbox--category">
+                      <input
+                        type="checkbox"
+                        checked={sel === 'all'}
+                        ref={(el) => {
+                          if (el) el.indeterminate = sel === 'some';
+                        }}
+                        onChange={() => toggleCategory(c.id)}
+                        aria-label={`${c.name_de} (${cMyths.length})`}
+                      />
+                      <span className="carm-checkbox__label" id={headingId}>
+                        {c.name_de}
+                        <span className="carm-checkbox__count">
+                          ({cMyths.length})
+                        </span>
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      className={`carm-filter-accordion__toggle${
+                        isOpen ? ' is-open' : ''
+                      }`}
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      aria-labelledby={headingId}
+                      onClick={() => toggleExpanded(c.id)}
+                    >
+                      <ChevronRight
+                        size={16}
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </div>
+                  {/* Panel is ALWAYS rendered so the height transition
+                      can animate from 0 → content. The wrapper carries
+                      the open class which drives a `grid-template-rows`
+                      transition (modern browsers; degrades to instant
+                      open in older ones). `inert` keeps the collapsed
+                      content out of the focus order + AT tree. */}
+                  <div
+                    {...(isOpen ? {} : { inert: '' as unknown as boolean })}
+                    className={`carm-filter-accordion__panel-wrap${
+                      isOpen ? ' is-open' : ''
+                    }`}
                   >
-                    {cMyths.map((m) => renderMythRow(m))}
-                  </ul>
+                    <ul
+                      id={panelId}
+                      role="list"
+                      className="carm-filter-section__list carm-filter-myth-list carm-filter-accordion__panel"
+                    >
+                      {cMyths.map((m) => renderMythRow(m))}
+                    </ul>
+                  </div>
                 </li>
               );
             })}

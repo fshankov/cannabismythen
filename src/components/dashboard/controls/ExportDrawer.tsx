@@ -22,7 +22,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { Download, FileText, FileImage, FileJson } from 'lucide-react';
+import { Check, Download, FileText, FileImage, FileJson, Link as LinkIcon } from 'lucide-react';
 import type { CarmData, GroupId, Indicator, Myth } from '../../../lib/dashboard/types';
 import Drawer from '../../shared/Drawer';
 import {
@@ -118,6 +118,33 @@ export default function ExportDrawer({
   const handleJson = () => {
     downloadFullJSON(myths, metrics, groupIds);
     onClose();
+  };
+
+  // Link kopieren — copies the current URL (with filters + view state
+  // baked into the query string) to the clipboard. Brief "Kopiert!"
+  // feedback on the row, then auto-closes the dialog.
+  const [linkCopied, setLinkCopied] = useState(false);
+  useEffect(() => {
+    if (!linkCopied) return;
+    const id = window.setTimeout(() => setLinkCopied(false), 1800);
+    return () => window.clearTimeout(id);
+  }, [linkCopied]);
+
+  const handleCopyLink = () => {
+    if (typeof navigator === 'undefined') return;
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => {
+        setLinkCopied(true);
+        // Close on a short delay so the user sees the "Kopiert!" state
+        // before the dialog dismisses.
+        window.setTimeout(() => onClose(), 700);
+      })
+      .catch(() => {
+        // If the clipboard API rejects (HTTP / permission), do nothing —
+        // the user can copy from the URL bar manually. Don't surface
+        // an error to the dialog; it adds noise without recourse.
+      });
   };
 
   const handlePng = () => {
@@ -220,6 +247,21 @@ export default function ExportDrawer({
       {tab === 'data' && (
         <ul className="carm-export-list" role="list">
           <ExportRow
+            icon={<LinkIcon size={20} strokeWidth={2} />}
+            title={
+              linkCopied
+                ? t('export.link.copied', 'de')
+                : t('export.link.title', 'de')
+            }
+            desc={t('export.link.desc', 'de')}
+            onClick={handleCopyLink}
+            cta={
+              linkCopied ? (
+                <Check size={18} strokeWidth={2.5} aria-hidden="true" />
+              ) : undefined
+            }
+          />
+          <ExportRow
             icon={<FileText size={20} strokeWidth={2} />}
             title={t('export.csv.title', 'de')}
             desc={t('export.csv.desc', 'de')}
@@ -245,6 +287,9 @@ interface ExportRowProps {
   disabled?: boolean;
   previewDataUrl?: string | null;
   previewAlt?: string;
+  /** Override the right-side icon. Defaults to a Download chevron;
+   *  the Link kopieren row swaps in a Check after a successful copy. */
+  cta?: React.ReactNode;
 }
 
 /**
@@ -261,6 +306,7 @@ function ExportRow({
   disabled,
   previewDataUrl,
   previewAlt,
+  cta,
 }: ExportRowProps) {
   return (
     <li>
@@ -287,12 +333,9 @@ function ExportRow({
           <span className="carm-export-row__title">{title}</span>
           <span className="carm-export-row__desc">{desc}</span>
         </span>
-        <Download
-          size={18}
-          strokeWidth={2}
-          aria-hidden="true"
-          className="carm-export-row__cta"
-        />
+        <span className="carm-export-row__cta" aria-hidden="true">
+          {cta ?? <Download size={18} strokeWidth={2} />}
+        </span>
       </button>
     </li>
   );

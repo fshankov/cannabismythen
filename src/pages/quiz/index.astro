@@ -12,14 +12,46 @@ const quizzes = entries.filter(([slug]) => slug !== "feedback-texte");
 
 // Quiz card data: emoji + question count
 const quizMeta: Record<string, { emoji: string; count: number; featured?: boolean }> = {
-  "quiz-medizin":         { emoji: "\uD83D\uDC8A", count: 7  },
-  "quiz-risiken":         { emoji: "\u26A0\uFE0F",  count: 11 },
-  "quiz-stimmung":        { emoji: "\uD83E\uDDE0", count: 6  },
-  "quiz-gesellschaft":    { emoji: "\uD83C\uDFDB\uFE0F", count: 10 },
-  "quiz-gefaehrlichkeit": { emoji: "\u2696\uFE0F",  count: 6  },
-  // Stage 6 \u2014 Schnellcheck. Dynamic 7-myth deck, re-rolled per visit.
-  "quiz-schnellcheck":    { emoji: "\uD83C\uDFB2", count: 7, featured: true },
+  "quiz-medizin":         { emoji: "💊", count: 7  },
+  "quiz-risiken":         { emoji: "⚠️",  count: 11 },
+  "quiz-stimmung":        { emoji: "🧠", count: 6  },
+  "quiz-gesellschaft":    { emoji: "🏛️", count: 10 },
+  "quiz-gefaehrlichkeit": { emoji: "⚖️",  count: 6  },
+  // Stage 6 — Schnellcheck. Dynamic 7-myth deck, re-rolled per visit.
+  "quiz-schnellcheck":    { emoji: "🎲", count: 7, featured: true },
 };
+
+// Remediation 6 — precompute per-tile values in the frontmatter (pure TS).
+// Doing this inline inside the JSX expression confused Astro's template
+// parser, which mis-read `i << s.length` and `(h << 5)` as JSX tags.
+//
+// Deck thickness ladder: ≤6 questions → 1 card behind, 7–9 → 2, ≥10 → 3.
+// Idle tilt is a deterministic −1.6° to +1.6° per slug so the index reads
+// as a hand-laid spread of cards, mirroring the in-quiz card's idle tilt.
+function hashCode(input: string): number {
+  let h = 0;
+  for (let i = 0; i < input.length; i++) {
+    h = (((h << 5) - h) + input.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+const tiles = quizzes.map(([slug, entry]) => {
+  const e = entry as { title: string; questionCount?: number };
+  const meta = quizMeta[slug as string];
+  const count = (meta?.count || e.questionCount || 7) as number;
+  const deckDepth = count >= 10 ? 3 : count >= 7 ? 2 : 1;
+  const tilt = ((hashCode(slug as string) % 1000) / 1000) * 3.2 - 1.6;
+  return {
+    slug: slug as string,
+    title: e.title,
+    emoji: meta?.emoji || "📋",
+    count,
+    deckDepth,
+    tilt: tilt.toFixed(2),
+    featured: Boolean(meta?.featured),
+  };
+});
 ---
 
 <BaseLayout
@@ -34,27 +66,26 @@ const quizMeta: Record<string, { emoji: string; count: number; featured?: boolea
       Teste dein Wissen in fünf thematischen Quiz-Modulen oder im
       Schnellcheck mit zufälligen Aussagen aus allen Themen. Jede Aussage
       ist mit dem Stand der Forschung erklärt; deine Einschätzungen
-      vergleichen wir mit denen der Erwachsenen (18–70) in der CaRM-Studie.
+      vergleichen wir mit denen der Erwachsenen (18–70) in einer
+      repräsentativen Stichprobe in Deutschland.
     </p>
   </div>
 
   <section class="quiz-selection">
-    {quizzes.map(([slug, entry]) => {
-      const e = entry as any;
-      const meta = quizMeta[slug as string];
-      const featured = meta?.featured ? "quiz-select-card--featured" : "";
-      return (
-        <a href={`/quiz/${slug}/`} class={`quiz-select-card ${featured}`}>
-          <span class="quiz-select-card__emoji">{meta?.emoji || "\uD83D\uDCCB"}</span>
-          <h2 class="quiz-select-card__title">{e.title}</h2>
-          <span class="quiz-select-card__count">
-            {meta?.count || e.questionCount || "?"} Fragen
-          </span>
-          {meta?.featured && (
-            <span class="quiz-select-card__chip">Mix</span>
-          )}
-        </a>
-      );
-    })}
+    {tiles.map((tile) => (
+      <a
+        href={`/quiz/${tile.slug}/`}
+        class={`quiz-select-card ${tile.featured ? "quiz-select-card--featured" : ""}`}
+        data-deck={tile.deckDepth}
+        style={`--card-tilt: ${tile.tilt}deg`}
+      >
+        <span class="quiz-select-card__emoji">{tile.emoji}</span>
+        <h2 class="quiz-select-card__title">{tile.title}</h2>
+        <span class="quiz-select-card__count">{tile.count} Fragen</span>
+        {tile.featured && (
+          <span class="quiz-select-card__chip">Mix</span>
+        )}
+      </a>
+    ))}
   </section>
 </BaseLayout>

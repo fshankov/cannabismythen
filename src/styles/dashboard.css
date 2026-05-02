@@ -329,6 +329,19 @@ main:has(.carm-explorer) {
   overflow: hidden;
 }
 
+/* Streifen (Punktwolke) renders its toolbar INSIDE chart-area; the
+   white card behind it made the toolbar look distinct from Balken /
+   Tabelle. Drop the white surround on Streifen so the toolbar sits
+   on the page bg, matching the other tabs. The strips themselves
+   carry their own grey backgrounds drawn directly in the SVG, so
+   the transparent surround doesn't change the chart visuals. */
+.carm-explorer .chart-area--strips {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
 .carm-explorer .chart-area.fullscreen {
   position: fixed;
   top: 0;
@@ -3956,12 +3969,26 @@ body.carm-modal-open {
 
 .carm-drawer__header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--space-md, 16px);
   padding: var(--space-md, 16px) var(--space-lg, 24px);
   border-bottom: 1px solid var(--color-border, #e2e8f0);
   flex-shrink: 0;
+}
+
+/* Title block grows to fill the row so the close button stays
+   right-aligned. The optional `headerEnd` slot sits between the
+   titles and the close button — used by FilterDrawer to show the
+   "X Mythen ausgewählt" badge without disrupting the body layout. */
+.carm-drawer__header-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.carm-drawer__header-end {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
 }
 
 .carm-drawer__title {
@@ -4649,29 +4676,42 @@ body.carm-modal-open {
   outline: none;
 }
 
+/* Search-chip dropdown — anchored to the chip's right edge so it can
+   extend LEFTWARD when the myth statement is long. The chip itself
+   sits at the right of the toolbar, so growing left is safe. The
+   width clamps to a comfortable 480px on desktop (≈ 60ch of statement
+   text without horizontal scroll), shrinks to fit on mobile. */
 .carm-search-chip__list {
   list-style: none;
   margin: 0;
   padding: 4px;
   position: absolute;
   top: calc(100% + 6px);
-  left: 0;
   right: 0;
+  /* Always at least as wide as the chip; expand up to 480px so a full
+     myth statement wraps to a sensible 2–3 lines instead of clipping. */
+  min-width: 100%;
+  width: 480px;
+  max-width: min(560px, 92vw);
   z-index: 60;
   background: white;
   border: 1px solid var(--color-border, #cbd5e1);
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-  max-height: 360px;
+  max-height: 420px;
   overflow-y: auto;
+  /* Prevent horizontal scroll: long unbroken tokens (URLs, German
+     compound words) wrap inside the row, never push the container
+     wider. */
+  overflow-x: hidden;
 }
 
 .carm-search-chip__item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 10px;
   border: 0;
   background: transparent;
   text-align: left;
@@ -4694,6 +4734,10 @@ body.carm-modal-open {
   justify-content: center;
   width: 22px;
   height: 22px;
+  /* Arrow sits inline with the first line of the title (which is
+     larger than the meta line). flex-start alignment keeps it
+     anchored to the top when titles wrap. */
+  margin-top: 2px;
   color: var(--color-text-secondary, #4a5568);
 }
 
@@ -4701,20 +4745,28 @@ body.carm-modal-open {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  /* min-width: 0 lets the flex child shrink below its content's
+     intrinsic width — required for word-wrap to actually kick in
+     inside flex containers. */
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .carm-search-chip__item-title {
   font-size: 0.88rem;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Wrap long German compound words rather than clipping. */
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
 }
 
 .carm-search-chip__item-meta {
   font-size: 0.75rem;
   color: var(--color-text-muted, #718096);
+  white-space: normal;
+  word-break: break-word;
 }
 
 @media (max-width: 640px) {
@@ -4722,6 +4774,12 @@ body.carm-modal-open {
     min-width: 0;
     max-width: 100%;
     flex-basis: 100%;
+  }
+  .carm-search-chip__list {
+    /* Mobile: ignore the desktop fixed width, let the dropdown span
+       the chip's width minus a small viewport margin. */
+    width: auto;
+    max-width: 92vw;
   }
 }
 
@@ -5395,10 +5453,37 @@ body.carm-modal-open {
   color: var(--color-text, #1a1a2e);
 }
 
-.carm-filter-summary {
-  margin: 0 4px 12px;
+/* Selection-count badge that lives in the FilterDrawer header's
+   `headerEnd` slot (right of the title). Fades in when totalSelected
+   crosses zero; never disrupts body geometry. */
+.carm-filter-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-accent-light, #e8f5ef);
+  color: var(--color-accent, #2d6a4f);
   font-size: 0.78rem;
-  color: var(--color-text-muted, #718096);
+  font-weight: 600;
+  white-space: nowrap;
+  animation: carm-filter-count-fade 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.carm-filter-count__suffix {
+  font-weight: 500;
+}
+
+@keyframes carm-filter-count-fade {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  /* Tight viewport: the badge can drop the "ausgewählt" suffix to fit. */
+  .carm-filter-count__suffix {
+    display: none;
+  }
 }
 
 .carm-filter-empty {
@@ -5407,23 +5492,128 @@ body.carm-modal-open {
   font-size: 0.9rem;
 }
 
-.carm-filter-myth-groups {
+/* Accordion-by-category list inside the FilterDrawer. Each item
+   has a heading row with the category checkbox + chevron, and an
+   optional collapsible body listing the myths in that category. */
+.carm-filter-accordion {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.carm-filter-myth-group {
-  margin-bottom: 14px;
+.carm-filter-accordion__item {
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-surface, #ffffff);
+  overflow: hidden;
 }
 
-.carm-filter-myth-group__heading {
-  margin: 6px 4px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.carm-filter-accordion__heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 8px;
+}
+
+.carm-filter-accordion__heading .carm-checkbox--category {
+  /* The label fills the heading row so clicking anywhere left of the
+     chevron toggles the category checkbox. */
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.carm-filter-accordion__heading .carm-checkbox--category:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+}
+
+.carm-filter-accordion__heading .carm-checkbox__count {
+  margin-left: 6px;
   color: var(--color-text-muted, #718096);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.carm-filter-accordion__toggle {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm, 4px);
+  color: var(--color-text-muted, #718096);
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: transform var(--duration-fast, 150ms) var(--ease-out, ease),
+              background var(--duration-fast, 150ms) var(--ease-out, ease),
+              color var(--duration-fast, 150ms) var(--ease-out, ease);
+}
+
+.carm-filter-accordion__toggle:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-text, #1a1a2e);
+}
+
+.carm-filter-accordion__toggle:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 1px;
+}
+
+.carm-filter-accordion__toggle.is-open svg {
+  /* Chevron rotates 90° to point down when the panel is open. */
+  transform: rotate(90deg);
+  transition: transform var(--duration-fast, 150ms) var(--ease-out, ease);
+}
+
+.carm-filter-accordion__toggle svg {
+  transition: transform var(--duration-fast, 150ms) var(--ease-out, ease);
+}
+
+/* Smooth open/close — the wrapper carries a `grid-template-rows`
+   transition from 0fr (collapsed) to 1fr (expanded). Modern browsers
+   interpolate to actual content height; older browsers snap to the
+   end state, which still works (just no animation). The inner panel
+   has overflow:hidden so content doesn't bleed during the transition. */
+.carm-filter-accordion__panel-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.carm-filter-accordion__panel-wrap.is-open {
+  grid-template-rows: 1fr;
+}
+
+.carm-filter-accordion__panel-wrap > .carm-filter-accordion__panel {
+  overflow: hidden;
+  /* Border + bg fade in alongside the height so the panel doesn't
+     pop visually when the wrapper hits 1fr. */
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.carm-filter-accordion__panel-wrap.is-open > .carm-filter-accordion__panel {
+  opacity: 1;
+}
+
+.carm-filter-accordion__panel {
+  padding: 4px 10px 10px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-bg-subtle, #fbfbf7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carm-filter-accordion__panel-wrap,
+  .carm-filter-accordion__panel-wrap > .carm-filter-accordion__panel {
+    transition: none;
+  }
 }
 
 .carm-filter-myth-list {

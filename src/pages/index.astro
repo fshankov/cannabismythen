@@ -3,12 +3,14 @@ export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
+import { deriveHeroLabel } from "@lib/myth";
 import { HeroBlock } from "@components/hero/HeroBlock";
 import { mythPositions } from "@components/hero/mythPositions";
 import type { HeroMyth } from "@components/hero/HeroBlock";
 import CredibilityBlock from "@components/home/CredibilityBlock.astro";
 import HeadlineFindingBlock from "@components/home/HeadlineFindingBlock.astro";
 import QuizHookBlock from "@components/home/QuizHookBlock.astro";
+import type { CorrectnessClass } from "@lib/dashboard/types";
 
 // ── Hero content from Keystatic ─────────────────────────────────────────────
 const heroBlockData = await reader.singletons.heroBlock.read();
@@ -16,25 +18,84 @@ const headline1 = heroBlockData?.headline1 ?? "Was glauben wir zu wissen —";
 const headline2 = heroBlockData?.headline2 ?? "und was stimmt wirklich?";
 const eyebrow   = heroBlockData?.eyebrow   ?? "ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft";
 
-// ── Myth classifications from Keystatic ────────────────────────────────────
-const clsBySlugPrefix = new Map<string, string>();
+// ── Read all myth entries once — title + classification + summary ──────────
+// We use this single read to drive: (1) the hero labels (real statements),
+// (2) the classification distribution counts on the Headline-Finding block,
+// (3) the 3 representative preview cards on the Fakten-Karten teaser.
+type MythRecord = {
+  prefix: string;
+  classification: string;
+  heroLabel: string;
+  cardSummary: string;
+};
+
 const allSlugs = await reader.collections.zahlenUndFakten.list();
+const mythRecords: MythRecord[] = [];
 
 for (const slug of allSlugs) {
   const entry = await reader.collections.zahlenUndFakten.read(slug);
-  if (!entry) continue;
+  if (!entry || entry.status !== "published") continue;
+  // Slug prefixes look like "m01" or dual myths like "m31-m32".
   const prefixMatch = slug.match(/^(m\d+-m\d+|m\d+)/);
-  if (prefixMatch) {
-    clsBySlugPrefix.set(prefixMatch[1], entry.classification);
+  if (!prefixMatch) continue;
+  mythRecords.push({
+    prefix: prefixMatch[1],
+    classification: entry.classification,
+    heroLabel: deriveHeroLabel(entry.title ?? ""),
+    cardSummary: entry.cardSummary ?? "",
+  });
+}
+
+const recordByPrefix = new Map(mythRecords.map((r) => [r.prefix, r]));
+
+// ── Hero myth field — real titles where available ──────────────────────────
+const heroMyths: HeroMyth[] = mythPositions.map((pos) => {
+  const rec = recordByPrefix.get(pos.id);
+  return {
+    id: pos.id,
+    text: rec?.heroLabel || pos.text, // fall back to curated short text if no .mdoc
+    classification: rec?.classification ?? "keine_aussage",
+    position: pos,
+  };
+});
+
+// ── Classification distribution for HeadlineFindingBlock ───────────────────
+const counts: Record<CorrectnessClass, number> = {
+  richtig: 0,
+  eher_richtig: 0,
+  eher_falsch: 0,
+  falsch: 0,
+  no_classification: 0,
+};
+
+for (const r of mythRecords) {
+  switch (r.classification) {
+    case "richtig":      counts.richtig++; break;
+    case "eher_richtig": counts.eher_richtig++; break;
+    case "eher_falsch":  counts.eher_falsch++; break;
+    case "falsch":       counts.falsch++; break;
+    default:             counts.no_classification++; break;
   }
 }
 
-const heroMyths: HeroMyth[] = mythPositions.map(pos => ({
-  id: pos.id,
-  text: pos.text,
-  classification: clsBySlugPrefix.get(pos.id) ?? "keine_aussage",
-  position: pos,
-}));
+// ── Pick 3 representative preview myths (one per core verdict) ─────────────
+// Prefer myths whose title is short-ish so the deck previews stay legible.
+function pickRepresentative(cls: string): MythRecord | undefined {
+  const candidates = mythRecords
+    .filter((r) => r.classification === cls)
+    .sort((a, b) => a.heroLabel.length - b.heroLabel.length);
+  return candidates[0];
+}
+
+const previewRichtig    = pickRepresentative("richtig");
+const previewEherFalsch = pickRepresentative("eher_falsch");
+const previewFalsch     = pickRepresentative("falsch");
+
+const previewCards = [
+  previewRichtig    && { cls: "richtig"     as CorrectnessClass, label: "Richtig",     text: previewRichtig.heroLabel },
+  previewEherFalsch && { cls: "eher_falsch" as CorrectnessClass, label: "Eher falsch", text: previewEherFalsch.heroLabel },
+  previewFalsch     && { cls: "falsch"      as CorrectnessClass, label: "Falsch",      text: previewFalsch.heroLabel },
+].filter(Boolean) as Array<{ cls: CorrectnessClass; label: string; text: string }>;
 
 // ── Editorial section content ───────────────────────────────────────────────
 const credibility = await reader.singletons.credibilityBlock.read();
@@ -73,13 +134,15 @@ const credibilityRows = credibility
       eyebrow={headlineFinding.eyebrow}
       leadClause={headlineFinding.leadClause}
       counterClause={headlineFinding.counterClause}
-      counterClassification={headlineFinding.counterClassification as "richtig" | "eher_richtig" | "eher_falsch" | "falsch" | "no_classification"}
+      counterClassification={headlineFinding.counterClassification as CorrectnessClass}
       dashboardCardTitle={headlineFinding.dashboardCardTitle}
       dashboardCardBody={headlineFinding.dashboardCardBody}
       dashboardCtaLabel={headlineFinding.dashboardCtaLabel}
       faktenKartenCardTitle={headlineFinding.faktenKartenCardTitle}
       faktenKartenCardBody={headlineFinding.faktenKartenCardBody}
       faktenKartenCtaLabel={headlineFinding.faktenKartenCtaLabel}
+      classificationCounts={counts}
+      previewCards={previewCards}
     />
   )}
 

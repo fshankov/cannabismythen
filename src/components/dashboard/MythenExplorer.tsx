@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Share2, Download, Filter, Maximize2, Minimize2,
+  Download, Filter,
   Eye, TrendingUp, Target, Shield, Globe,
   Users, Baby, Cannabis, GraduationCap, UsersRound,
 } from 'lucide-react';
@@ -19,7 +19,6 @@ import type {
 import {
   loadData,
   filterMyths,
-  exportCSV,
   correctGroupsForIndicator,
   getDisabledGroupsForIndicator,
 } from '../../lib/dashboard/data';
@@ -110,12 +109,13 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     merged.groupIds = correctGroupsForIndicator(merged.indicator, merged.groupIds);
     return merged;
   });
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [copied, setCopied] = useState(false);
+  // (Fullscreen + chartRef state were dropped along with the legacy
+  // utility bar — browser-native F11 covers the same use case for
+  // power users. The Link kopieren copy-feedback state lives inside
+  // ExportDrawer now.)
   const [snackbar, setSnackbar] = useState<string | null>(null);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [exportDrawerOpen, setExportDrawerOpen] = useState(false);
-  const chartRef = useRef<HTMLDivElement>(null);
   const balkenRef = useRef<BalkenViewHandle>(null);
   const stripsRef = useRef<StripsViewHandle>(null);
   const sourcesRef = useRef<SourcesStripsViewHandle>(null);
@@ -266,40 +266,14 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     );
   }, [data, state.categoryIds, state.mythIds, state.verdictFilter]);
 
-  const handleShareLink = useCallback(() => {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }, []);
+  // (`handleShareLink` was inlined into `ExportDrawer`'s
+  // `handleCopyLink` — the dialog manages its own "Kopiert!" feedback
+  // state so the trigger lives next to the consumer.)
 
-  const handleDownloadCSV = useCallback(() => {
-    if (!data) return;
-    const csv = exportCSV(filteredMyths, data.metrics, state.groupIds, 'de');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `cannabis-myths-${state.indicator}.csv`;
-    link.click();
-  }, [data, filteredMyths, state.groupIds, state.indicator]);
-
-  const handleFullscreen = useCallback(() => {
-    if (!isFullscreen && chartRef.current) {
-      chartRef.current.requestFullscreen?.();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen?.();
-      setIsFullscreen(false);
-    }
-  }, [isFullscreen]);
-
-  useEffect(() => {
-    const handler = () => {
-      if (!document.fullscreenElement) setIsFullscreen(false);
-    };
-    document.addEventListener('fullscreenchange', handler);
-    return () => document.removeEventListener('fullscreenchange', handler);
-  }, []);
+  // (`handleDownloadCSV` + `handleFullscreen` + the
+  // `fullscreenchange` listener were dropped along with the legacy
+  // utility bar. ExportDrawer's CSV row covers downloads; F11 covers
+  // fullscreen.)
 
   // selectMyth is the "open factsheet" action passed to all views.
   // It sets BOTH the highlight (selectedMythId) and the factsheet open state
@@ -459,21 +433,34 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             <ToolbarRow
               aria-label={t('filter.title', 'de')}
               pivot={
-                <SortToggle
-                  value={state.balkenSort}
-                  onChange={(v) => update('balkenSort', v)}
-                />
+                // Tabelle has its own column-click sort in the table
+                // header — the toolbar SortToggle would be redundant
+                // there. Render it only on Balken.
+                state.view === 'balken' ? (
+                  <SortToggle
+                    value={state.balkenSort}
+                    onChange={(v) => update('balkenSort', v)}
+                  />
+                ) : undefined
               }
               pickers={[
-                <DataPicker<Indicator>
-                  key="indicator"
-                  caption={t('igs.indicator.legend', 'de')}
-                  value={state.indicator}
-                  options={indicatorOptions}
-                  onChange={(v) => update('indicator', v)}
-                  aria-label={t('igs.indicator.legend', 'de')}
-                  lang="de"
-                />,
+                // Tabelle renders ALL indicator columns side-by-side, so
+                // the Indikator picker (which scopes the chart to one
+                // indicator at a time) is redundant there. Hide it on
+                // table view; Balken keeps it.
+                ...(state.view === 'table'
+                  ? []
+                  : [
+                      <DataPicker<Indicator>
+                        key="indicator"
+                        caption={t('igs.indicator.legend', 'de')}
+                        value={state.indicator}
+                        options={indicatorOptions}
+                        onChange={(v) => update('indicator', v)}
+                        aria-label={t('igs.indicator.legend', 'de')}
+                        lang="de"
+                      />,
+                    ]),
                 <DataPicker<GroupId>
                   key="group"
                   caption={t('igs.group.legend', 'de')}
@@ -517,37 +504,17 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             />
           )}
 
-        {/* Legacy utility bar (share/CSV/fullscreen) for the older views.
-            Modern views (balken, table) use the StickyToolbar + ExportDrawer. */}
-        {!isModernView && state.view !== 'strips' && state.view !== 'sources' && (
-          <div className="utility-bar">
-            <div className="utility-buttons">
-              <button className="util-btn" onClick={handleShareLink}>
-                <Share2 size={13} strokeWidth={2} aria-hidden="true" />
-                {copied ? t('util.copied', 'de') : t('util.share', 'de')}
-              </button>
-              <button className="util-btn" onClick={handleDownloadCSV}>
-                <Download size={13} strokeWidth={2} aria-hidden="true" />
-                CSV
-              </button>
-              <button className="util-btn" onClick={handleFullscreen}>
-                {isFullscreen
-                  ? <Minimize2 size={13} strokeWidth={2} aria-hidden="true" />
-                  : <Maximize2 size={13} strokeWidth={2} aria-hidden="true" />
-                }
-                {isFullscreen ? t('util.exitFullscreen', 'de') : t('util.fullscreen', 'de')}
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Legacy utility bar removed — Link kopieren is now in the
+            Exportieren dialog (Daten tab); CSV / JSON / PNG / SVG live
+            there too. Vollbild was dropped (browser-native F11 covers
+            the same use case for the rare power user). */}
 
         {state.view !== 'strips' && state.view !== 'sources' && (
           <p className="howto-microcopy">{t(`howto.${state.view}` as never, 'de')}</p>
         )}
 
         <div
-          className={`chart-area${isFullscreen ? ' fullscreen' : ''}`}
-          ref={chartRef}
+          className={`chart-area${state.view === 'strips' ? ' chart-area--strips' : ''}`}
         >
           <div className="chart-area__chart">
             {state.view === 'sources' ? (
@@ -627,29 +594,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
         )}
 
-        {/* Utility buttons after the chart area on strips tabs and the
-            Informationsquellen tab, with a gap above. */}
-        {(state.view === 'strips' || state.view === 'sources') && (
-          <div className="utility-bar utility-bar--bottom">
-            <div className="utility-buttons">
-              <button className="util-btn" onClick={handleShareLink}>
-                <Share2 size={13} strokeWidth={2} aria-hidden="true" />
-                {copied ? t('util.copied', 'de') : t('util.share', 'de')}
-              </button>
-              <button className="util-btn" onClick={handleDownloadCSV}>
-                <Download size={13} strokeWidth={2} aria-hidden="true" />
-                CSV
-              </button>
-              <button className="util-btn" onClick={handleFullscreen}>
-                {isFullscreen
-                  ? <Minimize2 size={13} strokeWidth={2} aria-hidden="true" />
-                  : <Maximize2 size={13} strokeWidth={2} aria-hidden="true" />
-                }
-                {isFullscreen ? t('util.exitFullscreen', 'de') : t('util.fullscreen', 'de')}
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Bottom utility bar (Link kopieren / CSV / Vollbild) was
+            removed — Exportieren dialog covers Link kopieren + CSV +
+            JSON + PNG + SVG; Vollbild dropped. */}
       </div>
 
       {factsheetMyth && (

@@ -170,8 +170,9 @@ const verdictButtons: Array<{ key: VerdictKey; label: string }> = [
   .quiz-hook__primary {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
-    padding: 14px 22px;
+    padding: 14px 24px;
     background: #6bc4a0;
     color: #0d2e20;
     font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
@@ -181,12 +182,18 @@ const verdictButtons: Array<{ key: VerdictKey; label: string }> = [
     text-decoration: none;
     transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: 0 6px 16px rgba(107, 196, 160, 0.25);
+    min-height: 48px;
   }
 
   .quiz-hook__primary:hover {
     background: #7ed0ad;
     transform: translateY(-1px);
     box-shadow: 0 8px 22px rgba(107, 196, 160, 0.35);
+  }
+
+  .quiz-hook__primary:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
   }
 
   .quiz-hook__secondary {
@@ -199,14 +206,28 @@ const verdictButtons: Array<{ key: VerdictKey; label: string }> = [
     font-size: 14.5px;
     text-decoration: none;
     border-bottom: 1px solid rgba(237, 244, 240, 0.25);
-    padding-bottom: 2px;
+    padding: 12px 4px;
     transition: color 0.2s ease, border-color 0.2s ease, gap 0.2s ease;
+    min-height: 44px;
+    align-items: center;
   }
 
   .quiz-hook__secondary:hover {
     color: #edf4f0;
     border-color: rgba(237, 244, 240, 0.55);
     gap: 8px;
+  }
+
+  .quiz-hook__secondary:focus-visible {
+    outline: 2px solid rgba(237, 244, 240, 0.7);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  @media (max-width: 480px) {
+    .quiz-hook__ctas { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+    .quiz-hook__primary { width: 100%; padding: 16px 20px; }
+    .quiz-hook__secondary { justify-content: center; padding: 12px 0; border-bottom: none; color: rgba(237, 244, 240, 0.85); }
   }
 
   /* ── Preview card ─────────────────────────────────────────────────────── */
@@ -242,7 +263,8 @@ const verdictButtons: Array<{ key: VerdictKey; label: string }> = [
   }
 
   @media (max-width: 640px) {
-    .quiz-hook__preview-card { max-width: 340px; padding: 1.25rem 1.25rem 1.5rem; transform: rotate(-2deg); }
+    .quiz-hook__preview-card { max-width: 320px; padding: 1.25rem 1.25rem 1.5rem; transform: rotate(-1.5deg); }
+    .quiz-hook__preview { padding: 0 12px; }
   }
 
   .quiz-hook__preview-eyebrow {
@@ -300,5 +322,17 @@ const verdictButtons: Array<{ key: VerdictKey; label: string }> = [
     border-width: 2px;
     font-weight: 700;
     background: rgba(180, 83, 9, 0.04);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quiz-hook__preview-card,
+    .quiz-hook__preview-card:hover,
+    .quiz-hook__primary,
+    .quiz-hook__primary:hover,
+    .quiz-hook__secondary,
+    .quiz-hook__secondary:hover {
+      transition: none !important;
+      transform: none !important;
+    }
   }
 </style>

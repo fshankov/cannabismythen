@@ -303,6 +303,12 @@ const translations = {
     de: 'Strukturierte Daten für Forschung & Programme.',
     en: 'Structured data for research and integrations.',
   },
+  'export.link.title': { de: 'Link kopieren', en: 'Copy link' },
+  'export.link.desc': {
+    de: 'Aktuelle Filter & Ansicht als URL teilen.',
+    en: 'Share the current filters & view as a URL.',
+  },
+  'export.link.copied': { de: 'Kopiert!', en: 'Copied!' },
   // Tabs in the OWID-style export dialog (Stage 3 of the Daten-Explorer refactor).
   'export.tab.visualization': { de: 'Visualisierung', en: 'Visualization' },
   'export.tab.data': { de: 'Daten', en: 'Data' },

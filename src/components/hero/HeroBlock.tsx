@@ -22,16 +22,32 @@ interface Props {
 // Hue families (green / sage / amber / coral / slate) stay distinct from each
 // other and from the #1f4f3a background without going neon.
 const CLS: Record<string, { color: string; glow: string }> = {
-  richtig:       { color: "#6bc4a0", glow: "rgba(107,196,160,0.35)" }, // seafoam
-  eher_richtig:  { color: "#93c265", glow: "rgba(147,194,101,0.35)" }, // sage-olive
-  eher_falsch:   { color: "#c8a060", glow: "rgba(200,160,96,0.30)"  }, // warm honey
-  falsch:        { color: "#d17e75", glow: "rgba(209,126,117,0.35)" }, // muted coral
+  richtig:       { color: "#6bc4a0", glow: "rgba(107,196,160,0.40)" }, // seafoam
+  eher_richtig:  { color: "#9bcc6b", glow: "rgba(155,204,107,0.38)" }, // sage-olive
+  eher_falsch:   { color: "#cea566", glow: "rgba(206,165,102,0.34)" }, // warm honey
+  falsch:        { color: "#d8857c", glow: "rgba(216,133,124,0.40)" }, // muted coral
   keine_aussage: { color: "#8fa8bf", glow: "rgba(143,168,191,0.30)" }, // slate blue
 };
 
 // ── Font families ─────────────────────────────────────────────────────────────
 const SERIF = "'DM Serif Display', Georgia, serif";
 const SANS  = "'Inter Variable', 'Inter', system-ui, sans-serif";
+
+// ── Adaptive font sizing for real titles ──────────────────────────────────────
+// The .mdoc titles vary from 24 chars ("Cannabis ist harmlos") to 100+ chars
+// ("Cannabiskonsum durch Heranwachsende führt in stärkerem Maße…"). Auto-scale
+// the curated base size in `mythPositions` by string length so longer titles
+// stay readable without overflowing their slot.
+function adaptiveSize(baseSize: number, textLen: number, isMobile: boolean): number {
+  // For mobile, baseline shrink by ~12% across the board so the canvas isn't
+  // overwhelmed on a 380px viewport.
+  const mobileFactor = isMobile ? 0.88 : 1;
+  // Anything ≤ 30 chars uses base size. Beyond that, shrink ~6% per extra 10
+  // chars, but never below 56% of base (keeps the word "Cannabiskonsum" legible).
+  const overflow = Math.max(0, textLen - 30);
+  const scale = Math.max(0.56, 1 - (overflow / 10) * 0.06);
+  return Math.round(baseSize * scale * mobileFactor);
+}
 
 // ── Fog blob configs ──────────────────────────────────────────────────────────
 // Desktop: full density. Mobile: reduced count + scaled down so the moving
@@ -83,9 +99,12 @@ export function HeroBlock({
     const el = containerRef.current;
     if (!el) return;
 
-    const REVEAL_R = 175;
-    const FOG_RX   = 125;
-    const FOG_RY   = 112;
+    // Larger reveal so longer real titles (e.g. "Cannabiskonsum bewirkt
+    // Übelkeit und Erbrechen") fit inside the lit area without cutting
+    // mid-character.
+    const REVEAL_R = 230;
+    const FOG_RX   = 165;
+    const FOG_RY   = 145;
     let raf: number;
 
     const onMove = (e: MouseEvent) => {
@@ -98,8 +117,8 @@ export function HeroBlock({
         if (revealRef.current) {
           const rm =
             `radial-gradient(circle ${REVEAL_R}px at ${x}px ${y}px,` +
-            ` black 0%, black 25%, rgba(0,0,0,0.88) 42%, rgba(0,0,0,0.55) 58%,` +
-            ` rgba(0,0,0,0.18) 72%, transparent 88%)`;
+            ` black 0%, black 38%, rgba(0,0,0,0.92) 55%, rgba(0,0,0,0.62) 70%,` +
+            ` rgba(0,0,0,0.22) 84%, transparent 96%)`;
           revealRef.current.style.webkitMaskImage = rm;
           revealRef.current.style.maskImage = rm;
         }
@@ -107,9 +126,9 @@ export function HeroBlock({
         if (fogRef.current) {
           const fm =
             `radial-gradient(ellipse ${FOG_RX * 2}px ${FOG_RY * 2}px at ${x}px ${y}px,` +
-            ` transparent 0%, transparent 18%, rgba(0,0,0,0.06) 28%,` +
-            ` rgba(0,0,0,0.22) 40%, rgba(0,0,0,0.52) 56%,` +
-            ` rgba(0,0,0,0.80) 70%, black 88%)`;
+            ` transparent 0%, transparent 22%, rgba(0,0,0,0.10) 34%,` +
+            ` rgba(0,0,0,0.30) 48%, rgba(0,0,0,0.58) 62%,` +
+            ` rgba(0,0,0,0.82) 76%, black 92%)`;
           fogRef.current.style.webkitMaskImage = fm;
           fogRef.current.style.maskImage = fm;
         }
@@ -144,9 +163,9 @@ export function HeroBlock({
     const el = containerRef.current;
     if (!el) return;
 
-    const REVEAL_R = 150;
-    const FOG_RX   = 110;
-    const FOG_RY   = 100;
+    const REVEAL_R = 200;
+    const FOG_RX   = 145;
+    const FOG_RY   = 130;
 
     // Current centre (animated), target centre, and whether user is currently
     // steering manually after a tap.
@@ -165,17 +184,17 @@ export function HeroBlock({
       if (revealRef.current) {
         const rm =
           `radial-gradient(circle ${REVEAL_R}px at ${x}px ${y}px,` +
-          ` black 0%, black 25%, rgba(0,0,0,0.88) 42%, rgba(0,0,0,0.55) 58%,` +
-          ` rgba(0,0,0,0.18) 72%, transparent 88%)`;
+          ` black 0%, black 38%, rgba(0,0,0,0.92) 55%, rgba(0,0,0,0.62) 70%,` +
+          ` rgba(0,0,0,0.22) 84%, transparent 96%)`;
         revealRef.current.style.webkitMaskImage = rm;
         revealRef.current.style.maskImage = rm;
       }
       if (fogRef.current) {
         const fm =
           `radial-gradient(ellipse ${FOG_RX * 2}px ${FOG_RY * 2}px at ${x}px ${y}px,` +
-          ` transparent 0%, transparent 18%, rgba(0,0,0,0.06) 28%,` +
-          ` rgba(0,0,0,0.22) 40%, rgba(0,0,0,0.52) 56%,` +
-          ` rgba(0,0,0,0.80) 70%, black 88%)`;
+          ` transparent 0%, transparent 22%, rgba(0,0,0,0.10) 34%,` +
+          ` rgba(0,0,0,0.30) 48%, rgba(0,0,0,0.58) 62%,` +
+          ` rgba(0,0,0,0.82) 76%, black 92%)`;
         fogRef.current.style.webkitMaskImage = fm;
         fogRef.current.style.maskImage = fm;
       }
@@ -262,16 +281,18 @@ export function HeroBlock({
     <section
       ref={containerRef}
       aria-label="Einstieg: Cannabis-Mythen und ihre Einordnung"
+      className="hero-block"
       style={{
         background: "#1f4f3a",
-        minHeight: "560px",
-        height: "100vh",
         position: "relative",
         overflow: "hidden",
         touchAction: "manipulation",
       }}
     >
       {/* ── Layer 1 · Dim myth field ────────────────────────────────────────── */}
+      {/* Sits a touch brighter than before so the "field of 42 statements"
+          metaphor reads even without revealing — the user senses there are
+          claims out there before the spotlight ever lands on them. */}
       <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
         {myths.map(({ id, text, position: p }) => (
           <span
@@ -282,14 +303,12 @@ export function HeroBlock({
               left: `${p.x}%`,
               top: `${p.y}%`,
               transform: `rotate(${p.r}deg)`,
-              fontSize: `${p.size}px`,
+              fontSize: `${adaptiveSize(p.size, text.length, isTouch)}px`,
               fontFamily: SANS,
               fontStyle: "normal",
               fontWeight: p.weight,
-              // Touch + desktop: same "barely visible" treatment — the
-              // metaphor only works if myths feel obscured.
-              color: "rgba(195,228,210,0.20)",
-              filter: "blur(4px)",
+              color: "rgba(195,228,210,0.32)",
+              filter: "blur(3.5px)",
               whiteSpace: "nowrap",
               userSelect: "none",
               lineHeight: 1,
@@ -326,12 +345,12 @@ export function HeroBlock({
                 left: `${p.x}%`,
                 top: `${p.y}%`,
                 transform: `rotate(${p.r}deg)`,
-                fontSize: `${p.size}px`,
+                fontSize: `${adaptiveSize(p.size, text.length, isTouch)}px`,
                 fontFamily: SANS,
                 fontStyle: "normal",
                 fontWeight: p.weight,
                 color: c.color,
-                textShadow: `0 0 22px ${c.glow}, 0 0 8px ${c.glow}`,
+                textShadow: `0 0 24px ${c.glow}, 0 0 8px ${c.glow}`,
                 whiteSpace: "nowrap",
                 userSelect: "none",
                 lineHeight: 1,
@@ -369,15 +388,28 @@ export function HeroBlock({
               borderRadius: "50%",
               background:
                 "radial-gradient(ellipse at center," +
-                " rgba(8,24,16,0.90) 0%," +
-                " rgba(8,24,16,0.60) 35%," +
-                " rgba(8,24,16,0.25) 58%," +
-                " transparent 70%)",
+                " rgba(8,24,16,0.88) 0%," +
+                " rgba(8,24,16,0.55) 38%," +
+                " rgba(8,24,16,0.22) 60%," +
+                " transparent 72%)",
               animation: reducedMotion ? "none" : b.animation,
             }}
           />
         ))}
       </div>
+
+      {/* ── Layer 3.5 · Subtle vignette to anchor the headline plate ────────── */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 4,
+          pointerEvents: "none",
+          background:
+            "radial-gradient(ellipse 70% 50% at 50% 55%, rgba(8,24,16,0.55) 0%, rgba(8,24,16,0.20) 45%, transparent 75%)",
+        }}
+      />
 
       {/* ── Mobile-only · Touch hint (pulsing hand near current path) ───────── */}
       {isTouch && (
@@ -386,7 +418,7 @@ export function HeroBlock({
           aria-hidden="true"
           style={{
             position: "absolute",
-            bottom: "28%",
+            bottom: "22%",
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 15,
@@ -397,17 +429,17 @@ export function HeroBlock({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "8px",
+            gap: "10px",
           }}
         >
-          <Hand size={26} color="rgba(237,244,240,0.78)" strokeWidth={1.5} />
+          <Hand size={30} color="rgba(237,244,240,0.85)" strokeWidth={1.5} />
           <span
             style={{
               fontFamily: SANS,
-              fontSize: "11px",
-              letterSpacing: "1.4px",
+              fontSize: "12px",
+              letterSpacing: "1.6px",
               textTransform: "uppercase",
-              color: "rgba(237,244,240,0.62)",
+              color: "rgba(237,244,240,0.72)",
               fontWeight: 600,
             }}
           >
@@ -426,36 +458,35 @@ export function HeroBlock({
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          padding: "40px 28px",
+          padding: "40px 24px",
           pointerEvents: "none",
           textAlign: "center",
         }}
       >
         {/* Background glow keeps the headline legible through the fog */}
         <div
+          aria-hidden="true"
+          className="hero-block__headline-glow"
           style={{
             position: "absolute",
-            width: "600px",
-            height: "340px",
             background:
               "radial-gradient(ellipse at center," +
-              " rgba(20,56,38,0.98) 28%," +
-              " rgba(20,56,38,0.70) 55%," +
+              " rgba(20,56,38,0.97) 28%," +
+              " rgba(20,56,38,0.65) 55%," +
               " transparent 75%)",
             pointerEvents: "none",
           }}
         />
 
-        <div style={{ position: "relative", maxWidth: "700px" }}>
+        <div style={{ position: "relative", maxWidth: "760px" }}>
           {/* Eyebrow */}
           <p
+            className="hero-block__eyebrow"
             style={{
-              fontSize: "10px",
               fontWeight: 600,
-              letterSpacing: "2.8px",
-              color: "#6eaa8a",
+              letterSpacing: "2.6px",
+              color: "#7ebb9a",
               textTransform: "uppercase",
-              marginBottom: "22px",
               marginTop: 0,
               fontFamily: SANS,
             }}
@@ -466,31 +497,26 @@ export function HeroBlock({
           {/* Headline — Inter bold + DM Serif italic on two lines */}
           <h1 style={{ margin: 0, padding: 0, lineHeight: 1 }}>
             <span
+              className="hero-block__headline-line hero-block__headline-line--primary"
               style={{
-                display: "block",
                 color: "#edf4f0",
-                fontSize: "clamp(26px, 5vw, 46px)",
                 fontWeight: 800,
-                lineHeight: 1.13,
                 fontFamily: SANS,
                 letterSpacing: "-0.8px",
-                textShadow: "0 2px 36px rgba(0,0,0,0.65)",
+                textShadow: "0 2px 36px rgba(0,0,0,0.7)",
               }}
             >
               {headline1}
             </span>
             <span
+              className="hero-block__headline-line hero-block__headline-line--accent"
               style={{
-                display: "block",
-                marginTop: "6px",
-                color: "#95c4ad",
-                fontSize: "clamp(25px, 4.8vw, 44px)",
+                color: "#9bd0b6",
                 fontWeight: 400,
-                lineHeight: 1.2,
                 fontFamily: SERIF,
                 fontStyle: "italic",
                 letterSpacing: "0.4px",
-                textShadow: "0 2px 36px rgba(0,0,0,0.65)",
+                textShadow: "0 2px 36px rgba(0,0,0,0.7)",
               }}
             >
               {headline2}
@@ -511,19 +537,91 @@ export function HeroBlock({
           zIndex: 25,
           animation: reducedMotion ? "none" : "heroBounce 2.6s ease-in-out infinite",
           display: "flex",
-          opacity: 0.4,
+          opacity: 0.5,
           transition: "opacity 0.2s ease",
           color: "inherit",
           textDecoration: "none",
+          // Larger tap target than the visible icon (44×44 minimum) for mobile.
+          padding: "10px 16px",
+          minWidth: "44px",
+          minHeight: "44px",
+          alignItems: "center",
+          justifyContent: "center",
+          marginLeft: "-22px",
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.7"; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.4"; }}
+        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.85"; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.5"; }}
       >
-        <ChevronDown size={22} color="rgba(255,255,255,0.9)" />
+        <ChevronDown size={22} color="rgba(255,255,255,0.95)" />
       </a>
 
-      {/* ── Keyframes ────────────────────────────────────────────────────────── */}
+      {/* ── Layout + keyframes ──────────────────────────────────────────────── */}
       <style>{`
+        /* Hero sizing: prefer 100svh on supporting browsers (accounts for
+           mobile browser chrome so the chevron isn't pushed off-screen),
+           fall back to 100vh, with a sensible cap on tall desktops. */
+        .hero-block {
+          min-height: 560px;
+          height: 100vh;
+          height: 100svh;
+          max-height: 1080px;
+        }
+        @media (max-width: 640px) {
+          .hero-block {
+            /* Phones: cap at 720px so users see the start of the next
+               section without an exhausting full-screen fog. */
+            min-height: 540px;
+            height: 100svh;
+            max-height: 720px;
+          }
+        }
+
+        /* Eyebrow + headline scale */
+        .hero-block__eyebrow {
+          font-size: 11px;
+          margin-bottom: 22px;
+        }
+        .hero-block__headline-line {
+          display: block;
+        }
+        .hero-block__headline-line--primary {
+          font-size: clamp(28px, 5vw, 48px);
+          line-height: 1.13;
+        }
+        .hero-block__headline-line--accent {
+          font-size: clamp(27px, 4.8vw, 46px);
+          line-height: 1.2;
+          margin-top: 6px;
+        }
+        .hero-block__headline-glow {
+          width: min(88vw, 680px);
+          height: clamp(280px, 40vw, 360px);
+        }
+
+        @media (max-width: 640px) {
+          .hero-block__eyebrow {
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+            line-height: 1.5;
+            max-width: 32ch;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          .hero-block__headline-line--primary {
+            font-size: clamp(26px, 7.4vw, 34px);
+            letter-spacing: -0.6px;
+          }
+          .hero-block__headline-line--accent {
+            font-size: clamp(25px, 7vw, 32px);
+            margin-top: 4px;
+          }
+          .hero-block__headline-glow {
+            width: 110vw;
+            height: 320px;
+          }
+        }
+
         @keyframes fogA {
           0%,100% { transform: translate(0px,   0px)   scale(1);    }
           33%      { transform: translate(170px, 120px) scale(1.07); }
@@ -555,8 +653,8 @@ export function HeroBlock({
           55%      { transform: translate(85px, -120px)   scale(1.06); }
         }
         @keyframes heroBounce {
-          0%,100% { transform: translateX(-50%) translateY(0px); }
-          50%      { transform: translateX(-50%) translateY(8px); }
+          0%,100% { transform: translateY(0px); }
+          50%      { transform: translateY(8px); }
         }
         @keyframes heroHintFadeIn {
           from { opacity: 0; }
@@ -567,7 +665,7 @@ export function HeroBlock({
           50%      { transform: translateX(-50%) translateY(-6px);  opacity: 0.55; }
         }
         @media (prefers-reduced-motion: reduce) {
-          [aria-label="Einstieg: Cannabis-Mythen und ihre Einordnung"] * {
+          .hero-block * {
             animation-duration: 0.01ms !important;
             animation-iteration-count: 1 !important;
           }
