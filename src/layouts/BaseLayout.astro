@@ -34,6 +34,11 @@ const ogImageAbs = ogImage
   : null;
 const ogUrl = `${siteUrl}${Astro.url.pathname}`;
 const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
+
+// BugHerd — only loads on Netlify preview builds where PUBLIC_BUGHERD_KEY is set.
+// Leave this var unset locally and in production to suppress the widget entirely.
+// See _local/bugherd-setup.md for the full reviewer-onboarding workflow.
+const bugherdKey = import.meta.env.PUBLIC_BUGHERD_KEY;
 ---
 
 <!doctype html>
@@ -75,6 +80,40 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
       })();
     </script>
+
+    {/* BugHerd feedback widget — staging only, injected when PUBLIC_BUGHERD_KEY is set.
+        Async script appends a sidebar iframe; does not touch React island roots
+        on /fakten-karten/, /selbsttest/, or /daten-explorer/. */}
+    {bugherdKey && (
+      <script define:vars={{ bugherdKey }}>
+        (function (d, t) {
+          var bh = d.createElement(t), s = d.getElementsByTagName(t)[0];
+          bh.type = "text/javascript";
+          bh.src = "https://www.bugherd.com/sidebarv2.js?apikey=" + bugherdKey;
+          s.parentNode.insertBefore(bh, s);
+        })(document, "script");
+      </script>
+    )}
+
+    {/* Hide BugHerd on auth + admin routes (login gate, Keystatic CMS).
+        Belt-and-braces: unauthenticated traffic can't reach Keystatic anyway,
+        but this keeps reviewers from accidentally pinning feedback there. */}
+    {bugherdKey && (
+      <script is:inline>
+        (function () {
+          var path = window.location.pathname;
+          if (
+            path === "/login" ||
+            path.startsWith("/api/") ||
+            path.startsWith("/keystatic/")
+          ) {
+            document.addEventListener("bugherd:loaded", function () {
+              if (window.BugHerd) window.BugHerd.hide();
+            });
+          }
+        })();
+      </script>
+    )}
   </head>
   <body class={heroMode ? "has-hero" : ""}>
     <header>
