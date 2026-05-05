@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { ECharts } from 'echarts';
 import type { Myth, Metric, AppState, BalkenSort } from '../../../lib/dashboard/types';
@@ -71,11 +71,29 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
   const [viewportH, setViewportH] = useState(
     typeof window !== 'undefined' ? window.innerHeight : 800,
   );
+  /** Measured top offset of the chart wrapper inside the viewport. Drives
+   *  the container's max-height so the chart fills the rest of the
+   *  visible area below the sticky toolbar. */
+  const [measuredTop, setMeasuredTop] = useState(200);
+
   useEffect(() => {
-    const onResize = () => setViewportH(window.innerHeight);
+    const onResize = () => {
+      setViewportH(window.innerHeight);
+      if (wrapperRef.current) {
+        setMeasuredTop(wrapperRef.current.getBoundingClientRect().top);
+      }
+    };
     window.addEventListener('resize', onResize);
     onResize();
     return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Measure top after first paint so the initial render switches from the
+  // 200px fallback to the real offset (toolbar + tabs + nav header).
+  useLayoutEffect(() => {
+    if (wrapperRef.current) {
+      setMeasuredTop(wrapperRef.current.getBoundingClientRect().top);
+    }
   }, []);
 
   const groupId = state.groupIds[0] ?? 'adults';
@@ -98,9 +116,6 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     const ordered = [...data].reverse();
 
     const max = state.indicator === 'awareness' ? 100 : 100;
-    // Smart label position: render the value INSIDE the bar when there's
-    // room (≥25% of axis), otherwise just past the bar end.
-    const insideThreshold = max * 0.25;
 
     // Verdict-coloured y-axis labels — replaces the separate
     // VerdictLegend sidebar that used to live to the right of the chart.
@@ -192,14 +207,20 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
         // 248 leaves an 8px gap between the verdict-tinted y-axis
         // label pills (width 232 below) and the chart's left axis
         // line so the pills don't visually butt against the bars.
+        // Stage 6: extra `right: 80` makes room for the value pill that
+        // sits just past the longest bar without clipping at the edge.
+        // Top is bumped to 40 to fit the relocated xAxis title.
         left: 248,
-        right: 64,
-        top: 16,
-        bottom: 40,
+        right: 80,
+        top: 40,
+        bottom: 16,
       },
       xAxis: {
         type: 'value' as const,
         max,
+        // Stage 6: xAxis sits at the TOP so it stays visible at the
+        // start of the internal scroll (chart taller than container).
+        position: 'top' as const,
         name: t(`indicator.${state.indicator}` as never, 'de'),
         nameLocation: 'middle' as const,
         nameGap: 28,
@@ -234,39 +255,31 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
             borderRadius: [0, 3, 3, 0] as [number, number, number, number],
           },
           label: {
+            // Stage 6: always-outside white pill. No more contrast
+            // edge cases (lime, rose, etc.) — the label sits just past
+            // the bar end on plain white background with a 1px border.
             show: true,
             formatter: (p: { value: number; dataIndex: number }) => {
               return formatValue(p.value, state.indicator);
             },
-            // Per-datum position: insideRight when bar is wide, otherwise right.
-            position: ((p: { value: number }) =>
-              p.value >= insideThreshold ? 'insideRight' : 'right') as unknown as 'insideRight',
-            color: '#1e293b',
+            position: 'right' as const,
+            distance: 4,
+            color: '#1a1a2e',
+            backgroundColor: '#ffffff',
+            borderColor: '#e2e8f0',
+            borderWidth: 1,
+            borderRadius: 4,
+            padding: [2, 6, 2, 6],
             fontSize: 11,
             fontWeight: 600,
           },
-          data: ordered.map((d) => {
-            // Stage 4 — fix bar-label contrast on the lime-700
-            // (`eher_richtig`) bars. White text on #4d7c0f fails
-            // WCAG AA at body sizes (~3.7:1). Force the dark text
-            // token for that one verdict so the inside-right label
-            // stays legible.
-            const insideRight = d.value >= insideThreshold;
-            const isLime = d.myth.correctness_class === 'eher_richtig';
-            const labelColor = insideRight
-              ? isLime
-                ? '#1a1a2e'
-                : '#ffffff'
-              : '#1e293b';
-            return {
-              value: d.value,
-              itemStyle: {
-                color: getCorrectnessColor(d.myth.correctness_class),
-                borderRadius: [0, 3, 3, 0] as [number, number, number, number],
-              },
-              label: { color: labelColor },
-            };
-          }),
+          data: ordered.map((d) => ({
+            value: d.value,
+            itemStyle: {
+              color: getCorrectnessColor(d.myth.correctness_class),
+              borderRadius: [0, 3, 3, 0] as [number, number, number, number],
+            },
+          })),
         },
       ],
     };
@@ -311,28 +324,43 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
   };
 
   /**
-   * Height — Stage 4. Prefers the available viewport: the chart
-   * wrapper's top offset (measured during render) is subtracted from
-   * `window.innerHeight`, leaving room for an 80px footer. Clamp
-   * 420–1200 to keep extreme small / tall windows sane. Falls back
-   * to the legacy `data.length * 22 + 80` curve when measurement
-   * isn't available yet.
+   * Height — Stage 6 follow-up (v2). Bars are a fixed 28px row each so
+   * they never compress on short viewports. Total chart SVG height =
+   * rows × rowHeight + axis chrome. The wrapper measures its own top
+   * offset and computes container height = viewportH − top − 24px
+   * bottom margin, so the chart fills the entire visible space below
+   * the toolbar (no big empty gap before the footer). Falls back to
+   * a 360px floor if the measurement is too small (e.g. very short
+   * window) and clamps at fullChartHeight so no empty bottom appears
+   * when the data fits comfortably.
    */
-  const top = wrapperRef.current?.getBoundingClientRect().top ?? 200;
-  const measured = Math.floor(viewportH - top - 80);
-  const fallback = data.length * 22 + 80;
-  const height = Math.min(1200, Math.max(420, measured > 0 ? measured : fallback));
+  const ROW_HEIGHT = 28;
+  // 40px top padding (xAxis title + line) + 16px bottom = 56px chrome.
+  const AXIS_CHROME = 56;
+  const fullChartHeight = data.length * ROW_HEIGHT + AXIS_CHROME;
+  // 24px breathing room before the global footer / page edge.
+  const BOTTOM_MARGIN = 24;
+  const availableH = Math.max(360, viewportH - measuredTop - BOTTOM_MARGIN);
+  // If the chart's own content is shorter than the available area, the
+  // container shrinks to fit (no empty bottom); otherwise it caps at
+  // availableH and scrolls.
+  const containerHeight = Math.min(fullChartHeight, availableH);
 
   return (
     <div className="carm-balken-view" ref={wrapperRef}>
-      <ReactECharts
-        ref={chartRef}
-        option={option}
-        style={{ height, width: '100%' }}
-        onEvents={{ click: handleClick }}
-        opts={{ renderer: 'svg' }}
-        notMerge
-      />
+      <div
+        className="carm-balken-view__scroll"
+        style={{ maxHeight: containerHeight, overflowY: 'auto' }}
+      >
+        <ReactECharts
+          ref={chartRef}
+          option={option}
+          style={{ height: fullChartHeight, width: '100%' }}
+          onEvents={{ click: handleClick }}
+          opts={{ renderer: 'svg' }}
+          notMerge
+        />
+      </div>
     </div>
   );
 });

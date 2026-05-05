@@ -266,7 +266,7 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
   const allColumnIds: string[] = mode === 'metric'
     ? (METRICS as unknown as string[])
     : (GROUPS as unknown as string[]);
-  const { hidden, hide, show, reset, hiddenCount, isHidden } = useHiddenColumns(
+  const { hidden, hide, show, isHidden } = useHiddenColumns(
     `carm.sources.hidden.${mode}`,
     allColumnIds,
   );
@@ -369,9 +369,22 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
   // ── Build columns based on the active pivot ───────────────────────
   const columns = useMemo<ColumnData[]>(() => {
     if (!sourceData) return [];
-    /** Same radius clamp as Mythen-Streifen so the two views feel identical.
-     *  Children render at this × 0.7. */
-    const radius = Math.max(3.5, Math.min(8, colW * 0.07));
+    /**
+     * Stage 6 follow-up: circle radius now scales by VIEWPORT WIDTH
+     * (matches the StripsView arrow scaling tiers), with the column-
+     * width math kept as a soft minimum so very narrow columns still
+     * shrink the radius. Children render at radius × 0.7.
+     *   <480px   → 5  (small phone)
+     *   <768px   → 7  (large phone / portrait tablet)
+     *   <1280px  → 9  (laptop / landscape tablet)
+     *   ≥1280px  → 11 (desktop)
+     */
+    const widthBase =
+      width < 480 ? 5
+      : width < 768 ? 7
+      : width < 1280 ? 9
+      : 11;
+    const radius = Math.max(3.5, Math.min(widthBase, colW * 0.09));
 
     /** Run a force-simulated beeswarm for one strip's nodes. */
     const buildNodes = (
@@ -687,20 +700,9 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
           ) : (
           <>
 
-          {hiddenCount > 0 && (
-            <div className="carm-hidden-reset">
-              <button
-                type="button"
-                className="carm-hidden-reset__link"
-                onClick={reset}
-              >
-                {t('column.showAll', 'de')} ({hiddenCount})
-              </button>
-            </div>
-          )}
-
-          {/* Chart wrapper — same structure as StripsView so the absolute
-              header overlay sits on top of the SVG strip rectangles. */}
+          {/* Chart wrapper — same structure as StripsView. Stage 6: the
+              "Alle Spalten einblenden" reset link was removed; hidden
+              strips themselves are clickable to reveal. */}
           <div className="strips-svg-wrap" style={{ position: 'relative', width }}>
             <svg
               ref={svgRef}

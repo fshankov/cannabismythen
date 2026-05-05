@@ -128,6 +128,40 @@ main:has(.carm-explorer) {
   min-width: 0;
 }
 
+/* Stage 6 — sticky tabs + toolbar on mobile (≤768px) so the user can
+   change indicator / group / sort while the chart scrolls below. The
+   tabs row sticks to the very top of the viewport; the toolbar row
+   stacks just under it. The howto-microcopy line below the toolbar is
+   NOT sticky (it's documentation, not control). Background is the
+   page color so content scrolls under cleanly. */
+@media (max-width: 768px) {
+  .carm-explorer .tabs-bar {
+    position: sticky;
+    top: 0;
+    z-index: 51;
+    background: var(--color-bg, #f4f4f0);
+    /* Compensate for the page padding so the sticky strip reaches
+       edge-to-edge on small screens. */
+    margin-left: calc(-1 * var(--space-md, 16px));
+    margin-right: calc(-1 * var(--space-md, 16px));
+    padding-left: var(--space-md, 16px);
+    padding-right: var(--space-md, 16px);
+  }
+  .carm-explorer .carm-toolbar-row {
+    position: sticky;
+    /* Sits flush below the tabs row (~50px tall on mobile). */
+    top: 50px;
+    z-index: 50;
+    background: var(--color-bg, #f4f4f0);
+    margin-left: calc(-1 * var(--space-md, 16px));
+    margin-right: calc(-1 * var(--space-md, 16px));
+    padding-left: var(--space-md, 16px);
+    padding-right: var(--space-md, 16px);
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+}
+
 /* ==================== TABS ====================
    Chrome-browser style: connected rounded-top tabs that visually merge
    into the chart container below. The tab-bar's bottom border doubles
@@ -2416,48 +2450,18 @@ main:has(.carm-explorer) {
   margin-top: 24px;
 }
 
-/* "Alle Spalten einblenden" link — appears above the chart whenever
-   ≥1 column is hidden. Sits right-aligned. */
-.carm-hidden-reset {
-  display: flex;
-  justify-content: flex-end;
-  margin: 4px 0 8px;
-}
-
-.carm-hidden-reset__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border: 0;
-  background: transparent;
-  color: var(--color-accent, #2d6a4f);
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: background 0.15s ease;
-}
-
-.carm-hidden-reset__link:hover,
-.carm-hidden-reset__link:focus-visible {
-  background: var(--color-accent-light, #e8f5ef);
-  outline: none;
-}
-
-/* Tabelle hide UX — header gets an inline EyeOff button beside the sort
-   click target; hidden columns collapse to a thin (~28px) cell with a
-   chevron + rotated label, matching the strips placeholder. */
-.data-table__th-inner {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  justify-content: flex-end;
-  width: 100%;
+/* Tabelle hide UX — header gets an EyeOff button absolutely positioned
+   in the upper-LEFT corner of the cell (matching the Punktwolke +
+   Informationsquellen pattern). Hidden columns collapse to a thin
+   (~28px) cell with a chevron + rotated label. */
+.data-table__th {
+  position: relative;
 }
 
 .data-table__hide-btn {
+  position: absolute;
+  top: 4px;
+  left: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2466,10 +2470,12 @@ main:has(.carm-explorer) {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.92);
   color: var(--color-text-muted, #94a3b8);
   cursor: pointer;
   flex-shrink: 0;
+  line-height: 0;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .data-table__hide-btn:hover,
@@ -4724,6 +4730,20 @@ body.carm-modal-open {
    =========================================================================== */
 
 .carm-balken-view { width: 100%; }
+
+/* Stage 6: scroll container — fixed bar height (28px each row) means
+   the SVG can be taller than the viewport when 30+ myths are shown.
+   The wrapper caps the container height (set inline by BalkenView)
+   and lets the chart scroll inside. The toolbar above stays
+   anchored. Subtle inset shadow at top + bottom hints at scrollable
+   content without a heavy custom scrollbar. */
+.carm-balken-view__scroll {
+  border-radius: 4px;
+  /* Hint that there's more above/below when scrolled away from edges. */
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03), transparent 8px) top / 100% 8px no-repeat,
+    linear-gradient(to top, rgba(0, 0, 0, 0.03), transparent 8px) bottom / 100% 8px no-repeat;
+}
 
 /* Stage 6: the inline `.carm-balken-sort` chip row was retired — sort
    is now a third <DataPicker> in the shared toolbar (see MythenExplorer). */

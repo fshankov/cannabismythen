@@ -254,7 +254,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
   const allColumnIds: string[] = mode === 'indicator'
     ? (dataAvailableIndicators as string[])
     : (dataAvailableGroupIds as string[]);
-  const { hidden, hide, show, reset, hiddenCount, isHidden } = useHiddenColumns(
+  const { hidden, hide, show, isHidden } = useHiddenColumns(
     `carm.strips.hidden.${mode}`,
     allColumnIds,
   );
@@ -630,21 +630,13 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
             );
           })()}
 
-          {hiddenCount > 0 && (
-            <div className="carm-hidden-reset">
-              <button
-                type="button"
-                className="carm-hidden-reset__link"
-                onClick={reset}
-              >
-                {t('column.showAll', state.lang)} ({hiddenCount})
-              </button>
-            </div>
-          )}
-
           {/* SVG chart wrapper — relative-positioned so HTML strip headers
               can be absolutely positioned over the in-SVG header area for
-              each column, giving us a single unified box per strip. */}
+              each column, giving us a single unified box per strip.
+              Stage 6: the standalone "Alle Spalten einblenden" link was
+              removed because it caused the chart to jump vertically when
+              a column was first hidden. Each hidden strip is itself
+              clickable to reveal — that's the only reset path now. */}
           <div className="strips-svg-wrap" style={{ position: 'relative', width }}>
           <svg
             ref={svgRef}
@@ -853,17 +845,23 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 : [...col.nodes.filter((n) => n.mythId !== focusMythId),
                    ...col.nodes.filter((n) => n.mythId === focusMythId)];
               /**
-               * Auto-scale arrow size by column density. Sparse columns
-               * get a larger, easier-to-read arrow; crowded columns
-               * shrink so the beeswarm stays legible. Selected / hover
-               * states scale up modestly to mirror the old radius bump.
-               * Sizes were bumped from 10/12/14 → 14/16/18 in response
-               * to user feedback that the original tier was too small
-               * to read at-a-glance.
+               * Stage 6 follow-up: arrow size scales by VIEWPORT WIDTH
+               * primarily, with a small density penalty so crowded
+               * columns shrink slightly. Width tiers:
+               *   <480px   → base 10  (small phone)
+               *   <768px   → base 14  (large phone / portrait tablet)
+               *   <1280px  → base 18  (laptop / landscape tablet)
+               *   ≥1280px  → base 22  (desktop)
+               * Density penalty: -2 when ≥13 dots in the column.
                */
+              const widthBase =
+                width < 480 ? 10
+                : width < 768 ? 14
+                : width < 1280 ? 18
+                : 22;
               const density = col.nodes.length;
-              const baseSize =
-                density >= 13 ? 14 : density >= 7 ? 16 : 18;
+              const densityPenalty = density >= 13 ? 2 : 0;
+              const baseSize = Math.max(8, widthBase - densityPenalty);
               return (
                 <g key={`dots-${String(col.id)}`} transform={`translate(0, ${margin.top})`}>
                   {sortedNodes.map((n) => {

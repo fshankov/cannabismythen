@@ -47,7 +47,7 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
   // visible (it's the row anchor); only the 4 indicator columns are
   // hideable.
   const allIndicatorIds = INDICATOR_COLS.map((c) => c.key as string);
-  const { hide, show, isHidden, hiddenCount, reset } = useHiddenColumns(
+  const { hide, show, isHidden } = useHiddenColumns(
     'carm.table.hidden',
     allIndicatorIds,
   );
@@ -101,17 +101,8 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
 
   return (
     <div className="data-table-container">
-      {hiddenCount > 0 && (
-        <div className="carm-hidden-reset">
-          <button
-            type="button"
-            className="carm-hidden-reset__link"
-            onClick={reset}
-          >
-            {t('column.showAll', state.lang)} ({hiddenCount})
-          </button>
-        </div>
-      )}
+      {/* Stage 6: standalone reset link removed — clicking a hidden
+          column's chevron reveals it. */}
       <table className="data-table" role="table">
         <thead>
           <tr>
@@ -147,27 +138,34 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
                 );
               }
               return (
-                <th key={col.key} style={{ textAlign: 'right' }}>
-                  <span className="data-table__th-inner">
-                    <button
-                      type="button"
-                      className="data-table__hide-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        hide(col.key);
-                      }}
-                      aria-label={`${t('column.hide', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
-                      title={`${t('column.hide', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
-                    >
-                      <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
-                    </button>
-                    <span
-                      className="data-table__th-label"
-                      onClick={() => toggleSort(col.key)}
-                    >
-                      <span className="th-icon"><col.Icon size={14} strokeWidth={1.75} aria-hidden="true" /></span>{' '}
-                      {t(`indicator.${col.key}.short` as any, state.lang)} {renderSortArrow(col.key)}
-                    </span>
+                <th
+                  key={col.key}
+                  className="data-table__th"
+                  style={{ textAlign: 'right' }}
+                >
+                  {/* Stage 6 follow-up — EyeOff sits absolutely at the
+                      top-LEFT of the cell, matching the Punktwolke /
+                      Quellen column-header pattern. The label + sort
+                      arrow stay flush-right (the table is right-aligned
+                      for numerical columns). */}
+                  <button
+                    type="button"
+                    className="data-table__hide-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      hide(col.key);
+                    }}
+                    aria-label={`${t('column.hide', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
+                    title={`${t('column.hide', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
+                  >
+                    <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
+                  </button>
+                  <span
+                    className="data-table__th-label"
+                    onClick={() => toggleSort(col.key)}
+                  >
+                    <span className="th-icon"><col.Icon size={14} strokeWidth={1.75} aria-hidden="true" /></span>{' '}
+                    {t(`indicator.${col.key}.short` as any, state.lang)} {renderSortArrow(col.key)}
                   </span>
                 </th>
               );

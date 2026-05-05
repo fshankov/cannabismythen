@@ -343,7 +343,6 @@ const translations = {
   // Stage 6 follow-up — hide / show columns (Punktwolke + Quellen + Tabelle)
   'column.hide': { de: 'Spalte ausblenden', en: 'Hide column' },
   'column.show': { de: 'Spalte einblenden', en: 'Show column' },
-  'column.showAll': { de: 'Alle Spalten einblenden', en: 'Show all columns' },
   'column.hidden': { de: 'Ausgeblendet', en: 'Hidden' },
 } as const;
 
