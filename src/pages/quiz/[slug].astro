@@ -2,13 +2,15 @@
 export const prerender = true;
 
 import Markdoc from "@markdoc/markdoc";
-import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 import QuizPlayer from "@components/quiz/QuizPlayer";
 import { QUIZ_THEMES } from "@components/quiz/quizData";
 import type { MythGroupMetrics } from "@lib/dashboard/types";
+// Direct JSON import — see fakten-karten/index.astro for the rationale.
+// `readFile(new URL(..., import.meta.url))` resolves wrong after Vite
+// bundles this page into Netlify's prerender chunk.
+import carmRawJson from "../../../public/data/carm-data.json";
 import "../../styles/quiz.css";
 
 // ── Build-time per-myth metric slice ────────────────────────────
@@ -34,12 +36,7 @@ interface RawMetric {
   population_relevance: number | null;
 }
 
-const carmDataPath = fileURLToPath(
-  new URL("../../../public/data/carm-data.json", import.meta.url),
-);
-const carmRaw = JSON.parse(await readFile(carmDataPath, "utf8")) as {
-  metrics: RawMetric[];
-};
+const carmRaw = carmRawJson as { metrics: RawMetric[] };
 
 const groupMetricsByMythId: Record<number, MythGroupMetrics> = {};
 for (const m of carmRaw.metrics) {
