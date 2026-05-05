@@ -27,6 +27,7 @@ import {
 } from 'react';
 import { Search } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import InfoTooltip from '../InfoTooltip';
 
 export interface DataPickerOption<T extends string> {
   value: T;
@@ -86,9 +87,6 @@ export default function DataPicker<T extends string>({
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
-  /** Which menu row's inline definition is currently expanded.
-   *  `null` means none. */
-  const [expandedDefId, setExpandedDefId] = useState<T | null>(null);
   const [query, setQuery] = useState('');
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const listboxId = useId();
@@ -119,21 +117,23 @@ export default function DataPicker<T extends string>({
     }
   }, [open, searchable]);
 
-  // Outside-pointer + Escape close — same wiring as the original
-  // .strips-picker handlers in StripsView.
+  // Outside-pointer + Escape close. Stage 6 follow-up: the InfoTooltip
+  // popover renders OUTSIDE this container (it's `position: fixed`), so
+  // we ignore pointerdowns that land inside an `.info-tooltip-card` to
+  // avoid closing the picker when a user reads a definition.
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest?.('.info-tooltip-card')) return;
       const node = containerRef.current;
       if (node && !node.contains(e.target as Node)) {
         setOpen(false);
-        setExpandedDefId(null);
       }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setOpen(false);
-        setExpandedDefId(null);
       }
     };
     document.addEventListener('pointerdown', onPointerDown);
@@ -175,7 +175,6 @@ export default function DataPicker<T extends string>({
         aria-label={ariaLabel}
         onClick={() => {
           setOpen((v) => !v);
-          setExpandedDefId(null);
         }}
       >
         {renderLeading(active)}
@@ -236,11 +235,9 @@ export default function DataPicker<T extends string>({
                     if (target && !target.disabled) {
                       onChange(target.value);
                       setOpen(false);
-                      setExpandedDefId(null);
                     }
                   } else if (e.key === 'Escape') {
                     setOpen(false);
-                    setExpandedDefId(null);
                   }
                 }}
                 aria-controls={listboxId}
@@ -253,7 +250,6 @@ export default function DataPicker<T extends string>({
             </p>
           )}
           {visibleOptions.map((opt, i) => {
-            const expanded = expandedDefId === opt.value;
             const isActive = opt.value === value;
             const hasDef = !!opt.definition?.text;
             const isDisabled = !!opt.disabled;
@@ -261,7 +257,7 @@ export default function DataPicker<T extends string>({
             return (
               <div
                 key={opt.value}
-                className={`carm-picker__row ${expanded ? 'expanded' : ''} ${
+                className={`carm-picker__row ${
                   isDisabled ? 'is-disabled' : ''
                 } ${isHighlighted ? 'is-highlighted' : ''}`}
               >
@@ -278,7 +274,6 @@ export default function DataPicker<T extends string>({
                       if (isDisabled) return;
                       onChange(opt.value);
                       setOpen(false);
-                      setExpandedDefId(null);
                     }}
                   >
                     {renderLeading(opt)}
@@ -286,48 +281,17 @@ export default function DataPicker<T extends string>({
                       {opt.label}
                     </span>
                   </button>
-                  {hasDef && (
-                    <button
-                      type="button"
-                      className={`carm-picker__row-info ${expanded ? 'active' : ''}`}
-                      aria-expanded={expanded}
-                      aria-label={
-                        lang === 'de'
-                          ? 'Definition anzeigen'
-                          : 'Show definition'
-                      }
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedDefId(expanded ? null : opt.value);
-                      }}
-                    >
-                      <span aria-hidden="true">i</span>
-                    </button>
+                  {hasDef && opt.definition && (
+                    <span className="carm-picker__row-info-wrap">
+                      <InfoTooltip
+                        title={opt.definition.title}
+                        definition={opt.definition.text}
+                        scale={opt.definition.scale}
+                        sampleSize={opt.definition.sampleSize}
+                      />
+                    </span>
                   )}
                 </div>
-                {expanded && opt.definition?.text && (
-                  <div className="carm-picker__row-def">
-                    {opt.definition.title && (
-                      <p className="carm-picker__row-def-title">
-                        {opt.definition.title}
-                      </p>
-                    )}
-                    {opt.definition.sampleSize && (
-                      <p className="carm-picker__row-def-sample">
-                        {opt.definition.sampleSize}
-                      </p>
-                    )}
-                    <p className="carm-picker__row-def-text">
-                      {opt.definition.text}
-                    </p>
-                    {opt.definition.scale && (
-                      <p className="carm-picker__row-def-scale">
-                        {lang === 'de' ? 'Skala' : 'Scale'}:{' '}
-                        {opt.definition.scale}
-                      </p>
-                    )}
-                  </div>
-                )}
               </div>
             );
           })}

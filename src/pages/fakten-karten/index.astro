@@ -2,9 +2,12 @@
 export const prerender = true;
 
 import Markdoc from "@markdoc/markdoc";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import FaktenKartenExplorer from "@components/fakten-karten/FaktenKartenExplorer";
 import { reader, getPublishedEntries } from "@lib/content";
+import type { MythGroupMetrics } from "@lib/dashboard/types";
 import "../../styles/quiz.css";
 
 // Combined myth factsheets: one .mdoc covers two CaRM myth IDs.
@@ -14,6 +17,55 @@ const COMBINED_MYTHS: Record<number, number> = {
   37: 36, // m36-m37-leistungen-niveau
   42: 41, // m41-m42-anstieg-konsum
 };
+
+// ── Build-time per-myth metric slice ────────────────────────────
+// Reads `public/data/carm-data.json` once at build, slices by myth_id,
+// and forwards a typed `MythGroupMetrics` per myth to the React island.
+// The exact same dataset powers the Daten-Explorer at runtime; doing
+// the slice at build time avoids a redundant fetch on the lighter
+// fakten-karten page (it doesn't otherwise touch the dashboard data).
+//
+// `general_population` is excluded — it mixes minors and adults and is
+// not displayed on any user-facing chart (mirrors EXCLUDED_GROUP_IDS
+// in src/lib/dashboard/data.ts).
+const VALID_GROUPS: ReadonlySet<string> = new Set([
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
+]);
+
+interface RawMetric {
+  myth_id: number;
+  group_id: string;
+  awareness: number | null;
+  significance: number | null;
+  correctness: number | null;
+  prevention_significance: number | null;
+  population_relevance: number | null;
+}
+
+const carmDataPath = fileURLToPath(
+  new URL("../../../public/data/carm-data.json", import.meta.url),
+);
+const carmRaw = JSON.parse(await readFile(carmDataPath, "utf8")) as {
+  metrics: RawMetric[];
+};
+
+const groupMetricsByMyth: Record<number, MythGroupMetrics> = {};
+for (const m of carmRaw.metrics) {
+  if (!VALID_GROUPS.has(m.group_id)) continue;
+  if (!groupMetricsByMyth[m.myth_id]) groupMetricsByMyth[m.myth_id] = [];
+  groupMetricsByMyth[m.myth_id].push({
+    group_id: m.group_id as MythGroupMetrics[number]["group_id"],
+    awareness: m.awareness,
+    significance: m.significance,
+    correctness: m.correctness,
+    prevention_significance: m.prevention_significance,
+    population_relevance: m.population_relevance,
+  });
+}
 
 // Build myth ID → factsheet slug mapping
 const factsheetEntries = await getPublishedEntries("zahlenUndFakten");
@@ -88,6 +140,15 @@ for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
   if (mythContentMap[p]) {
     mythContentMap[Number(secondary)] = mythContentMap[p];
   }
+  // The CaRM dataset has its own metric record per CaRM myth_id —
+  // i.e. m32 has its own row independent of m31. Only fall back to
+  // the primary's metrics if the dataset doesn't carry the secondary
+  // (defensive — should never trigger today but means future
+  // editorial-only combined myths still get a chart).
+  const s = Number(secondary);
+  if (!groupMetricsByMyth[s] && groupMetricsByMyth[p]) {
+    groupMetricsByMyth[s] = groupMetricsByMyth[p];
+  }
 }
 
 // Sort myths by mythNumber ascending
@@ -101,5 +162,6 @@ myths.sort((a, b) => a.mythNumber - b.mythNumber);
     client:load
     myths={JSON.stringify(myths)}
     mythContent={JSON.stringify(mythContentMap)}
+    groupMetrics={JSON.stringify(groupMetricsByMyth)}
   />
 </BaseLayout>

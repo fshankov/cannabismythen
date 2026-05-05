@@ -247,7 +247,7 @@ export default function FilterDrawer({
         <>
           <button
             type="button"
-            className="carm-btn carm-btn--ghost"
+            className="carm-btn"
             onClick={reset}
           >
             {t('filter.reset', 'de')}

@@ -11,6 +11,26 @@ import FaktenCard from "./FaktenCard";
 import type { FaktenCardMyth } from "./FaktenCard";
 import SharedFactsheetPanel from "../shared/FactsheetPanel";
 import type { MythContentEntry } from "../shared/FactsheetPanel";
+import VerdictArrowWithInfo from "../shared/VerdictArrowWithInfo";
+import type {
+  CorrectnessClass,
+  MythGroupMetrics,
+} from "../../lib/dashboard/types";
+import { t, type TranslationKey } from "../../lib/dashboard/translations";
+
+const VALID_VERDICTS: ReadonlySet<CorrectnessClass> = new Set([
+  "richtig",
+  "eher_richtig",
+  "eher_falsch",
+  "falsch",
+  "no_classification",
+]);
+
+function toVerdict(raw: string): CorrectnessClass {
+  return VALID_VERDICTS.has(raw as CorrectnessClass)
+    ? (raw as CorrectnessClass)
+    : "no_classification";
+}
 
 /** Category groups in display order */
 const CATEGORY_GROUPS = [
@@ -33,11 +53,17 @@ interface FaktenKartenExplorerProps {
   myths: string;
   /** JSON-serialized Record<number, MythContentEntry> */
   mythContent: string;
+  /** JSON-serialized Record<number, MythGroupMetrics>. Built at build
+   *  time from `public/data/carm-data.json`. Powers the interactive
+   *  bar chart inside the FactsheetPanel popup that replaces the old
+   *  "Daten nach Zielgruppen" markdown table. */
+  groupMetrics?: string;
 }
 
 export default function FaktenKartenExplorer({
   myths: mythsJson,
   mythContent: mythContentJson,
+  groupMetrics: groupMetricsJson,
 }: FaktenKartenExplorerProps) {
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [factsheetMyth, setFactsheetMyth] = useState<string | null>(null);
@@ -57,6 +83,15 @@ export default function FaktenKartenExplorer({
       return {};
     }
   }, [mythContentJson]);
+
+  const groupMetricsMap: Record<number, MythGroupMetrics> = useMemo(() => {
+    if (!groupMetricsJson) return {};
+    try {
+      return JSON.parse(groupMetricsJson);
+    } catch {
+      return {};
+    }
+  }, [groupMetricsJson]);
 
   const filteredMyths = useMemo(() => {
     const list = activeGroup
@@ -120,17 +155,38 @@ export default function FaktenKartenExplorer({
         ))}
       </div>
 
-      {openMyth && (
-        <SharedFactsheetPanel
-          context="fakten-karten"
-          mythText={openMyth.title}
-          classificationKey={openMyth.classification}
-          classificationLabel={openMyth.classificationLabel}
-          mythContentEntry={openMythContent}
-          factsheetSlug={openMyth.slug}
-          onClose={handleCloseFactsheet}
-        />
-      )}
+      {openMyth && (() => {
+        // Inside the popup the verdict is rendered with the canonical
+        // label ("Falsch") + the daten-explorer's hover-info arrow, so
+        // the popup reads identically across every surface. The
+        // conversational `classificationLabel` stays on the FRONT of
+        // the flip card — that's the editorial-voice surface.
+        const verdict = toVerdict(openMyth.classification);
+        const canonicalLabel = t(
+          `verdict.${verdict}` as TranslationKey,
+          "de",
+        );
+        return (
+          <SharedFactsheetPanel
+            context="fakten-karten"
+            mythText={openMyth.title}
+            classificationKey={openMyth.classification}
+            classificationLabel={canonicalLabel}
+            mythContentEntry={openMythContent}
+            factsheetSlug={openMyth.slug}
+            verdictLabel="Wissenschaftliches Urteil:"
+            verdictAccessory={
+              <VerdictArrowWithInfo
+                verdict={verdict}
+                size={14}
+                strokeWidth={2.25}
+              />
+            }
+            groupMetrics={groupMetricsMap[openMyth.mythNumber]}
+            onClose={handleCloseFactsheet}
+          />
+        );
+      })()}
     </div>
   );
 }

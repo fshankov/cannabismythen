@@ -5,6 +5,8 @@
 
 import SharedFactsheetPanel from '../shared/FactsheetPanel';
 import type { MythContentEntry } from '../shared/FactsheetPanel';
+import VerdictArrowWithInfo from '../shared/VerdictArrowWithInfo';
+import type { MythGroupMetrics } from '../../lib/dashboard/types';
 import type { QuizMyth } from './types';
 import { t } from './i18n';
 
@@ -13,6 +15,10 @@ export type { MythContentEntry };
 interface FactsheetPanelProps {
   myth: QuizMyth;
   mythContentEntry?: MythContentEntry;
+  /** Per-Zielgruppe metric slice for this myth, forwarded into the
+   *  shared panel's interactive bar chart (replaces the legacy
+   *  "Daten nach Zielgruppen" markdown table). */
+  groupMetrics?: MythGroupMetrics;
   onClose: () => void;
   /** Statement text from Keystatic content (overrides i18n key) */
   statementText?: string;
@@ -23,6 +29,7 @@ interface FactsheetPanelProps {
 export default function FactsheetPanel({
   myth,
   mythContentEntry,
+  groupMetrics,
   onClose,
   statementText,
   explanationText,
@@ -39,6 +46,14 @@ export default function FactsheetPanel({
       mythContentEntry={mythContentEntry}
       factsheetSlug={myth.mythPageSlug}
       verdictLabel={t('ui.correctAnswer')}
+      verdictAccessory={
+        <VerdictArrowWithInfo
+          verdict={myth.correctClassification}
+          size={14}
+          strokeWidth={2.25}
+        />
+      }
+      groupMetrics={groupMetrics}
       onClose={onClose}
       fallbackExplanation={explanationText || t(myth.explanationKey)}
     />

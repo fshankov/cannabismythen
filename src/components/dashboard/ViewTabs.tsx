@@ -57,7 +57,7 @@ export default function ViewTabs({ view, lang, onChange, onRundgang }: Props) {
       {onRundgang && (
         <button
           type="button"
-          className="tabs-bar__rundgang"
+          className="carm-btn tabs-bar__rundgang"
           onClick={onRundgang}
           aria-label={t('rundgang.label', lang)}
         >

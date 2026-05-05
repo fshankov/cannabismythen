@@ -61,6 +61,7 @@ import ResultScreen from "./ResultScreen";
 import FactsheetPanel from "./FactsheetPanel";
 import ShortcutHelp from "./ShortcutHelp";
 import type { MythContentEntry } from "./FactsheetPanel";
+import type { MythGroupMetrics } from "../../lib/dashboard/types";
 
 export type { MythContentEntry };
 
@@ -101,6 +102,11 @@ interface QuizPlayerProps {
   quizSlug: string;
   /** JSON-serialized Record<mythId, MythContentEntry> from Astro build */
   mythContent?: string;
+  /** JSON-serialized Record<mythId, MythGroupMetrics> from Astro build.
+   *  Powers the interactive bar chart inside the post-answer
+   *  FactsheetPanel popup (replaces the old "Daten nach Zielgruppen"
+   *  markdown table). */
+  groupMetrics?: string;
   /** JSON-serialized Record<mythId, QuizTextEntry> from Keystatic quiz content */
   quizText?: string;
   /** JSON-serialized QuizVerdictsEntry from Keystatic content. Stage 5
@@ -343,6 +349,7 @@ interface QuizPlayerInnerProps extends QuizPlayerProps {
 function QuizPlayerInner({
   quizSlug,
   mythContent,
+  groupMetrics,
   quizText,
   quizSummary,
   theme,
@@ -464,6 +471,15 @@ function QuizPlayerInner({
       return {};
     }
   }, [mythContent]);
+
+  const groupMetricsMap: Record<string, MythGroupMetrics> = useMemo(() => {
+    if (!groupMetrics) return {};
+    try {
+      return JSON.parse(groupMetrics);
+    } catch {
+      return {};
+    }
+  }, [groupMetrics]);
 
   const quizTextMap: Record<string, QuizTextEntry> = useMemo(() => {
     if (!quizText) return {};
@@ -912,6 +928,7 @@ function QuizPlayerInner({
         <FactsheetPanel
           myth={factsheetMyth}
           mythContentEntry={mythContentMap[factsheetMyth.id]}
+          groupMetrics={groupMetricsMap[factsheetMyth.id]}
           onClose={handleCloseFactsheet}
           statementText={quizTextMap[factsheetMyth.id]?.statement}
           explanationText={quizTextMap[factsheetMyth.id]?.explanation}

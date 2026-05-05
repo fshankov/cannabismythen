@@ -2,11 +2,58 @@
 export const prerender = true;
 
 import Markdoc from "@markdoc/markdoc";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 import QuizPlayer from "@components/quiz/QuizPlayer";
 import { QUIZ_THEMES } from "@components/quiz/quizData";
+import type { MythGroupMetrics } from "@lib/dashboard/types";
 import "../../styles/quiz.css";
+
+// ── Build-time per-myth metric slice ────────────────────────────
+// Same approach as the fakten-karten page: read carm-data.json once,
+// slice by myth_id, and forward the keyed-by-quiz-myth-id map into the
+// quiz player. The shared FactsheetPanel renders an interactive bar
+// chart instead of the legacy markdown table.
+const VALID_GROUPS: ReadonlySet<string> = new Set([
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
+]);
+
+interface RawMetric {
+  myth_id: number;
+  group_id: string;
+  awareness: number | null;
+  significance: number | null;
+  correctness: number | null;
+  prevention_significance: number | null;
+  population_relevance: number | null;
+}
+
+const carmDataPath = fileURLToPath(
+  new URL("../../../public/data/carm-data.json", import.meta.url),
+);
+const carmRaw = JSON.parse(await readFile(carmDataPath, "utf8")) as {
+  metrics: RawMetric[];
+};
+
+const groupMetricsByMythId: Record<number, MythGroupMetrics> = {};
+for (const m of carmRaw.metrics) {
+  if (!VALID_GROUPS.has(m.group_id)) continue;
+  if (!groupMetricsByMythId[m.myth_id]) groupMetricsByMythId[m.myth_id] = [];
+  groupMetricsByMythId[m.myth_id].push({
+    group_id: m.group_id as MythGroupMetrics[number]["group_id"],
+    awareness: m.awareness,
+    significance: m.significance,
+    correctness: m.correctness,
+    prevention_significance: m.prevention_significance,
+    population_relevance: m.population_relevance,
+  });
+}
 
 export async function getStaticPaths() {
   const slugs = await reader.collections.quiz.list();
@@ -87,6 +134,10 @@ const sharePayload = {
 // Pre-render myth page content for the factsheet panel
 const theme = QUIZ_THEMES[slug!];
 const mythContentMap: Record<string, { html: string; title: string; classification: string; classificationLabel: string; refCount: number }> = {};
+// Per-quiz-myth-id metrics map. The quiz uses string IDs ("m01"), so we
+// re-key the numeric carm-data map into the same shape QuizPlayer's
+// content map already uses.
+const quizGroupMetricsMap: Record<string, MythGroupMetrics> = {};
 
 if (theme) {
   for (const myth of theme.myths) {
@@ -107,6 +158,16 @@ if (theme) {
           classificationLabel: mythEntry.classificationLabel as string,
           refCount,
         };
+
+        // mNN → numeric id ("m01" → 1). The mythNumber field on the
+        // .mdoc is the canonical conversion; falling back to a regex on
+        // the id keeps things safe if the field is somehow missing.
+        const mythNumber =
+          (mythEntry as { mythNumber?: number }).mythNumber ??
+          Number(myth.id.replace(/[^0-9]/g, ""));
+        if (Number.isFinite(mythNumber) && groupMetricsByMythId[mythNumber]) {
+          quizGroupMetricsMap[myth.id] = groupMetricsByMythId[mythNumber];
+        }
       }
     } catch {
       // If a myth page doesn't exist or fails to render, skip it
@@ -125,6 +186,7 @@ if (theme) {
       client:load
       quizSlug={slug!}
       mythContent={JSON.stringify(mythContentMap)}
+      groupMetrics={JSON.stringify(quizGroupMetricsMap)}
       quizText={JSON.stringify(quizTextMap)}
       verdicts={JSON.stringify(verdictsPayload)}
       intros={JSON.stringify(introsPayload)}

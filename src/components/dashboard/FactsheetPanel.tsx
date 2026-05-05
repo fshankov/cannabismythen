@@ -5,7 +5,7 @@
 
 import SharedFactsheetPanel from '../shared/FactsheetPanel';
 import type { MythContentEntry } from '../shared/FactsheetPanel';
-import type { Myth } from '../../lib/dashboard/types';
+import type { Myth, MythGroupMetrics } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import VerdictArrowWithInfo from './VerdictArrowWithInfo';
 
@@ -15,6 +15,10 @@ interface FactsheetPanelProps {
   myth: Myth;
   mythContentEntry?: MythContentEntry;
   factsheetSlug?: string;
+  /** Per-Zielgruppe metric slice for the open myth. Forwarded to the
+   *  shared panel which renders the interactive bar chart in place of
+   *  the legacy "Daten nach Zielgruppen" markdown table. */
+  groupMetrics?: MythGroupMetrics;
   onClose: () => void;
 }
 
@@ -22,6 +26,7 @@ export default function FactsheetPanel({
   myth,
   mythContentEntry,
   factsheetSlug,
+  groupMetrics,
   onClose,
 }: FactsheetPanelProps) {
   // Canonical verdict label — the conversational `classificationLabel`
@@ -48,6 +53,7 @@ export default function FactsheetPanel({
           strokeWidth={2.25}
         />
       }
+      groupMetrics={groupMetrics}
       onClose={onClose}
     />
   );

@@ -33,7 +33,7 @@ import * as d3 from 'd3';
 import {
   Search, Eye, ShieldCheck, Sparkles,
   Users, Baby, Cannabis, GraduationCap, UsersRound,
-  Layers,
+  Layers, EyeOff,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type {
@@ -50,6 +50,8 @@ import InfoTooltip from '../InfoTooltip';
 import PivotToggle from '../controls/PivotToggle';
 import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
 import ToolbarRow from '../controls/ToolbarRow';
+import { useHiddenColumns } from '../hooks/useHiddenColumns';
+import { t } from '../../../lib/dashboard/translations';
 
 interface Props {
   state: AppState;
@@ -243,9 +245,11 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
   const isMobile = width < 640;
   const isNarrow = width < 480;
 
+  // Stage 6: `left` reserves a small gutter for the y-axis numbers
+  // (0/20/40/60/80/100) at fontSize 12 — no axis title.
   const margin = isMobile
-    ? { top: 8, right: 8, bottom: 28, left: 28 }
-    : { top: 10, right: 20, bottom: 32, left: 36 };
+    ? { top: 8, right: 8, bottom: 28, left: 32 }
+    : { top: 10, right: 20, bottom: 32, left: 40 };
 
   const headerH = isMobile ? 50 : 56;
 
@@ -256,17 +260,71 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
   const innerW = Math.max(0, width - margin.left - margin.right);
   const innerH = Math.max(0, height - margin.top - margin.bottom - headerH);
   const colGap = isMobile ? 4 : 10;
-  const numColumns = mode === 'metric' ? METRICS.length : GROUPS.length;
-  const colW = (innerW - colGap * (numColumns - 1)) / Math.max(1, numColumns);
+
+  // Stage 6 follow-up: per-column hide. Storage key is per-pivot so a
+  // hide in 'metric' mode doesn't bleed into 'group' mode.
+  const allColumnIds: string[] = mode === 'metric'
+    ? (METRICS as unknown as string[])
+    : (GROUPS as unknown as string[]);
+  const { hidden, hide, show, reset, hiddenCount, isHidden } = useHiddenColumns(
+    `carm.sources.hidden.${mode}`,
+    allColumnIds,
+  );
+
+  const visibleColumnIds: string[] = allColumnIds.filter((id) => !isHidden(id));
+  const hiddenColumnIds: string[] = allColumnIds.filter((id) => isHidden(id));
+
+  const HIDDEN_STRIP_W = 28;
+  const totalSlots = visibleColumnIds.length + hiddenColumnIds.length;
+  const totalGaps = colGap * Math.max(0, totalSlots - 1);
+  const availableForVisible = Math.max(
+    0,
+    innerW - HIDDEN_STRIP_W * hiddenColumnIds.length - totalGaps,
+  );
+  const numColumns = visibleColumnIds.length;
+  const colW = availableForVisible / Math.max(1, numColumns);
 
   const yScale = useMemo(
     () => d3.scaleLinear().domain([0, 100]).range([headerH + innerH, headerH]),
     [innerH, headerH],
   );
 
+  /**
+   * slotLayout — left x + width for each slot (visible + hidden) in
+   * original column order. Identical pattern to StripsView.
+   */
+  type Slot = {
+    id: string;
+    kind: 'visible' | 'hidden';
+    left: number;
+    width: number;
+  };
+  const slotLayout: Slot[] = useMemo(() => {
+    const out: Slot[] = [];
+    let cursor = margin.left;
+    allColumnIds.forEach((id) => {
+      const isHid = hidden.has(id);
+      const w = isHid ? HIDDEN_STRIP_W : colW;
+      out.push({
+        id,
+        kind: isHid ? 'hidden' : 'visible',
+        left: cursor,
+        width: w,
+      });
+      cursor += w + colGap;
+    });
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allColumnIds, hidden, margin.left, colW, colGap]);
+
   const colCenterX = useCallback(
-    (i: number) => margin.left + colW / 2 + i * (colW + colGap),
-    [margin.left, colW, colGap],
+    (i: number) => {
+      const visible = slotLayout.filter((s) => s.kind === 'visible');
+      const slot = visible[i];
+      if (!slot) return margin.left + colW / 2;
+      return slot.left + slot.width / 2;
+    },
+    [slotLayout, margin.left, colW],
   );
 
   const ticks = [0, 20, 40, 60, 80, 100];
@@ -363,7 +421,7 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
 
     if (mode === 'metric') {
       // 4 strips, one per source metric — at the selected population group.
-      return METRICS.map((m) => {
+      return METRICS.filter((m) => !isHidden(m)).map((m) => {
         const def = definitions?.sourcesIndicators?.[m];
         const data = sourceData.metrics[m]?.data[selectedGroup] || {};
         const { nodes, valueByMyth } = buildNodes(visibleSources, (s) => {
@@ -387,7 +445,7 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
 
     // mode === 'group' — 5 strips, one per population group, at the selected metric.
     const metricData = sourceData.metrics[selectedMetric]?.data || ({} as Record<SourceGroupId, Record<string, number>>);
-    return GROUPS.map((g) => {
+    return GROUPS.filter((g) => !isHidden(g)).map((g) => {
       const def = definitions?.groups?.[g];
       const data = metricData[g] || {};
       const { nodes, valueByMyth } = buildNodes(visibleSources, (s) => {
@@ -629,6 +687,18 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
           ) : (
           <>
 
+          {hiddenCount > 0 && (
+            <div className="carm-hidden-reset">
+              <button
+                type="button"
+                className="carm-hidden-reset__link"
+                onClick={reset}
+              >
+                {t('column.showAll', 'de')} ({hiddenCount})
+              </button>
+            </div>
+          )}
+
           {/* Chart wrapper — same structure as StripsView so the absolute
               header overlay sits on top of the SVG strip rectangles. */}
           <div className="strips-svg-wrap" style={{ position: 'relative', width }}>
@@ -642,6 +712,31 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
               aria-label="Streifen-Diagramm der Informationsquellen"
               onMouseLeave={() => { setHoveredSourceId(null); setHoverPos(null); }}
             >
+              {/* Y-axis gutter (Stage 6) — dedicated left column with the
+                  0/20/40/60/80/100 tick numbers. Drawn ONCE so the same
+                  scale labels every strip column. */}
+              <g
+                className="strips-yaxis"
+                transform={`translate(0, ${margin.top})`}
+                pointerEvents="none"
+              >
+                {ticks.map((tk) => (
+                  <text
+                    key={`yax-${tk}`}
+                    x={margin.left - 8}
+                    y={yScale(tk) + 4}
+                    textAnchor="end"
+                    fontSize={12}
+                    fontWeight={500}
+                    style={{
+                      fill: 'var(--color-text-secondary, #4a5568)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {tk}
+                  </text>
+                ))}
+              </g>
               {/* Strip backgrounds + gridlines */}
               {columns.map((col, i) => {
                 const cx = colCenterX(i);
@@ -839,7 +934,9 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
               )}
             </svg>
 
-            {/* Absolute-positioned HTML headers over the in-SVG header area */}
+            {/* Absolute-positioned HTML headers over the in-SVG header area.
+                Includes per-column EyeOff button (Stage 6) + hidden-column
+                placeholders rendered from slotLayout. */}
             <div className="strips-svg-headers" aria-hidden={false}>
               {columns.map((col, i) => {
                 const cx = colCenterX(i);
@@ -851,6 +948,15 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                     className="strips-svg-header"
                     style={{ left, top, width: colW, height: headerH }}
                   >
+                    <button
+                      type="button"
+                      className="strips-svg-header__hide"
+                      onClick={() => hide(String(col.id))}
+                      aria-label={`${t('column.hide', 'de')} — ${col.label}`}
+                      title={`${t('column.hide', 'de')} — ${col.label}`}
+                    >
+                      <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
+                    </button>
                     <div className="strips-svg-header__inner">
                       {col.Icon ? (
                         <col.Icon size={isNarrow ? 16 : 18} strokeWidth={1.75} aria-hidden="true" />
@@ -872,6 +978,36 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                   </div>
                 );
               })}
+              {slotLayout
+                .filter((s) => s.kind === 'hidden')
+                .map((s) => {
+                  const labelLookup = mode === 'metric'
+                    ? METRIC_LABELS[s.id as SourceMetricType]
+                    : GROUP_LABELS[s.id as SourceGroupId];
+                  return (
+                    <button
+                      key={`hd-hidden-${s.id}`}
+                      type="button"
+                      className="strips-svg-header strips-svg-header--hidden"
+                      style={{
+                        left: s.left,
+                        top: margin.top,
+                        width: s.width,
+                        height: headerH + innerH,
+                      }}
+                      onClick={() => show(s.id)}
+                      aria-label={`${t('column.show', 'de')} — ${labelLookup}`}
+                      title={`${t('column.show', 'de')} — ${labelLookup}`}
+                    >
+                      <span className="strips-svg-header--hidden__chevron" aria-hidden="true">
+                        ▸
+                      </span>
+                      <span className="strips-svg-header--hidden__label">
+                        {labelLookup}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
 
             {/* Hover source label — paints over the strip headers via z-index.

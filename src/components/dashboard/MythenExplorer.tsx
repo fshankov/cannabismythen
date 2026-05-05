@@ -14,6 +14,7 @@ import type {
   VerdictFilter,
   GroupId,
   Indicator,
+  BalkenSort,
   DashboardDefinitions,
 } from '../../lib/dashboard/types';
 import {
@@ -41,7 +42,6 @@ import FilterDrawer from './controls/FilterDrawer';
 import ExportDrawer from './controls/ExportDrawer';
 import DataPicker, { type DataPickerOption } from './controls/DataPicker';
 import MythosSearchChip from './controls/MythosSearchChip';
-import SortToggle from './controls/SortToggle';
 import ToolbarRow from './controls/ToolbarRow';
 import FactsheetPanel from './FactsheetPanel';
 import DashboardOnboarding from './DashboardOnboarding';
@@ -294,6 +294,24 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     return data.myths.find((m) => m.id === state.factsheetMythId) || null;
   }, [data, state.factsheetMythId]);
 
+  // Per-Zielgruppe metrics for the open myth, filtered to the five
+  // groups the FactsheetGroupBars chart renders. Excluded:
+  // `general_population` (already filtered out of `data.metrics` by
+  // loadData → EXCLUDED_GROUP_IDS).
+  const factsheetGroupMetrics = useMemo(() => {
+    if (!data || !factsheetMyth) return undefined;
+    return data.metrics
+      .filter((m) => m.myth_id === factsheetMyth.id)
+      .map((m) => ({
+        group_id: m.group_id,
+        awareness: m.awareness,
+        significance: m.significance,
+        correctness: m.correctness,
+        prevention_significance: m.prevention_significance,
+        population_relevance: m.population_relevance,
+      }));
+  }, [data, factsheetMyth]);
+
   if (!data) {
     return <div className="carm-loading">Daten werden geladen…</div>;
   }
@@ -302,6 +320,21 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    *  Modern views (Balken, Tabelle) embed it directly in the ToolbarRow
    *  below; Streifen + Sources accept it as a prop and slot it next to
    *  their own pivot toggle so the bar stays in lockstep across tabs. */
+  /** Just the Exportieren chip — used on Informationsquellen, where
+   *  Mythos suchen + Filter target Mythen state and don't apply to
+   *  source/channel data. */
+  const exportOnlyAction: ReactNode = (
+    <button
+      type="button"
+      className="carm-btn"
+      onClick={() => setExportDrawerOpen(true)}
+      aria-label={t('export.button', 'de')}
+    >
+      <Download size={14} strokeWidth={2} aria-hidden="true" />
+      {t('export.button', 'de')}
+    </button>
+  );
+
   const sharedActions: ReactNode = (
     <>
       <MythosSearchChip
@@ -313,7 +346,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       />
       <button
         type="button"
-        className="carm-btn carm-btn--ghost"
+        className="carm-btn"
         onClick={() => setFilterDrawerOpen(true)}
         aria-label={t('filter.button', 'de')}
       >
@@ -328,15 +361,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           </span>
         )}
       </button>
-      <button
-        type="button"
-        className="carm-btn carm-btn--ghost"
-        onClick={() => setExportDrawerOpen(true)}
-        aria-label={t('export.button', 'de')}
-      >
-        <Download size={14} strokeWidth={2} aria-hidden="true" />
-        {t('export.button', 'de')}
-      </button>
+      {exportOnlyAction}
     </>
   );
 
@@ -429,18 +454,38 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
 
           const groupValue: GroupId = state.groupIds[0] ?? 'adults';
 
+          // Stage 6: Sortierung is a single toggle button — click flips
+          // between desc and asc. Drops the dropdown overhead since the
+          // BalkenSort type is binary; the arrow in the label carries
+          // the current direction visually.
+          const sortIsDesc = state.balkenSort === 'value-desc';
+          const sortLabel = t(
+            sortIsDesc ? 'sort.value-desc' : 'sort.value-asc',
+            'de',
+          );
+          const toggleSort = () =>
+            update(
+              'balkenSort',
+              sortIsDesc ? 'value-asc' : 'value-desc',
+            );
+
           return (
             <ToolbarRow
               aria-label={t('filter.title', 'de')}
               pivot={
-                // Tabelle has its own column-click sort in the table
-                // header — the toolbar SortToggle would be redundant
-                // there. Render it only on Balken.
+                // Stage 6 follow-up: Sortierung sits leftmost on Balken
+                // (in the pivot slot), so it's visually distinct from
+                // the Indikator/Bevölkerungsgruppe dropdowns to its right.
                 state.view === 'balken' ? (
-                  <SortToggle
-                    value={state.balkenSort}
-                    onChange={(v) => update('balkenSort', v)}
-                  />
+                  <button
+                    type="button"
+                    className="carm-btn"
+                    onClick={toggleSort}
+                    aria-pressed={sortIsDesc}
+                    aria-label={`${t('sort.label', 'de')} — ${sortLabel}`}
+                  >
+                    {sortLabel}
+                  </button>
                 ) : undefined
               }
               pickers={[
@@ -523,7 +568,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 state={state}
                 update={update}
                 definitions={defs}
-                sharedActions={sharedActions}
+                sharedActions={exportOnlyAction}
               />
             ) : filteredMyths.length === 0 ? (
               <div className="no-results">{t('misc.noResults', 'de')}</div>
@@ -604,6 +649,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           myth={factsheetMyth}
           mythContentEntry={mythContentMap[factsheetMyth.id]}
           factsheetSlug={mythSlugMap?.get(factsheetMyth.id)}
+          groupMetrics={factsheetGroupMetrics}
           onClose={closeFactsheet}
         />
       )}

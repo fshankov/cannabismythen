@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Eye, TrendingUp, Target, Shield } from 'lucide-react';
+import { Eye, EyeOff, TrendingUp, Target, Shield } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Myth, Metric, AppState, Indicator } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, formatValue } from '../../../lib/dashboard/data';
 import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
 import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
 import { t } from '../../../lib/dashboard/translations';
+import { useHiddenColumns } from '../hooks/useHiddenColumns';
 
 interface Props {
   myths: Myth[];
@@ -41,6 +42,15 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
   const [sortKey, setSortKey] = useState<SortKey>('verdict');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const groupId = state.groupIds[0] || 'adults';
+
+  // Stage 6 follow-up: per-column hide. The Mythos column is always
+  // visible (it's the row anchor); only the 4 indicator columns are
+  // hideable.
+  const allIndicatorIds = INDICATOR_COLS.map((c) => c.key as string);
+  const { hide, show, isHidden, hiddenCount, reset } = useHiddenColumns(
+    'carm.table.hidden',
+    allIndicatorIds,
+  );
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -91,6 +101,17 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
 
   return (
     <div className="data-table-container">
+      {hiddenCount > 0 && (
+        <div className="carm-hidden-reset">
+          <button
+            type="button"
+            className="carm-hidden-reset__link"
+            onClick={reset}
+          >
+            {t('column.showAll', state.lang)} ({hiddenCount})
+          </button>
+        </div>
+      )}
       <table className="data-table" role="table">
         <thead>
           <tr>
@@ -105,16 +126,52 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
                 {t('table.myth', state.lang)} {renderSortArrow('myth')}
               </span>
             </th>
-            {INDICATOR_COLS.map((col) => (
-              <th
-                key={col.key}
-                onClick={() => toggleSort(col.key)}
-                style={{ textAlign: 'right' }}
-              >
-                <span className="th-icon"><col.Icon size={14} strokeWidth={1.75} aria-hidden="true" /></span>{' '}
-                {t(`indicator.${col.key}.short` as any, state.lang)} {renderSortArrow(col.key)}
-              </th>
-            ))}
+            {INDICATOR_COLS.map((col) => {
+              const colHidden = isHidden(col.key);
+              if (colHidden) {
+                // Hidden column → 28px placeholder header. Click anywhere
+                // on the cell to reveal.
+                return (
+                  <th
+                    key={col.key}
+                    className="data-table__col--hidden"
+                    onClick={() => show(col.key)}
+                    title={`${t('column.show', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
+                    aria-label={`${t('column.show', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
+                  >
+                    <span className="data-table__col--hidden__chevron" aria-hidden="true">▸</span>
+                    <span className="data-table__col--hidden__label">
+                      {t(`indicator.${col.key}.short` as any, state.lang)}
+                    </span>
+                  </th>
+                );
+              }
+              return (
+                <th key={col.key} style={{ textAlign: 'right' }}>
+                  <span className="data-table__th-inner">
+                    <button
+                      type="button"
+                      className="data-table__hide-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        hide(col.key);
+                      }}
+                      aria-label={`${t('column.hide', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
+                      title={`${t('column.hide', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
+                    >
+                      <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
+                    </button>
+                    <span
+                      className="data-table__th-label"
+                      onClick={() => toggleSort(col.key)}
+                    >
+                      <span className="th-icon"><col.Icon size={14} strokeWidth={1.75} aria-hidden="true" /></span>{' '}
+                      {t(`indicator.${col.key}.short` as any, state.lang)} {renderSortArrow(col.key)}
+                    </span>
+                  </span>
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
@@ -149,6 +206,17 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
                   {getMythShortText(myth, state.lang)}
                 </td>
                 {INDICATOR_COLS.map((col) => {
+                  if (isHidden(col.key)) {
+                    // Empty thin cell that lines up with the placeholder
+                    // header. Stops at the bottom of each row visually.
+                    return (
+                      <td
+                        key={col.key}
+                        className="value-cell data-table__col--hidden-cell"
+                        aria-hidden="true"
+                      />
+                    );
+                  }
                   const val = getIndicatorValue(metric, col.key);
                   return (
                     <td key={col.key} className={`value-cell ${val === null ? 'na-value' : ''}`}>

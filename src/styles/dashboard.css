@@ -197,51 +197,20 @@ main:has(.carm-explorer) {
 
 /* Rundgang chip on the right of the tabs row (Stage 1 of the
    Daten-Explorer refactor — the floating <Fab> was deleted and the
-   StickyToolbar Rundgang button was relocated here). Uses .carm-btn--ghost
-   geometry but lives in the tab row to keep all tab-level affordances
-   in one place. */
+   StickyToolbar Rundgang button was relocated here). Stage 6: visual
+   properties come from the unified .carm-btn rule; this block only
+   handles right-alignment + the mobile icon-only collapse. */
 .carm-explorer .tabs-bar__rundgang {
   margin-left: auto;
   align-self: center;
   flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  min-height: 40px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full, 9999px);
-  background: white;
-  color: var(--color-text-secondary);
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
-  font-family: var(--font-sans);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out),
-              border-color var(--duration-fast) var(--ease-out);
-}
-
-.carm-explorer .tabs-bar__rundgang:hover {
-  background: var(--color-surface-raised, #f8fafc);
-  color: var(--color-text);
-  border-color: var(--color-border-strong);
-}
-
-.carm-explorer .tabs-bar__rundgang:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
 }
 
 /* Mobile: keep the chip square (icon-only) so the tab row can still
-   scroll horizontally without the chip eating tab width. The label is
-   hidden via this CSS so the React layer can keep the same JSX. */
+   scroll horizontally without the chip eating tab width. */
 @media (max-width: 639px) {
   .carm-explorer .tabs-bar__rundgang {
-    padding: 8px 10px;
-    min-width: 40px;
+    padding: 0 10px;
   }
   .carm-explorer .tabs-bar__rundgang-label {
     display: none;
@@ -2373,6 +2342,204 @@ main:has(.carm-explorer) {
   color: var(--color-accent, #2d6a4f);
 }
 
+/* Stage 6 follow-up — per-column hide. Top-LEFT EyeOff trigger that
+   mirrors the top-RIGHT info `i` icon on each strip header. Two icons
+   per header but they're symmetric and small (12px), unobtrusive. */
+.strips-svg-header__hide {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+  line-height: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.strips-svg-header__hide:hover,
+.strips-svg-header__hide:focus-visible {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-accent, #2d6a4f);
+  outline: none;
+}
+
+/* Hidden-column placeholder strip — renders as an HTML button overlaid
+   at the strip's left/top, full strip height. The chevron + rotated
+   label tell the user which column is hidden; click reveals. */
+.strips-svg-header.strips-svg-header--hidden {
+  /* Override the standard header-only height with the full strip height
+     passed inline (header + dot area). */
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 0;
+  gap: 8px;
+  border: 1px dashed var(--color-border, #cbd5e1);
+  border-radius: 10px;
+  background: var(--color-bg-subtle, #f8fafc);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  overflow: hidden;
+}
+
+.strips-svg-header.strips-svg-header--hidden:hover,
+.strips-svg-header.strips-svg-header--hidden:focus-visible {
+  background: var(--color-accent-light, #e8f5ef);
+  border-color: var(--color-accent, #2d6a4f);
+  outline: none;
+}
+
+.strips-svg-header--hidden__chevron {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent, #2d6a4f);
+  line-height: 1;
+}
+
+.strips-svg-header--hidden__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary, #4a5568);
+  white-space: nowrap;
+  /* Rotate so a long label fits inside the 28px-wide strip. */
+  transform: rotate(-90deg);
+  transform-origin: center;
+  margin-top: 24px;
+}
+
+/* "Alle Spalten einblenden" link — appears above the chart whenever
+   ≥1 column is hidden. Sits right-aligned. */
+.carm-hidden-reset {
+  display: flex;
+  justify-content: flex-end;
+  margin: 4px 0 8px;
+}
+
+.carm-hidden-reset__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent, #2d6a4f);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.carm-hidden-reset__link:hover,
+.carm-hidden-reset__link:focus-visible {
+  background: var(--color-accent-light, #e8f5ef);
+  outline: none;
+}
+
+/* Tabelle hide UX — header gets an inline EyeOff button beside the sort
+   click target; hidden columns collapse to a thin (~28px) cell with a
+   chevron + rotated label, matching the strips placeholder. */
+.data-table__th-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.data-table__hide-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.data-table__hide-btn:hover,
+.data-table__hide-btn:focus-visible {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-accent, #2d6a4f);
+  outline: none;
+}
+
+.data-table__th-label {
+  cursor: pointer;
+  user-select: none;
+}
+
+.data-table__col--hidden {
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  padding: 6px 4px !important;
+  cursor: pointer;
+  text-align: center;
+  border-left: 1px dashed var(--color-border, #cbd5e1);
+  border-right: 1px dashed var(--color-border, #cbd5e1);
+  background: var(--color-bg-subtle, #f8fafc);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.data-table__col--hidden:hover {
+  background: var(--color-accent-light, #e8f5ef);
+  border-color: var(--color-accent, #2d6a4f);
+}
+
+.data-table__col--hidden__chevron {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-accent, #2d6a4f);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.data-table__col--hidden__label {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-secondary, #4a5568);
+  white-space: nowrap;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  margin-top: 12px;
+}
+
+.data-table__col--hidden-cell {
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  padding: 0 !important;
+  background: var(--color-bg-subtle, #f8fafc);
+  border-left: 1px dashed var(--color-border, #cbd5e1);
+  border-right: 1px dashed var(--color-border, #cbd5e1);
+}
+
+@media (max-width: 640px) {
+  .strips-svg-header--hidden__label {
+    /* Mobile: shorter strip means less rotated-label room. */
+    margin-top: 18px;
+    font-size: 10px;
+  }
+}
+
 /* DEAD CODE WARNING — every rule from here through line ~2675 is
    superseded by `.carm-picker*` further down this file (Stage 2 of
    the Daten-Explorer refactor). Every Streifen / Sources / Balken /
@@ -4495,38 +4662,62 @@ body.carm-modal-open {
   color: var(--color-text-muted, #718096);
 }
 
-.carm-btn {
+/* Stage 6 — single unified chip for every non-tab toolbar control.
+   `.carm-btn`, `.carm-picker__trigger`, and `.carm-pivot-toggle__btn`
+   all share this visual contract (36px height, 8px radius, 1px border,
+   white bg, accent on active). Tabs stay Chrome-style elsewhere. */
+.carm-btn,
+.carm-picker__trigger,
+.carm-pivot-toggle__btn {
   appearance: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  min-height: 38px;
-  border-radius: var(--radius-md, 8px);
-  border: 1px solid transparent;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1a1a2e);
   font: inherit;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background var(--transition-fast, 0.15s ease), border-color var(--transition-fast, 0.15s ease);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.carm-btn:focus-visible {
+.carm-btn:hover,
+.carm-picker__trigger:hover,
+.carm-pivot-toggle__btn:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+  border-color: var(--color-border-strong, #cbd5e1);
+}
+
+.carm-btn:focus-visible,
+.carm-picker__trigger:focus-visible,
+.carm-pivot-toggle__btn:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
   outline-offset: 2px;
 }
 
+/* Primary stays a separate variant for the FilterDrawer's Anwenden CTA
+   and any other "filled accent" verbs. */
 .carm-btn--primary {
   background: var(--color-accent, #2d6a4f);
   color: var(--color-text-inverse, #ffffff);
+  border-color: var(--color-accent, #2d6a4f);
 }
-.carm-btn--primary:hover { background: var(--color-accent-hover, #1f4f3a); }
+.carm-btn--primary:hover {
+  background: var(--color-accent-hover, #1f4f3a);
+  border-color: var(--color-accent-hover, #1f4f3a);
+}
 
-.carm-btn--ghost {
-  background: transparent;
-  border-color: var(--color-border, #e2e8f0);
-  color: var(--color-text-secondary, #4a5568);
-}
-.carm-btn--ghost:hover { background: var(--color-bg-subtle, #eeeee8); }
+/* `--ghost` is now a no-op alias kept for backward compat with any
+   stragglers that still pass it. The base `.carm-btn` IS the ghost
+   appearance. Safe to drop the modifier in JSX. */
+.carm-btn--ghost { /* alias of .carm-btn — Stage 6 unified chip */ }
 
 /* ===========================================================================
    BalkenView
@@ -4534,49 +4725,8 @@ body.carm-modal-open {
 
 .carm-balken-view { width: 100%; }
 
-/* Stage 4 — inline sort chips above the Balken chart, synced with
-   `state.balkenSort`. Mirrors the FilterDrawer's radio group so the
-   two surfaces stay in lockstep. */
-.carm-balken-sort {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0 0 12px;
-}
-
-.carm-balken-sort__chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 999px;
-  background: white;
-  color: var(--color-text-secondary, #4a5568);
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--duration-fast, 150ms) var(--ease-out, ease),
-              color var(--duration-fast, 150ms) var(--ease-out, ease),
-              border-color var(--duration-fast, 150ms) var(--ease-out, ease);
-}
-
-.carm-balken-sort__chip:hover {
-  background: var(--color-surface-raised, #f8fafc);
-  color: var(--color-text, #1a1a2e);
-}
-
-.carm-balken-sort__chip.is-active {
-  background: var(--color-accent-light, #e8f5ef);
-  color: var(--color-accent, #2d6a4f);
-  border-color: var(--color-accent, #2d6a4f);
-}
-
-.carm-balken-sort__chip:focus-visible {
-  outline: 2px solid var(--color-accent, #2d6a4f);
-  outline-offset: 2px;
-}
+/* Stage 6: the inline `.carm-balken-sort` chip row was retired — sort
+   is now a third <DataPicker> in the shared toolbar (see MythenExplorer). */
 
 .carm-balken-empty {
   padding: var(--space-2xl, 48px) var(--space-md, 16px);
@@ -4607,49 +4757,47 @@ body.carm-modal-open {
   align-items: center;
 }
 
+/* Stage 6: trigger is just a `.carm-btn` pill — fixed width, no resize
+   on click. The popup with input + suggestions appears below. */
 .carm-search-chip__trigger {
-  /* Inherits .carm-btn .carm-btn--ghost — no extra styling needed. */
+  /* Inherits .carm-btn — no extra styling. */
 }
 
-.carm-search-chip__expanded {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px 4px 28px;
-  min-height: 38px;
-  border: 1px solid var(--color-accent, #2d6a4f);
-  border-radius: 999px;
-  background: white;
-  /* Grow into the available toolbar space rather than forcing the
-     toolbar to wrap when 280px doesn't fit. The chip stays inline; on
-     narrow viewports it shrinks down to its readable minimum. */
-  flex: 1 1 220px;
-  min-width: 200px;
-  max-width: 320px;
-}
-
-.carm-search-chip__clear {
+/* Popup container — anchored to the chip's right edge so the wider
+   480px panel grows leftward (the chip sits in the toolbar's actions
+   slot, flush right). Shrinks to fit on mobile. */
+.carm-search-chip__popup {
   position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--color-text-muted, #94a3b8);
-  cursor: pointer;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 60;
+  width: 480px;
+  max-width: min(560px, 92vw);
+  background: white;
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.carm-search-chip__clear:hover {
-  background: var(--color-bg-subtle, #eeeee8);
-  color: var(--color-text, #1a1a2e);
+/* Input row inside the popup — search icon (left) + input + clear (right). */
+.carm-search-chip__input-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 32px 0 32px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--color-surface, #ffffff);
+}
+
+.carm-search-chip__input-row:focus-within {
+  border-color: var(--color-accent, #2d6a4f);
+  box-shadow: 0 0 0 3px var(--color-accent-light, #e8f5ef);
 }
 
 .carm-search-chip__icon {
@@ -4667,7 +4815,7 @@ body.carm-modal-open {
   border: 0;
   background: transparent;
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: var(--color-text, #1a1a2e);
   padding: 0;
 }
@@ -4676,29 +4824,38 @@ body.carm-modal-open {
   outline: none;
 }
 
-/* Search-chip dropdown — anchored to the chip's right edge so it can
-   extend LEFTWARD when the myth statement is long. The chip itself
-   sits at the right of the toolbar, so growing left is safe. The
-   width clamps to a comfortable 480px on desktop (≈ 60ch of statement
-   text without horizontal scroll), shrinks to fit on mobile. */
+.carm-search-chip__clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+}
+
+.carm-search-chip__clear:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-text, #1a1a2e);
+}
+
+/* Suggestion list inside the popup. */
 .carm-search-chip__list {
   list-style: none;
   margin: 0;
-  padding: 4px;
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  /* Always at least as wide as the chip; expand up to 480px so a full
-     myth statement wraps to a sensible 2–3 lines instead of clipping. */
-  min-width: 100%;
-  width: 480px;
-  max-width: min(560px, 92vw);
-  z-index: 60;
-  background: white;
-  border: 1px solid var(--color-border, #cbd5e1);
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-  max-height: 420px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 360px;
   overflow-y: auto;
   /* Prevent horizontal scroll: long unbroken tokens (URLs, German
      compound words) wrap inside the row, never push the container
@@ -4770,16 +4927,14 @@ body.carm-modal-open {
 }
 
 @media (max-width: 640px) {
-  .carm-search-chip__expanded {
-    min-width: 0;
-    max-width: 100%;
-    flex-basis: 100%;
-  }
-  .carm-search-chip__list {
-    /* Mobile: ignore the desktop fixed width, let the dropdown span
-       the chip's width minus a small viewport margin. */
+  /* Mobile: popup spans the viewport width minus a small margin. */
+  .carm-search-chip__popup {
     width: auto;
     max-width: 92vw;
+    /* Anchor to the right edge of the trigger; the chip lives in the
+       actions row that's full-width on mobile so the popup naturally
+       fills most of the screen. */
+    right: 0;
   }
 }
 
@@ -4985,45 +5140,51 @@ body.carm-modal-open {
    in this file can be deleted (Stage 2 cleanup task).
    =========================================================================== */
 
-/* PivotToggle — Indikatoren | Gruppen pill switch. */
+/* PivotToggle — Indikatoren | Gruppen segmented chip group.
+   Stage 6: outer container is now a 36px unified "wrapper chip" with
+   thin internal divider; inner buttons override the unified chip's
+   height/border to slot inside without doubling the borders. */
 .carm-pivot-toggle {
   display: inline-flex;
   align-items: stretch;
-  gap: 0;
-  padding: 2px;
+  gap: 2px;
+  padding: 3px;
+  height: 36px;
   border: 1px solid var(--color-border, #e2e8f0);
-  background: var(--color-bg-subtle, #f1f5f9);
-  border-radius: 999px;
+  background: var(--color-bg-subtle, #eeeee8);
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
+/* Override the unified chip rule for the inner segments — they sit
+   INSIDE the wrapper chip so they need no border + a smaller radius. */
 .carm-pivot-toggle__btn {
+  height: auto;
+  min-height: 28px;
+  padding: 0 12px;
   border: 0;
+  border-radius: 6px;
   background: transparent;
   color: var(--color-text-secondary, #4a5568);
-  padding: 4px 12px;
-  min-height: 28px;
-  border-radius: 999px;
-  font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .carm-pivot-toggle__btn:hover {
+  background: transparent;
+  border: 0;
   color: var(--color-accent, #2d6a4f);
 }
 
 .carm-pivot-toggle__btn.active {
-  background: white;
-  color: var(--color-text, #1e293b);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1a1a2e);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
 }
 
 .carm-pivot-toggle__btn:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
-  outline-offset: 1px;
+  outline-offset: -1px;
 }
 
 /* DataPicker — caption + dropdown trigger + menu (with inline definitions). */
@@ -5043,32 +5204,12 @@ body.carm-modal-open {
   flex-shrink: 0;
 }
 
+/* Stage 6: visual properties (height/border/radius/bg/font) come from the
+   unified `.carm-btn, .carm-picker__trigger, .carm-pivot-toggle__btn` rule
+   above. Trigger-specific tweak: the right-side chevron sits flush with
+   8px right padding rather than 12px so the chevron doesn't feel orphaned. */
 .carm-picker__trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  padding: 4px 10px 4px 12px;
-  border: 1px solid var(--color-border, #cbd5e1);
-  background: white;
-  color: var(--color-text, #1e293b);
-  border-radius: 999px;
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.carm-picker__trigger:hover {
-  border-color: var(--color-accent, #2d6a4f);
-  color: var(--color-accent, #2d6a4f);
-}
-
-.carm-picker__trigger:focus-visible {
-  outline: 3px solid var(--color-accent, #2d6a4f);
-  outline-offset: 2px;
+  padding: 0 10px 0 12px;
 }
 
 .carm-picker__emoji {
@@ -5224,81 +5365,15 @@ body.carm-modal-open {
   text-overflow: ellipsis;
 }
 
-.carm-picker__row-info {
+/* Stage 6 follow-up: the inline-expand `.carm-picker__row-info` button +
+   `.carm-picker__row-def` panel were retired. Each picker row now uses
+   the shared <InfoTooltip> popover (same component as the strip column
+   headers), so `i` UX is unified. */
+.carm-picker__row-info-wrap {
   flex-shrink: 0;
-  width: 32px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border: 0;
-  background: transparent;
-  color: var(--color-text-muted, #94a3b8);
-  font-family: serif;
-  font-style: italic;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.carm-picker__row-info:hover {
-  background: var(--color-bg-subtle, #eeeee8);
-  color: var(--color-accent, #2d6a4f);
-}
-
-.carm-picker__row-info.active {
-  background: var(--color-accent-light, #e8f5ef);
-  color: var(--color-accent, #2d6a4f);
-}
-
-.carm-picker__row-info:focus-visible {
-  outline: 2px solid var(--color-accent, #2d6a4f);
-  outline-offset: 1px;
-}
-
-.carm-picker__row-def {
-  margin: 2px 4px 6px;
-  padding: 8px 10px 10px;
-  background: var(--color-bg-subtle, #eeeee8);
-  border-left: 3px solid var(--color-accent, #2d6a4f);
-  border-radius: 6px;
-}
-
-.carm-picker__row-def-title {
-  margin: 0 0 4px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--color-text, #1e293b);
-  line-height: 1.3;
-}
-
-.carm-picker__row-def-sample {
-  display: inline-block;
-  margin: 0 0 6px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--color-accent, #2d6a4f);
-  background: var(--color-accent-light, #e8f5ef);
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-variant-numeric: tabular-nums;
-}
-
-.carm-picker__row-def-text {
-  margin: 0;
-  font-size: 0.74rem;
-  color: var(--color-text-secondary, #4a5568);
-  line-height: 1.45;
-}
-
-.carm-picker__row-def-scale {
-  margin: 6px 0 0;
-  padding-top: 5px;
-  border-top: 1px solid var(--color-border, #e2e8f0);
-  font-size: 0.68rem;
-  color: var(--color-text-muted, #94a3b8);
-  font-variant-numeric: tabular-nums;
+  margin-right: 4px;
 }
 
 @media (max-width: 640px) {
@@ -5348,28 +5423,36 @@ body.carm-modal-open {
   margin-left: auto;
 }
 
-/* Tight viewports: drop dropdown captions so two triggers still fit on
-   a single line. Mirrors the previous `.strips-controls-row--dropdowns
-   .strips-picker__caption` rule. */
-@media (max-width: 720px) {
+/* Below desktop (≤1024px) — strict 2-row toolbar layout.
+   Line 1: pivot + pickers flow inline, captions hidden, value text
+   truncates with ellipsis. Line 2: actions stretch to full width,
+   distributed equally so each is ≥44px tap target. Below desktop,
+   the natural flex-wrap fragmented into 3+ uneven rows; this rule
+   forces a clean 2-row grouping at every viewport width below 1024. */
+@media (max-width: 1024px) {
+  .carm-toolbar-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .carm-toolbar-row__pivot {
+    order: 1;
+    flex: 0 0 auto;
+  }
+  .carm-toolbar-row__pickers {
+    order: 2;
+    flex: 1 1 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  /* Hide the picker captions ("Indikator:", "Bevölkerungsgruppe:")
+     to keep the triggers compact on the picker row. */
   .carm-toolbar-row__pickers .carm-picker__caption {
     display: none;
   }
-}
-
-/* Mobile compact mode (≤640): stack vertically with full-width pickers
-   and let actions wrap below. */
-@media (max-width: 640px) {
-  .carm-toolbar-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .carm-toolbar-row__pickers {
-    flex-direction: column;
-    align-items: stretch;
-  }
   .carm-toolbar-row__picker {
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
   }
   .carm-toolbar-row__picker .carm-picker {
     width: 100%;
@@ -5378,19 +5461,41 @@ body.carm-modal-open {
     width: 100%;
     justify-content: space-between;
   }
+  .carm-toolbar-row__picker .carm-picker__current {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  /* Force the actions row to wrap onto its own line and stretch equally,
+     so Mythos suchen / Filter / Exportieren each occupy a third of the
+     row instead of bunching to the right. */
   .carm-toolbar-row__actions {
+    order: 3;
+    flex: 1 1 100%;
     margin-left: 0;
-    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+  .carm-toolbar-row__actions > .carm-btn,
+  .carm-toolbar-row__actions > .carm-search-chip {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+  }
+  .carm-toolbar-row__actions > .carm-search-chip > .carm-btn {
     width: 100%;
+    justify-content: center;
   }
 }
 
-/* ===========================================================================
-   SortToggle — single-button sort direction (Balken / Tabelle)
-   =========================================================================== */
-
-.carm-sort-toggle {
-  white-space: nowrap;
+/* Phone-narrow (≤640px) — make every picker chip take its own row so
+   the 3 dropdowns stack vertically when the device is too narrow for
+   them to fit inline. Above 640 (tablet/laptop), they share a row. */
+@media (max-width: 640px) {
+  .carm-toolbar-row__picker {
+    flex: 1 1 100%;
+  }
 }
 
 /* ===========================================================================
@@ -5713,4 +5818,150 @@ body.carm-modal-open {
 
 .carm-verdict-arrow-info__trigger:hover {
   background: rgba(0, 0, 0, 0.04);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Verdict row polish (shared FactsheetPanel)
+   The verdict row slots a hover-info arrow next to the badge — the
+   center alignment vertically aligns the arrow with the badge so the
+   row reads like a single unit. Mirrors the rules duplicated into
+   quiz.css for the non-dashboard surfaces.
+   ═══════════════════════════════════════════════════════════════ */
+
+.factsheet-panel__classification {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.factsheet-panel__classification .classification {
+  font-size: 0.85rem;
+  padding: 4px 12px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   FactsheetGroupBars — interactive replacement for the static
+   "Daten nach Zielgruppen" markdown table inside the popup.
+   Same rules as in quiz.css — duplicated here because dashboard pages
+   don't load quiz.css and vice-versa.
+   ═══════════════════════════════════════════════════════════════ */
+
+.factsheet-group-bars {
+  margin-top: 16px;
+  margin-bottom: 12px;
+}
+
+.factsheet-group-bars__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 14px;
+}
+
+.factsheet-group-bars__pill {
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-surface, #fff);
+  color: var(--color-text-secondary, #475569);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.factsheet-group-bars__pill:hover {
+  border-color: var(--color-text-secondary, #475569);
+  color: var(--color-text, #0f172a);
+}
+
+.factsheet-group-bars__pill:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+.factsheet-group-bars__pill--active,
+.factsheet-group-bars__pill--active:hover {
+  background: var(--color-text, #0f172a);
+  border-color: var(--color-text, #0f172a);
+  color: var(--color-surface, #fff);
+}
+
+.factsheet-group-bars__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.factsheet-group-bars__row {
+  display: grid;
+  grid-template-columns: minmax(110px, 38%) 1fr 44px;
+  align-items: center;
+  gap: 10px;
+}
+
+.factsheet-group-bars__group-label {
+  font-size: 0.78rem;
+  color: var(--color-text, #0f172a);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.factsheet-group-bars__track {
+  position: relative;
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.factsheet-group-bars__fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.factsheet-group-bars__value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.factsheet-group-bars__value--na {
+  color: var(--color-text-muted, #64748b);
+  font-weight: 600;
+  cursor: help;
+}
+
+.factsheet-group-bars__hint {
+  margin: 12px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary, #475569);
+}
+
+.factsheet-group-bars__hint-label {
+  font-weight: 700;
+  color: var(--color-text, #0f172a);
+}
+
+@media (max-width: 480px) {
+  .factsheet-group-bars__row {
+    grid-template-columns: minmax(90px, 42%) 1fr 40px;
+    gap: 8px;
+  }
+
+  .factsheet-group-bars__group-label {
+    font-size: 0.72rem;
+  }
+
+  .factsheet-group-bars__track {
+    height: 12px;
+  }
 }

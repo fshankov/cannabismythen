@@ -35,6 +35,24 @@ export interface Metric {
   population_relevance: number | null;
 }
 
+/** A myth's per-group metric slice, ready for the FactsheetGroupBars
+ *  component inside the shared FactsheetPanel.
+ *
+ *  Built at build-time from `public/data/carm-data.json` (fakten-karten,
+ *  quiz pages) or sliced from already-loaded CarmData (daten-explorer)
+ *  and passed through as a JSON prop. Replaces the static "Daten nach
+ *  Zielgruppen" markdown table that used to live in each myth's `.mdoc`.
+ *  See `src/components/shared/FactsheetGroupBars.tsx`. */
+export type MythGroupMetrics = Pick<
+  Metric,
+  | 'group_id'
+  | 'awareness'
+  | 'significance'
+  | 'correctness'
+  | 'prevention_significance'
+  | 'population_relevance'
+>[];
+
 export interface Group {
   id: GroupId;
   name_de: string;

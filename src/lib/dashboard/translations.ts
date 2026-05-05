@@ -248,14 +248,8 @@ const translations = {
     en: 'Population Relevance only available for adults — group switched automatically.',
   },
   'sort.label': { de: 'Sortierung', en: 'Sort' },
-  'sort.value-desc': { de: 'Wert absteigend', en: 'Value descending' },
-  'sort.value-asc': { de: 'Wert aufsteigend', en: 'Value ascending' },
-  'sort.toggle.aria': {
-    de: 'Sortierung umschalten — aktuell: {dir}',
-    en: 'Toggle sort — currently: {dir}',
-  },
-  'sort.toggle.label.desc': { de: 'Wert ↓', en: 'Value ↓' },
-  'sort.toggle.label.asc': { de: 'Wert ↑', en: 'Value ↑' },
+  'sort.value-desc': { de: 'Wert ↓', en: 'Value ↓' },
+  'sort.value-asc': { de: 'Wert ↑', en: 'Value ↑' },
   'filter.button': { de: 'Filter', en: 'Filter' },
   'filter.title': { de: 'Filter & Sortierung', en: 'Filter & sort' },
   'filter.reset': { de: 'Alle Filter zurücksetzen', en: 'Reset all filters' },
@@ -345,6 +339,12 @@ const translations = {
   },
   'balken.title': { de: 'Mythen-Ranking', en: 'Myth ranking' },
   'balken.subtitle': { de: '{indicator} · {group}', en: '{indicator} · {group}' },
+
+  // Stage 6 follow-up — hide / show columns (Punktwolke + Quellen + Tabelle)
+  'column.hide': { de: 'Spalte ausblenden', en: 'Hide column' },
+  'column.show': { de: 'Spalte einblenden', en: 'Show column' },
+  'column.showAll': { de: 'Alle Spalten einblenden', en: 'Show all columns' },
+  'column.hidden': { de: 'Ausgeblendet', en: 'Hidden' },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

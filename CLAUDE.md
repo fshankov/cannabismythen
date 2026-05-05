@@ -4,22 +4,95 @@ Guidance for AI assistants working in this repository. Read `README.md` first fo
 project intro and structure; this file captures conventions, patterns, and gotchas that
 aren't obvious from the source.
 
+> **Run / Build / Verify:** `./_local/render.sh` is Fedor's preferred way to start the
+> dev server (does `npm install` first, runs `npm run dev`, watches the log for the
+> actual port Astro picked, opens `/fakten-karten/` in the default browser, warns when
+> port 4321 is already in use). When advising Fedor to (re)start the dev server, point
+> at `./_local/render.sh`, NOT raw `npm run dev`. Other commands: `npm run build` (runs
+> `astro check` first — type errors fail) · `npm run preview` · `npm run og:generate`
+> to refresh quiz OG images. No test runner, no linter — `astro check` is the gate.
+>
+> **Vite cache recovery:** if the dev server overlay shows
+> `Cannot read properties of undefined (reading 'call')` (a Vite plugin pipeline error,
+> usually from two dev servers sharing `node_modules/.vite/deps` or a mid-transform
+> save), tell Fedor to: stop the dev server, `rm -rf node_modules/.vite`, re-run
+> `./_local/render.sh`. The render script's port-collision warning explains this.
+
 ## Working with Fedor — process rule (HARD)
 
-**Ask before implementing.** When the user asks for a change that touches
-copy, layout, scoring, content shape, navigation, or any user-visible decision:
+**Ask before implementing — always with options, via the AskUserQuestion tool.**
+When the user asks for a change that touches copy, layout, scoring, content shape,
+navigation, visual style, classification thresholds, or any user-visible decision:
 
 1. State your understanding of the change in plain language.
 2. Spell out the trade-offs and your recommendation (with rationale).
-3. Use the AskUserQuestion tool to confirm before writing code.
+3. Use the **AskUserQuestion tool** (not just inline text) to confirm — give 2–4
+   concrete options with a recommendation marked. Inline questions get skipped or
+   misanswered; the tool's structured options are far easier for Fedor to act on.
 4. Only then implement.
 
-This applies even when the request feels obvious. Visual taste, copy tone,
-data thresholds, and where new copy lands (per-card vs. per-page vs. global)
-are decisions, not implementation details. Verify, don't assume.
+This applies even when the request feels obvious. Visual taste, copy tone, data
+thresholds, and where new copy lands (per-card vs. per-page vs. global) are
+decisions, not implementation details. **Pay extra care for design** — many past
+mistakes have come from acting on assumed taste; verify, don't assume.
+
+**Language note for communication:** Fedor's first language is neither English nor
+German. He may slip in Russian words mid-message or use English phrasings that need
+clarification — when something is ambiguous, prefer the AskUserQuestion tool over
+guessing. The website itself is fully in **German**, but Fedor doesn't speak German;
+when you're discussing or proposing German copy with him, **always include a brief
+English translation in parentheses or as a follow-up line** so he can confirm tone
+and meaning. Never propose German copy without a translation.
 
 Pure technical decisions with no user-visible effect (file naming inside a
-folder, type names, refactor patterns) don't need confirmation.
+folder, type names, refactor patterns, internal helper signatures) don't need
+confirmation.
+
+## Never modify without asking
+
+Path-based safety rules. Claude must NOT edit any of the following without an
+explicit ask from Fedor in this session — and even then, must confirm with
+AskUserQuestion before writing.
+
+- **`public/data/carm-data.json`** — pre-processed CaRM survey dataset. Treat as
+  an immutable upstream artifact. Regenerate only when explicitly asked, never as
+  a side-effect of other work.
+- **`src/components/quiz/quizData.ts` — fields `mythId`, `correctClassification`,
+  `populationCorrectPct`** — runtime data integrity. Code-review-gated; the quiz
+  trusts these values when computing scores.
+- **`src/content/zahlen-und-fakten/mNN-*.mdoc` — `mythId` and `mythNumber`** —
+  these are referenced by `relatedMyths[]`, `quizIds[]`, and dashboards.
+  Never renumber. Add new myths with the next sequential ID.
+- **`keystatic.config.ts`** — schema source of truth. Schema changes require a
+  data migration pass on existing `.mdoc` files. Confirm scope first.
+- **`.npmrc`** (`legacy-peer-deps=true`) — load-bearing. Do not remove.
+- **`netlify.toml`, `src/middleware.ts`** — edge config and password gate. Auth or
+  redirect changes need to consider both edge and origin behavior.
+- **`.superpowers/`, `.playwright-mcp/`, `editorial/`, `_local/`** — session
+  artifacts and editorial scratch space. Don't refactor or "clean them up".
+
+## The Weird Things (will break if you don't know)
+
+Things that look normal but aren't — every one of these has bitten somebody.
+
+1. **Classification is 4-level, not binary.** Every myth resolves to one of
+   `richtig | eher_richtig | eher_falsch | falsch` (plus `keine_aussage` for
+   "no scientific verdict"). Never collapse to true/false in copy, UI, or data.
+2. **The dashboard URL is `/daten-explorer/`, but the content folder is still
+   `src/content/zahlen-und-fakten/`.** This is intentional — only the public URL
+   moved (Stage 5 refactor). 301 redirects fire from three layers; don't link to
+   the old URL in new code, but don't rename the content folder either.
+3. **Quiz scoring goes through `schritte()` exclusively.** Anywhere you see
+   per-question math that isn't routed through `schritte()` /
+   `pointsForSchritte()` / `moduleScore()` / `scoreBand()` in `quizData.ts`,
+   that's a bug.
+4. **The quiz lives in two stores by design.** Editorial text in
+   `src/content/quiz/*.mdoc` (Keystatic), data integrity in `quizData.ts` (code).
+   `src/pages/quiz/[slug].astro` is the join point — a new editorial field is
+   silently dropped if you don't extend the Astro page to forward it.
+5. **Population framing must say "Erwachsene (18–70)…"**, never "Bevölkerung in
+   Deutschland" alone or "Befragten" without qualifier. CaRM IS the sample; the
+   wording protects honesty about who the data describes.
 
 ## What this project is
 

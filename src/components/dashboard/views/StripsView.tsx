@@ -29,7 +29,7 @@ import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback,
 import type { ReactNode } from 'react';
 import * as d3 from 'd3';
 import {
-  Eye, TrendingUp, Target, Shield, Globe,
+  Eye, EyeOff, TrendingUp, Target, Shield, Globe,
   Users, Baby, Cannabis, GraduationCap, UsersRound,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -45,6 +45,7 @@ import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
 import PivotToggle from '../controls/PivotToggle';
 import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
 import ToolbarRow from '../controls/ToolbarRow';
+import { useHiddenColumns } from '../hooks/useHiddenColumns';
 import type { CorrectnessClass } from '../../../lib/dashboard/types';
 import type { MythContentEntry } from '../FactsheetPanel';
 
@@ -200,9 +201,11 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
 
   // SVG layout — small top margin since the strip rect itself contains a
   // header area at the top (drawn directly inside the rect with a divider line).
+  // Stage 6: `left` reserves a small gutter for the y-axis numbers
+  // (0/20/40/60/80/100) at fontSize 12 — no axis title.
   const margin = isMobile
-    ? { top: 8, right: 8, bottom: 28, left: 28 }
-    : { top: 10, right: 20, bottom: 32, left: 36 };
+    ? { top: 8, right: 8, bottom: 28, left: 32 }
+    : { top: 10, right: 20, bottom: 32, left: 40 };
 
   /** Height of the in-strip header area (icon + label + i tooltip), drawn at
    *  the top of each strip rectangle inside the SVG. */
@@ -220,8 +223,119 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
   /** Dot area height (excludes the in-strip header area). */
   const innerH = Math.max(0, height - margin.top - margin.bottom - headerH);
   const colGap = isMobile ? 4 : 10;
-  const numColumns = 5;
-  const colW = (innerW - colGap * (numColumns - 1)) / Math.max(1, numColumns);
+  /**
+   * Visible columns — drops any combination that has no data per the
+   * CaRM methodology (verified against `Ergebnisse CaRM Tab sort 1.xlsx`):
+   * `population_relevance` is only defined for Volljährige + Minderjährige.
+   * The JSON has stray non-null values for the 3 target groups, but the
+   * project's methodology excludes them; we hide those columns rather
+   * than render them as 'k. A.' placeholders or empty strips.
+   */
+  const POP_REL_VALID_GROUPS_LOCAL: GroupId[] = ['adults', 'minors'];
+  const dataAvailableIndicators = useMemo<Indicator[]>(() => {
+    if (mode !== 'indicator') return INDICATORS;
+    // Drop `population_relevance` when the active group is a target group.
+    return POP_REL_VALID_GROUPS_LOCAL.includes(selectedGroup)
+      ? INDICATORS
+      : INDICATORS.filter((ind) => ind !== 'population_relevance');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, selectedGroup]);
+  const dataAvailableGroupIds = useMemo<GroupId[]>(() => {
+    if (mode !== 'group') return STRIP_GROUP_IDS;
+    // Drop the 3 target groups when `population_relevance` is selected.
+    return selectedIndicator === 'population_relevance'
+      ? STRIP_GROUP_IDS.filter((g) => POP_REL_VALID_GROUPS_LOCAL.includes(g))
+      : STRIP_GROUP_IDS;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, selectedIndicator]);
+
+  // User-driven column hide (Stage 6 follow-up). Storage key is per-pivot
+  // so hiding a column in 'indicator' mode doesn't bleed into 'group' mode.
+  const allColumnIds: string[] = mode === 'indicator'
+    ? (dataAvailableIndicators as string[])
+    : (dataAvailableGroupIds as string[]);
+  const { hidden, hide, show, reset, hiddenCount, isHidden } = useHiddenColumns(
+    `carm.strips.hidden.${mode}`,
+    allColumnIds,
+  );
+
+  // Visible (non-hidden) IDs in original order. The chart layout maps
+  // these to the full-width strips; hidden IDs render as 28px placeholders.
+  const visibleIndicators = useMemo<Indicator[]>(
+    () => (mode === 'indicator'
+      ? dataAvailableIndicators.filter((id) => !isHidden(id))
+      : dataAvailableIndicators),
+    [mode, dataAvailableIndicators, isHidden],
+  );
+  const visibleGroupIds = useMemo<GroupId[]>(
+    () => (mode === 'group'
+      ? dataAvailableGroupIds.filter((id) => !isHidden(id))
+      : dataAvailableGroupIds),
+    [mode, dataAvailableGroupIds, isHidden],
+  );
+
+  const visibleNumColumns = mode === 'indicator'
+    ? visibleIndicators.length
+    : mode === 'group'
+      ? visibleGroupIds.length
+      : 5;
+  // Reserve 28px per hidden column placeholder + colGap; remaining width
+  // is split between the visible strips.
+  const HIDDEN_STRIP_W = 28;
+  const hiddenColumnIds: string[] = (mode === 'indicator'
+    ? dataAvailableIndicators.filter((id) => isHidden(id))
+    : dataAvailableGroupIds.filter((id) => isHidden(id))) as string[];
+  const totalSlots = visibleNumColumns + hiddenColumnIds.length;
+  const totalGaps = colGap * Math.max(0, totalSlots - 1);
+  const availableForVisible = Math.max(
+    0,
+    innerW - HIDDEN_STRIP_W * hiddenColumnIds.length - totalGaps,
+  );
+  const colW = availableForVisible / Math.max(1, visibleNumColumns);
+  const numColumns = visibleNumColumns;
+
+  /**
+   * slotLayout — left x-coord + width for EVERY slot (visible + hidden)
+   * in the original column order. Visible strips reach into this for
+   * their centerX; hidden placeholders are rendered directly from this
+   * structure. Recomputed when mode, hidden set, or geometry changes.
+   */
+  type Slot = {
+    id: string;
+    kind: 'visible' | 'hidden';
+    /** Left x in SVG coordinates (already includes margin.left). */
+    left: number;
+    width: number;
+    /** Original index in dataAvailable* (for visible-color etc.). */
+    originalIndex: number;
+  };
+  const slotLayout: Slot[] = useMemo(() => {
+    const ids: string[] = mode === 'indicator'
+      ? (dataAvailableIndicators as string[])
+      : (dataAvailableGroupIds as string[]);
+    const out: Slot[] = [];
+    let cursor = margin.left;
+    ids.forEach((id, idx) => {
+      const isHid = hidden.has(id);
+      const w = isHid ? HIDDEN_STRIP_W : colW;
+      out.push({
+        id,
+        kind: isHid ? 'hidden' : 'visible',
+        left: cursor,
+        width: w,
+        originalIndex: idx,
+      });
+      cursor += w + colGap;
+    });
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, dataAvailableIndicators, dataAvailableGroupIds, hidden, margin.left, colW, colGap]);
+
+  /** Lookup: visible-only slot center for the i-th visible column. */
+  const visibleSlotCentersById = new Map<string, number>();
+  slotLayout
+    .filter((s) => s.kind === 'visible')
+    .forEach((s) => visibleSlotCentersById.set(s.id, s.left + s.width / 2));
 
   /** Y is fixed: 0 at bottom, 100 at top. The output range is shifted by
    *  headerH so dots/ticks are placed inside the dot area, below the header. */
@@ -230,9 +344,17 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
     [innerH, headerH],
   );
 
+  /** colCenterX(i) — center x for the i-th VISIBLE column (used by all
+   *  existing render code). Hidden slot centers are looked up via the
+   *  slotLayout array directly. */
   const colCenterX = useCallback(
-    (i: number) => margin.left + colW / 2 + i * (colW + colGap),
-    [margin.left, colW, colGap],
+    (i: number) => {
+      const visible = slotLayout.filter((s) => s.kind === 'visible');
+      const slot = visible[i];
+      if (!slot) return margin.left + colW / 2;
+      return slot.left + slot.width / 2;
+    },
+    [slotLayout, margin.left, colW],
   );
 
   const ticks = [0, 20, 40, 60, 80, 100];
@@ -279,7 +401,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
     };
 
     if (mode === 'indicator') {
-      return INDICATORS.map((ind) => {
+      return visibleIndicators.map((ind) => {
         const def = definitions?.mythIndicators?.[ind];
         const { nodes, valueByMyth } = buildNodes(visibleMyths, (m) => {
           const metric = getMythMetric(metrics, m.id, selectedGroup);
@@ -299,7 +421,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
       });
     }
     if (mode === 'group') {
-      return STRIP_GROUP_IDS.map((gid) => {
+      return visibleGroupIds.map((gid) => {
         const g = groups.find((x) => x.id === gid);
         const def = definitions?.groups?.[gid];
         const { nodes, valueByMyth } = buildNodes(visibleMyths, (m) => {
@@ -323,7 +445,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
     // mode is exhaustively handled above ('indicator' or 'group').
     // (Themen no longer pivots — it stays as a filter row only.)
     return [];
-  }, [mode, myths, visibleMyths, metrics, groups, selectedGroup, selectedIndicator, yScale, isMobile, state.lang, definitions, colW]);
+  }, [mode, myths, visibleMyths, metrics, groups, selectedGroup, selectedIndicator, yScale, isMobile, state.lang, definitions, colW, visibleIndicators, visibleGroupIds]);
 
   // Stage 1 — tap a dot to highlight
   const handleDotClick = useCallback(
@@ -508,6 +630,18 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
             );
           })()}
 
+          {hiddenCount > 0 && (
+            <div className="carm-hidden-reset">
+              <button
+                type="button"
+                className="carm-hidden-reset__link"
+                onClick={reset}
+              >
+                {t('column.showAll', state.lang)} ({hiddenCount})
+              </button>
+            </div>
+          )}
+
           {/* SVG chart wrapper — relative-positioned so HTML strip headers
               can be absolutely positioned over the in-SVG header area for
               each column, giving us a single unified box per strip. */}
@@ -590,6 +724,31 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 </g>
               </symbol>
             </defs>
+            {/* Y-axis gutter (Stage 6) — dedicated left column with the
+                0/20/40/60/80/100 tick numbers. Drawn ONCE, outside the
+                per-strip map, so the same scale labels every strip column. */}
+            <g
+              className="strips-yaxis"
+              transform={`translate(0, ${margin.top})`}
+              pointerEvents="none"
+            >
+              {ticks.map((tk) => (
+                <text
+                  key={`yax-${tk}`}
+                  x={margin.left - 8}
+                  y={yScale(tk) + 4}
+                  textAnchor="end"
+                  fontSize={12}
+                  fontWeight={500}
+                  style={{
+                    fill: 'var(--color-text-secondary, #4a5568)',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {tk}
+                </text>
+              ))}
+            </g>
             {/* Strip backgrounds + gridlines.
                 Each strip is ONE fully-rounded grey rectangle that spans both
                 the header area at the top (icon + label + 'i') and the dots
@@ -824,18 +983,31 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
 
           {/* Absolute-positioned HTML headers over the in-SVG header area —
               one per column — so each strip rectangle reads as a single
-              unified box: header on top, divider line, dots below. */}
+              unified box: header on top, divider line, dots below. Hidden
+              columns (Stage 6 follow-up) render as 28px placeholders with
+              a chevron + rotated label that span the full strip height. */}
           <div className="strips-svg-headers" aria-hidden={false}>
             {columns.map((col, i) => {
               const cx = colCenterX(i);
               const left = cx - colW / 2;
               const top = margin.top;
+              const colLabel = isMobile ? col.shortLabel : col.label;
               return (
                 <div
                   key={`hd-${String(col.id)}`}
                   className="strips-svg-header"
                   style={{ left, top, width: colW, height: headerH }}
                 >
+                  {/* Stage 6: top-left EyeOff trigger to hide this column. */}
+                  <button
+                    type="button"
+                    className="strips-svg-header__hide"
+                    onClick={() => hide(String(col.id))}
+                    aria-label={`${t('column.hide', state.lang)} — ${col.label}`}
+                    title={`${t('column.hide', state.lang)} — ${col.label}`}
+                  >
+                    <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
+                  </button>
                   <div className="strips-svg-header__inner">
                     {col.emoji ? (
                       <span className="strips-svg-header__emoji" aria-hidden="true">{col.emoji}</span>
@@ -843,7 +1015,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                       <col.Icon size={isNarrow ? 16 : 18} strokeWidth={1.75} aria-hidden="true" />
                     ) : null}
                     <span className="strips-svg-header__label">
-                      {isMobile ? col.shortLabel : col.label}
+                      {colLabel}
                     </span>
                   </div>
                   {col.defLabel && col.defText && (
@@ -859,6 +1031,42 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 </div>
               );
             })}
+            {/* Hidden-column placeholders — full-strip-height pills with
+                chevron + rotated label. Click anywhere on them to reveal. */}
+            {slotLayout
+              .filter((s) => s.kind === 'hidden')
+              .map((s) => {
+                // Find the original column metadata for the label.
+                const labelLookup =
+                  mode === 'indicator'
+                    ? t(`indicator.${s.id as Indicator}.short` as TranslationKey, state.lang)
+                    : (groups.find((g) => g.id === s.id)?.[
+                        state.lang === 'de' ? 'name_de' : 'name_en'
+                      ] ?? s.id);
+                return (
+                  <button
+                    key={`hd-hidden-${s.id}`}
+                    type="button"
+                    className="strips-svg-header strips-svg-header--hidden"
+                    style={{
+                      left: s.left,
+                      top: margin.top,
+                      width: s.width,
+                      height: headerH + innerH,
+                    }}
+                    onClick={() => show(s.id)}
+                    aria-label={`${t('column.show', state.lang)} — ${labelLookup}`}
+                    title={`${t('column.show', state.lang)} — ${labelLookup}`}
+                  >
+                    <span className="strips-svg-header--hidden__chevron" aria-hidden="true">
+                      ▸
+                    </span>
+                    <span className="strips-svg-header--hidden__label">
+                      {labelLookup}
+                    </span>
+                  </button>
+                );
+              })}
           </div>
 
           {/* Hover statement card — rendered AFTER strip-svg-headers so it

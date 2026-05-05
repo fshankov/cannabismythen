@@ -20,6 +20,11 @@
  */
 
 import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
+import FactsheetGroupBars from './FactsheetGroupBars';
+import type {
+  CorrectnessClass,
+  MythGroupMetrics,
+} from '../../lib/dashboard/types';
 
 /** Pre-rendered factsheet content from Keystatic (passed from Astro at build time). */
 export interface MythContentEntry {
@@ -75,6 +80,17 @@ interface FactsheetPanelProps {
    *  explanation popover shows on hover. Other surfaces leave it
    *  undefined and render the existing label-only treatment. */
   verdictAccessory?: ReactNode;
+
+  /** Per-Zielgruppe metric slice for this myth. When provided, the
+   *  panel renders the interactive `<FactsheetGroupBars>` chart in
+   *  place of the static "Daten nach Zielgruppen" markdown table that
+   *  used to be baked into the .mdoc HTML. Pre-computed at build-time
+   *  on every call site so the popup never round-trips to the network.
+   *
+   *  When omitted (e.g. a myth without a metric record yet), the panel
+   *  falls back to whatever "Daten nach Zielgruppen" markdown is present
+   *  in `mythContentEntry.html` so legacy content keeps rendering. */
+  groupMetrics?: MythGroupMetrics;
 }
 
 /**
@@ -116,6 +132,13 @@ const SECTION_ORDER = [
   'Daten nach Zielgruppen',
 ];
 
+/** Section heading whose markdown table is replaced by the interactive
+ *  <FactsheetGroupBars> when build-time metrics are wired in. The
+ *  markdown stays in the .mdoc so the full factsheet page (under
+ *  `/daten-explorer/<slug>/`) still renders the table for accessibility
+ *  and print readers — only the popup swaps it out. */
+const GROUP_METRICS_SECTION = 'Daten nach Zielgruppen';
+
 export default function FactsheetPanel({
   context,
   mythText,
@@ -127,6 +150,7 @@ export default function FactsheetPanel({
   onClose,
   fallbackExplanation,
   verdictAccessory,
+  groupMetrics,
 }: FactsheetPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -178,8 +202,14 @@ export default function FactsheetPanel({
     sectionMap.set(s.title, s);
   }
 
-  // Ordered sections to render
+  // Ordered sections to render. When build-time `groupMetrics` are wired
+  // in, the static "Daten nach Zielgruppen" markdown table is hidden
+  // here and the interactive <FactsheetGroupBars> renders below the
+  // ordered list instead. Falling back to the markdown when metrics
+  // aren't wired keeps legacy editor content rendering.
+  const hasInteractiveBars = !!groupMetrics && groupMetrics.length > 0;
   const orderedSections = SECTION_ORDER
+    .filter((title) => !(hasInteractiveBars && title === GROUP_METRICS_SECTION))
     .map((title) => sectionMap.get(title))
     .filter((s): s is Section => !!s);
 
@@ -266,8 +296,19 @@ export default function FactsheetPanel({
                 {verdictAccessory}
               </div>
 
-              {/* 3-7. Ordered sections */}
+              {/* 3-7. Ordered sections (markdown table hidden when bars wired) */}
               {orderedSections.map((section, i) => renderSection(section, i))}
+
+              {/* Interactive replacement for the "Daten nach Zielgruppen"
+                  markdown table. Rendered last so it sits in the same
+                  visual position the table used to occupy, just above
+                  the link to the full factsheet page. */}
+              {hasInteractiveBars && (
+                <FactsheetGroupBars
+                  metrics={groupMetrics!}
+                  verdict={classificationKey as CorrectnessClass}
+                />
+              )}
 
               {/* Link to full page */}
               {pageSlug && (
@@ -295,6 +336,15 @@ export default function FactsheetPanel({
                     <p>{fallbackExplanation}</p>
                   </div>
                 </div>
+              )}
+
+              {/* Bars work even without prerendered HTML, so render them
+                  in the fallback branch too. */}
+              {hasInteractiveBars && (
+                <FactsheetGroupBars
+                  metrics={groupMetrics!}
+                  verdict={classificationKey as CorrectnessClass}
+                />
               )}
 
               {pageSlug && (

@@ -2,8 +2,14 @@
  * MythosSearchChip — toolbar-anchored combobox.
  *
  * Lives in the shared dashboard toolbar `actions` slot on every tab so
- * users can pick a specific myth from any view. Click expands an inline
- * input with autocomplete; suggestions show:
+ * users can pick a specific myth from any view.
+ *
+ * Stage 6: the trigger is a stable fixed-width pill (`.carm-btn`) that
+ * never resizes. Clicking it opens a popup positioned absolutely below
+ * the trigger; the input + autocomplete list live inside the popup so
+ * the surrounding chips don't reflow. Mirrors the DataPicker pattern.
+ *
+ * Suggestions show:
  *   - verdict arrow (color-coded)
  *   - long claim sentence (from the .mdoc factsheet `title` field)
  *   - category label
@@ -18,10 +24,10 @@ import {
   useId,
   useMemo,
   useRef,
+  useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import { Search, X } from 'lucide-react';
-import { useState } from 'react';
 import type { CorrectnessClass, Myth } from '../../../lib/dashboard/types';
 import {
   getMythText,
@@ -60,9 +66,9 @@ export default function MythosSearchChip({
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  // The chip is collapsed by default; when the user starts typing or
-  // there's already a query in shared state we expand inline.
-  const [open, setOpen] = useState<boolean>(value.length > 0);
+  // Popup open state. The trigger is always rendered (fixed-width pill);
+  // when open, a separate popup with input + listbox sits beneath it.
+  const [open, setOpen] = useState<boolean>(false);
   const [highlight, setHighlight] = useState(-1);
   const inputId = useId();
   const listboxId = useId();
@@ -89,13 +95,7 @@ export default function MythosSearchChip({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myths, value, mythContent]);
 
-  // Auto-expand whenever the shared query is non-empty (e.g. after a
-  // tab switch or URL deep-link).
-  useEffect(() => {
-    if (value.length > 0 && !open) setOpen(true);
-  }, [value, open]);
-
-  // Focus the input when the chip expands and reset highlight.
+  // Focus the input when the popup opens; reset highlight on close.
   useEffect(() => {
     if (!open) {
       setHighlight(-1);
@@ -105,21 +105,19 @@ export default function MythosSearchChip({
     return () => window.clearTimeout(id);
   }, [open]);
 
-  // Outside-click + Escape handlers — fire while open. Outside-click
-  // collapses the chip ONLY if the query is empty; otherwise we keep
-  // it expanded so the user can see what they typed when they come back.
+  // Outside-click + Escape close the popup.
   useEffect(() => {
     if (!open) return;
     const onPointer = (e: PointerEvent) => {
       const node = containerRef.current;
       if (node && !node.contains(e.target as Node)) {
-        if (value.trim().length === 0) setOpen(false);
+        setOpen(false);
         setHighlight(-1);
       }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (value.trim().length === 0) setOpen(false);
+        setOpen(false);
         setHighlight(-1);
       }
     };
@@ -129,11 +127,12 @@ export default function MythosSearchChip({
       document.removeEventListener('pointerdown', onPointer);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open, value]);
+  }, [open]);
 
   const commit = (m: Myth) => {
     onSelectMyth(m.id);
     setHighlight(-1);
+    setOpen(false);
   };
 
   const onInputKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -153,66 +152,81 @@ export default function MythosSearchChip({
     }
   };
 
+  // Show a small dot on the trigger when there's an active query — same
+  // pattern as the Filter chip's count badge, signals "search is active".
+  const hasQuery = value.trim().length > 0;
+
   return (
     <div className="carm-search-chip" ref={containerRef}>
-      {!open ? (
-        <button
-          type="button"
-          className="carm-btn carm-btn--ghost carm-search-chip__trigger"
-          onClick={() => setOpen(true)}
-          aria-label={t('filter.search.label', 'de')}
-          aria-expanded={false}
-        >
-          <Search size={14} strokeWidth={2} aria-hidden="true" />
-          {t('filter.search.label', 'de')}
-        </button>
-      ) : (
+      <button
+        type="button"
+        className="carm-btn carm-search-chip__trigger"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listboxId}
+        aria-label={t('filter.search.label', 'de')}
+      >
+        <Search size={14} strokeWidth={2} aria-hidden="true" />
+        {t('filter.search.label', 'de')}
+        {hasQuery && (
+          <span
+            className="carm-btn__badge"
+            aria-label={t('filter.search.label', 'de')}
+          >
+            •
+          </span>
+        )}
+      </button>
+      {open && (
         <div
-          className="carm-search-chip__expanded"
+          className="carm-search-chip__popup"
           role="combobox"
           aria-expanded={open}
           aria-haspopup="listbox"
           aria-controls={listboxId}
           aria-owns={listboxId}
         >
-          <Search
-            size={14}
-            strokeWidth={2}
-            aria-hidden="true"
-            className="carm-search-chip__icon"
-          />
-          <input
-            id={inputId}
-            ref={inputRef}
-            type="search"
-            className="carm-search-chip__input"
-            placeholder={t('filter.search.placeholder', 'de')}
-            value={value}
-            aria-autocomplete="list"
-            aria-controls={listboxId}
-            aria-activedescendant={
-              highlight >= 0 ? `${listboxId}-${highlight}` : undefined
-            }
-            onChange={(e) => {
-              onChange(e.target.value);
-              setHighlight(-1);
-            }}
-            onKeyDown={onInputKeyDown}
-          />
-          {value.length > 0 && (
-            <button
-              type="button"
-              className="carm-search-chip__clear"
-              aria-label={t('filter.reset', 'de')}
-              onClick={() => {
-                onChange('');
+          <div className="carm-search-chip__input-row">
+            <Search
+              size={14}
+              strokeWidth={2}
+              aria-hidden="true"
+              className="carm-search-chip__icon"
+            />
+            <input
+              id={inputId}
+              ref={inputRef}
+              type="search"
+              className="carm-search-chip__input"
+              placeholder={t('filter.search.placeholder', 'de')}
+              value={value}
+              aria-autocomplete="list"
+              aria-controls={listboxId}
+              aria-activedescendant={
+                highlight >= 0 ? `${listboxId}-${highlight}` : undefined
+              }
+              onChange={(e) => {
+                onChange(e.target.value);
                 setHighlight(-1);
-                inputRef.current?.focus();
               }}
-            >
-              <X size={12} strokeWidth={2} aria-hidden="true" />
-            </button>
-          )}
+              onKeyDown={onInputKeyDown}
+            />
+            {value.length > 0 && (
+              <button
+                type="button"
+                className="carm-search-chip__clear"
+                aria-label={t('filter.reset', 'de')}
+                onClick={() => {
+                  onChange('');
+                  setHighlight(-1);
+                  inputRef.current?.focus();
+                }}
+              >
+                <X size={12} strokeWidth={2} aria-hidden="true" />
+              </button>
+            )}
+          </div>
           {matches.length > 0 && (
             <ul
               id={listboxId}
