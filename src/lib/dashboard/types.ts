@@ -81,7 +81,7 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'balken' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'sources';
+export type ViewTab = 'balken' | 'balken2' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'sources';
 
 /** Information-sources Streifen view — pivot mirrors the Mythen-Streifen idiom.
  *  - 'metric' → 4 strips (Suche / Wahrnehmung / Vertrauen / Prävention),

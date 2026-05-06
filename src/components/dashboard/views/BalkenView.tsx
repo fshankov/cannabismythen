@@ -187,6 +187,14 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
       animation: false,
       tooltip: {
         trigger: 'axis' as const,
+        // Stage 6 v3: confine the tooltip to the chart container so
+        // long German tooltip text (e.g. "Konsum durch Heranwachsende
+        // führt – stärker als bei Erwachsenen…") doesn't escape the
+        // right edge and get clipped. extraCssText caps the visual
+        // width and lets long titles word-wrap inside the box.
+        confine: true,
+        extraCssText:
+          'max-width: 320px; white-space: normal; word-break: break-word; overflow-wrap: anywhere;',
         axisPointer: { type: 'shadow' as const },
         formatter: (params: { dataIndex?: number }[] | { dataIndex?: number }) => {
           const arr = Array.isArray(params) ? params : [params];

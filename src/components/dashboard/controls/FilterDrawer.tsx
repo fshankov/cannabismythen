@@ -312,13 +312,16 @@ export default function FilterDrawer({
               return (
                 <li key={c.id} className="carm-filter-accordion__item">
                   <div className="carm-filter-accordion__heading">
-                    {/* The category-level checkbox is its own focusable
-                        label so it stays a clean checkbox affordance —
-                        the chevron next to it controls open/close
-                        independently. Two distinct hit areas matches
-                        the GitHub / Notion accordion-with-multiselect
-                        pattern. */}
-                    <label className="carm-checkbox carm-checkbox--category">
+                    {/* Stage 6 v3: small checkbox is its own hit
+                        target (toggles the category selection). The
+                        REST of the heading row — name, count, chevron —
+                        is one big button that toggles open/close. So:
+                        click the box to select, click anywhere else to
+                        expand. */}
+                    <label
+                      className="carm-checkbox carm-checkbox--category"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <input
                         type="checkbox"
                         checked={sel === 'all'}
@@ -328,12 +331,6 @@ export default function FilterDrawer({
                         onChange={() => toggleCategory(c.id)}
                         aria-label={`${c.name_de} (${cMyths.length})`}
                       />
-                      <span className="carm-checkbox__label" id={headingId}>
-                        {c.name_de}
-                        <span className="carm-checkbox__count">
-                          ({cMyths.length})
-                        </span>
-                      </span>
                     </label>
                     <button
                       type="button"
@@ -342,13 +339,22 @@ export default function FilterDrawer({
                       }`}
                       aria-expanded={isOpen}
                       aria-controls={panelId}
-                      aria-labelledby={headingId}
                       onClick={() => toggleExpanded(c.id)}
                     >
+                      <span
+                        className="carm-filter-accordion__name"
+                        id={headingId}
+                      >
+                        {c.name_de}
+                        <span className="carm-checkbox__count">
+                          ({cMyths.length})
+                        </span>
+                      </span>
                       <ChevronRight
                         size={16}
                         strokeWidth={2}
                         aria-hidden="true"
+                        className="carm-filter-accordion__chevron"
                       />
                     </button>
                   </div>

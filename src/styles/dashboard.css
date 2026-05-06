@@ -4731,6 +4731,170 @@ body.carm-modal-open {
 
 .carm-balken-view { width: 100%; }
 
+/* ===========================================================================
+   BalkenView2 — experimental "text on bar" layout (Stage 6 v3).
+   Each row stacks 3 layers absolutely:
+     1. dark text under the bar (visible past the bar end)
+     2. bar fill with white text inside (overflow:hidden clips the text
+        to the bar's width)
+     3. arrow + value pill positioned at the bar's right edge
+   The HTML+CSS approach gives full control over the dual-color text
+   handoff (white inside bar, dark outside) which ECharts can't do
+   cleanly. Used only for `state.view === 'balken2'`.
+   =========================================================================== */
+
+.carm-balken2 {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top axis row — 0/20/40/60/80/100 reference. v2: ticks at the edges
+   (0 + 100) anchor flush-left / flush-right so they're never clipped
+   by the chart container's right edge. */
+.carm-balken2__axis {
+  position: relative;
+  height: 28px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+  margin-bottom: 4px;
+}
+
+.carm-balken2__axis-tick {
+  position: absolute;
+  top: 8px;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-secondary, #4a5568);
+  font-variant-numeric: tabular-nums;
+}
+
+.carm-balken2__axis-tick.is-first {
+  /* Left edge — anchor at left:0 with no -50% transform so "0" sits
+     flush with the chart's left edge. */
+  transform: translateX(0);
+}
+
+.carm-balken2__axis-tick.is-last {
+  /* Right edge — anchor at left:100% with -100% transform so "100"
+     ends flush with the chart's right edge. */
+  transform: translateX(-100%);
+}
+
+.carm-balken2__axis-name {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--color-text-muted, #718096);
+}
+
+.carm-balken2__scroll {
+  border-radius: 4px;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03), transparent 8px) top / 100% 8px no-repeat,
+    linear-gradient(to top, rgba(0, 0, 0, 0.03), transparent 8px) bottom / 100% 8px no-repeat;
+}
+
+.carm-balken2__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* v2 row: bar fill underneath, content (text + arrow) on top in
+   verdict color. No right-side pill anymore — bar fills the full
+   row width up to value%. */
+.carm-balken2__row {
+  position: relative;
+  display: block;
+  height: 36px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.carm-balken2__row:hover {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+
+.carm-balken2__row:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: -2px;
+}
+
+/* Layer 1 (z=1): beige bar fill, width set inline as percentage. */
+.carm-balken2__bar {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  z-index: 1;
+  border-radius: 0 4px 4px 0;
+  pointer-events: none;
+}
+
+/* Layer 2: inline-flex container [text][arrow], anchored at the row's
+   left. Arrow follows the text naturally so it sits at the END OF TEXT,
+   never inside the statement on short bars. */
+.carm-balken2__content {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.carm-balken2__text {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text, #1a1a2e);
+  white-space: nowrap;
+}
+
+.carm-balken2__arrow {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  /* Color set inline via style="color: …" — full-saturation verdict. */
+}
+
+/* Cursor-following tooltip — position: fixed with viewport coords set
+   inline (left, top). Mirrors Balken 1's ECharts tooltip placement so
+   the popup tracks the cursor instead of the row centre. */
+.carm-balken2__tooltip {
+  position: fixed;
+  z-index: 200;
+  width: 320px;
+  max-width: calc(100vw - 16px);
+  padding: 10px 12px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--color-text, #1a1a2e);
+  pointer-events: none;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .carm-balken2__text {
+    font-size: 0.85rem;
+  }
+  .carm-balken2__tooltip {
+    width: 280px;
+  }
+}
+
 /* Stage 6: scroll container — fixed bar height (28px each row) means
    the SVG can be taller than the viewport when 30+ myths are shown.
    The wrapper caps the container height (set inline by BalkenView)
@@ -4771,48 +4935,30 @@ body.carm-modal-open {
 /* Stage 4 — search chip in the modern toolbar's actions slot.
    Collapsed: a Search-icon ghost button. Expanded: an inline input
    with an autocomplete listbox below. Outside-click + Escape collapse. */
+/* Stage 6 v3: search is now an always-visible input field shaped
+   like a unified chip, sitting inline with Filter / Exportieren.
+   Suggestions appear in a dropdown popup below ONLY when there's
+   a match AND the input is focused. */
 .carm-search-chip {
   position: relative;
   display: inline-flex;
   align-items: center;
+  flex: 1 1 200px;
+  min-width: 160px;
+  max-width: 280px;
 }
 
-/* Stage 6: trigger is just a `.carm-btn` pill — fixed width, no resize
-   on click. The popup with input + suggestions appears below. */
-.carm-search-chip__trigger {
-  /* Inherits .carm-btn — no extra styling. */
-}
-
-/* Popup container — anchored to the chip's right edge so the wider
-   480px panel grows leftward (the chip sits in the toolbar's actions
-   slot, flush right). Shrinks to fit on mobile. */
-.carm-search-chip__popup {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 60;
-  width: 480px;
-  max-width: min(560px, 92vw);
-  background: white;
-  border: 1px solid var(--color-border, #cbd5e1);
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* Input row inside the popup — search icon (left) + input + clear (right). */
 .carm-search-chip__input-row {
   position: relative;
   display: flex;
   align-items: center;
   height: 36px;
+  width: 100%;
   padding: 0 32px 0 32px;
   border: 1px solid var(--color-border, #e2e8f0);
   border-radius: 8px;
   background: var(--color-surface, #ffffff);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .carm-search-chip__input-row:focus-within {
@@ -4867,11 +5013,24 @@ body.carm-modal-open {
   color: var(--color-text, #1a1a2e);
 }
 
-/* Suggestion list inside the popup. */
+/* Stage 6 v3: suggestion list now anchors directly below the input
+   chip (no popup wrapper). Position absolute so it overlays content
+   without pushing the toolbar around. */
 .carm-search-chip__list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 4px;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 100%;
+  width: 480px;
+  max-width: min(560px, 92vw);
+  z-index: 60;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -4881,6 +5040,14 @@ body.carm-modal-open {
      compound words) wrap inside the row, never push the container
      wider. */
   overflow-x: hidden;
+}
+
+@media (max-width: 640px) {
+  .carm-search-chip__list {
+    width: auto;
+    max-width: 92vw;
+    right: 0;
+  }
 }
 
 .carm-search-chip__item {
@@ -4946,17 +5113,9 @@ body.carm-modal-open {
   word-break: break-word;
 }
 
-@media (max-width: 640px) {
-  /* Mobile: popup spans the viewport width minus a small margin. */
-  .carm-search-chip__popup {
-    width: auto;
-    max-width: 92vw;
-    /* Anchor to the right edge of the trigger; the chip lives in the
-       actions row that's full-width on mobile so the popup naturally
-       fills most of the screen. */
-    right: 0;
-  }
-}
+/* Stage 6 v3: legacy `.carm-search-chip__popup` was retired with the
+   trigger-button pattern. The list now anchors directly below the
+   input chip via `.carm-search-chip__list` (see above for mobile). */
 
 /* Modern chart-area layout: chart in flex-grow column with optional desktop
    verdict-legend sidebar to the right. Mobile renders the legend as a strip
@@ -5636,20 +5795,24 @@ body.carm-modal-open {
   overflow: hidden;
 }
 
+/* Stage 6 v3: heading row = small checkbox (left) + a wide button that
+   fills the rest of the row and toggles expansion. So the user can
+   click the box to select OR click the row text/chevron to expand. */
 .carm-filter-accordion__heading {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 6px 4px 8px;
+  align-items: stretch;
+  gap: 4px;
+  padding: 2px 6px 2px 6px;
 }
 
 .carm-filter-accordion__heading .carm-checkbox--category {
-  /* The label fills the heading row so clicking anywhere left of the
-     chevron toggles the category checkbox. */
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   margin: 0;
-  padding: 6px 4px;
+  padding: 6px;
   border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
 }
 
 .carm-filter-accordion__heading .carm-checkbox--category:hover {
@@ -5667,23 +5830,25 @@ body.carm-modal-open {
   appearance: none;
   background: transparent;
   border: 0;
-  width: 30px;
-  height: 30px;
+  flex: 1 1 auto;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
   border-radius: var(--radius-sm, 4px);
-  color: var(--color-text-muted, #718096);
+  color: var(--color-text, #1a1a2e);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-align: left;
   cursor: pointer;
-  flex: 0 0 auto;
-  transition: transform var(--duration-fast, 150ms) var(--ease-out, ease),
-              background var(--duration-fast, 150ms) var(--ease-out, ease),
+  transition: background var(--duration-fast, 150ms) var(--ease-out, ease),
               color var(--duration-fast, 150ms) var(--ease-out, ease);
 }
 
 .carm-filter-accordion__toggle:hover {
   background: var(--color-bg-subtle, #eeeee8);
-  color: var(--color-text, #1a1a2e);
 }
 
 .carm-filter-accordion__toggle:focus-visible {
@@ -5691,14 +5856,20 @@ body.carm-modal-open {
   outline-offset: 1px;
 }
 
-.carm-filter-accordion__toggle.is-open svg {
-  /* Chevron rotates 90° to point down when the panel is open. */
-  transform: rotate(90deg);
+.carm-filter-accordion__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.carm-filter-accordion__chevron {
+  flex: 0 0 auto;
+  color: var(--color-text-muted, #94a3b8);
   transition: transform var(--duration-fast, 150ms) var(--ease-out, ease);
 }
 
-.carm-filter-accordion__toggle svg {
-  transition: transform var(--duration-fast, 150ms) var(--ease-out, ease);
+.carm-filter-accordion__toggle.is-open .carm-filter-accordion__chevron {
+  /* Chevron rotates 90° to point down when the panel is open. */
+  transform: rotate(90deg);
 }
 
 /* Smooth open/close — the wrapper carries a `grid-template-rows`

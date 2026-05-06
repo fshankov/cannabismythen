@@ -570,65 +570,12 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
             'Vergleichen nach:' toggle below — same pattern as the
             Informationsquellen tab's 'Spalten:' switch. */}
         <div className="strips-grid3__content" ref={contentRef}>
-          {/* Unified toolbar — pivot + "Wert für" picker on the left,
-              shared actions (Mythos-Suche, Filter, Exportieren) on the
-              right so the bar reads identically across all four tabs.
-              The "Mythos-Kategorie" dropdown that used to live here was
-              removed in the toolbar-consolidation pass — its job is now
-              done by the unified Filter drawer. */}
-          {(() => {
-            const activeId = topRow.items.find((it) => it.active)?.id
-              ?? topRow.items[0]?.id
-              ?? '';
-            const valuePickerOptions: DataPickerOption<string>[] = topRow.items.map(
-              (item) => ({
-                value: item.id,
-                label: item.label,
-                Icon: item.Icon,
-                emoji: item.emoji,
-                definition:
-                  item.defLabel && item.defText
-                    ? {
-                        title: item.defLabel,
-                        text: item.defText,
-                        scale: item.scale,
-                        sampleSize: item.sampleSize,
-                      }
-                    : undefined,
-              }),
-            );
-            return (
-              <ToolbarRow
-                aria-label={t('strips.compare.label', state.lang)}
-                pivot={
-                  <PivotToggle<typeof mode>
-                    aria-label={t('strips.compare.label', state.lang)}
-                    value={mode}
-                    onChange={(v) => update('stripsMode', v)}
-                    options={[
-                      { value: 'indicator', label: t('strips.mode.indicator', state.lang) },
-                      { value: 'group', label: t('strips.mode.group', state.lang) },
-                    ]}
-                  />
-                }
-                pickers={[
-                  <DataPicker<string>
-                    key="value"
-                    caption={t('strips.value.label', state.lang)}
-                    value={activeId}
-                    options={valuePickerOptions}
-                    onChange={(next) => {
-                      const item = topRow.items.find((it) => it.id === next);
-                      item?.onActivate();
-                    }}
-                    aria-label={t('strips.value.label', state.lang)}
-                    lang={state.lang}
-                  />,
-                ]}
-                actions={sharedActions}
-              />
-            );
-          })()}
+          {/* Stage 6 v3: toolbar hoisted to MythenExplorer (page level)
+              so all four tabs render their toolbar at the same DOM
+              depth. See <StripsToolbar /> rendered alongside the
+              Balken / Tabelle toolbars. The internal helpers
+              (groupRow, indicatorRow, topRow) are kept below in case
+              future reintroduction of in-view filters needs them. */}
 
           {/* SVG chart wrapper — relative-positioned so HTML strip headers
               can be absolutely positioned over the in-SVG header area for
@@ -773,13 +720,6 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                   />
                   {ticks.map((tk) => (
                     <g key={tk}>
-                      {/* Dashed gridline only — the per-tick text labels
-                          ("0 / 20 / 40 / …") were removed: they read as
-                          a noisy column of digits in the left margin
-                          without adding much beyond the implicit
-                          0–100 score range that the chart already
-                          communicates via dot height + value pills on
-                          hover. */}
                       <line
                         x1={stripLeft + 2}
                         x2={stripLeft + colW - 2}
@@ -788,6 +728,28 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                         stroke="#e5e7eb"
                         strokeDasharray="2 4"
                       />
+                      {/* Stage 6 v3: faint grey tick labels INSIDE
+                          every strip, anchored to the strip's left
+                          edge just above the gridline. Lets users read
+                          values inside any strip without looking back
+                          at the far-left axis. Skip 0 (sits at the
+                          strip's bottom edge — visually noisy) and 100
+                          (header divider eats the space). */}
+                      {tk !== 0 && tk !== 100 && (
+                        <text
+                          x={stripLeft + 4}
+                          y={yScale(tk) - 3}
+                          fontSize={9}
+                          fontWeight={500}
+                          style={{
+                            fill: 'var(--color-border-strong, #cbd5e1)',
+                            fontVariantNumeric: 'tabular-nums',
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          {tk}
+                        </text>
+                      )}
                     </g>
                   ))}
                   {col.nodes.length === 0 && (

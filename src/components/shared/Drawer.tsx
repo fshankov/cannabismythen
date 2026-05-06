@@ -87,15 +87,32 @@ export default function Drawer({
         ? 'carm-drawer--bottom-sheet'
         : `carm-drawer--${side} carm-drawer--${size}`;
 
+  // Stage 6 v3: clicking the dim backdrop closes the drawer (matches
+  // OWID grapher + Notion modals). Previously only the X button worked
+  // because the backdrop was a separate child div the click handler
+  // didn't recognise. We accept clicks on either the root div OR the
+  // backdrop element so users can dismiss naturally.
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      e.target === e.currentTarget ||
+      target.classList?.contains('carm-drawer-backdrop')
+    ) {
+      onClose();
+    }
+  };
+
   return (
     <div
       className={`carm-drawer-root ${variantClass}`}
       role="presentation"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onMouseDown={handleBackdropClick}
     >
-      <div className="carm-drawer-backdrop" aria-hidden="true" />
+      <div
+        className="carm-drawer-backdrop"
+        aria-hidden="true"
+        onMouseDown={handleBackdropClick}
+      />
       <div
         ref={panelRef}
         className={`carm-drawer ${panelVariantClass}`}

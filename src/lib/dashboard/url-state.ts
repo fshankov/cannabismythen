@@ -18,7 +18,7 @@ import type {
 
 const ALL_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 const ALL_INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
-const ALL_VIEWS: ViewTab[] = ['balken', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'sources'];
+const ALL_VIEWS: ViewTab[] = ['balken', 'balken2', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'sources'];
 const ALL_VERDICTS: CorrectnessClass[] = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
 const ALL_SOURCE_METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
 const ALL_SOURCE_GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];

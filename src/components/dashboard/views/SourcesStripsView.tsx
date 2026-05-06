@@ -765,8 +765,6 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                     />
                     {ticks.map((tk) => (
                       <g key={tk}>
-                        {/* Dashed gridline only — tick number labels
-                            were removed (parity with StripsView). */}
                         <line
                           x1={stripLeft + 2}
                           x2={stripLeft + colW - 2}
@@ -775,6 +773,23 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                           stroke="#e5e7eb"
                           strokeDasharray="2 4"
                         />
+                        {/* Stage 6 v3: faint grey per-strip tick labels
+                            (parity with StripsView). Skip 0 + 100. */}
+                        {tk !== 0 && tk !== 100 && (
+                          <text
+                            x={stripLeft + 4}
+                            y={yScale(tk) - 3}
+                            fontSize={9}
+                            fontWeight={500}
+                            style={{
+                              fill: 'var(--color-border-strong, #cbd5e1)',
+                              fontVariantNumeric: 'tabular-nums',
+                              pointerEvents: 'none',
+                            }}
+                          >
+                            {tk}
+                          </text>
+                        )}
                       </g>
                     ))}
                     {col.nodes.length === 0 && (

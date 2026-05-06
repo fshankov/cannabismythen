@@ -37,12 +37,14 @@ import LadderView from './views/LadderView';
 import StripsView, { type StripsViewHandle } from './views/StripsView';
 import SourcesStripsView, { type SourcesStripsViewHandle } from './views/SourcesStripsView';
 import BalkenView, { type BalkenViewHandle } from './views/BalkenView';
+import BalkenView2 from './views/BalkenView2';
 import type { ChartHandle } from '../../lib/dashboard/export';
 import FilterDrawer from './controls/FilterDrawer';
 import ExportDrawer from './controls/ExportDrawer';
 import DataPicker, { type DataPickerOption } from './controls/DataPicker';
 import MythosSearchChip from './controls/MythosSearchChip';
 import ToolbarRow from './controls/ToolbarRow';
+import StripsToolbar from './controls/StripsToolbar';
 import FactsheetPanel from './FactsheetPanel';
 import DashboardOnboarding from './DashboardOnboarding';
 import type { MythContentEntry } from './FactsheetPanel';
@@ -142,17 +144,22 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     }
   }, [state.view]);
 
-  /** Active count of non-default filters (Mythos categories + individual
-   *  myths + verdict). Drives the badge on the Filter button. Search and
-   *  sort are surfaced as their own first-class toolbar controls and are
-   *  intentionally NOT counted here. */
+  /** Filter button badge — Stage 6 v3: now reflects the TOTAL number
+   *  of myths the user has narrowed to via category checkboxes +
+   *  individual myth checkboxes. Selecting one category that contains
+   *  6 myths shows "6", not "1". The verdict filter still adds +1
+   *  because it's a categorical narrowing (not a per-myth selection).
+   *  Search + sort surface as their own toolbar controls and are
+   *  intentionally NOT counted. */
   const activeFilterCount = useMemo(() => {
-    let n = 0;
-    if (state.categoryIds.length > 0) n += 1;
-    if (state.mythIds.length > 0) n += 1;
+    if (!data) return 0;
+    let n = state.mythIds.length;
+    for (const cid of state.categoryIds) {
+      n += data.myths.filter((m) => m.category_id === cid).length;
+    }
     if (state.verdictFilter !== 'all') n += 1;
     return n;
-  }, [state.categoryIds, state.mythIds, state.verdictFilter]);
+  }, [data, state.categoryIds, state.mythIds, state.verdictFilter]);
 
   const disabledGroups = useMemo(
     () => getDisabledGroupsForIndicator(state.indicator),
@@ -164,7 +171,10 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    *  other two tabs (`strips`, `sources`) own their own pivot/picker
    *  setup but receive the shared `actions` (Suche / Filter / Export)
    *  from this component. */
-  const isModernView = state.view === 'balken' || state.view === 'table';
+  const isModernView =
+    state.view === 'balken' ||
+    state.view === 'balken2' ||
+    state.view === 'table';
 
   /** Counter that, when bumped, opens the DashboardOnboarding modal. */
   const [rundgangSignal, setRundgangSignal] = useState(0);
@@ -476,7 +486,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 // Stage 6 follow-up: Sortierung sits leftmost on Balken
                 // (in the pivot slot), so it's visually distinct from
                 // the Indikator/Bevölkerungsgruppe dropdowns to its right.
-                state.view === 'balken' ? (
+                state.view === 'balken' || state.view === 'balken2' ? (
                   <button
                     type="button"
                     className="carm-btn"
@@ -534,6 +544,20 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           );
         })()}
 
+        {/* Stage 6 v3: Punktwolke (Streifen) toolbar hoisted to the
+            page-level wrapper so it aligns horizontally with the
+            Balken / Tabelle toolbars instead of nesting inside
+            chart-area like before. */}
+        {state.view === 'strips' && (
+          <StripsToolbar
+            state={state}
+            update={update}
+            groups={data.groups}
+            definitions={defs}
+            sharedActions={sharedActions}
+          />
+        )}
+
         {/* Legacy <FilterBar /> rendered for the retired views
          *  (scatter / lollipop / overview / circular / ladder) so
          *  share-links still resolve. The four public tabs no longer
@@ -586,6 +610,24 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                       // the active filter count tracks so the empty
                       // state CTA always exits the "over-filtered to
                       // nothing" trap.
+                      setState((prev) => ({
+                        ...prev,
+                        categoryIds: [],
+                        mythIds: [],
+                        verdictFilter: 'all',
+                        search: '',
+                        balkenSort: 'value-desc',
+                      }));
+                    }}
+                  />
+                )}
+                {state.view === 'balken2' && (
+                  <BalkenView2
+                    myths={filteredMyths}
+                    metrics={data.metrics}
+                    state={state}
+                    onSelectMyth={selectMyth}
+                    onResetFilters={() => {
                       setState((prev) => ({
                         ...prev,
                         categoryIds: [],

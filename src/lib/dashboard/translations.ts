@@ -229,6 +229,7 @@ const translations = {
 
   // Balken view + new dashboard chrome (refactor)
   'view.balken': { de: 'Balken', en: 'Bars' },
+  'view.balken2': { de: 'Balken 2', en: 'Bars 2' },
   'view.streifen': { de: 'Punktwolke', en: 'Point Cloud' },
   'view.tabelle': { de: 'Tabelle', en: 'Table' },
   'view.quellen': { de: 'Informationsquellen', en: 'Information Sources' },
@@ -336,6 +337,10 @@ const translations = {
   'howto.balken': {
     de: 'Mythen sortiert nach gewähltem Indikator. Farbe = wissenschaftliches Urteil. Klick öffnet das Factsheet.',
     en: 'Myths ranked by the selected indicator. Color = scientific verdict. Click for the factsheet.',
+  },
+  'howto.balken2': {
+    de: 'Experimentelle Ansicht: Mythen-Statement liegt direkt auf dem Balken. Pfeil rechts = wissenschaftliches Urteil. Klick öffnet das Factsheet.',
+    en: 'Experimental view: myth statement sits directly on the bar. Arrow at right = scientific verdict. Click for the factsheet.',
   },
   'balken.title': { de: 'Mythen-Ranking', en: 'Myth ranking' },
   'balken.subtitle': { de: '{indicator} · {group}', en: '{indicator} · {group}' },
