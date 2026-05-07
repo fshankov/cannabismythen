@@ -2304,18 +2304,14 @@
    read as red and the best rows quietly green. Legacy --correct/--incorrect
    rules above only matched .quiz-card--{correct,incorrect} (still applied
    when the new code re-uses the .quiz-result__item base). */
+/* BugHerd #42: removed the colored left frame on .quiz-result__item--*
+   (was: border-left-color: var(--color-richtig|eher-richtig|eher-falsch|
+   falsch). The verdict-colored chips inside the row already carry the
+   band signal; the extra left frame doubled it. Kept the lighter
+   background for "exact" rows so the worst-first sort still has a quiet
+   tail. */
 .quiz-result__item--exact {
-  border-left-color: var(--color-richtig);
   background: rgba(236, 253, 245, 0.5);
-}
-.quiz-result__item--near {
-  border-left-color: var(--color-eher-richtig);
-}
-.quiz-result__item--off {
-  border-left-color: var(--color-eher-falsch);
-}
-.quiz-result__item--far {
-  border-left-color: var(--color-falsch);
 }
 
 /* De-emphasise correct rows (Schritte 0) at the bottom of the worst-first
@@ -2326,10 +2322,11 @@
 }
 
 .quiz-result__item-meta-label {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  /* BugHerd #23: removed `text-transform: uppercase` — sentence-case
+     reads less shouty than "DEINE ANTWORT:" / "WISSENSCHAFTLICH:" */
+  letter-spacing: 0.02em;
   font-weight: 600;
 }
 
@@ -2388,6 +2385,20 @@
   opacity: 0.9;
 }
 
+/* BugHerd #37 + #38: absolute "X,Y von Z möglichen Punkten" sits
+   between the % hero and the breakdown line. Smaller weight than the
+   percentage but heavier than the breakdown — it's a secondary anchor
+   that puts the raw score in concrete numbers for readers who don't
+   parse percentages well. */
+.share-card__absolute-score {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 4px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 .share-card__breakdown {
   font-size: 0.92rem;
   color: rgba(255, 255, 255, 0.85);
@@ -2418,6 +2429,23 @@
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.92);
   margin: 0;
+}
+
+/* BugHerd #36: "Fakten-Karten" inline link in the verdict body. Inherits
+   color so the green-card aesthetic stays intact; subtle underline marks
+   it as interactive without screaming. */
+.share-card__verdict-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+  transition: text-decoration-color 0.15s ease;
+}
+
+.share-card__verdict-link:hover,
+.share-card__verdict-link:focus-visible {
+  text-decoration-color: currentColor;
 }
 
 .share-card__pop-line {

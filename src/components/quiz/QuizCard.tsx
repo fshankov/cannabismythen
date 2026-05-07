@@ -367,13 +367,12 @@ export default function QuizCard({
                   {schritteVerdictText}
                 </p>
 
-                {/* 4 — Points sub-line (German decimal comma). */}
-                <p className="quiz-card__verdict-points">
-                  {t("schritte.points", {
-                    schritte: userSchritte ?? 0,
-                    points: formatPoints(userPoints),
-                  })}
-                </p>
+                {/* 4 — Points sub-line removed per BugHerd #27 (reviewer
+                    pinned "This should be deleted" on the
+                    "X Schritt(e) daneben — Y,YY Punkte" line). The big
+                    coloured "Nah dran" / "Genau richtig" headline above is
+                    enough verdict on the card; raw Punkte numbers are kept
+                    only on the result-screen ShareCard hero. */}
 
                 {/* 4 — Explanation. Scrollable inside its own region only when
                     it overflows the available card height. */}
@@ -383,18 +382,19 @@ export default function QuizCard({
                   </div>
                 </div>
 
-                {/* 6 — Population stat (always shown). New wording:
-                    "repräsentative Stichprobe in Deutschland" — same data
-                    (CaRM IS that sample), more relatable framing. */}
+                {/* 6 — Population stat (always shown). Wording:
+                    "Bevölkerungsbefragung in Deutschland" — same data
+                    (CaRM IS that sample), with "repräsentativ" dropped
+                    from user-visible copy per editorial ruling 2026-05-06. */}
                 {hasPopData && (
                   <div
                     className="quiz-card__pop-bar"
                     role="img"
-                    aria-label={`${popPct} Prozent der Erwachsenen 18 bis 70 in einer repräsentativen Stichprobe in Deutschland haben diesen Mythos genau richtig eingeschätzt`}
+                    aria-label={`${popPct} Prozent der Erwachsenen 18 bis 70 in einer Bevölkerungsbefragung in Deutschland haben diesen Mythos genau richtig eingeschätzt`}
                   >
                     <p className="quiz-card__pop-bar-text">
                       <strong>{popPct}&nbsp;%</strong> der Erwachsenen
-                      (18–70) in einer repräsentativen Stichprobe in
+                      (18–70) in einer Bevölkerungsbefragung in
                       Deutschland haben diesen Mythos genau richtig
                       eingeschätzt.
                     </p>

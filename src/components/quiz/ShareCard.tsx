@@ -40,6 +40,34 @@ const BAND_EMOJI: Record<ScoreBand, string> = {
   erwischt: "\u{1F331}",
 };
 
+/** Render the verdict body with the substring "Fakten-Karten" wrapped as a
+ *  link to /fakten-karten/ (BugHerd #36 — reviewer wanted that phrase to be
+ *  a clickable navigation aid back to the deck). Splits on the literal
+ *  string; if not present, returns the text unchanged. The link inherits
+ *  the body's color and uses a subtle underline so the styling stays
+ *  appropriate for the share-card aesthetic. */
+function renderBodyWithFaktenKartenLink(body: string) {
+  const TOKEN = "Fakten-Karten";
+  const parts = body.split(TOKEN);
+  if (parts.length === 1) return body;
+  const out: (string | JSX.Element)[] = [];
+  parts.forEach((part, i) => {
+    if (i > 0) {
+      out.push(
+        <a
+          key={`fk-${i}`}
+          href="/fakten-karten/"
+          className="share-card__verdict-link"
+        >
+          {TOKEN}
+        </a>,
+      );
+    }
+    if (part) out.push(part);
+  });
+  return out;
+}
+
 export default function ShareCard({
   result,
   quizUrl,
@@ -53,6 +81,35 @@ export default function ShareCard({
   const [copied, setCopied] = useState(false);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
   const emoji = BAND_EMOJI[band];
+
+  // BugHerd #37 + #38 — show absolute score below the percentage hero.
+  // Reviewer wanted "X von Y möglichen Punkten" (X of Y possible points).
+  // Recompute raw points from the breakdown counts so we don't rely on
+  // a new field in QuizResult: each "exact" (0 Schritte) = 1 pt, "near"
+  // (1) = 0.66 pt, "off" (2) = 0.33 pt, "far" (3) = 0 pt — matches
+  // pointsForSchritte() in quizData.ts. Total questions answered = sum
+  // of the four counts; max points = that × 1.
+  const breakdown = result.breakdown ?? {
+    exact: 0,
+    near: 0,
+    off: 0,
+    far: 0,
+  };
+  const totalAnswered =
+    breakdown.exact + breakdown.near + breakdown.off + breakdown.far;
+  const rawPoints =
+    breakdown.exact * 1 + breakdown.near * 0.66 + breakdown.off * 0.33;
+  // German decimal separator (comma); 1 dp keeps the reviewer's example
+  // "2,6 von 6 möglichen Punkten" intact while matching the rest of the
+  // site's formatting.
+  const formattedPoints = rawPoints.toLocaleString("de-DE", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  const absoluteScoreLine =
+    totalAnswered > 0
+      ? `${formattedPoints} von ${totalAnswered} möglichen Punkten`
+      : "";
 
   const shareText = `Ich habe ${result.moduleScore} % beim Quiz „${moduleTitle}" auf cannabismythen.de erreicht.`;
   const fullShareText = `${shareText} ${quizUrl}`;
@@ -108,13 +165,20 @@ export default function ShareCard({
           <span className="share-card__score-unit">&nbsp;%</span>
         </div>
 
+        {/* BugHerd #37 + #38: absolute score directly below the % hero. */}
+        {absoluteScoreLine && (
+          <p className="share-card__absolute-score">{absoluteScoreLine}</p>
+        )}
+
         {breakdownLine && (
           <p className="share-card__breakdown">{breakdownLine}</p>
         )}
 
         <div className="share-card__verdict">
           <h2 className="share-card__verdict-title">{verdictTitle}</h2>
-          <p className="share-card__verdict-body">{verdictBody}</p>
+          <p className="share-card__verdict-body">
+            {renderBodyWithFaktenKartenLink(verdictBody)}
+          </p>
         </div>
 
         <p className="share-card__pop-line">{populationLine}</p>

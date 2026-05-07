@@ -873,17 +873,27 @@ function QuizPlayerInner({
               The persistence notice + reset link below remains the only
               footer chrome. */}
 
-          {allAnswered && !showResults && (
-            <div className="quiz-player__finish-row">
-              <button
-                type="button"
-                className="quiz-card__next-btn"
-                onClick={() => setFinished(true)}
-              >
-                {t("ui.finishQuiz")} →
-              </button>
-            </div>
-          )}
+          {/* BugHerd #34: when the user is on the LAST question and has
+              answered everything, the in-card button on the back face
+              already shows "Ergebnis ansehen →" (see QuizCard back-face
+              CTA, isLastQuestion branch). Hiding the standalone finish-row
+              in that exact case removes the visible duplicate. The finish-
+              row still appears when the user has answered all questions
+              but happens to be looking at an earlier card (e.g., after
+              jumping around with the deck) — that's the safety-net case. */}
+          {allAnswered &&
+            !showResults &&
+            safeIndex !== totalQuestions - 1 && (
+              <div className="quiz-player__finish-row">
+                <button
+                  type="button"
+                  className="quiz-card__next-btn"
+                  onClick={() => setFinished(true)}
+                >
+                  {t("ui.finishQuiz")} →
+                </button>
+              </div>
+            )}
 
           <div className="quiz-player__notice" role="note">
             <span aria-hidden="true">🔒</span>{" "}

@@ -71,6 +71,19 @@ const GROUP_ORDER: GroupId[] = [
   'parents',
 ];
 
+/** Groups for which `population_relevance` is methodologically undefined.
+ *  CaRM only computed this metric on the population-level samples (Erwachsene
+ *  18–70 and Minderjährige 16–17). The carm-data.json file contains stray
+ *  non-null values for consumers / young_adults / parents that bypass the
+ *  null check below; this set forces them back to null at render time so
+ *  the cell renders as "k. A." (per stakeholder ruling 2026-05-06,
+ *  BugHerd #33). */
+const POP_REL_INVALID_GROUPS = new Set<GroupId>([
+  'consumers',
+  'young_adults',
+  'parents',
+]);
+
 /** Full Zielgruppe labels — match the daten-explorer Balken view's
  *  GROUP_LABELS verbatim (single source of voice). */
 const GROUP_LABELS: Record<GroupId, string> = {
@@ -197,7 +210,14 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
       <ul className="factsheet-group-bars__list" role="presentation">
         {GROUP_ORDER.map((g) => {
           const entry = byGroup.get(g);
-          const value = entry ? (entry[indicator] as number | null) : null;
+          const rawValue = entry ? (entry[indicator] as number | null) : null;
+          // Force null for invalid pop_relevance combos so stray data values
+          // don't render as bars (BugHerd #33 — see POP_REL_INVALID_GROUPS).
+          const value =
+            indicator === 'population_relevance' &&
+            POP_REL_INVALID_GROUPS.has(g)
+              ? null
+              : rawValue;
           const hasValue = typeof value === 'number';
           // Values are 0–100 across every indicator — same scale the
           // daten-explorer's Balken view uses (formatValue + 100 max).

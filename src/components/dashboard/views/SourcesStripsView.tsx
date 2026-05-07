@@ -245,11 +245,12 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
   const isMobile = width < 640;
   const isNarrow = width < 480;
 
-  // Stage 6: `left` reserves a small gutter for the y-axis numbers
-  // (0/20/40/60/80/100) at fontSize 12 — no axis title.
+  // Stage 6 v4: prominent left-margin y-axis labels removed; strips
+  // can extend further left now. Tiny 12px gutter kept for breathing
+  // room against the page edge.
   const margin = isMobile
-    ? { top: 8, right: 8, bottom: 28, left: 32 }
-    : { top: 10, right: 20, bottom: 32, left: 40 };
+    ? { top: 8, right: 8, bottom: 28, left: 12 }
+    : { top: 10, right: 20, bottom: 32, left: 16 };
 
   const headerH = isMobile ? 50 : 56;
 
@@ -714,31 +715,9 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
               aria-label="Streifen-Diagramm der Informationsquellen"
               onMouseLeave={() => { setHoveredSourceId(null); setHoverPos(null); }}
             >
-              {/* Y-axis gutter (Stage 6) — dedicated left column with the
-                  0/20/40/60/80/100 tick numbers. Drawn ONCE so the same
-                  scale labels every strip column. */}
-              <g
-                className="strips-yaxis"
-                transform={`translate(0, ${margin.top})`}
-                pointerEvents="none"
-              >
-                {ticks.map((tk) => (
-                  <text
-                    key={`yax-${tk}`}
-                    x={margin.left - 8}
-                    y={yScale(tk) + 4}
-                    textAnchor="end"
-                    fontSize={12}
-                    fontWeight={500}
-                    style={{
-                      fill: 'var(--color-text-secondary, #4a5568)',
-                      fontVariantNumeric: 'tabular-nums',
-                    }}
-                  >
-                    {tk}
-                  </text>
-                ))}
-              </g>
+              {/* Stage 6 v4: prominent left-margin y-axis numbers removed.
+                  Per-strip faint grey labels (below each gridline inside
+                  the strip column) are the only y-axis reference now. */}
               {/* Strip backgrounds + gridlines */}
               {columns.map((col, i) => {
                 const cx = colCenterX(i);
@@ -773,12 +752,13 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                           stroke="#e5e7eb"
                           strokeDasharray="2 4"
                         />
-                        {/* Stage 6 v3: faint grey per-strip tick labels
-                            (parity with StripsView). Skip 0 + 100. */}
+                        {/* Stage 6 v4: faint grey per-strip tick labels,
+                            BELOW the dashed gridline (was above). Sole
+                            y-axis reference. Skip 0 + 100. */}
                         {tk !== 0 && tk !== 100 && (
                           <text
                             x={stripLeft + 4}
-                            y={yScale(tk) - 3}
+                            y={yScale(tk) + 11}
                             fontSize={9}
                             fontWeight={500}
                             style={{

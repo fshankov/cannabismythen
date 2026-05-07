@@ -214,11 +214,18 @@ live site without a code change.
   `breakdownCounts()` / `scoreBand()` in `quizData.ts`. If you find another
   scorer anywhere in the quiz codebase, that's a bug.
 - **Population framing is honest.** Compare against
-  "Erwachsene (18–70) in einer repräsentativen Stichprobe in Deutschland".
+  "Erwachsene (18–70) in einer Bevölkerungsbefragung in Deutschland".
   CaRM IS that sample, so the data is unchanged — just framed for a
   general reader. Never reference "Bevölkerung in Deutschland" alone
   (implies all 80M), "Gesamtbevölkerung 16–70" (different cohort), or
-  "Befragten" without qualifier (loses the population context).
+  "Befragten" without qualifier (loses the population context). The
+  word "repräsentativ" / "representative" must NOT appear anywhere in
+  user-visible copy (per stakeholder ruling 2026-05-06, BugHerd #28) —
+  the survey IS methodologically representative (n=2.097, weighted by
+  sex/age/education), but the word is dropped at editorial request.
+  Canonical replacement phrasing for share copy / credibility blocks /
+  quiz framing: "in einer Bevölkerungsbefragung in Deutschland
+  (Erwachsene 18–70)".
 
 ## Routing patterns
 

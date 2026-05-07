@@ -7,12 +7,12 @@
     "adults": {
       "label": "Erwachsene (18–70)",
       "sampleSize": "n = 2.097",
-      "definition": "Repräsentative Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund."
+      "definition": "Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund."
     },
     "minors": {
       "label": "Minderjährige (16–17)",
       "sampleSize": "n = 555",
-      "definition": "Repräsentative Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel."
+      "definition": "Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel."
     },
     "consumers": {
       "label": "Konsumierende",
@@ -38,7 +38,7 @@
     },
     "significance": {
       "label": "Bedeutung (Punkte)",
-      "definition": "Subjektive Wichtigkeit des Mythos für eigene Entscheidungen. Nur bei Personen erhoben, die den Mythos kennen.",
+      "definition": "Subjektive Wichtigkeit des Mythos für den eigenen Umgang mit Cannabis. Nur bei Personen erhoben, die den Mythos kennen.",
       "scale": "0–100 Punkte"
     },
     "correctness": {

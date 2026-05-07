@@ -201,11 +201,12 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
 
   // SVG layout — small top margin since the strip rect itself contains a
   // header area at the top (drawn directly inside the rect with a divider line).
-  // Stage 6: `left` reserves a small gutter for the y-axis numbers
-  // (0/20/40/60/80/100) at fontSize 12 — no axis title.
+  // Stage 6 v4: prominent left-margin y-axis labels removed; strips
+  // can extend further left now. Tiny 12px gutter kept for breathing
+  // room against the page edge.
   const margin = isMobile
-    ? { top: 8, right: 8, bottom: 28, left: 32 }
-    : { top: 10, right: 20, bottom: 32, left: 40 };
+    ? { top: 8, right: 8, bottom: 28, left: 12 }
+    : { top: 10, right: 20, bottom: 32, left: 16 };
 
   /** Height of the in-strip header area (icon + label + i tooltip), drawn at
    *  the top of each strip rectangle inside the SVG. */
@@ -663,31 +664,10 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 </g>
               </symbol>
             </defs>
-            {/* Y-axis gutter (Stage 6) — dedicated left column with the
-                0/20/40/60/80/100 tick numbers. Drawn ONCE, outside the
-                per-strip map, so the same scale labels every strip column. */}
-            <g
-              className="strips-yaxis"
-              transform={`translate(0, ${margin.top})`}
-              pointerEvents="none"
-            >
-              {ticks.map((tk) => (
-                <text
-                  key={`yax-${tk}`}
-                  x={margin.left - 8}
-                  y={yScale(tk) + 4}
-                  textAnchor="end"
-                  fontSize={12}
-                  fontWeight={500}
-                  style={{
-                    fill: 'var(--color-text-secondary, #4a5568)',
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                >
-                  {tk}
-                </text>
-              ))}
-            </g>
+            {/* Stage 6 v4: the prominent left-margin y-axis numbers
+                were removed. The per-strip faint grey labels (rendered
+                inside each strip column, below each gridline) now
+                serve as the only y-axis reference. */}
             {/* Strip backgrounds + gridlines.
                 Each strip is ONE fully-rounded grey rectangle that spans both
                 the header area at the top (icon + label + 'i') and the dots
@@ -728,17 +708,17 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                         stroke="#e5e7eb"
                         strokeDasharray="2 4"
                       />
-                      {/* Stage 6 v3: faint grey tick labels INSIDE
-                          every strip, anchored to the strip's left
-                          edge just above the gridline. Lets users read
-                          values inside any strip without looking back
-                          at the far-left axis. Skip 0 (sits at the
-                          strip's bottom edge — visually noisy) and 100
-                          (header divider eats the space). */}
+                      {/* Stage 6 v4: faint grey tick labels INSIDE
+                          every strip, BELOW the dashed gridline (was
+                          above). This is the only y-axis reference now
+                          that the prominent left-margin labels are
+                          gone. Skip 0 (sits at the strip's bottom
+                          edge — visually noisy) and 100 (header
+                          divider eats the space). */}
                       {tk !== 0 && tk !== 100 && (
                         <text
                           x={stripLeft + 4}
-                          y={yScale(tk) - 3}
+                          y={yScale(tk) + 11}
                           fontSize={9}
                           fontWeight={500}
                           style={{

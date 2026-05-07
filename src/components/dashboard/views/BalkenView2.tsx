@@ -72,16 +72,27 @@ const VERDICT_ARROW_ICONS: Record<CorrectnessClass, LucideIcon> = {
   no_classification: Minus,
 };
 
-/** v3: subtle verdict tint per row — mirrors `--classification-{v}-bg`
- *  tokens (emerald-50, lime-50, amber-50, rose-50). Light enough that
- *  dark text on top stays max-readable, present enough that the eye
- *  picks up the verdict-color rhythm scrolling down the chart. */
+/** v4: bumped from classification-50 to classification-100 so the bars
+ *  read clearly against the page's `#f4f4f0` warm off-white. Paired
+ *  with a 1px border in the -200 shade for crisp edges. Dark text on
+ *  top still passes WCAG AA at body sizes. */
 const BAR_FILL: Record<CorrectnessClass, string> = {
-  richtig: '#ecfdf5',           // emerald-50
-  eher_richtig: '#f7fee7',      // lime-50
-  eher_falsch: '#fffbeb',       // amber-50
-  falsch: '#fff1f2',            // rose-50
-  no_classification: '#f3f4f6', // gray-100
+  richtig: '#d1fae5',           // emerald-100
+  eher_richtig: '#ecfccb',      // lime-100
+  eher_falsch: '#fef3c7',       // amber-100
+  falsch: '#ffe4e6',            // rose-100
+  no_classification: '#e5e7eb', // gray-200
+};
+
+/** Matching border shade per verdict (one step more saturated than
+ *  the fill) — defines the bar's right edge clearly against the
+ *  page background. */
+const BAR_BORDER: Record<CorrectnessClass, string> = {
+  richtig: '#a7f3d0',           // emerald-200
+  eher_richtig: '#d9f99d',      // lime-200
+  eher_falsch: '#fde68a',       // amber-200
+  falsch: '#fecdd3',            // rose-200
+  no_classification: '#cbd5e1', // gray-300
 };
 
 /** Full-saturation verdict color for the bar-end arrow.
@@ -245,13 +256,14 @@ const BalkenView2 = forwardRef<BalkenView2Handle, Props>(function BalkenView2(
                 }}
                 aria-label={`${text} — ${formatted}`}
               >
-                {/* Layer 1 (z=1): subtle verdict-tinted bar fill,
-                    width = value%. */}
+                {/* Layer 1 (z=1): verdict-tinted bar fill + matching
+                    border for crisp edges against the page bg. */}
                 <div
                   className="carm-balken2__bar"
                   style={{
                     width: `${d.value}%`,
                     background: BAR_FILL[cls],
+                    border: `1px solid ${BAR_BORDER[cls]}`,
                   }}
                   aria-hidden="true"
                 />

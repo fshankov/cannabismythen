@@ -86,16 +86,17 @@ function bandedPopulationLine(
 }
 
 /** Final-defence fallback in case both the per-module override AND the
- *  global singleton are empty. New wording: CaRM IS a representative
- *  German sample, so the data is unchanged — just framed for a general
- *  reader. */
+ *  global singleton are empty. CaRM IS a methodologically representative
+ *  German sample (n=2.097, weighted by sex/age/education), but the word
+ *  "repräsentativ" is dropped from user-visible copy per editorial ruling
+ *  2026-05-06; the data framing remains accurate. */
 const HARDCODED_FALLBACK: Record<ScoreBand, string> = {
   profi:
-    "Du liegst klar über dem Schnitt der Erwachsenen (18–70) in einer repräsentativen Stichprobe in Deutschland (ca. {pct} %).",
+    "Du liegst klar über dem Schnitt der Erwachsenen (18–70) in einer Bevölkerungsbefragung in Deutschland (ca. {pct} %).",
   guterweg:
-    "Du liegst leicht über dem Schnitt der Erwachsenen (18–70) in einer repräsentativen Stichprobe in Deutschland (ca. {pct} %).",
+    "Du liegst leicht über dem Schnitt der Erwachsenen (18–70) in einer Bevölkerungsbefragung in Deutschland (ca. {pct} %).",
   gehtnoch:
-    "Du liegst etwa im Schnitt der Erwachsenen (18–70) in einer repräsentativen Stichprobe in Deutschland (ca. {pct} %).",
+    "Du liegst etwa im Schnitt der Erwachsenen (18–70) in einer Bevölkerungsbefragung in Deutschland (ca. {pct} %).",
   erwischt:
     "Hier saßen noch viele Mythen. Die Fakten-Karten räumen das in zehn Minuten auf.",
 };
@@ -258,11 +259,17 @@ export default function ResultScreen({
                 className={`quiz-result__item quiz-result__item--${bandModifier}`}
               >
                 <div className="quiz-result__item-row">
+                  {/* BugHerd #42: chip showing the schritte number ("0..3")
+                      and the colored left frame on the row both removed —
+                      the verdict colour on the actual answer/science chips
+                      below already communicates the band; the extra step-
+                      count chip felt arithmetic. Kept invisibly for screen
+                      readers. */}
                   <span
-                    className={`quiz-result__item-chip quiz-result__item-chip--${bandModifier}`}
+                    className="sr-only"
                     aria-label={schritteLabel(s)}
                   >
-                    {s}
+                    {schritteLabel(s)}
                   </span>
                   <p className="quiz-result__item-statement">{statement}</p>
                 </div>
