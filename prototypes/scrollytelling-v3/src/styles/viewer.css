@@ -1,0 +1,148 @@
+/* ScrollytellingViewerV3 layout. Mirrors v2's two-column sticky pattern. */
+
+.scrolly {
+  position: relative;
+  display: block;
+}
+
+.scrolly__container {
+  display: grid;
+  grid-template-columns: minmax(320px, 40%) 1fr;
+  gap: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+/* Left text column — flows naturally, each step is a tall card */
+.scrolly__text-col {
+  padding: 4rem 2rem 4rem 0;
+}
+
+.scrolly__step {
+  min-height: 90vh;
+  padding: 4rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0.45;
+  transition: opacity 0.4s ease;
+}
+
+.scrolly__step--active { opacity: 1; }
+
+/* Step 6 is taller — three sub-phases inside */
+.scrolly__step[data-step="6"] {
+  min-height: 280vh;
+  padding: 4rem 0 4rem 0;
+  justify-content: flex-start;
+  gap: 80vh;
+}
+.scrolly__step[data-step="6"] .scrolly__phase-marker {
+  height: 1px;
+  width: 100%;
+}
+
+.scrolly__step-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--fg-dim);
+  margin-bottom: var(--space-md);
+}
+
+.scrolly__heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  line-height: 1.2;
+  font-weight: 600;
+  margin: 0 0 var(--space-md) 0;
+  color: var(--fg);
+}
+
+.scrolly__body {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--fg);
+  margin: 0 0 var(--space-md) 0;
+  white-space: pre-wrap;
+}
+
+.scrolly__hint {
+  font-size: 0.875rem;
+  color: var(--fg-muted);
+  margin-top: var(--space-md);
+  font-style: italic;
+}
+
+.scrolly__cta {
+  display: inline-block;
+  margin-top: var(--space-lg);
+  padding: 0.625rem 1.25rem;
+  background: var(--bg-elev-2);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.scrolly__cta:hover {
+  background: var(--classification-richtig);
+  border-color: var(--classification-richtig);
+  transform: translateY(-1px);
+}
+
+/* Right viz column — sticky on desktop */
+.scrolly__viz-col {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+}
+
+.scrolly__viz-mobile {
+  display: none;
+}
+
+/* Mobile: viz sticky-top, text scrolls */
+@media (max-width: 1023px) {
+  .scrolly__container {
+    grid-template-columns: 1fr;
+  }
+  .scrolly__viz-col { display: none; }
+  .scrolly__viz-mobile {
+    display: flex;
+    position: sticky;
+    top: 0;
+    height: 45vh;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+  }
+  .scrolly__step {
+    min-height: 75vh;
+    padding: 2rem 0;
+  }
+  .scrolly__step[data-step="6"] {
+    min-height: 240vh;
+    gap: 70vh;
+  }
+  .scrolly__text-col {
+    padding: 2rem 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrolly__step,
+  .scrolly__cta {
+    transition: none;
+  }
+}
