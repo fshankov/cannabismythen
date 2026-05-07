@@ -42,6 +42,32 @@ export const onRequest = defineMiddleware(async (context, next) => {
     );
   }
 
+  /**
+   * Session 1 of 2026-05 — quiz module slug renames per the
+   * Kategorisierung_2026 05 06 docx. Four modules got longer slugs that
+   * match the canonical 5-cat taxonomy. quiz-gefaehrlichkeit and
+   * quiz-schnellcheck are unchanged. Mirror rules also live in
+   * `netlify.toml` for paths that bypass the edge middleware.
+   */
+  const QUIZ_SLUG_RENAMES: Record<string, string> = {
+    "quiz-medizin": "quiz-medizinischer-nutzen",
+    "quiz-risiken": "quiz-risiken-koerper-psyche",
+    "quiz-stimmung": "quiz-stimmung-wahrnehmung",
+    "quiz-gesellschaft": "quiz-soziales-bevoelkerung",
+  };
+  const quizMatch = pathname.match(/^\/quiz\/([^/]+)(\/.*)?$/);
+  if (quizMatch) {
+    const oldSlug = quizMatch[1];
+    const trailing = quizMatch[2] ?? "/";
+    const newSlug = QUIZ_SLUG_RENAMES[oldSlug];
+    if (newSlug) {
+      return Response.redirect(
+        new URL(`/quiz/${newSlug}${trailing}${search}`, context.url),
+        301,
+      );
+    }
+  }
+
   // Never block: login page, keystatic CMS, API routes, static assets
   if (
     pathname.startsWith("/login") ||

@@ -1,8 +1,22 @@
+# BugHerd #29/#38/#39 — canonical population sentence (2026-05-07).
+# All four bands now use the same factual statement about the population's
+# score for the module. Banded differentiation moves to the verdict block
+# (Keystatic verdicts.{band}.title/body).
+#
+# Placeholders interpolated by ResultScreen.tsx at render time:
+#   {x}    → population's average absolute points for THIS module (int)
+#   {z}    → number of myths in THIS module (int)
+#   {pct}  → population's average percentage for THIS module (int, 0–100)
+#
+# All values are rounded to the nearest integer (BugHerd #31, no decimals).
+# Source data: each myth's populationCorrectPct (CaRM mean distanceScore).
+#
+# AI draft, awaiting ISD review.
 profi: |
-  Du liegst klar über dem Schnitt der Erwachsenen (18–70) in einer Bevölkerungsbefragung in Deutschland (ca. {pct} %). Stark gemacht.
+  Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).
 guterweg: |
-  Du liegst leicht über dem Schnitt der Erwachsenen (18–70) in einer Bevölkerungsbefragung in Deutschland (ca. {pct} %).
+  Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).
 gehtnoch: |
-  Du liegst etwa im Schnitt der Erwachsenen (18–70) in einer Bevölkerungsbefragung in Deutschland (ca. {pct} %).
+  Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).
 erwischt: |
-  Hier saßen noch viele Mythen. Die Fakten-Karten räumen das in zehn Minuten auf.
+  Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).

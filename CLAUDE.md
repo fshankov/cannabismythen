@@ -48,6 +48,32 @@ Pure technical decisions with no user-visible effect (file naming inside a
 folder, type names, refactor patterns, internal helper signatures) don't need
 confirmation.
 
+## German text quality (HARD)
+
+Every line of user-visible German on this site is reviewed by ISD
+before it ships. AI-drafted German has shown two recurring failure
+modes flagged by the team: (1) it reads like a translation from
+English (English clause order, loaned constructions, calques like
+"macht Sinn"), and (2) it occasionally inverts technical claims (m13
+"löst Spasmen" vs. Excel "lindert Spastiken").
+
+Rules for any German text Claude proposes:
+
+1. Always include a brief English gloss in parentheses or as a
+   follow-up line. Fedor doesn't speak German — he can't sanity-check
+   tone without it.
+2. Never ship AI-drafted German into a .mdoc file's body without an
+   ISD-review checkpoint. Mark drafts clearly (e.g., `internalNotes:
+   "AI draft, awaiting ISD review"`). The Keystatic editor is the
+   review surface.
+3. Avoid English-pattern phrasing. Common slips to self-check:
+   English-style noun stacking, "es ist wichtig zu erwähnen, dass…",
+   over-literal translations of "in terms of", "aus meiner Sicht"
+   used as filler. Prefer short, declarative sentences.
+4. Source-of-truth check before drafting. When the source is the CaRM
+   final report or the Excel master, quote the exact wording first,
+   then adapt — don't paraphrase from memory.
+
 ## Never modify without asking
 
 Path-based safety rules. Claude must NOT edit any of the following without an
@@ -106,9 +132,10 @@ Two product principles to keep in mind when making changes:
 - **Classification is 4-level, not binary.** Every myth resolves to one of
   `richtig | eher_richtig | eher_falsch | falsch`. Never collapse this to true/false in
   copy, UI, or data.
-- **Four audiences:** general public, parents, prevention professionals, researchers.
-  Many pages and dashboards switch view based on audience — don't assume a single
-  reader.
+- **Five Zielgruppen** are the data filters in CaRM and on the public site:
+  Volljährige (18–70), Minderjährige (16–17), Konsumierende, Junge
+  Erwachsene (18–26), Eltern. These are data slices, not reader-personas.
+  Pages and dashboards switch view based on the selected Zielgruppe.
 
 For deep design rationale (color tokens, typography scale, component specs, UX
 architecture), see `DESIGN.md` (~47KB).

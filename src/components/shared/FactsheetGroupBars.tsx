@@ -244,7 +244,8 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                   className="factsheet-group-bars__value"
                   style={{ color: fill }}
                 >
-                  {value!.toFixed(1)}
+                  {/* BugHerd #31 — round-to-int site-wide. */}
+                  {Math.round(value!)}
                 </span>
               ) : (
                 <span

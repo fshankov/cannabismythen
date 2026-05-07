@@ -10,15 +10,19 @@ const entries = await getPublishedEntries("quiz");
 // Filter out feedback-texte for the quiz index (it's not a playable quiz)
 const quizzes = entries.filter(([slug]) => slug !== "feedback-texte");
 
-// Quiz card data: emoji + question count
+// Quiz card data: emoji + question count.
+// Session 1 of 2026-05 — slugs renamed to match the docx 5-cat taxonomy
+// (Kategorisierung_2026 05 06.docx). m03 moved from quiz-risiken to
+// quiz-gefaehrlichkeit per the same docx, hence risiken 11→10 and
+// gefaehrlichkeit 6→7.
 const quizMeta: Record<string, { emoji: string; count: number; featured?: boolean }> = {
-  "quiz-medizin":         { emoji: "💊", count: 7  },
-  "quiz-risiken":         { emoji: "⚠️",  count: 11 },
-  "quiz-stimmung":        { emoji: "🧠", count: 6  },
-  "quiz-gesellschaft":    { emoji: "🏛️", count: 10 },
-  "quiz-gefaehrlichkeit": { emoji: "⚖️",  count: 6  },
+  "quiz-medizinischer-nutzen":  { emoji: "💊", count: 7  },
+  "quiz-risiken-koerper-psyche": { emoji: "⚠️",  count: 10 },
+  "quiz-stimmung-wahrnehmung":  { emoji: "🧠", count: 6  },
+  "quiz-soziales-bevoelkerung": { emoji: "🏛️", count: 10 },
+  "quiz-gefaehrlichkeit":       { emoji: "⚖️",  count: 7  },
   // Stage 6 — Schnellcheck. Dynamic 7-myth deck, re-rolled per visit.
-  "quiz-schnellcheck":    { emoji: "🎲", count: 7, featured: true },
+  "quiz-schnellcheck":          { emoji: "🎲", count: 7, featured: true },
 };
 
 // Remediation 6 — precompute per-tile values in the frontmatter (pure TS).
@@ -63,9 +67,9 @@ const tiles = quizzes.map(([slug, entry]) => {
 
   <div class="quiz-index__intro">
     <p>
-      Teste dein Wissen in fünf thematischen Quiz-Modulen oder im
+      Testen Sie Ihr Wissen in fünf thematischen Quiz-Modulen oder im
       Schnellcheck mit zufälligen Aussagen aus allen Themen. Jede Aussage
-      ist mit dem Stand der Forschung erklärt; deine Einschätzungen
+      ist mit dem Stand der Forschung erklärt; Ihre Einschätzungen
       vergleichen wir mit denen der Erwachsenen (18–70) in einer
       Bevölkerungsbefragung in Deutschland.
     </p>

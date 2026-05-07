@@ -730,6 +730,41 @@ a.version-card:hover {
 }
 
 
+/* ── Lesebeispiel (auto-rendered "reading example" paragraph) ─────────
+   Component: src/components/dashboard/Lesebeispiel.tsx
+   Source: Harald Lahusen (ISD), email 2026-05-07. AI draft, awaiting
+   ISD review. Sits between the factsheet body content and the
+   related-myths rail on /daten-explorer/<slug>/. */
+
+.lesebeispiel {
+  margin-top: var(--space-2xl);
+  padding: var(--space-lg);
+  background: var(--color-bg-subtle, var(--color-bg));
+  border-left: 3px solid var(--color-text-secondary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.lesebeispiel__heading {
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: var(--space-md);
+  color: var(--color-text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.lesebeispiel__body {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.lesebeispiel__body strong {
+  font-weight: 600;
+}
+
+
 /* ── FAQ Page & TOC (Decision F: Hybrid jump links + full) ──── */
 
 .faq-page {

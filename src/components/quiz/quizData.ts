@@ -258,17 +258,13 @@ const mythsMedizin: QuizMyth[] = [
   },
 ];
 
-// ─── Quiz 2: Risiken für Entwicklung, Körper und Psyche (11 questions) ────────
+// ─── Quiz 2: Risiken für Entwicklung, Körper und Psyche (10 questions) ────────
+//
+// Session 1 of 2026-05 — m03 (Heranwachsende) moved out of this module
+// into Allgemeine-Gefährlichkeit per the Kategorisierung_2026 05 06 docx
+// Quiz table.
 
 const mythsRisiken: QuizMyth[] = [
-  {
-    id: "m03",
-    statementKey: "myth.m03.statement",
-    correctClassification: "eher_richtig",
-    explanationKey: "myth.m03.explanation",
-    populationCorrectPct: 77.84,
-    mythPageSlug: "m03-heranwachsende",
-  },
   {
     id: "m08",
     statementKey: "myth.m08.statement",
@@ -489,7 +485,11 @@ const mythsGesellschaft: QuizMyth[] = [
   },
 ];
 
-// ─── Quiz 5: Allgemeine Einschätzung der Gefährlichkeit (6 questions) ─────────
+// ─── Quiz 5: Allgemeine Einschätzung der Gefährlichkeit (7 questions) ─────────
+//
+// Session 1 of 2026-05 — m03 (Heranwachsende) added to this module per the
+// Kategorisierung_2026 05 06 docx Quiz table. Order matches the docx:
+// m04, m02, m03, m09, m05, m06, m07.
 
 const mythsGefaehrlichkeit: QuizMyth[] = [
   {
@@ -507,6 +507,14 @@ const mythsGefaehrlichkeit: QuizMyth[] = [
     explanationKey: "myth.m02.explanation",
     populationCorrectPct: 63.86,
     mythPageSlug: "m02-harmlos",
+  },
+  {
+    id: "m03",
+    statementKey: "myth.m03.statement",
+    correctClassification: "eher_richtig",
+    explanationKey: "myth.m03.explanation",
+    populationCorrectPct: 77.84,
+    mythPageSlug: "m03-heranwachsende",
   },
   {
     id: "m09",
@@ -545,29 +553,29 @@ const mythsGefaehrlichkeit: QuizMyth[] = [
 // ─── Quiz Themes ───────────────────────────────────────────────────────────────
 
 export const QUIZ_THEMES: Record<string, QuizTheme> = {
-  "quiz-medizin": {
-    slug: "quiz-medizin",
+  "quiz-medizinischer-nutzen": {
+    slug: "quiz-medizinischer-nutzen",
     titleKey: "quiz.medizin.title",
     subtitleKey: "quiz.medizin.subtitle",
     descriptionKey: "quiz.medizin.description",
     myths: mythsMedizin,
   },
-  "quiz-risiken": {
-    slug: "quiz-risiken",
+  "quiz-risiken-koerper-psyche": {
+    slug: "quiz-risiken-koerper-psyche",
     titleKey: "quiz.risiken.title",
     subtitleKey: "quiz.risiken.subtitle",
     descriptionKey: "quiz.risiken.description",
     myths: mythsRisiken,
   },
-  "quiz-stimmung": {
-    slug: "quiz-stimmung",
+  "quiz-stimmung-wahrnehmung": {
+    slug: "quiz-stimmung-wahrnehmung",
     titleKey: "quiz.stimmung.title",
     subtitleKey: "quiz.stimmung.subtitle",
     descriptionKey: "quiz.stimmung.description",
     myths: mythsStimmung,
   },
-  "quiz-gesellschaft": {
-    slug: "quiz-gesellschaft",
+  "quiz-soziales-bevoelkerung": {
+    slug: "quiz-soziales-bevoelkerung",
     titleKey: "quiz.gesellschaft.title",
     subtitleKey: "quiz.gesellschaft.subtitle",
     descriptionKey: "quiz.gesellschaft.description",
@@ -597,10 +605,10 @@ export const QUIZ_THEMES: Record<string, QuizTheme> = {
 /** All five static quiz slugs that group the 40 used myths by theme.
  *  m12 + m17 are `keine_aussage` and not included in any module. */
 const STATIC_THEME_BUCKETS: Array<{ slug: string; myths: QuizMyth[] }> = [
-  { slug: "quiz-medizin", myths: mythsMedizin },
-  { slug: "quiz-risiken", myths: mythsRisiken },
-  { slug: "quiz-stimmung", myths: mythsStimmung },
-  { slug: "quiz-gesellschaft", myths: mythsGesellschaft },
+  { slug: "quiz-medizinischer-nutzen", myths: mythsMedizin },
+  { slug: "quiz-risiken-koerper-psyche", myths: mythsRisiken },
+  { slug: "quiz-stimmung-wahrnehmung", myths: mythsStimmung },
+  { slug: "quiz-soziales-bevoelkerung", myths: mythsGesellschaft },
   { slug: "quiz-gefaehrlichkeit", myths: mythsGefaehrlichkeit },
 ];
 
@@ -668,10 +676,10 @@ export function pickSchnellcheckMyths(
 /** All quiz slugs in display order. Schnellcheck sits last so editorial
  *  modules remain the primary entry points. */
 export const QUIZ_SLUGS = [
-  "quiz-medizin",
-  "quiz-risiken",
-  "quiz-stimmung",
-  "quiz-gesellschaft",
+  "quiz-medizinischer-nutzen",
+  "quiz-risiken-koerper-psyche",
+  "quiz-stimmung-wahrnehmung",
+  "quiz-soziales-bevoelkerung",
   "quiz-gefaehrlichkeit",
   "quiz-schnellcheck",
 ] as const;

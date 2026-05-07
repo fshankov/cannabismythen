@@ -2094,10 +2094,18 @@
 }
 
 .quiz-result__item-meta {
+  /* BugHerd #24 — stack the two pairs vertically with a blank-line
+     spacer between them, so each row reads:
+       Wissenschaftlich: <verdict>
+       <blank-line spacer>
+       Ihre Antwort: <verdict>
+     Reviewer wanted the truth-first / answer-second order *and* a
+     visible separation. The 1rem `--space-md` gap gives the blank-line
+     feel without an actual empty <div>. */
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-sm);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
   font-size: 0.85rem;
   color: var(--color-text-secondary);
   padding-left: calc(1.4em + var(--space-sm) + 2.5em);

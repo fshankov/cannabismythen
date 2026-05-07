@@ -291,7 +291,7 @@ function VizColorReveal({ active }: { active: boolean }) {
       <div className="viz-cta-cards">
         <a href="/quiz/" className="viz-cta-card viz-cta-card--quiz">
           🎯 Quiz starten →
-          <span>Teste dich selbst gegen den Wissenschaftsstand</span>
+          <span>Testen Sie sich selbst gegen den Wissenschaftsstand</span>
         </a>
         <a href="/daten-explorer/" className="viz-cta-card viz-cta-card--myths">
           🔍 Alle 42 Mythen erkunden →

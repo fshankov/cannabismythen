@@ -30,3 +30,59 @@
   to = "/daten-explorer/:splat"
   status = 301
   force = true
+
+# ---------------------------------------------------------------------------
+# Session 1 of 2026-05 — quiz module slug renames per the
+# Kategorisierung_2026 05 06 docx. Four modules got longer, more descriptive
+# slugs that match the canonical 5-cat docx taxonomy. The 301s here mirror
+# the same rules in `src/middleware.ts`. quiz-gefaehrlichkeit and
+# quiz-schnellcheck are unchanged.
+# ---------------------------------------------------------------------------
+
+[[redirects]]
+  from = "/quiz/quiz-medizin"
+  to = "/quiz/quiz-medizinischer-nutzen/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quiz/quiz-medizin/*"
+  to = "/quiz/quiz-medizinischer-nutzen/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quiz/quiz-risiken"
+  to = "/quiz/quiz-risiken-koerper-psyche/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quiz/quiz-risiken/*"
+  to = "/quiz/quiz-risiken-koerper-psyche/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quiz/quiz-stimmung"
+  to = "/quiz/quiz-stimmung-wahrnehmung/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quiz/quiz-stimmung/*"
+  to = "/quiz/quiz-stimmung-wahrnehmung/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quiz/quiz-gesellschaft"
+  to = "/quiz/quiz-soziales-bevoelkerung/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quiz/quiz-gesellschaft/*"
+  to = "/quiz/quiz-soziales-bevoelkerung/:splat"
+  status = 301
+  force = true

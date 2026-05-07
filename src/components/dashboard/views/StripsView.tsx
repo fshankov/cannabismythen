@@ -134,7 +134,8 @@ interface ColumnData {
 /** Format a metric value for display in a value pill. */
 function formatPillValue(value: number | null, isAwareness: boolean, lang: 'de' | 'en'): string {
   if (value === null) return t('strips.na', lang);
-  return `${value.toFixed(1)}${isAwareness ? '%' : ''}`;
+  // BugHerd #31 — round-to-int site-wide.
+  return `${Math.round(value)}${isAwareness ? '%' : ''}`;
 }
 
 /** Imperative handle exposed via forwardRef so MythenExplorer's

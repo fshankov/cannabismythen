@@ -28,31 +28,31 @@ const translations: Record<Lang, Record<string, string>> = {
     "classification.richtig": "Richtig",
 
     // ── Quiz theme titles ─────────────────────────────────────────────
-    "quiz.medizin.title": "Medizinischer Nutzen",
+    "quiz.medizin.title": "Medizinischer und therapeutischer Nutzen",
     "quiz.medizin.subtitle":
-      "Was weißt du über den therapeutischen Nutzen von Cannabis?",
+      "Was wissen Sie über den therapeutischen Nutzen von Cannabis?",
     "quiz.medizin.description":
       "Schmerzlinderung, Spastiken, Schlaf, Angst, Depressionen und ADHS.",
-    "quiz.risiken.title": "Risiken & Gesundheit",
+    "quiz.risiken.title": "Risiken für Entwicklung, Körper und Psyche",
     "quiz.risiken.subtitle":
-      "Was weißt du über die gesundheitlichen Risiken von Cannabis?",
+      "Was wissen Sie über die gesundheitlichen Risiken von Cannabis?",
     "quiz.risiken.description":
       "Entwicklung, Körper, Psyche — von Fötus bis Sucht und Suizidgedanken.",
-    "quiz.stimmung.title": "Stimmung & Wahrnehmung",
+    "quiz.stimmung.title": "Wirkung auf Stimmung und Wahrnehmung",
     "quiz.stimmung.subtitle":
-      "Was weißt du über die Wirkungen von Cannabis auf Stimmung und Sinne?",
+      "Was wissen Sie über die Wirkungen von Cannabis auf Stimmung und Sinne?",
     "quiz.stimmung.description":
       "Entspannung, Kreativität, Motivation, Aggression und Wahrnehmung.",
-    "quiz.gesellschaft.title": "Gesellschaft & Gesetz",
+    "quiz.gesellschaft.title": "Soziales, Bevölkerung und Gesetzgebung",
     "quiz.gesellschaft.subtitle":
-      "Was weißt du über Cannabis in der Gesellschaft?",
+      "Was wissen Sie über Cannabis in der Gesellschaft?",
     "quiz.gesellschaft.description":
       "Verbreitung, Verkehr, soziale Folgen, Legalisierung und Vorurteile.",
-    "quiz.gefaehrlichkeit.title": "Gefährlichkeit",
+    "quiz.gefaehrlichkeit.title": "Allgemeine Einschätzung der Gefährlichkeit",
     "quiz.gefaehrlichkeit.subtitle":
-      "Was weißt du über die allgemeine Gefährlichkeit von Cannabis?",
+      "Was wissen Sie über die allgemeine Gefährlichkeit von Cannabis?",
     "quiz.gefaehrlichkeit.description":
-      "Alkohol-Vergleich, Harmlosigkeit, Dosierung und Mischkonsum.",
+      "Alkohol-Vergleich, Harmlosigkeit, Heranwachsende, Dosierung und Mischkonsum.",
     // Stage 6 — Schnellcheck (dynamic 7-myth deck across all themes)
     "quiz.schnellcheck.title": "Schnellcheck",
     "quiz.schnellcheck.subtitle":
@@ -220,7 +220,8 @@ const translations: Record<Lang, Record<string, string>> = {
     // ── Population comparison strings ─────────────────────────────────
     // ── UI strings ────────────────────────────────────────────────────
     "ui.progress": "{answered} von {total} beantwortet",
-    "ui.resultTitle": "Dein Ergebnis",
+    // BugHerd #13 — Sie form (sentence case). Session 1 sweep missed this key.
+    "ui.resultTitle": "Ihr Ergebnis",
     "ui.shareButton": "Ergebnis teilen",
     "ui.copiedToClipboard": "Link kopiert! \u2713",
     "ui.shareTitle": "Mein Cannabis-Quiz Ergebnis",
@@ -265,8 +266,12 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.classificationPhrase.eher_falsch": "eher falsch",
     "ui.classificationPhrase.falsch": "falsch",
     "ui.correctAnswer": "Evidenzbasierte Bewertung:",
-    "ui.yourAnswer": "Deine Antwort:",
-    "ui.yourAnswerLabel": "Deine Antwort",
+    // BugHerd #13 + #23 — "Deine" → "Ihre" (Sie form, sentence case).
+    // Session 1's sweep missed these two i18n keys; caught in Session 2
+    // when chasing the "IHRE" pin (which turned out to be the per-row
+    // label, not an uppercase issue).
+    "ui.yourAnswer": "Ihre Antwort:",
+    "ui.yourAnswerLabel": "Ihre Antwort",
     "classification.scientific": "Wissenschaftlich",
     "ui.correctAnswerLabel": "Richtige Antwort",
     "ui.swipeHint": "oder nach links wischen",
@@ -281,11 +286,11 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.previousQuestion": "Zur\u00fcck",
     "ui.finishQuiz": "Ergebnis ansehen",
     "ui.persistenceNotice":
-      "Wir speichern deinen Fortschritt nur in diesem Browser.",
+      "Wir speichern Ihren Fortschritt nur in diesem Browser.",
     "ui.progressRestored":
       "Fortschritt wiederhergestellt.",
     "ui.resetProgress": "Quiz zur\u00fccksetzen",
-    "ui.retrospectiveTitle": "Deine Antworten im \u00dcberblick",
+    "ui.retrospectiveTitle": "Ihre Antworten im \u00dcberblick",
     "ui.exploreData": "Daten-Explorer \u00f6ffnen",
     "ui.shareResultHeading": "Ergebnis teilen",
     "ui.openMythDetail": "Details zu dieser Aussage \u2192",

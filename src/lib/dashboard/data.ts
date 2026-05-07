@@ -7,6 +7,89 @@ let cachedData: CarmData | null = null;
  *  scores that don't match the published per-group analysis. */
 const EXCLUDED_GROUP_IDS = new Set(['general_population']);
 
+/**
+ * Session 1 of 2026-05 — Daten-Explorer category taxonomy migration.
+ *
+ * `public/data/carm-data.json` ships a 7-category taxonomy that bundles
+ * "Soziale Auswirkungen und Leistungsfähigkeit" into "Einfluss auf Stimmung
+ * und Wahrnehmung". The docx (`_local/team/Kategorisierung_2026 05 06.docx`)
+ * defines an 8-category taxonomy that ISD wants on the public site, and
+ * the per-myth `.mdoc` `categoryGroup` field already mirrors that 8-cat
+ * taxonomy. CLAUDE.md treats `carm-data.json` as immutable upstream.
+ *
+ * To keep `carm-data.json` untouched while shipping the 8-cat filter, we
+ * intercept the dataset inside `loadData()` and:
+ *   1. Replace the 7-cat `categories` array with the 8-cat `CATEGORIES_DOCX`
+ *      below (ids 1–8, name_de + name_en).
+ *   2. Re-key every myth's `category_id` / `category_de` / `category_en`
+ *      using `MYTH_NUMBER_TO_CATEGORY_GROUP` (sourced from the .mdoc
+ *      `categoryGroup` field per myth — the audit lives at
+ *      `_local/BugHerd/categoryGroup-audit.md`).
+ *
+ * This single-point intercept means every downstream consumer (FilterBar,
+ * Sidebar, BalkenView, StripsView, etc.) automatically renders the new
+ * 8-cat taxonomy without needing component-level edits. If carm-data.json
+ * is ever regenerated and ships its own 8-cat taxonomy, this override can
+ * be removed.
+ */
+const CATEGORIES_DOCX: CarmData['categories'] = [
+  { id: 1, name_de: 'Medizinischer und therapeutischer Nutzen', name_en: 'Medical and Therapeutic Benefits' },
+  { id: 2, name_de: 'Risiken für den Körper und die Entwicklung', name_en: 'Physical and Developmental Risks' },
+  { id: 3, name_de: 'Risiken für die psychische Gesundheit', name_en: 'Mental Health Risks' },
+  { id: 4, name_de: 'Einfluss auf Stimmung und Wahrnehmung', name_en: 'Effects on Mood and Perception' },
+  { id: 5, name_de: 'Soziale Auswirkungen und Leistungsfähigkeit', name_en: 'Social Effects and Performance' },
+  { id: 6, name_de: 'Risiken durch Dosierung und Qualität', name_en: 'Dosage and Quality Risks' },
+  { id: 7, name_de: 'Verbreitung in der Bevölkerung und Gesetzgebung', name_en: 'Prevalence and Legislation' },
+  { id: 8, name_de: 'Allgemeine Einschätzung der Gefährlichkeit', name_en: 'General Risk Assessment' },
+];
+
+/** mythNumber (1–42) → 8-cat docx categoryGroup id. Source of truth: the
+ *  per-myth `.mdoc` `categoryGroup` field; see audit file referenced above. */
+const MYTH_NUMBER_TO_CATEGORY_ID: Record<number, number> = {
+  1: 1,    // Allheilmittel              → Medizinischer
+  2: 8,    // Harmlos                    → Allgemeine Gefährlichkeit
+  3: 8,    // Heranwachsende             → Allgemeine Gefährlichkeit (moved from 'Risiken Körper' per docx)
+  4: 8,    // Weniger schädlich Alkohol  → Allgemeine Gefährlichkeit
+  5: 6,    // Schwierig zu dosieren      → Risiken Dosierung
+  6: 6,    // Mischkonsum                → Risiken Dosierung
+  7: 6,    // Zusätze                    → Risiken Dosierung
+  8: 2,    // Fötus                      → Risiken Körper
+  9: 6,    // Überdosierung              → Risiken Dosierung (moved from 'Allgemeine Gefährlichkeit' per docx)
+  10: 1,   // Schmerzen                  → Medizinischer
+  11: 2,   // Übelkeit                   → Risiken Körper
+  12: 1,   // Entzündungen               → Medizinischer
+  13: 1,   // Spastiken                  → Medizinischer
+  14: 2,   // Herz-Kreislauf             → Risiken Körper
+  15: 2,   // Atemwege                   → Risiken Körper
+  16: 2,   // Krebs                      → Risiken Körper
+  17: 1,   // Abnehmen                   → Medizinischer
+  18: 1,   // Schlaf                     → Medizinischer
+  19: 4,   // Wahrnehmung                → Stimmung
+  20: 3,   // Kognition                  → Risiken psychisch
+  21: 5,   // Verkehr                    → Soziale Auswirkungen
+  22: 3,   // Einstiegsdroge             → Risiken psychisch
+  23: 3,   // Abhängigkeit               → Risiken psychisch
+  24: 3,   // Psychosen                  → Risiken psychisch
+  25: 1,   // Angst                      → Medizinischer
+  26: 1,   // Depressionen               → Medizinischer
+  27: 1,   // ADHS                       → Medizinischer
+  28: 3,   // Motivation                 → Risiken psychisch
+  29: 4,   // Gemütslage                 → Stimmung
+  30: 3,   // Suizid                     → Risiken psychisch
+  31: 4,   // Entspannt                  → Stimmung
+  32: 4,   // Aggressiv                  → Stimmung
+  33: 5,   // Kreativ                    → Soziale Auswirkungen (moved from 'Stimmung' per docx)
+  34: 5,   // Soziale Beziehungen        → Soziale Auswirkungen
+  35: 5,   // Soziale Regeln             → Soziale Auswirkungen
+  36: 5,   // Niedrige Leistungen        → Soziale Auswirkungen
+  37: 5,   // Niedriges soziales Niveau  → Soziale Auswirkungen
+  38: 5,   // Cool                       → Soziale Auswirkungen
+  39: 7,   // Bevölkerung konsumiert     → Verbreitung
+  40: 7,   // Überall erlaubt            → Verbreitung
+  41: 7,   // Anstieg Erwachsene         → Verbreitung
+  42: 7,   // Anstieg Minderjährige      → Verbreitung
+};
+
 export async function loadData(): Promise<CarmData> {
   if (cachedData) return cachedData;
   const res = await fetch('/data/carm-data.json');
@@ -14,8 +97,30 @@ export async function loadData(): Promise<CarmData> {
     metrics: Array<Metric & { group_id: string }>;
     groups: Array<{ id: string }>;
   };
+
+  // 8-cat docx-taxonomy override. Each myth's category_id / category_de /
+  // category_en is rewritten from the mythNumber→categoryId map; myths not
+  // present in the map fall through to the carm-data.json values (defensive
+  // fallback in case carm-data.json is regenerated and gains rows we don't
+  // yet know about).
+  const docxCategoryById = new Map(CATEGORIES_DOCX.map((c) => [c.id, c]));
+  const remappedMyths: Myth[] = raw.myths.map((m) => {
+    const newId = MYTH_NUMBER_TO_CATEGORY_ID[m.id];
+    if (newId == null) return m;
+    const cat = docxCategoryById.get(newId);
+    if (!cat) return m;
+    return {
+      ...m,
+      category_id: newId,
+      category_de: cat.name_de,
+      category_en: cat.name_en,
+    };
+  });
+
   cachedData = {
     ...raw,
+    categories: CATEGORIES_DOCX,
+    myths: remappedMyths,
     metrics: raw.metrics.filter((m) => !EXCLUDED_GROUP_IDS.has(m.group_id)) as Metric[],
     groups: raw.groups.filter((g) => !EXCLUDED_GROUP_IDS.has(g.id)) as CarmData['groups'],
   };
@@ -49,10 +154,17 @@ export function getCategoryName(myth: Myth, lang: Lang): string {
 
 export function formatValue(value: number | null, indicator: Indicator): string {
   if (value === null || value === undefined) return 'n/a';
+  // BugHerd #31 — round-to-int site-wide. Reviewer asked for "no decimals
+  // please on the whole site"; Fedor confirmed round-to-int (not floor)
+  // for both percentages and 0-100 indicator scores in the 2026-05-07
+  // session. Math.round breaks ties to nearest even? No — JS Math.round
+  // breaks ties toward +Infinity (27.5 → 28), which is the German banking
+  // convention readers expect.
+  const rounded = Math.round(value);
   if (indicator === 'awareness') {
-    return `${value.toFixed(1)}%`;
+    return `${rounded}%`;
   }
-  return value.toFixed(1);
+  return String(rounded);
 }
 
 export function getIndicatorUnit(indicator: Indicator): string {

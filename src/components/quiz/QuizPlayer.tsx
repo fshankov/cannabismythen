@@ -98,7 +98,7 @@ export interface QuizShareCopyEntry {
 }
 
 interface QuizPlayerProps {
-  /** Quiz slug, e.g. "quiz-risiken" */
+  /** Quiz slug, e.g. "quiz-risiken-koerper-psyche" */
   quizSlug: string;
   /** JSON-serialized Record<mythId, MythContentEntry> from Astro build */
   mythContent?: string;
@@ -233,11 +233,11 @@ function clearProgress(slug: string): void {
 /** Per-quiz accent token (one of the four classification colours) used to
  *  tint the progress bar fill, the dot ring, and the next-question CTA. */
 const QUIZ_ACCENT: Record<string, string> = {
-  "quiz-medizin": "var(--color-richtig)",
-  "quiz-risiken": "var(--color-falsch)",
-  "quiz-stimmung": "var(--color-eher-richtig)",
+  "quiz-medizinischer-nutzen": "var(--color-richtig)",
+  "quiz-risiken-koerper-psyche": "var(--color-falsch)",
+  "quiz-stimmung-wahrnehmung": "var(--color-eher-richtig)",
   "quiz-gefaehrlichkeit": "var(--color-eher-falsch)",
-  "quiz-gesellschaft": "var(--color-accent)",
+  "quiz-soziales-bevoelkerung": "var(--color-accent)",
 };
 
 /** Count of consecutive `isCorrect` answers ending at index `idx`. Walks

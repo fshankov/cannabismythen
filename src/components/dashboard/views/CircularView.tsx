@@ -35,6 +35,11 @@ const INDICATOR_LABELS: Record<CircularIndicator, { de: string; en: string }> = 
 
 /* ── 8-category mapping (user-specified order) ─────────────────── */
 
+// Session 1 of 2026-05 — mythIds realigned with the 8-cat docx taxonomy
+// (Kategorisierung_2026 05 06.docx). Three reassignments per docx:
+//   m03 (Heranwachsende) → Allgemeine Gefährlichkeit (was Körper & Entwicklung)
+//   m09 (Überdosierung)  → Dosierung & Qualität     (was Allgemeine Gefährlichkeit)
+//   m33 (Kreativ)        → Soziale Auswirkungen     (was Stimmung & Wahrnehmung)
 const CIRCULAR_CATEGORIES = [
   {
     name_de: 'Medizinischer Nutzen',
@@ -46,7 +51,7 @@ const CIRCULAR_CATEGORIES = [
     name_de: 'Körper & Entwicklung',
     name_en: 'Body & Development',
     color: '#DC2626',
-    mythIds: [3, 8, 14, 15, 16, 11],
+    mythIds: [8, 14, 15, 16, 11],
   },
   {
     name_de: 'Psychische Gesundheit',
@@ -58,19 +63,19 @@ const CIRCULAR_CATEGORIES = [
     name_de: 'Stimmung & Wahrnehmung',
     name_en: 'Mood & Perception',
     color: '#9333EA',
-    mythIds: [31, 29, 33, 19, 32],
+    mythIds: [31, 29, 19, 32],
   },
   {
     name_de: 'Soziale Auswirkungen',
     name_en: 'Social Impact',
     color: '#0891B2',
-    mythIds: [21, 34, 36, 37, 35, 38],
+    mythIds: [21, 33, 34, 36, 37, 35, 38],
   },
   {
     name_de: 'Dosierung & Qualität',
     name_en: 'Dosing & Quality',
     color: '#6B7280',
-    mythIds: [5, 6, 7],
+    mythIds: [5, 6, 7, 9],
   },
   {
     name_de: 'Verbreitung & Gesetzgebung',
@@ -82,7 +87,7 @@ const CIRCULAR_CATEGORIES = [
     name_de: 'Allgemeine Gefährlichkeit',
     name_en: 'General Risk Assessment',
     color: '#be123c',
-    mythIds: [4, 2, 9],
+    mythIds: [4, 2, 3],
   },
 ];
 
@@ -457,12 +462,13 @@ export default function CircularView({
           {INDICATORS.map((ind) => {
             const raw = hoveredData.rawValues[ind];
             const label = INDICATOR_LABELS[ind][lang];
+            // BugHerd #31 — round-to-int site-wide.
             const val =
               raw === null
                 ? 'k. A.'
                 : ind === 'awareness'
-                  ? `${raw.toFixed(1)}%`
-                  : raw.toFixed(1);
+                  ? `${Math.round(raw)}%`
+                  : String(Math.round(raw));
             return (
               <div key={ind} className="circular-tooltip-row">
                 <span

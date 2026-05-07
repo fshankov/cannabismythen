@@ -210,7 +210,8 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
                   onClick={() => handleDotClick(d.mythId)}
                 >
                   <title>
-                    {`${getMythShortText(d.myth, state.lang)} — ${t(`indicator.${d.indicator}.short` as any, state.lang)}: ${d.value.toFixed(1)}`}
+                    {/* BugHerd #31 — round-to-int site-wide. */}
+                    {`${getMythShortText(d.myth, state.lang)} — ${t(`indicator.${d.indicator}.short` as any, state.lang)}: ${Math.round(d.value)}`}
                   </title>
                 </circle>
               </g>
