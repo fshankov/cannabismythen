@@ -2,7 +2,7 @@
 export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { reader } from "@lib/content";
+import { reader, getPublishedEntries } from "@lib/content";
 import { deriveHeroLabel } from "@lib/myth";
 import { HeroBlock } from "@components/hero/HeroBlock";
 import { mythPositions } from "@components/hero/mythPositions";
@@ -29,20 +29,18 @@ type MythRecord = {
   cardSummary: string;
 };
 
-const allSlugs = await reader.collections.zahlenUndFakten.list();
 const mythRecords: MythRecord[] = [];
 
-for (const slug of allSlugs) {
-  const entry = await reader.collections.zahlenUndFakten.read(slug);
-  if (!entry || entry.status !== "published") continue;
+for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
   // Slug prefixes look like "m01" or dual myths like "m31-m32".
   const prefixMatch = slug.match(/^(m\d+-m\d+|m\d+)/);
   if (!prefixMatch) continue;
+  const e = entry as { classification: string; title?: string; cardSummary?: string };
   mythRecords.push({
     prefix: prefixMatch[1],
-    classification: entry.classification,
-    heroLabel: deriveHeroLabel(entry.title ?? ""),
-    cardSummary: entry.cardSummary ?? "",
+    classification: e.classification,
+    heroLabel: deriveHeroLabel(e.title ?? ""),
+    cardSummary: e.cardSummary ?? "",
   });
 }
 
