@@ -7,50 +7,14 @@ import { reader } from "@lib/content";
 import QuizPlayer from "@components/quiz/QuizPlayer";
 import { QUIZ_THEMES } from "@components/quiz/quizData";
 import type { MythGroupMetrics } from "@lib/dashboard/types";
+import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
 // Direct JSON import — see fakten-karten/index.astro for the rationale.
 // `readFile(new URL(..., import.meta.url))` resolves wrong after Vite
 // bundles this page into Netlify's prerender chunk.
 import carmRawJson from "../../../public/data/carm-data.json";
 import "../../styles/quiz.css";
 
-// ── Build-time per-myth metric slice ────────────────────────────
-// Same approach as the fakten-karten page: read carm-data.json once,
-// slice by myth_id, and forward the keyed-by-quiz-myth-id map into the
-// quiz player. The shared FactsheetPanel renders an interactive bar
-// chart instead of the legacy markdown table.
-const VALID_GROUPS: ReadonlySet<string> = new Set([
-  "adults",
-  "minors",
-  "consumers",
-  "young_adults",
-  "parents",
-]);
-
-interface RawMetric {
-  myth_id: number;
-  group_id: string;
-  awareness: number | null;
-  significance: number | null;
-  correctness: number | null;
-  prevention_significance: number | null;
-  population_relevance: number | null;
-}
-
-const carmRaw = carmRawJson as { metrics: RawMetric[] };
-
-const groupMetricsByMythId: Record<number, MythGroupMetrics> = {};
-for (const m of carmRaw.metrics) {
-  if (!VALID_GROUPS.has(m.group_id)) continue;
-  if (!groupMetricsByMythId[m.myth_id]) groupMetricsByMythId[m.myth_id] = [];
-  groupMetricsByMythId[m.myth_id].push({
-    group_id: m.group_id as MythGroupMetrics[number]["group_id"],
-    awareness: m.awareness,
-    significance: m.significance,
-    correctness: m.correctness,
-    prevention_significance: m.prevention_significance,
-    population_relevance: m.population_relevance,
-  });
-}
+const groupMetricsByMythId = buildGroupMetricsByMythId(carmRawJson.metrics);
 
 export async function getStaticPaths() {
   const slugs = await reader.collections.quiz.list();
