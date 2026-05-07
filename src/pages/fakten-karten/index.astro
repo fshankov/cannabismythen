@@ -5,7 +5,7 @@ import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import FaktenKartenExplorer from "@components/fakten-karten/FaktenKartenExplorer";
 import { reader, getPublishedEntries } from "@lib/content";
-import type { MythGroupMetrics } from "@lib/dashboard/types";
+import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
 // Direct JSON import — Vite bundles the 79 KB into the prerender chunk at
 // build time. The public copy at /data/carm-data.json stays put for the
 // Daten-Explorer's runtime `fetch()`. Previously this used
@@ -24,49 +24,7 @@ const COMBINED_MYTHS: Record<number, number> = {
   42: 41, // m41-m42-anstieg-konsum
 };
 
-// ── Build-time per-myth metric slice ────────────────────────────
-// Reads `public/data/carm-data.json` once at build, slices by myth_id,
-// and forwards a typed `MythGroupMetrics` per myth to the React island.
-// The exact same dataset powers the Daten-Explorer at runtime; doing
-// the slice at build time avoids a redundant fetch on the lighter
-// fakten-karten page (it doesn't otherwise touch the dashboard data).
-//
-// `general_population` is excluded — it mixes minors and adults and is
-// not displayed on any user-facing chart (mirrors EXCLUDED_GROUP_IDS
-// in src/lib/dashboard/data.ts).
-const VALID_GROUPS: ReadonlySet<string> = new Set([
-  "adults",
-  "minors",
-  "consumers",
-  "young_adults",
-  "parents",
-]);
-
-interface RawMetric {
-  myth_id: number;
-  group_id: string;
-  awareness: number | null;
-  significance: number | null;
-  correctness: number | null;
-  prevention_significance: number | null;
-  population_relevance: number | null;
-}
-
-const carmRaw = carmRawJson as { metrics: RawMetric[] };
-
-const groupMetricsByMyth: Record<number, MythGroupMetrics> = {};
-for (const m of carmRaw.metrics) {
-  if (!VALID_GROUPS.has(m.group_id)) continue;
-  if (!groupMetricsByMyth[m.myth_id]) groupMetricsByMyth[m.myth_id] = [];
-  groupMetricsByMyth[m.myth_id].push({
-    group_id: m.group_id as MythGroupMetrics[number]["group_id"],
-    awareness: m.awareness,
-    significance: m.significance,
-    correctness: m.correctness,
-    prevention_significance: m.prevention_significance,
-    population_relevance: m.population_relevance,
-  });
-}
+const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
 
 // Build myth ID → factsheet slug mapping
 const factsheetEntries = await getPublishedEntries("zahlenUndFakten");
