@@ -3,87 +3,57 @@ import { sortedMyths } from '../data/carmData';
 
 interface Props {
   data: CarmData;
-  /** 'themed' = pastel category background; 'classified' = classification colors. */
-  mode: 'themed' | 'classified';
 }
-
-const CLASSIFICATION_COLOR: Record<string, string> = {
-  richtig: 'var(--classification-richtig)',
-  eher_richtig: 'var(--classification-eher-richtig)',
-  eher_falsch: 'var(--classification-eher-falsch)',
-  falsch: 'var(--classification-falsch)',
-  no_classification: 'var(--classification-keine-aussage)',
-};
-
-const CLASSIFICATION_LABEL: Record<string, string> = {
-  richtig: 'stimmt',
-  eher_richtig: 'stimmt eher',
-  eher_falsch: 'stimmt eher nicht',
-  falsch: 'stimmt nicht',
-  no_classification: 'keine Aussage',
-};
-
-const CLASSIFICATION_ORDER = [
-  'richtig',
-  'eher_richtig',
-  'eher_falsch',
-  'falsch',
-  'no_classification',
-] as const;
 
 function themeColorFor(catId: number | null): string {
   if (catId === null) return 'var(--bg-elev)';
-  // Map any category_id 1–9 onto themed pastels in tokens.css
   const idx = ((catId - 1) % 9) + 1;
   return `var(--theme-${idx})`;
 }
 
-export function VizMythGrid({ data, mode }: Props) {
-  const myths = sortedMyths(data);
-  // Pad/cap to 42 — defensive
-  const cells = myths.slice(0, 42);
+export function VizMythGrid({ data }: Props) {
+  const myths = sortedMyths(data).slice(0, 42);
 
-  // Counts for legend
-  const counts: Record<string, number> = {};
-  for (const m of cells) counts[m.correctness_class] = (counts[m.correctness_class] ?? 0) + 1;
+  // Build a list of unique categories that appear, in order of first appearance.
+  const seenCats = new Set<number>();
+  const orderedCats: { id: number; name: string }[] = [];
+  for (const m of myths) {
+    if (m.category_id !== null && !seenCats.has(m.category_id)) {
+      seenCats.add(m.category_id);
+      const cat = data.categories.find((c) => c.id === m.category_id);
+      orderedCats.push({
+        id: m.category_id,
+        name: cat?.name_de ?? `Kategorie ${m.category_id}`,
+      });
+    }
+  }
 
   return (
     <div className="viz">
       <div className="viz-grid" role="img" aria-label="42 Cannabis-Mythen, sortiert nach Themenfeld">
-        {cells.map((m, i) => {
-          const bg =
-            mode === 'classified'
-              ? CLASSIFICATION_COLOR[m.correctness_class] ?? 'var(--bg-elev)'
-              : themeColorFor(m.category_id);
-          return (
-            <div
-              key={m.id}
-              className={`viz-grid__cell ${mode === 'classified' ? 'viz-grid__cell--classified' : 'viz-grid__cell--themed'}`}
-              style={{
-                backgroundColor: bg,
-                transitionDelay: mode === 'classified' ? `${i * 35}ms` : '0ms',
-              }}
-              title={m.text_de}
-            >
-              {m.text_short_de}
-            </div>
-          );
-        })}
+        {myths.map((m) => (
+          <div
+            key={m.id}
+            className="viz-grid__cell viz-grid__cell--themed"
+            style={{ backgroundColor: themeColorFor(m.category_id) }}
+            title={m.text_de}
+          >
+            {m.text_short_de}
+          </div>
+        ))}
       </div>
-      <div className="viz-grid__legend" aria-hidden="true">
-        {mode === 'classified'
-          ? CLASSIFICATION_ORDER.filter((c) => counts[c]).map((c) => (
-              <span key={c} className="viz-grid__legend-item">
-                <span
-                  className="viz-grid__legend-swatch"
-                  style={{ background: CLASSIFICATION_COLOR[c] }}
-                />
-                {CLASSIFICATION_LABEL[c]} ({counts[c] ?? 0})
-              </span>
-            ))
-          : <span className="viz-grid__legend-item" style={{ color: 'var(--fg-muted)' }}>
-              Sortiert nach Themenfeld · 42 Thesen
-            </span>}
+      <div className="viz-grid__theme-legend" aria-label="Themenfelder">
+        <span className="viz-grid__theme-legend-title">Themenfelder:</span>
+        {orderedCats.map((c) => (
+          <span key={c.id} className="viz-grid__theme-chip">
+            <span
+              className="viz-grid__theme-swatch"
+              style={{ background: themeColorFor(c.id) }}
+              aria-hidden="true"
+            />
+            {c.name}
+          </span>
+        ))}
       </div>
     </div>
   );

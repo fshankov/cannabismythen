@@ -8,32 +8,49 @@ interface Props {
 interface Voice {
   id: number;
   text: string;
+  /** 0..1 — relative weight, mapped to font size + bubble scale.
+   *  Approximates how widespread the underlying belief is. */
+  weight: number;
 }
 
-/** Hand-curated everyday-voice quotes inspired by the 42 myths.
- *  Phase-A approximations; Phase-E will be reviewed against the report's
- *  media-analysis appendix. */
+/** 28 hand-curated everyday voices loosely grounded in CaRM's media analysis.
+ *  Weight ≈ awareness magnitude (0.35 = niche, 1.0 = ubiquitous). */
 const VOICES: Voice[] = [
-  { id: 1, text: 'Macht abhängig wie Heroin.' },
-  { id: 2, text: 'Sicherer als Alkohol — wirklich?' },
-  { id: 3, text: 'Hilft besser gegen Schmerzen als Pillen.' },
-  { id: 4, text: 'Wer kifft, kommt nicht aus dem Bett.' },
-  { id: 5, text: 'Naturprodukt — also unbedenklich.' },
-  { id: 6, text: 'Cannabis ist eine Einstiegsdroge.' },
-  { id: 7, text: 'Macht entspannt — was soll daran schlimm sein?' },
-  { id: 8, text: 'Ist jetzt überall erlaubt.' },
-  { id: 9, text: 'Wer kifft, wird depressiv.' },
-  { id: 10, text: 'Macht Jugendliche dumm.' },
-  { id: 11, text: 'Schadet dem ungeborenen Kind.' },
-  { id: 12, text: 'Ist medizinisch sehr nützlich.' },
+  { id: 1,  text: 'Hilft besser gegen Schmerzen als Pillen.',     weight: 1.00 },
+  { id: 2,  text: 'Cannabis ist eine Einstiegsdroge.',             weight: 0.95 },
+  { id: 3,  text: 'Macht entspannt — was soll daran schlimm sein?', weight: 0.90 },
+  { id: 4,  text: 'Sicherer als Alkohol — wirklich?',              weight: 0.85 },
+  { id: 5,  text: 'Schadet dem ungeborenen Kind.',                 weight: 0.80 },
+  { id: 6,  text: 'Wer kifft, kommt nicht aus dem Bett.',          weight: 0.75 },
+  { id: 7,  text: 'Hilft beim Schlafen — fast wie ein Tee.',       weight: 0.72 },
+  { id: 8,  text: 'Macht abhängig wie Heroin.',                    weight: 0.68 },
+  { id: 9,  text: 'Verändert die Wahrnehmung total.',              weight: 0.65 },
+  { id: 10, text: 'Naturprodukt — also unbedenklich.',             weight: 0.62 },
+  { id: 11, text: 'Junge Gehirne nehmen Schaden, klar.',           weight: 0.58 },
+  { id: 12, text: 'Ist jetzt überall erlaubt.',                    weight: 0.55 },
+  { id: 13, text: 'Wer kifft, wird depressiv.',                    weight: 0.52 },
+  { id: 14, text: 'Macht Jugendliche dumm.',                       weight: 0.50 },
+  { id: 15, text: 'Macht kreativ und entspannt zugleich.',         weight: 0.48 },
+  { id: 16, text: 'Mischen mit Alkohol ist riskant.',              weight: 0.46 },
+  { id: 17, text: 'Hilft gegen Angststörungen.',                   weight: 0.44 },
+  { id: 18, text: 'Streckmittel sind das eigentliche Problem.',    weight: 0.42 },
+  { id: 19, text: 'Ist medizinisch sehr nützlich.',                weight: 0.40 },
+  { id: 20, text: 'Cool ist das jedenfalls nicht mehr.',           weight: 0.38 },
+  { id: 21, text: 'Hilft gegen Übelkeit bei Chemo.',               weight: 0.36 },
+  { id: 22, text: 'Lungenkrebs durch Joints? Wahrscheinlich.',     weight: 0.35 },
+  { id: 23, text: 'Hilft sogar bei ADHS, sagt mein Cousin.',       weight: 0.34 },
+  { id: 24, text: 'Wer regelmäßig kifft, ist sozial schwächer.',   weight: 0.33 },
+  { id: 25, text: 'Allheilmittel — alles Marketing.',              weight: 0.32 },
+  { id: 26, text: 'Überdosis? Nein, davon stirbt man nicht.',      weight: 0.31 },
+  { id: 27, text: 'Kann man eigentlich gar nicht überdosieren.',   weight: 0.30 },
+  { id: 28, text: 'Eine Mehrheit kifft heute doch eh, oder?',      weight: 0.30 },
 ];
 
 interface SimNode extends d3.SimulationNodeDatum {
   id: number;
   text: string;
-  // initial randomized "home" position so layout is stable
-  x?: number;
-  y?: number;
+  weight: number;
+  size: number;
 }
 
 export function VizPeopleVoices({ active }: Props) {
@@ -52,19 +69,29 @@ export function VizPeopleVoices({ active }: Props) {
     const h = container.clientHeight;
     if (w === 0 || h === 0) return;
 
-    // Seed deterministic positions
-    const rng = mulberry32(1729);
-    const nodes: SimNode[] = VOICES.map((v) => ({
-      id: v.id,
-      text: v.text,
-      x: rng() * w,
-      y: rng() * h,
-    }));
+    const rng = mulberry32(31337);
+    const nodes: SimNode[] = VOICES.map((v) => {
+      // Bubble width estimate from weight (12–17px font, ~10ch)
+      const fontSize = 11 + v.weight * 6;
+      const padding = 14;
+      const ch = v.text.length;
+      const wEst = Math.min(260, ch * fontSize * 0.42 + padding * 2);
+      const hEst = fontSize * (ch > 28 ? 3.4 : 2.4) + padding;
+      return {
+        id: v.id,
+        text: v.text,
+        weight: v.weight,
+        size: Math.max(wEst, hEst) / 2 + 8,
+        x: rng() * w,
+        y: rng() * h,
+      };
+    });
 
     if (reduced) {
-      // Static grid: 4 cols × 3 rows
-      const cols = 4;
-      nodes.forEach((n, i) => {
+      // Static masonry-ish grid (5 cols × 6 rows) sorted by weight desc
+      const cols = w < 600 ? 3 : 5;
+      const sorted = [...nodes].sort((a, b) => b.weight - a.weight);
+      sorted.forEach((n, i) => {
         n.x = ((i % cols) + 0.5) * (w / cols);
         n.y = (Math.floor(i / cols) + 0.5) * (h / Math.ceil(VOICES.length / cols));
       });
@@ -74,58 +101,49 @@ export function VizPeopleVoices({ active }: Props) {
 
     const sim = d3
       .forceSimulation<SimNode>(nodes)
-      .force('center', d3.forceCenter(w / 2, h / 2).strength(0.05))
-      .force('collide', d3.forceCollide(95).strength(0.85))
-      .force('x', d3.forceX(w / 2).strength(0.04))
+      .force('center', d3.forceCenter(w / 2, h / 2).strength(0.04))
+      .force(
+        'collide',
+        d3.forceCollide<SimNode>().radius((n) => n.size).strength(0.9),
+      )
+      .force('x', d3.forceX(w / 2).strength(0.025))
       .force('y', d3.forceY(h / 2).strength(0.04))
       .alphaDecay(0.04)
-      .on('tick', () => {
-        applyPositions(nodes, cardRefs.current);
-      });
+      .on('tick', () => applyPositions(nodes, cardRefs.current));
 
     return () => {
       sim.stop();
     };
   }, []);
 
-  // Re-trigger gentle drift when active toggles
-  useEffect(() => {
-    if (!active) return;
-    const t = setInterval(() => {
-      const cards = cardRefs.current;
-      cards.forEach((el) => {
-        if (!el) return;
-        // small random jitter via CSS for life
-        el.animate(
-          [
-            { transform: el.style.transform + ' translate(0, 0)' },
-            { transform: el.style.transform + ' translate(2px, -3px)' },
-            { transform: el.style.transform + ' translate(0, 0)' },
-          ],
-          { duration: 4000 + Math.random() * 2000, iterations: 1 },
-        );
-      });
-    }, 6000);
-    return () => clearInterval(t);
-  }, [active]);
-
   return (
     <div className="viz" style={{ width: '100%' }}>
-      <div className="viz-voices" ref={containerRef} style={{ height: 480, width: '100%' }}>
-        {VOICES.map((v) => (
-          <div
-            key={v.id}
-            ref={(el) => {
-              cardRefs.current.set(v.id, el);
-            }}
-            className="viz-voice-card"
-            tabIndex={0}
-            style={{ left: 0, top: 0 }}
-          >
-            <span className="viz-voice-card__glyph" aria-hidden="true">„</span>
-            <span className="viz-voice-card__quote">{v.text}</span>
-          </div>
-        ))}
+      <div className="viz-voices" ref={containerRef} style={{ height: 560, width: '100%' }}>
+        {VOICES.map((v) => {
+          const fontSize = 11 + v.weight * 6;
+          const opacity = 0.55 + v.weight * 0.45;
+          return (
+            <div
+              key={v.id}
+              ref={(el) => {
+                cardRefs.current.set(v.id, el);
+              }}
+              className={`viz-voice-card ${active ? 'viz-voice-card--in' : ''}`}
+              tabIndex={0}
+              style={{
+                left: 0,
+                top: 0,
+                fontSize: `${fontSize.toFixed(1)}px`,
+                opacity,
+              }}
+              title={v.text}
+            >
+              <span className="viz-voice-card__glyph" aria-hidden="true">„</span>
+              <span className="viz-voice-card__quote">{v.text}</span>
+              <span className="viz-voice-card__tail" aria-hidden="true" />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -139,7 +157,6 @@ function applyPositions(nodes: SimNode[], cards: Map<number, HTMLDivElement | nu
   }
 }
 
-/** Tiny seeded RNG for deterministic layouts during development. */
 function mulberry32(a: number) {
   return function () {
     let t = (a += 0x6d2b79f5);

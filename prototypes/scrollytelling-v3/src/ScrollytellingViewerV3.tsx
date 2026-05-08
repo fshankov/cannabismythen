@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { CarmData, IndicatorPhase, ScrollyStep } from './data/types';
 import { STEPS } from './data/steps';
-import { VizLawDateBadge } from './viz/VizLawDateBadge';
+import { VizTimeline } from './viz/VizTimeline';
 import { VizPeopleVoices } from './viz/VizPeopleVoices';
 import { VizMythGrid } from './viz/VizMythGrid';
-import { VizIndicatorStrip } from './viz/VizIndicatorStrip';
-import { VizTrustGap } from './viz/VizTrustGap';
+import { VizClassificationReveal } from './viz/VizClassificationReveal';
+import { VizSampleAndIndicators } from './viz/VizSampleAndIndicators';
+import { VizIndicatorRanked } from './viz/VizIndicatorRanked';
+import { VizTrustScatter } from './viz/VizTrustScatter';
 import { VizCtaGrid } from './viz/VizCtaGrid';
 import { VizTeamRow } from './viz/VizTeamRow';
 
@@ -22,20 +24,20 @@ interface VizDispatchProps {
 
 function StepVisualization({ step, active, data, phase }: VizDispatchProps) {
   switch (step.vizName) {
-    case 'lawDateBadge':
-      return <VizLawDateBadge active={active} />;
+    case 'timeline':
+      return <VizTimeline active={active} />;
     case 'peopleVoices':
       return <VizPeopleVoices active={active} />;
     case 'mythGrid':
-      return <VizMythGrid data={data} mode="themed" />;
+      return <VizMythGrid data={data} />;
     case 'classificationReveal':
-      return <VizMythGrid data={data} mode={active ? 'classified' : 'themed'} />;
-    case 'indicatorStrip':
-      return <VizIndicatorStrip data={data} phase={null} />;
-    case 'indicatorStripLive':
-      return <VizIndicatorStrip data={data} phase={phase} />;
-    case 'trustGap':
-      return <VizTrustGap />;
+      return <VizClassificationReveal data={data} active={active} />;
+    case 'sampleAndIndicators':
+      return <VizSampleAndIndicators />;
+    case 'indicatorRanked':
+      return <VizIndicatorRanked data={data} phase={phase} />;
+    case 'trustScatter':
+      return <VizTrustScatter />;
     case 'ctaGrid':
       return <VizCtaGrid />;
     case 'teamRow':
@@ -65,7 +67,6 @@ export function ScrollytellingViewerV3({ data }: Props) {
     [],
   );
 
-  // Step-level IntersectionObserver — same pattern as v2 ScrollytellingViewer
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
     stepsRef.current.forEach((el, i) => {
@@ -84,7 +85,6 @@ export function ScrollytellingViewerV3({ data }: Props) {
     return () => observers.forEach((o) => o.disconnect());
   }, []);
 
-  // Step-6 phase markers — three internal triggers driving the heatmap recolor
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
     const phaseOrder: IndicatorPhase[] = [
@@ -112,13 +112,11 @@ export function ScrollytellingViewerV3({ data }: Props) {
 
   return (
     <section className="scrolly" aria-label="Scrollytelling: Forschungsprozess">
-      {/* Mobile sticky-top viz */}
       <div className="scrolly__viz-mobile" aria-hidden="true">
         <StepVisualization step={currentStep} active data={data} phase={phase} />
       </div>
 
       <div className="scrolly__container">
-        {/* Left text column */}
         <div className="scrolly__text-col">
           {STEPS.map((step, i) => (
             <div
@@ -149,7 +147,6 @@ export function ScrollytellingViewerV3({ data }: Props) {
                   {step.ctaLabel} →
                 </a>
               )}
-              {/* Step 6 — three phase markers for heatmap sub-phases */}
               {step.stepNumber === 6 && (
                 <>
                   {[0, 1, 2].map((idx) => (
@@ -166,7 +163,6 @@ export function ScrollytellingViewerV3({ data }: Props) {
           ))}
         </div>
 
-        {/* Right viz column — sticky on desktop */}
         <div className="scrolly__viz-col" aria-live="polite">
           <StepVisualization step={currentStep} active data={data} phase={phase} />
         </div>

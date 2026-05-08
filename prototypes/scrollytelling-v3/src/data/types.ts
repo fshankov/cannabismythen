@@ -84,13 +84,13 @@ export interface ScrollyStep {
   bodyText: string;
   hint?: string;
   vizName:
-    | 'lawDateBadge'
+    | 'timeline'
     | 'peopleVoices'
     | 'mythGrid'
     | 'classificationReveal'
-    | 'indicatorStrip'
-    | 'indicatorStripLive'
-    | 'trustGap'
+    | 'sampleAndIndicators'
+    | 'indicatorRanked'
+    | 'trustScatter'
     | 'ctaGrid'
     | 'teamRow';
   ctaLabel?: string;
