@@ -36,8 +36,13 @@ export function VizCtaGrid() {
   return (
     <div className="viz">
       <div className="viz-cta">
-        {CTAS.map((c) => (
-          <a key={c.href} className="viz-cta__card" href={c.href}>
+        {CTAS.map((c, i) => (
+          <a
+            key={c.href}
+            className="viz-cta__card"
+            href={c.href}
+            style={{ animationDelay: `${i * 80}ms` }}
+          >
             <span className="viz-cta__card-title">
               <span aria-hidden="true">{c.glyph}</span>
               {c.title}

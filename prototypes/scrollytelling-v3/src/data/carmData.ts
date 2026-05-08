@@ -1,6 +1,14 @@
-import type { CarmData, GroupId, Indicator, Metric, Myth } from './types';
+import type {
+  CarmData,
+  GroupId,
+  Indicator,
+  InformationSourcesData,
+  Metric,
+  Myth,
+} from './types';
 
 let cached: CarmData | null = null;
+let cachedSources: InformationSourcesData | null = null;
 
 /**
  * Load carm-data.json from the prototype's public/ folder.
@@ -12,6 +20,15 @@ export async function loadCarmData(): Promise<CarmData> {
   if (!res.ok) throw new Error(`Failed to load carm-data.json: ${res.status}`);
   cached = (await res.json()) as CarmData;
   return cached;
+}
+
+/** Load info-sources.json (mirrors src/lib/dashboard's information-sources). */
+export async function loadInformationSources(): Promise<InformationSourcesData> {
+  if (cachedSources) return cachedSources;
+  const res = await fetch('/info-sources.json');
+  if (!res.ok) throw new Error(`Failed to load info-sources.json: ${res.status}`);
+  cachedSources = (await res.json()) as InformationSourcesData;
+  return cachedSources;
 }
 
 /** Look up the metric row for one myth × one group. May return null if missing. */

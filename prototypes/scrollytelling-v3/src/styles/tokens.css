@@ -55,6 +55,42 @@
 
   /* Shadows */
   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  /* Animation kit — applied uniformly across vizzes (Iter-3) */
+  --anim-stagger: 30ms;
+  --anim-entry-dur: 400ms;
+  --anim-entry-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --anim-hover-dur: 200ms;
+  --anim-color-morph-dur: 600ms;
+  --anim-bar-grow-dur: 800ms;
+  --anim-step-fade-dur: 500ms;
+
+  /* Source category palette (info-sources.json colors) */
+  --source-cat-institutional: #2563eb;
+  --source-cat-internet: #8b5cf6;
+  --source-cat-social_media: #06b6d4;
+  --source-cat-traditional_media: #f97316;
+  --source-cat-print_physical: #ec4899;
+  --source-cat-personal: #6b7280;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --anim-stagger: 0ms;
+    --anim-entry-dur: 0ms;
+    --anim-hover-dur: 0ms;
+    --anim-color-morph-dur: 0ms;
+    --anim-bar-grow-dur: 0ms;
+    --anim-step-fade-dur: 0ms;
+  }
+}
+[data-reduced-motion="true"] {
+  --anim-stagger: 0ms;
+  --anim-entry-dur: 0ms;
+  --anim-hover-dur: 0ms;
+  --anim-color-morph-dur: 0ms;
+  --anim-bar-grow-dur: 0ms;
+  --anim-step-fade-dur: 0ms;
 }
 
 /* Themenfeld pastels — backgrounds for myth-grid cells (resting state).

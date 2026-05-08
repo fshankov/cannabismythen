@@ -103,6 +103,22 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-md);
+  contain: layout;
+}
+
+/* Viz "stage" — cross-fade between unrelated viz families
+   (key swap on the React node triggers a remount; opacity animates in). */
+.scrolly__viz-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: scrolly-stage-in var(--anim-step-fade-dur, 500ms) ease both;
+}
+@keyframes scrolly-stage-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .scrolly__viz-mobile {

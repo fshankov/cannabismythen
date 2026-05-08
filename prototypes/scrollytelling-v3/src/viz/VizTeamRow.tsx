@@ -17,16 +17,21 @@ export function VizTeamRow() {
   return (
     <div className="viz viz-team">
       <div className="viz-team__avatars" aria-label="Forschungsteam">
-        {TEAM.map((m) => (
+        {TEAM.map((m, i) => (
           <span
             key={m.initials}
             className="viz-team__avatar"
-            style={{ background: m.color }}
+            style={{
+              background: m.color,
+              animationDelay: `${i * 80}ms`,
+            }}
             title={m.fullName}
+            tabIndex={0}
             role="img"
             aria-label={m.fullName}
           >
-            {m.initials}
+            <span className="viz-team__avatar-initials">{m.initials}</span>
+            <span className="viz-team__avatar-name">{m.fullName}</span>
           </span>
         ))}
       </div>
