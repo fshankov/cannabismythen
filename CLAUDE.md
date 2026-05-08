@@ -17,6 +17,40 @@ aren't obvious from the source.
 > usually from two dev servers sharing `node_modules/.vite/deps` or a mid-transform
 > save), tell Fedor to: stop the dev server, `rm -rf node_modules/.vite`, re-run
 > `./_local/render.sh`. The render script's port-collision warning explains this.
+>
+> **Sandbox-side `astro check`:** the Cowork sandbox runs Linux. Running `astro check`
+> in the sandbox hits two recurring failures: (1) the macOS-installed
+> `node_modules` ships `@rollup/rollup-darwin-arm64` not the `linux-arm64-gnu`
+> variant — fix with `npm install @rollup/rollup-linux-arm64-gnu --no-save`;
+> (2) the `@astrojs/netlify` integration `astro:config:setup` hook tries to
+> `rmdir .netlify/v1/edge-functions/middleware` and fails on EPERM because that
+> dir was created by Fedor's macOS Netlify CLI with restrictive perms. Workaround:
+> use the type-only config that doesn't load netlify integration:
+> `npx astro check --config astro.config.dev.mjs`. That's the canonical sandbox
+> typecheck command across S2/S3a/S3b/S3c.
+
+## Operator context
+
+Fedor works on **MacBook Pro** (Apple Silicon, zsh shell, primary path
+`/Users/feodorshankov/Documents/GitHub/cannabismythen`). Use macOS conventions when
+proposing keyboard shortcuts (Cmd not Ctrl: Cmd-S, Cmd-Tab, Cmd-Shift-3/4 for
+screenshots), app names (Finder, Safari, Chrome — not File Explorer / Edge),
+clipboard helpers (`pbcopy` / `pbpaste`), and "open in editor" commands (`open .`
+opens the current dir in Finder; VS Code path is the macOS .app bundle). Don't
+propose Ctrl-key shortcuts or Windows path conventions.
+
+## Tracker workflow (BugHerd feedback tracker)
+
+The team-shareable tracker lives at `docs/tracker/index.html` and is served by
+GitHub Pages (one-time setup: repo Settings → Pages → Source "Deploy from a
+branch" → main / `/docs`). The canonical source is the Cowork artifact at
+`~/Documents/Claude/Artifacts/cannabismythen-feedback-tracker/index.html`.
+After any session that updates the tracker, run `./scripts/sync-tracker.sh`,
+then commit + push `docs/tracker/`. Sessions can also edit `docs/tracker/`
+directly when needed — but Cowork artifact is the long-term canonical so
+that the tracker survives across sessions. Token cost of editing the tracker
+is small (~500–2000 per session); CLAUDE.md additions like this paragraph
+are ~100–300 tokens loaded per session start, negligible vs. session budget.
 
 ## Working with Fedor — process rule (HARD)
 
@@ -118,7 +152,41 @@ Things that look normal but aren't — every one of these has bitten somebody.
    silently dropped if you don't extend the Astro page to forward it.
 5. **Population framing must say "Erwachsene (18–70)…"**, never "Bevölkerung in
    Deutschland" alone or "Befragten" without qualifier. CaRM IS the sample; the
-   wording protects honesty about who the data describes.
+   wording protects honesty about who the data describes. **One sanctioned
+   exception** (Fedor 2026-05-07 PM): the homepage credibility lede in
+   `src/content/credibility-block.yaml` uses *"einer umfangreichen Befragung
+   in Deutschland"* without the (Erwachsene 18–70) qualifier. The headline
+   above it still says "Bevölkerungsbefragung", carrying the framing.
+   Everywhere else in user-visible copy, keep the audience qualifier.
+
+6. **"Evidenz" → "Wissenschaftlich" rule (UI labels only).** Site-wide policy
+   from BugHerd #30 (Fedor 2026-05-07 PM): UI labels and headings that mean
+   "evidence-based" use a *Wissenschaftlich…* form, not *Evidenz…*. The
+   substantive scientific term "Evidenz" stays in body copy of myth
+   explanations, methodology and glossary pages. The brand name **"Cannabis:
+   Mythen & Evidenz"** is protected — keep it everywhere it appears (login
+   page, BaseLayout title suffix, `ui.siteName`, CSS comments). When you
+   encounter an `Evidenz…` string, decide: is this a label/heading
+   (replace) or a substantive scientific claim in body copy (keep)? See
+   `src/components/quiz/i18n.ts` `ui.correctAnswer` for the canonical
+   replacement pattern.
+
+7. **Sie/Du baseline.** The site's voice is **Sie** (formal). The only
+   sanctioned Du-form pocket is the Jugendliche (16–17) FAQ section
+   (`src/content/faq/audiences.yaml` id `jugendliche`, title "Deine Fragen
+   rund um Cannabis"). The two scrollytelling drafts (`scrollytelling-v2.mdoc`
+   + `scrollytelling-v3.mdoc`) deliberately keep Du-form storytelling hooks
+   ("Glaubst du, du kennst dich aus?") flagged in their `internalNotes` for
+   ISD review; do NOT mechanically Sie-flip without ISD sign-off.
+
+8. **Quiz tile score persistence (Session 3b).** When a user finishes a
+   quiz, `QuizPlayer.tsx` writes `cm-quiz-score-{themeSlug}` to
+   `localStorage` (no cookies, no server, no PII). The `/quiz/` index reads
+   it via an inline script and renders a small "Zuletzt: X/Y · Z %" chip
+   on each tile. Key uses the canonical (post-Session-1) slug, so
+   `quiz-medizin` → `quiz-medizinischer-nutzen` rename does NOT bleed
+   scores. If you rename a slug in the future, follow the same pattern and
+   leave the old localStorage key behind (gracefully ignored).
 
 ## What this project is
 
@@ -184,7 +252,7 @@ Prefer aliases over relative paths:
 |---|---|---|
 | `zahlenUndFakten` | `src/content/zahlen-und-fakten/m01..m42.mdoc` | The 42 myth factsheets |
 | `zahlenUndFaktenDashboard` | `src/content/zahlen-und-fakten-dashboard/` | Audience-specific indicator pages |
-| `haeufigeFragen` | `src/content/haeufige-fragen/` | FAQ pages by theme/audience |
+| `faqQuestions` + `faqAudiences` | `src/content/faq/questions/`, `src/content/faq/audiences/` | "Meine Interessen" section — pages live under `/meine-interessen/` (renamed from `/haeufige-fragen/` in Session 3a, 2026-05-07; the legacy URL 301-redirects from edge + netlify.toml). Audience-first restructure replaced the legacy theme-based `haeufigeFragen` collection. |
 | `selbsttest` | `src/content/selbsttest/` | Quiz modules + feedback texts |
 | `startseite` | `src/content/startseite/` | Scrollytelling narratives |
 | `ueberUns` | `src/content/ueber-uns/` | klassifikation, methodik, projekt, team |
@@ -272,7 +340,7 @@ export async function getStaticPaths() {
 }
 ```
 
-URLs are German and slugs are kebab-case: `/daten-explorer/`, `/haeufige-fragen/`,
+URLs are German and slugs are kebab-case: `/daten-explorer/`, `/meine-interessen/`,
 `/selbsttest/`, `/ueber-uns/`, `/fakten-karten/`, `/startseite/`. Don't introduce
 English route segments.
 
@@ -294,10 +362,19 @@ English route segments.
   `/daten-explorer/...` everywhere. The `dashboardLinkLabel()` helper in
   `src/lib/faq.ts` keeps legacy editor entries with old URLs gracefully
   resolving to the same German captions.
+- The FAQ section is `/meine-interessen/` (renamed from `/haeufige-fragen/` in
+  Session 3a, 2026-05-07, per BugHerd #6). Three patterns 301 from the legacy
+  URL: bare, `/frage/{slug}/`, and `/{audience}/`. Edge middleware + netlify.toml
+  carry the rules. The visible label everywhere is **"Meine Interessen"**;
+  the legacy "Häufige Fragen" / "Ihre Fragen" labels were swept site-wide.
+- The on-disk content folder is `src/content/faq/` (audience-first restructure)
+  — only the URL moved, not the content folder. Don't link to `/haeufige-fragen/`
+  in new code; use `/meine-interessen/...`.
 
 `src/middleware.ts` enforces a `SITE_PASSWORD` cookie at the edge when the env var is
-set; `/login` and Keystatic's `/api/*` routes are exempt. The Stage 5
-`/zahlen-und-fakten/*` → `/daten-explorer/*` 301 redirects fire BEFORE the
+set; `/login` and Keystatic's `/api/*` routes are exempt. Both the Stage 5
+`/zahlen-und-fakten/*` → `/daten-explorer/*` and the Session 3a
+`/haeufige-fragen/*` → `/meine-interessen/*` 301 redirects fire BEFORE the
 password gate so external backlinks resolve for unauthenticated traffic too.
 
 ## Component organization
