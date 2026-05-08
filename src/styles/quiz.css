@@ -780,18 +780,12 @@
   letter-spacing: -0.01em;
 }
 
-.quiz-card--flow .quiz-card__verdict-line--richtig {
-  color: var(--color-richtig);
-}
-.quiz-card--flow .quiz-card__verdict-line--eher_richtig {
-  color: var(--color-eher-richtig);
-}
-.quiz-card--flow .quiz-card__verdict-line--eher_falsch {
-  color: var(--color-eher-falsch);
-}
-.quiz-card--flow .quiz-card__verdict-line--falsch {
-  color: var(--color-falsch);
-}
+/* BugHerd #26 (Session 3b, 2026-05-07): the .quiz-card__verdict-line--*
+   colour modifiers were removed. The big back-face Schritte verdict
+   line ("Nah dran" / "Genau richtig" / etc.) now renders monochrome
+   per the reviewer's ruling. The smaller chips above (Ihre Antwort +
+   Wissenschaftlich) keep their colour, and so do dashboard pills,
+   factsheet panel verdict header, fakten-karten flips, hero animation. */
 
 /* 3 — Points sub-line under the verdict. Muted, monospace numerals for
    alignment stability. */
@@ -2498,6 +2492,41 @@
   text-align: center;
 }
 
+/* BugHerd #44 (Session 3b, 2026-05-07): "Weiter erkunden" invitation
+   block. Sits between the primary CTAs and the tertiary text-links.
+   Renders a small heading and two cross-section text links so the
+   result screen reads as a launchpad, not a dead end. */
+.quiz-result__actions-explore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: var(--space-md) 0;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-line, #e7e7e2);
+}
+
+.quiz-result__explore-heading {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 4px;
+}
+
+.quiz-result__explore-link {
+  color: var(--color-accent);
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 4px 8px;
+}
+
+.quiz-result__explore-link:hover {
+  text-decoration-thickness: 2px;
+}
+
 .quiz-result__actions-tertiary {
   display: flex;
   align-items: center;
@@ -3190,6 +3219,24 @@
   padding: 0.25em 0.8em;
   border-radius: var(--radius-full);
   letter-spacing: 0.02em;
+}
+
+/* BugHerd #37b (Session 3b, 2026-05-07): per-tile last-score chip. The
+   element is hidden by default so tiles look unchanged when localStorage
+   is empty; the inline script in /quiz/index.astro reveals it once a
+   matching cm-quiz-score-{slug} entry is found. Sits below the question-
+   count pill, smaller and quieter so it doesn't compete with the title. */
+.quiz-select-card__last-score {
+  display: none;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  letter-spacing: 0.01em;
+}
+
+.quiz-select-card__last-score--has-data {
+  display: inline-block;
 }
 
 /* Stage 6 — Featured Schnellcheck tile. Subtle dotted border + "Mix"

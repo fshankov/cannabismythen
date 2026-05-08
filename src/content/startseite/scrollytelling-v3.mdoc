@@ -54,7 +54,7 @@ steps:
     ctaUrl: ''
   - stepNumber: 8
     heading: "Was wir daraus gemacht haben."
-    bodyText: "Diese Website verwertet die Befunde der CaRM-Studie für unterschiedliche Bedürfnisse:\n\n— 42 Faktenkarten mit der wissenschaftlichen Klassifikation, Quellen und Erklärungen je Mythos.\n— Ein Selbsttest, der dein eigenes Wissen mit den Ergebnissen der Bevölkerungsbefragung vergleicht.\n— Vier Daten-Dashboards für allgemeines Publikum, Eltern, Präventionsfachkräfte und Forschung.\n— Häufige Fragen, sortiert nach Themen und Zielgruppen."
+    bodyText: "Diese Website verwertet die Befunde der CaRM-Studie für unterschiedliche Bedürfnisse:\n\n— 42 Faktenkarten mit der wissenschaftlichen Klassifikation, Quellen und Erklärungen je Mythos.\n— Ein Selbsttest, der dein eigenes Wissen mit den Ergebnissen der Bevölkerungsbefragung vergleicht.\n— Vier Daten-Dashboards für allgemeines Publikum, Eltern, Präventionsfachkräfte und Forschung.\n— Meine Interessen, sortiert nach Themen und Zielgruppen."
     hint: ''
     vizType: colorReveal
     ctaLabel: Zu den Faktenkarten
@@ -88,6 +88,11 @@ internalNotes: |-
   filtert ihn aus), bis die Phase-D-Komponente fertig ist und Fedor die Copy abgenommen
   hat.
 
+  ISD-REVIEW-PENDING (Session 3b, 2026-05-07): body uses Du form ("dein eigenes Wissen").
+  Sie baseline rules elsewhere on site. Per Fedor 2026-05-07: defer to ISD direct edit
+  in Keystatic when the file is promoted to status: published. Either keep Du as
+  conversational hook or commit to a Sie rewrite owned by ISD.
+
   VIZ-MAPPING (Phase A → Phase C). Aktueller vizType ist nur Platzhalter aus dem v2-Enum.
   Phase B erweitert das Schema um neue Werte:
     Step 1 → bigNumber (placeholder) → INTENDED: lawDateBadge
@@ -109,7 +114,7 @@ internalNotes: |-
     Step 7 → trustGap (passt) → v2-Komponente weiterverwenden (Dumbbell-Chart).
     Step 8 → colorReveal (placeholder) → INTENDED: ctaGrid
               Vier CTA-Karten: /fakten-karten/, /quiz/, /daten-explorer/,
-              /haeufige-fragen/.
+              /meine-interessen/.
     Step 9 → bigNumber (placeholder) → INTENDED: teamRow
               Initialen-Avatare oder Stock-Silhouetten der ISD-Forschenden + BIÖG-Logo.
 

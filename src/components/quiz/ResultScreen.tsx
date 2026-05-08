@@ -373,7 +373,14 @@ export default function ResultScreen({
       </div>
 
       {/* Action buttons — exactly two primary actions in matching size,
-          plus two same-sized text links beneath. */}
+          plus a "Weiter erkunden" invitation block + two same-sized text
+          links beneath. BugHerd #44 (Session 3b, 2026-05-07): the
+          invitation block adds explicit cross-section CTAs to
+          Daten-Explorer + Meine Interessen so the result screen reads
+          as a launchpad, not a dead end. The label "Meine Interessen"
+          preempts the Item 6 FAQ section rename (still upcoming);
+          /meine-interessen/ will 301 to /meine-interessen/ once Item 6
+          ships. */}
       <div className="quiz-result__actions">
         <div className="quiz-result__actions-primary">
           <a
@@ -390,6 +397,21 @@ export default function ResultScreen({
               {t("ui.nextModule.cta", { title: nextThemeTitle })}
             </a>
           )}
+        </div>
+        <div className="quiz-result__actions-explore">
+          <p className="quiz-result__explore-heading">Weiter erkunden</p>
+          <a
+            href="/daten-explorer/"
+            className="quiz-result__explore-link"
+          >
+            Daten-Explorer →
+          </a>
+          <a
+            href="/meine-interessen/"
+            className="quiz-result__explore-link"
+          >
+            Meine Interessen →
+          </a>
         </div>
         <div className="quiz-result__actions-tertiary">
           <button

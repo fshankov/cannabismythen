@@ -318,7 +318,7 @@ export function exportCSV(
     'ID',
     lang === 'de' ? 'Mythos' : 'Myth',
     lang === 'de' ? 'Kategorie' : 'Category',
-    lang === 'de' ? 'Evidenz' : 'Science Verdict',
+    lang === 'de' ? 'Wissenschaftliche Einordnung' : 'Science Verdict',
     lang === 'de' ? 'Kenntnis (%)' : 'Awareness (%)',
     lang === 'de' ? 'Bedeutung' : 'Significance',
     lang === 'de' ? 'Richtigkeit' : 'Correctness',

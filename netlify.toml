@@ -32,6 +32,30 @@
   force = true
 
 # ---------------------------------------------------------------------------
+# Session 3a of 2026-05 — `/haeufige-fragen/*` renamed to
+# `/meine-interessen/*` per BugHerd #6 (Fedor 2026-05-07). Mirror rules
+# also live in `src/middleware.ts`.
+# ---------------------------------------------------------------------------
+
+[[redirects]]
+  from = "/haeufige-fragen"
+  to = "/meine-interessen/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/haeufige-fragen/frage/*"
+  to = "/meine-interessen/frage/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/haeufige-fragen/*"
+  to = "/meine-interessen/:splat"
+  status = 301
+  force = true
+
+# ---------------------------------------------------------------------------
 # Session 1 of 2026-05 — quiz module slug renames per the
 # Kategorisierung_2026 05 06 docx. Four modules got longer, more descriptive
 # slugs that match the canonical 5-cat docx taxonomy. The 301s here mirror

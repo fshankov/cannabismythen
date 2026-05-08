@@ -1,0 +1,11 @@
+// markdoc.config.mjs
+import { defineMarkdocConfig } from "@astrojs/markdoc/config";
+var markdoc_config_default = defineMarkdocConfig({
+  // Markdoc configuration for content rendering.
+  // Add custom tags, nodes, and functions here as the project grows.
+  // See: https://markdoc.dev/docs/config
+});
+export {
+  markdoc_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsibWFya2RvYy5jb25maWcubWpzIl0sCiAgInNvdXJjZXNDb250ZW50IjogWyJpbXBvcnQgeyBkZWZpbmVNYXJrZG9jQ29uZmlnIH0gZnJvbSBcIkBhc3Ryb2pzL21hcmtkb2MvY29uZmlnXCI7XG5cbmV4cG9ydCBkZWZhdWx0IGRlZmluZU1hcmtkb2NDb25maWcoe1xuICAvLyBNYXJrZG9jIGNvbmZpZ3VyYXRpb24gZm9yIGNvbnRlbnQgcmVuZGVyaW5nLlxuICAvLyBBZGQgY3VzdG9tIHRhZ3MsIG5vZGVzLCBhbmQgZnVuY3Rpb25zIGhlcmUgYXMgdGhlIHByb2plY3QgZ3Jvd3MuXG4gIC8vIFNlZTogaHR0cHM6Ly9tYXJrZG9jLmRldi9kb2NzL2NvbmZpZ1xufSk7XG4iXSwKICAibWFwcGluZ3MiOiAiO0FBQUEsU0FBUywyQkFBMkI7QUFFcEMsSUFBTyx5QkFBUSxvQkFBb0I7QUFBQTtBQUFBO0FBQUE7QUFJbkMsQ0FBQzsiLAogICJuYW1lcyI6IFtdCn0K

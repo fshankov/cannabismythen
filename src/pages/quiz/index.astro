@@ -20,7 +20,7 @@ const quizMeta: Record<string, { emoji: string; count: number; featured?: boolea
   "quiz-risiken-koerper-psyche": { emoji: "⚠️",  count: 10 },
   "quiz-stimmung-wahrnehmung":  { emoji: "🧠", count: 6  },
   "quiz-soziales-bevoelkerung": { emoji: "🏛️", count: 10 },
-  "quiz-gefaehrlichkeit":       { emoji: "⚖️",  count: 7  },
+  "quiz-gefaehrlichkeit":       { emoji: "🚨",  count: 7  },
   // Stage 6 — Schnellcheck. Dynamic 7-myth deck, re-rolled per visit.
   "quiz-schnellcheck":          { emoji: "🎲", count: 7, featured: true },
 };
@@ -86,10 +86,50 @@ const tiles = quizzes.map(([slug, entry]) => {
         <span class="quiz-select-card__emoji">{tile.emoji}</span>
         <h2 class="quiz-select-card__title">{tile.title}</h2>
         <span class="quiz-select-card__count">{tile.count} Fragen</span>
+        {/* BugHerd #37b (Session 3b, 2026-05-07): per-tile last-score
+            chip. Hidden until the inline script below finds a matching
+            cm-quiz-score-{slug} entry in localStorage and fills it in. */}
+        <span
+          class="quiz-select-card__last-score"
+          data-quiz-slug={tile.slug}
+          aria-live="polite"
+        ></span>
         {tile.featured && (
           <span class="quiz-select-card__chip">Mix</span>
         )}
       </a>
     ))}
   </section>
+
+  {/* BugHerd #37b — read each tile's last score from localStorage and
+      render it as a small chip below the question count. Inline so it
+      runs before the user can scroll; per-browser only, no cookies. */}
+  <script is:inline>
+    (function () {
+      if (typeof window === "undefined" || !window.localStorage) return;
+      var nodes = document.querySelectorAll("[data-quiz-slug]");
+      for (var i = 0; i < nodes.length; i++) {
+        var el = nodes[i];
+        var slug = el.getAttribute("data-quiz-slug");
+        if (!slug) continue;
+        try {
+          var raw = window.localStorage.getItem("cm-quiz-score-" + slug);
+          if (!raw) continue;
+          var data = JSON.parse(raw);
+          if (
+            typeof data.moduleScore !== "number" ||
+            typeof data.correctCount !== "number" ||
+            typeof data.totalQuestions !== "number"
+          ) continue;
+          var pct = Math.round(data.moduleScore);
+          el.textContent =
+            "Zuletzt: " + data.correctCount + "/" + data.totalQuestions +
+            " · " + pct + " %";
+          el.classList.add("quiz-select-card__last-score--has-data");
+        } catch (e) {
+          // ignore parse errors / disabled storage
+        }
+      }
+    })();
+  </script>
 </BaseLayout>

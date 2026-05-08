@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 
 const { question: slug } = Astro.params;
 const q = await getQuestionBySlug(slug!);
-if (!q) return Astro.redirect("/haeufige-fragen/");
+if (!q) return Astro.redirect("/meine-interessen/");
 
 // Pre-compute quiz titles for the related rail.
 const quizTitles: Record<string, string> = {};
@@ -41,7 +41,7 @@ const description =
 <BaseLayout title={q.questionLong} description={description}>
   <article class="faq-single-question">
     <nav class="faq-audience-header__crumbs" aria-label="Brotkrumen">
-      <a href="/haeufige-fragen/">Häufige Fragen</a>
+      <a href="/meine-interessen/">Meine Interessen</a>
       <span aria-hidden="true">›</span>
       <span aria-current="page">Einzelne Frage</span>
     </nav>
@@ -59,7 +59,7 @@ const description =
         <ul class="faq-also-see__list">
           {audiencesForLinks.map((a) => (
             <li>
-              <a href={`/haeufige-fragen/${a.id}/#faq-${q.slug}`} style={`--audience-accent: ${a.accentColor}`}>
+              <a href={`/meine-interessen/${a.id}/#faq-${q.slug}`} style={`--audience-accent: ${a.accentColor}`}>
                 <span aria-hidden="true">{a.emoji}</span> {a.cardLabel}
               </a>
             </li>
@@ -69,7 +69,7 @@ const description =
     )}
 
     <footer class="faq-audience-page__footer">
-      <a href="/haeufige-fragen/">← Alle Zielgruppen</a>
+      <a href="/meine-interessen/">← Alle Zielgruppen</a>
     </footer>
   </article>
 </BaseLayout>

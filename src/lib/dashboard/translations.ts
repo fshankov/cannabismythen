@@ -43,8 +43,8 @@ const translations = {
     en: 'Share of respondents who know the myth. Higher = better known.',
   },
   'indicator.significance.description': {
-    de: 'Subjektive Wichtigkeit des Mythos für eigene Entscheidungen (0–100). Nur bei Personen erhoben, die den Mythos kennen.',
-    en: 'Subjective importance of the myth for personal decisions (0–100). Only measured among respondents who know the myth.',
+    de: 'Subjektive Wichtigkeit des Mythos für den eigenen Umgang mit Cannabis (0–100). Nur bei Personen erhoben, die den Mythos kennen.',
+    en: 'Subjective importance of the myth for one\'s own use of cannabis (0–100). Only measured among respondents who know the myth.',
   },
   'indicator.correctness.description': {
     de: 'Übereinstimmung der Einschätzung mit der wissenschaftlichen Klassifikation (0–100). Höher = treffender.',
@@ -89,7 +89,7 @@ const translations = {
 
   // Table
   'table.myth': { de: 'Mythos', en: 'Myth' },
-  'table.verdict': { de: 'Evidenz', en: 'Science Verdict' },
+  'table.verdict': { de: 'Wissenschaftliche Einordnung', en: 'Science Verdict' },
   'table.awareness': { de: 'Kenntnis %', en: 'Awareness %' },
   'table.value': { de: 'Wert', en: 'Value' },
   'table.noData': { de: 'Keine Daten', en: 'No data' },

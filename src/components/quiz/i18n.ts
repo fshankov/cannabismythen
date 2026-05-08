@@ -250,22 +250,22 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.streak.label": "{n} richtig in Folge",
 
     // \u2500\u2500 Schritte band labels (Stage 1 \u2014 CaRM Schritte model) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-    "schritte.exact": "Genau richtig",
+    // BugHerd #25 (Session 3b, 2026-05-07): per-question Schritte band
+    // labels updated per ISD ruling — reviewer's set + 'Völlig daneben'
+    // for the 3-Schritte case (English glosses: completely correct /
+    // close to it / unfortunately incorrect / completely off).
+    "schritte.exact": "Völlig korrekt",
     "schritte.near": "Nah dran",
-    "schritte.off": "Daneben",
-    "schritte.far": "Komplett daneben",
-    // {schritte} Schritt(e), {points} Punkte. Use commas for German decimals.
-    "schritte.points":
-      "{schritte}\u00a0Schritt(e) daneben \u2192 {points}\u00a0Punkte",
-
-    // \u2500\u2500 Micro-copy table (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    "schritte.off": "Leider fehlerhaft",
+    "schritte.far": "Völlig daneben",
+    //\u2500\u2500 Micro-copy table (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     // \u2500\u2500 Result screen \u2014 N\u00e4chstes Modul (Phase C \u00a73.14) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     "ui.nextModule.cta": "N\u00e4chstes Modul: {title} \u2192",
     "ui.classificationPhrase.richtig": "richtig",
     "ui.classificationPhrase.eher_richtig": "eher richtig",
     "ui.classificationPhrase.eher_falsch": "eher falsch",
     "ui.classificationPhrase.falsch": "falsch",
-    "ui.correctAnswer": "Evidenzbasierte Bewertung:",
+    "ui.correctAnswer": "Wissenschaftliche Bewertung:",
     // BugHerd #13 + #23 — "Deine" → "Ihre" (Sie form, sentence case).
     // Session 1's sweep missed these two i18n keys; caught in Session 2
     // when chasing the "IHRE" pin (which turned out to be the per-row

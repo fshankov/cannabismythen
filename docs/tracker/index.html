@@ -132,13 +132,8 @@ input.row-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(
 <strong>Triage round 3 — 2026-05-08 (BugHerd export 2).</strong> 11 net-new comments added (#45 + #47–55, plus #56 already shipped). All 10 actionable new items live on the Daten-Explorer (#47/#48/#49/#50/#51/#52/#53/#54/#55) plus one Fakten-Karten contrast bug (#45). All slotted into Session 4 sub-sessions (S4a–d). See <em>Session plan</em> tab.
 </div>
 
-<div class="banner banner-warn">
-<strong>Decisions for the next team meeting (5 open).</strong> See <em>Decisions for the team</em> tab. Items needing a ruling before Session 4 can run:
-(1) #5 August 2025 date — ISD,
-(2) #45 contrast fix scope — Fedor / design,
-(3) #47 delete arrows site-wide or just dashboard — Fedor,
-(4) #50 search-into-filter UX — Fedor,
-(5) Cluster B card splits — touches CLAUDE.md "never modify mythId" rule, needs explicit go-ahead.
+<div class="banner">
+<strong>All 5 Session-4 blockers resolved (2026-05-08, Fedor).</strong> #5 = "Deutschland August 2025" (shipped); #45 = lighter-tint hover background; #47 = arrows only in Balken left-column; #50 = search ADDITIONALLY in filter (stays above) with checkbox-select; Cluster B = green-lit. Sessions 4a–d ready to run; ISD review window still needed for S4d body-copy.
 </div>
 
 <div class="tabs">
@@ -193,29 +188,19 @@ input.row-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(
 
 <!-- ====== DECISIONS TAB ====== -->
 <div class="panel" id="panel-decisions">
-  <h2>Decisions for the team (next meeting)</h2>
-  <p class="muted">Five items need a ruling before Session 4 sub-sessions can run. Tick off the corresponding rows in the Comments tab as you decide them.</p>
+  <h2>Decisions for the team (open queue)</h2>
+  <p class="muted">No open Session 4 blockers right now. The list below populates as new BugHerd rounds surface ambiguity. Use the <em>Comments</em> tab checkboxes to walk the team through resolved decisions in the meeting.</p>
 
-  <div class="agenda-item">
-    <span class="num">1.</span> <strong>#5 — "August 2025" date</strong> — BugHerd reviewer pinned this on the homepage credibility block. Either the field-study date is wrong (currently "Deutschland 2024") or the "Letzte Prüfung" date is wrong (currently "April 2026"). Which?
-    <div class="who">ISD owns · blocks Session 4c</div>
-  </div>
-  <div class="agenda-item">
-    <span class="num">2.</span> <strong>#45 — Fakten-Karten hover contrast</strong> — Category buttons turn green on hover and the green text becomes invisible against the green background. Fix scope: change hover background to a lighter tint (low risk), invert text to white (changes design rhythm), or use border-only hover state (cleanest visually)?
-    <div class="who">Fedor + design intuition · blocks Session 4c · I'll mock 3 options via AskUserQuestion when the session starts</div>
-  </div>
-  <div class="agenda-item">
-    <span class="num">3.</span> <strong>#47 — Delete arrows on Daten-Explorer</strong> — Reviewer says "the colour is sufficient" — drop the verdict-arrow icons next to bars. Scope: only the Balken view, or every surface that shows a VerdictArrow (factsheet panel, scrollytelling, hero)?
-    <div class="who">Fedor decides · blocks Session 4a</div>
-  </div>
-  <div class="agenda-item">
-    <span class="num">4.</span> <strong>#50 — Integrate search into filter section</strong> — Currently MythosSearch is a separate chip above the filter drawer. Reviewer wants it folded INTO the FilterDrawer. Confirm: is this a layout change only, or should mobile + desktop both move it?
-    <div class="who">Fedor decides · blocks Session 4a</div>
-  </div>
-  <div class="agenda-item">
-    <span class="num">5.</span> <strong>Cluster B — card splits (m31/m32, m36/m37, m41/m42)</strong> — Three current .mdoc files bundle two myths each. Splitting them touches CLAUDE.md's "never modify mythId" rule (this would be the explicit ask). Confirm: green-light Session 4d to do the splits + the dashboard rebinding?
-    <div class="who">Fedor + ISD (editorial review of split bodies) · blocks Session 4d</div>
-  </div>
+  <p class="muted" style="font-style: italic;">— No items pending —</p>
+
+  <h2>Resolved 2026-05-08 (Session 4 unblockers — Fedor)</h2>
+  <ul class="checklist">
+    <li><strong>#5 "August 2025" date</strong> — credibility block row 2 changed from "Deutschland 2024" to "Deutschland August 2025". Shipped to credibility-block.yaml.</li>
+    <li><strong>#45 Fakten-Karten hover contrast</strong> — option (a): lighter-tint hover background. Implements in S4c.</li>
+    <li><strong>#47 Delete arrows scope</strong> — only the Balken view, leftmost text-element column. Other VerdictArrow surfaces (factsheet panel, scrollytelling, hero) keep their arrows. Implements in S4a.</li>
+    <li><strong>#50 Search-into-filter UX</strong> — search stays above (existing) AND additionally appears in the FilterDrawer where it powers a checkbox list of currently-visible myths. Mobile + desktop both. Implements in S4a.</li>
+    <li><strong>Cluster B (m31/m32 + m36/m37 + m41/m42)</strong> — green-lit. Touches CLAUDE.md "never modify mythId" rule (this IS the explicit ask). Implements in S4d. ISD editorial window still needed for split-body review.</li>
+  </ul>
 
   <h2>Resolved 2026-05-07 / 2026-05-08 (Session 1 + 2 + 3a + 3b)</h2>
   <p class="muted">Decisions made + work shipped. Tick off in Comments tab as confirmed.</p>
@@ -434,13 +419,13 @@ statuses.</pre>
   <div class="card session-card s4">
     <h3>Session 4a — Daten-Explorer UX cluster · <span class="tag tag-medium">Sonnet 4.6</span> · ~3 hr</h3>
     <p><strong>Goal:</strong> Six small Daten-Explorer interaction polishes from BugHerd export 2. Reviewer's biggest pain point was the dashboard.</p>
-    <p><strong>Pre-reqs:</strong> Decisions #3 (delete arrows scope, #47), #4 (search-into-filter UX, #50). Other items don't need rulings.</p>
+    <p><strong>Pre-reqs:</strong> All decisions locked 2026-05-08 (Fedor) — ready to run.</p>
     <p><strong>Scope:</strong></p>
     <ul class="tight">
-      <li><strong>#47 — Delete arrows next to bars.</strong> Locate VerdictArrow component usage on Balken view, delete (or hide via prop) per Decision #3 scope.</li>
+      <li><strong>#47 — Delete arrows in Balken left column.</strong> Per Fedor's scope: ONLY the Balken view, ONLY the leftmost text-element column where the myth statement renders. Locate VerdictArrow usage in BalkenView2.tsx; remove or guard with a `showArrow={false}` prop. Other VerdictArrow surfaces (FactsheetPanel, ScrollytellingViewer, HeroBlock) keep their arrows.</li>
       <li><strong>#48 — Sort by "Wiss. Urteil".</strong> Add sort button labelled <em>Wiss. Urteil</em> on the Balken/Tabelle controls. Sort by classification rank (richtig → eher_richtig → eher_falsch → falsch → keine_aussage).</li>
-      <li><strong>#49 — Hover effect on TEXT.</strong> Currently only the Balken bar triggers the FactsheetPanel; extend the row's text label so the full row is the hover/click target. Touch BalkenView2.tsx + balken CSS.</li>
-      <li><strong>#50 — Search into filter section.</strong> Per Decision #4 scope: collapse MythosSearch into FilterDrawer or move it inside the filter chip strip.</li>
+      <li><strong>#49 — Hover effect on TEXT.</strong> Currently only the Balken bar triggers the FactsheetPanel; extend the row's text label so the full row (text + bar) is the hover/click target. Touch BalkenView2.tsx + balken CSS.</li>
+      <li><strong>#50 — Search ADDITIONALLY in Filter (per Fedor's scope).</strong> Search stays above the table as today. ALSO add a search box INSIDE the FilterDrawer; it powers a checkbox list of myths currently passing the active filter so the user can refine the visible-set selection. Mobile + desktop both.</li>
       <li><strong>#51 — A-Z / Z-A direction indicator.</strong> Tabelle view sort: render an arrow next to the active sort column header. Already partially present in TableView.tsx — verify and polish.</li>
       <li><strong>#54 — Streifen view legend.</strong> Add a colour-to-classification legend strip above the StripsView grid.</li>
     </ul>
@@ -462,18 +447,18 @@ statuses.</pre>
   <div class="card session-card s4">
     <h3>Session 4c — Bug fixes + Item 5 ISD date · <span class="tag tag-medium">Sonnet 4.6</span> · ~1 hr</h3>
     <p><strong>Goal:</strong> Two small bugs once decisions are unblocked.</p>
-    <p><strong>Pre-reqs:</strong> Decisions #1 (#5 August 2025 date), #2 (#45 hover contrast scope).</p>
+    <p><strong>Pre-reqs:</strong> All locked 2026-05-08. Note: #5 already shipped in this turn — only #45 remains for S4c.</p>
     <p><strong>Scope:</strong></p>
     <ul class="tight">
-      <li><strong>#5 — "August 2025" date</strong>: per ISD ruling, edit the relevant row in <span class="kbd">credibility-block.yaml</span> (likely row2Value or row3Value).</li>
-      <li><strong>#45 — Fakten-Karten hover contrast.</strong> Per Fedor's design choice (mockup-confirmed via AskUserQuestion), edit <span class="kbd">src/styles/global.css</span> or fakten-karten-specific CSS to fix the green-on-green disappearing-text state.</li>
+      <li><strong>#5 — "Deutschland August 2025"</strong>: ✓ shipped 2026-05-08. credibility-block.yaml row2Value updated.</li>
+      <li><strong>#45 — Fakten-Karten hover contrast.</strong> Per Fedor's option (a): change the hover background to a lighter tint (keep the green theme, lift the contrast). Edit fakten-karten-specific CSS in <span class="kbd">src/components/fakten-karten/</span> or the relevant style file. Walk through each category-button hover state to confirm contrast is fixed across all category colours.</li>
     </ul>
   </div>
 
   <div class="card session-card s4">
     <h3>Session 4d — Cluster B card splits · <span class="tag tag-major">Opus 4.7</span> · ~half-day</h3>
     <p><strong>Goal:</strong> Split three merged .mdoc files (m31-m32, m36-m37, m41-m42) into six. After this lands, the on-disk count matches "42" everywhere and dashboards rebind correctly.</p>
-    <p><strong>Pre-reqs:</strong> Decision #5 (green-light on the rename — touches CLAUDE.md "never modify mythId" rule). ISD editorial window for body-copy review.</p>
+    <p><strong>Pre-reqs:</strong> Green-lit by Fedor 2026-05-08. ISD editorial window still needed for split-body review of the six new .mdoc files (sections like Einordnung / Synthese / Zentrale Erkenntnisse) — coordinate with Harald before merging.</p>
     <p><strong>Scope:</strong></p>
     <ul class="tight">
       <li>Split <span class="kbd">m31-m32-entspannt-aggressiv.mdoc</span> → <span class="kbd">m31-entspannt.mdoc</span> + <span class="kbd">m32-aggressiv.mdoc</span> with correct per-myth classification (Excel: m31=eher_richtig, m32=eher_falsch).</li>
@@ -565,7 +550,7 @@ const comments = [
   ['2', '—', 'noise', 'Creating tags for tasks', 'noise', '—', 'n/a', '—'],
   ['3', '—', 'noise', 'test', 'noise', '—', 'n/a', '—'],
   ['4', 'A7', 'performance', 'Loading takes some time', 'parked', 'Major', 'Fedor', 'S4'],
-  ['5', 'A8', 'content', 'BugHerd screenshot drilled — pin on credibility block; ISD ruling needed on which date is wrong', 'pending-discussion', 'Quick', 'ISD', 'S3c done'],
+  ['5', 'A8', 'content', 'Credibility row 2: "Deutschland 2024" → "Deutschland August 2025" (Fedor 2026-05-08)', 'resolved', 'Quick', 'Fedor', 'S3c done'],
   ['6', 'A12', 'navigation', 'Häufige Fragen → Meine Interessen — pages + URLs + labels swept; 301s wired', 'resolved', 'Medium', 'Fedor', 'S3a done'],
   ['7', 'A9', 'content', 'Credibility lede: umfangreichen Befragung (Fedor 2026-05-07)', 'resolved', 'Quick', 'Fedor', 'S3a done'],
   ['8', 'A10', 'content', '"transparent, nachvollziehbar," → "transparent und nachvollziehbar,"', 'resolved', 'Quick', 'ISD', 'S3a done'],
@@ -605,12 +590,12 @@ const comments = [
   ['42', 'C7', 'design', 'Already done in S2 (frame + sr-only Schritte chip)', 'resolved', 'Medium', 'Claude', 'S2 done'],
   ['43', 'C18', 'content', 'Discuss how feedback is generated', 'pending-discussion', 'Discussion', 'ISD', 'n/a'],
   ['44', 'C12', 'navigation', 'Weiter erkunden block on result screen + Daten-Explorer + Meine Interessen links', 'resolved', 'Medium', 'Claude', 'S3b done'],
-  ['45', 'E', 'design', 'Fakten-Karten category buttons: text disappears on hover (green-on-green contrast)', 'pending-decision', 'Quick', 'Claude', 'S4c'],
+  ['45', 'E', 'design', 'Fakten-Karten hover: lighter-tint background (Fedor 2026-05-08, option a) — ready for S4c', 'pending-discussion', 'Quick', 'Claude', 'S4c'],
   // 46 was deleted in BugHerd
-  ['47', 'E', 'design', 'Daten-Explorer: delete arrows next to bars — colour is sufficient', 'pending-decision', 'Quick', 'Claude', 'S4a'],
-  ['48', 'F', 'feature', 'Daten-Explorer: add sort button "Wiss. Urteil" (scientific classification)', 'pending-decision', 'Medium', 'Claude', 'S4a'],
-  ['49', 'F', 'feature', 'Daten-Explorer Balken: hover effect on TEXT (not just bars) — full row triggers tooltip', 'pending-decision', 'Medium', 'Claude', 'S4a'],
-  ['50', 'F', 'feature', 'Daten-Explorer: integrate search function INTO the filter section', 'pending-decision', 'Medium', 'Claude', 'S4a'],
+  ['47', 'E', 'design', 'Delete arrows ONLY in Balken view, leftmost text-element column (Fedor 2026-05-08) — ready for S4a', 'pending-discussion', 'Quick', 'Claude', 'S4a'],
+  ['48', 'F', 'feature', 'Daten-Explorer: add sort button "Wiss. Urteil" (scientific classification)', 'pending-discussion', 'Medium', 'Claude', 'S4a'],
+  ['49', 'F', 'feature', 'Daten-Explorer Balken: hover effect on TEXT (not just bars) — full row triggers tooltip', 'pending-discussion', 'Medium', 'Claude', 'S4a'],
+  ['50', 'F', 'feature', 'Search ADDITIONALLY in Filter (stays above too) + checkbox-select visible myths from filter (Fedor 2026-05-08) — ready for S4a', 'pending-discussion', 'Medium', 'Claude', 'S4a'],
   ['51', 'E', 'design', 'Daten-Explorer Tabelle: add visible A-Z / Z-A direction indicator on sort', 'pending-decision', 'Quick', 'Claude', 'S4a'],
   ['52', 'F', 'feature', 'Daten-Explorer Quellen: delete the search function (irrelevant for this view)', 'pending-decision', 'Quick', 'Claude', 'S4b'],
   ['53', 'F', 'feature', 'Daten-Explorer Quellen: add filter for sub-items (e.g. Influencer:innen)', 'pending-decision', 'Medium', 'Claude', 'S4b'],
