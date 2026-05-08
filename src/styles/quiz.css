@@ -3408,6 +3408,20 @@
   color: var(--color-text-inverse);
 }
 
+/* BugHerd #45 (Session 4c, 2026-05-08): when the SELECTED button is
+   hovered, keep the white text on the green background. The earlier
+   :hover rule above sets color to --color-accent (green), which on an
+   active green-fill button became green-on-green and made the label
+   disappear. Per Fedor 2026-05-08: selected fills green, hover keeps
+   text white. The :hover specificity needed an `--active:hover`
+   override because both classes are present in the DOM together. */
+.fakten-filter-bar__btn--active:hover,
+.fakten-filter-bar__btn--active:focus-visible {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
 .fakten-explorer__count {
   font-size: 0.85rem;
   color: var(--color-text-muted);

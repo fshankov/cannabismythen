@@ -2,26 +2,27 @@
 # scripts/sync-tracker.sh
 #
 # Copies the Cowork-maintained CannabisMythen Feedback Tracker artifact
-# into the repo at docs/tracker/index.html, where GitHub Pages can
-# serve it. Run this after a session that updates the tracker.
+# into the repo at public/tracker/index.html. Astro/Netlify serves
+# public/* as-is, so the tracker becomes available at
+# https://cannabismythen.netlify.app/tracker/ after the next deploy.
+# The site's SITE_PASSWORD edge gate also protects /tracker/ — only
+# team members with the password can read it.
 #
 # Workflow:
 #   1. Run this script:        ./scripts/sync-tracker.sh
-#   2. Review the diff:        git diff docs/tracker/
-#   3. Commit + push:          git add docs/tracker && git commit -m "tracker: sync $(date +%F)" && git push
-#   4. Wait ~30s for Pages.    Visit: https://feodorshankov.github.io/cannabismythen/tracker/
-#                              (URL depends on the GitHub username/org — set once in repo Settings → Pages.)
+#   2. Review the diff:        git diff public/tracker/
+#   3. Commit + push:          git add public/tracker && git commit -m "tracker: sync $(date +%F)" && git push
+#   4. Wait ~2 min for Netlify deploy.
+#   5. Open: https://cannabismythen.netlify.app/tracker/
 #
-# One-time GitHub Pages setup (only needed once):
-#   - GitHub → repo Settings → Pages → Source: "Deploy from a branch"
-#   - Branch: main, Folder: /docs
-#   - Save. First deploy takes ~1 min.
+# Local preview: ./_local/render.sh opens both /fakten-karten/ AND
+# /tracker/ tabs in the browser automatically.
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SOURCE="$HOME/Documents/Claude/Artifacts/cannabismythen-feedback-tracker/index.html"
-TARGET_DIR="$REPO_ROOT/docs/tracker"
+TARGET_DIR="$REPO_ROOT/public/tracker"
 TARGET="$TARGET_DIR/index.html"
 
 if [ ! -f "$SOURCE" ]; then

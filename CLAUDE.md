@@ -41,16 +41,19 @@ propose Ctrl-key shortcuts or Windows path conventions.
 
 ## Tracker workflow (BugHerd feedback tracker)
 
-The team-shareable tracker lives at `docs/tracker/index.html` and is served by
-GitHub Pages (one-time setup: repo Settings → Pages → Source "Deploy from a
-branch" → main / `/docs`). The canonical source is the Cowork artifact at
+The team-shareable tracker lives at `public/tracker/index.html` and is served
+by Astro/Netlify at `https://cannabismythen.netlify.app/tracker/` — same
+SITE_PASSWORD edge gate as the rest of the site, so it's team-only. The
+canonical source is the Cowork artifact at
 `~/Documents/Claude/Artifacts/cannabismythen-feedback-tracker/index.html`.
-After any session that updates the tracker, run `./scripts/sync-tracker.sh`,
-then commit + push `docs/tracker/`. Sessions can also edit `docs/tracker/`
-directly when needed — but Cowork artifact is the long-term canonical so
-that the tracker survives across sessions. Token cost of editing the tracker
-is small (~500–2000 per session); CLAUDE.md additions like this paragraph
-are ~100–300 tokens loaded per session start, negligible vs. session budget.
+After any session that updates the tracker, run `./scripts/sync-tracker.sh`
+(also runs silently on every `./_local/render.sh` start), then commit + push
+`public/tracker/`. Sessions can also edit `public/tracker/index.html` directly
+when needed — but the Cowork artifact is the long-term canonical so the
+tracker survives across sessions. `render.sh` opens both `/fakten-karten/`
+and `/tracker/` in the browser automatically. Token cost of editing the
+tracker is small (~500–2000 per session); CLAUDE.md additions like this
+paragraph are ~100–300 tokens loaded per session start.
 
 ## Working with Fedor — process rule (HARD)
 
