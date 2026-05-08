@@ -98,7 +98,7 @@ export interface QuizShareCopyEntry {
 }
 
 interface QuizPlayerProps {
-  /** Quiz slug, e.g. "quiz-risiken" */
+  /** Quiz slug, e.g. "quiz-risiken-koerper-psyche" */
   quizSlug: string;
   /** JSON-serialized Record<mythId, MythContentEntry> from Astro build */
   mythContent?: string;
@@ -233,11 +233,11 @@ function clearProgress(slug: string): void {
 /** Per-quiz accent token (one of the four classification colours) used to
  *  tint the progress bar fill, the dot ring, and the next-question CTA. */
 const QUIZ_ACCENT: Record<string, string> = {
-  "quiz-medizin": "var(--color-richtig)",
-  "quiz-risiken": "var(--color-falsch)",
-  "quiz-stimmung": "var(--color-eher-richtig)",
+  "quiz-medizinischer-nutzen": "var(--color-richtig)",
+  "quiz-risiken-koerper-psyche": "var(--color-falsch)",
+  "quiz-stimmung-wahrnehmung": "var(--color-eher-richtig)",
   "quiz-gefaehrlichkeit": "var(--color-eher-falsch)",
-  "quiz-gesellschaft": "var(--color-accent)",
+  "quiz-soziales-bevoelkerung": "var(--color-accent)",
 };
 
 /** Count of consecutive `isCorrect` answers ending at index `idx`. Walks
@@ -561,6 +561,30 @@ function QuizPlayerInner({
     };
   }, [allAnswered, answers, theme.myths, quizSlug, totalQuestions]);
 
+  // BugHerd #37b (Session 3b, 2026-05-07): persist the latest module
+  // score to localStorage so the /quiz/ index can render a small
+  // "Zuletzt: 5/6 · 83 %" chip on each tile. No cookies, no server,
+  // no PII — purely a per-browser convenience. Key uses the canonical
+  // (post-Session-1) slug so renames don't bleed scores between modules.
+  useEffect(() => {
+    if (!result || typeof window === "undefined") return;
+    try {
+      const payload = {
+        slug: result.themeSlug,
+        moduleScore: result.moduleScore,
+        correctCount: result.correctCount,
+        totalQuestions: result.totalQuestions,
+        savedAt: Date.now(),
+      };
+      window.localStorage.setItem(
+        `cm-quiz-score-${result.themeSlug}`,
+        JSON.stringify(payload),
+      );
+    } catch {
+      // localStorage may be disabled (private mode, quota) — silently skip.
+    }
+  }, [result]);
+
   const handleAnswer = useCallback(
     (mythId: string, chosen: Classification) => {
       const myth = theme.myths.find((m) => m.id === mythId);
@@ -873,27 +897,25 @@ function QuizPlayerInner({
               The persistence notice + reset link below remains the only
               footer chrome. */}
 
-          {/* BugHerd #34: when the user is on the LAST question and has
-              answered everything, the in-card button on the back face
-              already shows "Ergebnis ansehen →" (see QuizCard back-face
-              CTA, isLastQuestion branch). Hiding the standalone finish-row
-              in that exact case removes the visible duplicate. The finish-
-              row still appears when the user has answered all questions
-              but happens to be looking at an earlier card (e.g., after
-              jumping around with the deck) — that's the safety-net case. */}
-          {allAnswered &&
-            !showResults &&
-            safeIndex !== totalQuestions - 1 && (
-              <div className="quiz-player__finish-row">
-                <button
-                  type="button"
-                  className="quiz-card__next-btn"
-                  onClick={() => setFinished(true)}
-                >
-                  {t("ui.finishQuiz")} →
-                </button>
-              </div>
-            )}
+          {/* BugHerd #34 (Session 3a, 2026-05-07): the standalone
+              finish-row is now the canonical "Ergebnis ansehen →" CTA
+              whenever every question is answered. The in-card back-face
+              CTA is suppressed on the LAST question (see QuizCard.tsx
+              `!isLastQuestion`) so they no longer duplicate. The
+              standalone row stays visible on every card position
+              (mid-deck and last alike) so the user always has a
+              path to the result. */}
+          {allAnswered && !showResults && (
+            <div className="quiz-player__finish-row">
+              <button
+                type="button"
+                className="quiz-card__next-btn"
+                onClick={() => setFinished(true)}
+              >
+                {t("ui.finishQuiz")} →
+              </button>
+            </div>
+          )}
 
           <div className="quiz-player__notice" role="note">
             <span aria-hidden="true">🔒</span>{" "}

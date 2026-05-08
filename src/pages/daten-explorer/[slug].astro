@@ -5,6 +5,10 @@ import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 import { getQuestionsForMyth, getAudience } from "@lib/faq";
+import Lesebeispiel from "@components/dashboard/Lesebeispiel";
+import type { Metric } from "@lib/dashboard/types";
+// Direct JSON import — see /quiz/[slug].astro for the rationale.
+import carmRawJson from "../../../public/data/carm-data.json";
 
 export async function getStaticPaths() {
   const slugs = await reader.collections.zahlenUndFakten.list();
@@ -69,6 +73,24 @@ for (const heading of FACHEBENE_HEADINGS) {
   });
 }
 
+// Lesebeispiel data — find this myth's metric for the Erwachsene group
+// (BugHerd / Harald 2026-05-07). The `.mdoc` carries `mythNumber` which
+// matches the integer `myth_id` in carm-data.json. Falls back to a regex
+// on the string id if mythNumber is somehow missing on a legacy entry.
+const mythNumber =
+  (meta as { mythNumber?: number }).mythNumber ??
+  (meta.mythId ? Number(meta.mythId.replace(/[^0-9]/g, "")) : NaN);
+let adultsMetric: Metric | null = null;
+if (Number.isFinite(mythNumber)) {
+  const raw = carmRawJson.metrics.find(
+    (m: { myth_id: number; group_id: string }) =>
+      m.myth_id === mythNumber && m.group_id === "adults",
+  );
+  if (raw) {
+    adultsMetric = raw as unknown as Metric;
+  }
+}
+
 // FAQ backlink rail — find any FAQ question whose primaryMyth or relatedMyths
 // references this myth, then group by audience for display.
 const faqMatches = meta.mythId ? await getQuestionsForMyth(meta.mythId) : [];
@@ -94,7 +116,7 @@ for (const q of faqMatches) {
       audienceLabel: audienceMeta.cardLabel,
       audienceColor: audienceMeta.accentColor,
       audienceEmoji: audienceMeta.emoji,
-      url: `/haeufige-fragen/${audId}/#faq-${q.slug}`,
+      url: `/meine-interessen/${audId}/#faq-${q.slug}`,
       questionLong: q.questionLong,
     });
   }
@@ -119,6 +141,15 @@ for (const q of faqMatches) {
     </header>
 
     <div class="factsheet-content" set:html={html} />
+
+    {adultsMetric && (
+      <Lesebeispiel
+        client:load
+        metric={adultsMetric}
+        audience="adults"
+        lang="de"
+      />
+    )}
 
     {meta.relatedMyths && meta.relatedMyths.length > 0 && (
       <aside class="related-myths">

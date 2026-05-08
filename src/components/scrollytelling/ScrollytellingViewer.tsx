@@ -291,7 +291,7 @@ function VizColorReveal({ active }: { active: boolean }) {
       <div className="viz-cta-cards">
         <a href="/quiz/" className="viz-cta-card viz-cta-card--quiz">
           🎯 Quiz starten →
-          <span>Teste dich selbst gegen den Wissenschaftsstand</span>
+          <span>Testen Sie sich selbst gegen den Wissenschaftsstand</span>
         </a>
         <a href="/daten-explorer/" className="viz-cta-card viz-cta-card--myths">
           🔍 Alle 42 Mythen erkunden →
@@ -358,7 +358,7 @@ function VizTrustGap({ active }: { active: boolean }) {
         })}
       </div>
       <div className="viz-trust-gap__footer">
-        <a href="/haeufige-fragen/">Häufige Fragen →</a>
+        <a href="/meine-interessen/">Meine Interessen →</a>
         <a href="/ueber-uns/">Über das Projekt →</a>
       </div>
       <details className="viz-trust-gap__table-details">

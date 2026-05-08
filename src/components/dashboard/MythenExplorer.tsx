@@ -94,7 +94,7 @@ interface Props {
   /** JSON-serialised DashboardDefinitions from dashboard-definitionen.json */
   definitions?: string;
   /** JSON-serialised Record<mythId, themeSlug> mapping each myth to its
-   *  Quiz theme (quiz-medizin / quiz-risiken / etc). Used by the
+   *  Quiz theme (quiz-medizinischer-nutzen / quiz-risiken-koerper-psyche / etc). Used by the
    *  Streifen view for the Themen filter / Themen pivot mode. */
   mythThemes?: string;
 }

@@ -14,7 +14,7 @@ import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
 import HelplineBox from "@components/faq/HelplineBox.astro";
 import WeiterfuehrendList from "@components/faq/WeiterfuehrendList.astro";
 
-// Legacy theme slugs (`/haeufige-fragen/gesundheit/`, etc.) are redirected to
+// Legacy theme slugs (`/meine-interessen/gesundheit/`, etc.) are redirected to
 // the appropriate audience page via `astro.config.mjs#redirects`.
 
 export async function getStaticPaths() {
@@ -24,11 +24,11 @@ export async function getStaticPaths() {
 const { slug } = Astro.params;
 
 if (!VALID_AUDIENCES.includes(slug as FaqAudienceId)) {
-  return Astro.redirect("/haeufige-fragen/");
+  return Astro.redirect("/meine-interessen/");
 }
 
 const audience = await getAudience(slug as FaqAudienceId);
-if (!audience) return Astro.redirect("/haeufige-fragen/");
+if (!audience) return Astro.redirect("/meine-interessen/");
 
 const questions = await getQuestionsByAudience(slug as FaqAudienceId);
 
@@ -89,7 +89,7 @@ const pageDescription = audience.description;
     <WeiterfuehrendList items={audience.weiterfuehrend} />
 
     <footer class="faq-audience-page__footer">
-      <a href="/haeufige-fragen/">← Alle Zielgruppen</a>
+      <a href="/meine-interessen/">← Alle Zielgruppen</a>
     </footer>
   </article>
 </BaseLayout>

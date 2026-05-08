@@ -2,7 +2,7 @@
  * ResultScreen — Per-module result page (Stage 5 rebuild).
  *
  * Top-to-bottom order:
- *   1) Header: "Dein Ergebnis — {module title}"
+ *   1) Header: "Ihr Ergebnis — {module title}"  (Sie form, BugHerd #13)
  *   2) Hero number: Schritte percentage in 60/80/96 px clamp, coloured by band
  *   3) Breakdown line: "X genau richtig · Y nah dran · Z daneben · W komplett daneben"
  *      (only bands with count > 0)
@@ -51,54 +51,100 @@ interface ResultScreenProps {
 const VERDICT_FALLBACK: Record<ScoreBand, { title: string; body: string }> = {
   profi: {
     title: "Mythen-Profi",
-    body: "Du erkennst die Cannabis-Mythen klar als das, was sie sind — Halbwahrheiten oder Mythen.",
+    body: "Sie erkennen die Cannabis-Mythen klar als das, was sie sind — Halbwahrheiten oder Mythen.",
   },
   guterweg: {
     title: "Auf dem richtigen Weg",
-    body: "Bei den meisten Aussagen liegst du richtig. Ein paar Details lohnen einen zweiten Blick.",
+    body: "Bei den meisten Aussagen liegen Sie richtig. Ein paar Details lohnen einen zweiten Blick.",
   },
   gehtnoch: {
     title: "Da geht noch was",
-    body: "Manche Mythen sind hartnäckig. In den Fakten-Karten findest du die Forschung dahinter.",
+    body: "Manche Mythen sind hartnäckig. In den Fakten-Karten finden Sie die Forschung dahinter.",
   },
   erwischt: {
-    title: "Mythen haben dich erwischt",
+    title: "Mythen haben Sie erwischt",
     body: "Die Forschung sagt häufig etwas anderes als die Alltagserzählung. Zeit für eine Tour durch die Fakten-Karten.",
   },
 };
 
-/** Stage 7 — banded honest population copy. Three-tier resolution:
- *  per-module Keystatic override (`shareCopy[band]`) → global default
- *  singleton (already merged into `shareCopy` by the Astro page) →
- *  hardcoded fallback (final defence so the layout never breaks). */
+/** BugHerd #29 + #38 + #39 — canonical population framing (2026-05-07).
+ *  Replaces the previous banded user-vs-population comparison with a
+ *  factual statement about the population's average score for the module:
+ *  "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen
+ *  Punkten erreicht ({pct} %)."
+ *
+ *  Three-tier copy resolution:
+ *    1. per-module Keystatic override (`shareCopy[band]`)
+ *    2. global default singleton (merged into `shareCopy` by the Astro page)
+ *    3. hardcoded fallback below (final defence so layout never breaks)
+ *
+ *  Placeholder semantics (changed in 2026-05-07 session):
+ *    - {x}    → population's average absolute points for THIS module (int)
+ *    - {z}    → number of myths in THIS module (int)
+ *    - {pct}  → population's average percentage for THIS module (int, 0–100)
+ *  Note: {pct} previously meant the user's percentile; legacy per-module
+ *  overrides in `.mdoc` may need editorial refresh (flagged in
+ *  internalNotes for ISD review).
+ */
 function bandedPopulationLine(
   band: ScoreBand,
-  percentile: number,
+  populationStats: PopulationStats,
   shareCopy: QuizShareCopyEntry
 ): string {
   const override = (shareCopy[band] ?? "").trim();
-  // Reject editorial PLACEHOLDER markers — they shouldn't reach the page.
   const usable =
     override && !/^PLACEHOLDER\b/i.test(override)
       ? override
       : HARDCODED_FALLBACK[band];
-  return usable.replace(/\{pct\}/g, String(percentile));
+  return usable
+    .replace(/\{x\}/g, String(populationStats.absolutePoints))
+    .replace(/\{z\}/g, String(populationStats.questionCount))
+    .replace(/\{pct\}/g, String(populationStats.percent));
+}
+
+interface PopulationStats {
+  /** Population's average absolute points for the module, rounded
+   *  (BugHerd #31). E.g. 4 if 4.27 of 7 questions on average. */
+  absolutePoints: number;
+  /** Number of myths/questions in the module. */
+  questionCount: number;
+  /** Population's average percentage score for the module, rounded. */
+  percent: number;
+}
+
+/** Compute the population's reference score for the module from each
+ *  myth's `populationCorrectPct` (CaRM mean distanceScore 0–100).
+ *  Average pct = mean of populationCorrectPct.
+ *  Average absolute = sum(populationCorrectPct) / 100, since each myth's
+ *  max points = 1 and pct/100 = expected points-per-question. */
+function computePopulationStats(myths: QuizMyth[]): PopulationStats {
+  if (myths.length === 0) {
+    return { absolutePoints: 0, questionCount: 0, percent: 0 };
+  }
+  const sumPct = myths.reduce((acc, m) => acc + m.populationCorrectPct, 0);
+  return {
+    absolutePoints: Math.round(sumPct / 100),
+    questionCount: myths.length,
+    percent: Math.round(sumPct / myths.length),
+  };
 }
 
 /** Final-defence fallback in case both the per-module override AND the
  *  global singleton are empty. CaRM IS a methodologically representative
  *  German sample (n=2.097, weighted by sex/age/education), but the word
  *  "repräsentativ" is dropped from user-visible copy per editorial ruling
- *  2026-05-06; the data framing remains accurate. */
+ *  2026-05-06; the data framing remains accurate. All four bands now
+ *  share the canonical sentence per the 2026-05-07 session — banded
+ *  differentiation moves to the verdict block (Keystatic verdicts.{band}). */
 const HARDCODED_FALLBACK: Record<ScoreBand, string> = {
   profi:
-    "Du liegst klar über dem Schnitt der Erwachsenen (18–70) in einer Bevölkerungsbefragung in Deutschland (ca. {pct} %).",
+    "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).",
   guterweg:
-    "Du liegst leicht über dem Schnitt der Erwachsenen (18–70) in einer Bevölkerungsbefragung in Deutschland (ca. {pct} %).",
+    "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).",
   gehtnoch:
-    "Du liegst etwa im Schnitt der Erwachsenen (18–70) in einer Bevölkerungsbefragung in Deutschland (ca. {pct} %).",
+    "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).",
   erwischt:
-    "Hier saßen noch viele Mythen. Die Fakten-Karten räumen das in zehn Minuten auf.",
+    "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).",
 };
 
 /** Schritte → German label, no period (matches the back-of-card verdict). */
@@ -196,9 +242,9 @@ export default function ResultScreen({
   const hasWeakSpot = reviewRows.some((r) => r.schritte >= 2);
   const reviewIntro = hasWeakSpot
     ? realCopy(intros.weakSpotIntro) ||
-      "Hier sind deine Antworten — sortiert nach Abstand zur Wissenschaft."
+      "Hier sind Ihre Antworten — sortiert nach Abstand zur Wissenschaft."
     : realCopy(intros.strongPerformanceIntro) ||
-      "Du lagst bei jeder Aussage nah dran. Hier zur Erinnerung der Stand der Forschung.";
+      "Sie lagen bei jeder Aussage nah dran. Hier zur Erinnerung der Stand der Forschung.";
 
   // ── Breakdown line (only bands with count > 0).
   const breakdownParts: string[] = [];
@@ -211,6 +257,10 @@ export default function ResultScreen({
   if (result.breakdown.far > 0)
     breakdownParts.push(`${result.breakdown.far} ${t("schritte.far").toLowerCase()}`);
   const breakdownLine = breakdownParts.join(" · ");
+
+  // Population reference for the canonical sentence (BugHerd #29/#38/#39).
+  // Computed from each myth's populationCorrectPct; rounded per #31.
+  const populationStats = computePopulationStats(theme.myths);
 
   return (
     <section
@@ -238,7 +288,7 @@ export default function ResultScreen({
         verdictTitle={verdictTitle}
         verdictBody={verdictBody}
         breakdownLine={breakdownLine}
-        populationLine={bandedPopulationLine(band, result.percentile, shareCopy)}
+        populationLine={bandedPopulationLine(band, populationStats, shareCopy)}
       />
 
       {/* Module review, worst-first */}
@@ -273,17 +323,12 @@ export default function ResultScreen({
                   </span>
                   <p className="quiz-result__item-statement">{statement}</p>
                 </div>
+                {/* BugHerd #24 + #40 — line order swapped (Wissenschaftlich
+                    first, then Ihre Antwort) per the 2026-05-07 ruling so the
+                    user reads "truth, then their answer" rather than the
+                    other way around. CSS adds a blank-line spacer between
+                    the two pairs (.quiz-result__item-meta gap). */}
                 <div className="quiz-result__item-meta">
-                  <span className="quiz-result__item-pair">
-                    <span className="quiz-result__item-meta-label">
-                      {t("ui.yourAnswerLabel")}:
-                    </span>{" "}
-                    <span
-                      className={`classification classification--${answer.chosenClassification}`}
-                    >
-                      {t(`classification.${answer.chosenClassification}`)}
-                    </span>
-                  </span>
                   <span className="quiz-result__item-pair">
                     <span className="quiz-result__item-meta-label">
                       Wissenschaftlich:
@@ -292,6 +337,16 @@ export default function ResultScreen({
                       className={`classification classification--${myth.correctClassification}`}
                     >
                       {t(`classification.${myth.correctClassification}`)}
+                    </span>
+                  </span>
+                  <span className="quiz-result__item-pair">
+                    <span className="quiz-result__item-meta-label">
+                      {t("ui.yourAnswerLabel")}:
+                    </span>{" "}
+                    <span
+                      className={`classification classification--${answer.chosenClassification}`}
+                    >
+                      {t(`classification.${answer.chosenClassification}`)}
                     </span>
                   </span>
                 </div>
@@ -318,7 +373,14 @@ export default function ResultScreen({
       </div>
 
       {/* Action buttons — exactly two primary actions in matching size,
-          plus two same-sized text links beneath. */}
+          plus a "Weiter erkunden" invitation block + two same-sized text
+          links beneath. BugHerd #44 (Session 3b, 2026-05-07): the
+          invitation block adds explicit cross-section CTAs to
+          Daten-Explorer + Meine Interessen so the result screen reads
+          as a launchpad, not a dead end. The label "Meine Interessen"
+          preempts the Item 6 FAQ section rename (still upcoming);
+          /meine-interessen/ will 301 to /meine-interessen/ once Item 6
+          ships. */}
       <div className="quiz-result__actions">
         <div className="quiz-result__actions-primary">
           <a
@@ -335,6 +397,21 @@ export default function ResultScreen({
               {t("ui.nextModule.cta", { title: nextThemeTitle })}
             </a>
           )}
+        </div>
+        <div className="quiz-result__actions-explore">
+          <p className="quiz-result__explore-heading">Weiter erkunden</p>
+          <a
+            href="/daten-explorer/"
+            className="quiz-result__explore-link"
+          >
+            Daten-Explorer →
+          </a>
+          <a
+            href="/meine-interessen/"
+            className="quiz-result__explore-link"
+          >
+            Meine Interessen →
+          </a>
         </div>
         <div className="quiz-result__actions-tertiary">
           <button

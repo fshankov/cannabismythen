@@ -780,18 +780,12 @@
   letter-spacing: -0.01em;
 }
 
-.quiz-card--flow .quiz-card__verdict-line--richtig {
-  color: var(--color-richtig);
-}
-.quiz-card--flow .quiz-card__verdict-line--eher_richtig {
-  color: var(--color-eher-richtig);
-}
-.quiz-card--flow .quiz-card__verdict-line--eher_falsch {
-  color: var(--color-eher-falsch);
-}
-.quiz-card--flow .quiz-card__verdict-line--falsch {
-  color: var(--color-falsch);
-}
+/* BugHerd #26 (Session 3b, 2026-05-07): the .quiz-card__verdict-line--*
+   colour modifiers were removed. The big back-face Schritte verdict
+   line ("Nah dran" / "Genau richtig" / etc.) now renders monochrome
+   per the reviewer's ruling. The smaller chips above (Ihre Antwort +
+   Wissenschaftlich) keep their colour, and so do dashboard pills,
+   factsheet panel verdict header, fakten-karten flips, hero animation. */
 
 /* 3 — Points sub-line under the verdict. Muted, monospace numerals for
    alignment stability. */
@@ -2094,10 +2088,18 @@
 }
 
 .quiz-result__item-meta {
+  /* BugHerd #24 — stack the two pairs vertically with a blank-line
+     spacer between them, so each row reads:
+       Wissenschaftlich: <verdict>
+       <blank-line spacer>
+       Ihre Antwort: <verdict>
+     Reviewer wanted the truth-first / answer-second order *and* a
+     visible separation. The 1rem `--space-md` gap gives the blank-line
+     feel without an actual empty <div>. */
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-sm);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
   font-size: 0.85rem;
   color: var(--color-text-secondary);
   padding-left: calc(1.4em + var(--space-sm) + 2.5em);
@@ -2488,6 +2490,41 @@
   padding: 12px 22px;
   min-width: 240px;
   text-align: center;
+}
+
+/* BugHerd #44 (Session 3b, 2026-05-07): "Weiter erkunden" invitation
+   block. Sits between the primary CTAs and the tertiary text-links.
+   Renders a small heading and two cross-section text links so the
+   result screen reads as a launchpad, not a dead end. */
+.quiz-result__actions-explore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: var(--space-md) 0;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-line, #e7e7e2);
+}
+
+.quiz-result__explore-heading {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 4px;
+}
+
+.quiz-result__explore-link {
+  color: var(--color-accent);
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 4px 8px;
+}
+
+.quiz-result__explore-link:hover {
+  text-decoration-thickness: 2px;
 }
 
 .quiz-result__actions-tertiary {
@@ -3184,6 +3221,24 @@
   letter-spacing: 0.02em;
 }
 
+/* BugHerd #37b (Session 3b, 2026-05-07): per-tile last-score chip. The
+   element is hidden by default so tiles look unchanged when localStorage
+   is empty; the inline script in /quiz/index.astro reveals it once a
+   matching cm-quiz-score-{slug} entry is found. Sits below the question-
+   count pill, smaller and quieter so it doesn't compete with the title. */
+.quiz-select-card__last-score {
+  display: none;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  letter-spacing: 0.01em;
+}
+
+.quiz-select-card__last-score--has-data {
+  display: inline-block;
+}
+
 /* Stage 6 — Featured Schnellcheck tile. Subtle dotted border + "Mix"
    chip in the top-right corner so it reads as the cross-thematic
    wildcard without out-shouting the editorial modules. */
@@ -3348,6 +3403,20 @@
 }
 
 .fakten-filter-bar__btn--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+/* BugHerd #45 (Session 4c, 2026-05-08): when the SELECTED button is
+   hovered, keep the white text on the green background. The earlier
+   :hover rule above sets color to --color-accent (green), which on an
+   active green-fill button became green-on-green and made the label
+   disappear. Per Fedor 2026-05-08: selected fills green, hover keeps
+   text white. The :hover specificity needed an `--active:hover`
+   override because both classes are present in the DOM together. */
+.fakten-filter-bar__btn--active:hover,
+.fakten-filter-bar__btn--active:focus-visible {
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: var(--color-text-inverse);

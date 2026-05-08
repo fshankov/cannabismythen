@@ -36,7 +36,7 @@ audiences:
   - label: Suchthilfeangebote in der Nähe
     url: https://www.dhs.de/service/suchthilfeverzeichnis
   helplines:
-  - label: Suchst Du Hilfe wegen Depressionen?
+  - label: Suchen Sie Hilfe wegen Depressionen?
     title: ich-bin-alles.de
     url: https://www.ich-bin-alles.de
 - id: konsumierende
@@ -87,7 +87,7 @@ audiences:
   accentColor: '#7c3aed'
   description: 'Präventionsfachkräfte, Suchtberatung, öffentliche Gesundheit: Welche Mythen priorisieren? Welche Zielgruppen
     haben die größten Lücken? Welche Kanäle wirken? Aufbereitete CaRM-Indikatoren für die professionelle Praxis.'
-  introNote: 'Hinweis: Schulkontext-spezifische Fragen finden Sie unter [Lehrkräfte](/haeufige-fragen/lehrkraefte/).'
+  introNote: 'Hinweis: Schulkontext-spezifische Fragen finden Sie unter [Lehrkräfte](/meine-interessen/lehrkraefte/).'
   weiterfuehrend:
   - label: Informationen und Tipps für Lehr- und Fachkräfte
     url: https://www.cannabispraevention.de/lehrkraefte/

@@ -99,13 +99,10 @@ export default function ShareCard({
     breakdown.exact + breakdown.near + breakdown.off + breakdown.far;
   const rawPoints =
     breakdown.exact * 1 + breakdown.near * 0.66 + breakdown.off * 0.33;
-  // German decimal separator (comma); 1 dp keeps the reviewer's example
-  // "2,6 von 6 möglichen Punkten" intact while matching the rest of the
-  // site's formatting.
-  const formattedPoints = rawPoints.toLocaleString("de-DE", {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  });
+  // BugHerd #31 — round-to-int site-wide. Confirmed in the 2026-05-07
+  // session: percentages and absolute scores both round to the nearest
+  // integer (no decimals). 2.66 → 3; 2.33 → 2.
+  const formattedPoints = String(Math.round(rawPoints));
   const absoluteScoreLine =
     totalAnswered > 0
       ? `${formattedPoints} von ${totalAnswered} möglichen Punkten`

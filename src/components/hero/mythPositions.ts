@@ -40,7 +40,7 @@ export const mythPositions: MythPosition[] = [
   { id: "m10",     text: "Cannabis wirkt gegen Schmerzen",       x: 30, y: 58, r: -2, size: 15, serif: false, weight: 400, italic: false },
   { id: "m11",     text: "Konsum bewirkt Übelkeit",              x: 80, y: 56, r: -3, size: 17, serif: false, weight: 400, italic: false },
   { id: "m12",     text: "Cannabis hemmt Entzündungen",          x:  2, y: 67, r:  2, size: 14, serif: false, weight: 400, italic: false },
-  { id: "m13",     text: "Cannabiskonsum löst Spasmen",          x: 35, y: 74, r: -1, size: 18, serif: false, weight: 400, italic: false },
+  { id: "m13",     text: "Cannabiskonsum lindert Spastiken",     x: 35, y: 74, r: -1, size: 18, serif: false, weight: 400, italic: false },
   { id: "m14",     text: "Cannabis schädigt das Herz",           x: 17, y: 79, r:  3, size: 16, serif: false, weight: 500, italic: false },
   { id: "m15",     text: "Konsum schadet den Atemwegen",         x: 64, y: 76, r: -2, size: 15, serif: false, weight: 400, italic: false },
   { id: "m16",     text: "Cannabis verursacht Krebs",            x: 36, y: 39, r:  1, size: 13, serif: false, weight: 400, italic: false },

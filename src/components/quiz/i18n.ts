@@ -28,31 +28,31 @@ const translations: Record<Lang, Record<string, string>> = {
     "classification.richtig": "Richtig",
 
     // ── Quiz theme titles ─────────────────────────────────────────────
-    "quiz.medizin.title": "Medizinischer Nutzen",
+    "quiz.medizin.title": "Medizinischer und therapeutischer Nutzen",
     "quiz.medizin.subtitle":
-      "Was weißt du über den therapeutischen Nutzen von Cannabis?",
+      "Was wissen Sie über den therapeutischen Nutzen von Cannabis?",
     "quiz.medizin.description":
       "Schmerzlinderung, Spastiken, Schlaf, Angst, Depressionen und ADHS.",
-    "quiz.risiken.title": "Risiken & Gesundheit",
+    "quiz.risiken.title": "Risiken für Entwicklung, Körper und Psyche",
     "quiz.risiken.subtitle":
-      "Was weißt du über die gesundheitlichen Risiken von Cannabis?",
+      "Was wissen Sie über die gesundheitlichen Risiken von Cannabis?",
     "quiz.risiken.description":
       "Entwicklung, Körper, Psyche — von Fötus bis Sucht und Suizidgedanken.",
-    "quiz.stimmung.title": "Stimmung & Wahrnehmung",
+    "quiz.stimmung.title": "Wirkung auf Stimmung und Wahrnehmung",
     "quiz.stimmung.subtitle":
-      "Was weißt du über die Wirkungen von Cannabis auf Stimmung und Sinne?",
+      "Was wissen Sie über die Wirkungen von Cannabis auf Stimmung und Sinne?",
     "quiz.stimmung.description":
       "Entspannung, Kreativität, Motivation, Aggression und Wahrnehmung.",
-    "quiz.gesellschaft.title": "Gesellschaft & Gesetz",
+    "quiz.gesellschaft.title": "Soziales, Bevölkerung und Gesetzgebung",
     "quiz.gesellschaft.subtitle":
-      "Was weißt du über Cannabis in der Gesellschaft?",
+      "Was wissen Sie über Cannabis in der Gesellschaft?",
     "quiz.gesellschaft.description":
       "Verbreitung, Verkehr, soziale Folgen, Legalisierung und Vorurteile.",
-    "quiz.gefaehrlichkeit.title": "Gefährlichkeit",
+    "quiz.gefaehrlichkeit.title": "Allgemeine Einschätzung der Gefährlichkeit",
     "quiz.gefaehrlichkeit.subtitle":
-      "Was weißt du über die allgemeine Gefährlichkeit von Cannabis?",
+      "Was wissen Sie über die allgemeine Gefährlichkeit von Cannabis?",
     "quiz.gefaehrlichkeit.description":
-      "Alkohol-Vergleich, Harmlosigkeit, Dosierung und Mischkonsum.",
+      "Alkohol-Vergleich, Harmlosigkeit, Heranwachsende, Dosierung und Mischkonsum.",
     // Stage 6 — Schnellcheck (dynamic 7-myth deck across all themes)
     "quiz.schnellcheck.title": "Schnellcheck",
     "quiz.schnellcheck.subtitle":
@@ -220,7 +220,8 @@ const translations: Record<Lang, Record<string, string>> = {
     // ── Population comparison strings ─────────────────────────────────
     // ── UI strings ────────────────────────────────────────────────────
     "ui.progress": "{answered} von {total} beantwortet",
-    "ui.resultTitle": "Dein Ergebnis",
+    // BugHerd #13 — Sie form (sentence case). Session 1 sweep missed this key.
+    "ui.resultTitle": "Ihr Ergebnis",
     "ui.shareButton": "Ergebnis teilen",
     "ui.copiedToClipboard": "Link kopiert! \u2713",
     "ui.shareTitle": "Mein Cannabis-Quiz Ergebnis",
@@ -249,24 +250,28 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.streak.label": "{n} richtig in Folge",
 
     // \u2500\u2500 Schritte band labels (Stage 1 \u2014 CaRM Schritte model) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-    "schritte.exact": "Genau richtig",
+    // BugHerd #25 (Session 3b, 2026-05-07): per-question Schritte band
+    // labels updated per ISD ruling — reviewer's set + 'Völlig daneben'
+    // for the 3-Schritte case (English glosses: completely correct /
+    // close to it / unfortunately incorrect / completely off).
+    "schritte.exact": "Völlig korrekt",
     "schritte.near": "Nah dran",
-    "schritte.off": "Daneben",
-    "schritte.far": "Komplett daneben",
-    // {schritte} Schritt(e), {points} Punkte. Use commas for German decimals.
-    "schritte.points":
-      "{schritte}\u00a0Schritt(e) daneben \u2192 {points}\u00a0Punkte",
-
-    // \u2500\u2500 Micro-copy table (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    "schritte.off": "Leider fehlerhaft",
+    "schritte.far": "Völlig daneben",
+    //\u2500\u2500 Micro-copy table (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     // \u2500\u2500 Result screen \u2014 N\u00e4chstes Modul (Phase C \u00a73.14) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     "ui.nextModule.cta": "N\u00e4chstes Modul: {title} \u2192",
     "ui.classificationPhrase.richtig": "richtig",
     "ui.classificationPhrase.eher_richtig": "eher richtig",
     "ui.classificationPhrase.eher_falsch": "eher falsch",
     "ui.classificationPhrase.falsch": "falsch",
-    "ui.correctAnswer": "Evidenzbasierte Bewertung:",
-    "ui.yourAnswer": "Deine Antwort:",
-    "ui.yourAnswerLabel": "Deine Antwort",
+    "ui.correctAnswer": "Wissenschaftliche Bewertung:",
+    // BugHerd #13 + #23 — "Deine" → "Ihre" (Sie form, sentence case).
+    // Session 1's sweep missed these two i18n keys; caught in Session 2
+    // when chasing the "IHRE" pin (which turned out to be the per-row
+    // label, not an uppercase issue).
+    "ui.yourAnswer": "Ihre Antwort:",
+    "ui.yourAnswerLabel": "Ihre Antwort",
     "classification.scientific": "Wissenschaftlich",
     "ui.correctAnswerLabel": "Richtige Antwort",
     "ui.swipeHint": "oder nach links wischen",
@@ -281,11 +286,11 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.previousQuestion": "Zur\u00fcck",
     "ui.finishQuiz": "Ergebnis ansehen",
     "ui.persistenceNotice":
-      "Wir speichern deinen Fortschritt nur in diesem Browser.",
+      "Wir speichern Ihren Fortschritt nur in diesem Browser.",
     "ui.progressRestored":
       "Fortschritt wiederhergestellt.",
     "ui.resetProgress": "Quiz zur\u00fccksetzen",
-    "ui.retrospectiveTitle": "Deine Antworten im \u00dcberblick",
+    "ui.retrospectiveTitle": "Ihre Antworten im \u00dcberblick",
     "ui.exploreData": "Daten-Explorer \u00f6ffnen",
     "ui.shareResultHeading": "Ergebnis teilen",
     "ui.openMythDetail": "Details zu dieser Aussage \u2192",

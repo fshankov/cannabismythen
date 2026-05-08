@@ -161,7 +161,8 @@ interface ColumnData {
 
 function formatPillValue(value: number | null): string {
   if (value === null) return 'k. A.';
-  return `${value.toFixed(1)}%`;
+  // BugHerd #31 — round-to-int (no decimals on the whole site).
+  return `${Math.round(value)}%`;
 }
 
 /** Imperative handle so MythenExplorer's ExportDrawer can grab the

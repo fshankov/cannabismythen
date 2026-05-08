@@ -264,7 +264,7 @@ export default function DashboardOnboarding({ active, openTrigger }: Props) {
       {
         title: 'Filter — Kategorien & einzelne Mythen',
         body:
-          'Über <strong>Filter</strong> wählen Sie ganze Mythos-Kategorien (Medizin, Risiken, Stimmung, Dosierung, Verbreitung, Gefährlichkeit, Allgemeine Einschätzung) oder einzelne Aussagen. Auswahl gilt auf allen Sichten gleichzeitig.',
+          'Über <strong>Filter</strong> wählen Sie ganze Mythos-Kategorien (Medizin, Körper & Entwicklung, Psychische Gesundheit, Stimmung & Wahrnehmung, Soziale Auswirkungen, Dosierung & Qualität, Verbreitung & Gesetzgebung, Allgemeine Gefährlichkeit) oder einzelne Aussagen. Auswahl gilt auf allen Sichten gleichzeitig.',
       },
       {
         title: 'Suche — auf jeder Sicht',

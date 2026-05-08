@@ -102,13 +102,14 @@ export type StripsSortDir = 'asc' | 'desc';
  *  toggle exposed by `<SortToggle>` in the shared dashboard toolbar. */
 export type BalkenSort = 'value-desc' | 'value-asc';
 
-/** Quiz module slugs — the 5 Themen blocks shown in StripsView */
+/** Quiz module slugs — the 5 Themen blocks shown in StripsView.
+ *  Renamed in Session 1 of 2026-05 to match the docx 5-cat taxonomy. */
 export type QuizThemeSlug =
   | 'quiz-gefaehrlichkeit'
-  | 'quiz-gesellschaft'
-  | 'quiz-medizin'
-  | 'quiz-risiken'
-  | 'quiz-stimmung';
+  | 'quiz-medizinischer-nutzen'
+  | 'quiz-risiken-koerper-psyche'
+  | 'quiz-soziales-bevoelkerung'
+  | 'quiz-stimmung-wahrnehmung';
 
 export type Lang = 'de' | 'en';
 

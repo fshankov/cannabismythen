@@ -289,6 +289,76 @@ export default function FilterDrawer({
         )}
       </div>
 
+      {/* Stage 6: chip strip showing every individual myth currently
+          in `state.mythIds`. Categories don't appear here — the
+          accordion already shows category state via its checkbox.
+          Each chip carries a verdict arrow, truncated title, and an
+          ✕ to remove. The strip stays visible through search-query
+          changes so you don't lose track of what you've selected. */}
+      {(() => {
+        const selectedMyths = myths.filter((m) =>
+          state.mythIds.includes(m.id),
+        );
+        if (selectedMyths.length === 0) return null;
+        return (
+          <div
+            className="carm-filter-selected"
+            aria-label={`${selectedMyths.length} ${
+              selectedMyths.length === 1 ? 'Mythos' : 'Mythen'
+            } ausgewählt`}
+          >
+            <p className="carm-filter-selected__label">
+              {selectedMyths.length}{' '}
+              {selectedMyths.length === 1 ? 'Mythos' : 'Mythen'} ausgewählt
+            </p>
+            <ul className="carm-filter-selected__chips" role="list">
+              {selectedMyths.map((m) => {
+                const txt = getMythShortText(m, 'de');
+                const truncated = txt.length > 32 ? txt.slice(0, 30) + '…' : txt;
+                return (
+                  <li key={m.id}>
+                    <span
+                      className={`carm-filter-selected__chip statement--${m.correctness_class}`}
+                    >
+                      <span
+                        className={`carm-filter-selected__chip-arrow classification--${m.correctness_class}`}
+                        aria-hidden="true"
+                      >
+                        <VerdictArrowWithInfo
+                          verdict={m.correctness_class}
+                          size={11}
+                          strokeWidth={2.5}
+                        />
+                      </span>
+                      <span
+                        className="carm-filter-selected__chip-text"
+                        title={txt}
+                      >
+                        {truncated}
+                      </span>
+                      <button
+                        type="button"
+                        className="carm-filter-selected__chip-remove"
+                        onClick={() =>
+                          update(
+                            'mythIds',
+                            state.mythIds.filter((id) => id !== m.id),
+                          )
+                        }
+                        aria-label={`Auswahl entfernen: ${txt}`}
+                        title={`Auswahl entfernen: ${txt}`}
+                      >
+                        <X size={11} strokeWidth={2.5} aria-hidden="true" />
+                      </button>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })()}
+
       <section className="carm-filter-section">
         <h3 className="carm-filter-section__title">
           {filteredMyths === null
@@ -396,13 +466,22 @@ export default function FilterDrawer({
 
   function renderMythRow(m: Myth) {
     const checked = isMythIncluded(m);
+    const inSearchMode = query.trim().length > 0;
     return (
       <li key={m.id}>
         <label className="carm-checkbox carm-checkbox--myth">
           <input
             type="checkbox"
             checked={checked}
-            onChange={() => toggleMyth(m)}
+            onChange={() => {
+              toggleMyth(m);
+              // Stage 6: when the user is searching ("type cannabis,
+              // pick one, clear, type alcohol, pick another"), clear
+              // the search after each pick so they can immediately
+              // type the next term. Selection stays visible in the
+              // chip strip above.
+              if (inSearchMode) setQuery('');
+            }}
           />
           <span
             className={`carm-checkbox__verdict classification--${m.correctness_class}`}

@@ -43,10 +43,10 @@ const HEIGHT = 630;
 
 // ── Module emoji + title fallback (matches index.astro) ────────────
 const MODULE_EMOJI: Record<string, string> = {
-  "quiz-medizin": "💊",
-  "quiz-risiken": "⚠️",
-  "quiz-stimmung": "🧠",
-  "quiz-gesellschaft": "🏛️",
+  "quiz-medizinischer-nutzen": "💊",
+  "quiz-risiken-koerper-psyche": "⚠️",
+  "quiz-stimmung-wahrnehmung": "🧠",
+  "quiz-soziales-bevoelkerung": "🏛️",
   "quiz-gefaehrlichkeit": "⚖️",
   "quiz-schnellcheck": "🎲",
 };

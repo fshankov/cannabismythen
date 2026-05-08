@@ -28,7 +28,7 @@ import type {
   Schritte,
 } from "./types";
 import { t } from "./i18n";
-import { schritte, pointsForSchritte } from "./quizData";
+import { schritte } from "./quizData";
 import {
   usePointerSwipe,
   useIsCoarsePointer,
@@ -70,21 +70,14 @@ const SCHRITTE_LABEL_KEY: Record<Schritte, string> = {
   3: "schritte.far",
 };
 
-/** Stage 3 — classification token used for the verdict text colour on the
- *  Schritte verdict line. Maps Schritte to the back-face colour ramp:
- *  0 → richtig (green), 1 → eher_richtig (lime), 2 → eher_falsch (amber),
- *  3 → falsch (rose). */
-const SCHRITTE_COLOR_CLASS: Record<Schritte, Classification> = {
-  0: "richtig",
-  1: "eher_richtig",
-  2: "eher_falsch",
-  3: "falsch",
-};
-
-/** German decimal-comma formatting for Schritte points. */
-function formatPoints(p: number): string {
-  return p.toFixed(2).replace(".", ",");
-}
+// SCHRITTE_COLOR_CLASS removed in Session 3b (BugHerd #26, 2026-05-07):
+// the back-face Schritte verdict line now renders monochrome — the
+// reviewer wanted the big "Nah dran" / "Genau richtig" headline to read
+// as a calm assessment, not a colour-coded judgement. The smaller
+// classification chips above (Ihre Antwort + Wissenschaftlich) keep
+// their colour, and so do dashboard pills, factsheet panel, fakten-karten
+// flips. The Schritte → classification mapping itself still drives the
+// .quiz-result__item--exact background tint on the result-screen rows.
 
 interface QuizCardProps {
   myth: QuizMyth;
@@ -185,12 +178,6 @@ export default function QuizCard({
   const schritteVerdictText = userSchritte !== null
     ? t(SCHRITTE_LABEL_KEY[userSchritte])
     : "";
-  const schritteVerdictColorClass = userSchritte !== null
-    ? `quiz-card__verdict-line--${SCHRITTE_COLOR_CLASS[userSchritte]}`
-    : "";
-  const userPoints = userSchritte !== null
-    ? pointsForSchritte(userSchritte)
-    : 0;
 
   const verdictPhrase = t(
     `ui.classificationPhrase.${myth.correctClassification}`
@@ -324,12 +311,15 @@ export default function QuizCard({
                 {/* Remediation 5 — back-face copy stack, top to bottom,
                     all left-aligned:
                     1) Myth statement (left, tinted by scientific verdict).
-                    2) Chip pair: Deine Antwort + Wissenschaftlich.
+                    2) Chip pair: Ihre Antwort + Wissenschaftlich.
                     3) Schritte verdict line (large, colored by Schritte).
-                    4) Sub-line: "n Schritt(e) daneben → x,xx Punkte".
-                    5) Explanation paragraph.
-                    6) Population stat (always shown, new wording).
-                    7) Action buttons. */}
+                    4) Explanation paragraph.
+                    5) Population stat (always shown, new wording).
+                    6) Action buttons.
+                    Note: the "n Schritt(e) daneben → x,xx Punkte" sub-line
+                    was removed per BugHerd #27 (Session 2). i18n key
+                    `schritte.points` was deleted in Session 3a as dead
+                    code. Raw Punkte numbers stay only on ShareCard hero. */}
 
                 {/* 1 — Statement, left-aligned, tinted by scientific verdict. */}
                 <p
@@ -362,17 +352,10 @@ export default function QuizCard({
 
                 {/* 3 — Schritte verdict — large, colored by Schritte band. */}
                 <p
-                  className={`quiz-card__verdict-line ${schritteVerdictColorClass}`}
+                  className="quiz-card__verdict-line"
                 >
                   {schritteVerdictText}
                 </p>
-
-                {/* 4 — Points sub-line removed per BugHerd #27 (reviewer
-                    pinned "This should be deleted" on the
-                    "X Schritt(e) daneben — Y,YY Punkte" line). The big
-                    coloured "Nah dran" / "Genau richtig" headline above is
-                    enough verdict on the card; raw Punkte numbers are kept
-                    only on the result-screen ShareCard hero. */}
 
                 {/* 4 — Explanation. Scrollable inside its own region only when
                     it overflows the available card height. */}
@@ -407,7 +390,12 @@ export default function QuizCard({
                   </div>
                 )}
 
-                {/* 6 — Action row pinned to the bottom. */}
+                {/* 6 — Action row pinned to the bottom.
+                    BugHerd #34 (Session 3a, 2026-05-07): on the LAST
+                    question we hide the in-card "Ergebnis ansehen →" CTA
+                    so it doesn't duplicate the standalone finish-row
+                    rendered just below the card by QuizPlayer. On
+                    earlier cards the in-card "Nächste Frage →" stays. */}
                 <div className="quiz-card__back-actions">
                   {onShowFactsheet && (
                     <button
@@ -418,17 +406,16 @@ export default function QuizCard({
                       {t("ui.openMythDetail")}
                     </button>
                   )}
-                  <button
-                    type="button"
-                    className="quiz-card__next-btn"
-                    onClick={onNext}
-                    autoFocus
-                  >
-                    {isLastQuestion
-                      ? t("ui.finishQuiz")
-                      : t("ui.nextQuestion")}{" "}
-                    →
-                  </button>
+                  {!isLastQuestion && (
+                    <button
+                      type="button"
+                      className="quiz-card__next-btn"
+                      onClick={onNext}
+                      autoFocus
+                    >
+                      {t("ui.nextQuestion")} →
+                    </button>
+                  )}
                 </div>
 
                 <p className="quiz-card__swipe-hint" aria-hidden="true">
