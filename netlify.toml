@@ -7,6 +7,27 @@
   SECRETS_SCAN_OMIT_KEYS = "SITE_PASSWORD,KEYSTATIC_GITHUB_CLIENT_ID,KEYSTATIC_GITHUB_CLIENT_SECRET,KEYSTATIC_SECRET"
 
 # ---------------------------------------------------------------------------
+# Tracker artifact (BugHerd feedback tracker) lives at
+# public/tracker/index.html and is served at /tracker/. With
+# edgeMiddleware: true, Astro's SSR function handles directory URLs and
+# returns 404 because there's no /tracker route in src/pages. These two
+# rules rewrite both /tracker and /tracker/ to the concrete file so the
+# static asset is served. SITE_PASSWORD gate still applies via middleware.
+# ---------------------------------------------------------------------------
+
+[[redirects]]
+  from = "/tracker"
+  to = "/tracker/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tracker/"
+  to = "/tracker/index.html"
+  status = 200
+  force = true
+
+# ---------------------------------------------------------------------------
 # Stage 5 of the Daten-Explorer refactor — `/zahlen-und-fakten/*` renamed
 # to `/daten-explorer/*`. Belt-and-braces with the edge middleware in
 # `src/middleware.ts`: middleware handles the request flow, these rules
