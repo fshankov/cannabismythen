@@ -9,7 +9,7 @@ const TEAM: Member[] = [
   { initials: 'BS', fullName: 'Dr. Bernd Schulte', color: '#14b8a6' },
   { initials: 'SB', fullName: 'Dr. Sven Buth', color: '#f97316' },
   { initials: 'PD', fullName: 'Dr. Peter Degkwitz', color: '#a855f7' },
-  { initials: 'MR', fullName: 'Moritz Rosenkranz', color: '#eab308' },
+  { initials: 'MR', fullName: 'Dr. Moritz Rosenkranz', color: '#eab308' },
   { initials: 'HL', fullName: 'Harald Lahusen', color: '#10b981' },
 ];
 
@@ -36,9 +36,9 @@ export function VizTeamRow() {
         ))}
       </div>
       <p className="viz-team__caption">
-        Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg
+        Die CaRM-Studie — Cannabiskonsum: Risiken und Mythen
       </p>
-      <p className="viz-team__funder">Mai 2026 · Gefördert vom BIÖG</p>
+      <p className="viz-team__funder">ISD Hamburg · Gefördert vom BIÖG</p>
     </div>
   );
 }

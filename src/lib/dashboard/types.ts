@@ -97,10 +97,13 @@ export type StripsMode = 'indicator' | 'group';
 export type StripsSortAxis = Indicator | GroupId;
 export type StripsSortDir = 'asc' | 'desc';
 
-/** Balken (ranking bar) view sort options. The legacy 'category' option was
- *  retired in the unified-toolbar refactor — sort is now a simple direction
- *  toggle exposed by `<SortToggle>` in the shared dashboard toolbar. */
-export type BalkenSort = 'value-desc' | 'value-asc';
+/** Balken (ranking bar) view sort options.
+ *  - 'value-desc' / 'value-asc' — sort by the active indicator's value.
+ *  - 'verdict-rank' — sort by the scientific verdict band
+ *    (richtig → eher_richtig → eher_falsch → falsch → keine Aussage),
+ *    with descending value as the in-band tie-break. Added in
+ *    Session 4a (BugHerd #48). */
+export type BalkenSort = 'value-desc' | 'value-asc' | 'verdict-rank';
 
 /** Quiz module slugs — the 5 Themen blocks shown in StripsView.
  *  Renamed in Session 1 of 2026-05 to match the docx 5-cat taxonomy. */
@@ -182,6 +185,13 @@ export interface AppState {
   /** Information-sources Streifen view — categories included in the chart.
    *  Empty array = include all categories (default). */
   sourceCategoryFilter: string[];
+  /** Information-sources Streifen view — parent source IDs to narrow to.
+   *  Empty array = no source-level restriction (default). When set, only
+   *  the listed parent sources (and their channel children) render.
+   *  Composes with `sourceCategoryFilter` (intersection). Added in
+   *  Session 4b (BugHerd #53) so users can drill from a category into a
+   *  specific source like "Influencer:innen" or "Suchmaschinen". */
+  sourceSubFilter: number[];
   /** "Streifen" view — columns by indicator or by population group */
   stripsMode: StripsMode;
   /** Sort anchor: an Indicator id when stripsMode='indicator', a GroupId when 'group' */

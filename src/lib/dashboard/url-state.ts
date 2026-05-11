@@ -28,7 +28,7 @@ const ALL_STRIPS_MODES: StripsMode[] = ['indicator', 'group'];
 const ALL_QUIZ_THEME_SLUGS: QuizThemeSlug[] = ['quiz-gefaehrlichkeit', 'quiz-medizinischer-nutzen', 'quiz-risiken-koerper-psyche', 'quiz-soziales-bevoelkerung', 'quiz-stimmung-wahrnehmung'];
 const ALL_STRIPS_SORT_AXES: StripsSortAxis[] = [...ALL_INDICATORS, ...ALL_GROUP_IDS] as StripsSortAxis[];
 const ALL_STRIPS_DIRS: StripsSortDir[] = ['asc', 'desc'];
-const ALL_BALKEN_SORTS: BalkenSort[] = ['value-desc', 'value-asc'];
+const ALL_BALKEN_SORTS: BalkenSort[] = ['value-desc', 'value-asc', 'verdict-rank'];
 
 /** Public view aliases. The four published tabs use German URL keys; legacy/internal
  *  views keep their English name (and emit it back on round-trip). */
@@ -79,6 +79,7 @@ const DEFAULTS: AppState = {
   sourceGroup: 'adults',
   sourcesStripsMode: 'metric',
   sourceCategoryFilter: [],
+  sourceSubFilter: [],
   stripsMode: 'indicator',
   stripsSortAxis: 'awareness',
   stripsSortDir: 'desc',
@@ -134,6 +135,12 @@ export function stateToUrl(state: Partial<AppState>): string {
   // (`ssc` URL param dropped in Stage 4 — subcategories always render now.)
   if (state.sourceCategoryFilter && state.sourceCategoryFilter.length > 0)
     params.set('scf', state.sourceCategoryFilter.join(','));
+  // Session 4b (BugHerd #53): parent-source sub-filter inside the Quellen
+  // view. Numeric IDs from /data/information-sources.json. We don't validate
+  // the IDs here (range check is impractical without loading the JSON);
+  // SourcesStripsView ignores any ID that doesn't resolve.
+  if (state.sourceSubFilter && state.sourceSubFilter.length > 0)
+    params.set('ssf', state.sourceSubFilter.join(','));
   if (state.stripsMode && state.stripsMode !== DEFAULTS.stripsMode)
     params.set('stm', state.stripsMode);
   if (state.stripsSortAxis && state.stripsSortAxis !== DEFAULTS.stripsSortAxis)
@@ -246,6 +253,16 @@ export function urlToState(): Partial<AppState> {
     state.sourceCategoryFilter = scf
       .split(',')
       .filter((c) => ALL_SOURCE_CATEGORIES.includes(c));
+  }
+
+  // Session 4b (BugHerd #53): parent-source sub-filter. Parsed as numeric
+  // IDs; non-numeric tokens are dropped silently.
+  const ssf = params.get('ssf');
+  if (ssf) {
+    state.sourceSubFilter = ssf
+      .split(',')
+      .map((tok) => Number.parseInt(tok, 10))
+      .filter((n) => Number.isFinite(n) && n > 0);
   }
 
   const stm = params.get('stm');

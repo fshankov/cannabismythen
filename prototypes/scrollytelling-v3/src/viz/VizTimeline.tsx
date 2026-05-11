@@ -35,7 +35,7 @@ const ANCHORS: Anchor[] = [
     endISO: '2025-02-28',
     labelDate: 'Jan.–Feb. 2025',
     title: 'Literaturanalysen',
-    subtitle: 'PubMed · Web of Science · EUDA',
+    subtitle: 'PubMed · PsychInfo · SocIndex',
   },
   {
     date: '2025-07-15',
@@ -53,10 +53,10 @@ const ANCHORS: Anchor[] = [
     title: 'Expert:innen-Diskussion',
   },
   {
-    date: '2026-05-01',
-    startISO: '2026-05-01',
-    endISO: '2026-05-31',
-    labelDate: 'Mai 2026',
+    date: '2026-09-01',
+    startISO: '2026-09-01',
+    endISO: '2026-09-30',
+    labelDate: 'September 2026',
     title: 'Veröffentlichung',
     subtitle: 'Diese Website',
     highlight: true,
@@ -64,7 +64,12 @@ const ANCHORS: Anchor[] = [
 ];
 
 const T_START = new Date('2024-04-01').getTime();
-const T_END = new Date('2026-06-01').getTime();
+const T_END = new Date('2026-10-01').getTime();
+
+const VIEW_W = 800;
+const VIEW_H = 320;
+const PAD_X = 40;
+const TRACK_W = VIEW_W - PAD_X * 2;
 
 function pct(d: string): number {
   const t = new Date(d).getTime();
@@ -106,10 +111,10 @@ export function VizTimeline({ active }: Props) {
   return (
     <div className="viz viz-timeline" role="img" aria-label="Zeitlicher Ablauf der CaRM-Studie">
       <div className="viz-timeline__chart">
-        <svg viewBox="0 0 800 280" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
           {/* Year ticks */}
           {[2024, 2025, 2026].map((year) => {
-            const x = (pct(`${year}-01-01`) / 100) * 800;
+            const x = PAD_X + (pct(`${year}-01-01`) / 100) * TRACK_W;
             return (
               <g key={year}>
                 <line
@@ -136,8 +141,8 @@ export function VizTimeline({ active }: Props) {
 
           {/* Track line */}
           <line
-            x1={0}
-            x2={800}
+            x1={PAD_X}
+            x2={VIEW_W - PAD_X}
             y1={140}
             y2={140}
             stroke="#2d3748"
@@ -146,8 +151,8 @@ export function VizTimeline({ active }: Props) {
 
           {/* Drawn line */}
           <line
-            x1={0}
-            x2={800 * drawn}
+            x1={PAD_X}
+            x2={PAD_X + TRACK_W * drawn}
             y1={140}
             y2={140}
             stroke="#047857"
@@ -157,8 +162,8 @@ export function VizTimeline({ active }: Props) {
 
           {/* Period bars (where applicable) */}
           {ANCHORS.map((a, i) => {
-            const x1 = (pct(a.startISO) / 100) * 800;
-            const x2 = (pct(a.endISO) / 100) * 800;
+            const x1 = PAD_X + (pct(a.startISO) / 100) * TRACK_W;
+            const x2 = PAD_X + (pct(a.endISO) / 100) * TRACK_W;
             if (x2 - x1 < 6) return null;
             const visible = pct(a.startISO) / 100 <= drawn + 0.02;
             return (
@@ -178,11 +183,19 @@ export function VizTimeline({ active }: Props) {
 
           {/* Anchor dots + labels */}
           {ANCHORS.map((a, i) => {
-            const x = (pct(a.date) / 100) * 800;
+            const x = PAD_X + (pct(a.date) / 100) * TRACK_W;
             const above = i % 2 === 0;
             const labelY = above ? 86 : 198;
             const subY = above ? 70 : 218;
             const visible = pct(a.date) / 100 <= drawn + 0.05;
+            // Use start/end anchors at the extremes so labels stay inside the box
+            const isFirst = i === 0;
+            const isLast = i === ANCHORS.length - 1;
+            const textAnchor: 'start' | 'middle' | 'end' = isFirst
+              ? 'start'
+              : isLast
+                ? 'end'
+                : 'middle';
             return (
               <g
                 key={a.date}
@@ -234,7 +247,7 @@ export function VizTimeline({ active }: Props) {
                   fontSize={13}
                   fontFamily="Georgia, serif"
                   fontWeight={600}
-                  textAnchor="middle"
+                  textAnchor={textAnchor}
                 >
                   {a.title}
                 </text>
@@ -246,7 +259,7 @@ export function VizTimeline({ active }: Props) {
                     fill="#9ca3af"
                     fontSize={10}
                     fontFamily="monospace"
-                    textAnchor="middle"
+                    textAnchor={textAnchor}
                   >
                     {a.subtitle}
                   </text>
@@ -258,7 +271,7 @@ export function VizTimeline({ active }: Props) {
                   fill={a.highlight ? '#facc15' : '#6b7280'}
                   fontSize={10}
                   fontFamily="monospace"
-                  textAnchor="middle"
+                  textAnchor={textAnchor}
                   fontWeight={a.highlight ? 600 : 400}
                 >
                   {a.labelDate}
@@ -269,7 +282,7 @@ export function VizTimeline({ active }: Props) {
         </svg>
       </div>
       <div className="viz-timeline__caption">
-        <span>★ Veröffentlichung dieser Aufklärungs-Website</span>
+        <span>★ Projektzeitraum CaRM-Studie · April 2024 bis September 2026</span>
       </div>
     </div>
   );

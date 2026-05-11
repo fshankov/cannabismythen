@@ -12,14 +12,14 @@ export const STEPS: ScrollyStep[] = [
     heading:
       'Hand aufs Herz:\nWie viel von dem, was du über Cannabis weißt, stimmt eigentlich?',
     bodyText:
-      'Im April 2024 wurde Cannabis in Deutschland teil-legalisiert. Mit dem Konsumcannabisgesetz endete eine jahrzehntelange Verbotskultur. Plötzlich stehen Fragen im Raum, die zuvor selten öffentlich gestellt wurden — und alle haben Meinungen dazu.\n\nDas Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD) wollte es genau wissen: Was glaubt die Bevölkerung tatsächlich über diese Substanz — und wie viel davon stimmt?',
+      'Im April 2024 wurde Cannabis in Deutschland teil-legalisiert. Das Konsumcannabisgesetz beendete eine jahrzehntelange Verbotskultur. Auf einmal stehen Fragen im Raum, die vorher selten gestellt wurden — und alle haben eine Meinung dazu.\n\nDas Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD) wollte es genau wissen: Was glaubt die Bevölkerung wirklich über Cannabis — und wie viel davon stimmt?',
     vizName: 'timeline',
   },
   {
     stepNumber: 2,
     heading: 'Jede:r in Deutschland\nhat eine Meinung über Cannabis.',
     bodyText:
-      'Online, am Küchentisch, im Wartezimmer. Das ISD sammelte Aussagen systematisch: aus einer Online-Befragung von 1.041 Personen, aus Gesprächen mit 60 Präventionsfachkräften und aus einer Analyse einschlägiger (Online-)Medien.\n\nWas Menschen so sagen — manches plausibel, manches widersprüchlich, manches schlicht falsch.',
+      'Online, am Küchentisch, im Wartezimmer — Cannabis ist ein Thema. Das ISD sammelte Aussagen systematisch: eine Online-Befragung von 1.041 Personen, Gespräche mit 60 Präventionsfachkräften, eine Analyse einschlägiger (Online-)Medien.\n\nManches klingt plausibel, manches widersprüchlich. Was davon stimmt eigentlich? Genau das wollten wir herausfinden.',
     hint: 'Tippe auf eine Stimme, um sie zu lesen. ↓',
     vizName: 'peopleVoices',
   },
@@ -27,7 +27,7 @@ export const STEPS: ScrollyStep[] = [
     stepNumber: 3,
     heading: 'Aus tausenden Stimmen\nblieben 42 prüfbare Thesen.',
     bodyText:
-      'Die gesammelten Auffassungen wurden gebündelt, abstrahiert und thematisch sortiert: substanzbezogen, übergreifend, körperlich, psychisch, kombiniert, sozial und rechtlich.\n\n42 Thesen, die als Mythen kursieren — manche stimmen, manche nicht.',
+      'Drei Quellen, gegeneinander abgeglichen: Online-Befragung, Fachgespräche, Medienanalyse. Aussagen, die immer wieder auftauchten, wurden gebündelt und zu prüfbaren Thesen verdichtet. Dann thematisch sortiert: medizinisch, körperlich, psychisch, kombiniert, sozial, rechtlich.\n\n42 Thesen blieben übrig. Manche stimmen, manche nicht.',
     vizName: 'mythGrid',
     gridMode: 'themed',
   },
@@ -35,7 +35,7 @@ export const STEPS: ScrollyStep[] = [
     stepNumber: 4,
     heading: 'Jede These wurde\ngegen die Forschungsliteratur geprüft.',
     bodyText:
-      'In einer systematischen Literaturanalyse wurde jede der 42 Thesen anhand der aktuellen wissenschaftlichen Evidenz bewertet — auf einer vierstufigen Skala: richtig, eher richtig, eher falsch, falsch.\n\n↑ 16 stimmen.\n↗ 6 stimmen eher.\n↙ 11 stimmen eher nicht.\n↓ 7 stimmen nicht.\n— Bei 2 Thesen lässt die aktuelle Forschungslage keine eindeutige Aussage zu.\n\nGrundlage: 39 Faktenblätter aus systematischen Reviews und Einzelstudien (PubMed, Web of Science, EUDA-Quellen — letzte 15 Jahre).',
+      'Jede der 42 Thesen geprüft — gegen die aktuelle wissenschaftliche Evidenz. Vierstufige Skala: richtig, eher richtig, eher falsch, falsch.\n\n↑ 16 stimmen.\n↗ 6 stimmen eher.\n↙ 11 stimmen eher nicht.\n↓ 7 stimmen nicht.\n— Bei 2 Thesen lässt die Forschungslage keine eindeutige Aussage zu.\n\nGrundlage: 548 wissenschaftliche Quellen aus PubMed, PsychInfo, SocIndex und Google Scholar (Stand: September 2025).',
     hint: 'Tippe auf eine Karte, um sie zu lesen. ↓',
     vizName: 'mythGrid',
     gridMode: 'classified',
@@ -44,16 +44,15 @@ export const STEPS: ScrollyStep[] = [
     stepNumber: 5,
     heading: 'Dann fragten wir 2.795 Menschen,\nwas sie für richtig halten.',
     bodyText:
-      'Eine Bevölkerungsbefragung in Deutschland mit 2.097 Erwachsenen (18–70 Jahre), 555 Minderjährigen (16–17 Jahre) und 143 Mitgliedern von Cannabis-Anbauvereinigungen.\n\nFür jede der 42 Thesen wurden fünf Indikatoren erhoben — über fünf Zielgruppen hinweg: Volljährige, Minderjährige, Konsumierende, junge Erwachsene und Eltern minderjähriger Kinder.',
+      'Bevölkerungsbefragung in Deutschland: 2.097 Erwachsene (18–70 Jahre), 555 Minderjährige (16–17 Jahre), 143 Mitglieder von Cannabis-Anbauvereinigungen.\n\nFür jede der 42 Thesen erhoben wir fünf Indikatoren — über fünf Zielgruppen hinweg: Volljährige, Minderjährige, Konsumierende, junge Erwachsene und Eltern minderjähriger Kinder.',
     vizName: 'sampleAndRanked',
     sampleRankedMode: 'sample',
   },
   {
     stepNumber: 6,
-    heading: 'Drei Fragen.\nDrei Befunde.',
+    heading: 'Was sie wissen.\nWas sie glauben.',
     bodyText:
-      'Wer kennt was? Am bekanntesten: „Cannabis lindert Schmerzen“ — 77% der Konsumierenden. Am unbekanntesten: „Cannabis ist ein Allheilmittel“ — nur 12% der Erwachsenen kennen diese Aussage überhaupt.\n\nWer beurteilt richtig? Beim Thema Verkehrssicherheit liegen 92 von 100 Punkten bei den Erwachsenen — nahezu perfekte Übereinstimmung mit der Wissenschaft. Beim „generellen Motivationsverlust“ nur 25 von 100 Punkten — die Mehrheit liegt falsch.\n\nWelche Mythen brauchen Aufklärung? Die Präventionsbedeutung kombiniert persönliche Bedeutung und Wissenslücke. Drei Themen ragen heraus: „Cannabis lindert Schmerzen“ (34 Punkte), „Cannabis ist eine Einstiegsdroge“ (28 Punkte) — und für Minderjährige besonders: „Das Gesetz wird den Konsum erhöhen“ (23 Punkte).',
-    hint: 'Scrolle weiter — die Top-10 wechseln in drei Phasen. ↓',
+      '**Kenntnis** — 77 % der Konsumierenden kennen „Cannabis lindert Schmerzen“ [↙ eher falsch]. „Cannabis ist ein Allheilmittel“ [↓ falsch] kennen dagegen nur 12 % der Erwachsenen.\n\n**Bedeutung** — was Menschen kennen, wiegt für sie meist auch schwerer. Beide Werte laufen eng zusammen.\n\n**Richtigkeit** — „Cannabis gefährdet die Verkehrssicherheit“ [↑ richtig] kommt bei Erwachsenen auf 92 von 100, fast Konsens. „Cannabis verursacht Motivationsverlust“ [↓ falsch] nur 25 — die Mehrheit liegt daneben.\n\n**Präventionsbedeutung** — wo prägt ein falsches Bild Verhalten? Genau dort lohnt sich Aufklärung am meisten.\n\n**Bevölkerungsrisiko** — ein verbreiteter Halbmythos erreicht mehr Köpfe als ein obskurer. Sinnvoll nur für Voll- und Minderjährige.',
     vizName: 'sampleAndRanked',
     sampleRankedMode: 'ranked-1',
   },
@@ -61,33 +60,28 @@ export const STEPS: ScrollyStep[] = [
     stepNumber: 7,
     heading: 'Wo wir suchen.\nWem wir vertrauen.',
     bodyText:
-      'Arztpraxen und Apotheken genießen mit 92 Vertrauenspunkten die höchste Glaubwürdigkeit als Gesundheitsinformations-Quelle — in allen Zielgruppen. Aber nur 37% der Minderjährigen suchen dort tatsächlich Informationen. Bei den Erwachsenen sind es 60%. Minderjährige fragen stattdessen Angehörige (53%) — die zwar ähnlich vertraut sind, aber selbst oft schlecht informiert.\n\nDie Lücke zwischen Vertrauen und Nutzung ist der eigentliche Befund.',
-    hint: 'Wechsle die Zielgruppe oben. Bewege die Maus über eine Quelle, um sie in beiden Streifen zu sehen. ↓',
+      '**Suche** — Apotheken und Arztpraxen führen bei Erwachsenen (60 %). Minderjährige greifen dort nur zu 37 % zu und fragen lieber Angehörige (53 %). Foren und Influencer:innen sind vor allem für jüngere Gruppen relevant.\n\n**Vertrauen** — Apotheken erreichen 92 Punkte, in allen Zielgruppen. Doch wer dort vertraut, sucht nicht zwangsläufig dort. Die Lücke zwischen Vertrauen und Nutzung ist der eigentliche Befund.',
     vizName: 'sourcesStrips',
-    sourcesPair: 'search-trust',
   },
   {
     stepNumber: 8,
     heading: 'Was uns nebenbei erreicht.\nWo Aufklärung am meisten bewegt.',
     bodyText:
-      'Nicht aktiv gesuchten Gesundheitsinformationen begegnen wir in Radio, Fernsehen und Plakaten. Vertrauen wir ihnen weniger? Ja — aber sie erreichen uns trotzdem.\n\nMultipliziert man, wie oft eine Quelle genutzt wird, mit dem Vertrauen in sie, ergibt sich ihr Präventionspotenzial. Die größten Hebel liegen nicht dort, wo Information am häufigsten landet — sondern dort, wo beides zusammenkommt.',
+      '**Wahrnehmung** — Nicht aktiv gesuchten Informationen begegnen wir in Radio, Fernsehen, auf Plakaten und Infoscreens. Wir vertrauen ihnen weniger, sie erreichen uns trotzdem.\n\n**Prävention** — Wahrnehmung × Vertrauen ergibt das Präventionspotenzial. Die größten Hebel liegen dort, wo Reichweite und Vertrauen zusammenfallen — nicht dort, wo Information am häufigsten landet.',
     vizName: 'sourcesStrips',
-    sourcesPair: 'perception-prevention',
   },
   {
     stepNumber: 9,
     heading: 'Was wir daraus gemacht haben.',
     bodyText:
-      'Diese Website verwertet die Befunde der CaRM-Studie für unterschiedliche Bedürfnisse:\n\n— 42 Faktenkarten mit der wissenschaftlichen Klassifikation, Quellen und Erklärungen je Mythos.\n— Ein Selbsttest, der dein eigenes Wissen mit den Ergebnissen der Bevölkerungsbefragung vergleicht.\n— Vier Daten-Dashboards für allgemeines Publikum, Eltern, Präventionsfachkräfte und Forschung.\n— Häufige Fragen, sortiert nach Themen und Zielgruppen.',
+      'Diese Website verwertet die Befunde der CaRM-Studie für unterschiedliche Bedürfnisse:\n\n— 42 Faktenkarten mit wissenschaftlicher Klassifikation, Quellen und Erklärungen je Mythos.\n— Ein Quiz, das dein eigenes Wissen mit den Ergebnissen der Bevölkerungsbefragung vergleicht.\n— Den Daten-Explorer mit Sichten für allgemeines Publikum, Eltern, Fachkräfte und Forschung.\n— Meine Interessen — die FAQ, sortiert nach Themen und Zielgruppen.',
     vizName: 'ctaGrid',
-    ctaLabel: 'Zu den Faktenkarten',
-    ctaUrl: '/fakten-karten/',
   },
   {
     stepNumber: 10,
     heading: 'Wer hinter der Studie steht.',
     bodyText:
-      'Die CaRM-Studie wurde durchgeführt vom Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD). Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIÖG). Mai 2026.',
+      'Die CaRM-Studie — Cannabiskonsum: Risiken und Mythen. Durchgeführt vom Institut für interdisziplinäre Sucht- und Drogenforschung (ISD) in Hamburg. Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIÖG).',
     vizName: 'teamRow',
   },
 ];

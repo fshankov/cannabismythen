@@ -692,15 +692,33 @@ main:has(.carm-explorer) {
   background: var(--color-border);
 }
 
+/* Session 4a (BugHerd #51): inactive sort arrows are hidden, the
+   active arrow reads bolder and in the primary color. Keeps headers
+   visually quiet — only the column you're sorting by carries an
+   arrow. On hover, a faint inactive arrow surfaces as the sortable
+   affordance so the column still reads as clickable.
+   The base `.sort-arrow` stays `inline-block` so the JSX (which
+   ALWAYS renders the span, see TableView.tsx renderSortArrow) keeps
+   its layout box; we just zero its opacity. */
 .carm-explorer .data-table th .sort-arrow {
   display: inline-block;
   margin-left: 4px;
-  opacity: 0.4;
+  opacity: 0;
   font-size: 0.7rem;
+  transition: opacity 0.15s ease;
+}
+
+.carm-explorer .data-table th:hover .sort-arrow {
+  /* Sortable affordance: hovering the column header reveals the
+     would-be sort arrow at a faded opacity. Active stays at 1
+     (rule below has higher specificity via `.active`). */
+  opacity: 0.45;
 }
 
 .carm-explorer .data-table th .sort-arrow.active {
   opacity: 1;
+  font-weight: 700;
+  font-size: 0.78rem;
   color: var(--color-primary);
 }
 
@@ -2224,6 +2242,66 @@ main:has(.carm-explorer) {
   align-items: start;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Session 4a (BugHerd #54) — verdict legend strip above the
+   Mythen-Streifen chart. Mirrors the dot encoding 1:1: same arrow
+   glyph + same verdict color. Sits at body-text scale so it reads
+   as a quiet caption, not a competing toolbar element. Wraps on
+   narrow viewports so the four labels stay legible at <600px. */
+.strips-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 6px 4px 10px;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary, #4a5568);
+  /* The legend is informational metadata; don't let it pick up the
+     SVG wrap's hover or click events. */
+  pointer-events: auto;
+}
+
+.strips-legend__caption {
+  font-weight: 600;
+  margin-right: 4px;
+  color: var(--color-text, #1a1a2e);
+}
+
+.strips-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Wraps the VerdictArrowWithInfo button so the arrow color picks up
+   from the inline `style.color` we set on the wrapper. The component
+   strokes via currentColor inside its SVG. */
+.strips-legend__arrow {
+  display: inline-flex;
+  align-items: center;
+  /* The popover trigger inside VerdictArrowWithInfo is a `<button>`
+     with its own padding; tighten it down so the legend swatch reads
+     as a flush glyph next to the label. */
+  line-height: 1;
+}
+
+.strips-legend__arrow > button {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+}
+
+.strips-legend__label {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .strips-legend {
+    font-size: 0.74rem;
+    gap: 4px 10px;
+  }
 }
 
 .strips-grid3__content {
@@ -4725,6 +4803,60 @@ body.carm-modal-open {
    appearance. Safe to drop the modifier in JSX. */
 .carm-btn--ghost { /* alias of .carm-btn — Stage 6 unified chip */ }
 
+/* Session 4a (BugHerd #48) — Sort control group on Balken / Balken 2.
+   Two side-by-side buttons (Wert direction toggle + Urteil activator)
+   render as a single connected segmented control. The active mode
+   gets the accent fill; the inactive stays in the standard chip
+   (outlined) treatment but remains clickable. */
+.carm-sort-group {
+  display: inline-flex;
+  align-items: stretch;
+  /* Negative inner gap so the two buttons share a border edge — looks
+     like a single segmented control instead of two loose chips. */
+  gap: 0;
+}
+
+.carm-sort-group .carm-sort-btn {
+  /* Squared-off interior edges so the two buttons join cleanly. The
+     outer edges keep the standard 8px radius via overrides below. */
+  border-radius: 0;
+  position: relative;
+}
+
+/* Outer corners pick up the chip's pill curve so the group reads as a
+   single rounded rectangle. */
+.carm-sort-group .carm-sort-btn:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+.carm-sort-group .carm-sort-btn:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* Avoid a double-border between the two buttons by collapsing the
+   left-button's right border onto the right-button's left border. */
+.carm-sort-group .carm-sort-btn + .carm-sort-btn {
+  margin-left: -1px;
+}
+
+/* Active state mirrors `.carm-btn--primary` — accent fill, white text.
+   Sits on top of its neighbour via z-index so the accent border edge
+   reads cleanly even where the buttons overlap by 1px. */
+.carm-sort-btn--active {
+  background: var(--color-accent, #2d6a4f);
+  color: var(--color-text-inverse, #ffffff);
+  border-color: var(--color-accent, #2d6a4f);
+  z-index: 1;
+}
+.carm-sort-btn--active:hover {
+  background: var(--color-accent-hover, #1f4f3a);
+  border-color: var(--color-accent-hover, #1f4f3a);
+  /* Restore the stronger border on hover too — the global rule
+     overrides this otherwise. */
+  color: var(--color-text-inverse, #ffffff);
+}
+
 /* ===========================================================================
    BalkenView
    =========================================================================== */
@@ -4806,17 +4938,24 @@ body.carm-modal-open {
 
 /* v2 row: bar fill underneath, content (text + arrow) on top in
    verdict color. No right-side pill anymore — bar fills the full
-   row width up to value%. */
+   row width up to value%.
+   Session 4a (BugHerd #49): explicit `width: 100%` so the <li>
+   spans the full chart width regardless of UA defaults. The bar
+   and content are both `position: absolute` AND have
+   `pointer-events: none`, so the <li> is the sole hit target across
+   the entire row. Hover bg bumped from 0.025 → 0.05 so the hover
+   state reads clearly when the cursor sits past the bar end. */
 .carm-balken2__row {
   position: relative;
   display: block;
+  width: 100%;
   height: 36px;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .carm-balken2__row:hover {
-  background-color: rgba(0, 0, 0, 0.025);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .carm-balken2__row:focus-visible {

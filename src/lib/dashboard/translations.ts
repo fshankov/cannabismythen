@@ -215,6 +215,14 @@ const translations = {
   'strips.theme.medizin.short': { de: 'Med.', en: 'Med.' },
   'strips.theme.risiken.short': { de: 'Ris.', en: 'Risks' },
   'strips.theme.stimmung.short': { de: 'Stim.', en: 'Mood' },
+  // Session 4a (BugHerd #54): verdict legend rendered above the
+  // Streifen chart. UI label, so per the site-wide
+  // "Evidenz → Wissenschaftlich" rule it uses the
+  // "Wissenschaftliche Einordnung" form.
+  'strips.legend.label': {
+    de: 'Wissenschaftliche Einordnung',
+    en: 'Scientific verdict',
+  },
   'misc.population': { de: 'Bevölkerungsgruppe', en: 'Population' },
   'misc.viewDetails': { de: 'Details anzeigen', en: 'View details' },
   'misc.deselect': { de: 'Auswahl aufheben', en: 'Deselect' },
@@ -249,8 +257,19 @@ const translations = {
     en: 'Population Relevance only available for adults — group switched automatically.',
   },
   'sort.label': { de: 'Sortierung', en: 'Sort' },
-  'sort.value-desc': { de: 'Wert ↓', en: 'Value ↓' },
-  'sort.value-asc': { de: 'Wert ↑', en: 'Value ↑' },
+  // Session 4a (BugHerd #48): switched from arrow glyphs ("Wert ↓")
+  // to text-based direction labels per Fedor's "Wert, not arrow,
+  // A–Z style" ruling. Two sort controls render side-by-side now —
+  // a Wert (value) toggle that flips direction on click, and a
+  // separate Urteil (verdict) button that activates verdict-rank.
+  'sort.value-desc': { de: 'Wert: hoch → niedrig', en: 'Value: high → low' },
+  'sort.value-asc': { de: 'Wert: niedrig → hoch', en: 'Value: low → high' },
+  'sort.verdict-rank': {
+    de: 'Urteil: richtig → falsch',
+    en: 'Verdict: correct → incorrect',
+  },
+  'sort.value.short': { de: 'Wert', en: 'Value' },
+  'sort.verdict.short': { de: 'Urteil', en: 'Verdict' },
   'filter.button': { de: 'Filter', en: 'Filter' },
   'filter.title': { de: 'Filter & Sortierung', en: 'Filter & sort' },
   'filter.reset': { de: 'Alle Filter zurücksetzen', en: 'Reset all filters' },
@@ -263,9 +282,13 @@ const translations = {
     de: 'Keine Mythen passen zur Suche.',
     en: 'No myths match the search.',
   },
+  // Session 4a (BugHerd #50): placeholder spells out the intent —
+  // search inside the Filter popup is for picking individual myths
+  // to add to the visible-set selection. Differentiates this input
+  // from the search chip above the chart, which jumps to a factsheet.
   'filter.myths.searchPlaceholder': {
-    de: 'Mythen durchsuchen…',
-    en: 'Search myths…',
+    de: 'Mythos suchen und auswählen…',
+    en: 'Search and select a myth…',
   },
   'filter.empty.title': { de: 'Keine Treffer', en: 'No matches' },
   'filter.empty.body': {

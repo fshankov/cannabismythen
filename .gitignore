@@ -34,3 +34,15 @@ _local/
 # Claude Code local tooling — per-machine settings and worktree scratch space
 .claude/settings.local.json
 .claude/worktrees/
+
+# ────────────────────────────────────────────────────────────────────
+# Internal team tracker — NOT for the public GitHub repo. Contains
+# BugHerd review data, internal session reports, team-only decisions.
+# Lives at public/tracker/ locally so dev preview works, but is
+# excluded from git so it never reaches the open repo. To deploy the
+# tracker for the team, see _local/team-only/tracker-hosting.md
+# (separate private Netlify project). Run ./scripts/sync-tracker.sh
+# to refresh public/tracker/ from the Cowork artifact for local dev.
+# ────────────────────────────────────────────────────────────────────
+public/tracker/
+docs/tracker/

@@ -206,6 +206,12 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
   // always render as smaller, lower-opacity dots beneath their
   // parents. The dimming is handled per-dot in the SVG below.)
   const categoryFilter = state.sourceCategoryFilter;
+  /** Session 4b (BugHerd #53): parent-source sub-filter. Holds a list of
+   *  parent source IDs (parentId === null) the user picked from the
+   *  toolbar's "Quelle" picker. When non-empty, only those parents (and
+   *  their channel children) render. Composes with categoryFilter
+   *  (intersection). */
+  const subFilter = state.sourceSubFilter;
   const selectedGroup: SourceGroupId = state.sourceGroup;
   const selectedMetric: SourceMetricType = state.sourceMetric;
 
@@ -348,18 +354,26 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
     if (!sourceData) return [] as InformationSource[];
     const filterByCat = (s: InformationSource) =>
       categoryFilter.length === 0 || categoryFilter.includes(s.category);
-    const parents = sourceData.sources.filter((s) => s.parentId === null && filterByCat(s));
+    // Session 4b (BugHerd #53): parent-source sub-filter. Composes with the
+    // category filter (intersection): a parent must clear BOTH gates to
+    // render. An empty subFilter is the no-op default.
+    const subSet = subFilter.length > 0 ? new Set(subFilter) : null;
+    const filterBySub = (s: InformationSource) =>
+      subSet === null || subSet.has(s.id);
+    const parents = sourceData.sources.filter(
+      (s) => s.parentId === null && filterByCat(s) && filterBySub(s),
+    );
     const result: InformationSource[] = [];
     const parentIds = new Set(parents.map((p) => p.id));
     for (const s of sourceData.sources) {
       if (s.parentId === null) {
-        if (filterByCat(s)) result.push(s);
+        if (filterByCat(s) && filterBySub(s)) result.push(s);
       } else if (parentIds.has(s.parentId)) {
         result.push(s);
       }
     }
     return result;
-  }, [sourceData, categoryFilter]);
+  }, [sourceData, categoryFilter, subFilter]);
 
   /** Live count for the bottom-of-chart caption. Counts parents only — that
    *  is what users mean by "Quellen" (sub-categories are toggleable detail). */
@@ -647,6 +661,49 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
             const catValue =
               categoryFilter.length === 0 ? ALL : categoryFilter[0];
 
+            // Session 4b (BugHerd #53): Quelle (parent-source) picker —
+            // single-select with an "Alle Unterkategorien" sentinel. Lists
+            // every parentId=null source. When a Quellen-Kategorie is
+            // active, the list narrows to that category's parents only so
+            // the user can drill from a category into a specific source
+            // (e.g. Internet → Influencer:innen). Selecting a parent here
+            // BUT no category auto-clears any stale category filter — the
+            // sub-filter is the more specific signal.
+            //
+            // German caption: "Quelle" (gloss: "Source"). Sentinel German:
+            // "Alle Unterkategorien" (gloss: "All sub-categories"). Sie
+            // baseline holds — there's no first-/second-person here.
+            // DataPicker is generic over `T extends string`, so we serialise
+            // numeric source IDs to strings at the boundary. The sentinel
+            // for "no sub-filter" is the literal "__all__"; numeric strings
+            // map back to source IDs via Number.parseInt.
+            const SUB_ALL = '__all__';
+            const subSourceOptions: DataPickerOption<string>[] = sourceData
+              ? [
+                  { value: SUB_ALL, label: 'Alle Unterkategorien' },
+                  ...sourceData.sources
+                    .filter((s) => {
+                      if (s.parentId !== null) return false;
+                      // When a Quellen-Kategorie is active, narrow the
+                      // sub-list to that category's parents only.
+                      if (categoryFilter.length > 0)
+                        return categoryFilter.includes(s.category);
+                      return true;
+                    })
+                    // Order: category-id (matches Quellen-Kategorie order
+                    // in the picker above) → name. Stable, so the list
+                    // groups by category visually without needing dividers.
+                    .sort((a, b) => {
+                      const ca = a.category.localeCompare(b.category);
+                      if (ca !== 0) return ca;
+                      return a.name.localeCompare(b.name, 'de');
+                    })
+                    .map((s) => ({ value: String(s.id), label: s.name })),
+                ]
+              : [{ value: SUB_ALL, label: 'Alle Unterkategorien' }];
+            const subValue =
+              subFilter.length === 0 ? SUB_ALL : String(subFilter[0]);
+
             return (
               <ToolbarRow
                 aria-label="Informationsquellen-Steuerung"
@@ -680,12 +737,51 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                     value={catValue}
                     options={catOptions}
                     onChange={(next) => {
-                      if (next === ALL) update('sourceCategoryFilter', []);
-                      else update('sourceCategoryFilter', [next]);
+                      if (next === ALL) {
+                        update('sourceCategoryFilter', []);
+                      } else {
+                        update('sourceCategoryFilter', [next]);
+                        // Session 4b: when the user picks a category, drop
+                        // any sub-filter pick that no longer belongs to it.
+                        // Otherwise the picker shows a stale active value
+                        // that doesn't match any visible row.
+                        if (subFilter.length > 0 && sourceData) {
+                          const stillValid = subFilter.filter((id) => {
+                            const src = sourceData.sources.find((s) => s.id === id);
+                            return src ? src.category === next : false;
+                          });
+                          if (stillValid.length !== subFilter.length) {
+                            update('sourceSubFilter', stillValid);
+                          }
+                        }
+                      }
                     }}
                     aria-label="Quellen-Kategorie"
                     searchable
                     searchPlaceholder="Kategorie suchen…"
+                    lang="de"
+                  />,
+                  // Session 4b (BugHerd #53): Quelle sub-picker. Searchable
+                  // because the parent-source list is ~30 rows long when no
+                  // category is active; type-ahead is the fastest way to
+                  // jump to "Influencer:innen" or "Suchmaschinen".
+                  <DataPicker<string>
+                    key="quelle-sub"
+                    caption="Quelle"
+                    value={subValue}
+                    options={subSourceOptions}
+                    onChange={(next) => {
+                      if (next === SUB_ALL) {
+                        update('sourceSubFilter', []);
+                      } else {
+                        const id = Number.parseInt(next, 10);
+                        if (Number.isFinite(id) && id > 0)
+                          update('sourceSubFilter', [id]);
+                      }
+                    }}
+                    aria-label="Quelle"
+                    searchable
+                    searchPlaceholder="Quelle suchen…"
                     lang="de"
                   />,
                 ]}
@@ -880,6 +976,63 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                   </g>
                 );
               })}
+
+              {/* Session 4b (BugHerd #55): Export-only chrome — column
+                  headers + per-dot value labels mirrored into the SVG so
+                  PNG/SVG exports include them. Hidden in normal viewing
+                  via inline `display: none`; revealed on the export
+                  clone by `revealExportOnly()` in `lib/dashboard/export.ts`.
+                  See StripsView.tsx for the full rationale. */}
+              <g data-export-only="true" style={{ display: 'none' }} pointerEvents="none">
+                {columns.map((col, i) => {
+                  const cx = colCenterX(i);
+                  const colLabel = isMobile ? col.shortLabel : col.label;
+                  return (
+                    <text
+                      key={`exp-hd-${String(col.id)}`}
+                      x={cx}
+                      y={margin.top + headerH / 2 + 4}
+                      textAnchor="middle"
+                      fontSize={isNarrow ? 11 : 13}
+                      fontWeight={600}
+                      fill="#1a1a2e"
+                    >
+                      {colLabel}
+                    </text>
+                  );
+                })}
+                {columns.map((col, i) => {
+                  const cx = colCenterX(i);
+                  return (
+                    <g key={`exp-vals-${String(col.id)}`} transform={`translate(0, ${margin.top})`}>
+                      {col.nodes.map((n) => {
+                        const valText = formatPillValue(n.value);
+                        const dotX = cx + n.x;
+                        const dotY = n.y;
+                        let labelX = dotX + 8;
+                        let anchor: 'start' | 'end' = 'start';
+                        if (labelX + valText.length * 5 > cx + colW / 2 - 2) {
+                          labelX = dotX - 8;
+                          anchor = 'end';
+                        }
+                        return (
+                          <text
+                            key={`exp-v-${col.id}-${n.sourceId}`}
+                            x={labelX}
+                            y={dotY + 3}
+                            textAnchor={anchor}
+                            fontSize={n.isChild ? 8 : 9}
+                            fontWeight={600}
+                            fill="#1a1a2e"
+                          >
+                            {valText}
+                          </text>
+                        );
+                      })}
+                    </g>
+                  );
+                })}
+              </g>
 
               {/* Inline value pills next to highlighted dots */}
               {focusSource && (

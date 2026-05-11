@@ -7,11 +7,12 @@
  *     verdict-color scan we lost in v2's all-beige version, without
  *     the loud contrast issues of v1's full-saturation bars.
  *   - Text always dark (`--color-text`). Reads cleanly on any tint.
- *   - Verdict arrow at the BAR's right edge (where the fill stops),
- *     full-saturation verdict color, 18px. Arrow is the decisive
- *     verdict marker AND visually closes the row at the right
- *     position. For short bars where the arrow lands inside the
- *     text, the verdict-color contrast keeps it legible.
+ *   - Session 4a (BugHerd #47): the trailing verdict arrow at the
+ *     end of the statement was removed. The bar's verdict-tinted
+ *     fill carries the verdict signal on its own; the arrow next to
+ *     the text was redundant and read as a duplicate cue. Other
+ *     VerdictArrow surfaces (FactsheetPanel, ScrollytellingViewer,
+ *     HeroBlock) are unchanged.
  *   - No percentages on screen — value lives in the row's `title`
  *     and `aria-label`. No more "Inhalation bewirkt Atemwegser…16%"
  *     overlap.
@@ -23,8 +24,6 @@
  */
 
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { ArrowDown, ArrowDownLeft, ArrowUp, ArrowUpRight, Minus } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import type { CorrectnessClass, Myth, Metric, AppState, BalkenSort } from '../../../lib/dashboard/types';
 import {
   buildTooltipHtml,
@@ -64,14 +63,6 @@ interface Datum {
   value: number;
 }
 
-const VERDICT_ARROW_ICONS: Record<CorrectnessClass, LucideIcon> = {
-  richtig: ArrowUp,
-  eher_richtig: ArrowUpRight,
-  eher_falsch: ArrowDownLeft,
-  falsch: ArrowDown,
-  no_classification: Minus,
-};
-
 /** v4: bumped from classification-50 to classification-100 so the bars
  *  read clearly against the page's `#f4f4f0` warm off-white. Paired
  *  with a 1px border in the -200 shade for crisp edges. Dark text on
@@ -95,18 +86,36 @@ const BAR_BORDER: Record<CorrectnessClass, string> = {
   no_classification: '#cbd5e1', // gray-300
 };
 
-/** Full-saturation verdict color for the bar-end arrow.
- *  Mirrors the canonical CSS tokens in `--classification-*`. */
-const ARROW_COLOR: Record<CorrectnessClass, string> = {
-  richtig: '#047857',
-  eher_richtig: '#4d7c0f',
-  eher_falsch: '#b45309',
-  falsch: '#be123c',
-  no_classification: '#6b7280',
-};
+/** Session 4a (BugHerd #47): the trailing verdict arrow was removed.
+ *  ARROW_COLOR + VERDICT_ARROW_ICONS were the only consumers of the
+ *  full-saturation palette in this view; both are now dead and have
+ *  been pruned. The bar's verdict-tinted fill (BAR_FILL + BAR_BORDER
+ *  above) carries the verdict signal on its own. */
 
-function sortData(data: Datum[], sort: BalkenSort): Datum[] {
+function sortData(
+  data: Datum[],
+  sort: BalkenSort,
+): Datum[] {
   const copy = data.slice();
+  if (sort === 'verdict-rank') {
+    // Sort green → red by verdict band, then by descending value as
+    // a stable tie-break so the highest indicator value within a band
+    // sits at the top. Mirrors the rank used in TableView.tsx so the
+    // two ranking views stay in lockstep.
+    const order: Record<CorrectnessClass, number> = {
+      richtig: 1,
+      eher_richtig: 2,
+      eher_falsch: 3,
+      falsch: 4,
+      no_classification: 5,
+    };
+    return copy.sort((a, b) => {
+      const oa = order[a.myth.correctness_class as CorrectnessClass] ?? 5;
+      const ob = order[b.myth.correctness_class as CorrectnessClass] ?? 5;
+      if (oa !== ob) return oa - ob;
+      return b.value - a.value;
+    });
+  }
   if (sort === 'value-asc') return copy.sort((a, b) => a.value - b.value);
   return copy.sort((a, b) => b.value - a.value);
 }
@@ -231,7 +240,6 @@ const BalkenView2 = forwardRef<BalkenView2Handle, Props>(function BalkenView2(
         <ul className="carm-balken2__rows" role="list">
           {data.map((d) => {
             const cls = d.myth.correctness_class as CorrectnessClass;
-            const Arrow = VERDICT_ARROW_ICONS[cls];
             const text = getMythShortText(d.myth, 'de');
             const formatted = formatValue(d.value, state.indicator);
             return (
@@ -268,19 +276,12 @@ const BalkenView2 = forwardRef<BalkenView2Handle, Props>(function BalkenView2(
                   aria-hidden="true"
                 />
 
-                {/* Layer 2 (z=2): inline-flex container [text][arrow].
-                    The arrow follows the text naturally — at the END
-                    OF TEXT, not the bar end — so it never lands inside
-                    the statement on short bars. */}
+                {/* Layer 2 (z=2): statement text only. Session 4a
+                    (BugHerd #47) dropped the trailing verdict arrow —
+                    the bar's verdict-tinted fill carries the verdict
+                    signal on its own. */}
                 <span className="carm-balken2__content">
                   <span className="carm-balken2__text">{text}</span>
-                  <span
-                    className="carm-balken2__arrow"
-                    style={{ color: ARROW_COLOR[cls] }}
-                    aria-hidden="true"
-                  >
-                    <Arrow size={18} strokeWidth={2.5} />
-                  </span>
                 </span>
               </li>
             );

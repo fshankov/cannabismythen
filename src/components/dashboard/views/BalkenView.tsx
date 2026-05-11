@@ -44,6 +44,24 @@ const GROUP_LABELS: Record<string, string> = {
 
 function sortData(data: Datum[], sort: BalkenSort): Datum[] {
   const copy = data.slice();
+  if (sort === 'verdict-rank') {
+    // Session 4a (BugHerd #48): rank by scientific verdict band, then
+    // by descending value as a tie-break so the highest indicator
+    // value within a band sits at the top. Same rank as TableView.
+    const order: Record<string, number> = {
+      richtig: 1,
+      eher_richtig: 2,
+      eher_falsch: 3,
+      falsch: 4,
+      no_classification: 5,
+    };
+    return copy.sort((a, b) => {
+      const oa = order[a.myth.correctness_class] ?? 5;
+      const ob = order[b.myth.correctness_class] ?? 5;
+      if (oa !== ob) return oa - ob;
+      return b.value - a.value;
+    });
+  }
   if (sort === 'value-asc') return copy.sort((a, b) => a.value - b.value);
   return copy.sort((a, b) => b.value - a.value);
 }

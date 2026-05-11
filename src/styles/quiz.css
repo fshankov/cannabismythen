@@ -3397,7 +3397,21 @@
   font-family: inherit;
 }
 
-.fakten-filter-bar__btn:hover {
+/* BugHerd #45 (Session 4b, 2026-05-08): hover state on UN-active filter
+   buttons now lifts the contrast against the page's green theme. The
+   previous rule only swapped border + text to --color-accent (forest
+   green #2d6a4f); on a green-leaning page the change didn't register
+   visually until you'd already squinted. Locked decision (option a —
+   lighter tint of the existing green): the hover background flips to
+   --color-accent-light (Emerald-50, #e8f5ef) so the hover state is
+   immediately visible. Text + border stay --color-accent (#2d6a4f),
+   which is dark green on light green — contrast 5.6:1, well above
+   AA 4.5:1 for body text. :focus-visible mirrors :hover so keyboard
+   users see the same affordance. The --active:hover rule below still
+   wins for selected buttons (more specific selector). */
+.fakten-filter-bar__btn:hover,
+.fakten-filter-bar__btn:focus-visible {
+  background: var(--color-accent-light);
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
@@ -3449,6 +3463,23 @@
   width: 0;
   height: 0;
   overflow: hidden;
+}
+
+/* BugHerd #45 (Session 4b, 2026-05-08): card hover inside the Fakten-
+   Karten grid. The global `.quiz-card:hover` rule in global.css sets
+   `border-color: var(--color-accent)` (forest green #2d6a4f); when the
+   verdict-bar at the top of the card is already a green tint
+   (richtig / eher_richtig), the hover border bled into the bar and the
+   hover state read as ambiguous. Locked decision (option a — lighter
+   tint of the existing green): swap to --color-accent-light for the
+   border so the hover stays in the green family but lifts away from
+   the verdict-bar tint. The shadow + translateY from the global rule
+   (overridden by `.quiz-card__cell .quiz-card:hover { transform: none }`
+   for the flip context) keep the hover physically distinguishable.
+   :focus-visible mirrors :hover for keyboard navigation. */
+.fakten-grid .quiz-card:hover,
+.fakten-grid .quiz-card:focus-visible {
+  border-color: var(--color-accent-light);
 }
 
 

@@ -164,6 +164,7 @@ function chartToPngDataUrl(chart: ChartHandle): Promise<{ dataUrl: string; width
   if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
   clone.setAttribute('width', String(w));
   clone.setAttribute('height', String(h));
+  revealExportOnly(clone);
   const xml = new XMLSerializer().serializeToString(clone);
   const svg64 = btoa(unescape(encodeURIComponent(xml)));
   const svgDataUrl = `data:image/svg+xml;base64,${svg64}`;
@@ -301,7 +302,36 @@ function chartToSvgString(chart: ChartHandle): { svg: string; width: number; hei
   if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
   clone.setAttribute('width', String(w));
   clone.setAttribute('height', String(h));
+  revealExportOnly(clone);
   return { svg: new XMLSerializer().serializeToString(clone), width: w, height: h };
+}
+
+/**
+ * Session 4b (BugHerd #55): the StripsView and SourcesStripsView render
+ * column headers as absolutely-positioned HTML overlays *outside* the
+ * SVG, and value pills only render when a myth/source is in focus. Both
+ * are invisible to the SVG serializer, so the exported PNG/SVG was
+ * showing empty header rectangles and no per-dot values.
+ *
+ * Fix: those views now render in-SVG mirrors of the headers + per-dot
+ * value labels inside `<g data-export-only="true">` groups, hidden in
+ * normal viewing via inline `style="display: none"`. This helper walks
+ * the export clone and removes that inline style so the elements paint
+ * into the canvas / serialised SVG.
+ *
+ * Why inline style and not CSS: the CSS class scope doesn't apply to a
+ * detached clone fed to an offscreen Image, and stylesheets aren't
+ * carried into the serialised SVG body. Inline style is the only signal
+ * that survives both rendering paths.
+ */
+function revealExportOnly(root: SVGElement): void {
+  const exportEls = root.querySelectorAll<SVGElement>('[data-export-only="true"]');
+  exportEls.forEach((el) => {
+    // Some browsers serialise `style.display` cleared as an empty
+    // attribute; setting via removeProperty is the cleanest.
+    el.style.removeProperty('display');
+    el.removeAttribute('display');
+  });
 }
 
 /** SVG export — the chart itself plus header/footer text wrapped into one SVG. */

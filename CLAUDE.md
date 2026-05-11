@@ -39,21 +39,68 @@ clipboard helpers (`pbcopy` / `pbpaste`), and "open in editor" commands (`open .
 opens the current dir in Finder; VS Code path is the macOS .app bundle). Don't
 propose Ctrl-key shortcuts or Windows path conventions.
 
-## Tracker workflow (BugHerd feedback tracker)
+## Tracker workflow (Asana + Feedbucket)
 
-The team-shareable tracker lives at `public/tracker/index.html` and is served
-by Astro/Netlify at `https://cannabismythen.netlify.app/tracker/` — same
-SITE_PASSWORD edge gate as the rest of the site, so it's team-only. The
-canonical source is the Cowork artifact at
-`~/Documents/Claude/Artifacts/cannabismythen-feedback-tracker/index.html`.
-After any session that updates the tracker, run `./scripts/sync-tracker.sh`
-(also runs silently on every `./_local/render.sh` start), then commit + push
-`public/tracker/`. Sessions can also edit `public/tracker/index.html` directly
-when needed — but the Cowork artifact is the long-term canonical so the
-tracker survives across sessions. `render.sh` opens both `/fakten-karten/`
-and `/tracker/` in the browser automatically. Token cost of editing the
-tracker is small (~500–2000 per session); CLAUDE.md additions like this
-paragraph are ~100–300 tokens loaded per session start.
+**Asana is the single source of truth** for tasks. Project name:
+**CannabisMythen** (workspace: `1214692075439040`, project gid:
+`1214704634010891`). Three groups write to it:
+
+- **Stakeholders / ISD reviewers** leave comments on the live site
+  via the **Feedbucket** widget (browser, no signup). Feedbucket's
+  native Asana integration auto-creates tasks with screenshot +
+  browser info, and supports 2-way comment sync (reply in Asana
+  with `@feedbucket` → posts back to the widget on the page).
+- **Fedor + dev team** triage and assign tasks in Asana directly
+  (web app or mobile).
+- **Claude Code** (local + Cowork) reads and writes Asana via the
+  Asana V2 MCP server.
+
+Sections (Kanban columns) ARE the status machine: `Backlog` ·
+`In progress` · `Awaiting decision` · `Awaiting review` · `Blocked` ·
+`Parked` · `Done` · `Noise`. Moving a card to a new section changes
+its status.
+
+Task notes carry the metadata schema (until native Asana custom
+fields are added in the UI — see `docs/asana-feedbucket-workflow.md`
+Stage 2.2 for the field list): a one-line header
+`[BugHerd #N] | <Session> | <Priority> | <Owner> | tags: <…> | section: <site-area>`
+followed by a free-form description. Site-area `section` values:
+`home` / `daten-explorer` / `quiz` / `fakten-karten` / `ueber-uns` /
+`cross-cutting`. Workspace tags (going forward):
+`design` · `functionality` · `german-review` · `pre-launch` ·
+`data-accuracy` · `nice-to-have` · `accessibility`.
+
+**Two-stage review (when a task needs sign-off):**
+1. Claude moves a finished task to `Awaiting review` with the
+   `Review stage` custom field = `My review (Fedor)`.
+2. Fedor reviews; if approved, sets `Review stage = Team review (ISD)`
+   and @mentions Harald/Christian.
+3. ISD reviews; if approved, sets `Review stage = Approved`.
+4. Once `Approved`, anyone moves the task to `Done` and sets
+   `completed: true`. Task is not closed before both reviews pass.
+
+Workflow for Claude per session:
+
+- **Session start:** Read open Asana tasks via MCP (typically the
+  `Backlog`, `In progress`, `Awaiting decision` sections). Surface
+  a 5-item priority list. Ask Fedor which to pick up.
+- **During session:** Use `add_comment` on the active task to record
+  progress + commit SHA(s) as commits land. When you find an
+  untracked issue, `create_tasks` it (project_id
+  `1214704634010891`, section_id `1214704526251784` for Backlog),
+  notes following the header schema above.
+- **Session end:** `update_tasks` to move the task into the right
+  section: → `Awaiting review` with `Review stage = My review (Fedor)`
+  if the change is complete, leave in `In progress` if partial.
+  Don't auto-set `completed: true` — that's only after `Review stage
+  = Approved`. Post a one-paragraph summary as a comment with commit
+  SHA(s).
+- **Commit-message convention (optional):** Reference the Asana
+  task GID or BugHerd ID in commit messages so later runs trace
+  which commit closed which task.
+
+The end-to-end 3-stage setup + daily workflow lives at
+[docs/asana-feedbucket-workflow.md](docs/asana-feedbucket-workflow.md).
 
 ## Working with Fedor — process rule (HARD)
 
@@ -174,13 +221,19 @@ Things that look normal but aren't — every one of these has bitten somebody.
    `src/components/quiz/i18n.ts` `ui.correctAnswer` for the canonical
    replacement pattern.
 
-7. **Sie/Du baseline.** The site's voice is **Sie** (formal). The only
-   sanctioned Du-form pocket is the Jugendliche (16–17) FAQ section
-   (`src/content/faq/audiences.yaml` id `jugendliche`, title "Deine Fragen
-   rund um Cannabis"). The two scrollytelling drafts (`scrollytelling-v2.mdoc`
-   + `scrollytelling-v3.mdoc`) deliberately keep Du-form storytelling hooks
-   ("Glaubst du, du kennst dich aus?") flagged in their `internalNotes` for
-   ISD review; do NOT mechanically Sie-flip without ISD sign-off.
+7. **Sie/Du baseline (FLIPPED 2026-05-08 — team meeting).** The site's
+   voice is now **Du** (informal) site-wide. The only sanctioned Sie-form
+   pockets are the Meine Interessen FAQ sections for **Eltern**,
+   **Fachkräfte**, and **Lehrkräfte** (adult professional audiences) —
+   identified in `src/content/faq/audiences.yaml` by their `id` fields
+   (`eltern`, `fachkraefte`, `lehrkraefte`). The Meine Interessen sections
+   for Konsumierende and Jugendliche use Du like the rest of the site.
+   This is a HARD reversal of the Sessions 1–3 sweep: every quiz module,
+   share-copy, hero copy, ResultScreen fallback, BaseLayout chrome, etc.
+   that S1+S2+S3a flipped to Sie now needs to flip back to Du. Treat as
+   a Major Revision — schedule its own session (Session 5 / "Du flip").
+   Do NOT do partial Sie→Du flips inside a normal session; the inconsistency
+   is worse than either pure baseline.
 
 8. **Quiz tile score persistence (Session 3b).** When a user finishes a
    quiz, `QuizPlayer.tsx` writes `cm-quiz-score-{themeSlug}` to

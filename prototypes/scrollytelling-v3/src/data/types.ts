@@ -119,11 +119,23 @@ export interface InformationSourcesData {
 
 /* ───── Prototype-only additions (not in main repo) ───── */
 
-/** Step 6 sub-phase identifier — drives heatmap recolor. */
-export type IndicatorPhase = 'awareness' | 'correctness' | 'prevention_significance';
+/** Step 6 sub-phase identifier — one per indicator, in display order. As the
+ *  reader scrolls, each phase reveals one more bar in the right-hand viz. */
+export type IndicatorPhase =
+  | 'awareness'
+  | 'significance'
+  | 'correctness'
+  | 'prevention_significance'
+  | 'population_relevance';
 
 /** Step 5+6 unified mode (Iter-3 shared-DOM refactor). */
-export type SampleRankedMode = 'sample' | 'ranked-1' | 'ranked-2' | 'ranked-3';
+export type SampleRankedMode =
+  | 'sample'
+  | 'ranked-1'
+  | 'ranked-2'
+  | 'ranked-3'
+  | 'ranked-4'
+  | 'ranked-5';
 
 /** Step 7a/7b metric pairing. Iter-3 split. */
 export type SourcesPair = 'search-trust' | 'perception-prevention';

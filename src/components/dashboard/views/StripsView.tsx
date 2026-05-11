@@ -579,6 +579,44 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
               (groupRow, indicatorRow, topRow) are kept below in case
               future reintroduction of in-view filters needs them. */}
 
+          {/* Session 4a (BugHerd #54): verdict legend strip. Sits
+              above the chart so first-time users see the dot-color
+              encoding before they parse the chart. Uses the same
+              VerdictArrowWithInfo glyph that each dot renders, in
+              the matching verdict color, so the legend is a 1:1
+              mirror of the chart's encoding. SourcesStripsView is
+              intentionally NOT touched here — sources color by
+              source category, not verdict. */}
+          <div
+            className="strips-legend"
+            role="list"
+            aria-label={t('strips.legend.label', 'de')}
+          >
+            <span className="strips-legend__caption">
+              {t('strips.legend.label', 'de')}:
+            </span>
+            {(['richtig', 'eher_richtig', 'eher_falsch', 'falsch'] as CorrectnessClass[]).map(
+              (v) => (
+                <span key={v} className="strips-legend__item" role="listitem">
+                  <span
+                    className={`strips-legend__arrow classification--${v}`}
+                    style={{ color: getCorrectnessColor(v) }}
+                    aria-hidden="true"
+                  >
+                    <VerdictArrowWithInfo
+                      verdict={v}
+                      size={14}
+                      strokeWidth={2.5}
+                    />
+                  </span>
+                  <span className="strips-legend__label">
+                    {t(`verdict.${v}` as TranslationKey, 'de')}
+                  </span>
+                </span>
+              ),
+            )}
+          </div>
+
           {/* SVG chart wrapper — relative-positioned so HTML strip headers
               can be absolutely positioned over the in-SVG header area for
               each column, giving us a single unified box per strip.
@@ -864,6 +902,79 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 </g>
               );
             })}
+
+            {/* Session 4b (BugHerd #55): Export-only chrome — column
+                headers + per-dot value labels rendered inside the SVG so
+                they're captured by the PNG/SVG export pipeline. The HTML
+                overlays below (`.strips-svg-headers`) and the focus pills
+                above stay the source of truth for normal interactive
+                viewing; this group is invisible on screen via inline
+                `display: none` and revealed only on the export clone by
+                `revealExportOnly()` in `src/lib/dashboard/export.ts`. We
+                use the `data-export-only` attribute as the signal because
+                CSS classes don't survive the detached-clone rendering
+                path (the clone is fed into an offscreen Image, where
+                stylesheets don't apply). */}
+            <g data-export-only="true" style={{ display: 'none' }} pointerEvents="none">
+              {/* Column header text — mirrors the HTML headers' label.
+                  Icon is intentionally omitted: Lucide icons render as
+                  nested <svg> tags which are awkward in serialised SVG,
+                  and the label alone is plenty for a static export. */}
+              {columns.map((col, i) => {
+                const cx = colCenterX(i);
+                const colLabel = isMobile ? col.shortLabel : col.label;
+                return (
+                  <text
+                    key={`exp-hd-${String(col.id)}`}
+                    x={cx}
+                    y={margin.top + headerH / 2 + 4}
+                    textAnchor="middle"
+                    fontSize={isNarrow ? 11 : 13}
+                    fontWeight={600}
+                    fill="#1a1a2e"
+                  >
+                    {colLabel}
+                  </text>
+                );
+              })}
+              {/* Per-dot value labels. Small `<text>` near each dot;
+                  no pill background to keep the export uncluttered when
+                  every column has 12–40 dots. */}
+              {columns.map((col, i) => {
+                const cx = colCenterX(i);
+                const isAwareness = mode === 'indicator' && col.id === 'awareness';
+                return (
+                  <g key={`exp-vals-${String(col.id)}`} transform={`translate(0, ${margin.top})`}>
+                    {col.nodes.map((n) => {
+                      const valText = formatPillValue(n.value, isAwareness, state.lang);
+                      const dotX = cx + n.x;
+                      const dotY = n.y;
+                      // Anchor to the right of the dot when there's room,
+                      // else flip to the left of the dot.
+                      let labelX = dotX + 8;
+                      let anchor: 'start' | 'end' = 'start';
+                      if (labelX + valText.length * 5 > cx + colW / 2 - 2) {
+                        labelX = dotX - 8;
+                        anchor = 'end';
+                      }
+                      return (
+                        <text
+                          key={`exp-v-${col.id}-${n.mythId}`}
+                          x={labelX}
+                          y={dotY + 3}
+                          textAnchor={anchor}
+                          fontSize={9}
+                          fontWeight={600}
+                          fill="#1a1a2e"
+                        >
+                          {valText}
+                        </text>
+                      );
+                    })}
+                  </g>
+                );
+              })}
+            </g>
 
             {/* Inline value pills next to highlighted dots — shown on
                 selection AND on hover so users see the numbers either way. */}

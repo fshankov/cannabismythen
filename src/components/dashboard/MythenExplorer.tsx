@@ -464,38 +464,91 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
 
           const groupValue: GroupId = state.groupIds[0] ?? 'adults';
 
-          // Stage 6: Sortierung is a single toggle button — click flips
-          // between desc and asc. Drops the dropdown overhead since the
-          // BalkenSort type is binary; the arrow in the label carries
-          // the current direction visually.
-          const sortIsDesc = state.balkenSort === 'value-desc';
-          const sortLabel = t(
-            sortIsDesc ? 'sort.value-desc' : 'sort.value-asc',
-            'de',
-          );
-          const toggleSort = () =>
-            update(
-              'balkenSort',
-              sortIsDesc ? 'value-asc' : 'value-desc',
-            );
+          // Session 4a (BugHerd #48): two side-by-side sort controls.
+          //   - Wert (Value) toggle: when active, click flips direction
+          //     between value-asc / value-desc. When inactive (Urteil
+          //     mode is active), one click switches back to the most
+          //     recent value direction (defaults to value-desc).
+          //   - Urteil (Verdict) button: activates verdict-rank sort
+          //     (richtig → falsch) on click. When already active, it
+          //     stays put (next click on Wert flips out of it).
+          //
+          // The two controls are mutually exclusive — only one sort
+          // mode applies at a time. Visual treatment: active control
+          // is the primary (filled) button; inactive is the secondary
+          // (outlined) button. Both stay clickable.
+          //
+          // Per Fedor's 2026-05-08 ruling, labels use text-based
+          // direction ("hoch → niedrig", "richtig → falsch") rather
+          // than arrow glyphs (↑↓), so the direction reads at a glance
+          // for users who don't parse arrow direction quickly.
+          const isVerdictMode = state.balkenSort === 'verdict-rank';
+          const isValueDesc = state.balkenSort === 'value-desc';
+          const isValueAsc = state.balkenSort === 'value-asc';
+          const isValueMode = isValueDesc || isValueAsc;
+          /** Label for the Wert toggle. When Wert is active, shows the
+           *  current direction. When Urteil is active, shows the
+           *  direction we'd switch back to (defaults to desc). */
+          const wertLabel = isValueAsc
+            ? t('sort.value-asc', 'de')
+            : t('sort.value-desc', 'de');
+          const verdictLabel = t('sort.verdict-rank', 'de');
+          const onClickWert = () => {
+            if (isVerdictMode) {
+              // Coming from verdict mode → switch to default value-desc.
+              update('balkenSort', 'value-desc');
+              return;
+            }
+            // Already in value mode → flip direction.
+            update('balkenSort', isValueDesc ? 'value-asc' : 'value-desc');
+          };
+          const onClickVerdict = () => {
+            if (!isVerdictMode) update('balkenSort', 'verdict-rank');
+          };
 
           return (
             <ToolbarRow
               aria-label={t('filter.title', 'de')}
               pivot={
-                // Stage 6 follow-up: Sortierung sits leftmost on Balken
-                // (in the pivot slot), so it's visually distinct from
-                // the Indikator/Bevölkerungsgruppe dropdowns to its right.
+                // Session 4a (BugHerd #48): two side-by-side sort
+                // controls — Wert direction toggle + Urteil activator.
+                // Sits leftmost on Balken (pivot slot) so it stays
+                // visually distinct from the Indikator/Bevölkerungsgruppe
+                // dropdowns to its right. The active mode renders as
+                // the primary (filled) button; the inactive renders as
+                // the standard outlined button. Both are clickable to
+                // switch modes.
                 state.view === 'balken' || state.view === 'balken2' ? (
-                  <button
-                    type="button"
-                    className="carm-btn"
-                    onClick={toggleSort}
-                    aria-pressed={sortIsDesc}
-                    aria-label={`${t('sort.label', 'de')} — ${sortLabel}`}
+                  <div
+                    className="carm-sort-group"
+                    role="group"
+                    aria-label={t('sort.label', 'de')}
                   >
-                    {sortLabel}
-                  </button>
+                    <button
+                      type="button"
+                      className={`carm-btn carm-sort-btn${
+                        isValueMode ? ' carm-sort-btn--active' : ''
+                      }`}
+                      onClick={onClickWert}
+                      aria-pressed={isValueMode}
+                      aria-label={`${t('sort.label', 'de')} — ${wertLabel}`}
+                      title={wertLabel}
+                    >
+                      {wertLabel}
+                    </button>
+                    <button
+                      type="button"
+                      className={`carm-btn carm-sort-btn${
+                        isVerdictMode ? ' carm-sort-btn--active' : ''
+                      }`}
+                      onClick={onClickVerdict}
+                      aria-pressed={isVerdictMode}
+                      aria-label={`${t('sort.label', 'de')} — ${verdictLabel}`}
+                      title={verdictLabel}
+                    >
+                      {verdictLabel}
+                    </button>
+                  </div>
                 ) : undefined
               }
               pickers={[
@@ -737,9 +790,35 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             };
           }
           if (state.view === 'sources') {
+            // Session 4b (BugHerd #55): subtitle now reflects the active
+            // pivot + the picker selection so the exported chart is
+            // self-describing. metric pivot → Indikatoren · {Gruppe};
+            // group pivot → Gruppen · {Indikator}. Mirrors the Streifen
+            // subtitle pattern. Labels are inlined here (rather than
+            // reusing the dashboard-wide translation table) because the
+            // sources view has its own German labels for metrics + groups
+            // in `SourcesStripsView.tsx` (METRIC_LABELS / GROUP_LABELS)
+            // and we want exports to match what the user sees on screen.
+            const sourcesPivot = state.sourcesStripsMode;
+            const SOURCES_METRIC_LABEL: Record<string, string> = {
+              search: 'Suche',
+              perception: 'Wahrnehmung',
+              trust: 'Vertrauen',
+              prevention: 'Prävention',
+            };
+            const SOURCES_GROUP_LABEL: Record<string, string> = {
+              adults: 'Volljährige (18–70 J.)',
+              minors: 'Minderjährige (16–17 J.)',
+              consumers: 'Konsument:innen',
+              young_adults: 'Junge Erwachsene (18–26 J.)',
+              parents: 'Eltern',
+            };
+            const subtitle = sourcesPivot === 'metric'
+              ? `Indikatoren · ${SOURCES_GROUP_LABEL[state.sourceGroup] ?? state.sourceGroup}`
+              : `Gruppen · ${SOURCES_METRIC_LABEL[state.sourceMetric] ?? state.sourceMetric}`;
             return {
               title: 'Informationsquellen',
-              subtitle: '',
+              subtitle,
             };
           }
           return {

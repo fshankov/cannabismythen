@@ -88,12 +88,14 @@
   position: absolute;
   top: -10px;
   left: 8px;
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  color: var(--classification-richtig);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
   background: var(--bg-elev);
-  padding: 0 4px;
+  padding: 2px 4px;
   line-height: 1;
+  border-radius: 4px;
 }
 .viz-voice-card__tail {
   position: absolute;
@@ -129,13 +131,19 @@
   aspect-ratio: 7 / 6;
 }
 .viz-grid__cell {
+  /* Always flex-column with two children (icon slot + text) so the text
+     position is fixed regardless of mode. In themed mode the icon is an
+     empty placeholder; in classified mode the verdict arrow renders into
+     the same slot. */
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+  gap: 2px;
   font-size: 0.6875rem;
   line-height: 1.15;
-  padding: 6px 4px;
+  padding: 4px;
   border-radius: var(--radius-sm);
   background: var(--bg-elev);
   color: var(--fg-muted);
@@ -167,15 +175,20 @@
   color: white;
   font-weight: 500;
   font-size: 0.7rem;
-  flex-direction: column;
-  gap: 2px;
-  padding: 4px;
 }
 .viz-grid__cell-icon {
   flex-shrink: 0;
   opacity: 0.95;
   /* Icon fades in 200ms after the cell color settles, per spec */
   animation: viz-fade-in 200ms ease 200ms both;
+}
+/* Placeholder slot in themed mode — reserves the same vertical space the
+   icon will occupy in classified mode so the text doesn't shift on transition. */
+.viz-grid__cell-icon-slot {
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 .viz-grid__cell-text {
   display: -webkit-box;
@@ -253,6 +266,61 @@
   animation: viz-fade-up var(--anim-entry-dur) var(--anim-entry-ease) 500ms both;
 }
 
+.viz-grid__hover {
+  position: absolute;
+  z-index: 10;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  width: min(320px, 90vw);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--fg);
+  animation: viz-fade-up 180ms var(--anim-entry-ease) both;
+}
+.viz-grid__hover::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  background: var(--bg-elev);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transform: translateX(-50%) rotate(45deg);
+}
+.viz-grid__hover-statement {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--fg);
+}
+.viz-grid__hover-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.viz-grid__hover-category {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+.viz-grid__hover-summary {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+  line-height: 1.5;
+}
+
 /* ───── VizSampleAndRanked (steps 5 + 6 — shared DOM) ───── */
 .viz-sr {
   width: 100%;
@@ -324,10 +392,7 @@
   transform: translateY(0);
 }
 .viz-sr__panel {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
+  padding: var(--space-md) 0;
 }
 .viz-sr__title {
   font-family: var(--font-display);
@@ -387,6 +452,27 @@
 }
 .viz-sr__indicator-desc { color: var(--fg-muted); line-height: 1.45; }
 
+/* Active indicator (the phase the reader is currently on) */
+.viz-sr__indicator {
+  transition: background 240ms ease, padding 240ms ease, opacity 240ms ease;
+  border-radius: var(--radius-sm);
+  opacity: 0.55;
+}
+.viz-sr__indicator--active {
+  background: var(--bg-elev);
+  padding: 8px 10px;
+  opacity: 1;
+  border-bottom-color: transparent;
+  box-shadow: inset 3px 0 0 var(--classification-richtig);
+}
+.viz-sr__indicator--active .viz-sr__indicator-name {
+  color: var(--classification-richtig);
+}
+
+.viz-sr__panel--indicators {
+  padding: 0 0 var(--space-sm) 0;
+}
+
 /* Ranked panel (step 6) */
 .viz-sr__ranked {
   display: flex;
@@ -437,6 +523,34 @@
   padding: 0 var(--space-sm);
   line-height: 1.45;
 }
+.viz-sr__pct {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: var(--space-sm) auto 0;
+  max-width: 320px;
+}
+.viz-sr__pct-grid {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 2px;
+  padding: 8px;
+  background: var(--bg-elev);
+  border-radius: var(--radius-sm);
+}
+.viz-sr__pct-caption {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  text-align: center;
+  line-height: 1.4;
+}
+.viz-sr__pct-caption strong {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
 .viz-sr__legend {
   display: flex;
   flex-wrap: wrap;
@@ -447,37 +561,183 @@
 }
 .viz-sr__legend-item { display: inline-flex; align-items: center; gap: 5px; }
 .viz-sr__legend-dot { width: 9px; height: 9px; border-radius: 50%; }
-.viz-sr__list {
+
+/* Example-myth × indicator-rows × Zielgruppen-bars (step 6 phases 2/3). */
+.viz-sr__example {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+}
+.viz-sr__example-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-bottom: 4px;
+}
+.viz-sr__example-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.viz-sr__example-myth {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--fg);
+}
+/* Myth title + verdict tag share a single line. The verdict pill sits to the
+   right of the title and wraps to a new line only if the title is very long. */
+.viz-sr__example-myth-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+/* Daten-Explorer CTA — always rendered (with reserved space) so its slot is
+   part of the panel's layout from phase 1. Becomes visible at phase 5
+   (`data-revealed="true"`). The reserved slot uses opacity-only animation
+   so nothing above moves when it fades in. */
+.viz-sr__example-cta {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+  margin-top: var(--space-md);
+  padding: 8px 18px;
+  border: 1px solid var(--classification-richtig);
+  border-radius: 99px;
+  background: rgba(4, 120, 87, 0.12);
+  color: var(--classification-richtig);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition:
+    opacity 320ms ease,
+    transform 320ms ease,
+    background 200ms ease,
+    color 200ms ease;
+}
+.viz-sr__example-cta[data-revealed='true'] {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.viz-sr__example-cta:hover,
+.viz-sr__example-cta:focus {
+  background: var(--classification-richtig);
+  color: white;
+  transform: translateY(-1px);
+  outline: none;
+}
+.viz-sr__example-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+/* Picker style — kept identical to .viz-strips__pick (step 7) so the
+   step 6 and step 7 group selectors look and behave the same way. */
+.viz-sr__example-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--bg-elev);
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background var(--anim-hover-dur) ease,
+    color var(--anim-hover-dur) ease,
+    border-color var(--anim-hover-dur) ease;
+}
+.viz-sr__example-pick:hover {
+  border-color: var(--classification-richtig);
+  color: var(--fg);
+}
+.viz-sr__example-pick--active {
+  /* Border-only highlight — keeps text + colored User icon readable. The
+     thicker green ring (via box-shadow not border-width so the pill doesn't
+     shift) signals "selected" without nuking the contents. */
+  background: var(--bg-elev);
+  color: var(--fg);
+  border-color: var(--classification-richtig);
+  box-shadow: 0 0 0 1px var(--classification-richtig);
+  font-weight: 500;
+}
+.viz-sr__example-pick-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.viz-sr__example-rows {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
-.viz-sr__row {
-  display: grid;
-  grid-template-columns: 26px 160px 1fr;
-  gap: 8px;
-  align-items: center;
-  background: var(--bg-elev);
+.viz-sr__example-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
   border-radius: var(--radius-sm);
-  padding: 6px 8px;
-  font-size: 0.75rem;
-  animation: viz-fade-up var(--anim-entry-dur) var(--anim-entry-ease) both;
+  background: transparent;
+  /* All 5 rows are always in the DOM (stable layout). Default reserved-but-
+     hidden state: zero opacity, transform tucked away, no interactivity.
+     Revealed rows fade in with `data-revealed="true"`. The container's
+     total height never changes between phases. */
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition:
+    opacity 320ms ease,
+    transform 320ms ease,
+    background 240ms ease;
 }
-.viz-sr__rank {
-  font-family: var(--font-mono);
-  color: var(--fg-dim);
-  font-size: 0.6875rem;
-  text-align: center;
+.viz-sr__example-row[data-revealed='true'] {
+  opacity: 0.7;
+  transform: translateY(0);
+  pointer-events: auto;
 }
-.viz-sr__row-label {
+.viz-sr__example-row--active {
+  background: var(--bg-elev);
+  box-shadow: inset 3px 0 0 var(--classification-richtig);
+}
+.viz-sr__example-row--active[data-revealed='true'] {
+  opacity: 1;
+}
+.viz-sr__example-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.8125rem;
+}
+.viz-sr__example-row-name {
+  font-weight: 500;
   color: var(--fg);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
+.viz-sr__example-row--active .viz-sr__example-row-name {
+  color: var(--classification-richtig);
+}
+.viz-sr__example-row-unit {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--fg-dim);
+}
+.viz-sr__example-bars { display: flex; flex-direction: column; gap: 2px; }
 .viz-sr__bars { display: flex; flex-direction: column; gap: 2px; }
 .viz-sr__bar-row {
   position: relative;
@@ -575,7 +835,31 @@
   justify-content: center;
   margin-bottom: var(--space-sm);
 }
+/* Step 8 header — small label + sources list. */
+.viz-strips__header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 4px;
+}
+.viz-strips__header-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.viz-strips__header-list {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  color: var(--fg);
+  line-height: 1.4;
+}
+
 .viz-strips__pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 4px 12px;
   border-radius: 99px;
   border: 1px solid var(--border);
@@ -593,9 +877,13 @@
   color: var(--fg);
 }
 .viz-strips__pick--active {
-  background: var(--classification-richtig);
-  color: white;
+  /* Border-only highlight (matches step 6 picker). Preserves text + colored
+     User icon legibility; the thicker green ring is a box-shadow so the pill
+     width stays exactly the same on active/inactive toggle. */
+  background: var(--bg-elev);
+  color: var(--fg);
   border-color: var(--classification-richtig);
+  box-shadow: 0 0 0 1px var(--classification-richtig);
 }
 .viz-strips__chart {
   width: 100%;
@@ -614,7 +902,18 @@
   padding: 8px 12px;
   font-size: 0.8125rem;
   color: var(--fg);
-  animation: viz-fade-in 200ms ease both;
+  min-height: 36px;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+.viz-strips__pill--idle {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--border);
+  color: var(--fg-muted);
+}
+.viz-strips__pill-hint {
+  font-style: italic;
+  font-size: 0.75rem;
 }
 .viz-strips__pill-cat {
   font-family: var(--font-mono);
@@ -641,7 +940,7 @@
   border-radius: 50%;
 }
 
-/* ───── VizCtaGrid (step 9) ───── */
+/* ───── VizCtaGrid (step 9) — 2×2 grid of square cards ───── */
 .viz-cta {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -650,6 +949,7 @@
   max-width: 540px;
 }
 .viz-cta__card {
+  aspect-ratio: 1 / 1;
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -658,7 +958,10 @@
   color: var(--fg);
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
   transition:
     transform 0.2s ease,
     border-color 0.2s ease,
@@ -672,15 +975,31 @@
   background: var(--bg-elev-2);
   outline: none;
 }
+.viz-cta__card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--bg-elev-2);
+  color: var(--classification-richtig);
+  margin-bottom: 2px;
+}
+.viz-cta__card:hover .viz-cta__card-icon,
+.viz-cta__card:focus .viz-cta__card-icon {
+  background: rgba(4, 120, 87, 0.15);
+}
 .viz-cta__card-title {
   font-family: var(--font-display);
   font-size: 1.125rem;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
 }
-.viz-cta__card-desc { font-size: 0.8125rem; color: var(--fg-muted); }
+.viz-cta__card-desc {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
 
 /* ───── VizTeamRow (step 10) ───── */
 .viz-team {

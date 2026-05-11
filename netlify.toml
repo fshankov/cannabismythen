@@ -27,6 +27,16 @@
   status = 200
   force = true
 
+# Catch-all: any other file under /tracker/ (e.g. embedded comparison
+# table at /tracker/feedback-tools-comparison-v2.html) should serve as
+# a static asset, not be intercepted by the SSR function. The :splat
+# resolves to whatever path the user requested under /tracker/.
+[[redirects]]
+  from = "/tracker/*"
+  to = "/tracker/:splat"
+  status = 200
+  force = true
+
 # ---------------------------------------------------------------------------
 # Stage 5 of the Daten-Explorer refactor — `/zahlen-und-fakten/*` renamed
 # to `/daten-explorer/*`. Belt-and-braces with the edge middleware in

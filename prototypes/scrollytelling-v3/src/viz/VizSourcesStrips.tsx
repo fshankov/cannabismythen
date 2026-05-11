@@ -1,23 +1,68 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { User } from 'lucide-react';
 import type {
   GroupId,
   InformationSource,
   InformationSourcesData,
   SourceCategoryId,
   SourceMetricId,
-  SourcesPair,
 } from '../data/types';
 
+/** Per-group color tokens — must match GROUP_COLOR in VizSampleAndRanked.tsx
+ *  so the User icons in both pickers (step 6 + step 7/8) read as the same
+ *  visual identity for each Zielgruppe. */
+const GROUP_COLOR: Record<GroupId, string> = {
+  adults: 'var(--group-adults)',
+  minors: 'var(--group-minors)',
+  consumers: 'var(--group-consumers)',
+  young_adults: 'var(--group-young_adults)',
+  parents: 'var(--group-parents)',
+};
+
 interface Props {
-  /** Step 7a or 7b — which metric pair to show. */
-  pair: SourcesPair;
+  /** Pre-loaded info-sources data (lifted to App so the data is cached). */
+  data: InformationSourcesData;
+  /** 0..4. Number of metric columns currently revealed.
+   *    0 → all four columns visible as empty placeholders (no dots yet)
+   *    1 → Suche has dots
+   *    2 → + Vertrauen + slope (Suche↔Vertrauen)
+   *    3 → + Wahrnehmung + slope (Vertrauen↔Wahrnehmung)
+   *    4 → + Prävention + slope (Wahrnehmung↔Prävention)
+   *  Step 7 progresses 0/1 → 2; step 8 continues 3 → 4. The viz panel
+   *  persists across the step transition without remounting. */
+  revealedColumns: 0 | 1 | 2 | 3 | 4;
 }
 
-const PAIR_METRICS: Record<SourcesPair, [SourceMetricId, SourceMetricId]> = {
-  'search-trust': ['search', 'trust'],
-  'perception-prevention': ['perception', 'prevention'],
+/** Four metric columns shown side-by-side as a parallel-coordinates strip
+ *  viz. The order is fixed: Suche → Vertrauen → Wahrnehmung → Prävention. */
+const COLUMNS: ReadonlyArray<SourceMetricId> = ['search', 'trust', 'perception', 'prevention'];
+
+const SHORT_METRIC_LABEL: Record<SourceMetricId, string> = {
+  search: 'Suche',
+  trust: 'Vertrauen',
+  perception: 'Wahrnehmung',
+  prevention: 'Prävention',
 };
+
+const METRIC_UNIT_LABEL: Record<SourceMetricId, string> = {
+  search: '% gesucht',
+  trust: 'Vertrauen',
+  perception: '% wahrgen.',
+  prevention: 'Potenzial',
+};
+
+/** Five exemplary sources, ordered to span 5 different categories so the
+ *  legend always shows the full source taxonomy. */
+const UNIFIED_EXEMPLARY_SOURCE_IDS: ReadonlyArray<number> = [
+  2,  // Apotheke / Arztpraxis      — institutionell
+  1,  // Angehörige                — persönliches Umfeld
+  16, // Foren                       — internet
+  33, // Plakat / Flyer              — print / physisch
+  43, // Kurzer Beitrag TV + Radio   — traditionelle Medien
+];
+
+const UNIFIED_HEADER = 'Apotheke · Angehörige · Foren · Plakat · Kurzbeitrag TV';
 
 const GROUP_OPTIONS: { id: GroupId; label: string }[] = [
   { id: 'adults', label: 'Volljährige' },
@@ -35,91 +80,74 @@ interface Dot {
   id: number;
   name: string;
   category: SourceCategoryId | string;
-  // Per-strip layout (filled by simulation)
-  x?: number;
-  y?: number;
-  yTarget: number;       // metric value for current group + metric
-  initialFx?: number;
+  yTarget: number;
 }
 
-const STRIP_W = 280;
-const STRIP_H = 360;
-const STRIP_GAP = 80;
-const PADDING_TOP = 24;
-const PADDING_BOTTOM = 36;
+type LaidOutDot = Dot & { x: number; y: number };
 
-export function VizSourcesStrips({ pair }: Props) {
-  const [data, setData] = useState<InformationSourcesData | null>(null);
+// Layout constants — four narrow strips side-by-side. Total width fits the
+// right column of the scrolly without overflowing.
+const STRIP_W = 130;
+const STRIP_H = 320;
+const STRIP_GAP = 36;
+const PADDING_TOP = 38;
+const PADDING_BOTTOM = 24;
+
+export function VizSourcesStrips({ data, revealedColumns }: Props) {
   const [activeGroup, setActiveGroup] = useState<GroupId>('adults');
   const [hoverId, setHoverId] = useState<number | null>(null);
-
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Data load (lazy import to avoid coupling carmData)
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await fetch('/info-sources.json');
-      const json = (await res.json()) as InformationSourcesData;
-      if (!cancelled) setData(json);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const parentSources: InformationSource[] = useMemo(() => {
+    const allParents = data.sources.filter((s) => s.parentId === null);
+    const allowSet = new Set(UNIFIED_EXEMPLARY_SOURCE_IDS);
+    return allParents.filter((s) => allowSet.has(s.id));
+  }, [data]);
 
-  const [metricA, metricB] = PAIR_METRICS[pair];
+  // Per-column beeswarm positions. Each column's dots cluster around its
+  // x-center; y maps to the metric value (0–100 inverted so high = top).
+  const positionsByColumn: LaidOutDot[][] = useMemo(() => {
+    return COLUMNS.map((metric, colIdx) => {
+      const m = data.metrics[metric];
+      const dots: Dot[] = parentSources.map((s) => ({
+        id: s.id,
+        name: s.name,
+        category: s.category,
+        yTarget: m?.data[activeGroup]?.[String(s.id)] ?? 0,
+      }));
+      return beeswarmLayout(dots, colIdx * (STRIP_W + STRIP_GAP));
+    });
+  }, [data, parentSources, activeGroup]);
 
-  // Parents only — children are surfaced via hover/title (cleaner viz)
-  const parentSources: InformationSource[] = useMemo(
-    () => (data ? data.sources.filter((s) => s.parentId === null) : []),
-    [data],
-  );
+  // Adjacent-column slope pairs. `slopeSegments[i]` connects column i to
+  // column i+1 for every source.
+  const slopeSegments = useMemo(() => {
+    return positionsByColumn.slice(0, -1).map((leftDots, segIdx) => {
+      const rightDots = positionsByColumn[segIdx + 1];
+      return leftDots
+        .map((a) => {
+          const b = rightDots.find((p) => p.id === a.id);
+          return b ? { id: a.id, a, b, category: a.category } : null;
+        })
+        .filter((p): p is NonNullable<typeof p> => p !== null);
+    });
+  }, [positionsByColumn]);
 
-  // Build dot lists per strip — values come from data.metrics[metric].data[group][sourceId]
-  const dotsA: Dot[] = useMemo(() => {
-    if (!data) return [];
-    const m = data.metrics[metricA];
-    return parentSources.map<Dot>((s) => ({
-      id: s.id,
-      name: s.name,
-      category: s.category,
-      yTarget: m.data[activeGroup]?.[String(s.id)] ?? 0,
-    }));
-  }, [data, metricA, activeGroup, parentSources]);
-
-  const dotsB: Dot[] = useMemo(() => {
-    if (!data) return [];
-    const m = data.metrics[metricB];
-    return parentSources.map<Dot>((s) => ({
-      id: s.id,
-      name: s.name,
-      category: s.category,
-      yTarget: m.data[activeGroup]?.[String(s.id)] ?? 0,
-    }));
-  }, [data, metricB, activeGroup, parentSources]);
-
-  // Beeswarm layout: y = scale(value); x = collision-avoided around centerline
-  const positionsA = useMemo(() => beeswarmLayout(dotsA, 0), [dotsA]);
-  const positionsB = useMemo(() => beeswarmLayout(dotsB, STRIP_W + STRIP_GAP), [dotsB]);
-
-  if (!data) {
-    return <div className="viz viz-strips viz-strips--loading">Lade Quellen-Daten …</div>;
-  }
-
-  const totalW = STRIP_W * 2 + STRIP_GAP;
+  const totalW = STRIP_W * COLUMNS.length + STRIP_GAP * (COLUMNS.length - 1);
   const totalH = STRIP_H + PADDING_TOP + PADDING_BOTTOM;
-  const labelA = data.metrics[metricA].label;
-  const labelB = data.metrics[metricB].label;
-  const unitA = data.metrics[metricA].unit;
-  const unitB = data.metrics[metricB].unit;
 
-  const allPositions = [...positionsA, ...positionsB];
-  const hovered = hoverId !== null ? allPositions.filter((p) => p.id === hoverId) : [];
+  const hoveredSource = hoverId !== null
+    ? parentSources.find((s) => s.id === hoverId) ?? null
+    : null;
 
   return (
     <div className="viz viz-strips" ref={containerRef}>
-      {/* Group picker */}
+      <div className="viz-strips__header">
+        <span className="viz-strips__header-label">Beispiel-Auswahl</span>
+        <span className="viz-strips__header-list">{UNIFIED_HEADER}</span>
+      </div>
+
+      {/* Group picker — colored User-icon affordance shared with step 6. */}
       <div className="viz-strips__picker" role="tablist" aria-label="Zielgruppe">
         {GROUP_OPTIONS.map((g) => (
           <button
@@ -130,167 +158,236 @@ export function VizSourcesStrips({ pair }: Props) {
             onClick={() => setActiveGroup(g.id)}
             type="button"
           >
+            <User
+              size={12}
+              strokeWidth={2}
+              color={GROUP_COLOR[g.id]}
+              aria-hidden="true"
+              style={{ flexShrink: 0 }}
+            />
             {g.label}
           </button>
         ))}
       </div>
 
-      {/* Strips chart */}
       <svg
         viewBox={`0 0 ${totalW} ${totalH}`}
         preserveAspectRatio="xMidYMid meet"
         className="viz-strips__chart"
         role="img"
-        aria-label={`Beeswarm-Streifen: ${labelA} und ${labelB} pro Quelle`}
+        aria-label="Vier Indikatoren über fünf Informationsquellen"
       >
-        {/* Strip backgrounds + Y-axis ticks */}
-        {[
-          { x: 0, label: labelA, unit: unitA },
-          { x: STRIP_W + STRIP_GAP, label: labelB, unit: unitB },
-        ].map((s) => (
-          <g key={s.label}>
-            <rect
-              x={s.x}
-              y={PADDING_TOP}
-              width={STRIP_W}
-              height={STRIP_H}
-              fill="rgba(31, 41, 55, 0.4)"
-              rx={6}
-            />
-            {[0, 25, 50, 75, 100].map((tick) => {
-              const y = PADDING_TOP + STRIP_H * (1 - tick / 100);
-              return (
-                <g key={tick}>
-                  <line
-                    x1={s.x}
-                    x2={s.x + STRIP_W}
-                    y1={y}
-                    y2={y}
-                    stroke="#2d3748"
-                    strokeWidth={1}
-                    strokeDasharray={tick === 0 || tick === 100 ? '0' : '2 4'}
-                  />
-                  <text
-                    x={s.x - 6}
-                    y={y + 3}
-                    textAnchor="end"
-                    fontSize={9}
-                    fontFamily="monospace"
-                    fill="#6b7280"
-                  >
-                    {tick}
-                  </text>
-                </g>
-              );
-            })}
-            {/* Strip title */}
-            <text
-              x={s.x + STRIP_W / 2}
-              y={14}
-              textAnchor="middle"
-              fontSize={12}
-              fontFamily="Georgia, serif"
-              fontWeight={600}
-              fill="#e5e7eb"
+        {/* Strip backgrounds + Y-axis ticks for each of 4 columns. The
+            placeholder (when a column hasn't been revealed yet) keeps the
+            geometry but dims to a faint outline. */}
+        {COLUMNS.map((metric, i) => {
+          const x = i * (STRIP_W + STRIP_GAP);
+          const isRevealed = i < revealedColumns;
+          return (
+            <g
+              key={metric}
+              opacity={isRevealed ? 1 : 0.45}
+              style={{ transition: 'opacity 320ms ease' }}
             >
-              {s.label}
-            </text>
-            <text
-              x={s.x + STRIP_W / 2}
-              y={totalH - 14}
-              textAnchor="middle"
-              fontSize={10}
-              fontFamily="monospace"
-              fill="#6b7280"
+              <rect
+                x={x}
+                y={PADDING_TOP}
+                width={STRIP_W}
+                height={STRIP_H}
+                fill="rgba(31, 41, 55, 0.4)"
+                rx={6}
+              />
+              {[0, 50, 100].map((tick) => {
+                const ty = PADDING_TOP + STRIP_H * (1 - tick / 100);
+                return (
+                  <g key={tick}>
+                    <line
+                      x1={x}
+                      x2={x + STRIP_W}
+                      y1={ty}
+                      y2={ty}
+                      stroke="#2d3748"
+                      strokeWidth={1}
+                      strokeDasharray={tick === 0 || tick === 100 ? '0' : '2 4'}
+                    />
+                    <text
+                      x={x - 4}
+                      y={ty + 3}
+                      textAnchor="end"
+                      fontSize={9}
+                      fontFamily="monospace"
+                      fill="#6b7280"
+                    >
+                      {tick}
+                    </text>
+                  </g>
+                );
+              })}
+              {/* Column title */}
+              <text
+                x={x + STRIP_W / 2}
+                y={16}
+                textAnchor="middle"
+                fontSize={12}
+                fontFamily="Georgia, serif"
+                fontWeight={600}
+                fill={isRevealed ? '#e5e7eb' : '#6b7280'}
+                style={{ transition: 'fill 320ms ease' }}
+              >
+                {SHORT_METRIC_LABEL[metric]}
+              </text>
+              {/* Unit subtitle */}
+              <text
+                x={x + STRIP_W / 2}
+                y={PADDING_TOP - 6}
+                textAnchor="middle"
+                fontSize={9}
+                fontFamily="monospace"
+                fill="#6b7280"
+              >
+                {METRIC_UNIT_LABEL[metric]}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Slope lines — only between consecutive REVEALED columns. */}
+        <g className="viz-strips__pairs" style={{ pointerEvents: 'none' }}>
+          {slopeSegments.map((segPairs, segIdx) => {
+            const segVisible = segIdx + 1 < revealedColumns;
+            return (
+              <g
+                key={`seg-${segIdx}`}
+                opacity={segVisible ? 1 : 0}
+                style={{ transition: 'opacity 320ms ease' }}
+              >
+                {segPairs.map((p) => {
+                  const isHovered = hoverId === p.id;
+                  const isDimmed = hoverId !== null && !isHovered;
+                  return (
+                    <line
+                      key={`seg-${segIdx}-${p.id}`}
+                      x1={p.a.x}
+                      y1={p.a.y}
+                      x2={p.b.x}
+                      y2={p.b.y}
+                      stroke={categoryColor(p.category)}
+                      strokeWidth={1}
+                      opacity={isHovered ? 0.95 : isDimmed ? 0.06 : 0.22}
+                      style={{ transition: 'opacity 180ms ease' }}
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
+        </g>
+
+        {/* Dots per column — fade in when that column is revealed. */}
+        {positionsByColumn.map((dots, colIdx) => {
+          const isRevealed = colIdx < revealedColumns;
+          return (
+            <g
+              key={`col-${colIdx}`}
+              opacity={isRevealed ? 1 : 0}
+              style={{ transition: 'opacity 320ms ease' }}
+              aria-hidden={!isRevealed}
             >
-              {s.unit}
-            </text>
-          </g>
-        ))}
-
-        {/* Connector polyline for hovered source (across both strips) */}
-        {hovered.length === 2 && (
-          <line
-            x1={hovered[0].x}
-            y1={hovered[0].y}
-            x2={hovered[1].x}
-            y2={hovered[1].y}
-            stroke="#facc15"
-            strokeWidth={1.5}
-            strokeDasharray="4 3"
-            opacity={0.75}
-          />
-        )}
-
-        {/* Dots — strip A */}
-        {positionsA.map((d) => (
-          <Dot
-            key={`a-${d.id}`}
-            d={d}
-            highlight={hoverId === d.id}
-            dim={hoverId !== null && hoverId !== d.id}
-            onHover={setHoverId}
-          />
-        ))}
-        {/* Dots — strip B */}
-        {positionsB.map((d) => (
-          <Dot
-            key={`b-${d.id}`}
-            d={d}
-            highlight={hoverId === d.id}
-            dim={hoverId !== null && hoverId !== d.id}
-            onHover={setHoverId}
-          />
-        ))}
+              {dots.map((d) => (
+                <Dot
+                  key={`${colIdx}-${d.id}`}
+                  d={d}
+                  dim={hoverId !== null && hoverId !== d.id}
+                  onHover={isRevealed ? setHoverId : noop}
+                />
+              ))}
+            </g>
+          );
+        })}
       </svg>
 
-      {/* Hover info pill */}
-      {hoverId !== null && hovered.length === 2 && (
-        <div className="viz-strips__pill" role="tooltip">
-          <strong>{hovered[0].name}</strong>
-          <span className="viz-strips__pill-cat" style={{ color: categoryColor(hovered[0].category) }}>
-            {hovered[0].category.replace('_', ' ')}
-          </span>
-          <span className="viz-strips__pill-vals">
-            {labelA}: <b>{Math.round(hovered[0].yTarget)} {unitA}</b>
-            {' · '}
-            {labelB}: <b>{Math.round(hovered[1].yTarget)} {unitB}</b>
-          </span>
-        </div>
-      )}
-
-      {/* Category legend */}
-      <div className="viz-strips__legend" aria-label="Quellen-Kategorien">
-        {data.sourceCategories.map((c) => (
-          <span key={c.id} className="viz-strips__legend-item">
+      {/* Info pill — always rendered (with idle hint when nothing is
+          hovered) so the legend below it doesn't reflow on hover. When a
+          source is hovered, show its values for every REVEALED metric. */}
+      <div
+        className={`viz-strips__pill ${hoveredSource ? '' : 'viz-strips__pill--idle'}`}
+        role="tooltip"
+        aria-live="polite"
+      >
+        {hoveredSource ? (
+          <>
+            <strong>{hoveredSource.name}</strong>
             <span
-              className="viz-strips__legend-dot"
-              style={{ background: categoryColor(c.id) }}
-              aria-hidden="true"
-            />
-            {c.name}
+              className="viz-strips__pill-cat"
+              style={{ color: categoryColor(hoveredSource.category) }}
+            >
+              {hoveredSource.category.replace('_', ' ')}
+            </span>
+            <span className="viz-strips__pill-vals">
+              {COLUMNS.slice(0, revealedColumns).map((metric, i) => {
+                const v = data.metrics[metric]?.data[activeGroup]?.[String(hoveredSource.id)];
+                return (
+                  <span key={metric}>
+                    {i > 0 && ' · '}
+                    {SHORT_METRIC_LABEL[metric]}: <b>{v == null ? '–' : Math.round(v)}</b>
+                  </span>
+                );
+              })}
+            </span>
+          </>
+        ) : (
+          <span className="viz-strips__pill-hint">
+            Bewege die Maus über eine Quelle, um Details zu sehen.
           </span>
-        ))}
+        )}
+      </div>
+
+      {/* Category legend — only the categories present in the 5 visible
+          sources, so the reader never sees a chip for a category that has
+          no dot on the chart. */}
+      <div className="viz-strips__legend" aria-label="Quellen-Kategorien">
+        {(() => {
+          const visibleCats = new Set(parentSources.map((s) => s.category));
+          return data.sourceCategories
+            .filter((c) => visibleCats.has(c.id))
+            .map((c) => (
+              <span key={c.id} className="viz-strips__legend-item">
+                <span
+                  className="viz-strips__legend-dot"
+                  style={{ background: categoryColor(c.id) }}
+                  aria-hidden="true"
+                />
+                {c.name}
+              </span>
+            ));
+        })()}
       </div>
     </div>
   );
 }
 
+function noop(_: number | null): void {
+  // Used as a hover-handler stub for non-revealed columns so the dots
+  // don't fire hover state until they're actually visible.
+}
+
 interface DotProps {
-  d: Dot & { x: number; y: number };
-  highlight: boolean;
+  d: LaidOutDot;
   dim: boolean;
   onHover: (id: number | null) => void;
 }
 
-function Dot({ d, highlight, dim, onHover }: DotProps) {
+function Dot({ d, dim, onHover }: DotProps) {
+  // Hover feedback is opacity-only. Stroke + radius FIXED — the chart
+  // cannot visibly shift on hover because no geometry changes. A
+  // transparent r=11 hit-area absorbs sub-pixel mouse jitter.
   return (
     <g
       transform={`translate(${d.x}, ${d.y})`}
       style={{
-        transition: 'transform 600ms cubic-bezier(0.22, 1, 0.36, 1)',
-        opacity: dim ? 0.35 : 1,
+        opacity: dim ? 0.28 : 1,
         cursor: 'pointer',
+        transition: 'opacity 180ms ease',
       }}
       onMouseEnter={() => onHover(d.id)}
       onMouseLeave={() => onHover(null)}
@@ -299,62 +396,48 @@ function Dot({ d, highlight, dim, onHover }: DotProps) {
       tabIndex={0}
       aria-label={`${d.name}: ${Math.round(d.yTarget)}`}
     >
+      <circle r={11} fill="transparent" />
       <circle
-        r={highlight ? 8 : 6}
+        r={6}
         fill={categoryColor(d.category)}
         stroke="#0f1318"
         strokeWidth={1.5}
-        style={{ transition: 'r 200ms ease' }}
+        pointerEvents="none"
       />
-      {highlight && (
-        <text
-          y={-12}
-          textAnchor="middle"
-          fontSize={10}
-          fontFamily="Georgia, serif"
-          fill="#e5e7eb"
-          style={{ pointerEvents: 'none' }}
-        >
-          {d.name}
-        </text>
-      )}
     </g>
   );
 }
 
-/**
- * Beeswarm layout. Y-axis = metric value (0–100 mapped to STRIP_H).
- * X-axis = forced collision avoidance around the strip's centerline.
- * Returns dots with absolute SVG coords.
- */
-function beeswarmLayout(
-  dots: Dot[],
-  xOffset: number,
-): (Dot & { x: number; y: number })[] {
+/** Beeswarm layout for one column. Y-axis = metric value (0–100 mapped to
+ *  STRIP_H). X-axis = forced collision avoidance around the strip's
+ *  centerline. Returns dots with absolute SVG coords inside the parent
+ *  viewBox. */
+function beeswarmLayout(dots: Dot[], xOffset: number): LaidOutDot[] {
   if (dots.length === 0) return [];
   const centerX = xOffset + STRIP_W / 2;
 
-  const nodes = dots.map((d) => ({
-    ...d,
-    y: PADDING_TOP + STRIP_H * (1 - Math.max(0, Math.min(100, d.yTarget)) / 100),
-  })) as (Dot & { x: number; y: number })[];
+  type SimNode = Dot & { x: number; y: number; _targetY: number };
+  const nodes: SimNode[] = dots.map((d) => {
+    const targetY =
+      PADDING_TOP + STRIP_H * (1 - Math.max(0, Math.min(100, d.yTarget)) / 100);
+    return {
+      ...d,
+      x: centerX,
+      y: targetY,
+      _targetY: targetY,
+    };
+  });
 
-  d3.forceSimulation(nodes as d3.SimulationNodeDatum[])
-    .force(
-      'y',
-      d3.forceY<{ x: number; y: number }>((n) => n.y).strength(1),
-    )
-    .force(
-      'x',
-      d3.forceX<{ x: number; y: number }>(centerX).strength(0.18),
-    )
-    .force('collide', d3.forceCollide(7))
+  d3.forceSimulation<SimNode>(nodes)
+    .force('y', d3.forceY<SimNode>((n) => n._targetY).strength(1))
+    .force('x', d3.forceX<SimNode>(centerX).strength(0.25))
+    .force('collide', d3.forceCollide<SimNode>(7))
     .stop()
-    .tick(140);
+    .tick(160);
 
-  // Clamp x within strip bounds
   for (const n of nodes) {
     n.x = Math.max(xOffset + 8, Math.min(xOffset + STRIP_W - 8, n.x));
+    n.y = Math.max(PADDING_TOP, Math.min(PADDING_TOP + STRIP_H, n.y));
   }
 
   return nodes;

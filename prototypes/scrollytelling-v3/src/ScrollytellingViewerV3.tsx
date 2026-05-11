@@ -1,6 +1,57 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import type { CarmData, SampleRankedMode, ScrollyStep } from './data/types';
+import { useState, useEffect, useRef, useCallback, Fragment } from 'react';
+import type { ReactNode } from 'react';
+import type { CarmData, InformationSourcesData, SampleRankedMode, ScrollyStep } from './data/types';
 import { STEPS } from './data/steps';
+
+/** Combined matcher: catches both bracketed verdict tags and **bold**
+ *  markdown spans in step body copy. The 'kind' capture groups determine
+ *  the render branch.
+ *    Group 1 (verdict-arrow), 2 (verdict-label)
+ *    Group 3 (bold inner text)
+ */
+const INLINE_RE = /\[([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\]|\*\*([^*]+)\*\*/g;
+const VERDICT_LABEL_TO_CLASS: Record<string, string> = {
+  'richtig': 'verdict-tag--richtig',
+  'eher richtig': 'verdict-tag--eher-richtig',
+  'eher falsch': 'verdict-tag--eher-falsch',
+  'falsch': 'verdict-tag--falsch',
+  'keine Aussage': 'verdict-tag--keine-aussage',
+};
+
+function renderBodyWithVerdicts(text: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  let lastIndex = 0;
+  let key = 0;
+  for (const match of text.matchAll(INLINE_RE)) {
+    const start = match.index ?? 0;
+    if (start > lastIndex) {
+      out.push(<Fragment key={key++}>{text.slice(lastIndex, start)}</Fragment>);
+    }
+    if (match[1]) {
+      // verdict tag
+      const arrow = match[1];
+      const label = match[2];
+      const cls = VERDICT_LABEL_TO_CLASS[label] ?? '';
+      out.push(
+        <span key={key++} className={`verdict-tag ${cls}`}>
+          {arrow} {label}
+        </span>,
+      );
+    } else if (match[3]) {
+      // **bold** indicator name
+      out.push(
+        <strong key={key++} className="scrolly__body-strong">
+          {match[3]}
+        </strong>,
+      );
+    }
+    lastIndex = start + match[0].length;
+  }
+  if (lastIndex < text.length) {
+    out.push(<Fragment key={key++}>{text.slice(lastIndex)}</Fragment>);
+  }
+  return out;
+}
 import { VizTimeline } from './viz/VizTimeline';
 import { VizPeopleVoices } from './viz/VizPeopleVoices';
 import { VizMythGrid } from './viz/VizMythGrid';
@@ -11,16 +62,29 @@ import { VizTeamRow } from './viz/VizTeamRow';
 
 interface Props {
   data: CarmData;
+  sources: InformationSourcesData;
 }
 
 interface VizDispatchProps {
   step: ScrollyStep;
   active: boolean;
   data: CarmData;
+  sources: InformationSourcesData;
   sampleRankedMode: SampleRankedMode;
+  /** 0..4 — how many of the 4 source-metric columns are revealed in the
+   *  shared step 7 + 8 viz. Only meaningful when the active step uses the
+   *  sourcesStrips viz. */
+  revealedColumns: 0 | 1 | 2 | 3 | 4;
 }
 
-function StepVisualization({ step, active, data, sampleRankedMode }: VizDispatchProps) {
+function StepVisualization({
+  step,
+  active,
+  data,
+  sources,
+  sampleRankedMode,
+  revealedColumns,
+}: VizDispatchProps) {
   switch (step.vizName) {
     case 'timeline':
       return <VizTimeline active={active} />;
@@ -31,7 +95,7 @@ function StepVisualization({ step, active, data, sampleRankedMode }: VizDispatch
     case 'sampleAndRanked':
       return <VizSampleAndRanked data={data} mode={sampleRankedMode} />;
     case 'sourcesStrips':
-      return <VizSourcesStrips pair={step.sourcesPair ?? 'search-trust'} />;
+      return <VizSourcesStrips data={sources} revealedColumns={revealedColumns} />;
     case 'ctaGrid':
       return <VizCtaGrid />;
     case 'teamRow':
@@ -41,12 +105,16 @@ function StepVisualization({ step, active, data, sampleRankedMode }: VizDispatch
   }
 }
 
-export function ScrollytellingViewerV3({ data }: Props) {
+export function ScrollytellingViewerV3({ data, sources }: Props) {
   const [activeStep, setActiveStep] = useState(1);
-  /** Step 6 has 3 phase markers driving sub-mode ranked-1/2/3. Step 5 forces 'sample'. */
+  /** Sub-phase index within the currently-active step. Updated by the
+   *  phase-marker IntersectionObserver. Step 6 cycles 0..4 (5 indicators);
+   *  steps 7 + 8 cycle 0..1 (2-column reveal). */
   const [phaseIdx, setPhaseIdx] = useState(0);
   const stepsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const phaseMarkersRef = useRef<(HTMLDivElement | null)[]>([]);
+  /** Phase markers keyed as `stepNumber * 100 + indexInStep`. Step 6 + 7 + 8
+   *  all share this map; each step gets its own contiguous index block. */
+  const phaseMarkersRef = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const setStepRef = useCallback(
     (index: number) => (el: HTMLDivElement | null) => {
@@ -55,14 +123,26 @@ export function ScrollytellingViewerV3({ data }: Props) {
     [],
   );
 
+  /** Build a ref callback keyed by `stepNumber * 100 + indexInStep`. Each
+   *  step's phase markers occupy a distinct namespace so step 6's markers
+   *  (indices 0..4) don't collide with step 7's (5..6) or step 8's (7..8). */
   const setPhaseMarkerRef = useCallback(
-    (index: number) => (el: HTMLDivElement | null) => {
-      phaseMarkersRef.current[index] = el;
-    },
+    (stepNumber: number, index: number) =>
+      (el: HTMLDivElement | null) => {
+        const key = stepNumber * 100 + index;
+        if (el === null) phaseMarkersRef.current.delete(key);
+        else phaseMarkersRef.current.set(key, el);
+      },
     [],
   );
 
-  // Step-level IntersectionObserver
+  // Step-level IntersectionObserver. We use a 1-pixel-tall trigger line at
+  // ~45% of the viewport (rootMargin -45% top / -54.99% bottom). Any step
+  // container whose pixels currently cross this line is "intersecting" — and
+  // since the line is essentially zero-height, exactly one step crosses at a
+  // time. This is robust to step containers of any height (step 6 has 3
+  // phase markers and ends up several thousand px tall, so threshold-based
+  // observers can't satisfy a 30% threshold there).
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
     stepsRef.current.forEach((el, i) => {
@@ -73,7 +153,7 @@ export function ScrollytellingViewerV3({ data }: Props) {
             if (e.isIntersecting) setActiveStep(STEPS[i].stepNumber);
           });
         },
-        { threshold: 0.3, rootMargin: '-20% 0px -30% 0px' },
+        { threshold: 0, rootMargin: '-45% 0px -54.99% 0px' },
       );
       obs.observe(el);
       observers.push(obs);
@@ -81,18 +161,25 @@ export function ScrollytellingViewerV3({ data }: Props) {
     return () => observers.forEach((o) => o.disconnect());
   }, []);
 
-  // Step-6 phase markers — 3 internal triggers
+  // Phase-marker IntersectionObserver. 30%-tall detection band centered on
+  // the viewport (rootMargin -35% top, -35% bottom). Marker keys are
+  // `stepNum * 100 + indexInStep`, so we decode `index = key % 100` when a
+  // marker fires and update `phaseIdx` to that local index. Steps don't
+  // interfere because only one step's markers can be inside the band at a
+  // time (each step's container spans the full viewport). One additional
+  // pass after mount so refs registered after the first paint get observed.
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
-    phaseMarkersRef.current.forEach((el, i) => {
+    phaseMarkersRef.current.forEach((el, key) => {
       if (!el) return;
+      const localIdx = key % 100;
       const obs = new IntersectionObserver(
         (entries) => {
           entries.forEach((e) => {
-            if (e.isIntersecting) setPhaseIdx(i);
+            if (e.isIntersecting) setPhaseIdx(localIdx);
           });
         },
-        { threshold: 0.5, rootMargin: '-40% 0px -40% 0px' },
+        { threshold: 0, rootMargin: '-35% 0px -35% 0px' },
       );
       obs.observe(el);
       observers.push(obs);
@@ -102,26 +189,46 @@ export function ScrollytellingViewerV3({ data }: Props) {
 
   const currentStep = STEPS.find((s) => s.stepNumber === activeStep) ?? STEPS[0];
 
-  // Compute the sample-ranked mode based on current step + phase index
+  // Compute the sample-ranked mode based on current step + phase index.
+  // Step 6 has 5 sub-phases — one per indicator (Kenntnis → Bedeutung →
+  // Richtigkeit → Präventionsbedeutung → Bevölkerungsrisiko). Each new
+  // strip slides in below the previous; nothing above shifts.
   const sampleRankedMode: SampleRankedMode = (() => {
     if (currentStep.stepNumber === 5) return 'sample';
     if (currentStep.stepNumber === 6) {
-      return (['ranked-1', 'ranked-2', 'ranked-3'] as const)[phaseIdx] ?? 'ranked-1';
+      return (
+        ['ranked-1', 'ranked-2', 'ranked-3', 'ranked-4', 'ranked-5'] as const
+      )[phaseIdx] ?? 'ranked-1';
     }
-    // For other steps, fall back to the step's declared mode if any (so the
-    // shared-DOM viz preserves a sensible state when scrolling away).
     return currentStep.sampleRankedMode ?? 'sample';
+  })();
+
+  // Step 7 + 8 share the 4-column sources viz. Each step contributes 2
+  // sub-phases:
+  //   step 7 phase 0 → 1 col revealed (Suche)
+  //   step 7 phase 1 → 2 cols (+ Vertrauen)
+  //   step 8 phase 0 → 3 cols (+ Wahrnehmung)
+  //   step 8 phase 1 → 4 cols (+ Prävention)
+  // Before reaching step 7 the viz isn't rendered, so the value is moot.
+  const revealedColumns: 0 | 1 | 2 | 3 | 4 = (() => {
+    if (currentStep.stepNumber === 7) return (phaseIdx + 1) as 1 | 2;
+    if (currentStep.stepNumber === 8) return (phaseIdx + 3) as 3 | 4;
+    // Other steps that happen to render sourcesStrips fall back to fully
+    // revealed (visible whilst scrolling away).
+    return 4;
   })();
 
   return (
     <section className="scrolly" aria-label="Scrollytelling: Forschungsprozess">
       {/* Mobile sticky-top viz */}
-      <div className="scrolly__viz-mobile" aria-hidden="true" key={`mob-${currentStep.vizName}-${currentStep.gridMode ?? ''}-${currentStep.sourcesPair ?? ''}`}>
+      <div className="scrolly__viz-mobile" aria-hidden="true" key={`mob-${currentStep.vizName}-${currentStep.gridMode ?? ''}`}>
         <StepVisualization
           step={currentStep}
           active
           data={data}
+          sources={sources}
           sampleRankedMode={sampleRankedMode}
+          revealedColumns={revealedColumns}
         />
       </div>
 
@@ -145,27 +252,39 @@ export function ScrollytellingViewerV3({ data }: Props) {
                   </span>
                 ))}
               </h2>
-              {step.bodyText.split('\n\n').map((para, pi) => (
-                <p key={pi} className="scrolly__body">
-                  {para}
-                </p>
-              ))}
-              {step.hint && <p className="scrolly__hint">{step.hint}</p>}
-              {step.ctaLabel && step.ctaUrl && (
-                <a href={step.ctaUrl} className="scrolly__cta">
-                  {step.ctaLabel} →
-                </a>
-              )}
-              {step.stepNumber === 6 && (
+              {step.stepNumber === 6 || step.stepNumber === 7 || step.stepNumber === 8 ? (
+                /* Steps 6, 7, 8: each paragraph is a "phase block" — its own
+                   scroll real-estate with a phase-marker sentinel at the top.
+                   Step 6 has 5 phases (one per indicator); steps 7 + 8 have
+                   2 phases each (one per column reveal). The viewer's
+                   phaseMarkersRef collects refs across all visible phase
+                   markers for the active step. */
                 <>
-                  {[0, 1, 2].map((idx) => (
-                    <div
-                      key={idx}
-                      ref={setPhaseMarkerRef(idx)}
-                      className="scrolly__phase-marker"
-                      data-phase-idx={idx}
-                    />
+                  {step.bodyText.split('\n\n').map((para, pi) => (
+                    <div className="scrolly__phase-block" key={pi}>
+                      <div
+                        ref={setPhaseMarkerRef(step.stepNumber, pi)}
+                        className="scrolly__phase-marker"
+                        data-phase-idx={pi}
+                      />
+                      <p className="scrolly__body">{renderBodyWithVerdicts(para)}</p>
+                    </div>
                   ))}
+                  {step.hint && <p className="scrolly__hint">{step.hint}</p>}
+                </>
+              ) : (
+                <>
+                  {step.bodyText.split('\n\n').map((para, pi) => (
+                    <p key={pi} className="scrolly__body">
+                      {renderBodyWithVerdicts(para)}
+                    </p>
+                  ))}
+                  {step.hint && <p className="scrolly__hint">{step.hint}</p>}
+                  {step.ctaLabel && step.ctaUrl && (
+                    <a href={step.ctaUrl} className="scrolly__cta">
+                      {step.ctaLabel} →
+                    </a>
+                  )}
                 </>
               )}
             </div>
@@ -187,7 +306,9 @@ export function ScrollytellingViewerV3({ data }: Props) {
               step={currentStep}
               active
               data={data}
+              sources={sources}
               sampleRankedMode={sampleRankedMode}
+              revealedColumns={revealedColumns}
             />
           </div>
         </div>
