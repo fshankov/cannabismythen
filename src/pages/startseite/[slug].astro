@@ -4,7 +4,7 @@ export const prerender = true;
 import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
-import ScrollytellingViewer from "@components/scrollytelling/ScrollytellingViewer";
+import HomepageScrollytellingViewer from "@components/scrollytelling/HomepageScrollytellingViewer";
 
 export async function getStaticPaths() {
   const slugs = await reader.collections.startseite.list();
@@ -51,7 +51,7 @@ const scrollySteps = (meta.steps || []).map((s: any) => ({
     </header>
 
     {scrollySteps.length > 0 ? (
-      <ScrollytellingViewer
+      <HomepageScrollytellingViewer
         steps={scrollySteps}
         title={meta.title}
         client:visible

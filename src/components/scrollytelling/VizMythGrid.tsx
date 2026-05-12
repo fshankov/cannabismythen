@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowDownLeft, ArrowUp, ArrowUpRight, Minus } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { CarmData, CorrectnessClass, Myth } from '../data/types';
-import { sortedMyths } from '../data/carmData';
-import { MehrPopover } from '../components/MehrPopover';
+import type { CarmData, CorrectnessClass, Myth } from './types';
+import { sortedMyths } from './dataLoaders';
+import { MehrPopover } from './MehrPopover';
 
 interface Props {
   data: CarmData;
@@ -65,7 +65,7 @@ export function VizMythGrid({ data, mode }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/myth-summaries.json')
+    fetch('/data/myth-summaries.json')
       .then((r) => (r.ok ? r.json() : {}))
       .then((json: MythSummaryMap) => {
         if (!cancelled) setSummaries(json);

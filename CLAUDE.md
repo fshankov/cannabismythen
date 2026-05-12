@@ -41,66 +41,97 @@ propose Ctrl-key shortcuts or Windows path conventions.
 
 ## Tracker workflow (Asana + Feedbucket)
 
-**Asana is the single source of truth** for tasks. Project name:
-**CannabisMythen** (workspace: `1214692075439040`, project gid:
-`1214704634010891`). Three groups write to it:
+**Use the Asana CannabisMythen project for every task related to
+this website.** It is the single source of truth — completed work,
+in-progress work, and items needing review all live there. Project:
+**CannabisMythen**, workspace `1214692075439040`, project gid
+`1214704634010891`.
+
+Three writers:
 
 - **Stakeholders / ISD reviewers** leave comments on the live site
   via the **Feedbucket** widget (browser, no signup). Feedbucket's
   native Asana integration auto-creates tasks with screenshot +
-  browser info, and supports 2-way comment sync (reply in Asana
+  browser info, with 2-way comment sync (reply in Asana starting
   with `@feedbucket` → posts back to the widget on the page).
-- **Fedor + dev team** triage and assign tasks in Asana directly
-  (web app or mobile).
+- **Fedor + dev team** triage and assign tasks in Asana directly.
 - **Claude Code** (local + Cowork) reads and writes Asana via the
   Asana V2 MCP server.
 
-Sections (Kanban columns) ARE the status machine: `Backlog` ·
-`In progress` · `Awaiting decision` · `Awaiting review` · `Blocked` ·
-`Parked` · `Done` · `Noise`. Moving a card to a new section changes
-its status.
+**Sections (Kanban columns) ARE the status machine.** Going-forward
+five-section design: `To do` · `In progress` · `Awaiting decision` ·
+`Needs review` · `Done`. Moving a card to a new section changes its
+status. Each section has a clear meaning:
 
-Task notes carry the metadata schema (until native Asana custom
-fields are added in the UI — see `docs/asana-feedbucket-workflow.md`
-Stage 2.2 for the field list): a one-line header
+- `To do` — not started, ready when capacity allows
+- `In progress` — actively being worked
+- `Awaiting decision` — work blocked on a ruling from Fedor or ISD;
+  cannot proceed until someone decides
+- `Needs review` — Claude or dev team finished; awaiting team review
+  before it can ship as Done
+- `Done` — shipped, approved, closed (`completed: true`)
+
+States that don't need their own column live as **tags** instead:
+`blocked` · `parked-s4` · `noise` (plus the workstream tags below).
+
+(Asana history note: the project was initially created with 8
+sections — `Backlog`, `Awaiting review`, `Blocked`, `Parked`, `Noise`
+remain in addition to the five above until Fedor renames/deletes
+them in the Asana UI. Claude should treat `Backlog` as `To do` and
+`Awaiting review` as `Needs review` while the rename is pending.)
+
+Task notes carry a metadata schema header on line 1:
 `[BugHerd #N] | <Session> | <Priority> | <Owner> | tags: <…> | section: <site-area>`
-followed by a free-form description. Site-area `section` values:
+followed by free-form description. Site-area `section` values:
 `home` / `daten-explorer` / `quiz` / `fakten-karten` / `ueber-uns` /
-`cross-cutting`. Workspace tags (going forward):
+`cross-cutting`. Workspace tags:
 `design` · `functionality` · `german-review` · `pre-launch` ·
-`data-accuracy` · `nice-to-have` · `accessibility`.
+`data-accuracy` · `nice-to-have` · `accessibility` · `blocked` ·
+`parked-s4` · `noise`.
 
-**Two-stage review (when a task needs sign-off):**
-1. Claude moves a finished task to `Awaiting review` with the
-   `Review stage` custom field = `My review (Fedor)`.
-2. Fedor reviews; if approved, sets `Review stage = Team review (ISD)`
-   and @mentions Harald/Christian.
-3. ISD reviews; if approved, sets `Review stage = Approved`.
-4. Once `Approved`, anyone moves the task to `Done` and sets
-   `completed: true`. Task is not closed before both reviews pass.
+**How Claude asks Fedor for review (when uncertain or finished):**
+
+When Claude is unsure about a decision, or has finished
+implementation and the work is ready for human eyes — Claude does
+NOT close the task or move it to `Done`. Instead:
+
+1. Move the task to `Needs review` (or leave it in `In progress`
+   for an open question).
+2. **Set the task assignee to Fedor** (`fshankov@gmail.com`).
+3. Add a comment using `@fshankov@gmail.com` mentioning Fedor
+   directly, stating what's done + commit SHA(s) + any open
+   question. The @mention triggers an email notification and the
+   task appears in Fedor's "My Tasks" inbox.
+4. Fedor reviews. If approved and no team review is needed: he
+   moves the task to `Done` + ticks `completed`. If team review is
+   needed, he reassigns to Harald/Christian, leaves it in
+   `Needs review`. They approve, then someone moves to `Done`.
+
+Tasks ONLY reach `Done` after the necessary review(s) — never
+auto-closed by Claude.
 
 Workflow for Claude per session:
 
 - **Session start:** Read open Asana tasks via MCP (typically the
-  `Backlog`, `In progress`, `Awaiting decision` sections). Surface
-  a 5-item priority list. Ask Fedor which to pick up.
-- **During session:** Use `add_comment` on the active task to record
-  progress + commit SHA(s) as commits land. When you find an
-  untracked issue, `create_tasks` it (project_id
-  `1214704634010891`, section_id `1214704526251784` for Backlog),
-  notes following the header schema above.
-- **Session end:** `update_tasks` to move the task into the right
-  section: → `Awaiting review` with `Review stage = My review (Fedor)`
-  if the change is complete, leave in `In progress` if partial.
-  Don't auto-set `completed: true` — that's only after `Review stage
-  = Approved`. Post a one-paragraph summary as a comment with commit
-  SHA(s).
+  `To do` / `Backlog`, `In progress`, `Awaiting decision`
+  sections). Surface a 5-item priority list. Ask Fedor which to
+  pick up.
+- **During session:** Use `add_comment` on the active task to
+  record progress + commit SHA(s) as commits land. When you find
+  an untracked issue worth fixing, `create_tasks` it
+  (project_id `1214704634010891`, section_id `1214704526251784`
+  for the current `Backlog`/`To do`), notes following the header
+  schema above.
+- **Session end:** Use `update_tasks` to move the task to
+  `Needs review` and set assignee = Fedor + add an @mention
+  comment per the pattern above. Leave in `In progress` if
+  partial. NEVER auto-set `completed: true`.
 - **Commit-message convention (optional):** Reference the Asana
   task GID or BugHerd ID in commit messages so later runs trace
   which commit closed which task.
 
-The end-to-end 3-stage setup + daily workflow lives at
-[docs/asana-feedbucket-workflow.md](docs/asana-feedbucket-workflow.md).
+(For setup steps and detailed workflow, see local notes — not in
+the public repo.)
 
 ## Working with Fedor — process rule (HARD)
 

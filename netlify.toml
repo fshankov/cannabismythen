@@ -87,6 +87,61 @@
   force = true
 
 # ---------------------------------------------------------------------------
+# 2026-05-11 — Über-das-Projekt scrollytelling consolidation. The 4 legacy
+# subpages (projekt, methodik, team, klassifikation) were removed; the
+# scrollytelling at /ueber-uns/ replaces them. Mirror rules also live in
+# `src/middleware.ts`.
+# ---------------------------------------------------------------------------
+
+[[redirects]]
+  from = "/ueber-uns/projekt"
+  to = "/ueber-uns/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ueber-uns/projekt/*"
+  to = "/ueber-uns/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ueber-uns/methodik"
+  to = "/ueber-uns/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ueber-uns/methodik/*"
+  to = "/ueber-uns/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ueber-uns/team"
+  to = "/ueber-uns/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ueber-uns/team/*"
+  to = "/ueber-uns/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ueber-uns/klassifikation"
+  to = "/ueber-uns/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ueber-uns/klassifikation/*"
+  to = "/ueber-uns/"
+  status = 301
+  force = true
+
+# ---------------------------------------------------------------------------
 # Session 1 of 2026-05 — quiz module slug renames per the
 # Kategorisierung_2026 05 06 docx. Four modules got longer, more descriptive
 # slugs that match the canonical 5-cat docx taxonomy. The 301s here mirror

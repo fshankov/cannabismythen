@@ -4,6 +4,7 @@ import { App } from './App';
 import './styles/tokens.css';
 import './styles/viewer.css';
 import './styles/viz.css';
+import './styles/popover.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

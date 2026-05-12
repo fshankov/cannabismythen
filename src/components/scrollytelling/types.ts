@@ -117,10 +117,9 @@ export interface InformationSourcesData {
   metrics: Record<SourceMetricId, SourceMetricDef>;
 }
 
-/* ───── Prototype-only additions (not in main repo) ───── */
+/* ───── Scrollytelling additions ───── */
 
-/** Step 6 sub-phase identifier — one per indicator, in display order. As the
- *  reader scrolls, each phase reveals one more bar in the right-hand viz. */
+/** Step 6 sub-phase identifier — one per indicator, in display order. */
 export type IndicatorPhase =
   | 'awareness'
   | 'significance'
@@ -137,39 +136,71 @@ export type SampleRankedMode =
   | 'ranked-4'
   | 'ranked-5';
 
-/** Step 7a/7b metric pairing. Iter-3 split. */
-export type SourcesPair = 'search-trust' | 'perception-prevention';
+/** Names of all viz components in the scrollytelling. */
+export type VizName =
+  | 'timeline'
+  | 'peopleVoices'
+  | 'mythGrid'
+  | 'sampleAndRanked'
+  | 'sourcesStrips'
+  | 'ctaGrid'
+  | 'teamRow';
 
-/** Inline "Mehr"-chip after a step's body text. Triggers the viewer to open
- *  a popover keyed by `popoverKey`. Iter-4. */
-export interface StepChip {
-  label: string;
-  popoverKey: 'methodik';
-}
+/* ───── Keystatic editorial-content shape ─────
+ *  Paired by index with STEP_DEFINITIONS in stepDefinitions.ts. Source of
+ *  truth: src/content/ueber-uns-scrolly.yaml (Keystatic singleton). */
 
-/** A scrollytelling step. Source of truth lives in src/data/steps.ts. */
-export interface ScrollyStep {
-  stepNumber: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export interface ScrollyEditorialStep {
   heading: string;
   bodyText: string;
-  hint?: string;
-  vizName:
-    | 'timeline'
-    | 'peopleVoices'
-    | 'mythGrid'
-    | 'classificationReveal'
-    | 'sampleAndRanked'
-    | 'sourcesStrips'
-    | 'ctaGrid'
-    | 'teamRow';
-  /** Step 3+4: shared-DOM mode flag. */
-  gridMode?: 'themed' | 'classified';
-  /** Step 5+6: shared-DOM mode flag. */
-  sampleRankedMode?: SampleRankedMode;
-  /** Step 7a/7b: which metric pair to show. */
-  sourcesPair?: SourcesPair;
-  ctaLabel?: string;
-  ctaUrl?: string;
-  /** Iter-4: optional inline chips rendered after body text. */
-  chips?: StepChip[];
+  hint: string;
+}
+export interface TimelineTooltip {
+  anchorDate: string;
+  body: string;
+}
+export interface TeamMember {
+  initials: string;
+  fullName: string;
+  role: string;
+  affiliation: string;
+  bio: string;
+  color: string;
+}
+export interface NamedExpert {
+  fullName: string;
+  affiliation: string;
+  context: string;
+}
+export interface MethodikPhase {
+  label: string;
+  title: string;
+  body: string;
+}
+export interface FooterKontakt {
+  label: string;
+  lines: ReadonlyArray<string>;
+  email: string;
+}
+export interface FooterBlock {
+  label: string;
+  body: string;
+}
+
+export interface ScrollyContent {
+  pageTitle: string;
+  pageDescription: string;
+  // Keystatic's reader returns readonly arrays; accepting them avoids a
+  // mutable/readonly clash when the Astro page passes data into the React
+  // island. The components only read these, never mutate.
+  steps: ReadonlyArray<ScrollyEditorialStep>;
+  timelineTooltips: ReadonlyArray<TimelineTooltip>;
+  teamMembers: ReadonlyArray<TeamMember>;
+  namedExperts: ReadonlyArray<NamedExpert>;
+  landesstellenCredit: string;
+  methodikPhases: ReadonlyArray<MethodikPhase>;
+  footerKontakt: FooterKontakt;
+  footerFoerderung: FooterBlock;
+  footerZitierweise: FooterBlock;
+  footerAbschlussbericht: FooterBlock;
 }

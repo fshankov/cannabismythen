@@ -575,21 +575,135 @@ const startseite = collection({
   },
 });
 
-const ueberUns = collection({
-  label: "ℹ️ Über das Projekt – Seiten",
-  slugField: "title",
-  path: "src/content/ueber-uns/*",
-  format: { contentField: "content" },
+// ─── Über das Projekt — Scrollytelling singleton ──────────────────────────────
+// All editorial German content for the /ueber-uns/ scrollytelling lives here.
+// Code-side structural data (viz family, gridMode, sampleRankedMode) stays in
+// src/components/scrollytelling/stepDefinitions.ts — these are paired by
+// stepNumber at render time. Replaces the legacy `ueberUns` collection
+// (deleted 2026-05-11 production-migration session).
+const ueberUnsScrolly = singleton({
+  label: "ℹ️ Über das Projekt – Scrollytelling",
+  path: "src/content/ueber-uns-scrolly",
+  format: { data: "yaml" },
   schema: {
-    title: fields.slug({ name: { label: "Title" } }),
-    sortOrder: fields.integer({
-      label: "Sort Order",
-      description: "Display order on the about page.",
+    pageTitle: fields.text({
+      label: "Seitentitel (SEO / Browser-Tab)",
+      defaultValue: "Über das Projekt",
     }),
-    ...metaFields,
-    content: fields.markdoc({
-      label: "Content",
-      description: "About page content (German).",
+    pageDescription: fields.text({
+      label: "Seitenbeschreibung (SEO)",
+      multiline: true,
+      defaultValue:
+        "Die CaRM-Studie — Cannabiskonsum: Risiken und Mythen. Forschungsprozess, Methodik und Team in einer interaktiven Geschichte.",
+    }),
+    // 10 narrative steps. Paired by index with stepDefinitions.ts (code).
+    // Order MUST be preserved — index = stepNumber - 1.
+    steps: fields.array(
+      fields.object({
+        heading: fields.text({
+          label: "Überschrift",
+          multiline: true,
+          description: "Zeilenumbruch mit \\n erlaubt.",
+        }),
+        bodyText: fields.text({
+          label: "Fließtext",
+          multiline: true,
+          description: "Absätze mit Leerzeile. **Fettdruck** und Verdikt-Tags [↑ richtig] werden geparst.",
+        }),
+        hint: fields.text({ label: "Hinweis (optional)", multiline: true }),
+      }),
+      {
+        label: "Schritte (10)",
+        itemLabel: (props) => props.fields.heading.value.split("\n")[0].slice(0, 60),
+      },
+    ),
+    // 6 timeline tooltips (Step 1). `anchorDate` is the join key with
+    // VizTimeline's ANCHORS array.
+    timelineTooltips: fields.array(
+      fields.object({
+        anchorDate: fields.text({
+          label: "Anker-Datum (ISO yyyy-mm-dd)",
+          description: "Muss mit ANCHORS in VizTimeline übereinstimmen.",
+        }),
+        body: fields.text({ label: "Tooltip-Text", multiline: true }),
+      }),
+      {
+        label: "Timeline-Tooltips (Schritt 1)",
+        itemLabel: (props) => props.fields.anchorDate.value,
+      },
+    ),
+    // 6 team members (Step 10 avatars).
+    teamMembers: fields.array(
+      fields.object({
+        initials: fields.text({ label: "Initialen (2 Buchstaben)" }),
+        fullName: fields.text({ label: "Voller Name" }),
+        role: fields.text({ label: "Rolle" }),
+        affiliation: fields.text({ label: "Institution", defaultValue: "ISD Hamburg" }),
+        bio: fields.text({ label: "Kurz-Bio", multiline: true }),
+        color: fields.text({
+          label: "Avatar-Farbe (CSS-Hex)",
+          description: "z. B. #6366f1",
+        }),
+      }),
+      {
+        label: "Projektteam",
+        itemLabel: (props) => props.fields.fullName.value,
+      },
+    ),
+    // 3 named experts (Befragte Präventionsexpert:innen).
+    namedExperts: fields.array(
+      fields.object({
+        fullName: fields.text({ label: "Voller Name" }),
+        affiliation: fields.text({ label: "Institution" }),
+        context: fields.text({ label: "Kontext", multiline: true }),
+      }),
+      {
+        label: "Befragte Präventionsexpert:innen",
+        itemLabel: (props) => props.fields.fullName.value,
+      },
+    ),
+    landesstellenCredit: fields.text({
+      label: "Landesstellen-Credit",
+      multiline: true,
+    }),
+    // 4 methodik phases (popover content from Step 5 chip).
+    methodikPhases: fields.array(
+      fields.object({
+        label: fields.text({ label: "Phasen-Label (z. B. 'Phase 1')" }),
+        title: fields.text({ label: "Titel der Phase" }),
+        body: fields.text({ label: "Beschreibung", multiline: true }),
+      }),
+      {
+        label: "Methodik-Phasen (Mehr-Popover)",
+        itemLabel: (props) => `${props.fields.label.value} · ${props.fields.title.value}`,
+      },
+    ),
+    // Page-level footer block (below the scrollytelling).
+    footerKontakt: fields.object({
+      label: fields.text({ label: "Block-Label", defaultValue: "Kontakt" }),
+      lines: fields.array(fields.text({ label: "Adress-Zeile" }), {
+        label: "Adress-Zeilen",
+        itemLabel: (props) => props.value,
+      }),
+      email: fields.text({ label: "E-Mail-Adresse" }),
+    }),
+    footerFoerderung: fields.object({
+      label: fields.text({ label: "Block-Label", defaultValue: "Förderung" }),
+      body: fields.text({ label: "Text", multiline: true }),
+    }),
+    footerZitierweise: fields.object({
+      label: fields.text({ label: "Block-Label", defaultValue: "Zitierweise" }),
+      body: fields.text({ label: "Text", multiline: true }),
+    }),
+    footerAbschlussbericht: fields.object({
+      label: fields.text({ label: "Block-Label", defaultValue: "Abschlussbericht" }),
+      body: fields.text({ label: "Text", multiline: true }),
+    }),
+    internalNotes: fields.text({
+      label: "Internal Notes",
+      multiline: true,
+      description:
+        "Editorial notes. NEVER rendered publicly — only visible in the CMS.",
     }),
   },
 });
@@ -1122,7 +1236,10 @@ export default config({
     faqQuestions,           // ❓ FAQ – Einzelne Fragen (audience-first)
     quiz,                   // 🧪 Quiz  →  /quiz/
     startseite,             // 🏠 Startseite  →  / (homepage scrollytelling)
-    ueberUns,               // ℹ️ Über das Projekt  →  /ueber-uns/
+    // Über das Projekt now lives as a singleton (ueberUnsScrolly).
+    // The legacy `ueberUns` collection + its 4 subpage mdoc files were
+    // removed in the 2026-05-11 production-migration session — the
+    // scrollytelling replaces them with a single canonical surface.
     // ── Internal ────────────────────────────────────────────────────────────
     meta,
     changelog,
@@ -1135,5 +1252,6 @@ export default config({
     dashboardDefinitionen,
     faqAudiences,
     shareCopy,
+    ueberUnsScrolly,        // ℹ️ Über das Projekt – Scrollytelling  →  /ueber-uns/
   },
 });

@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { TIMELINE_TOOLTIPS } from '../data/timeline-tooltips';
+import type { TimelineTooltip } from './types';
 
-interface Props { active: boolean; }
+interface Props {
+  active: boolean;
+  tooltips: ReadonlyArray<TimelineTooltip>;
+}
 
 interface Anchor {
   date: string;        // ISO yyyy-mm-dd, midpoint of period
@@ -77,10 +80,14 @@ function pct(d: string): number {
   return ((t - T_START) / (T_END - T_START)) * 100;
 }
 
-export function VizTimeline({ active }: Props) {
+export function VizTimeline({ active, tooltips }: Props) {
   const [drawn, setDrawn] = useState(0); // 0..1, line draw progress
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const rafRef = useRef<number | null>(null);
+  // Build a lookup map from anchor date → tooltip body. Keyed on the same
+  // ISO date string used by ANCHORS[*].date.
+  const tooltipMap: Record<string, string> = {};
+  for (const t of tooltips) tooltipMap[t.anchorDate] = t.body;
 
   useEffect(() => {
     const reduced =
@@ -301,7 +308,7 @@ export function VizTimeline({ active }: Props) {
         {hoveredIdx !== null && (() => {
           const a = ANCHORS[hoveredIdx];
           const xPct = (PAD_X + (pct(a.date) / 100) * TRACK_W) / VIEW_W * 100;
-          const tip = TIMELINE_TOOLTIPS[a.date];
+          const tipBody = tooltipMap[a.date];
           return (
             <div
               className="viz-timeline__tooltip"
@@ -314,8 +321,8 @@ export function VizTimeline({ active }: Props) {
             >
               <p className="viz-timeline__tooltip-date">{a.labelDate}</p>
               <p className="viz-timeline__tooltip-title">{a.title}</p>
-              {tip ? (
-                <p className="viz-timeline__tooltip-body">{tip.body}</p>
+              {tipBody ? (
+                <p className="viz-timeline__tooltip-body">{tipBody}</p>
               ) : (
                 a.subtitle && <p className="viz-timeline__tooltip-body">{a.subtitle}</p>
               )}

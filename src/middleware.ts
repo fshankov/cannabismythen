@@ -68,6 +68,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   /**
+   * 2026-05-11 — Über-das-Projekt scrollytelling consolidation.
+   * The 4 legacy subpages (projekt, methodik, team, klassifikation) were
+   * removed; their content lives in the new /ueber-uns/ scrollytelling.
+   * Any of the old URLs (or trailing-slash variants) 301 to /ueber-uns/.
+   * Mirror rules also live in `netlify.toml`.
+   */
+  const ueberUnsLegacy = pathname.match(
+    /^\/ueber-uns\/(projekt|methodik|team|klassifikation)\/?$/,
+  );
+  if (ueberUnsLegacy) {
+    return Response.redirect(new URL(`/ueber-uns/${search}`, context.url), 301);
+  }
+
+  /**
    * Session 1 of 2026-05 — quiz module slug renames per the
    * Kategorisierung_2026 05 06 docx. Four modules got longer slugs that
    * match the canonical 5-cat taxonomy. quiz-gefaehrlichkeit and

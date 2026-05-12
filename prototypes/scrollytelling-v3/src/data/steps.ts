@@ -47,6 +47,7 @@ export const STEPS: ScrollyStep[] = [
       'Bevölkerungsbefragung in Deutschland: 2.097 Erwachsene (18–70 Jahre), 555 Minderjährige (16–17 Jahre), 143 Mitglieder von Cannabis-Anbauvereinigungen.\n\nFür jede der 42 Thesen erhoben wir fünf Indikatoren — über fünf Zielgruppen hinweg: Volljährige, Minderjährige, Konsumierende, junge Erwachsene und Eltern minderjähriger Kinder.',
     vizName: 'sampleAndRanked',
     sampleRankedMode: 'sample',
+    chips: [{ label: 'Mehr zur Methodik', popoverKey: 'methodik' }],
   },
   {
     stepNumber: 6,

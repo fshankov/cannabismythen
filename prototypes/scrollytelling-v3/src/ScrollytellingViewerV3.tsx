@@ -59,6 +59,8 @@ import { VizSampleAndRanked } from './viz/VizSampleAndRanked';
 import { VizSourcesStrips } from './viz/VizSourcesStrips';
 import { VizCtaGrid } from './viz/VizCtaGrid';
 import { VizTeamRow } from './viz/VizTeamRow';
+import { MehrPopover } from './components/MehrPopover';
+import { METHODIK_PHASES, FOOTER_BLOCKS } from './data/mehrContent';
 
 interface Props {
   data: CarmData;
@@ -111,6 +113,16 @@ export function ScrollytellingViewerV3({ data, sources }: Props) {
    *  phase-marker IntersectionObserver. Step 6 cycles 0..4 (5 indicators);
    *  steps 7 + 8 cycle 0..1 (2-column reveal). */
   const [phaseIdx, setPhaseIdx] = useState(0);
+  /** Iter-4: which inline-chip popover is open (currently only 'methodik'). */
+  const [chipPopover, setChipPopover] = useState<'methodik' | null>(null);
+  /** Previous activeStep — used to detect scroll direction so we can snap
+   *  phaseIdx to the right initial value when entering a phase-marker step.
+   *  Without this snap, the phase-marker IntersectionObserver fires *after*
+   *  the step IntersectionObserver, leaving a brief frame where the new
+   *  step renders with the previous step's phase index (e.g. entering step
+   *  7 with phaseIdx=4 left over from step 6 → revealedColumns=5, out of
+   *  range). Iter-4-bugfix. */
+  const prevActiveStep = useRef(1);
   const stepsRef = useRef<(HTMLDivElement | null)[]>([]);
   /** Phase markers keyed as `stepNumber * 100 + indexInStep`. Step 6 + 7 + 8
    *  all share this map; each step gets its own contiguous index block. */
@@ -160,6 +172,24 @@ export function ScrollytellingViewerV3({ data, sources }: Props) {
     });
     return () => observers.forEach((o) => o.disconnect());
   }, []);
+
+  // Snap phaseIdx whenever activeStep changes, so the new step renders with
+  // a correct reveal count immediately — not 1–2 frames later when the
+  // phase-marker observer fires. Direction-aware: scrolling forward into a
+  // phase-marker step starts at phase 0 (build up); scrolling backward
+  // starts at the maximum phase (already-built-up).
+  useEffect(() => {
+    const direction: 'forward' | 'backward' =
+      activeStep > prevActiveStep.current ? 'forward' : 'backward';
+    if (activeStep === 6) {
+      setPhaseIdx(direction === 'forward' ? 0 : 4);
+    } else if (activeStep === 7) {
+      setPhaseIdx(direction === 'forward' ? 0 : 1);
+    } else if (activeStep === 8) {
+      setPhaseIdx(direction === 'forward' ? 0 : 1);
+    }
+    prevActiveStep.current = activeStep;
+  }, [activeStep]);
 
   // Phase-marker IntersectionObserver. 30%-tall detection band centered on
   // the viewport (rootMargin -35% top, -35% bottom). Marker keys are
@@ -219,6 +249,7 @@ export function ScrollytellingViewerV3({ data, sources }: Props) {
   })();
 
   return (
+    <>
     <section className="scrolly" aria-label="Scrollytelling: Forschungsprozess">
       {/* Mobile sticky-top viz */}
       <div className="scrolly__viz-mobile" aria-hidden="true" key={`mob-${currentStep.vizName}-${currentStep.gridMode ?? ''}`}>
@@ -279,6 +310,20 @@ export function ScrollytellingViewerV3({ data, sources }: Props) {
                       {renderBodyWithVerdicts(para)}
                     </p>
                   ))}
+                  {step.chips && step.chips.length > 0 && (
+                    <div className="scrolly__chip-row">
+                      {step.chips.map((chip) => (
+                        <button
+                          key={chip.popoverKey}
+                          type="button"
+                          className="scrolly__mehr-chip"
+                          onClick={() => setChipPopover(chip.popoverKey)}
+                        >
+                          {chip.label} →
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   {step.hint && <p className="scrolly__hint">{step.hint}</p>}
                   {step.ctaLabel && step.ctaUrl && (
                     <a href={step.ctaUrl} className="scrolly__cta">
@@ -313,7 +358,58 @@ export function ScrollytellingViewerV3({ data, sources }: Props) {
           </div>
         </div>
       </div>
+
+      <MehrPopover
+        open={chipPopover === 'methodik'}
+        onClose={() => setChipPopover(null)}
+        title="Methodik im Detail"
+        subtitle="Drei Phasen + Expert:innenrunde"
+      >
+        {METHODIK_PHASES.map((p) => (
+          <section key={p.label} className="mehr-popover__section">
+            <h3 className="mehr-popover__section-title">{p.label} · {p.title}</h3>
+            {p.body.split('\n\n').map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </section>
+        ))}
+      </MehrPopover>
     </section>
+
+    {/* Iter-4: project footer moved out of Step 10's right-side viz. Lives
+        below the scrollytelling, full-width, with the four mandatory
+        blocks (Kontakt · Förderung · Zitierweise · Abschlussbericht). */}
+    <footer className="scrolly-page-footer" aria-label="Projektinformationen">
+      <div className="scrolly-page-footer__inner">
+        <div className="scrolly-page-footer__block">
+          <p className="scrolly-page-footer__label">{FOOTER_BLOCKS.kontakt.label}</p>
+          <p className="scrolly-page-footer__body">
+            {FOOTER_BLOCKS.kontakt.lines.map((line, i) => (
+              <span key={i}>
+                {line}
+                <br />
+              </span>
+            ))}
+            <a href={`mailto:${FOOTER_BLOCKS.kontakt.email}`}>
+              {FOOTER_BLOCKS.kontakt.email}
+            </a>
+          </p>
+        </div>
+        <div className="scrolly-page-footer__block">
+          <p className="scrolly-page-footer__label">{FOOTER_BLOCKS.foerderung.label}</p>
+          <p className="scrolly-page-footer__body">{FOOTER_BLOCKS.foerderung.body}</p>
+        </div>
+        <div className="scrolly-page-footer__block">
+          <p className="scrolly-page-footer__label">{FOOTER_BLOCKS.zitierweise.label}</p>
+          <p className="scrolly-page-footer__body">{FOOTER_BLOCKS.zitierweise.body}</p>
+        </div>
+        <div className="scrolly-page-footer__block">
+          <p className="scrolly-page-footer__label">{FOOTER_BLOCKS.abschlussbericht.label}</p>
+          <p className="scrolly-page-footer__body">{FOOTER_BLOCKS.abschlussbericht.body}</p>
+        </div>
+      </div>
+    </footer>
+    </>
   );
 }
 

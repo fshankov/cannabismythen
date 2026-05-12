@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { MehrPopover } from '../components/MehrPopover';
-import {
-  TEAM,
-  NAMED_EXPERTS,
-  LANDESSTELLEN_CREDIT,
-} from '../data/mehrContent';
-import type { TeamMember, NamedExpert } from '../data/mehrContent';
+import { MehrPopover } from './MehrPopover';
+import type { TeamMember, NamedExpert } from './types';
+
+interface Props {
+  teamMembers: ReadonlyArray<TeamMember>;
+  namedExperts: ReadonlyArray<NamedExpert>;
+  landesstellenCredit: string;
+}
 
 type OpenTarget =
   | { kind: 'team'; member: TeamMember }
@@ -18,13 +19,17 @@ function expertInitials(fullName: string): string {
   return parts.map((p) => p[0]).join('').slice(0, 3).toUpperCase();
 }
 
-export function VizTeamRow() {
+export function VizTeamRow({
+  teamMembers,
+  namedExperts,
+  landesstellenCredit,
+}: Props) {
   const [open, setOpen] = useState<OpenTarget>(null);
 
   return (
     <div className="viz viz-team">
       <ul className="viz-team__avatars" aria-label="Projektteam">
-        {TEAM.map((m, i) => (
+        {teamMembers.map((m, i) => (
           <li key={m.initials} style={{ listStyle: 'none' }}>
             <button
               type="button"
@@ -51,7 +56,7 @@ export function VizTeamRow() {
       <section className="viz-team__experts" aria-label="Befragte Präventionsexpert:innen">
         <h4 className="viz-team__experts-title">Befragte Präventionsexpert:innen</h4>
         <ul className="viz-team__expert-avatars">
-          {NAMED_EXPERTS.map((e, i) => (
+          {namedExperts.map((e, i) => (
             <li key={e.fullName} style={{ listStyle: 'none' }}>
               <button
                 type="button"
@@ -68,7 +73,7 @@ export function VizTeamRow() {
             </li>
           ))}
         </ul>
-        <p className="viz-team__landesstellen">{LANDESSTELLEN_CREDIT}</p>
+        <p className="viz-team__landesstellen">{landesstellenCredit}</p>
       </section>
 
       <MehrPopover

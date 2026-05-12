@@ -2,34 +2,28 @@
 export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { getPublishedEntries } from "@lib/content";
+import { reader } from "@lib/content";
+import { ScrollytellingViewer } from "@components/scrollytelling/ScrollytellingViewer";
+import "../../styles/scrollytelling.css";
 
-const entries = await getPublishedEntries("ueberUns");
+// Editorial German content lives in the Keystatic singleton; structural
+// definitions (vizName, gridMode, …) live in stepDefinitions.ts. Heavy
+// datasets (carm-data, information-sources) are fetched client-side by
+// the React island from /data/.
+const content = await reader.singletons.ueberUnsScrolly.read();
+if (!content) {
+  throw new Error(
+    "ueberUnsScrolly singleton not found — check src/content/ueber-uns-scrolly.yaml",
+  );
+}
 
-// Sort by sortOrder
-entries.sort((a, b) => {
-  const orderA = (a[1] as any).sortOrder ?? 99;
-  const orderB = (b[1] as any).sortOrder ?? 99;
-  return orderA - orderB;
-});
+// Strip editorial-only field before passing to the client island.
+const { internalNotes, ...publicContent } = content;
 ---
 
-<BaseLayout title="Über das Projekt" description="Über das CaRM-Projekt, Methodik und das Team">
-  <h1>Über das Projekt</h1>
-  <p>
-    Informationen zum CaRM-Forschungsprojekt, zur Methodik,
-    zum Team und zum Klassifikationssystem.
-  </p>
-
-  <nav class="about-nav">
-    {entries.map(([slug, entry]) => {
-      const e = entry as any;
-      return (
-        <a href={`/ueber-uns/${slug}/`} class="about-card">
-          <h2>{e.title}</h2>
-          {e.summary && <p>{e.summary}</p>}
-        </a>
-      );
-    })}
-  </nav>
+<BaseLayout
+  title={publicContent.pageTitle}
+  description={publicContent.pageDescription}
+>
+  <ScrollytellingViewer client:load content={publicContent} />
 </BaseLayout>
