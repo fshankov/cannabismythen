@@ -76,31 +76,34 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       })();
     </script>
 
-    {/* BugHerd feedback widget — hardcoded per BugHerd's recommended install.
-        The async script appends a sidebar iframe; the green "Feedback" tab
-        only renders for users authenticated to BugHerd or carrying a guest
-        cookie from the project's guest link. The script does not touch the
-        React island roots on /fakten-karten/, /selbsttest/, or /daten-explorer/.
-        Project: Cannabismythen — Phase 1 (Studierendentest, Mai 2026).
-        See _local/bugherd-setup.md for the reviewer-onboarding workflow. */}
-    <script is:inline async src="https://www.bugherd.com/sidebarv2.js?apikey=sbaak1gzo28oox0hunu9pa"></script>
+    {/* Feedbucket feedback widget — vendor snippet from cdn.feedbucket.app.
+        Two-way Asana sync per CLAUDE.md "Tracker workflow": pins on the live
+        site create Asana tasks (project CannabisMythen, gid 1214704634010891);
+        replies in Asana prefixed with @feedbucket post back to the widget.
+        Replaces the previous BugHerd Phase 1 install (Studierendentest, Mai
+        2026) — historical pins are triaged in _local/BugHerd/triage.md.
 
-    {/* Hide BugHerd on auth + admin routes (login gate, Keystatic CMS).
-        Belt-and-braces: unauthenticated traffic can't reach Keystatic anyway,
-        but this keeps reviewers from accidentally pinning feedback there. */}
+        The install IIFE is wrapped in a path check so reviewers can't pin on
+        the login gate, API routes, or the Keystatic CMS. Feedbucket's
+        documented init doesn't expose a runtime hide/show hook, so
+        conditional injection is the equivalent of the previous BugHerd
+        post-load hide pattern. */}
     <script is:inline>
-      (function () {
+      (function (k) {
         var path = window.location.pathname;
         if (
           path === "/login" ||
           path.startsWith("/api/") ||
           path.startsWith("/keystatic/")
         ) {
-          document.addEventListener("bugherd:loaded", function () {
-            if (window.BugHerd) window.BugHerd.hide();
-          });
+          return;
         }
-      })();
+        var s = document.createElement("script");
+        s.defer = true;
+        s.src = "https://cdn.feedbucket.app/assets/feedbucket.js";
+        s.dataset.feedbucket = k;
+        document.head.appendChild(s);
+      })("lpuJyzKJ9oT0o2uKlRSk");
     </script>
   </head>
   <body class={heroMode ? "has-hero" : ""}>

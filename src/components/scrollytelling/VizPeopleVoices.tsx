@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { FileText, User } from 'lucide-react';
 
@@ -109,12 +109,18 @@ interface SimNode extends d3.SimulationNodeDatum {
   id: number;
   text: string;
   weight: number;
+  /** Bounding-circle radius — used by d3.forceCollide for non-overlap. */
   size: number;
+  /** Actual rendered half-width (px) — used to clamp x against container edges. */
+  halfW: number;
+  /** Actual rendered half-height (px) — used to clamp y against container edges. */
+  halfH: number;
 }
 
 export function VizPeopleVoices({ active }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
+  const [settled, setSettled] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -124,75 +130,112 @@ export function VizPeopleVoices({ active }: Props) {
       (window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
         document.documentElement.dataset.reducedMotion === 'true');
 
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    if (w === 0 || h === 0) return;
+    let done = false;
+    let cancelled = false;
 
-    const rng = mulberry32(31337);
-    const nodes: SimNode[] = VOICES.map((v) => {
-      // Font-size range 9 → 24 px gives a much bigger spread than the
-      // previous 11 → 17 px, so prominent voices read as a strong claim
-      // and niche voices as a faint murmur. Conveys "lots of statements,
-      // some loud, most quiet".
-      const fontSize = voiceFontSize(v.weight);
-      const padding = 10;
-      const ch = v.text.length;
-      const wEst = Math.min(240, ch * fontSize * 0.42 + padding * 2);
-      const hEst = fontSize * (ch > 28 ? 3.0 : 2.2) + padding;
-      // Smaller collision radius (allow overlap) + start scattered across the
-      // whole container so the cluster fills the box from frame 1.
-      return {
-        id: v.id,
-        text: v.text,
-        weight: v.weight,
-        size: Math.max(wEst, hEst) / 2,
-        x: 0.1 * w + rng() * 0.8 * w,
-        y: 0.1 * h + rng() * 0.8 * h,
-      };
-    });
+    // Stable non-null reference for the closures below — `containerRef`
+    // could go null on unmount, but the cleanup function disconnects the
+    // observer first.
+    const el = container;
 
-    if (reduced) {
-      // Static masonry-ish grid (5 cols × 6 rows) sorted by weight desc
-      const cols = w < 600 ? 3 : 5;
-      const sorted = [...nodes].sort((a, b) => b.weight - a.weight);
-      sorted.forEach((n, i) => {
-        n.x = ((i % cols) + 0.5) * (w / cols);
-        n.y = (Math.floor(i / cols) + 0.5) * (h / Math.ceil(VOICES.length / cols));
+    /** Compute positions once the container has real dimensions. Iter-6:
+     *  the wall-clamp now uses SEPARATE half-width and half-height per node
+     *  (not the bounding-circle radius) so wide-short cards don't get
+     *  stacked at (size*0.55, size*0.55) like they did in Iter-5. Initial
+     *  positions seed near the center so forces spread outward; no card
+     *  starts near a wall where the clamp can pin it in a corner. */
+    function runLayout() {
+      if (done || cancelled) return;
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      if (w < 200 || h < 200) return;
+      done = true;
+
+      const rng = mulberry32(31337);
+      const nodes: SimNode[] = VOICES.map((v) => {
+        const fontSize = voiceFontSize(v.weight);
+        const padding = 10;
+        const ch = v.text.length;
+        const wEst = Math.min(260, ch * fontSize * 0.42 + padding * 2);
+        const hEst = fontSize * (ch > 28 ? 3.0 : 2.2) + padding * 2;
+        return {
+          id: v.id,
+          text: v.text,
+          weight: v.weight,
+          size: Math.max(wEst, hEst) / 2,
+          halfW: wEst / 2,
+          halfH: hEst / 2,
+          // Iter-6: seed near the center (±20% from middle) rather than
+          // anywhere in [0.1w, 0.9w]. Prevents oversized cards from
+          // starting near a wall where the clamp pins them at a corner.
+          x: w / 2 + (rng() - 0.5) * 0.4 * w,
+          y: h / 2 + (rng() - 0.5) * 0.4 * h,
+        };
       });
+
+      if (reduced) {
+        const cols = w < 600 ? 3 : 5;
+        const sorted = [...nodes].sort((a, b) => b.weight - a.weight);
+        sorted.forEach((n, i) => {
+          n.x = ((i % cols) + 0.5) * (w / cols);
+          n.y = (Math.floor(i / cols) + 0.5) * (h / Math.ceil(VOICES.length / cols));
+        });
+        applyPositions(nodes, cardRefs.current);
+        if (!cancelled) setSettled(true);
+        return;
+      }
+
+      // Pre-run the d3 force layout synchronously to convergence so cards
+      // appear at their final positions instead of jumping into place
+      // tick-by-tick. Collision radius uses the bounding-circle (size) so
+      // cards don't overlap, but the wall-clamp uses each card's ACTUAL
+      // half-width/half-height — fixes the Iter-5 "all-clumped-at-corner"
+      // bug for wide-short cards.
+      const sim = d3
+        .forceSimulation<SimNode>(nodes)
+        .force('center', d3.forceCenter(w / 2, h / 2).strength(0.04))
+        .force(
+          'collide',
+          d3.forceCollide<SimNode>().radius((n) => n.size * 1.05).strength(0.95),
+        )
+        .force('x', d3.forceX(w / 2).strength(0.025))
+        .force('y', d3.forceY(h / 2).strength(0.025))
+        .stop();
+
+      const TICKS = 220;
+      for (let i = 0; i < TICKS; i++) {
+        sim.tick();
+        for (const n of nodes) {
+          const insetX = n.halfW * 1.05;
+          const insetY = n.halfH * 1.05;
+          if (n.x !== undefined) n.x = Math.max(insetX, Math.min(w - insetX, n.x));
+          if (n.y !== undefined) n.y = Math.max(insetY, Math.min(h - insetY, n.y));
+        }
+      }
       applyPositions(nodes, cardRefs.current);
-      return;
+      requestAnimationFrame(() => {
+        if (!cancelled) setSettled(true);
+      });
     }
 
-    // Simulation tuned to settle quickly (high alphaDecay, short alpha range)
-    // and spread the cluster to fill the box rather than centering tightly.
-    // Iter-4: collision strength bumped from 0.45 → 0.85 so frosted-glass
-    // bubbles barely overlap — each statement stays readable instead of
-    // disappearing into a wall of text.
-    const sim = d3
-      .forceSimulation<SimNode>(nodes)
-      .force('center', d3.forceCenter(w / 2, h / 2).strength(0.02))
-      .force(
-        'collide',
-        d3.forceCollide<SimNode>().radius((n) => n.size * 0.95).strength(0.85),
-      )
-      .force('x', d3.forceX(w / 2).strength(0.015))
-      .force('y', d3.forceY(h / 2).strength(0.015))
-      .alpha(0.6)
-      .alphaDecay(0.08)
-      .alphaMin(0.02)
-      .on('tick', () => {
-        // Clamp every node inside the container so bubbles never drift over
-        // the left text column even when the simulation hasn't settled.
-        for (const n of nodes) {
-          const inset = n.size * 0.5;
-          if (n.x !== undefined) n.x = Math.max(inset, Math.min(w - inset, n.x));
-          if (n.y !== undefined) n.y = Math.max(inset, Math.min(h - inset, n.y));
-        }
-        applyPositions(nodes, cardRefs.current);
-      });
+    // First attempt — usually succeeds on a hot mount.
+    runLayout();
+
+    // ResizeObserver: catches the case where the parent flexbox hadn't
+    // committed dimensions yet when the island hydrated.
+    const ro = new ResizeObserver(() => runLayout());
+    ro.observe(el);
+
+    // Iter-6 defensive fallback: if neither the initial call nor any
+    // resize event manages to trigger a successful layout within 500ms,
+    // force one more attempt. Belt-and-braces for browsers that don't
+    // fire ResizeObserver on the first layout commit.
+    const timeoutId = window.setTimeout(() => runLayout(), 500);
 
     return () => {
-      sim.stop();
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+      ro.disconnect();
     };
   }, []);
 
@@ -203,12 +246,9 @@ export function VizPeopleVoices({ active }: Props) {
         ref={containerRef}
         style={{ height: 640, width: '100%', position: 'relative', overflow: 'hidden' }}
       >
-        {VOICES.map((v) => {
+        {VOICES.map((v, idx) => {
           const fontSize = voiceFontSize(v.weight);
-          const opacity = 0.65 + v.weight * 0.35;
-          // Icon size scales subtly with the bubble — small icons for niche
-          // voices, larger icons for loud ones, but the variance is narrower
-          // than the font's so icons never dominate the quote.
+          const opacityTarget = 0.7 + v.weight * 0.3;
           const iconSize = Math.round(fontSize * 0.8);
           return (
             <div
@@ -216,13 +256,19 @@ export function VizPeopleVoices({ active }: Props) {
               ref={(el) => {
                 cardRefs.current.set(v.id, el);
               }}
-              className={`viz-voice-card ${active ? 'viz-voice-card--in' : ''}`}
+              className={`viz-voice-card ${active && settled ? 'viz-voice-card--in' : ''}`}
+              data-source={v.source}
               tabIndex={0}
               style={{
                 left: 0,
                 top: 0,
                 fontSize: `${fontSize.toFixed(1)}px`,
-                opacity,
+                // Fade-in target opacity; the card starts at 0 (see CSS) and
+                // animates up to this value once `settled` is true.
+                ['--card-opacity' as string]: opacityTarget,
+                // Stagger the fade-in slightly so the cluster appears as a
+                // wave rather than all-at-once — feels less abrupt.
+                animationDelay: `${Math.min(idx, 40) * 18}ms`,
               }}
               title={v.text}
             >
@@ -260,10 +306,18 @@ function voiceFontSize(weight: number): number {
 }
 
 function applyPositions(nodes: SimNode[], cards: Map<number, HTMLDivElement | null>) {
+  // Iter-6 bugfix: write to left/top, NOT transform. The fade-in keyframe
+  // animates `transform: translate(-50%, -50%) scale(...)`, which would
+  // otherwise override an inline transform set here — wiping the computed
+  // x/y and stacking every card at (-50%, -50%) i.e. negative coords
+  // outside the container's overflow-hidden clip. With position via
+  // left/top, the keyframe's transform only handles centering + scale,
+  // and the computed position survives.
   for (const n of nodes) {
     const el = cards.get(n.id);
     if (!el) continue;
-    el.style.transform = `translate(${(n.x ?? 0).toFixed(1)}px, ${(n.y ?? 0).toFixed(1)}px) translate(-50%, -50%)`;
+    el.style.left = `${(n.x ?? 0).toFixed(1)}px`;
+    el.style.top = `${(n.y ?? 0).toFixed(1)}px`;
   }
 }
 

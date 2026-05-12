@@ -6,12 +6,6 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "--port", "4321"],
       "port": 4321
-    },
-    {
-      "name": "scrollytelling-v3",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "prototypes/scrollytelling-v3"],
-      "port": 4327
     }
   ]
 }

@@ -420,44 +420,80 @@ html, body {
   width: 100%;
   max-height: 600px;
 }
+@keyframes viz-voice-card-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
+  to   { opacity: var(--card-opacity, 1); transform: translate(-50%, -50%) scale(1); }
+}
+
 .viz-voice-card {
   position: absolute;
-  /* Frosted-glass surface — Iter-4 redesign. The card sits above the dark
-     backdrop with a slight blur so overlapping bubbles remain individually
-     readable instead of melting into a wall of text. */
-  background: rgba(22, 30, 41, 0.72);
+  /* Frosted-glass surface with subtle per-source tint (see [data-source]
+     rules below). Each card sits above the dark backdrop with a soft blur
+     so neighboring cards don't melt into a wall of text. */
+  background:
+    linear-gradient(135deg, var(--card-tint, transparent) 0%, transparent 60%),
+    rgba(22, 30, 41, 0.78);
   backdrop-filter: blur(10px) saturate(120%);
   -webkit-backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
   /* Radius pinches at the bottom-left corner where the tail + source icon
      sit — the "this voice came from here" anchor. */
   border-radius: 14px 14px 14px 4px;
-  padding: 0.625rem 0.875rem 0.625rem 0.875rem;
+  padding: 0.6rem 0.85rem 0.7rem 0.85rem;
   line-height: 1.35;
   color: var(--fg);
   max-width: 260px;
+  /* Card starts invisible and animates in via `viz-voice-card--in` once the
+     d3 simulation has settled and positions are committed (see TS). */
+  opacity: 0;
+  transform: translate(-50%, -50%);
   cursor: default;
   box-shadow:
     0 4px 12px -4px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition:
-    transform 0.3s ease,
     box-shadow 0.3s ease,
     border-color 0.3s ease,
     background 0.3s ease;
-  will-change: transform;
+  will-change: transform, opacity;
+}
+.viz-voice-card--in {
+  animation: viz-voice-card-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .viz-voice-card:hover,
 .viz-voice-card:focus {
   transform: translate(-50%, -50%) scale(1.06);
-  background: rgba(28, 38, 52, 0.92);
+  background:
+    linear-gradient(135deg, var(--card-tint-hover, transparent) 0%, transparent 60%),
+    rgba(28, 38, 52, 0.95);
   box-shadow:
     0 8px 22px -6px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  border-color: rgba(250, 204, 21, 0.45);
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  border-color: var(--card-border-hover, rgba(250, 204, 21, 0.45));
   z-index: 2;
   outline: none;
   opacity: 1 !important;
+}
+
+/* Per-source tint (Iter-5). Bubbles get a very faint hue in the top-left so
+   the three CaRM sources read as distinct without dominating. */
+.viz-voice-card[data-source="survey"] {
+  --card-tint: rgba(99, 102, 241, 0.16);          /* indigo */
+  --card-tint-hover: rgba(99, 102, 241, 0.26);
+  --card-border: rgba(99, 102, 241, 0.20);
+  --card-border-hover: rgba(129, 140, 248, 0.55);
+}
+.viz-voice-card[data-source="professional"] {
+  --card-tint: rgba(20, 184, 166, 0.16);          /* teal */
+  --card-tint-hover: rgba(20, 184, 166, 0.26);
+  --card-border: rgba(20, 184, 166, 0.22);
+  --card-border-hover: rgba(45, 212, 191, 0.55);
+}
+.viz-voice-card[data-source="media"] {
+  --card-tint: rgba(245, 158, 11, 0.16);          /* amber */
+  --card-tint-hover: rgba(245, 158, 11, 0.26);
+  --card-border: rgba(245, 158, 11, 0.22);
+  --card-border-hover: rgba(251, 191, 36, 0.55);
 }
 .viz-voice-card__quote { font-style: italic; }
 /* Source icon — moved to the bottom-left of the card (Iter-4). Sits next
@@ -985,18 +1021,43 @@ html, body {
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.viz-sr__example-myth {
-  font-family: var(--font-display);
-  font-size: 1rem;
+.viz-sr__example-hint {
+  margin: 0;
+  font-size: 0.92rem;
   color: var(--fg);
+  line-height: 1.45;
+  /* Static height — never reflows on hover, which keeps the SVG below from
+     shifting (Iter-5 fix for the hover-shake). */
+  min-height: calc(0.92rem * 1.45 * 2);
 }
-/* Myth title + verdict tag share a single line. The verdict pill sits to the
-   right of the title and wraps to a new line only if the title is very long. */
-.viz-sr__example-myth-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 10px;
+
+/* Iter-5: hover tooltip overlay for Step 6 — replaces the old dynamic-
+   header text that shifted layout on hover. Positioned in CSS-percent over
+   the SVG so it tracks the hovered arrow/line. */
+.viz-sr__strips-tooltip {
+  position: absolute;
+  z-index: 5;
+  max-width: 280px;
+  min-width: 160px;
+  padding: 0.55rem 0.7rem 0.6rem;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: var(--radius-md, 8px);
+  color: #e5e7eb;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 14px));
+  opacity: 1;
+}
+.viz-sr__strips-tooltip-myth {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #f3f4f6;
+  line-height: 1.35;
 }
 /* Daten-Explorer CTA — always rendered (with reserved space) so its slot is
    part of the panel's layout from phase 1. Becomes visible at phase 5
@@ -1037,25 +1098,35 @@ html, body {
   transform: translateY(-1px);
   outline: none;
 }
+/* Iter-6: pickers for Step 6 and Step 7/8 share identical typography +
+   layout so they read as one design system. All 5 group pills (Volljährige
+   · Minderjährige · Konsumierende · junge Erwachsene · Eltern) fit on a
+   single row at the standard viz column width. Below 600px the row
+   horizontally scrolls instead of wrapping. */
 .viz-sr__example-picker {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
   padding-bottom: 8px;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
-/* Picker style — kept identical to .viz-strips__pick (step 7) so the
-   step 6 and step 7 group selectors look and behave the same way. */
+.viz-sr__example-picker::-webkit-scrollbar { display: none; }
 .viz-sr__example-pick {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 3px 9px;
   border: 1px solid var(--border);
   border-radius: 99px;
   background: var(--bg-elev);
   color: var(--fg-muted);
-  font-size: 0.75rem;
-  font-family: inherit;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 400;
+  white-space: nowrap;
   cursor: pointer;
   transition:
     background var(--anim-hover-dur) ease,
@@ -1067,9 +1138,6 @@ html, body {
   color: var(--fg);
 }
 .viz-sr__example-pick--active {
-  /* Border-only highlight — keeps text + colored User icon readable. The
-     thicker green ring (via box-shadow not border-width so the pill doesn't
-     shift) signals "selected" without nuking the contents. */
   background: var(--bg-elev);
   color: var(--fg);
   border-color: var(--classification-richtig);
@@ -1230,19 +1298,31 @@ html, body {
   padding: var(--space-lg);
   text-align: center;
 }
+/* Iter-7: Step 7/8 header layout now mirrors Step 6 — eyebrow + title
+   left-aligned at the start of the viz container so BEISPIEL-AUSWAHL
+   reads as a tag for the source list (not as a centered title above the
+   picker). Picker pills remain horizontally centered to match Step 6's
+   .viz-sr__example-picker. */
 .viz-strips__picker {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
   justify-content: center;
   margin-bottom: var(--space-sm);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
-/* Step 8 header — small label + sources list. */
+.viz-strips__picker::-webkit-scrollbar { display: none; }
+/* Step 7/8 header — small label + sources list. Mirror .viz-sr__example-
+   header (Step 6): align-items: flex-start so the eyebrow + title sit at
+   the left edge of the viz container. */
 .viz-strips__header {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
   padding-bottom: 4px;
+  align-self: stretch;
 }
 .viz-strips__header-label {
   font-family: var(--font-mono);
@@ -1261,11 +1341,15 @@ html, body {
 .viz-strips__pick {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 3px 9px;
   border-radius: 99px;
   border: 1px solid var(--border);
-  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 400;
+  white-space: nowrap;
   color: var(--fg-muted);
   background: var(--bg-elev);
   cursor: pointer;

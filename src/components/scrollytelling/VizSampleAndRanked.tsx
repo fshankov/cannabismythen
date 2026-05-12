@@ -213,11 +213,18 @@ function ExampleMythStrips({
 }: {
   data: CarmData;
   myths: ReadonlyArray<{ id: number; text_de: string; text_short_de: string; correctness_class: string }>;
-  /** 2 / 3 / 5 — how many indicator strips are visible at the current phase. */
+  /** 1..5 — how many indicator strips currently show data points + slope
+   *  lines. ALL 5 strip axes (header, mini-def, axis line, ticks) are
+   *  always visible from phase 1; only the data layer is gated by this
+   *  value, and the most-recently-revealed strip gets a highlight ring
+   *  so the eye knows where the new reading lives. */
   revealedStrips: number;
 }) {
   const [activeGroup, setActiveGroup] = useState<GroupId>('adults');
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  // Hover tooltip position (in SVG-percent coords, anchored to the hovered
+  // arrow). Replaces the old dynamic-header text that caused layout shake.
+  const [hoverPos, setHoverPos] = useState<{ xPct: number; yPct: number } | null>(null);
 
 
   // Build a value matrix: myths × indicators × selected group. Bev.risiko
@@ -300,22 +307,12 @@ function ExampleMythStrips({
     <div className="viz-sr__example">
       <div className="viz-sr__example-header">
         <span className="viz-sr__example-label">Beispiel-Auswahl</span>
-        <div className="viz-sr__example-myth-row">
-          {hoveredMyth ? (
-            <>
-              <span className="viz-sr__example-myth">„{hoveredMyth.text_de}“</span>
-              {hoveredVerdict && (
-                <span className={`verdict-tag ${hoveredVerdict.cls}`}>
-                  {hoveredVerdict.arrow} {hoveredVerdict.label}
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="viz-sr__example-hint">
-              Fünf Mythen mit unterschiedlichem Aufklärungsbedarf. Berühre eine Linie, um die These zu lesen.
-            </span>
-          )}
-        </div>
+        {/* Static description — no longer swaps with hovered-myth text. The
+            myth statement now lives in an absolutely-positioned tooltip
+            near the hovered arrow (see viz-sr__strips-tooltip below). */}
+        <p className="viz-sr__example-hint">
+          Fünf Mythen mit unterschiedlichem Aufklärungsbedarf. Berühre eine Linie, um die These zu lesen.
+        </p>
       </div>
 
       <div className="viz-sr__example-picker" role="tablist" aria-label="Zielgruppe">
@@ -343,6 +340,7 @@ function ExampleMythStrips({
         })}
       </div>
 
+      <div className="viz-sr__strips-wrap" style={{ position: 'relative' }}>
       <svg
         className="viz-sr__strips"
         viewBox={`0 0 ${W} ${H}`}
@@ -359,53 +357,22 @@ function ExampleMythStrips({
         {INDICATORS.map((ind, i) => {
           const y = STRIP_TOP_PAD + i * STRIP_GAP;
           const lineY = y + STRIP_LINE_Y;
+          // Iter-5: all strip AXES visible from phase 1. Only the data
+          // layer (arrows + slope lines) is gated by `revealedStrips`.
+          // Iter-6: yellow highlight ring removed for visual parity with
+          // Step 7/8.
           const isRevealed = i < revealedStrips;
           const isBevRisikoStrip = ind.key === 'population_relevance';
           const bevRisikoDimmed = isBevRisikoStrip && !BEV_RISIKO_VALID_GROUPS.has(activeGroup);
+          const axisOpacity = isRevealed ? (bevRisikoDimmed ? 0.55 : 1) : 0.45;
           return (
             <g
-              key={ind.name}
-              className="viz-sr__strip"
+              key={`axis-${ind.name}`}
+              className="viz-sr__strip-axis"
               data-revealed={isRevealed}
-              aria-hidden={!isRevealed}
               style={{ transition: 'opacity 320ms ease' }}
-              opacity={isRevealed ? (bevRisikoDimmed ? 0.4 : 1) : 0}
+              opacity={axisOpacity}
             >
-              {/* Strip header */}
-              <text
-                x={STRIP_X0}
-                y={y + 6}
-                fill="#e5e7eb"
-                fontSize={12}
-                fontFamily="Georgia, serif"
-                fontWeight={500}
-              >
-                {ind.name}
-              </text>
-              <text
-                x={STRIP_X1}
-                y={y + 6}
-                textAnchor="end"
-                fill="#6b7280"
-                fontSize={10}
-                fontFamily="monospace"
-              >
-                {bevRisikoDimmed ? 'nur Voll- + Minderjährige' : ind.unit}
-              </text>
-
-              {/* Mini-definition — one sentence under the strip header so
-                  each indicator is self-explanatory the moment it reveals. */}
-              <text
-                x={STRIP_X0}
-                y={y + 20}
-                fill="#9ca3af"
-                fontSize={10}
-                fontFamily="Georgia, serif"
-                fontStyle="italic"
-              >
-                {ind.mini}
-              </text>
-
               {/* Axis line */}
               <line
                 x1={STRIP_X0}
@@ -416,28 +383,19 @@ function ExampleMythStrips({
                 strokeWidth={2}
                 strokeLinecap="round"
               />
-              {/* Tick marks at 0 / 50 / 100 */}
+              {/* Tick marks at 0 / 50 / 100 (lines only — number labels are
+                  rendered in the LATER text-layer pass so they appear over
+                  any slope line that crosses them). */}
               {[0, 50, 100].map((t) => (
-                <g key={t}>
-                  <line
-                    x1={valueToX(t)}
-                    x2={valueToX(t)}
-                    y1={lineY - 4}
-                    y2={lineY + 4}
-                    stroke="#3a4452"
-                    strokeWidth={1}
-                  />
-                  <text
-                    x={valueToX(t)}
-                    y={lineY + 16}
-                    textAnchor="middle"
-                    fill="#4d5566"
-                    fontSize={9}
-                    fontFamily="monospace"
-                  >
-                    {t}
-                  </text>
-                </g>
+                <line
+                  key={`tick-${t}`}
+                  x1={valueToX(t)}
+                  x2={valueToX(t)}
+                  y1={lineY - 4}
+                  y2={lineY + 4}
+                  stroke="#3a4452"
+                  strokeWidth={1}
+                />
               ))}
             </g>
           );
@@ -456,6 +414,8 @@ function ExampleMythStrips({
           const isDimmed = hoveredId !== null && !isHovered;
           const color = CORRECTNESS_PATH_COLOR[myth.correctness_class] ?? 'var(--fg-muted)';
           const d = visible.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+          // Anchor the tooltip at the midpoint of the visible polyline.
+          const midpoint = visible[Math.floor(visible.length / 2)];
           return (
             <path
               key={`path-${myth.id}`}
@@ -467,10 +427,134 @@ function ExampleMythStrips({
               strokeLinejoin="round"
               opacity={isHovered ? 0.95 : isDimmed ? 0.18 : 0.55}
               style={{ transition: 'opacity 180ms ease' }}
-              onMouseEnter={() => setHoveredId(myth.id)}
-              onMouseLeave={() => setHoveredId(null)}
+              onMouseEnter={() => {
+                setHoveredId(myth.id);
+                setHoverPos({ xPct: (midpoint.x / W) * 100, yPct: (midpoint.y / H) * 100 });
+              }}
+              onMouseLeave={() => {
+                setHoveredId(null);
+                setHoverPos(null);
+              }}
               pointerEvents="stroke"
             />
+          );
+        })}
+
+        {/* Iter-6: text labels rendered AFTER slope lines so they paint on
+            top — fixes the unreadability when a connecting line cuts
+            through the italic mini-definition. Each text element gets a
+            translucent dark backing rect so it stays legible against any
+            line passing behind it. */}
+        {INDICATORS.map((ind, i) => {
+          const y = STRIP_TOP_PAD + i * STRIP_GAP;
+          const lineY = y + STRIP_LINE_Y;
+          const isRevealed = i < revealedStrips;
+          const isBevRisikoStrip = ind.key === 'population_relevance';
+          const bevRisikoDimmed = isBevRisikoStrip && !BEV_RISIKO_VALID_GROUPS.has(activeGroup);
+          const axisOpacity = isRevealed ? (bevRisikoDimmed ? 0.55 : 1) : 0.45;
+          const unitText = bevRisikoDimmed ? 'nur Voll- + Minderjährige' : ind.unit;
+          // Approximate text widths so the dark backing rect snugly hugs
+          // each text element. Slight overestimate keeps text comfortably
+          // inside its backing on any browser's font metrics.
+          const nameW = ind.name.length * 7 + 6;
+          const unitW = unitText.length * 6 + 6;
+          const miniW = ind.mini.length * 5.2 + 8;
+          return (
+            <g
+              key={`text-${ind.name}`}
+              className="viz-sr__strip-text"
+              data-revealed={isRevealed}
+              style={{ transition: 'opacity 320ms ease' }}
+              opacity={axisOpacity}
+            >
+              {/* Strip header — name + unit, both with dark backing. The
+                  name uses pure-white + heavier weight to match Step 7/8's
+                  column titles (Suche · Vertrauen · …) which render as
+                  bold HTML text. SVG antialiases lighter than HTML at the
+                  same nominal weight, so we step weight up to 600. */}
+              <rect
+                x={STRIP_X0 - 2}
+                y={y - 7}
+                width={nameW}
+                height={18}
+                fill="#0f1318"
+                opacity={0.82}
+                rx={3}
+              />
+              <text
+                x={STRIP_X0}
+                y={y + 6}
+                fill="#ffffff"
+                fontSize={13}
+                fontFamily="Georgia, serif"
+                fontWeight={600}
+              >
+                {ind.name}
+              </text>
+              <rect
+                x={STRIP_X1 - unitW + 2}
+                y={y - 6}
+                width={unitW}
+                height={14}
+                fill="#0f1318"
+                opacity={0.72}
+                rx={3}
+              />
+              <text
+                x={STRIP_X1}
+                y={y + 6}
+                textAnchor="end"
+                fill="#6b7280"
+                fontSize={10}
+                fontFamily="monospace"
+              >
+                {unitText}
+              </text>
+              {/* Mini-definition — italic question under the header */}
+              <rect
+                x={STRIP_X0 - 2}
+                y={y + 10}
+                width={miniW}
+                height={14}
+                fill="#0f1318"
+                opacity={0.72}
+                rx={3}
+              />
+              <text
+                x={STRIP_X0}
+                y={y + 20}
+                fill="#9ca3af"
+                fontSize={10}
+                fontFamily="Georgia, serif"
+                fontStyle="italic"
+              >
+                {ind.mini}
+              </text>
+              {/* Tick number labels (0 / 50 / 100) over the slope lines */}
+              {[0, 50, 100].map((t) => (
+                <g key={`ticknum-${t}`}>
+                  <rect
+                    x={valueToX(t) - 10}
+                    y={lineY + 7}
+                    width={20}
+                    height={12}
+                    fill="#0f1318"
+                    opacity={0.72}
+                    rx={2}
+                  />
+                  <text
+                    x={valueToX(t)}
+                    y={lineY + 16}
+                    textAnchor="middle"
+                    fill="#4d5566"
+                    fontSize={9}
+                    fontFamily="monospace"
+                  >
+                    {t}
+                  </text>
+                </g>
+              ))}
+            </g>
           );
         })}
 
@@ -506,10 +590,22 @@ function ExampleMythStrips({
                   width={ARROW_SIZE + ARROW_HIT_PAD * 2}
                   height={ARROW_SIZE + ARROW_HIT_PAD * 2}
                   fill="transparent"
-                  onMouseEnter={() => setHoveredId(myth.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  onFocus={() => setHoveredId(myth.id)}
-                  onBlur={() => setHoveredId(null)}
+                  onMouseEnter={() => {
+                    setHoveredId(myth.id);
+                    setHoverPos({ xPct: (p.x / W) * 100, yPct: (p.y / H) * 100 });
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredId(null);
+                    setHoverPos(null);
+                  }}
+                  onFocus={() => {
+                    setHoveredId(myth.id);
+                    setHoverPos({ xPct: (p.x / W) * 100, yPct: (p.y / H) * 100 });
+                  }}
+                  onBlur={() => {
+                    setHoveredId(null);
+                    setHoverPos(null);
+                  }}
                   tabIndex={0}
                   role="img"
                   aria-label={`${myth.text_short_de} · ${INDICATORS[i].name}: ${Math.round(p.v)}`}
@@ -543,6 +639,28 @@ function ExampleMythStrips({
           }),
         )}
       </svg>
+
+      {/* Hover tooltip overlay — positioned in CSS-percent over the SVG's
+          viewBox so it tracks the hovered arrow/line accurately regardless
+          of the SVG's rendered size. Mirrors the timeline tooltip pattern
+          in VizTimeline. The dynamic header text was removed to fix the
+          scroll-shake caused by the row reflowing on every hover. */}
+      {hoveredMyth && hoverPos && hoveredVerdict && (
+        <div
+          className="viz-sr__strips-tooltip"
+          role="tooltip"
+          style={{
+            left: `${hoverPos.xPct}%`,
+            top: `${hoverPos.yPct}%`,
+          }}
+        >
+          <p className="viz-sr__strips-tooltip-myth">„{hoveredMyth.text_de}"</p>
+          <span className={`verdict-tag ${hoveredVerdict.cls}`}>
+            {hoveredVerdict.arrow} {hoveredVerdict.label}
+          </span>
+        </div>
+      )}
+      </div>
     </div>
   );
 }
