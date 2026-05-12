@@ -170,7 +170,6 @@ export interface InformationSourcesData {
 export interface AppState {
   lang: Lang;
   view: ViewTab;
-  search: string;
   groupIds: GroupId[];
   categoryIds: number[];
   indicator: Indicator;

@@ -4615,7 +4615,7 @@ body.carm-modal-open {
 }
 
 /* ===========================================================================
-   FilterDrawer / MythosSearch / generic checkbox+radio rows + buttons.
+   FilterDrawer / generic checkbox+radio rows + buttons.
    =========================================================================== */
 
 .carm-filter-section {
@@ -5070,191 +5070,6 @@ body.carm-modal-open {
      not just another option. */
   margin-top: 4px;
 }
-
-/* Stage 4 — search chip in the modern toolbar's actions slot.
-   Collapsed: a Search-icon ghost button. Expanded: an inline input
-   with an autocomplete listbox below. Outside-click + Escape collapse. */
-/* Stage 6 v3: search is now an always-visible input field shaped
-   like a unified chip, sitting inline with Filter / Exportieren.
-   Suggestions appear in a dropdown popup below ONLY when there's
-   a match AND the input is focused. */
-.carm-search-chip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  flex: 1 1 200px;
-  min-width: 160px;
-  max-width: 280px;
-}
-
-.carm-search-chip__input-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 36px;
-  width: 100%;
-  padding: 0 32px 0 32px;
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 8px;
-  background: var(--color-surface, #ffffff);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.carm-search-chip__input-row:focus-within {
-  border-color: var(--color-accent, #2d6a4f);
-  box-shadow: 0 0 0 3px var(--color-accent-light, #e8f5ef);
-}
-
-.carm-search-chip__icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-muted, #94a3b8);
-  pointer-events: none;
-}
-
-.carm-search-chip__input {
-  flex: 1 1 auto;
-  width: 100%;
-  border: 0;
-  background: transparent;
-  font: inherit;
-  font-size: 0.875rem;
-  color: var(--color-text, #1a1a2e);
-  padding: 0;
-}
-
-.carm-search-chip__input:focus {
-  outline: none;
-}
-
-.carm-search-chip__clear {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--color-text-muted, #94a3b8);
-  cursor: pointer;
-}
-
-.carm-search-chip__clear:hover {
-  background: var(--color-bg-subtle, #eeeee8);
-  color: var(--color-text, #1a1a2e);
-}
-
-/* Stage 6 v3: suggestion list now anchors directly below the input
-   chip (no popup wrapper). Position absolute so it overlays content
-   without pushing the toolbar around. */
-.carm-search-chip__list {
-  list-style: none;
-  margin: 0;
-  padding: 4px;
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  min-width: 100%;
-  width: 480px;
-  max-width: min(560px, 92vw);
-  z-index: 60;
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border, #cbd5e1);
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-height: 360px;
-  overflow-y: auto;
-  /* Prevent horizontal scroll: long unbroken tokens (URLs, German
-     compound words) wrap inside the row, never push the container
-     wider. */
-  overflow-x: hidden;
-}
-
-@media (max-width: 640px) {
-  .carm-search-chip__list {
-    width: auto;
-    max-width: 92vw;
-    right: 0;
-  }
-}
-
-.carm-search-chip__item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  width: 100%;
-  padding: 10px;
-  border: 0;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 6px;
-  font: inherit;
-  color: var(--color-text, #1a1a2e);
-  transition: background var(--duration-fast, 150ms) var(--ease-out, ease);
-}
-
-.carm-search-chip__item:hover,
-.carm-search-chip__item.is-active {
-  background: var(--color-accent-light, #e8f5ef);
-}
-
-.carm-search-chip__item-arrow {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  /* Arrow sits inline with the first line of the title (which is
-     larger than the meta line). flex-start alignment keeps it
-     anchored to the top when titles wrap. */
-  margin-top: 2px;
-  color: var(--color-text-secondary, #4a5568);
-}
-
-.carm-search-chip__item-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  /* min-width: 0 lets the flex child shrink below its content's
-     intrinsic width — required for word-wrap to actually kick in
-     inside flex containers. */
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-.carm-search-chip__item-title {
-  font-size: 0.88rem;
-  font-weight: 500;
-  /* Wrap long German compound words rather than clipping. */
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  line-height: 1.35;
-}
-
-.carm-search-chip__item-meta {
-  font-size: 0.75rem;
-  color: var(--color-text-muted, #718096);
-  white-space: normal;
-  word-break: break-word;
-}
-
-/* Stage 6 v3: legacy `.carm-search-chip__popup` was retired with the
-   trigger-button pattern. The list now anchors directly below the
-   input chip via `.carm-search-chip__list` (see above for mobile). */
 
 /* Modern chart-area layout: chart in flex-grow column with optional desktop
    verdict-legend sidebar to the right. Mobile renders the legend as a strip
@@ -5795,14 +5610,9 @@ body.carm-modal-open {
     gap: 8px;
     flex-wrap: nowrap;
   }
-  .carm-toolbar-row__actions > .carm-btn,
-  .carm-toolbar-row__actions > .carm-search-chip {
+  .carm-toolbar-row__actions > .carm-btn {
     flex: 1 1 0;
     min-width: 0;
-    justify-content: center;
-  }
-  .carm-toolbar-row__actions > .carm-search-chip > .carm-btn {
-    width: 100%;
     justify-content: center;
   }
 }
@@ -5899,49 +5709,100 @@ body.carm-modal-open {
   outline: none;
 }
 
+/* Sticky search header at the top of the FilterDrawer body. Icon
+   sits INSIDE the input (absolute-positioned), so the input pill is
+   the dominant visual element. Stronger border + raised background
+   contrast lift the field off the drawer body — the previous flat
+   styling let it disappear into the surrounding chrome. */
 .carm-filter-search-row {
   position: sticky;
   top: 0;
   z-index: 4;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 4px;
-  margin: 0 0 8px;
-  background: var(--color-surface, #ffffff);
+  gap: 0;
+  padding: 12px 4px 14px;
+  margin: 0 0 12px;
+  background: var(--color-bg, #f4f4f0);
   border-bottom: 1px solid var(--color-border, #e2e8f0);
 }
 
 .carm-filter-search-row__icon {
-  flex: 0 0 auto;
-  color: var(--color-text-muted, #94a3b8);
-  margin-left: 4px;
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--color-text-muted, #718096);
 }
 
 .carm-filter-search-row__input {
-  flex: 1 1 auto;
+  /* Locked-width strategy: width:100% + flex-basis:0 keeps the input
+     pill at a fixed width regardless of typed content or whether the
+     clear button is rendered. Without this, browsers reserve room for
+     the native ::-webkit-search-cancel-button which made the pill
+     visibly shift when the user typed. */
+  flex: 1 1 0;
+  width: 100%;
   min-width: 0;
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--color-border, #cbd5e1);
+  box-sizing: border-box;
+  height: 40px;
+  /* Left padding leaves room for the icon (18px gap + 14px icon + 8px
+     space ≈ 40px), right padding leaves room for the custom clear
+     button. */
+  padding: 0 40px 0 40px;
+  border: 1.5px solid var(--color-border-strong, #cbd5e1);
   border-radius: 999px;
-  background: white;
+  background: var(--color-surface, #ffffff);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  color: var(--color-text, #1a1a2e);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  /* Strip the browser-native search affordances so only our custom
+     clear button shows. WebKit + Chromium render an inset ✕ inside
+     type="search" inputs by default; the row already has its own
+     accessible Lucide-X clear button, so the native one is redundant
+     and visually doubles up. */
+  -webkit-appearance: none;
+  appearance: none;
 }
 
+.carm-filter-search-row__input::-webkit-search-cancel-button,
+.carm-filter-search-row__input::-webkit-search-decoration,
+.carm-filter-search-row__input::-webkit-search-results-button,
+.carm-filter-search-row__input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+.carm-filter-search-row__input::placeholder {
+  color: var(--color-text-muted, #718096);
+  opacity: 1;
+}
+
+.carm-filter-search-row__input:hover {
+  border-color: var(--color-text-muted, #94a3b8);
+}
+
+.carm-filter-search-row__input:focus,
 .carm-filter-search-row__input:focus-visible {
-  outline: 2px solid var(--color-accent, #2d6a4f);
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--color-accent, #2d6a4f);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.18);
 }
 
 .carm-filter-search-row__clear {
-  flex: 0 0 auto;
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
   border-radius: 999px;
@@ -6168,13 +6029,6 @@ body.carm-modal-open {
   font-size: 0.9rem;
   line-height: 1.35;
 }
-
-/* MythosSearchChip — color autocomplete row by verdict (parallel to drawer rows). */
-.carm-search-chip__item-arrow.classification--richtig          { color: var(--classification-richtig); }
-.carm-search-chip__item-arrow.classification--eher_richtig     { color: var(--classification-eher-richtig); }
-.carm-search-chip__item-arrow.classification--eher_falsch      { color: var(--classification-eher-falsch); }
-.carm-search-chip__item-arrow.classification--falsch           { color: var(--classification-falsch); }
-.carm-search-chip__item-arrow.classification--no_classification { color: var(--color-text); }
 
 /* ===========================================================================
    Inline verdict cues on myth labels (Stage X — replaces the separate

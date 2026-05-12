@@ -23,7 +23,7 @@
  * visible row count correct without surprising the user.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Search, X } from 'lucide-react';
 import type { AppState, Category, Myth } from '../../../lib/dashboard/types';
 import Drawer from '../../shared/Drawer';
@@ -72,6 +72,16 @@ export default function FilterDrawer({
    *  Default: empty (all collapsed). The user expands a category to
    *  reveal its myths. */
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Focus the search field whenever the drawer opens so the user can
+  // type a myth name immediately — this is the entry point for myth
+  // discovery now that the toolbar's "Mythos suchen" chip is gone.
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(() => searchInputRef.current?.focus(), 50);
+    return () => window.clearTimeout(t);
+  }, [open]);
 
   /** Long statement (Markdoc title) when available, else the short label.
    *  This is what the drawer + autocomplete render. */
@@ -270,6 +280,7 @@ export default function FilterDrawer({
           className="carm-filter-search-row__icon"
         />
         <input
+          ref={searchInputRef}
           type="search"
           className="carm-filter-search-row__input"
           placeholder={t('filter.myths.searchPlaceholder', 'de')}
@@ -466,22 +477,13 @@ export default function FilterDrawer({
 
   function renderMythRow(m: Myth) {
     const checked = isMythIncluded(m);
-    const inSearchMode = query.trim().length > 0;
     return (
       <li key={m.id}>
         <label className="carm-checkbox carm-checkbox--myth">
           <input
             type="checkbox"
             checked={checked}
-            onChange={() => {
-              toggleMyth(m);
-              // Stage 6: when the user is searching ("type cannabis,
-              // pick one, clear, type alcohol, pick another"), clear
-              // the search after each pick so they can immediately
-              // type the next term. Selection stays visible in the
-              // chip strip above.
-              if (inSearchMode) setQuery('');
-            }}
+            onChange={() => toggleMyth(m)}
           />
           <span
             className={`carm-checkbox__verdict classification--${m.correctness_class}`}

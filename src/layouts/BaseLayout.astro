@@ -122,8 +122,43 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       <slot />
     </main>
     <footer id="main-content">
-      <p>&copy; {new Date().getFullYear()} CaRM-Projekt</p>
+      <p>
+        &copy; {new Date().getFullYear()} CaRM-Projekt
+        <span class="footer-sep" aria-hidden="true">·</span>
+        <a
+          id="footer-feedback-trigger"
+          class="footer-feedback-link"
+          href="?feedbucketKey=cm-feedback-2026"
+          rel="nofollow"
+        >Feedback geben</a>
+      </p>
     </footer>
+
+    {/* Reviewer-only feedback trigger.
+        Clicking the footer link reloads the current page with
+        ?feedbucketKey=<secret> appended; Feedbucket's Query Trigger
+        (configured in the project's Widget settings) then activates the
+        widget for this visitor and sets a persistence cookie for 1 hour, so
+        the widget stays available on subsequent pages without the key.
+
+        The href is rewritten on load so existing query params are preserved
+        (e.g. /quiz/?theme=… stays intact, just gains feedbucketKey). The
+        secret value here MUST match what's configured in the Feedbucket
+        project dashboard. If you rotate the secret, update both places. */}
+    <script is:inline>
+      (function () {
+        var a = document.getElementById('footer-feedback-trigger');
+        if (!a) return;
+        try {
+          var u = new URL(window.location.href);
+          u.searchParams.set('feedbucketKey', 'cm-feedback-2026');
+          a.href = u.toString();
+        } catch (e) {
+          // URL ctor failed (very old browser) — leave the static href; the
+          // default href is still valid, it just discards prior query params.
+        }
+      })();
+    </script>
 
     {/* Scroll-aware nav: adds .is-scrolled once user leaves the hero zone */}
     <script is:inline>

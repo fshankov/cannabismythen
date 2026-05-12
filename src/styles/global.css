@@ -195,7 +195,11 @@ hr {
 
 /* ── Site Layout ────────────────────────────────────────────── */
 
-header {
+/* Scoped to the site nav (direct child of body) so that nested
+   <header> elements (e.g. FilterDrawer/ExportDrawer title bars,
+   <section> headers inside content) do NOT inherit fixed-positioning
+   and end up overlaying their own panel bodies. */
+body > header {
   position: fixed;
   top: 0;
   left: 0;
@@ -214,7 +218,7 @@ header {
 }
 
 /* ── Hero-page: dark green glass before scroll ───────────────── */
-body.has-hero header:not(.is-scrolled) {
+body.has-hero > header:not(.is-scrolled) {
   background: rgba(8, 26, 16, 0.22);
   border-bottom-color: rgba(255, 255, 255, 0.06);
   box-shadow: none;
@@ -308,6 +312,39 @@ footer p {
   font-size: 0.85rem;
   color: var(--color-text-muted);
   margin: 0;
+}
+
+/* Footer "Feedback geben" pill — invited reviewers click this to activate
+   Feedbucket's widget (appends ?feedbucketKey=<secret> to the current URL).
+   Styled in Feedbucket's brand violet (#4F47E6) rather than the site's
+   green accent so it visually reads as a tool button, not site content.
+   See BaseLayout.astro for the trigger script. */
+.footer-sep {
+  margin: 0 0.5em;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+.footer-feedback-link {
+  display: inline-block;
+  background: #4F47E6;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  transition: background-color 0.15s ease;
+}
+.footer-feedback-link:hover,
+.footer-feedback-link:focus {
+  background: #3F38C9;
+  color: #fff;
+  text-decoration: none;
+}
+.footer-feedback-link:focus-visible {
+  outline: 2px solid #4F47E6;
+  outline-offset: 2px;
 }
 
 section {

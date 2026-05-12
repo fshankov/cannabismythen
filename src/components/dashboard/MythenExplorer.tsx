@@ -42,7 +42,6 @@ import type { ChartHandle } from '../../lib/dashboard/export';
 import FilterDrawer from './controls/FilterDrawer';
 import ExportDrawer from './controls/ExportDrawer';
 import DataPicker, { type DataPickerOption } from './controls/DataPicker';
-import MythosSearchChip from './controls/MythosSearchChip';
 import ToolbarRow from './controls/ToolbarRow';
 import StripsToolbar from './controls/StripsToolbar';
 import FactsheetPanel from './FactsheetPanel';
@@ -167,10 +166,11 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   );
 
   /** Views that share the unified dashboard toolbar (SortToggle +
-   *  Indikator + Bevölkerungsgruppe + Suche + Filter + Export). The
+   *  Indikator + Bevölkerungsgruppe + Filter + Export). The
    *  other two tabs (`strips`, `sources`) own their own pivot/picker
-   *  setup but receive the shared `actions` (Suche / Filter / Export)
-   *  from this component. */
+   *  setup but receive the shared `actions` (Filter / Export) from
+   *  this component. Myth search/selection lives inside the Filter
+   *  drawer (search-at-top + category + individual-myth checkboxes). */
   const isModernView =
     state.view === 'balken' ||
     state.view === 'balken2' ||
@@ -331,7 +331,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    *  below; Streifen + Sources accept it as a prop and slot it next to
    *  their own pivot toggle so the bar stays in lockstep across tabs. */
   /** Just the Exportieren chip — used on Informationsquellen, where
-   *  Mythos suchen + Filter target Mythen state and don't apply to
+   *  the Filter drawer targets Mythen state and doesn't apply to
    *  source/channel data. */
   const exportOnlyAction: ReactNode = (
     <button
@@ -347,13 +347,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
 
   const sharedActions: ReactNode = (
     <>
-      <MythosSearchChip
-        myths={data.myths}
-        value={state.search}
-        onChange={(q) => update('search', q)}
-        onSelectMyth={selectMyth}
-        mythContent={mythContentMap}
-      />
       <button
         type="button"
         className="carm-btn"
@@ -668,7 +661,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                         categoryIds: [],
                         mythIds: [],
                         verdictFilter: 'all',
-                        search: '',
                         balkenSort: 'value-desc',
                       }));
                     }}
@@ -686,7 +678,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                         categoryIds: [],
                         mythIds: [],
                         verdictFilter: 'all',
-                        search: '',
                         balkenSort: 'value-desc',
                       }));
                     }}

@@ -12,8 +12,8 @@
  * trigger nears the viewport edge, repositions on scroll/resize.
  *
  * Surfaces:
- *   - Daten-Explorer: TableView, StripsView, MythosSearchChip,
- *     FilterDrawer, FactsheetPanel header
+ *   - Daten-Explorer: TableView, StripsView, FilterDrawer,
+ *     FactsheetPanel header
  *   - Fakten-Karten: FactsheetPanel header (hoisted to shared/ so the
  *     verdict treatment is identical to the daten-explorer)
  *   - Quiz: post-answer FactsheetPanel header

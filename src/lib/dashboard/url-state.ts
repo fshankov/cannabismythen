@@ -67,7 +67,6 @@ const GROUP_FROM_DE: Record<string, GroupId> = Object.fromEntries(
 const DEFAULTS: AppState = {
   lang: 'de',
   view: 'balken',
-  search: '',
   groupIds: ['adults'],
   categoryIds: [],
   indicator: 'awareness',
@@ -96,8 +95,6 @@ export function stateToUrl(state: Partial<AppState>): string {
   if (state.view && state.view !== DEFAULTS.view) {
     params.set('view', VIEW_DE[state.view] ?? state.view);
   }
-
-  if (state.search) params.set('q', state.search);
 
   if (state.groupIds && JSON.stringify(state.groupIds) !== JSON.stringify(DEFAULTS.groupIds)) {
     if (state.groupIds.length === 1) {
@@ -176,8 +173,8 @@ export function urlToState(): Partial<AppState> {
     }
   }
 
-  const q = params.get('q');
-  if (q) state.search = q;
+  // Legacy `q` param (Mythos-suchen chip, retired) is silently ignored —
+  // old shared links still load, they just don't pre-fill a query.
 
   const groupSingular = params.get('group');
   const groupPlural = params.get('groups');
