@@ -35,6 +35,21 @@ _local/
 .claude/settings.local.json
 .claude/worktrees/
 
+# Vite/esbuild orphan temp files. @astrojs/markdoc reloads markdoc.config.mjs
+# by writing a sibling esbuild-compiled file and immediately re-importing it.
+# If the dev server is killed mid-import (Ctrl-C during reload, crash), the
+# temp file is left behind. They have no functional purpose — Vite writes
+# fresh ones on every dev start. Archived copies at
+# _local/archive/markdoc-timestamps-2026-05-11/ for reference.
+markdoc.config.timestamp-*.mjs
+
+# Session artifacts — local-only tooling traces. Kept on disk for reference
+# (CLAUDE.md says "don't refactor them") but excluded from the public repo.
+# .playwright-mcp holds Playwright MCP run dumps + screenshots.
+# .superpowers holds brainstorm session state (server pids/logs/html).
+.playwright-mcp/
+.superpowers/
+
 # ────────────────────────────────────────────────────────────────────
 # Internal team tracker — NOT for the public GitHub repo. Contains
 # BugHerd review data, internal session reports, team-only decisions.
