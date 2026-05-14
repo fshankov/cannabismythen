@@ -83,7 +83,7 @@ them in the Asana UI. Claude should treat `Backlog` as `To do` and
 Task notes carry a metadata schema header on line 1:
 `[BugHerd #N] | <Session> | <Priority> | <Owner> | tags: <…> | section: <site-area>`
 followed by free-form description. Site-area `section` values:
-`home` / `daten-explorer` / `quiz` / `fakten-karten` / `ueber-uns` /
+`home` / `daten-explorer` / `quiz` / `fakten-karten` / `projekt` /
 `cross-cutting`. Workspace tags:
 `design` · `functionality` · `german-review` · `pre-launch` ·
 `data-accuracy` · `nice-to-have` · `accessibility` · `blocked` ·
@@ -451,7 +451,7 @@ export async function getStaticPaths() {
 ```
 
 URLs are German and slugs are kebab-case: `/daten-explorer/`, `/meine-interessen/`,
-`/selbsttest/`, `/ueber-uns/`, `/fakten-karten/`, `/startseite/`. Don't introduce
+`/selbsttest/`, `/projekt/`, `/fakten-karten/`, `/startseite/`. Don't introduce
 English route segments.
 
 ### URL conventions
@@ -480,12 +480,21 @@ English route segments.
 - The on-disk content folder is `src/content/faq/` (audience-first restructure)
   — only the URL moved, not the content folder. Don't link to `/haeufige-fragen/`
   in new code; use `/meine-interessen/...`.
+- The Über-das-Projekt page is `/projekt/` (renamed from `/ueber-uns/` on
+  2026-05-14 so the URL matches the visible nav label "Über das Projekt").
+  301s in three layers: middleware, page-level `Astro.redirect` stub at
+  `src/pages/ueber-uns/index.astro`, and `netlify.toml`. The Keystatic
+  singleton is still `ueberUnsScrolly` and its content file is still at
+  `src/content/ueber-uns-scrolly.yaml` — only the URL moved, not the
+  content path. Don't link to `/ueber-uns/...` in new code; use
+  `/projekt/...`.
 
 `src/middleware.ts` enforces a `SITE_PASSWORD` cookie at the edge when the env var is
-set; `/login` and Keystatic's `/api/*` routes are exempt. Both the Stage 5
-`/zahlen-und-fakten/*` → `/daten-explorer/*` and the Session 3a
-`/haeufige-fragen/*` → `/meine-interessen/*` 301 redirects fire BEFORE the
-password gate so external backlinks resolve for unauthenticated traffic too.
+set; `/login` and Keystatic's `/api/*` routes are exempt. The Stage 5
+`/zahlen-und-fakten/*` → `/daten-explorer/*`, the Session 3a
+`/haeufige-fragen/*` → `/meine-interessen/*`, and the 2026-05-14
+`/ueber-uns/*` → `/projekt/` 301 redirects all fire BEFORE the password gate so
+external backlinks resolve for unauthenticated traffic too.
 
 ## Component organization
 

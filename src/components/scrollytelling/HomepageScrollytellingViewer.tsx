@@ -359,7 +359,7 @@ function VizTrustGap({ active }: { active: boolean }) {
       </div>
       <div className="viz-trust-gap__footer">
         <a href="/meine-interessen/">Meine Interessen →</a>
-        <a href="/ueber-uns/">Über das Projekt →</a>
+        <a href="/projekt/">Über das Projekt →</a>
       </div>
       <details className="viz-trust-gap__table-details">
         <summary>Daten als Tabelle anzeigen</summary>

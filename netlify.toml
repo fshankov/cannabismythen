@@ -87,57 +87,71 @@
   force = true
 
 # ---------------------------------------------------------------------------
-# 2026-05-11 — Über-das-Projekt scrollytelling consolidation. The 4 legacy
-# subpages (projekt, methodik, team, klassifikation) were removed; the
-# scrollytelling at /ueber-uns/ replaces them. Mirror rules also live in
-# `src/middleware.ts`.
+# 2026-05-14 — `/ueber-uns/` renamed to `/projekt/` so the URL matches the
+# nav label "Über das Projekt". Also collapses the 4 legacy sub-paths
+# (projekt, methodik, team, klassifikation) from the 2026-05-11
+# scrollytelling consolidation. Mirror rules also live in
+# `src/middleware.ts`. Order matters: the more specific sub-path rules
+# come BEFORE the catch-all so they don't accidentally pass through.
 # ---------------------------------------------------------------------------
 
 [[redirects]]
   from = "/ueber-uns/projekt"
-  to = "/ueber-uns/"
+  to = "/projekt/"
   status = 301
   force = true
 
 [[redirects]]
   from = "/ueber-uns/projekt/*"
-  to = "/ueber-uns/"
+  to = "/projekt/"
   status = 301
   force = true
 
 [[redirects]]
   from = "/ueber-uns/methodik"
-  to = "/ueber-uns/"
+  to = "/projekt/"
   status = 301
   force = true
 
 [[redirects]]
   from = "/ueber-uns/methodik/*"
-  to = "/ueber-uns/"
+  to = "/projekt/"
   status = 301
   force = true
 
 [[redirects]]
   from = "/ueber-uns/team"
-  to = "/ueber-uns/"
+  to = "/projekt/"
   status = 301
   force = true
 
 [[redirects]]
   from = "/ueber-uns/team/*"
-  to = "/ueber-uns/"
+  to = "/projekt/"
   status = 301
   force = true
 
 [[redirects]]
   from = "/ueber-uns/klassifikation"
-  to = "/ueber-uns/"
+  to = "/projekt/"
   status = 301
   force = true
 
 [[redirects]]
   from = "/ueber-uns/klassifikation/*"
-  to = "/ueber-uns/"
+  to = "/projekt/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ueber-uns"
+  to = "/projekt/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ueber-uns/"
+  to = "/projekt/"
   status = 301
   force = true
 

@@ -1,0 +1,29 @@
+---
+export const prerender = true;
+
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { reader } from "@lib/content";
+import { ScrollytellingViewer } from "@components/scrollytelling/ScrollytellingViewer";
+import "../../styles/scrollytelling.css";
+
+// Editorial German content lives in the Keystatic singleton; structural
+// definitions (vizName, gridMode, …) live in stepDefinitions.ts. Heavy
+// datasets (carm-data, information-sources) are fetched client-side by
+// the React island from /data/.
+const content = await reader.singletons.ueberUnsScrolly.read();
+if (!content) {
+  throw new Error(
+    "ueberUnsScrolly singleton not found — check src/content/ueber-uns-scrolly.yaml",
+  );
+}
+
+// Strip editorial-only field before passing to the client island.
+const { internalNotes, ...publicContent } = content;
+---
+
+<BaseLayout
+  title={publicContent.pageTitle}
+  description={publicContent.pageDescription}
+>
+  <ScrollytellingViewer client:load content={publicContent} />
+</BaseLayout>

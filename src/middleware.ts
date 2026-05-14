@@ -68,17 +68,24 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   /**
-   * 2026-05-11 — Über-das-Projekt scrollytelling consolidation.
-   * The 4 legacy subpages (projekt, methodik, team, klassifikation) were
-   * removed; their content lives in the new /ueber-uns/ scrollytelling.
-   * Any of the old URLs (or trailing-slash variants) 301 to /ueber-uns/.
+   * 2026-05-14 — `/ueber-uns/` renamed to `/projekt/` so the URL matches
+   * the nav label "Über das Projekt" (and the mobile-tab-bar short label
+   * "Projekt"). 301 the bare path AND the four legacy sub-paths
+   * (projekt, methodik, team, klassifikation) from the 2026-05-11
+   * scrollytelling consolidation — they all collapse to /projekt/.
+   * Order matters: the legacy sub-path regex runs FIRST so the bare
+   * match doesn't try to redirect `/ueber-uns/projekt/` to `/projekt/`
+   * via a single-slash strip.
    * Mirror rules also live in `netlify.toml`.
    */
   const ueberUnsLegacy = pathname.match(
     /^\/ueber-uns\/(projekt|methodik|team|klassifikation)\/?$/,
   );
   if (ueberUnsLegacy) {
-    return Response.redirect(new URL(`/ueber-uns/${search}`, context.url), 301);
+    return Response.redirect(new URL(`/projekt/${search}`, context.url), 301);
+  }
+  if (pathname === "/ueber-uns" || pathname === "/ueber-uns/") {
+    return Response.redirect(new URL(`/projekt/${search}`, context.url), 301);
   }
 
   /**
