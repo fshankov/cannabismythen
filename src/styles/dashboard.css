@@ -4824,34 +4824,63 @@ body.carm-modal-open {
   color: var(--color-text-inverse, #ffffff);
 }
 
-/* Spannweite v3.1 — icon-bearing sort buttons (A-Z toggle + verdict
-   gradient toggle). Icon + label sit side-by-side; on narrow widths
-   the label collapses and only the icon remains. */
-.carm-sort-btn.carm-sort-btn--icon {
+/* Spannweite v3.3 — icon-only sort buttons. The verdict-rank icon
+   carries its own colour signal (red/green bottom rule); the toolbar
+   uses the PivotToggle visual language (subtle outer pill, white
+   inner active state) so the icon colours stay readable in both
+   active and inactive states. Scoped to .carm-sort-group--icon so
+   Balken's text-label sort group is unaffected. */
+.carm-sort-group--icon {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 3px;
+  height: 36px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-bg-subtle, #eeeee8);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.carm-sort-group--icon .carm-sort-btn {
+  height: auto;
+  min-height: 28px;
+  min-width: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-secondary, #4a5568);
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding-left: 0.5rem;
-  padding-right: 0.6rem;
+  justify-content: center;
+  position: relative;
 }
 
-.carm-sort-btn.carm-sort-btn--icon svg {
+.carm-sort-group--icon .carm-sort-btn:hover {
+  background: transparent;
+  border: 0;
+  color: var(--color-accent, #2d6a4f);
+}
+
+.carm-sort-group--icon .carm-sort-btn.carm-sort-btn--active {
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1a1a2e);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+}
+
+.carm-sort-group--icon .carm-sort-btn.carm-sort-btn--active:hover {
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1a1a2e);
+}
+
+.carm-sort-group--icon .carm-sort-btn:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: -1px;
+}
+
+.carm-sort-group--icon .carm-sort-btn svg {
   flex: 0 0 auto;
-}
-
-.carm-sort-btn__label {
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-@media (max-width: 720px) {
-  .carm-sort-btn__label {
-    display: none;
-  }
-  .carm-sort-btn.carm-sort-btn--icon {
-    padding-left: 0.55rem;
-    padding-right: 0.55rem;
-  }
 }
 
 /* ===========================================================================
@@ -6210,6 +6239,10 @@ body.carm-modal-open {
 
 .carm-spannweite__grid {
   display: grid;
+  /* First row is the explicit header (taller — fits centered
+     icon+name+i cluster). All subsequent body rows use the smaller
+     auto-row height. */
+  grid-template-rows: 56px;
   grid-auto-rows: var(--carm-spannweite-row-h);
   min-width: 0;
   background: var(--color-surface, #ffffff);
@@ -6260,12 +6293,22 @@ body.carm-modal-open {
   background: var(--color-surface, #ffffff);
   border-bottom: 1px solid var(--color-border, #e5e7eb);
   border-right: 1px solid var(--color-border, #e5e7eb);
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
-  min-height: 44px;
+  padding: 0.4rem 0.5rem;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 2;
   position: sticky;
   top: 0;
+}
+
+/* When a column header is being hovered or has its InfoTooltip open
+   via keyboard focus, lift it above its neighbours so the popover
+   isn't visually trapped under the next column's sticky header. */
+.carm-spannweite__cell--header:hover,
+.carm-spannweite__cell--header:focus-within {
+  z-index: 30;
 }
 
 .carm-spannweite__cell--header:last-child {
@@ -6309,9 +6352,12 @@ body.carm-modal-open {
   align-items: center;
   gap: 0.35rem;
   color: var(--color-text, #0f172a);
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.1;
+  /* Center the icon+label+i cluster inside the header cell, leaving
+     room for the upper-left hide button and upper-right sort button. */
+  padding: 0 22px;
 }
 
 .carm-spannweite__header-inner svg {
@@ -6323,6 +6369,22 @@ body.carm-modal-open {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Inline "i" InfoTooltip — sits immediately after the label text
+   inside `.header-inner`. Slightly muted to defer to the label. */
+.carm-spannweite__info-inline {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 1px;
+  opacity: 0.6;
+  transition: opacity 120ms ease;
+}
+
+.carm-spannweite__header-inner:hover .carm-spannweite__info-inline,
+.carm-spannweite__info-inline:hover,
+.carm-spannweite__info-inline:focus-within {
+  opacity: 1;
 }
 
 /* Upper-LEFT EyeOff hide button (Punktwolke pattern). Always visible
@@ -6358,14 +6420,46 @@ body.carm-modal-open {
   color: var(--color-text, #0f172a);
 }
 
-/* Upper-RIGHT InfoTooltip "i" button (Punktwolke pattern). The
-   InfoTooltip component renders its own button; we just position
-   the wrapper. */
-.carm-spannweite__info-btn {
+/* Upper-RIGHT per-column value sort button. Lucide ArrowDown01
+   icon = ascending; ArrowDown10 = descending. Faded by default,
+   opaque + accent-colored when this column is the active sort. */
+.carm-spannweite__col-sort-btn {
   position: absolute;
   top: 4px;
   right: 4px;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #94a3b8);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.45;
   z-index: 1;
+  transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.carm-spannweite__col-sort-btn:hover,
+.carm-spannweite__cell--header:hover .carm-spannweite__col-sort-btn {
+  opacity: 1;
+  background: var(--color-surface-alt, #f1f5f9);
+  color: var(--color-text, #0f172a);
+}
+
+.carm-spannweite__col-sort-btn.is-active {
+  opacity: 1;
+  color: var(--color-accent, #2d6a4f);
+  background: var(--color-surface-alt, #f1f5f9);
+}
+
+.carm-spannweite__col-sort-btn:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 1px;
 }
 
 /* Hidden column: collapsed 28-px placeholder. Chevron only — no
@@ -6433,29 +6527,20 @@ body.carm-modal-open {
   pointer-events: none;
 }
 
-/* The verdict-arrow SVG isn't visually centered around its viewBox
-   center — its chevron tip sits a few px off, depending on rotation
-   (richtig: tip 2.67px above center; falsch: 2.67px below; eher_*:
-   ±1.89px). React sets --y-shift inline per row so the CHEVRON TIP
-   lands on the bar's vertical midline. */
-.carm-spannweite__pos {
+/* v3.3 — glyph and numeric label are positioned INDEPENDENTLY so
+   the glyph's CENTER lands at value% (not the center of a wrapped
+   glyph+number cluster). This lets the bar terminate exactly at the
+   glyph's left edge via `calc(value% - 8px)` without overlap.
+
+   The verdict-arrow SVG isn't visually centred around its viewBox
+   centre — chevron tip sits a few px off depending on rotation
+   (richtig: tip 2.67 px above centre; falsch: 2.67 px below; eher_*:
+   ±1.89 px). React sets --y-shift inline so the CHEVRON TIP lands on
+   the bar's vertical midline. */
+.carm-spannweite__glyph {
   position: absolute;
   top: 50%;
   transform: translate(-50%, calc(-50% + var(--y-shift, 0px)));
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  pointer-events: none;
-  transition: transform 160ms ease;
-}
-
-.carm-spannweite__row:hover .carm-spannweite__pos,
-.carm-spannweite__row.is-hover .carm-spannweite__pos,
-.carm-spannweite__row:focus-visible .carm-spannweite__pos {
-  transform: translate(-50%, calc(-50% + var(--y-shift, 0px))) scale(1.08);
-}
-
-.carm-spannweite__glyph {
   width: 16px;
   height: 16px;
   display: inline-flex;
@@ -6463,13 +6548,26 @@ body.carm-modal-open {
   justify-content: center;
   line-height: 0;
   color: inherit;
+  pointer-events: none;
+  transition: transform 160ms ease;
+}
+
+.carm-spannweite__row:hover .carm-spannweite__glyph,
+.carm-spannweite__row.is-hover .carm-spannweite__glyph,
+.carm-spannweite__row:focus-visible .carm-spannweite__glyph {
+  transform: translate(-50%, calc(-50% + var(--y-shift, 0px))) scale(1.12);
 }
 
 .carm-spannweite__num {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   font:
     11px/1 ui-monospace, 'SF Mono', Menlo, monospace;
   font-variant-numeric: tabular-nums;
   color: var(--color-text, #0f172a);
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .carm-spannweite__no-data {
@@ -6520,40 +6618,78 @@ body.carm-modal-open {
   /* 28-px slot under a hidden column; no labels. */
 }
 
-/* Balken-style verdict-tinted hover card. */
+/* Verdict-tinted hover card. position:fixed (set inline by React) so
+   the viewport-clamp logic in handleHover can keep it on-screen near
+   the left/right edges. */
 .carm-spannweite__tooltip {
-  position: absolute;
-  transform: translate(-50%, calc(-100% - 0.5rem));
+  /* position:fixed comes from inline style; transform centers
+     horizontally and lifts the card above the cursor. */
+  transform: translate(-50%, calc(-100% - 12px));
   color: var(--color-text, #0f172a);
-  padding: 0.55rem 0.75rem;
+  padding: 0.55rem 0.75rem 0.55rem 0.85rem;
   border-radius: 8px;
   font-size: 0.8rem;
   line-height: 1.4;
+  width: 280px;
   max-width: 320px;
   pointer-events: none;
   z-index: 50;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.22);
 }
 
-.carm-spannweite__tooltip-myth {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+/* Row 1: myth statement + verdict glyph (right). */
+.carm-spannweite__tooltip-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
 }
 
-.carm-spannweite__tooltip-meta {
-  display: flex;
+.carm-spannweite__tooltip-myth {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--color-text, #0f172a);
+}
+
+.carm-spannweite__tooltip-glyph {
+  flex: 0 0 auto;
+  display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.72rem;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+/* Row 2: Wissenschaftlich [verdict] (verdict-colored, slightly
+   smaller than the myth, regular weight). */
+.carm-spannweite__tooltip-verdict {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Row 3: gruppe · indikator · value (small meta). */
+.carm-spannweite__tooltip-meta {
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
   color: var(--color-text-muted, #475569);
 }
 
-.carm-spannweite__tooltip-verdict {
-  font-weight: 600;
+/* Progressive header collapse for narrow viewports — step the label
+   text down in size, then hide it entirely while keeping the indicator
+   icon and the InfoTooltip "ⓘ" visible (so meaning is never lost,
+   only abbreviated). The sort + hide buttons in the corners stay put. */
+@media (max-width: 1100px) {
+  .carm-spannweite__header-text { font-size: 0.72rem; }
 }
-
-.carm-spannweite__tooltip-sep {
-  color: var(--color-text-muted, #94a3b8);
+@media (max-width: 960px) {
+  .carm-spannweite__header-text { font-size: 0.66rem; }
+}
+@media (max-width: 840px) {
+  /* Hide the textual label. Indicator icon + InfoTooltip "ⓘ" remain
+     so the column is still identifiable on hover/click. */
+  .carm-spannweite__header-text { display: none; }
+  .carm-spannweite__header-inner { gap: 0.25rem; padding: 0 18px; }
 }
 
 @media (max-width: 720px) {
@@ -6563,11 +6699,7 @@ body.carm-modal-open {
   }
 
   .carm-spannweite__grid {
-    min-width: 640px;
-  }
-
-  .carm-spannweite__header-text {
-    font-size: 0.66rem;
+    min-width: 480px;
   }
 
   .carm-spannweite__axis-scale {

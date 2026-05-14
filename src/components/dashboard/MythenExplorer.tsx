@@ -35,6 +35,7 @@ import OverviewView from './views/OverviewView';
 import CircularView from './views/CircularView';
 import LadderView from './views/LadderView';
 import StripsView, { type StripsViewHandle } from './views/StripsView';
+import SpannweiteView, { type SpannweiteViewHandle } from './views/SpannweiteView';
 import SourcesStripsView, { type SourcesStripsViewHandle } from './views/SourcesStripsView';
 import BalkenView, { type BalkenViewHandle } from './views/BalkenView';
 import BalkenView2 from './views/BalkenView2';
@@ -44,6 +45,7 @@ import ExportDrawer from './controls/ExportDrawer';
 import DataPicker, { type DataPickerOption } from './controls/DataPicker';
 import ToolbarRow from './controls/ToolbarRow';
 import StripsToolbar from './controls/StripsToolbar';
+import SpannweiteToolbar from './controls/SpannweiteToolbar';
 import FactsheetPanel from './FactsheetPanel';
 import DashboardOnboarding from './DashboardOnboarding';
 import type { MythContentEntry } from './FactsheetPanel';
@@ -119,6 +121,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   const [exportDrawerOpen, setExportDrawerOpen] = useState(false);
   const balkenRef = useRef<BalkenViewHandle>(null);
   const stripsRef = useRef<StripsViewHandle>(null);
+  const spannweiteRef = useRef<SpannweiteViewHandle>(null);
   const sourcesRef = useRef<SourcesStripsViewHandle>(null);
 
   /**
@@ -135,6 +138,8 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         return balkenRef.current?.getEchartsInstance() ?? null;
       case 'strips':
         return stripsRef.current?.getSvgElement() ?? null;
+      case 'spannweite':
+        return spannweiteRef.current?.getSvgElement() ?? null;
       case 'sources':
         return sourcesRef.current?.getSvgElement() ?? null;
       case 'table':
@@ -604,12 +609,23 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           />
         )}
 
+        {state.view === 'spannweite' && (
+          <SpannweiteToolbar
+            state={state}
+            update={update}
+            groups={data.groups}
+            definitions={defs}
+            sharedActions={sharedActions}
+          />
+        )}
+
         {/* Legacy <FilterBar /> rendered for the retired views
          *  (scatter / lollipop / overview / circular / ladder) so
          *  share-links still resolve. The four public tabs no longer
          *  use it — they pick up the unified Filter drawer instead. */}
         {state.view !== 'sources' &&
           state.view !== 'strips' &&
+          state.view !== 'spannweite' &&
           !isModernView && (
             <FilterBar
               state={state}
@@ -716,12 +732,27 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                     sharedActions={sharedActions}
                   />
                 )}
+                {state.view === 'spannweite' && (
+                  <SpannweiteView
+                    ref={spannweiteRef}
+                    myths={filteredMyths}
+                    metrics={data.metrics}
+                    groups={data.groups}
+                    state={state}
+                    update={update}
+                    onSelectMyth={selectMyth}
+                    definitions={defs}
+                    mythThemes={mythThemeMap}
+                    mythContentMap={mythContentMap}
+                    sharedActions={sharedActions}
+                  />
+                )}
               </>
             )}
           </div>
         </div>
 
-        {!isModernView && state.view !== 'sources' && state.view !== 'strips' && (
+        {!isModernView && state.view !== 'sources' && state.view !== 'strips' && state.view !== 'spannweite' && (
           <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
         )}
 
@@ -778,6 +809,15 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             return {
               title: 'Mythen-Streifen',
               subtitle: `${indicatorLabel} · ${groupLabel}`,
+            };
+          }
+          if (state.view === 'spannweite') {
+            return {
+              title: t('spannweite.title', 'de'),
+              subtitle:
+                state.stripsMode === 'indicator'
+                  ? t('strips.mode.indicator', 'de')
+                  : t('strips.mode.group', 'de'),
             };
           }
           if (state.view === 'sources') {

@@ -6,7 +6,8 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 import { getQuestionsForMyth, getAudience } from "@lib/faq";
 import Lesebeispiel from "@components/dashboard/Lesebeispiel";
-import type { Metric } from "@lib/dashboard/types";
+import VerdictStatement from "@components/shared/VerdictStatement";
+import type { CorrectnessClass, Metric } from "@lib/dashboard/types";
 // Direct JSON import — see /quiz/[slug].astro for the rationale.
 import carmRawJson from "../../../public/data/carm-data.json";
 
@@ -33,23 +34,11 @@ if (!entry || entry.status !== "published") {
 
 const { content, internalNotes, ...meta } = entry;
 
-/**
- * Canonical verdict labels — keep in sync with `verdict.*` keys in
- * `src/lib/dashboard/translations.ts` and `classification.*` in
- * `src/components/quiz/i18n.ts`. The conversational
- * `meta.classificationLabel` from each `.mdoc` (e.g. "Das stimmt nicht.")
- * is intentionally bypassed so the factsheet header matches every other
- * verdict surface on the site (Stage 1 of the Daten-Explorer refactor).
- */
-const VERDICT_LABEL: Record<string, string> = {
-  richtig: 'Richtig',
-  eher_richtig: 'Eher richtig',
-  eher_falsch: 'Eher falsch',
-  falsch: 'Falsch',
-  no_classification: 'Keine Aussage möglich',
-};
-const verdictLabel =
-  VERDICT_LABEL[meta.classification ?? ''] ?? meta.classificationLabel ?? '';
+// v3 verdict system: the bold colored H1 + trailing arrow now carries
+// the verdict signal, so the separate "Richtig"/"Falsch" label paragraph
+// is dropped from the header.
+const verdict = (meta.classification ?? 'no_classification') as CorrectnessClass;
+
 // Render Markdoc content: AST node → renderable tree → HTML string
 const { node } = await content();
 let html = Markdoc.renderers.html(Markdoc.transform(node));
@@ -127,10 +116,7 @@ for (const q of faqMatches) {
   <article class="factsheet">
     <header>
       <span class="myth-id">{meta.mythId}</span>
-      <h1 class={`statement--${meta.classification}`}>{meta.title}</h1>
-      <p class={`classification classification--${meta.classification}`}>
-        {verdictLabel}
-      </p>
+      <VerdictStatement statement={meta.title} verdict={verdict} as="h1" />
       {meta.tags && meta.tags.length > 0 && (
         <div class="tags">
           {meta.tags.map((tag: string) => (

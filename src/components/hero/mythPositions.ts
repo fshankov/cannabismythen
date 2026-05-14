@@ -59,13 +59,13 @@ export const mythPositions: MythPosition[] = [
   // ── m29–m41/42 ────────────────────────────────────────────────────────────
   { id: "m29",     text: "Konsum verbessert die Stimmung",       x: 91, y: 40, r:  2, size: 16, serif: false, weight: 400, italic: false },
   { id: "m30",     text: "Konsum führt zu Suizidgedanken",       x: 60, y: 16, r: -1, size: 13, serif: false, weight: 400, italic: false },
-  { id: "m31-m32", text: "Cannabis entspannt und beruhigt",      x:  4, y: 37, r:  3, size: 17, serif: false, weight: 600, italic: false },
+  { id: "m31",     text: "Cannabis entspannt",                   x:  4, y: 37, r:  3, size: 17, serif: false, weight: 600, italic: false },
   { id: "m33",     text: "Cannabis macht kreativ",               x: 49, y: 52, r: -2, size: 15, serif: false, weight: 400, italic: false },
   { id: "m34",     text: "Konsum schädigt Beziehungen",          x: 78, y: 68, r:  1, size: 14, serif: false, weight: 400, italic: false },
   { id: "m35",     text: "Konsumierende missachten Regeln",      x: 15, y: 92, r: -1, size: 12, serif: false, weight: 400, italic: false },
-  { id: "m36-m37", text: "Konsum senkt schulische Leistungen",   x: 50, y: 31, r:  2, size: 16, serif: false, weight: 500, italic: false },
+  { id: "m36",     text: "Konsum senkt schulische Leistungen",   x: 50, y: 31, r:  2, size: 16, serif: false, weight: 500, italic: false },
   { id: "m38",     text: "Cannabiskonsum ist cool",              x: 88, y: 78, r: -3, size: 13, serif: false, weight: 400, italic: false },
   { id: "m39",     text: "Cannabis konsumieren viele",           x:  3, y: 73, r:  1, size: 16, serif: false, weight: 400, italic: false },
   { id: "m40",     text: "Konsum ist nun überall erlaubt",       x: 72, y:  5, r: -2, size: 15, serif: false, weight: 400, italic: false },
-  { id: "m41-m42", text: "Legalisierung erhöht den Konsum",      x: 93, y: 17, r:  1, size: 13, serif: false, weight: 500, italic: false },
+  { id: "m41",     text: "Legalisierung erhöht den Konsum",      x: 93, y: 17, r:  1, size: 13, serif: false, weight: 500, italic: false },
 ];

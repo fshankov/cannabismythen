@@ -153,6 +153,10 @@ export type VizName =
 export interface ScrollyEditorialStep {
   heading: string;
   bodyText: string;
+  /** Optional small-print metadata line rendered below body text (e.g. source
+   *  attribution, sample-size note, project timeframe). Visually separated
+   *  from bodyText via a top border + muted color — see `.scrolly__legend`. */
+  legend?: string;
   hint: string;
 }
 export interface TimelineTooltip {
@@ -171,11 +175,6 @@ export interface NamedExpert {
   fullName: string;
   affiliation: string;
   context: string;
-}
-export interface MethodikPhase {
-  label: string;
-  title: string;
-  body: string;
 }
 export interface FooterKontakt {
   label: string;
@@ -198,7 +197,6 @@ export interface ScrollyContent {
   teamMembers: ReadonlyArray<TeamMember>;
   namedExperts: ReadonlyArray<NamedExpert>;
   landesstellenCredit: string;
-  methodikPhases: ReadonlyArray<MethodikPhase>;
   footerKontakt: FooterKontakt;
   footerFoerderung: FooterBlock;
   footerZitierweise: FooterBlock;

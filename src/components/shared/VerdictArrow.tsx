@@ -1,67 +1,72 @@
 /**
- * VerdictArrow — directional Lucide-arrow icon paired with each
- * scientific verdict on the cannabismythen site.
+ * VerdictArrow — directional verdict glyph for the cannabismythen site.
  *
- * Mapping (deuteranopia-safe; redundant with the verdict color tokens
- * in `src/styles/global.css` so users can read verdicts without color):
+ * Renders a standalone <svg> (sized in pixels) wrapping the canonical
+ * verdict paths from `./verdictGlyph`. The glyph itself (chevron +
+ * vertical shaft in the verdict color, plus a horizontal shadow line
+ * in a lighter shadow color, rotated by a per-verdict angle so the
+ * tip points in the right direction) is THE site's canonical verdict
+ * marker. All visible verdict surfaces (Daten-Explorer arrows,
+ * Fakten-Karten card glyphs, Quiz factsheet panels, the /projekt/
+ * scrollytelling step-4 grid and step-6 strips) inherit from one
+ * source — change `VERDICT_GLYPHS` in `./verdictGlyph` and every
+ * badge updates.
  *
- *   richtig          → ArrowUp        ↑
- *   eher_richtig     → ArrowUpRight   ↗
- *   eher_falsch      → ArrowDownLeft  ↙
- *   falsch           → ArrowDown      ↓
- *   no_classification → Minus         —
+ * For use INSIDE another <svg> (e.g. when paint order must be
+ * controlled across multiple layers), import `<VerdictGlyphPaths>`
+ * from `./verdictGlyph` directly — this component would otherwise
+ * nest <svg> in <svg> which is awkward to scale and serialise.
  *
- * Renders inline as `currentColor`, so the parent's `color` rule
- * (e.g. `var(--classification-richtig)`) cascades into the stroke.
+ * Deuteranopia accessibility: the four arrow directions provide a
+ * redundant non-color signal — color-blind users can read verdicts
+ * by tip direction alone.
  *
- * This is the canonical verdict glyph for the entire site. The legacy
- * unicode `getCorrectnessIcon()` helper in `src/lib/dashboard/colors.ts`
- * is `@deprecated` and should not be used in new code.
+ * The legacy unicode `getCorrectnessIcon()` helper in
+ * `src/lib/dashboard/colors.ts` is `@deprecated` and should not be used.
  */
 
-import {
-  ArrowUp,
-  ArrowUpRight,
-  ArrowDownLeft,
-  ArrowDown,
-  Minus,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import type { CorrectnessClass } from '../../lib/dashboard/types';
+import { VerdictGlyphPaths, type VerdictColorOverride } from './verdictGlyph';
 
 interface VerdictArrowProps {
   verdict: CorrectnessClass;
   /** Pixel size of the rendered SVG. Default 14 matches the legend swatch. */
   size?: number;
-  /** Stroke width passed to the Lucide icon. Default 2.25. */
+  /** Stroke width in SVG user units (24×24 viewBox). Default 2. */
   strokeWidth?: number;
   /** Set to `false` if the icon is the only label for its meaning. Default `true`. */
   'aria-hidden'?: boolean;
   className?: string;
+  /** Override the per-verdict main/shadow colors. Use when rendering ON a
+   *  verdict-colored background (the scrollytelling Step 4 grid cells). */
+  colorOverride?: VerdictColorOverride;
 }
-
-const ICONS: Record<CorrectnessClass, LucideIcon> = {
-  richtig: ArrowUp,
-  eher_richtig: ArrowUpRight,
-  eher_falsch: ArrowDownLeft,
-  falsch: ArrowDown,
-  no_classification: Minus,
-};
 
 export default function VerdictArrow({
   verdict,
   size = 14,
-  strokeWidth = 2.25,
+  strokeWidth = 2,
   'aria-hidden': ariaHidden = true,
   className,
+  colorOverride,
 }: VerdictArrowProps) {
-  const Icon = ICONS[verdict] ?? Minus;
   return (
-    <Icon
-      size={size}
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
       strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden={ariaHidden}
       className={className}
-    />
+    >
+      <VerdictGlyphPaths
+        verdict={verdict}
+        strokeWidth={strokeWidth}
+        colorOverride={colorOverride}
+      />
+    </svg>
   );
 }

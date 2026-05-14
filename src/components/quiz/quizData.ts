@@ -356,7 +356,7 @@ const mythsStimmung: QuizMyth[] = [
     correctClassification: "eher_richtig",
     explanationKey: "myth.m31.explanation",
     populationCorrectPct: 81.98,
-    mythPageSlug: "m31-m32-entspannt-aggressiv",
+    mythPageSlug: "m31-entspannt",
   },
   {
     id: "m29",
@@ -380,7 +380,7 @@ const mythsStimmung: QuizMyth[] = [
     correctClassification: "eher_falsch",
     explanationKey: "myth.m32.explanation",
     populationCorrectPct: 57.98,
-    mythPageSlug: "m31-m32-entspannt-aggressiv",
+    mythPageSlug: "m32-nicht-aggressiv",
   },
   {
     id: "m28",
@@ -433,7 +433,7 @@ const mythsGesellschaft: QuizMyth[] = [
     correctClassification: "eher_falsch",
     explanationKey: "myth.m36.explanation",
     populationCorrectPct: 55.41,
-    mythPageSlug: "m36-m37-leistungen-niveau",
+    mythPageSlug: "m36-leistungen",
   },
   {
     id: "m37",
@@ -441,7 +441,7 @@ const mythsGesellschaft: QuizMyth[] = [
     correctClassification: "falsch",
     explanationKey: "myth.m37.explanation",
     populationCorrectPct: 35.76,
-    mythPageSlug: "m36-m37-leistungen-niveau",
+    mythPageSlug: "m37-soziales-niveau",
   },
   {
     id: "m35",
@@ -465,7 +465,7 @@ const mythsGesellschaft: QuizMyth[] = [
     correctClassification: "richtig",
     explanationKey: "myth.m41.explanation",
     populationCorrectPct: 79.23,
-    mythPageSlug: "m41-m42-anstieg-konsum",
+    mythPageSlug: "m41-gesetz-anstieg",
   },
   {
     id: "m42",
@@ -473,7 +473,7 @@ const mythsGesellschaft: QuizMyth[] = [
     correctClassification: "eher_falsch",
     explanationKey: "myth.m42.explanation",
     populationCorrectPct: 53.12,
-    mythPageSlug: "m41-m42-anstieg-konsum",
+    mythPageSlug: "m42-gesetz-anstieg-minderjaehrige",
   },
   {
     id: "m40",

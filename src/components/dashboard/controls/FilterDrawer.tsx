@@ -29,7 +29,8 @@ import type { AppState, Category, Myth } from '../../../lib/dashboard/types';
 import Drawer from '../../shared/Drawer';
 import { t } from '../../../lib/dashboard/translations';
 import { getMythText, getMythShortText } from '../../../lib/dashboard/data';
-import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
+import { normalize } from '../../../lib/text-normalize';
+import VerdictStatement from '../../shared/VerdictStatement';
 import type { MythContentEntry } from '../FactsheetPanel';
 
 interface Props {
@@ -48,13 +49,6 @@ interface Props {
    *  `mythContent[id].title` to show the long claim sentence next to
    *  each myth, falling back to the short label when missing. */
   mythContent?: Record<number, MythContentEntry>;
-}
-
-function normalize(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
 }
 
 export default function FilterDrawer({
@@ -329,24 +323,15 @@ export default function FilterDrawer({
                 return (
                   <li key={m.id}>
                     <span
-                      className={`carm-filter-selected__chip statement--${m.correctness_class}`}
+                      className="carm-filter-selected__chip"
+                      title={txt}
                     >
-                      <span
-                        className={`carm-filter-selected__chip-arrow classification--${m.correctness_class}`}
-                        aria-hidden="true"
-                      >
-                        <VerdictArrowWithInfo
-                          verdict={m.correctness_class}
-                          size={11}
-                          strokeWidth={2.5}
-                        />
-                      </span>
-                      <span
+                      <VerdictStatement
+                        statement={truncated}
+                        verdict={m.correctness_class}
+                        as="span"
                         className="carm-filter-selected__chip-text"
-                        title={txt}
-                      >
-                        {truncated}
-                      </span>
+                      />
                       <button
                         type="button"
                         className="carm-filter-selected__chip-remove"
@@ -485,21 +470,12 @@ export default function FilterDrawer({
             checked={checked}
             onChange={() => toggleMyth(m)}
           />
-          <span
-            className={`carm-checkbox__verdict classification--${m.correctness_class}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <VerdictArrowWithInfo
-              verdict={m.correctness_class}
-              size={12}
-              strokeWidth={2.25}
-            />
-          </span>
-          <span
-            className={`carm-checkbox__label statement--${m.correctness_class}`}
-          >
-            {longText(m)}
-          </span>
+          <VerdictStatement
+            statement={longText(m)}
+            verdict={m.correctness_class}
+            as="span"
+            className="carm-checkbox__label"
+          />
         </label>
       </li>
     );

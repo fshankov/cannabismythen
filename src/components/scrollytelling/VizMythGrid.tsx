@@ -1,23 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowDownLeft, ArrowUp, ArrowUpRight, Minus } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import type { CarmData, CorrectnessClass, Myth } from './types';
 import { sortedMyths } from './dataLoaders';
 import { MehrPopover } from './MehrPopover';
+import VerdictArrow from '../shared/VerdictArrow';
 
 interface Props {
   data: CarmData;
   /** 'themed' = pastel category bg (step 3); 'classified' = verdict color + arrow (step 4). */
   mode: 'themed' | 'classified';
 }
-
-const VERDICT_ARROW: Record<CorrectnessClass, LucideIcon> = {
-  richtig: ArrowUp,
-  eher_richtig: ArrowUpRight,
-  eher_falsch: ArrowDownLeft,
-  falsch: ArrowDown,
-  no_classification: Minus,
-};
 
 const VERDICT_COLOR: Record<CorrectnessClass, string> = {
   richtig: 'var(--classification-richtig)',
@@ -35,13 +26,25 @@ const VERDICT_LABEL: Record<CorrectnessClass, string> = {
   no_classification: 'keine Aussage',
 };
 
+// Site-wide convention is falsch → richtig (matches the daten-explorer
+// verdict-tags filter row and the fakten-karten sort). Keeps the legend
+// reading direction consistent with the rest of the site.
 const VERDICT_ORDER: CorrectnessClass[] = [
-  'richtig',
-  'eher_richtig',
-  'eher_falsch',
   'falsch',
+  'eher_falsch',
+  'eher_richtig',
+  'richtig',
   'no_classification',
 ];
+
+/** Glyph color override for surfaces where the BACKGROUND is the verdict
+ *  color (Step 4 grid cells, legend pills). The per-verdict main/shadow
+ *  colors disappear into a same-color bg; white-on-color keeps the
+ *  chevron direction legible while the bg carries the verdict signal. */
+const ON_VERDICT_BG_GLYPH = {
+  main: '#ffffff',
+  shadow: 'rgba(255, 255, 255, 0.55)',
+} as const;
 
 function themeColorFor(catId: number | null): string {
   if (catId === null) return 'var(--bg-elev)';
@@ -136,7 +139,6 @@ export function VizMythGrid({ data, mode }: Props) {
         style={{ position: 'relative' }}
       >
         {myths.map((m, i) => {
-          const Icon = VERDICT_ARROW[m.correctness_class];
           const themedBg = themeColorFor(m.category_id);
           const classifiedBg = VERDICT_COLOR[m.correctness_class];
           const bg = mode === 'classified' ? classifiedBg : themedBg;
@@ -175,11 +177,12 @@ export function VizMythGrid({ data, mode }: Props) {
                   cell's flex-column layout identical between modes so the
                   myth text below it doesn't shift down when crossing 3 → 4. */}
               {mode === 'classified' ? (
-                <Icon
+                <VerdictArrow
+                  verdict={m.correctness_class}
                   className="viz-grid__cell-icon"
                   size={14}
                   strokeWidth={2.5}
-                  aria-hidden="true"
+                  colorOverride={ON_VERDICT_BG_GLYPH}
                 />
               ) : (
                 <span className="viz-grid__cell-icon-slot" aria-hidden="true" />
@@ -222,25 +225,26 @@ export function VizMythGrid({ data, mode }: Props) {
       {mode === 'classified' && (
         <>
           <div className="viz-grid__verdict-legend" aria-label="Klassifikationen">
-            {VERDICT_ORDER.filter((c) => counts[c] > 0).map((c) => {
-              const Icon = VERDICT_ARROW[c];
-              return (
-                <span key={c} className="viz-grid__verdict-item">
-                  <span
-                    className="viz-grid__verdict-pill"
-                    style={{ background: VERDICT_COLOR[c] }}
-                  >
-                    <Icon size={12} strokeWidth={3} aria-hidden="true" />
-                  </span>
-                  {VERDICT_LABEL[c]} ({counts[c]})
+            {VERDICT_ORDER.filter((c) => counts[c] > 0).map((c) => (
+              <span key={c} className="viz-grid__verdict-item">
+                <span
+                  className="viz-grid__verdict-pill"
+                  style={{ background: VERDICT_COLOR[c] }}
+                >
+                  <VerdictArrow
+                    verdict={c}
+                    size={12}
+                    strokeWidth={2.5}
+                    colorOverride={ON_VERDICT_BG_GLYPH}
+                  />
                 </span>
-              );
-            })}
+                {VERDICT_LABEL[c]} ({counts[c]})
+              </span>
+            ))}
           </div>
-          <p className="viz-grid__sources">
-            548 wissenschaftliche Quellen — systematische Literaturrecherche in
-            PubMed, PsychInfo, SocIndex, Google Scholar (Stand 09/2025).
-          </p>
+          {/* Iter-9: source attribution legend moved to the left text
+              column as `editorial.legend` so the viz column stays purely
+              visual. */}
         </>
       )}
 
@@ -294,7 +298,6 @@ interface HoverCardProps {
 }
 
 function MythHoverCard({ myth, mode, summary, x, y, categoryName }: HoverCardProps) {
-  const Icon = VERDICT_ARROW[myth.correctness_class];
   const verdictColor = VERDICT_COLOR[myth.correctness_class];
   return (
     <div
@@ -309,7 +312,7 @@ function MythHoverCard({ myth, mode, summary, x, y, categoryName }: HoverCardPro
       <p className="viz-grid__hover-statement">{myth.text_de}</p>
       {mode === 'classified' && (
         <div className="viz-grid__hover-verdict" style={{ color: verdictColor }}>
-          <Icon size={14} strokeWidth={3} aria-hidden="true" />
+          <VerdictArrow verdict={myth.correctness_class} size={14} strokeWidth={2.5} />
           <span>{VERDICT_LABEL[myth.correctness_class]}</span>
         </div>
       )}

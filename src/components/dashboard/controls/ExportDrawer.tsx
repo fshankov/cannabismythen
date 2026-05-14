@@ -56,10 +56,10 @@ interface Props {
 }
 
 const VERDICT_LEGEND = [
-  { color: getCorrectnessColor('richtig'), key: 'verdict.richtig' as const },
-  { color: getCorrectnessColor('eher_richtig'), key: 'verdict.eher_richtig' as const },
-  { color: getCorrectnessColor('eher_falsch'), key: 'verdict.eher_falsch' as const },
-  { color: getCorrectnessColor('falsch'), key: 'verdict.falsch' as const },
+  { verdict: 'richtig' as const, color: getCorrectnessColor('richtig'), key: 'verdict.richtig' as const },
+  { verdict: 'eher_richtig' as const, color: getCorrectnessColor('eher_richtig'), key: 'verdict.eher_richtig' as const },
+  { verdict: 'eher_falsch' as const, color: getCorrectnessColor('eher_falsch'), key: 'verdict.eher_falsch' as const },
+  { verdict: 'falsch' as const, color: getCorrectnessColor('falsch'), key: 'verdict.falsch' as const },
 ];
 
 type DialogTab = 'visual' | 'data';
@@ -76,7 +76,11 @@ export default function ExportDrawer({
   chartChrome,
 }: Props) {
   const legend = useMemo(
-    () => VERDICT_LEGEND.map((v) => ({ color: v.color, label: t(v.key, 'de') })),
+    () => VERDICT_LEGEND.map((v) => ({
+      verdict: v.verdict,
+      color: v.color,
+      label: t(v.key, 'de'),
+    })),
     [],
   );
   const [tab, setTab] = useState<DialogTab>('visual');

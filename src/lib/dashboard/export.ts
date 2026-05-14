@@ -1,5 +1,5 @@
 import type { ECharts } from 'echarts';
-import type { CarmData, GroupId, Indicator, Myth } from './types';
+import type { CarmData, CorrectnessClass, GroupId, Indicator, Myth } from './types';
 import { exportCSV } from './data';
 
 const SOURCE_LINE = 'Datenquelle: CaRM-Studie, ISD Hamburg, 2022–2023 · cannabismythen.de';
@@ -109,8 +109,10 @@ export function downloadFullJSON(
 interface ExportChrome {
   title: string;
   subtitle: string;
-  /** Verdict legend swatches — color, label pairs. */
-  legend: { color: string; label: string }[];
+  /** Verdict legend entries. `verdict` (when set) triggers the
+   *  verdict-arrow glyph rendering — matching the on-page Punktwolke /
+   *  Spannweite arrow language. `color` is the line/swatch fallback. */
+  legend: { color: string; label: string; verdict?: CorrectnessClass }[];
 }
 
 export type ChartHandle = ECharts | SVGElement;
@@ -127,6 +129,62 @@ const TITLE_HEIGHT = 28;
 const SUBTITLE_HEIGHT = 20;
 const LEGEND_HEIGHT = 28;
 const SOURCE_HEIGHT = 18;
+
+/** Verdict-arrow glyph colours (foreground + shadow) and rotation —
+ *  must mirror `verdictArrowSymbols.tsx` exactly so the PNG legend
+ *  reads identically to the on-page glyphs. */
+const VERDICT_GLYPH_GEOMETRY: Record<CorrectnessClass, { fg: string; shadow: string; rotation: number }> = {
+  richtig:           { fg: '#047857', shadow: '#a7d3c5', rotation: Math.PI }, // 180°
+  eher_richtig:      { fg: '#4d7c0f', shadow: '#c2d3a3', rotation: -3 * Math.PI / 4 }, // -135°
+  eher_falsch:       { fg: '#b45309', shadow: '#e0b58d', rotation: Math.PI / 4 }, // 45°
+  falsch:            { fg: '#be123c', shadow: '#e9a8b9', rotation: 0 },
+  no_classification: { fg: '#6b7280', shadow: '#94a3b8', rotation: 0 },
+};
+
+/** Draw a verdict-arrow glyph centred at (cx, cy) on a 2D canvas. Size
+ *  is the rendered glyph diameter in canvas pixels. Geometry mirrors
+ *  the 24×24 viewBox of `verdictArrowSymbols.tsx`. */
+function drawVerdictGlyph(
+  ctx: CanvasRenderingContext2D,
+  verdict: CorrectnessClass,
+  cx: number,
+  cy: number,
+  size: number,
+): void {
+  const { fg, shadow, rotation } = VERDICT_GLYPH_GEOMETRY[verdict];
+  const scale = size / 24;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rotation);
+  ctx.scale(scale, scale);
+  ctx.translate(-12, -12); // viewBox origin
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // Shadow horizontal line at y=16.
+  ctx.beginPath();
+  ctx.moveTo(2, 16);
+  ctx.lineTo(22, 16);
+  ctx.strokeStyle = shadow;
+  ctx.stroke();
+
+  if (verdict !== 'no_classification') {
+    // Shaft.
+    ctx.beginPath();
+    ctx.moveTo(12, 2);
+    ctx.lineTo(12, 16);
+    ctx.strokeStyle = fg;
+    ctx.stroke();
+    // Chevron.
+    ctx.beginPath();
+    ctx.moveTo(5, 9);
+    ctx.lineTo(12, 16);
+    ctx.lineTo(19, 9);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
 
 /** Type guard distinguishing the ECharts instance from a raw SVGElement. */
 function isEcharts(chart: ChartHandle): chart is ECharts {
@@ -241,14 +299,22 @@ export async function downloadChartPng(opts: ChartExportOpts) {
   ctx.drawImage(img, 0, y);
   y += chartH + CANVAS_PADDING;
 
-  // Legend swatches + labels
+  // Legend: verdict-arrow glyphs (when `verdict` is set) or colour
+  // swatches (fallback). Same visual language as the on-page Punktwolke
+  // / Spannweite marker so the legend reads as the site, not as a
+  // generic chart key.
   let lx = CANVAS_PADDING * 2;
   ctx.font = '22px "Segoe UI", system-ui, sans-serif';
+  const glyphSize = 28; // rendered diameter on-canvas (*2 for retina)
   for (const item of legend) {
-    ctx.fillStyle = item.color;
-    ctx.fillRect(lx, y + 4, 24, 24);
+    if (item.verdict) {
+      drawVerdictGlyph(ctx, item.verdict, lx + glyphSize / 2, y + 4 + glyphSize / 2, glyphSize);
+    } else {
+      ctx.fillStyle = item.color;
+      ctx.fillRect(lx, y + 4, 24, 24);
+    }
     ctx.fillStyle = '#1a1a2e';
-    const labelX = lx + 32;
+    const labelX = lx + glyphSize + 10;
     ctx.fillText(item.label, labelX, y + 4);
     const w = ctx.measureText(item.label).width;
     lx = labelX + w + 32;

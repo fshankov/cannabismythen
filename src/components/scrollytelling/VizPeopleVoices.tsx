@@ -138,81 +138,108 @@ export function VizPeopleVoices({ active }: Props) {
     // observer first.
     const el = container;
 
-    /** Compute positions once the container has real dimensions. Iter-6:
-     *  the wall-clamp now uses SEPARATE half-width and half-height per node
-     *  (not the bounding-circle radius) so wide-short cards don't get
-     *  stacked at (size*0.55, size*0.55) like they did in Iter-5. Initial
-     *  positions seed near the center so forces spread outward; no card
-     *  starts near a wall where the clamp can pin it in a corner. */
+    /** Compute positions once the container has real dimensions. Iter-8:
+     *  MEASURE-then-place. Iter-6/7 estimated each card's half-width and
+     *  half-height from character count × font-size, which underestimated
+     *  the rendered card (padding, inline icon, tail, natural text wrap)
+     *  and let the wall-clamp permit cards to extend past the right edge.
+     *  We now place every card at the container center (visibility:hidden)
+     *  so the browser does REAL text-wrap layout, read getBoundingClientRect
+     *  for the true dimensions, then run d3 with real halfW/halfH and
+     *  weaker centering forces so the cluster expands toward edges instead
+     *  of bunching mid-frame. */
     function runLayout() {
       if (done || cancelled) return;
       const w = el.clientWidth;
       const h = el.clientHeight;
       if (w < 200 || h < 200) return;
-      done = true;
 
       const rng = mulberry32(31337);
-      const nodes: SimNode[] = VOICES.map((v) => {
-        const fontSize = voiceFontSize(v.weight);
-        const padding = 10;
-        const ch = v.text.length;
-        const wEst = Math.min(260, ch * fontSize * 0.42 + padding * 2);
-        const hEst = fontSize * (ch > 28 ? 3.0 : 2.2) + padding * 2;
-        return {
+
+      // PHASE 1 — pre-position every card at the container center, hidden.
+      // The browser then lays out the real card (padding + icon + tail +
+      // natural text wrap) so we can read its true dimensions.
+      for (const v of VOICES) {
+        const card = cardRefs.current.get(v.id);
+        if (!card) continue;
+        card.style.visibility = 'hidden';
+        card.style.left = `${w / 2}px`;
+        card.style.top = `${h / 2}px`;
+      }
+
+      // Force a synchronous layout flush so getBoundingClientRect returns
+      // the freshly-laid-out dimensions, not stale ones. Reading offsetWidth
+      // is the cheapest reliable trigger.
+      void el.offsetWidth;
+
+      const measured: SimNode[] = [];
+      for (const v of VOICES) {
+        const card = cardRefs.current.get(v.id);
+        if (!card) continue;
+        const r = card.getBoundingClientRect();
+        measured.push({
           id: v.id,
           text: v.text,
           weight: v.weight,
-          size: Math.max(wEst, hEst) / 2,
-          halfW: wEst / 2,
-          halfH: hEst / 2,
-          // Iter-6: seed near the center (±20% from middle) rather than
-          // anywhere in [0.1w, 0.9w]. Prevents oversized cards from
-          // starting near a wall where the clamp pins them at a corner.
-          x: w / 2 + (rng() - 0.5) * 0.4 * w,
-          y: h / 2 + (rng() - 0.5) * 0.4 * h,
-        };
-      });
+          halfW: r.width / 2,
+          halfH: r.height / 2,
+          size: Math.max(r.width, r.height) / 2,
+          // Wider seed band [0.18w, 0.82w] × [0.18h, 0.82h] so cards fill
+          // the field. Iter-6 used [0.30w, 0.70w] — too tight, left the
+          // perimeter black even after d3 converged.
+          x: w / 2 + (rng() - 0.5) * 0.64 * w,
+          y: h / 2 + (rng() - 0.5) * 0.64 * h,
+        });
+      }
 
       if (reduced) {
         const cols = w < 600 ? 3 : 5;
-        const sorted = [...nodes].sort((a, b) => b.weight - a.weight);
+        const sorted = [...measured].sort((a, b) => b.weight - a.weight);
         sorted.forEach((n, i) => {
           n.x = ((i % cols) + 0.5) * (w / cols);
           n.y = (Math.floor(i / cols) + 0.5) * (h / Math.ceil(VOICES.length / cols));
         });
-        applyPositions(nodes, cardRefs.current);
+        applyPositions(measured, cardRefs.current);
         if (!cancelled) setSettled(true);
+        done = true;
         return;
       }
 
-      // Pre-run the d3 force layout synchronously to convergence so cards
-      // appear at their final positions instead of jumping into place
-      // tick-by-tick. Collision radius uses the bounding-circle (size) so
-      // cards don't overlap, but the wall-clamp uses each card's ACTUAL
-      // half-width/half-height — fixes the Iter-5 "all-clumped-at-corner"
-      // bug for wide-short cards.
+      // PHASE 2 — d3 sim with REAL halfW/halfH. Centering forces are
+      // weaker than Iter-6 (0.04→0.012, 0.025→0.008) so the cluster
+      // expands toward edges instead of bunching mid-frame. Collision
+      // unchanged.
       const sim = d3
-        .forceSimulation<SimNode>(nodes)
-        .force('center', d3.forceCenter(w / 2, h / 2).strength(0.04))
+        .forceSimulation<SimNode>(measured)
+        .force('center', d3.forceCenter(w / 2, h / 2).strength(0.012))
         .force(
           'collide',
-          d3.forceCollide<SimNode>().radius((n) => n.size * 1.05).strength(0.95),
+          d3.forceCollide<SimNode>().radius((n) => n.size * 1.04).strength(0.95),
         )
-        .force('x', d3.forceX(w / 2).strength(0.025))
-        .force('y', d3.forceY(h / 2).strength(0.025))
+        .force('x', d3.forceX(w / 2).strength(0.008))
+        .force('y', d3.forceY(h / 2).strength(0.008))
         .stop();
 
-      const TICKS = 220;
+      const TICKS = 240;
       for (let i = 0; i < TICKS; i++) {
         sim.tick();
-        for (const n of nodes) {
+        for (const n of measured) {
           const insetX = n.halfW * 1.05;
           const insetY = n.halfH * 1.05;
           if (n.x !== undefined) n.x = Math.max(insetX, Math.min(w - insetX, n.x));
           if (n.y !== undefined) n.y = Math.max(insetY, Math.min(h - insetY, n.y));
         }
       }
-      applyPositions(nodes, cardRefs.current);
+
+      // PHASE 3 — apply final positions and reveal.
+      for (const n of measured) {
+        const c = cardRefs.current.get(n.id);
+        if (!c) continue;
+        c.style.left = `${(n.x ?? 0).toFixed(1)}px`;
+        c.style.top = `${(n.y ?? 0).toFixed(1)}px`;
+        c.style.visibility = '';
+      }
+      done = true;
       requestAnimationFrame(() => {
         if (!cancelled) setSettled(true);
       });
@@ -281,17 +308,9 @@ export function VizPeopleVoices({ active }: Props) {
           );
         })}
       </div>
-      {/*
-        Iter-4 funnel caption. AI-drafted, awaiting ISD review.
-        EN: "7,408 statements · distilled into 53 thematic fields · 42 testable theses"
-      */}
-      <p className="viz-voices__caption">
-        <span className="viz-voices__caption-num">7.408</span>{' '}Aussagen
-        <span className="viz-voices__caption-sep"> · </span>
-        <span className="viz-voices__caption-num">53</span>{' '}Themenfelder
-        <span className="viz-voices__caption-sep"> · </span>
-        <span className="viz-voices__caption-num">42</span>{' '}prüfbare Thesen
-      </p>
+      {/* Iter-9: the funnel-caption legend (7.408 · 53 · 42) moved to the
+          left text column as `editorial.legend` so the viz column stays
+          purely visual. */}
     </div>
   );
 }

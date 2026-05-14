@@ -1,5 +1,5 @@
 /*
- * /ueber-uns/ scrollytelling — merged stylesheet.
+ * /projekt/ scrollytelling — merged stylesheet.
  * Sources (ported 2026-05-11):
  *   prototypes/scrollytelling-v3/src/styles/tokens.css   — design tokens
  *   prototypes/scrollytelling-v3/src/styles/viewer.css   — 2-col layout, step text
@@ -12,7 +12,7 @@
  */
 
 /* Design tokens — scoped to `body:has(.scrolly)` so they apply page-wide on
- * /ueber-uns/ (where the html/body rule below paints the dark backdrop) but
+ * /projekt/ (where the html/body rule below paints the dark backdrop) but
  * cannot leak to other pages even if this stylesheet is loaded elsewhere.
  *
  * Tokens that match global.css exactly (`--classification-richtig` etc., the
@@ -74,6 +74,23 @@ body:has(.scrolly) {
   --anim-bar-grow-dur: 800ms;
   --anim-step-fade-dur: 500ms;
 
+  /* Iter-10 — canonical text scale for in-viz typography.
+     ALL viz components (timeline, voices, grids, strips, sources) read
+     from these tokens so the scale is consistent across the
+     scrollytelling and editable from one place. The Iter-9 baseline
+     was 13/10; bumped to 14/11 per Fedor's readability ask. */
+  --viz-text-primary: 14px;    /* strip headers, anchor titles, indicator names — Georgia bold */
+  --viz-text-secondary: 11px;  /* units, dates, mini-defs — mono */
+  --viz-text-micro: 10px;      /* tick labels, smallest annotations */
+
+  /* Iter-10 — staggered-reveal rhythm. Each revealable element in
+     VizSampleAndRanked (strips) and VizSourcesStrips (columns) sets
+     `--reveal-idx` to its position in the CURRENT reveal cascade
+     (rebased to 0 at each step entry, so newly-revealed strips don't
+     inherit huge delays from their absolute index). The transition-
+     delay = max(--reveal-idx, 0) * --viz-reveal-stagger. */
+  --viz-reveal-stagger: 200ms;
+
   /* Source category palette (info-sources.json colors) */
   --source-cat-institutional: #2563eb;
   --source-cat-internet: #8b5cf6;
@@ -130,7 +147,7 @@ html, body {
 }
 #root { min-height: 100vh; }
 
-/* ── Dark site header on /ueber-uns/ ────────────────────────────
+/* ── Dark site header on /projekt/ ──────────────────────────────
    The global site header (BaseLayout) defaults to a light beige
    glass. On the scrollytelling page that backdrop reads light-on-
    light against the dark body. Override with a dark glass tuned
@@ -237,6 +254,23 @@ body:has(.scrolly) header nav a.active {
   display: inline-block;
   vertical-align: -2px;
   margin-right: 0.35em;
+}
+
+/* Small-print legend line below the body text — for source attributions,
+   project timeframe, sample-size totals. Visually separated by a top
+   border + muted color so it reads as metadata, not as part of the
+   editorial prose. Rendered via the optional `legend` field on each
+   step in the Keystatic singleton. */
+.scrolly__legend {
+  margin: var(--space-md) 0 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(45, 55, 72, 0.55);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: var(--fg-muted);
+  white-space: pre-wrap;
 }
 
 .scrolly__step-label {
@@ -419,6 +453,223 @@ body:has(.scrolly) header nav a.active {
   0%, 100% { transform: scale(1); opacity: 0.7; }
   50%      { transform: scale(1.4); opacity: 0; }
 }
+
+/* ───── VizTimeline (vertical, Iter-10) ─────
+   Two-column grid: 60 px track on the left (line + dots + period bars),
+   labels-and-year-markers on the right. Both columns are full-height of
+   the same container so absolute-positioned children share one y-axis
+   (`top: <pct>%` for each anchor / year / period bar).
+*/
+.viz-timeline-v {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.viz-timeline-v__grid {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  column-gap: 1.5rem;
+  height: clamp(560px, 78vh, 760px);
+  position: relative;
+}
+
+/* — Track column (left) — */
+.viz-timeline-v__track-col {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.viz-timeline-v__track-bg {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--border);
+  transform: translateX(-50%);
+  border-radius: 1px;
+}
+.viz-timeline-v__track-fg {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2.5px;
+  background: #3a8c5a;
+  transform: translateX(-50%);
+  border-radius: 1px;
+  box-shadow: 0 0 8px rgba(58, 140, 90, 0.45);
+}
+.viz-timeline-v__period-bar {
+  position: absolute;
+  left: 50%;
+  width: 8px;
+  background: rgba(58, 140, 90, 0.28);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.viz-timeline-v__year-tick {
+  position: absolute;
+  left: 50%;
+  width: 14px;
+  height: 1px;
+  background: var(--fg-dim);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.viz-timeline-v__dot-wrap {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 220ms ease;
+}
+.viz-timeline-v__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #3a8c5a;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px rgba(58, 140, 90, 0.4);
+  transition: width 160ms ease, height 160ms ease, background 160ms ease;
+}
+.viz-timeline-v__dot-wrap--highlight .viz-timeline-v__dot {
+  background: #f5c542;
+  box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.5);
+}
+.viz-timeline-v__dot-wrap--hovered .viz-timeline-v__dot {
+  width: 14px;
+  height: 14px;
+}
+.viz-timeline-v__dot-pulse {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #f5c542;
+  opacity: 0.7;
+  animation: viz-timeline-pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+.viz-timeline-v__dot-hit {
+  position: absolute;
+  inset: -8px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.viz-timeline-v__dot-hit:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+/* — Labels column (right) — */
+.viz-timeline-v__labels-col {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.viz-timeline-v__year-label {
+  position: absolute;
+  left: 0;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: var(--viz-text-secondary);
+  color: var(--fg-dim);
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  pointer-events: none;
+}
+.viz-timeline-v__label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* transform + opacity set inline based on `visible` */
+  transition: opacity 320ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  line-height: 1.35;
+  padding-left: 2.75rem; /* leave room for the year label on the same y */
+}
+.viz-timeline-v__label-date {
+  font-family: var(--font-mono);
+  font-size: var(--viz-text-secondary);
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+.viz-timeline-v__label-title {
+  font-family: var(--font-display);
+  font-size: var(--viz-text-primary);
+  color: var(--fg);
+  font-weight: 600;
+}
+.viz-timeline-v__label-subtitle {
+  font-family: var(--font-mono);
+  font-size: var(--viz-text-secondary);
+  color: var(--fg-muted);
+  margin-top: 2px;
+}
+.viz-timeline-v__label--highlight .viz-timeline-v__label-title {
+  color: #f5c542;
+}
+
+/* — Shared hover tooltip (Iter-10) — used by VizTimeline,
+   VizSampleAndRanked, and VizSourcesStrips. Positioned by
+   `useFlipPosition` (position: fixed; top/left/width set inline). */
+.scrolly-hover-tooltip {
+  position: fixed;
+  z-index: 30;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: var(--viz-text-secondary);
+  line-height: 1.5;
+  color: var(--fg);
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+  max-width: 320px;
+}
+.scrolly-hover-tooltip.is-open { opacity: 1; }
+.scrolly-hover-tooltip p { margin: 0; }
+.scrolly-hover-tooltip p + p { margin-top: 0.4rem; }
+.scrolly-hover-tooltip__date {
+  font-family: var(--font-mono);
+  font-size: var(--viz-text-secondary);
+  color: var(--fg-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.scrolly-hover-tooltip__title {
+  font-family: var(--font-display);
+  font-size: var(--viz-text-primary);
+  font-weight: 600;
+  color: var(--fg);
+}
+.scrolly-hover-tooltip__body {
+  color: var(--fg);
+}
+.scrolly-hover-tooltip__category {
+  font-family: var(--font-mono);
+  font-size: var(--viz-text-micro);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.scrolly-hover-tooltip__metrics {
+  font-family: var(--font-mono);
+  font-size: var(--viz-text-secondary);
+  color: var(--fg-muted);
+}
+.scrolly-hover-tooltip__metrics b { color: var(--fg); }
 
 /* ───── VizPeopleVoices (step 2) ───── */
 .viz-voices {

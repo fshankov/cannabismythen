@@ -243,6 +243,34 @@ export function getFirstAvailableMetric(
   return undefined;
 }
 
+/** Verdict-arrow SVG as a string, for inline use inside ECharts
+ *  tooltip HTML. Geometry mirrors verdictArrowSymbols.tsx exactly:
+ *  vertical shaft + chevron + horizontal shadow line, rotated per
+ *  verdict around (12, 12). */
+function verdictArrowSvgString(verdict: Myth['correctness_class']): string {
+  const colors: Record<Myth['correctness_class'], { fg: string; shadow: string }> = {
+    richtig: { fg: '#047857', shadow: '#a7d3c5' },
+    eher_richtig: { fg: '#4d7c0f', shadow: '#c2d3a3' },
+    eher_falsch: { fg: '#b45309', shadow: '#e0b58d' },
+    falsch: { fg: '#be123c', shadow: '#e9a8b9' },
+    no_classification: { fg: '#6b7280', shadow: '#94a3b8' },
+  };
+  const rotations: Record<Myth['correctness_class'], string> = {
+    richtig: 'rotate(180 12 12)',
+    eher_richtig: 'rotate(-135 12 12)',
+    eher_falsch: 'rotate(45 12 12)',
+    falsch: '',
+    no_classification: '',
+  };
+  const { fg, shadow } = colors[verdict];
+  const rot = rotations[verdict];
+  const tx = rot ? ` transform="${rot}"` : '';
+  if (verdict === 'no_classification') {
+    return `<svg width="22" height="22" viewBox="0 0 24 24" style="display:block"><g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16h20" stroke="${shadow}"/></g></svg>`;
+  }
+  return `<svg width="22" height="22" viewBox="0 0 24 24" style="display:block"><g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"${tx}><path d="M2 16h20" stroke="${shadow}"/><path d="M12 2v14" stroke="${fg}"/><path d="m5 9 7 7 7-7" stroke="${fg}"/></g></svg>`;
+}
+
 export function buildTooltipHtml(opts: {
   myth: Myth;
   lang: Lang;
@@ -253,54 +281,52 @@ export function buildTooltipHtml(opts: {
 }): string {
   const { myth, lang, groupName, indicator, value, extraLines } = opts;
   const text = getMythText(myth, lang);
-  const category = getCategoryName(myth, lang);
-  // Canonical verdict labels (matches verdict.* in translations.ts and
-  // classification.* in quiz i18n). Don't reintroduce "Fakt" / "Mythos".
-  const verdict = lang === 'de'
-    ? ({ richtig: 'Richtig', eher_richtig: 'Eher richtig', eher_falsch: 'Eher falsch', falsch: 'Falsch', no_classification: 'Keine Aussage möglich' }[myth.correctness_class])
-    : ({ richtig: 'Correct', eher_richtig: 'Tends to be correct', eher_falsch: 'Tends to be incorrect', falsch: 'Incorrect', no_classification: 'No classification' }[myth.correctness_class]);
-  // Verdict explanation paragraph — re-homes the copy that used to
-  // live in the deleted right-hand `VerdictLegend` sidebar so the
-  // chart tooltip can carry the same definition that the inline
-  // VerdictArrowWithInfo popover surfaces on every other tab.
-  const verdictInfo: Partial<Record<typeof myth.correctness_class, { de: string; en: string }>> = {
-    richtig: {
-      de: 'Der Mythos entspricht dem aktuellen wissenschaftlichen Kenntnisstand.',
-      en: 'The myth aligns with the current scientific evidence.',
-    },
-    eher_richtig: {
-      de: 'Der Mythos ist tendenziell zutreffend, aber mit Einschränkungen.',
-      en: 'The myth tends to be correct, with caveats.',
-    },
-    eher_falsch: {
-      de: 'Der Mythos ist tendenziell nicht zutreffend, enthält aber Teilwahrheiten.',
-      en: 'The myth tends to be incorrect, with partial truths.',
-    },
-    falsch: {
-      de: 'Der Mythos widerspricht dem wissenschaftlichen Kenntnisstand.',
-      en: 'The myth contradicts the current scientific evidence.',
-    },
-  };
-  const verdictCopy = verdictInfo[myth.correctness_class]?.[lang];
+  // Canonical verdict label (lowercased for the "Wissenschaftlich …"
+  // sentence; matches verdict.* in translations.ts).
+  const verdictLabel = lang === 'de'
+    ? ({ richtig: 'richtig', eher_richtig: 'eher richtig', eher_falsch: 'eher falsch', falsch: 'falsch', no_classification: 'keine Einordnung möglich' }[myth.correctness_class])
+    : ({ richtig: 'correct', eher_richtig: 'tends to be correct', eher_falsch: 'tends to be incorrect', falsch: 'incorrect', no_classification: 'not classified' }[myth.correctness_class]);
+  const wissenschaftlich = myth.correctness_class === 'no_classification'
+    ? (lang === 'de' ? 'Wissenschaftlich: keine Einordnung möglich' : 'Scientific verdict: not classified')
+    : `${lang === 'de' ? 'Wissenschaftlich' : 'Scientifically'}: ${verdictLabel}`;
   const indLabel = lang === 'de'
     ? ({ awareness: 'Kenntnis', significance: 'Bedeutung', correctness: 'Richtigkeit', prevention_significance: 'Prävention', population_relevance: 'Bev. Relevanz' }[indicator])
     : ({ awareness: 'Awareness', significance: 'Significance', correctness: 'Correctness', prevention_significance: 'Prevention', population_relevance: 'Pop. Relevance' }[indicator]);
   const val = formatValue(value, indicator);
 
-  let html = `<div style="max-width:360px;line-height:1.5">`;
-  html += `<strong style="font-size:13px">${text}</strong><br/>`;
-  html += `<span style="color:#64748b;font-size:11px">${category}</span><br/>`;
-  if (groupName) {
-    html += `${lang === 'de' ? 'Gruppe' : 'Group'}: ${groupName}<br/>`;
-  }
-  html += `${indLabel}: <strong>${val}</strong><br/>`;
-  html += `${lang === 'de' ? 'Urteil' : 'Verdict'}: ${verdict}`;
-  if (verdictCopy) {
-    html += `<br/><span style="color:#475569;font-size:11px;font-style:italic">${verdictCopy}</span>`;
+  // Verdict tinting (matches getCorrectnessColor / getCorrectnessBgColor).
+  const verdictColor = ({
+    richtig: '#047857', eher_richtig: '#4d7c0f', eher_falsch: '#b45309',
+    falsch: '#be123c', no_classification: '#6b7280',
+  } as const)[myth.correctness_class];
+  const verdictBg = ({
+    richtig: '#ecfdf5', eher_richtig: '#f7fee7', eher_falsch: '#fffbeb',
+    falsch: '#fff1f2', no_classification: '#f3f4f6',
+  } as const)[myth.correctness_class];
+
+  // Meta line: gruppe · indikator · value. Omit empty pieces gracefully.
+  const metaPieces = [groupName, indLabel, val].filter((s) => s && s !== 'n/a');
+  const metaLine = metaPieces.join(' · ');
+
+  let html =
+    `<div style="background:${verdictBg};border-left:3px solid ${verdictColor};` +
+    `padding:8px 10px 8px 12px;border-radius:6px;width:280px;max-width:320px;` +
+    `line-height:1.4;color:#0f172a">`;
+  // Row 1: myth statement + verdict glyph (right).
+  html +=
+    `<div style="display:flex;align-items:flex-start;gap:8px">` +
+      `<div style="flex:1;min-width:0;font-weight:600;font-size:13px">${text}</div>` +
+      `<div style="flex:0 0 auto;margin-top:1px">${verdictArrowSvgString(myth.correctness_class)}</div>` +
+    `</div>`;
+  // Row 2: Wissenschaftlich [verdict] (verdict-colored).
+  html += `<div style="margin-top:6px;color:${verdictColor};font-weight:600;font-size:12px">${wissenschaftlich}</div>`;
+  // Row 3: meta (gruppe · indikator · value) — small, muted.
+  if (metaLine) {
+    html += `<div style="margin-top:3px;color:#475569;font-size:11px">${metaLine}</div>`;
   }
   if (extraLines) {
     for (const line of extraLines) {
-      html += `<br/>${line}`;
+      html += `<div style="margin-top:3px;color:#475569;font-size:11px">${line}</div>`;
     }
   }
   html += `</div>`;

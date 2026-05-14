@@ -3,8 +3,8 @@ import { Eye, EyeOff, TrendingUp, Target, Shield } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Myth, Metric, AppState, Indicator } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, formatValue } from '../../../lib/dashboard/data';
-import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
-import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
+import { getCorrectnessBgColor } from '../../../lib/dashboard/colors';
+import VerdictStatement from '../../shared/VerdictStatement';
 import { t } from '../../../lib/dashboard/translations';
 import { useHiddenColumns } from '../hooks/useHiddenColumns';
 
@@ -176,7 +176,6 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
           {sortedMyths.map((myth) => {
             const metric = getMythMetric(metrics, myth.id, groupId);
             const bgColor = getCorrectnessBgColor(myth.correctness_class);
-            const textColor = getCorrectnessColor(myth.correctness_class);
 
             return (
               <tr
@@ -187,21 +186,14 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
                 role="row"
               >
                 <td
-                  className={`myth-cell statement--${myth.correctness_class}`}
-                  style={{ backgroundColor: bgColor, color: textColor, fontWeight: 600 }}
+                  className="myth-cell"
+                  style={{ backgroundColor: bgColor }}
                 >
-                  <span
-                    className="carm-myth-label__arrow"
-                    style={{ marginRight: 6, verticalAlign: 'middle' }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <VerdictArrowWithInfo
-                      verdict={myth.correctness_class}
-                      size={13}
-                      strokeWidth={2.25}
-                    />
-                  </span>
-                  {getMythShortText(myth, state.lang)}
+                  <VerdictStatement
+                    statement={getMythShortText(myth, state.lang)}
+                    verdict={myth.correctness_class}
+                    as="span"
+                  />
                 </td>
                 {INDICATOR_COLS.map((col) => {
                   if (isHidden(col.key)) {

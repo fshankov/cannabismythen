@@ -14,11 +14,12 @@ import type {
   StripsSortDir,
   QuizThemeSlug,
   BalkenSort,
+  SpannweiteSort,
 } from './types';
 
 const ALL_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 const ALL_INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
-const ALL_VIEWS: ViewTab[] = ['balken', 'balken2', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'sources'];
+const ALL_VIEWS: ViewTab[] = ['balken', 'balken2', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'spannweite', 'sources'];
 const ALL_VERDICTS: CorrectnessClass[] = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
 const ALL_SOURCE_METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
 const ALL_SOURCE_GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
@@ -29,12 +30,16 @@ const ALL_QUIZ_THEME_SLUGS: QuizThemeSlug[] = ['quiz-gefaehrlichkeit', 'quiz-med
 const ALL_STRIPS_SORT_AXES: StripsSortAxis[] = [...ALL_INDICATORS, ...ALL_GROUP_IDS] as StripsSortAxis[];
 const ALL_STRIPS_DIRS: StripsSortDir[] = ['asc', 'desc'];
 const ALL_BALKEN_SORTS: BalkenSort[] = ['value-desc', 'value-asc', 'verdict-rank'];
+const ALL_SPANNWEITE_SORTS: SpannweiteSort[] = [
+  'a-z', 'verdict-r-to-f', 'verdict-f-to-r', 'value-asc', 'value-desc',
+];
 
 /** Public view aliases. The four published tabs use German URL keys; legacy/internal
  *  views keep their English name (and emit it back on round-trip). */
 const VIEW_DE: Partial<Record<ViewTab, string>> = {
   balken: 'balken',
   strips: 'streifen',
+  spannweite: 'spannweite',
   table: 'tabelle',
   sources: 'quellen',
 };
@@ -85,6 +90,8 @@ const DEFAULTS: AppState = {
   factsheetMythId: null,
   stripsThemeFilter: [],
   balkenSort: 'value-desc',
+  spannweiteSort: 'a-z',
+  spannweiteSortColumn: null,
   mythIds: [],
 };
 
@@ -117,6 +124,11 @@ export function stateToUrl(state: Partial<AppState>): string {
 
   if (state.balkenSort && state.balkenSort !== DEFAULTS.balkenSort)
     params.set('sort', state.balkenSort);
+
+  if (state.spannweiteSort && state.spannweiteSort !== DEFAULTS.spannweiteSort)
+    params.set('spsort', state.spannweiteSort);
+
+  if (state.spannweiteSortColumn) params.set('spcol', state.spannweiteSortColumn);
 
   if (state.mythIds && state.mythIds.length > 0)
     params.set('myths', state.mythIds.join(','));
@@ -216,6 +228,19 @@ export function urlToState(): Partial<AppState> {
     // to the default value-descending sort so existing share links resolve.
     state.balkenSort = 'value-desc';
   }
+
+  const spsort = params.get('spsort');
+  if (spsort && ALL_SPANNWEITE_SORTS.includes(spsort as SpannweiteSort)) {
+    state.spannweiteSort = spsort as SpannweiteSort;
+  } else if (spsort === 'median-desc' || spsort === 'z-a') {
+    // Legacy URLs: v2 'median-desc' (row-median sort), v3.1 'z-a'
+    // (reverse alpha). Both retired. Snap to default A-Z so old
+    // share-links still resolve cleanly.
+    state.spannweiteSort = 'a-z';
+  }
+
+  const spcol = params.get('spcol');
+  if (spcol) state.spannweiteSortColumn = spcol;
 
   const myths = params.get('myths');
   if (myths) {

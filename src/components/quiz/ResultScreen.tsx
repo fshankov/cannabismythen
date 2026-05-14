@@ -21,6 +21,7 @@ import { QUIZ_THEMES, schritte, scoreBand } from "./quizData";
 import { t } from "./i18n";
 import { trackResultCardViewed } from "./matomo";
 import ShareCard from "./ShareCard";
+import VerdictPill from "../shared/VerdictPill";
 import type {
   QuizTextEntry,
   QuizVerdictsEntry,
@@ -333,21 +334,21 @@ export default function ResultScreen({
                     <span className="quiz-result__item-meta-label">
                       Wissenschaftlich:
                     </span>{" "}
-                    <span
-                      className={`classification classification--${myth.correctClassification}`}
-                    >
-                      {t(`classification.${myth.correctClassification}`)}
-                    </span>
+                    <VerdictPill
+                      verdict={myth.correctClassification}
+                      label={t(`classification.${myth.correctClassification}`)}
+                      size="sm"
+                    />
                   </span>
                   <span className="quiz-result__item-pair">
                     <span className="quiz-result__item-meta-label">
                       {t("ui.yourAnswerLabel")}:
                     </span>{" "}
-                    <span
-                      className={`classification classification--${answer.chosenClassification}`}
-                    >
-                      {t(`classification.${answer.chosenClassification}`)}
-                    </span>
+                    <VerdictPill
+                      verdict={answer.chosenClassification}
+                      label={t(`classification.${answer.chosenClassification}`)}
+                      size="sm"
+                    />
                   </span>
                 </div>
                 <div className="quiz-result__item-actions">

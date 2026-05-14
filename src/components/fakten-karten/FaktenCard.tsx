@@ -14,7 +14,7 @@
  */
 
 import { useState, useCallback } from "react";
-import VerdictArrow from "../shared/VerdictArrow";
+import VerdictStatement from "../shared/VerdictStatement";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
 import type { MythContentEntry } from "../shared/FactsheetPanel";
 
@@ -25,7 +25,9 @@ export interface FaktenCardMyth {
   /**
    * Conversational label from Keystatic (e.g. "Das stimmt nicht.").
    * Retained on the type for backwards compatibility but not rendered —
-   * Stage 1 of the Daten-Explorer refactor unified all verdict labels.
+   * Stage 1 of the Daten-Explorer refactor unified all verdict labels;
+   * v3 (2026-05-13) moved the verdict signal entirely into the colored
+   * statement + trailing arrow rendered via <VerdictStatement>.
    */
   classificationLabel: string;
   cardSummary: string;
@@ -46,17 +48,6 @@ const VALID_VERDICTS: ReadonlySet<CorrectnessClass> = new Set([
   "no_classification",
 ]);
 
-/** Canonical German labels for each verdict. Mirrors `verdict.*` in
- *  `src/lib/dashboard/translations.ts` and `classification.*` in
- *  `src/components/quiz/i18n.ts` — keep in sync. */
-const VERDICT_LABEL: Record<CorrectnessClass, string> = {
-  richtig: "Richtig",
-  eher_richtig: "Eher richtig",
-  eher_falsch: "Eher falsch",
-  falsch: "Falsch",
-  no_classification: "Keine Aussage möglich",
-};
-
 function toVerdict(raw: string): CorrectnessClass {
   return VALID_VERDICTS.has(raw as CorrectnessClass)
     ? (raw as CorrectnessClass)
@@ -69,7 +60,6 @@ export default function FaktenCard({
 }: FaktenCardProps) {
   const [flipped, setFlipped] = useState(false);
   const verdict = toVerdict(myth.classification);
-  const verdictLabel = VERDICT_LABEL[verdict];
 
   const handleFlip = useCallback(() => {
     setFlipped((prev) => !prev);
@@ -91,21 +81,14 @@ export default function FaktenCard({
         }}
       >
         <div className="quiz-card__inner">
-          {/* ── FRONT FACE ── */}
+          {/* ── FRONT FACE — statement carries the verdict (v3) ── */}
           <div className="quiz-card__face quiz-card__front fakten-card__front">
-            <div
-              className={`fakten-card__verdict-bar classification--${verdict}`}
-            >
-              <span className="fakten-card__verdict-icon" aria-hidden="true">
-                <VerdictArrow verdict={verdict} size={14} strokeWidth={2.5} />
-              </span>
-              <span className="fakten-card__verdict-label">
-                {verdictLabel}
-              </span>
-            </div>
-            <p className={`quiz-card__statement statement--${verdict}`}>
-              {myth.title}
-            </p>
+            <VerdictStatement
+              statement={myth.title}
+              verdict={verdict}
+              as="p"
+              className="quiz-card__statement fakten-card__statement"
+            />
             <span className="fakten-card__flip-hint">
               {"↩"} Erklärung
             </span>

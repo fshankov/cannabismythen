@@ -1,5 +1,7 @@
 ---
 import { CLASSIFICATION_LABEL, type FaqClassification } from "@lib/faq";
+import VerdictPill from "@components/shared/VerdictPill";
+import type { CorrectnessClass } from "@/lib/dashboard/types";
 
 interface Props {
   classification: FaqClassification;
@@ -11,12 +13,18 @@ const { classification, customLabel, size = "md" } = Astro.props;
 
 const label = customLabel?.trim() || CLASSIFICATION_LABEL[classification];
 
-// Reuse the existing global .classification--<value> styles. The "n_a" value
-// is FAQ-only (meta questions); falls back to keine_aussage styling.
-const styleKey = classification === "n_a" ? "keine_aussage" : classification;
-const className = `classification classification--${styleKey} faq-verdict faq-verdict--${size}`;
+// FAQ's "n_a" (meta questions) + "keine_aussage" both render as the
+// no-classification verdict in the .pill system.
+const verdict: CorrectnessClass =
+  classification === "n_a" || classification === "keine_aussage"
+    ? "no_classification"
+    : classification;
 ---
 
-<span class={className} aria-label={`Wissenschaftliche Einordnung: ${label}`}>
-  {label}
-</span>
+<VerdictPill
+  verdict={verdict}
+  label={label}
+  size={size}
+  className={`faq-verdict faq-verdict--${size}`}
+  aria-label={`Wissenschaftliche Einordnung: ${label}`}
+/>

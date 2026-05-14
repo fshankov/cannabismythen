@@ -81,7 +81,23 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'balken' | 'balken2' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'sources';
+export type ViewTab = 'balken' | 'balken2' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'spannweite' | 'sources';
+
+/** Spannweite view sort key.
+ *  - 'a-z' — alphabetical by short text.
+ *  - 'verdict-r-to-f' / 'verdict-f-to-r' — by scientific verdict rank,
+ *    toggle direction. Icon = Lucide ArrowDownToLine variant with the
+ *    bottom rule recoloured per direction (red when falsch is at the
+ *    bottom; green when richtig is at the bottom).
+ *  - 'value-asc' / 'value-desc' — per-column numeric sort. The
+ *    column whose values drive the sort is stored separately in
+ *    `spannweiteSortColumn`. */
+export type SpannweiteSort =
+  | 'a-z'
+  | 'verdict-r-to-f'
+  | 'verdict-f-to-r'
+  | 'value-asc'
+  | 'value-desc';
 
 /** Information-sources Streifen view — pivot mirrors the Mythen-Streifen idiom.
  *  - 'metric' → 4 strips (Suche / Wahrnehmung / Vertrauen / Prävention),
@@ -205,6 +221,12 @@ export interface AppState {
   stripsThemeFilter: QuizThemeSlug[];
   /** Balken (ranking bar) view sort key. */
   balkenSort: BalkenSort;
+  /** Spannweite view sort key. */
+  spannweiteSort: SpannweiteSort;
+  /** Spannweite view: when `spannweiteSort` is 'value-asc' or
+   *  'value-desc', the column ID (indicator slug or group slug) whose
+   *  values drive the row ordering. null otherwise. */
+  spannweiteSortColumn: string | null;
   /** Individually selected myth IDs from the unified Filter drawer.
    *  When non-empty (alone or together with `categoryIds`), the dashboard
    *  shows only the union of "myths in selected categories" + "myths in

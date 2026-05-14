@@ -42,12 +42,14 @@ import { getCorrectnessColor } from '../../../lib/dashboard/colors';
 import { t, type TranslationKey } from '../../../lib/dashboard/translations';
 import InfoTooltip from '../InfoTooltip';
 import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
+import VerdictStatement from '../../shared/VerdictStatement';
 import PivotToggle from '../controls/PivotToggle';
 import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
 import ToolbarRow from '../controls/ToolbarRow';
 import { useHiddenColumns } from '../hooks/useHiddenColumns';
 import type { CorrectnessClass } from '../../../lib/dashboard/types';
 import type { MythContentEntry } from '../FactsheetPanel';
+import VerdictArrowSymbols from './verdictArrowSymbols';
 
 interface Props {
   myths: Myth[];
@@ -636,72 +638,11 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
             onMouseLeave={() => { setHoveredMythId(null); setHoverPos(null); }}
           >
             {/* Verdict-arrow symbol library — referenced via <use> for
-                each beeswarm marker. Five symbols, one per verdict,
-                using the canonical Lucide arrow paths. Stroke uses
-                `currentColor` so we can tint per-marker via the parent
-                <g style={{ color: ... }}>. Stroke-width slightly heavier
-                than the legend's 2.25 so the arrows read clearly at
-                10–14px in the chart. */}
+                each beeswarm marker. Five symbols, one per verdict.
+                Source of truth lives in verdictArrowSymbols.tsx so the
+                Spannweite view can reuse the same IDs. */}
             <defs>
-              <symbol id="strips-arrow-richtig" viewBox="0 0 24 24" overflow="visible">
-                <g
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 5v14" />
-                  <path d="m5 12 7-7 7 7" />
-                </g>
-              </symbol>
-              <symbol id="strips-arrow-eher_richtig" viewBox="0 0 24 24" overflow="visible">
-                <g
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M7 7h10v10" />
-                  <path d="M7 17 17 7" />
-                </g>
-              </symbol>
-              <symbol id="strips-arrow-eher_falsch" viewBox="0 0 24 24" overflow="visible">
-                <g
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M17 17H7V7" />
-                  <path d="m17 7-10 10" />
-                </g>
-              </symbol>
-              <symbol id="strips-arrow-falsch" viewBox="0 0 24 24" overflow="visible">
-                <g
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 5v14" />
-                  <path d="m19 12-7 7-7-7" />
-                </g>
-              </symbol>
-              <symbol id="strips-arrow-no_classification" viewBox="0 0 24 24" overflow="visible">
-                <g
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14" />
-                </g>
-              </symbol>
+              <VerdictArrowSymbols />
             </defs>
             {/* Stage 6 v4: the prominent left-margin y-axis numbers
                 were removed. The per-strip faint grey labels (rendered
@@ -1168,11 +1109,12 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 </span>
                 <span className="strips-myth-card__bar-label">{cardClassification}</span>
               </div>
-              <p
-                className={`strips-myth-card__statement statement--${selectedMyth.correctness_class}`}
-              >
-                {cardTitle}
-              </p>
+              <VerdictStatement
+                statement={cardTitle}
+                verdict={selectedMyth.correctness_class as CorrectnessClass}
+                as="p"
+                className="strips-myth-card__statement"
+              />
               {cardSummary && <p className="strips-myth-card__summary">{cardSummary}</p>}
               <div className="strips-myth-card__actions">
                 <button

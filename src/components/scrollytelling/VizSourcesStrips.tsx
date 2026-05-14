@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { User } from 'lucide-react';
 import type {
@@ -9,6 +9,7 @@ import type {
   SourceCategoryId,
   SourceMetricId,
 } from './types';
+import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
 
 /** Per-group color tokens — must match GROUP_COLOR in VizSampleAndRanked.tsx
  *  so the User icons in both pickers (step 6 + step 7/8) read as the same
@@ -99,6 +100,43 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
   const [hoverId, setHoverId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  // Iter-10 staggered reveal: track previous revealedColumns so each
+  // newly-revealed column fades in 0/200 ms apart, not at its absolute
+  // column index. Step 8 entry: cols 0/1 (delays 0/200). Step 9 entry:
+  // cols 2/3 (rebased delays 0/200).
+  const prevRevealedRef = useRef(revealedColumns);
+  useEffect(() => {
+    prevRevealedRef.current = revealedColumns;
+  }, [revealedColumns]);
+  const prevRevealed = prevRevealedRef.current;
+
+  // Iter-10 hover tooltip — anchored to the hovered source dot via
+  // useFlipPosition. Replaces the previous static info-pill below the
+  // chart so the source values pop up near the cursor and clamp to the
+  // viewport edge instead of bleeding off the right side.
+  const {
+    triggerRef: tooltipTriggerRef,
+    cardRef: tooltipCardRef,
+    pos: tooltipPos,
+    open: tooltipOpen,
+    setOpen: setTooltipOpen,
+    updatePosition: updateTooltipPosition,
+  } = useFlipPosition<HTMLElement, HTMLDivElement>({
+    maxWidth: 320,
+    gap: 10,
+  });
+
+  function openSourceTooltip(id: number, el: SVGGElement) {
+    (tooltipTriggerRef as unknown as React.MutableRefObject<Element | null>).current = el;
+    setHoverId(id);
+    setTooltipOpen(true);
+    updateTooltipPosition();
+  }
+  function closeSourceTooltip() {
+    setTooltipOpen(false);
+    setHoverId(null);
+  }
+
   const parentSources: InformationSource[] = useMemo(() => {
     const allParents = data.sources.filter((s: InformationSource) => s.parentId === null);
     const allowSet = new Set(UNIFIED_EXEMPLARY_SOURCE_IDS);
@@ -184,11 +222,17 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         {COLUMNS.map((metric, i) => {
           const x = i * (STRIP_W + STRIP_GAP);
           const isRevealed = i < revealedColumns;
+          // Iter-10 stagger — rebase the delay so newly-revealed columns
+          // fade in 0/200 ms apart, not at their absolute column index.
+          const revealIdx = isRevealed && i >= prevRevealed ? i - prevRevealed : 0;
           return (
             <g
               key={metric}
               opacity={isRevealed ? 1 : 0.45}
-              style={{ transition: 'opacity 320ms ease' }}
+              style={{
+                transition: 'opacity 360ms ease',
+                transitionDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
+              }}
             >
               <rect
                 x={x}
@@ -287,11 +331,18 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         {/* Dots per column — fade in when that column is revealed. */}
         {positionsByColumn.map((dots, colIdx) => {
           const isRevealed = colIdx < revealedColumns;
+          // Iter-10 stagger — dots inherit the same rhythm as the column
+          // wrappers above so headers and dots arrive in sync.
+          const revealIdx =
+            isRevealed && colIdx >= prevRevealed ? colIdx - prevRevealed : 0;
           return (
             <g
               key={`col-${colIdx}`}
               opacity={isRevealed ? 1 : 0}
-              style={{ transition: 'opacity 320ms ease' }}
+              style={{
+                transition: 'opacity 360ms ease',
+                transitionDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
+              }}
               aria-hidden={!isRevealed}
             >
               {dots.map((d) => (
@@ -299,7 +350,9 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
                   key={`${colIdx}-${d.id}`}
                   d={d}
                   dim={hoverId !== null && hoverId !== d.id}
-                  onHover={isRevealed ? setHoverId : noop}
+                  enabled={isRevealed}
+                  onEnter={openSourceTooltip}
+                  onLeave={closeSourceTooltip}
                 />
               ))}
             </g>
@@ -307,39 +360,48 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         })}
       </svg>
 
-      {/* Info pill — always rendered (with idle hint when nothing is
-          hovered) so the legend below it doesn't reflow on hover. When a
-          source is hovered, show its values for every REVEALED metric. */}
+      {/* Iter-10 hover tooltip — replaces the static pill below the
+          chart. Anchored to the hovered dot via useFlipPosition so it
+          flips above/below the dot depending on viewport room and
+          clamps horizontally. */}
       <div
-        className={`viz-strips__pill ${hoveredSource ? '' : 'viz-strips__pill--idle'}`}
+        ref={tooltipCardRef}
         role="tooltip"
-        aria-live="polite"
+        className={`scrolly-hover-tooltip ${tooltipOpen && hoveredSource ? 'is-open' : ''}`}
+        style={
+          tooltipPos
+            ? {
+                position: 'fixed',
+                top: tooltipPos.top,
+                left: tooltipPos.left,
+                width: tooltipPos.width,
+              }
+            : undefined
+        }
       >
-        {hoveredSource ? (
+        {hoveredSource && (
           <>
-            <strong>{hoveredSource.name}</strong>
-            <span
-              className="viz-strips__pill-cat"
+            <p className="scrolly-hover-tooltip__title">{hoveredSource.name}</p>
+            <p
+              className="scrolly-hover-tooltip__category"
               style={{ color: categoryColor(hoveredSource.category) }}
             >
               {hoveredSource.category.replace('_', ' ')}
-            </span>
-            <span className="viz-strips__pill-vals">
+            </p>
+            <p className="scrolly-hover-tooltip__metrics">
               {COLUMNS.slice(0, revealedColumns).map((metric, i) => {
-                const v = data.metrics[metric]?.data[activeGroup]?.[String(hoveredSource.id)];
+                const v =
+                  data.metrics[metric]?.data[activeGroup]?.[String(hoveredSource.id)];
                 return (
                   <span key={metric}>
                     {i > 0 && ' · '}
-                    {SHORT_METRIC_LABEL[metric]}: <b>{v == null ? '–' : Math.round(v)}</b>
+                    {SHORT_METRIC_LABEL[metric]}:{' '}
+                    <b>{v == null ? '–' : Math.round(v)}</b>
                   </span>
                 );
               })}
-            </span>
+            </p>
           </>
-        ) : (
-          <span className="viz-strips__pill-hint">
-            Bewege die Maus über eine Quelle, um Details zu sehen.
-          </span>
         )}
       </div>
 
@@ -367,18 +429,15 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
   );
 }
 
-function noop(_: number | null): void {
-  // Used as a hover-handler stub for non-revealed columns so the dots
-  // don't fire hover state until they're actually visible.
-}
-
 interface DotProps {
   d: LaidOutDot;
   dim: boolean;
-  onHover: (id: number | null) => void;
+  enabled: boolean;
+  onEnter: (id: number, el: SVGGElement) => void;
+  onLeave: () => void;
 }
 
-function Dot({ d, dim, onHover }: DotProps) {
+function Dot({ d, dim, enabled, onEnter, onLeave }: DotProps) {
   // Hover feedback is opacity-only. Stroke + radius FIXED — the chart
   // cannot visibly shift on hover because no geometry changes. A
   // transparent r=11 hit-area absorbs sub-pixel mouse jitter.
@@ -387,14 +446,14 @@ function Dot({ d, dim, onHover }: DotProps) {
       transform={`translate(${d.x}, ${d.y})`}
       style={{
         opacity: dim ? 0.28 : 1,
-        cursor: 'pointer',
+        cursor: enabled ? 'pointer' : 'default',
         transition: 'opacity 180ms ease',
       }}
-      onMouseEnter={() => onHover(d.id)}
-      onMouseLeave={() => onHover(null)}
-      onFocus={() => onHover(d.id)}
-      onBlur={() => onHover(null)}
-      tabIndex={0}
+      onMouseEnter={(e) => enabled && onEnter(d.id, e.currentTarget)}
+      onMouseLeave={() => enabled && onLeave()}
+      onFocus={(e) => enabled && onEnter(d.id, e.currentTarget)}
+      onBlur={() => enabled && onLeave()}
+      tabIndex={enabled ? 0 : -1}
       aria-label={`${d.name}: ${Math.round(d.yTarget)}`}
     >
       <circle r={11} fill="transparent" />

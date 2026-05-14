@@ -139,21 +139,13 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     // VerdictLegend sidebar that used to live to the right of the chart.
     // Each label is rendered with an ECharts `rich` style keyed by the
     // myth's correctness_class, so the text picks up the verdict colour
-    // and a leading verdict arrow glyph (↑ ↗ ↙ ↓ —) before the label.
-    // Truncation rule unchanged.
-    const VERDICT_GLYPH: Record<string, string> = {
-      richtig: '↑ ',
-      eher_richtig: '↗ ',
-      eher_falsch: '↙ ',
-      falsch: '↓ ',
-      no_classification: '— ',
-    };
+    // tint as a pill background. v3: no leading arrow glyph — just short
+    // statements. Truncation rule unchanged.
     const yLabels = ordered.map((d) => {
       const txt = getMythShortText(d.myth, 'de');
       const trimmed = txt.length > 60 ? txt.slice(0, 58) + '…' : txt;
       const cls = d.myth.correctness_class;
-      const glyph = VERDICT_GLYPH[cls] ?? '';
-      return `{${cls}|${glyph}${trimmed}}`;
+      return `{${cls}|${trimmed}}`;
     });
 
     // Each y-axis label renders as a verdict-tinted pill: subtle bg
@@ -205,14 +197,18 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
       animation: false,
       tooltip: {
         trigger: 'axis' as const,
-        // Stage 6 v3: confine the tooltip to the chart container so
-        // long German tooltip text (e.g. "Konsum durch Heranwachsende
-        // führt – stärker als bei Erwachsenen…") doesn't escape the
-        // right edge and get clipped. extraCssText caps the visual
-        // width and lets long titles word-wrap inside the box.
+        // Confine to the chart container so the card stays on-screen.
+        // Strip the ECharts default tooltip chrome (white bg + shadow
+        // + padding) — the verdict-tinted card built by
+        // `buildTooltipHtml()` carries its own background, border, and
+        // padding now. Without this override the ECharts wrapper sits
+        // around the card making it look double-bordered.
         confine: true,
+        backgroundColor: 'transparent',
+        borderWidth: 0,
+        padding: 0,
         extraCssText:
-          'max-width: 320px; white-space: normal; word-break: break-word; overflow-wrap: anywhere;',
+          'box-shadow: 0 6px 18px rgba(15,23,42,0.22); background: transparent; border-radius: 8px; padding: 0;',
         axisPointer: { type: 'shadow' as const },
         formatter: (params: { dataIndex?: number }[] | { dataIndex?: number }) => {
           const arr = Array.isArray(params) ? params : [params];

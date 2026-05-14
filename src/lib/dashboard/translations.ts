@@ -239,6 +239,7 @@ const translations = {
   'view.balken': { de: 'Balken', en: 'Bars' },
   'view.balken2': { de: 'Balken 2', en: 'Bars 2' },
   'view.streifen': { de: 'Punktwolke', en: 'Point Cloud' },
+  'view.spannweite': { de: 'Spannweite', en: 'Range' },
   'view.tabelle': { de: 'Tabelle', en: 'Table' },
   'view.quellen': { de: 'Informationsquellen', en: 'Information Sources' },
   'igs.indicator.legend': { de: 'Indikator', en: 'Indicator' },
@@ -271,7 +272,7 @@ const translations = {
   'sort.value.short': { de: 'Wert', en: 'Value' },
   'sort.verdict.short': { de: 'Urteil', en: 'Verdict' },
   'filter.button': { de: 'Filter', en: 'Filter' },
-  'filter.title': { de: 'Filter & Sortierung', en: 'Filter & sort' },
+  'filter.title': { de: 'Filter & Mythen-Auswahl', en: 'Filter & myth selection' },
   'filter.reset': { de: 'Alle Filter zurücksetzen', en: 'Reset all filters' },
   'filter.apply': { de: 'Anwenden', en: 'Apply' },
   'filter.search.label': { de: 'Mythos suchen', en: 'Search myth' },
@@ -364,6 +365,43 @@ const translations = {
   'howto.balken2': {
     de: 'Experimentelle Ansicht: Mythen-Statement liegt direkt auf dem Balken. Pfeil rechts = wissenschaftliches Urteil. Klick öffnet das Factsheet.',
     en: 'Experimental view: myth statement sits directly on the bar. Arrow at right = scientific verdict. Click for the factsheet.',
+  },
+  // Spannweite view. AI draft, awaiting ISD review per CLAUDE.md's
+  // German-text-quality rule.
+  'howto.spannweite': {
+    de: 'Jede Zeile ein Mythos, jede Spalte ein Indikator oder eine Bevölkerungsgruppe. Wählen Sie oben den Wert. Der Pfeil markiert den Wert für jeden Mythos, der gefärbte Balken zeigt die Skala 0–100 %. Klick öffnet das Factsheet.',
+    en: 'Each row is one myth, each column an indicator or population group. Pick the value at the top. The arrow marks the value for each myth, the tinted bar shows the 0–100 % scale. Click for the factsheet.',
+  },
+  'spannweite.title': { de: 'Mythen-Spannweite', en: 'Myth range' },
+  // User-friendly hover tooltips. Drafted German, awaiting ISD review.
+  'spannweite.sort.alpha.tooltip': {
+    de: 'Mythen alphabetisch sortieren (A → Z)',
+    en: 'Sort myths alphabetically (A → Z)',
+  },
+  'spannweite.sort.verdict.r-to-f.tooltip': {
+    de: 'Sortiert nach wissenschaftlichem Urteil: wissenschaftlich richtige Mythen oben, falsche unten. Erneut klicken zum Umkehren.',
+    en: 'Sorted by scientific verdict: scientifically correct myths at the top, incorrect at the bottom. Click again to reverse.',
+  },
+  'spannweite.sort.verdict.f-to-r.tooltip': {
+    de: 'Sortiert nach wissenschaftlichem Urteil: wissenschaftlich falsche Mythen oben, richtige unten. Erneut klicken zum Umkehren.',
+    en: 'Sorted by scientific verdict: scientifically incorrect myths at the top, correct at the bottom. Click again to reverse.',
+  },
+  'spannweite.sort.verdict.activate.tooltip': {
+    de: 'Nach wissenschaftlichem Urteil sortieren (richtig oben, falsch unten). Erneut klicken zum Umkehren.',
+    en: 'Sort by scientific verdict (correct at the top, incorrect at the bottom). Click again to reverse.',
+  },
+  // Per-column value sort tooltips (Spannweite v3.3).
+  'spannweite.sort.col.activate.tooltip': {
+    de: 'Nach {col} sortieren (niedrige Werte oben). Erneut klicken: hohe Werte oben.',
+    en: 'Sort by {col} (low values first). Click again: high values first.',
+  },
+  'spannweite.sort.col.asc.tooltip': {
+    de: 'Sortiert nach {col} — niedrige Werte oben. Erneut klicken: hohe Werte oben.',
+    en: 'Sorted by {col} — low values first. Click again: high values first.',
+  },
+  'spannweite.sort.col.desc.tooltip': {
+    de: 'Sortiert nach {col} — hohe Werte oben. Erneut klicken: niedrige Werte oben.',
+    en: 'Sorted by {col} — high values first. Click again: low values first.',
   },
   'balken.title': { de: 'Mythen-Ranking', en: 'Myth ranking' },
   'balken.subtitle': { de: '{indicator} · {group}', en: '{indicator} · {group}' },

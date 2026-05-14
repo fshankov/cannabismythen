@@ -608,12 +608,19 @@ const ueberUnsScrolly = singleton({
         bodyText: fields.text({
           label: "Fließtext",
           multiline: true,
-          description: "Absätze mit Leerzeile. **Fettdruck** und Verdikt-Tags [↑ richtig] werden geparst.",
+          description:
+            "Absätze mit Leerzeile. **Fettdruck** und Verdikt-Tags [↑ richtig] werden geparst. Bei Schritt 6: eine Zeile `---` trennt Phase 1 (3 Indikatoren) von Phase 2 (Synthese).",
+        }),
+        legend: fields.text({
+          label: "Legende / Metadaten (optional)",
+          multiline: true,
+          description:
+            "Kleingedruckter Hinweis unter dem Fließtext, visuell abgesetzt — z. B. Quellen, Zeitraum, n-Werte. Nur eine Zeile.",
         }),
         hint: fields.text({ label: "Hinweis (optional)", multiline: true }),
       }),
       {
-        label: "Schritte (10)",
+        label: "Schritte (11)",
         itemLabel: (props) => props.fields.heading.value.split("\n")[0].slice(0, 60),
       },
     ),
@@ -666,18 +673,6 @@ const ueberUnsScrolly = singleton({
       label: "Landesstellen-Credit",
       multiline: true,
     }),
-    // 4 methodik phases (popover content from Step 5 chip).
-    methodikPhases: fields.array(
-      fields.object({
-        label: fields.text({ label: "Phasen-Label (z. B. 'Phase 1')" }),
-        title: fields.text({ label: "Titel der Phase" }),
-        body: fields.text({ label: "Beschreibung", multiline: true }),
-      }),
-      {
-        label: "Methodik-Phasen (Mehr-Popover)",
-        itemLabel: (props) => `${props.fields.label.value} · ${props.fields.title.value}`,
-      },
-    ),
     // Page-level footer block (below the scrollytelling).
     footerKontakt: fields.object({
       label: fields.text({ label: "Block-Label", defaultValue: "Kontakt" }),

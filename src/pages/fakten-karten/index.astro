@@ -16,14 +16,6 @@ import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
 import carmRawJson from "../../../public/data/carm-data.json";
 import "../../styles/quiz.css";
 
-// Combined myth factsheets: one .mdoc covers two CaRM myth IDs.
-// Map the secondary myth ID to the same slug and content.
-const COMBINED_MYTHS: Record<number, number> = {
-  32: 31, // m31-m32-entspannt-aggressiv
-  37: 36, // m36-m37-leistungen-niveau
-  42: 41, // m41-m42-anstieg-konsum
-};
-
 const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
 
 // Build myth ID → factsheet slug mapping
@@ -56,9 +48,15 @@ for (const [slug, entry] of factsheetEntries) {
   const e = entry as any;
   if (!e.mythNumber) continue;
 
-  // Strip "Mythos XX:" or "Mythos XX/YY:" prefix from the display title
+  // Strip "Mythos XX:" or "Mythos XX/YY:" prefix and trailing terminal
+  // punctuation (.!?) so consumers downstream — including any future
+  // surface that bypasses VerdictStatement's splitForTail — get a clean
+  // statement. VerdictStatement still strips trailing punctuation at
+  // render time as a belt-and-braces.
   const rawTitle = e.title as string;
-  const cleanTitle = rawTitle.replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "");
+  const cleanTitle = rawTitle
+    .replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "")
+    .replace(/[.!?]+$/u, "");
 
   // Build myth entry for the card
   myths.push({
@@ -90,23 +88,6 @@ for (const [slug, entry] of factsheetEntries) {
     }
   } catch {
     // If a factsheet fails to render, skip it
-  }
-}
-
-// Copy content entries for secondary combined myth IDs
-for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
-  const p = Number(primary);
-  if (mythContentMap[p]) {
-    mythContentMap[Number(secondary)] = mythContentMap[p];
-  }
-  // The CaRM dataset has its own metric record per CaRM myth_id —
-  // i.e. m32 has its own row independent of m31. Only fall back to
-  // the primary's metrics if the dataset doesn't carry the secondary
-  // (defensive — should never trigger today but means future
-  // editorial-only combined myths still get a chart).
-  const s = Number(secondary);
-  if (!groupMetricsByMyth[s] && groupMetricsByMyth[p]) {
-    groupMetricsByMyth[s] = groupMetricsByMyth[p];
   }
 }
 

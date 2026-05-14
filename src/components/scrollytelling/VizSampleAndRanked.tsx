@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { User } from 'lucide-react';
 import type {
   CarmData,
@@ -11,6 +11,10 @@ import {
   GROUP_LABEL_DE,
   getMetric,
 } from './dataLoaders';
+import VerdictPill from '../shared/VerdictPill';
+import { VerdictGlyphPaths } from '../shared/verdictGlyph';
+import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
+import type { CorrectnessClass } from '../../lib/dashboard/types';
 
 interface Props {
   data: CarmData;
@@ -49,18 +53,13 @@ const INDICATORS: readonly IndicatorMeta[] = [
   { name: 'Bevölkerungsrisiko',   unit: 'Punkte',        desc: 'Präventionsbedeutung × Kenntnisanteil — nur für Voll- und Minderjährige.',      mini: 'Präventionsbedeutung × Bekanntheit — nur Voll- + Minderjährige.',               key: 'population_relevance',    phase: 'population_relevance' },
 ];
 
-/** Lucide arrow path data (24 × 24 viewBox), inlined so we can render the
- *  arrows inside the parent SVG with a guaranteed paint order (lines below,
- *  arrows above). foreignObject + Lucide-React paints in a separate layer
- *  and can render *under* sibling SVG content in some browsers. */
-const ARROW_PATHS: Record<string, string> = {
-  richtig:           'M12 19V5 M5 12l7-7 7 7',
-  eher_richtig:      'M7 17 17 7 M7 7h10v10',
-  eher_falsch:       'M17 7 7 17 M17 17H7V7',
-  falsch:            'M12 5v14 M19 12l-7 7-7-7',
-  no_classification: 'M5 12h14',
-};
-
+/** Verdict glyphs are drawn inline inside the parent <svg> via
+ *  <VerdictGlyphPaths> from the shared spec at `../shared/verdictGlyph`.
+ *  Inlining (not <foreignObject>) keeps paint order under control: axis
+ *  lines paint below, slope polylines paint above the axis, glyphs paint
+ *  on top. Same chevron + shadow treatment as everywhere else on the
+ *  site (dashboard, fakten-karten, quiz) — change the spec in one place,
+ *  every surface updates. */
 const ARROW_SIZE = 14;            // visible arrow width/height (px)
 const ARROW_HIT_PAD = 6;          // transparent hit-area extension beyond the arrow rect
 const ARROW_JITTER_MIN_GAP = 20;  // minimum horizontal distance between two arrows on the same strip — wider than ARROW_SIZE so no two arrows ever touch
@@ -222,9 +221,48 @@ function ExampleMythStrips({
 }) {
   const [activeGroup, setActiveGroup] = useState<GroupId>('adults');
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  // Hover tooltip position (in SVG-percent coords, anchored to the hovered
-  // arrow). Replaces the old dynamic-header text that caused layout shake.
-  const [hoverPos, setHoverPos] = useState<{ xPct: number; yPct: number } | null>(null);
+
+  // Iter-10: hover tooltip is now driven by `useFlipPosition` so it
+  // clamps to the viewport edges instead of clipping when an arrow sits
+  // near the right border. The triggerRef is repointed at each hovered
+  // hit-rect on enter.
+  const {
+    triggerRef: tooltipTriggerRef,
+    cardRef: tooltipCardRef,
+    pos: tooltipPos,
+    open: tooltipOpen,
+    setOpen: setTooltipOpen,
+    updatePosition: updateTooltipPosition,
+  } = useFlipPosition<HTMLElement, HTMLDivElement>({
+    maxWidth: 320,
+    gap: 10,
+  });
+
+  // The trigger may be either the SVG <rect> hit zone over an arrow or
+  // the slope <path> itself. useFlipPosition only reads
+  // getBoundingClientRect() from the ref, which exists on every DOM
+  // element — the cast through `unknown` quiets the TS-level
+  // HTMLElement constraint on the hook.
+  function openMythTooltip(id: number, el: SVGGraphicsElement) {
+    (tooltipTriggerRef as unknown as React.MutableRefObject<Element | null>).current = el;
+    setHoveredId(id);
+    setTooltipOpen(true);
+    updateTooltipPosition();
+  }
+  function closeMythTooltip() {
+    setTooltipOpen(false);
+    setHoveredId(null);
+  }
+
+  // Iter-10 staggered reveal: track the previous revealedStrips count so
+  // each newly-revealed strip can stagger its fade-in from delay 0, not
+  // from its absolute index. Strips that were already revealed don't
+  // re-animate (their opacity doesn't change).
+  const prevRevealedRef = useRef(revealedStrips);
+  useEffect(() => {
+    prevRevealedRef.current = revealedStrips;
+  }, [revealedStrips]);
+  const prevRevealed = prevRevealedRef.current;
 
 
   // Build a value matrix: myths × indicators × selected group. Bev.risiko
@@ -301,7 +339,9 @@ function ExampleMythStrips({
   }));
 
   const hoveredMyth = hoveredId !== null ? myths.find((m) => m.id === hoveredId) ?? null : null;
-  const hoveredVerdict = hoveredMyth ? VERDICT_FROM_CLASS[hoveredMyth.correctness_class] ?? null : null;
+  const hoveredVerdict: CorrectnessClass | null = hoveredMyth
+    ? (hoveredMyth.correctness_class as CorrectnessClass)
+    : null;
 
   return (
     <div className="viz-sr__example">
@@ -365,12 +405,18 @@ function ExampleMythStrips({
           const isBevRisikoStrip = ind.key === 'population_relevance';
           const bevRisikoDimmed = isBevRisikoStrip && !BEV_RISIKO_VALID_GROUPS.has(activeGroup);
           const axisOpacity = isRevealed ? (bevRisikoDimmed ? 0.55 : 1) : 0.45;
+          // Iter-10 stagger: rebase the delay so newly-revealed strips
+          // fade in 0/200/400 ms apart, not at their absolute strip index.
+          const revealIdx = isRevealed && i >= prevRevealed ? i - prevRevealed : 0;
           return (
             <g
               key={`axis-${ind.name}`}
               className="viz-sr__strip-axis"
               data-revealed={isRevealed}
-              style={{ transition: 'opacity 320ms ease' }}
+              style={{
+                transition: 'opacity 360ms ease',
+                transitionDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
+              }}
               opacity={axisOpacity}
             >
               {/* Axis line */}
@@ -414,8 +460,8 @@ function ExampleMythStrips({
           const isDimmed = hoveredId !== null && !isHovered;
           const color = CORRECTNESS_PATH_COLOR[myth.correctness_class] ?? 'var(--fg-muted)';
           const d = visible.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-          // Anchor the tooltip at the midpoint of the visible polyline.
-          const midpoint = visible[Math.floor(visible.length / 2)];
+          // (Iter-10) Tooltip is now anchored to the DOM element via
+          // useFlipPosition — no need to pre-compute a midpoint here.
           return (
             <path
               key={`path-${myth.id}`}
@@ -427,14 +473,8 @@ function ExampleMythStrips({
               strokeLinejoin="round"
               opacity={isHovered ? 0.95 : isDimmed ? 0.18 : 0.55}
               style={{ transition: 'opacity 180ms ease' }}
-              onMouseEnter={() => {
-                setHoveredId(myth.id);
-                setHoverPos({ xPct: (midpoint.x / W) * 100, yPct: (midpoint.y / H) * 100 });
-              }}
-              onMouseLeave={() => {
-                setHoveredId(null);
-                setHoverPos(null);
-              }}
+              onMouseEnter={(e) => openMythTooltip(myth.id, e.currentTarget)}
+              onMouseLeave={closeMythTooltip}
               pointerEvents="stroke"
             />
           );
@@ -459,12 +499,17 @@ function ExampleMythStrips({
           const nameW = ind.name.length * 7 + 6;
           const unitW = unitText.length * 6 + 6;
           const miniW = ind.mini.length * 5.2 + 8;
+          // Iter-10 stagger — same rhythm as the axis layer above.
+          const revealIdx = isRevealed && i >= prevRevealed ? i - prevRevealed : 0;
           return (
             <g
               key={`text-${ind.name}`}
               className="viz-sr__strip-text"
               data-revealed={isRevealed}
-              style={{ transition: 'opacity 320ms ease' }}
+              style={{
+                transition: 'opacity 360ms ease',
+                transitionDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
+              }}
               opacity={axisOpacity}
             >
               {/* Strip header — name + unit, both with dark backing. The
@@ -568,9 +613,7 @@ function ExampleMythStrips({
             if (p.v == null) return null;
             const isHovered = hoveredId === myth.id;
             const isDimmed = hoveredId !== null && !isHovered;
-            const color = CORRECTNESS_PATH_COLOR[myth.correctness_class] ?? 'var(--fg-muted)';
-            const pathD = ARROW_PATHS[myth.correctness_class] ?? ARROW_PATHS.no_classification;
-            // Lucide paths use a 24×24 viewBox; we scale them to ARROW_SIZE.
+            // <VerdictGlyphPaths> uses a 24×24 user-space; scale to ARROW_SIZE.
             const scale = ARROW_SIZE / 24;
             return (
               <g
@@ -590,22 +633,10 @@ function ExampleMythStrips({
                   width={ARROW_SIZE + ARROW_HIT_PAD * 2}
                   height={ARROW_SIZE + ARROW_HIT_PAD * 2}
                   fill="transparent"
-                  onMouseEnter={() => {
-                    setHoveredId(myth.id);
-                    setHoverPos({ xPct: (p.x / W) * 100, yPct: (p.y / H) * 100 });
-                  }}
-                  onMouseLeave={() => {
-                    setHoveredId(null);
-                    setHoverPos(null);
-                  }}
-                  onFocus={() => {
-                    setHoveredId(myth.id);
-                    setHoverPos({ xPct: (p.x / W) * 100, yPct: (p.y / H) * 100 });
-                  }}
-                  onBlur={() => {
-                    setHoveredId(null);
-                    setHoverPos(null);
-                  }}
+                  onMouseEnter={(e) => openMythTooltip(myth.id, e.currentTarget)}
+                  onMouseLeave={closeMythTooltip}
+                  onFocus={(e) => openMythTooltip(myth.id, e.currentTarget)}
+                  onBlur={closeMythTooltip}
                   tabIndex={0}
                   role="img"
                   aria-label={`${myth.text_short_de} · ${INDICATORS[i].name}: ${Math.round(p.v)}`}
@@ -622,17 +653,15 @@ function ExampleMythStrips({
                   opacity={0.85}
                   pointerEvents="none"
                 />
-                {/* The arrow itself, scaled from Lucide's 24×24 paths. */}
-                <g
-                  fill="none"
-                  stroke={color}
-                  strokeWidth={2.5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  transform={`scale(${scale})`}
-                  pointerEvents="none"
-                >
-                  <path d={pathD} />
+                {/* The verdict glyph — chevron + shaft (main color) + horizontal
+                    shadow line (lighter color), rendered from the canonical
+                    site-wide spec in `shared/verdictGlyph`. Edits to that
+                    module update every verdict surface on the site. */}
+                <g transform={`scale(${scale})`} pointerEvents="none">
+                  <VerdictGlyphPaths
+                    verdict={myth.correctness_class as CorrectnessClass}
+                    strokeWidth={2.25}
+                  />
                 </g>
               </g>
             );
@@ -640,37 +669,36 @@ function ExampleMythStrips({
         )}
       </svg>
 
-      {/* Hover tooltip overlay — positioned in CSS-percent over the SVG's
-          viewBox so it tracks the hovered arrow/line accurately regardless
-          of the SVG's rendered size. Mirrors the timeline tooltip pattern
-          in VizTimeline. The dynamic header text was removed to fix the
-          scroll-shake caused by the row reflowing on every hover. */}
-      {hoveredMyth && hoverPos && hoveredVerdict && (
-        <div
-          className="viz-sr__strips-tooltip"
-          role="tooltip"
-          style={{
-            left: `${hoverPos.xPct}%`,
-            top: `${hoverPos.yPct}%`,
-          }}
-        >
-          <p className="viz-sr__strips-tooltip-myth">„{hoveredMyth.text_de}"</p>
-          <span className={`verdict-tag ${hoveredVerdict.cls}`}>
-            {hoveredVerdict.arrow} {hoveredVerdict.label}
-          </span>
-        </div>
-      )}
+      {/* Iter-10 hover tooltip — anchored to the hovered hit-rect via
+          `useFlipPosition`, clamps to the viewport edges so it never
+          clips off-screen when an arrow sits near the right border. */}
+      <div
+        ref={tooltipCardRef}
+        role="tooltip"
+        className={`scrolly-hover-tooltip ${tooltipOpen && hoveredMyth && hoveredVerdict ? 'is-open' : ''}`}
+        style={
+          tooltipPos
+            ? {
+                position: 'fixed',
+                top: tooltipPos.top,
+                left: tooltipPos.left,
+                width: tooltipPos.width,
+              }
+            : undefined
+        }
+      >
+        {hoveredMyth && hoveredVerdict && (
+          <>
+            <p className="scrolly-hover-tooltip__title">
+              „{hoveredMyth.text_de}"
+            </p>
+            <p>
+              <VerdictPill verdict={hoveredVerdict} size="sm" />
+            </p>
+          </>
+        )}
+      </div>
       </div>
     </div>
   );
 }
-
-
-/** Map carm-data.json's `correctness_class` field to verdict-tag styling. */
-const VERDICT_FROM_CLASS: Record<string, { arrow: string; label: string; cls: string }> = {
-  richtig: { arrow: '↑', label: 'richtig', cls: 'verdict-tag--richtig' },
-  eher_richtig: { arrow: '↗', label: 'eher richtig', cls: 'verdict-tag--eher-richtig' },
-  eher_falsch: { arrow: '↙', label: 'eher falsch', cls: 'verdict-tag--eher-falsch' },
-  falsch: { arrow: '↓', label: 'falsch', cls: 'verdict-tag--falsch' },
-  no_classification: { arrow: '—', label: 'keine Aussage', cls: 'verdict-tag--keine-aussage' },
-};

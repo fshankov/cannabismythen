@@ -1,5 +1,5 @@
 /**
- * ScrollytellingViewer — production version for the /ueber-uns/ page.
+ * ScrollytellingViewer — production version for the /projekt/ page.
  *
  * Two-column scrollytelling: text scrolls on the left, sticky viz on the right
  * (desktop ≥1024px). Mobile: viz pinned to top (45vh), text scrolls below.
@@ -28,17 +28,26 @@ import { VizSampleAndRanked } from './VizSampleAndRanked';
 import { VizSourcesStrips } from './VizSourcesStrips';
 import { VizCtaGrid } from './VizCtaGrid';
 import { VizTeamRow } from './VizTeamRow';
-import { MehrPopover } from './MehrPopover';
+import VerdictPill from '../shared/VerdictPill';
+import VerdictArrow from '../shared/VerdictArrow';
+import type { CorrectnessClass } from '../../lib/dashboard/types';
 
-/** Inline matcher for verdict tags [↑ richtig] and **bold** spans in body copy. */
+/** Inline matchers for body copy:
+ *   - `[↑ richtig]`  → <VerdictPill>  (arrow glyph + verdict label)
+ *   - `{↑ richtig}`  → <VerdictArrow> (arrow glyph ONLY, no label —
+ *                       for tally lists like "{↓ falsch} 7 stimmen nicht")
+ *   - `**bold**`     → <strong>
+ *
+ * Both bracket forms accept the same set of arrow/verdict pairs so the
+ * editor can pick "with label" vs "icon only" depending on context. */
 const INLINE_RE =
-  /\[([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\]|\*\*([^*]+)\*\*/g;
-const VERDICT_LABEL_TO_CLASS: Record<string, string> = {
-  richtig: 'verdict-tag--richtig',
-  'eher richtig': 'verdict-tag--eher-richtig',
-  'eher falsch': 'verdict-tag--eher-falsch',
-  falsch: 'verdict-tag--falsch',
-  'keine Aussage': 'verdict-tag--keine-aussage',
+  /\[([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\]|\{([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\}|\*\*([^*]+)\*\*/g;
+const VERDICT_LABEL_TO_CLASS: Record<string, CorrectnessClass> = {
+  richtig: 'richtig',
+  'eher richtig': 'eher_richtig',
+  'eher falsch': 'eher_falsch',
+  falsch: 'falsch',
+  'keine Aussage': 'no_classification',
 };
 
 function renderBodyWithVerdicts(text: string): ReactNode[] {
@@ -51,18 +60,29 @@ function renderBodyWithVerdicts(text: string): ReactNode[] {
       out.push(<Fragment key={key++}>{text.slice(lastIndex, start)}</Fragment>);
     }
     if (match[1]) {
-      const arrow = match[1];
-      const label = match[2];
-      const cls = VERDICT_LABEL_TO_CLASS[label] ?? '';
-      out.push(
-        <span key={key++} className={`verdict-tag ${cls}`}>
-          {arrow} {label}
-        </span>,
-      );
+      // `[↑ richtig]` — pill (icon + label)
+      const verdict = VERDICT_LABEL_TO_CLASS[match[2]];
+      if (verdict) {
+        out.push(<VerdictPill key={key++} verdict={verdict} size="sm" />);
+      }
     } else if (match[3]) {
+      // `{↑ richtig}` — bare verdict glyph, inline with surrounding text
+      const verdict = VERDICT_LABEL_TO_CLASS[match[4]];
+      if (verdict) {
+        out.push(
+          <VerdictArrow
+            key={key++}
+            verdict={verdict}
+            size={14}
+            strokeWidth={2.25}
+            className="scrolly__body-arrow"
+          />,
+        );
+      }
+    } else if (match[5]) {
       out.push(
         <strong key={key++} className="scrolly__body-strong">
-          {match[3]}
+          {match[5]}
         </strong>,
       );
     }
@@ -130,7 +150,7 @@ function StepVisualization({
 }
 
 /**
- * Top-level component for the /ueber-uns/ page. Loads carm-data +
+ * Top-level component for the /projekt/ page. Loads carm-data +
  * information-sources from /data/ on mount, then renders the inner viewer
  * once both datasets are ready.
  */
@@ -166,28 +186,11 @@ export function ScrollytellingViewer({ content }: Props) {
 
 function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
   const [activeStep, setActiveStep] = useState(1);
-  const [phaseIdx, setPhaseIdx] = useState(0);
-  const [chipPopover, setChipPopover] = useState<'methodik' | null>(null);
-  /** Previous activeStep — used to detect scroll direction so we can snap
-   *  phaseIdx to the right initial value when entering a phase-marker step.
-   *  Without this snap the phase-marker observer fires *after* the step
-   *  observer, briefly leaving the new step with the old step's phase idx. */
-  const prevActiveStep = useRef(1);
   const stepsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const phaseMarkersRef = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const setStepRef = useCallback(
     (index: number) => (el: HTMLDivElement | null) => {
       stepsRef.current[index] = el;
-    },
-    [],
-  );
-
-  const setPhaseMarkerRef = useCallback(
-    (stepNumber: number, index: number) => (el: HTMLDivElement | null) => {
-      const key = stepNumber * 100 + index;
-      if (el === null) phaseMarkersRef.current.delete(key);
-      else phaseMarkersRef.current.set(key, el);
     },
     [],
   );
@@ -212,65 +215,23 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
     return () => observers.forEach((o) => o.disconnect());
   }, []);
 
-  // Direction-aware phaseIdx snap when activeStep changes.
-  useEffect(() => {
-    const direction: 'forward' | 'backward' =
-      activeStep > prevActiveStep.current ? 'forward' : 'backward';
-    if (activeStep === 6) {
-      setPhaseIdx(direction === 'forward' ? 0 : 4);
-    } else if (activeStep === 7) {
-      setPhaseIdx(direction === 'forward' ? 0 : 1);
-    } else if (activeStep === 8) {
-      setPhaseIdx(direction === 'forward' ? 0 : 1);
-    }
-    prevActiveStep.current = activeStep;
-  }, [activeStep]);
-
-  // Phase-marker IntersectionObserver — 30%-tall band centered on viewport.
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-    phaseMarkersRef.current.forEach((el, key) => {
-      if (!el) return;
-      const localIdx = key % 100;
-      const obs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => {
-            if (e.isIntersecting) setPhaseIdx(localIdx);
-          });
-        },
-        { threshold: 0, rootMargin: '-35% 0px -35% 0px' },
-      );
-      obs.observe(el);
-      observers.push(obs);
-    });
-    return () => observers.forEach((o) => o.disconnect());
-  }, []);
-
   const currentStep =
     STEP_DEFINITIONS.find((s) => s.stepNumber === activeStep) ??
     STEP_DEFINITIONS[0];
 
-  const sampleRankedMode: SampleRankedMode = (() => {
-    if (currentStep.stepNumber === 5) return 'sample';
-    if (currentStep.stepNumber === 6) {
-      return (
-        (
-          [
-            'ranked-1',
-            'ranked-2',
-            'ranked-3',
-            'ranked-4',
-            'ranked-5',
-          ] as const
-        )[phaseIdx] ?? 'ranked-1'
-      );
-    }
-    return currentStep.sampleRankedMode ?? 'sample';
-  })();
+  // Iter-10: the 5-indicator story is split across Steps 6 (3 raw) and
+  // Step 7 (5 = + 2 derived). Each step's structural definition carries
+  // its `sampleRankedMode` directly — no phase-idx machinery needed.
+  const sampleRankedMode: SampleRankedMode =
+    currentStep.sampleRankedMode ?? 'sample';
 
+  // Iter-10: Steps 8 and 9 split the sources story (active vs passive).
+  // Each step enters with its full set of source columns already visible;
+  // the active/passive narrative split is carried by the BETWEEN-step
+  // boundary, not by phased gating within a step.
   const revealedColumns: 0 | 1 | 2 | 3 | 4 = (() => {
-    if (currentStep.stepNumber === 7) return (phaseIdx + 1) as 1 | 2;
-    if (currentStep.stepNumber === 8) return (phaseIdx + 3) as 3 | 4;
+    if (currentStep.stepNumber === 8) return 2;
+    if (currentStep.stepNumber === 9) return 4;
     return 4;
   })();
 
@@ -322,51 +283,19 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                       </span>
                     ))}
                   </h2>
-                  {step.stepNumber === 6 ||
-                  step.stepNumber === 7 ||
-                  step.stepNumber === 8 ? (
-                    <>
-                      {editorial.bodyText.split('\n\n').map((para, pi) => (
-                        <div className="scrolly__phase-block" key={pi}>
-                          <div
-                            ref={setPhaseMarkerRef(step.stepNumber, pi)}
-                            className="scrolly__phase-marker"
-                            data-phase-idx={pi}
-                          />
-                          <p className="scrolly__body">
-                            {renderBodyWithVerdicts(para)}
-                          </p>
-                        </div>
-                      ))}
-                      {editorial.hint && (
-                        <p className="scrolly__hint">{editorial.hint}</p>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {editorial.bodyText.split('\n\n').map((para, pi) => (
-                        <p key={pi} className="scrolly__body">
-                          {renderBodyWithVerdicts(para)}
-                        </p>
-                      ))}
-                      {step.chips && step.chips.length > 0 && (
-                        <div className="scrolly__chip-row">
-                          {step.chips.map((chip) => (
-                            <button
-                              key={chip.popoverKey}
-                              type="button"
-                              className="scrolly__mehr-chip"
-                              onClick={() => setChipPopover(chip.popoverKey)}
-                            >
-                              {chip.label} →
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {editorial.hint && (
-                        <p className="scrolly__hint">{editorial.hint}</p>
-                      )}
-                    </>
+                  {/* Iter-10: all 11 steps render through one branch.
+                      Step 6's old `---` phase-marker mechanism is gone
+                      because the synthesis lives in its own Step 7 now. */}
+                  {editorial.bodyText.split('\n\n').map((para, pi) => (
+                    <p key={pi} className="scrolly__body">
+                      {renderBodyWithVerdicts(para)}
+                    </p>
+                  ))}
+                  {editorial.legend && (
+                    <p className="scrolly__legend">{editorial.legend}</p>
+                  )}
+                  {editorial.hint && (
+                    <p className="scrolly__hint">{editorial.hint}</p>
                   )}
                 </div>
               );
@@ -387,24 +316,6 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
             </div>
           </div>
         </div>
-
-        <MehrPopover
-          open={chipPopover === 'methodik'}
-          onClose={() => setChipPopover(null)}
-          title="Methodik im Detail"
-          subtitle="Drei Phasen + Expert:innenrunde"
-        >
-          {content.methodikPhases.map((p) => (
-            <section key={p.label} className="mehr-popover__section">
-              <h3 className="mehr-popover__section-title">
-                {p.label} · {p.title}
-              </h3>
-              {p.body.split('\n\n').map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-            </section>
-          ))}
-        </MehrPopover>
       </section>
 
       <footer className="scrolly-page-footer" aria-label="Projektinformationen">

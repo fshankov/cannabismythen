@@ -11,14 +11,6 @@ import { reader, getPublishedEntries } from "@lib/content";
 import definitionsData from "../../content/dashboard-definitionen.json";
 import "../../styles/dashboard.css";
 
-// Combined myth factsheets: one .mdoc covers two CaRM myth IDs.
-// Map the secondary myth ID to the same slug and content.
-const COMBINED_MYTHS: Record<number, number> = {
-  32: 31, // m31-m32-entspannt-aggressiv
-  37: 36, // m36-m37-leistungen-niveau
-  42: 41, // m41-m42-anstieg-konsum
-};
-
 // Build mythId → Quiz theme slug map. Each quiz module mdoc lists
 // the myth IDs it covers via questions[].mythId (format "m04"). We map the
 // numeric myth_id ("m04" → 4) to the theme slug ("quiz-gefaehrlichkeit").
@@ -44,12 +36,6 @@ for (const [slug, entry] of factsheetEntries) {
   const e = entry as any;
   if (e.mythNumber) {
     mythSlugs[e.mythNumber] = slug;
-  }
-}
-// Add secondary IDs for combined myths
-for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
-  if (mythSlugs[Number(primary)]) {
-    mythSlugs[Number(secondary)] = mythSlugs[Number(primary)];
   }
 }
 
@@ -78,9 +64,14 @@ for (const [slug, entry] of factsheetEntries) {
       const refMatch = fullHtml.match(/<li>/g);
       const refCount = refMatch ? refMatch.length : 0;
 
-      // Strip "Mythos XX:" or "Mythos XX/YY:" prefix from the display title
+      // Strip "Mythos XX:" prefix AND trailing terminal punctuation (.!?)
+      // from the display title — same canonical form used by Fakten-Karten
+      // and the quiz popup. Future surfaces that render mythContent.title
+      // get a clean statement either way.
       const rawTitle = fullEntry.title as string;
-      const cleanTitle = rawTitle.replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "");
+      const cleanTitle = rawTitle
+        .replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "")
+        .replace(/[.!?]+$/u, "");
 
       mythContentMap[e.mythNumber] = {
         html: fullHtml,
@@ -92,14 +83,6 @@ for (const [slug, entry] of factsheetEntries) {
     }
   } catch {
     // If a factsheet fails to render, skip it
-  }
-}
-
-// Copy content entries for secondary combined myth IDs
-for (const [secondary, primary] of Object.entries(COMBINED_MYTHS)) {
-  const p = Number(primary);
-  if (mythContentMap[p]) {
-    mythContentMap[Number(secondary)] = mythContentMap[p];
   }
 }
 ---

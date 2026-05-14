@@ -1,22 +1,27 @@
 /**
  * FaktenKartenExplorer — Main React island for the Fakten-Karten page.
  *
- * Displays all 42 myth cards in a filterable grid, grouped by categoryGroup.
- * Cards flip to show a short evidence-based summary; a "mehr erfahren" button
- * opens the shared FactsheetPanel with the full factsheet content.
+ * Displays all 42 myth cards in a filterable grid. Cards flip to show a
+ * short evidence-based summary; a "mehr erfahren" button opens the
+ * shared FactsheetPanel with the full factsheet content.
+ *
+ * Filtering is INLINE — a search input + categories dropdown sit
+ * directly above the grid (no drawer, no slide-out). Per Fedor
+ * 2026-05-14, the discoverability of always-visible filters is more
+ * valuable than the visual restraint of a drawer for this surface.
  */
 
 import { useState, useMemo, useCallback } from "react";
 import FaktenCard from "./FaktenCard";
 import type { FaktenCardMyth } from "./FaktenCard";
+import FaktenFilterBar from "./FaktenFilterBar";
 import SharedFactsheetPanel from "../shared/FactsheetPanel";
 import type { MythContentEntry } from "../shared/FactsheetPanel";
-import VerdictArrowWithInfo from "../shared/VerdictArrowWithInfo";
 import type {
   CorrectnessClass,
   MythGroupMetrics,
 } from "../../lib/dashboard/types";
-import { t, type TranslationKey } from "../../lib/dashboard/translations";
+import { normalize } from "../../lib/text-normalize";
 
 const VALID_VERDICTS: ReadonlySet<CorrectnessClass> = new Set([
   "richtig",
@@ -32,7 +37,7 @@ function toVerdict(raw: string): CorrectnessClass {
     : "no_classification";
 }
 
-/** Category groups in display order */
+/** Category groups in display order. */
 const CATEGORY_GROUPS = [
   "Medizinischer und therapeutischer Nutzen",
   "Risiken für den Körper und die Entwicklung",
@@ -42,7 +47,7 @@ const CATEGORY_GROUPS = [
   "Risiken durch Dosierung und Qualität",
   "Verbreitung in der Bevölkerung und Gesetzgebung",
   "Allgemeine Einschätzung der Gefährlichkeit",
-];
+] as const;
 
 interface MythEntry extends FaktenCardMyth {
   categoryGroup: string;
@@ -55,8 +60,7 @@ interface FaktenKartenExplorerProps {
   mythContent: string;
   /** JSON-serialized Record<number, MythGroupMetrics>. Built at build
    *  time from `public/data/carm-data.json`. Powers the interactive
-   *  bar chart inside the FactsheetPanel popup that replaces the old
-   *  "Daten nach Zielgruppen" markdown table. */
+   *  bar chart inside the FactsheetPanel popup. */
   groupMetrics?: string;
 }
 
@@ -65,7 +69,10 @@ export default function FaktenKartenExplorer({
   mythContent: mythContentJson,
   groupMetrics: groupMetricsJson,
 }: FaktenKartenExplorerProps) {
-  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const [selectedGroups, setSelectedGroups] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [searchQuery, setSearchQuery] = useState("");
   const [factsheetMyth, setFactsheetMyth] = useState<string | null>(null);
 
   const allMyths: MythEntry[] = useMemo(() => {
@@ -93,12 +100,33 @@ export default function FaktenKartenExplorer({
     }
   }, [groupMetricsJson]);
 
+  const toggleGroup = useCallback((group: string) => {
+    setSelectedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group);
+      else next.add(group);
+      return next;
+    });
+  }, []);
+
+  const resetFilters = useCallback(() => {
+    setSelectedGroups(new Set());
+    setSearchQuery("");
+  }, []);
+
   const filteredMyths = useMemo(() => {
-    const list = activeGroup
-      ? allMyths.filter((m) => m.categoryGroup === activeGroup)
-      : allMyths;
+    const q = normalize(searchQuery.trim());
+    const noSelection = selectedGroups.size === 0;
+    const list = allMyths.filter((m) => {
+      if (q.length > 0) {
+        // Search bypasses the category filter — show all title matches.
+        return normalize(m.title).includes(q);
+      }
+      if (noSelection) return true;
+      return selectedGroups.has(m.categoryGroup);
+    });
     return list.sort((a, b) => a.mythNumber - b.mythNumber);
-  }, [allMyths, activeGroup]);
+  }, [allMyths, selectedGroups, searchQuery]);
 
   const handleShowFactsheet = useCallback((slug: string) => {
     setFactsheetMyth(slug);
@@ -119,29 +147,21 @@ export default function FaktenKartenExplorer({
 
   return (
     <div className="fakten-explorer">
-      <div className="fakten-filter-bar">
-        <button
-          type="button"
-          className={`fakten-filter-bar__btn ${activeGroup === null ? "fakten-filter-bar__btn--active" : ""}`}
-          onClick={() => setActiveGroup(null)}
-        >
-          Alle
-        </button>
-        {CATEGORY_GROUPS.map((group) => (
-          <button
-            key={group}
-            type="button"
-            className={`fakten-filter-bar__btn ${activeGroup === group ? "fakten-filter-bar__btn--active" : ""}`}
-            onClick={() => setActiveGroup(group)}
-          >
-            {group}
-          </button>
-        ))}
-      </div>
+      <FaktenFilterBar
+        categoryGroups={CATEGORY_GROUPS}
+        myths={allMyths}
+        selectedGroups={selectedGroups}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onToggleGroup={toggleGroup}
+        onReset={resetFilters}
+      />
 
       <p className="fakten-explorer__count">
         {filteredMyths.length} Mythen{" "}
-        {activeGroup ? `in \u201E${activeGroup}\u201C` : "insgesamt"}
+        {selectedGroups.size > 0 || searchQuery.trim().length > 0
+          ? "ausgewählt"
+          : "insgesamt"}
       </p>
 
       <div className="fakten-grid">
@@ -156,32 +176,20 @@ export default function FaktenKartenExplorer({
       </div>
 
       {openMyth && (() => {
-        // Inside the popup the verdict is rendered with the canonical
-        // label ("Falsch") + the daten-explorer's hover-info arrow, so
-        // the popup reads identically across every surface. The
-        // conversational `classificationLabel` stays on the FRONT of
-        // the flip card — that's the editorial-voice surface.
+        // The popup heading uses the unified VerdictStatement (statement
+        // with verdict color + arrow) plus the new "Wissenschaftlich:
+        // <pill>" line that lives inside SharedFactsheetPanel itself.
+        // We no longer pass the legacy verdictLabel / verdictAccessory
+        // props — they were removed in the panel's v3 refresh.
         const verdict = toVerdict(openMyth.classification);
-        const canonicalLabel = t(
-          `verdict.${verdict}` as TranslationKey,
-          "de",
-        );
         return (
           <SharedFactsheetPanel
             context="fakten-karten"
             mythText={openMyth.title}
-            classificationKey={openMyth.classification}
-            classificationLabel={canonicalLabel}
+            classificationKey={verdict}
+            classificationLabel={openMyth.classificationLabel}
             mythContentEntry={openMythContent}
             factsheetSlug={openMyth.slug}
-            verdictLabel="Wissenschaftliches Urteil:"
-            verdictAccessory={
-              <VerdictArrowWithInfo
-                verdict={verdict}
-                size={14}
-                strokeWidth={2.25}
-              />
-            }
             groupMetrics={groupMetricsMap[openMyth.mythNumber]}
             onClose={handleCloseFactsheet}
           />

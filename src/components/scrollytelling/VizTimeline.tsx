@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { TimelineTooltip } from './types';
+import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
 
 interface Props {
   active: boolean;
@@ -7,11 +8,11 @@ interface Props {
 }
 
 interface Anchor {
-  date: string;        // ISO yyyy-mm-dd, midpoint of period
+  date: string; // ISO yyyy-mm-dd, midpoint of period
   startISO: string;
   endISO: string;
-  labelDate: string;   // German display
-  title: string;       // short German title
+  labelDate: string; // German display
+  title: string; // short German title
   subtitle?: string;
   highlight?: boolean; // pulse marker for the publication anchor
 }
@@ -70,24 +71,51 @@ const ANCHORS: Anchor[] = [
 const T_START = new Date('2024-04-01').getTime();
 const T_END = new Date('2026-10-01').getTime();
 
-const VIEW_W = 800;
-const VIEW_H = 320;
-const PAD_X = 40;
-const TRACK_W = VIEW_W - PAD_X * 2;
-
 function pct(d: string): number {
   const t = new Date(d).getTime();
   return ((t - T_START) / (T_END - T_START)) * 100;
 }
 
+const YEAR_TICKS: { date: string; label: string }[] = [
+  { date: '2024-04-01', label: '2024' },
+  { date: '2025-01-01', label: '2025' },
+  { date: '2026-01-01', label: '2026' },
+];
+
+/**
+ * VizTimeline — Step 1 vertical timeline.
+ *
+ * Iter-10 rewrite: switched from a horizontal 800×320 SVG with alternating
+ * above/below labels to a vertical CSS-grid + absolutely-positioned-HTML
+ * layout. The track is a 2px vertical line down the left column; anchor
+ * dots sit on the track and HTML label rows sit beside them in the right
+ * column at the same vertical position. This gains:
+ *   - Larger, fluid-wrapping anchor titles (no SVG <text> sizing pain).
+ *   - One canonical text scale via `--viz-text-primary` / `--viz-text-secondary`.
+ *   - A tooltip with viewport-edge clamping via `useFlipPosition`.
+ *
+ * The drawn-line entry animation is preserved: a vertical foreground bar
+ * grows from 0 to 100% height over ~1.4s with easeOutCubic; anchor dots
+ * fade in as the bar passes their date.
+ */
 export function VizTimeline({ active, tooltips }: Props) {
   const [drawn, setDrawn] = useState(0); // 0..1, line draw progress
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const rafRef = useRef<number | null>(null);
-  // Build a lookup map from anchor date → tooltip body. Keyed on the same
-  // ISO date string used by ANCHORS[*].date.
-  const tooltipMap: Record<string, string> = {};
-  for (const t of tooltips) tooltipMap[t.anchorDate] = t.body;
+
+  const tooltipMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const t of tooltips) m[t.anchorDate] = t.body;
+    return m;
+  }, [tooltips]);
+
+  // Tooltip positioning — anchor follows the hovered dot's bounding box,
+  // flipped above/below + clamped to viewport edges by the shared hook.
+  const { triggerRef, cardRef, pos, open, setOpen, updatePosition } =
+    useFlipPosition<HTMLButtonElement, HTMLDivElement>({
+      maxWidth: 320,
+      gap: 12,
+    });
 
   useEffect(() => {
     const reduced =
@@ -106,8 +134,7 @@ export function VizTimeline({ active, tooltips }: Props) {
     const dur = 1400;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / dur);
-      // easeOutCubic
-      const eased = 1 - Math.pow(1 - t, 3);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
       setDrawn(eased);
       if (t < 1) rafRef.current = requestAnimationFrame(tick);
     };
@@ -117,221 +144,167 @@ export function VizTimeline({ active, tooltips }: Props) {
     };
   }, [active]);
 
+  const hoveredAnchor = hoveredIdx !== null ? ANCHORS[hoveredIdx] : null;
+
+  function handleEnter(idx: number, el: HTMLButtonElement) {
+    // Point the shared triggerRef at the freshly-hovered hit zone.
+    (triggerRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
+    setHoveredIdx(idx);
+    setOpen(true);
+    updatePosition();
+  }
+  function handleLeave() {
+    setOpen(false);
+    setHoveredIdx(null);
+  }
+
   return (
-    <div className="viz viz-timeline" role="img" aria-label="Zeitlicher Ablauf der CaRM-Studie">
-      <div className="viz-timeline__chart">
-        <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-          {/* Year ticks */}
-          {[2024, 2025, 2026].map((year) => {
-            const x = PAD_X + (pct(`${year}-01-01`) / 100) * TRACK_W;
-            return (
-              <g key={year}>
-                <line
-                  x1={x}
-                  x2={x}
-                  y1={140}
-                  y2={150}
-                  stroke="#3a4452"
-                  strokeWidth={1}
-                />
-                <text
-                  x={x}
-                  y={170}
-                  fill="#6b7280"
-                  fontSize={11}
-                  fontFamily="monospace"
-                  textAnchor="middle"
-                >
-                  {year}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* Track line */}
-          <line
-            x1={PAD_X}
-            x2={VIEW_W - PAD_X}
-            y1={140}
-            y2={140}
-            stroke="#2d3748"
-            strokeWidth={2}
+    <div
+      className="viz viz-timeline-v"
+      role="img"
+      aria-label="Zeitlicher Ablauf der CaRM-Studie"
+    >
+      <div className="viz-timeline-v__grid">
+        {/* Left column: vertical track with year ticks + anchor dots */}
+        <div className="viz-timeline-v__track-col" aria-hidden="true">
+          <div className="viz-timeline-v__track-bg" />
+          <div
+            className="viz-timeline-v__track-fg"
+            style={{ height: `${(drawn * 100).toFixed(2)}%` }}
           />
-
-          {/* Drawn line */}
-          <line
-            x1={PAD_X}
-            x2={PAD_X + TRACK_W * drawn}
-            y1={140}
-            y2={140}
-            stroke="#047857"
-            strokeWidth={3}
-            strokeLinecap="round"
-          />
-
-          {/* Period bars (where applicable) */}
+          {/* Period bars — vertical highlight for date ranges */}
           {ANCHORS.map((a, i) => {
-            const x1 = PAD_X + (pct(a.startISO) / 100) * TRACK_W;
-            const x2 = PAD_X + (pct(a.endISO) / 100) * TRACK_W;
-            if (x2 - x1 < 6) return null;
-            const visible = pct(a.startISO) / 100 <= drawn + 0.02;
+            if (a.startISO === a.endISO) return null;
+            const ys = pct(a.startISO);
+            const ye = pct(a.endISO);
             return (
-              <rect
-                key={`p${i}`}
-                x={x1}
-                y={134}
-                width={Math.max(2, x2 - x1)}
-                height={12}
-                rx={3}
-                fill="#047857"
-                opacity={visible ? 0.35 : 0}
-                style={{ transition: 'opacity 400ms ease' }}
+              <div
+                key={`bar-${i}`}
+                className="viz-timeline-v__period-bar"
+                style={{
+                  top: `${ys.toFixed(2)}%`,
+                  height: `${(ye - ys).toFixed(2)}%`,
+                }}
               />
             );
           })}
-
-          {/* Anchor dots + labels */}
+          {/* Year ticks */}
+          {YEAR_TICKS.map((y) => (
+            <div
+              key={y.label}
+              className="viz-timeline-v__year-tick"
+              style={{ top: `${pct(y.date).toFixed(2)}%` }}
+            />
+          ))}
+          {/* Anchor dots */}
           {ANCHORS.map((a, i) => {
-            const x = PAD_X + (pct(a.date) / 100) * TRACK_W;
-            const above = i % 2 === 0;
-            const labelY = above ? 86 : 198;
-            const subY = above ? 70 : 218;
-            const visible = pct(a.date) / 100 <= drawn + 0.05;
-            // Use start/end anchors at the extremes so labels stay inside the box
-            const isFirst = i === 0;
-            const isLast = i === ANCHORS.length - 1;
-            const textAnchor: 'start' | 'middle' | 'end' = isFirst
-              ? 'start'
-              : isLast
-                ? 'end'
-                : 'middle';
+            const visible = drawn >= pct(a.date) / 100;
+            const isHovered = hoveredIdx === i;
             return (
-              <g
-                key={a.date}
+              <div
+                key={`dot-${i}`}
+                className={[
+                  'viz-timeline-v__dot-wrap',
+                  a.highlight ? 'viz-timeline-v__dot-wrap--highlight' : '',
+                  isHovered ? 'viz-timeline-v__dot-wrap--hovered' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
                 style={{
+                  top: `${pct(a.date).toFixed(2)}%`,
                   opacity: visible ? 1 : 0,
-                  transition: 'opacity 500ms ease',
-                  transitionDelay: `${i * 80}ms`,
                 }}
               >
-                {/* Connector */}
-                <line
-                  x1={x}
-                  x2={x}
-                  y1={140}
-                  y2={above ? 100 : 180}
-                  stroke={a.highlight ? '#facc15' : '#4d7c0f'}
-                  strokeWidth={1}
-                  strokeDasharray={a.highlight ? '0' : '2 2'}
-                />
-                {/* Dot */}
-                <circle
-                  cx={x}
-                  cy={140}
-                  r={a.highlight ? 8 : 5}
-                  fill={a.highlight ? '#facc15' : '#10b981'}
-                  stroke="#0f1318"
-                  strokeWidth={2}
-                />
-                {a.highlight && (
-                  <circle
-                    cx={x}
-                    cy={140}
-                    r={14}
-                    fill="none"
-                    stroke="#facc15"
-                    strokeWidth={1}
-                    opacity={0.6}
-                    style={{
-                      animation: 'viz-timeline-pulse 2s ease-in-out infinite',
-                      transformOrigin: `${x}px 140px`,
-                    }}
-                  />
-                )}
-                {/* Title */}
-                <text
-                  x={x}
-                  y={labelY}
-                  fill="#e5e7eb"
-                  fontSize={13}
-                  fontFamily="Georgia, serif"
-                  fontWeight={600}
-                  textAnchor={textAnchor}
-                >
-                  {a.title}
-                </text>
-                {/* Subtitle */}
-                {a.subtitle && (
-                  <text
-                    x={x}
-                    y={subY}
-                    fill="#9ca3af"
-                    fontSize={10}
-                    fontFamily="monospace"
-                    textAnchor={textAnchor}
-                  >
-                    {a.subtitle}
-                  </text>
-                )}
-                {/* Date */}
-                <text
-                  x={x}
-                  y={above ? labelY - 28 : subY + 14}
-                  fill={a.highlight ? '#facc15' : '#6b7280'}
-                  fontSize={10}
-                  fontFamily="monospace"
-                  textAnchor={textAnchor}
-                  fontWeight={a.highlight ? 600 : 400}
-                >
-                  {a.labelDate}
-                </text>
-                {/* Invisible hotspot — bigger than the visible dot so the
-                    pointer/keyboard target is reachable. */}
-                <circle
-                  className="viz-timeline__hotspot"
-                  cx={x}
-                  cy={140}
-                  r={14}
+                {a.highlight && <span className="viz-timeline-v__dot-pulse" />}
+                <span className="viz-timeline-v__dot" />
+                <button
+                  type="button"
+                  className="viz-timeline-v__dot-hit"
+                  aria-label={`${a.labelDate}: ${a.title}`}
                   tabIndex={visible ? 0 : -1}
-                  role="button"
-                  aria-label={`${a.labelDate} — ${a.title}${a.subtitle ? ', ' + a.subtitle : ''}`}
-                  onMouseEnter={() => setHoveredIdx(i)}
-                  onMouseLeave={() => setHoveredIdx((cur) => (cur === i ? null : cur))}
-                  onFocus={() => setHoveredIdx(i)}
-                  onBlur={() => setHoveredIdx((cur) => (cur === i ? null : cur))}
+                  onMouseEnter={(e) => handleEnter(i, e.currentTarget)}
+                  onMouseLeave={handleLeave}
+                  onFocus={(e) => handleEnter(i, e.currentTarget)}
+                  onBlur={handleLeave}
                 />
-              </g>
+              </div>
             );
           })}
-        </svg>
-        {/* HTML tooltip overlay (positioned in CSS-percent over the SVG). */}
-        {hoveredIdx !== null && (() => {
-          const a = ANCHORS[hoveredIdx];
-          const xPct = (PAD_X + (pct(a.date) / 100) * TRACK_W) / VIEW_W * 100;
-          const tipBody = tooltipMap[a.date];
-          return (
+        </div>
+
+        {/* Right column: HTML labels + year markers */}
+        <div className="viz-timeline-v__labels-col">
+          {YEAR_TICKS.map((y) => (
             <div
-              className="viz-timeline__tooltip"
-              data-visible="true"
-              style={{
-                left: `${xPct}%`,
-                top: `${(140 / VIEW_H) * 100}%`,
-              }}
-              role="tooltip"
+              key={y.label}
+              className="viz-timeline-v__year-label"
+              style={{ top: `${pct(y.date).toFixed(2)}%` }}
+              aria-hidden="true"
             >
-              <p className="viz-timeline__tooltip-date">{a.labelDate}</p>
-              <p className="viz-timeline__tooltip-title">{a.title}</p>
-              {tipBody ? (
-                <p className="viz-timeline__tooltip-body">{tipBody}</p>
-              ) : (
-                a.subtitle && <p className="viz-timeline__tooltip-body">{a.subtitle}</p>
-              )}
+              {y.label}
             </div>
-          );
-        })()}
+          ))}
+          {ANCHORS.map((a, i) => {
+            const visible = drawn >= pct(a.date) / 100;
+            return (
+              <div
+                key={`label-${i}`}
+                className={[
+                  'viz-timeline-v__label',
+                  a.highlight ? 'viz-timeline-v__label--highlight' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                style={{
+                  top: `${pct(a.date).toFixed(2)}%`,
+                  opacity: visible ? 1 : 0,
+                  transform: visible
+                    ? 'translateY(-50%) translateX(0)'
+                    : 'translateY(-50%) translateX(8px)',
+                }}
+              >
+                <div className="viz-timeline-v__label-date">{a.labelDate}</div>
+                <div className="viz-timeline-v__label-title">{a.title}</div>
+                {a.subtitle && (
+                  <div className="viz-timeline-v__label-subtitle">
+                    {a.subtitle}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div className="viz-timeline__caption">
-        <span>★ Projektzeitraum CaRM-Studie · April 2024 bis September 2026</span>
+
+      {/* Tooltip — flip-positioned over the viewport */}
+      <div
+        ref={cardRef}
+        role="tooltip"
+        className={`scrolly-hover-tooltip ${open && hoveredAnchor ? 'is-open' : ''}`}
+        style={
+          pos
+            ? {
+                position: 'fixed',
+                top: pos.top,
+                left: pos.left,
+                width: pos.width,
+              }
+            : undefined
+        }
+      >
+        {hoveredAnchor && (
+          <>
+            <p className="scrolly-hover-tooltip__date">
+              {hoveredAnchor.labelDate}
+            </p>
+            <p className="scrolly-hover-tooltip__title">{hoveredAnchor.title}</p>
+            {tooltipMap[hoveredAnchor.date] && (
+              <p className="scrolly-hover-tooltip__body">
+                {tooltipMap[hoveredAnchor.date]}
+              </p>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

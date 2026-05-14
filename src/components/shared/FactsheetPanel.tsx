@@ -21,6 +21,8 @@
 
 import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
 import FactsheetGroupBars from './FactsheetGroupBars';
+import VerdictStatement from './VerdictStatement';
+import VerdictPill from './VerdictPill';
 import type {
   CorrectnessClass,
   MythGroupMetrics,
@@ -143,15 +145,24 @@ export default function FactsheetPanel({
   context,
   mythText,
   classificationKey,
-  classificationLabel,
   mythContentEntry,
   factsheetSlug,
-  verdictLabel = 'Wissenschaftliches Urteil:',
   onClose,
   fallbackExplanation,
-  verdictAccessory,
   groupMetrics,
+  // v3 (2026-05-13): verdict is now carried by the colored statement +
+  // trailing arrow inside <VerdictStatement>. These three props from the
+  // legacy "separate verdict block" pattern are kept in the type so the
+  // 3 wrapper FactsheetPanels (quiz/, dashboard/, fakten-karten/) don't
+  // need to change, but they're no longer rendered. Remove the props +
+  // wrapper plumbing in a follow-up cleanup.
+  classificationLabel: _classificationLabel,
+  verdictLabel: _verdictLabel,
+  verdictAccessory: _verdictAccessory,
 }: FactsheetPanelProps) {
+  void _classificationLabel;
+  void _verdictLabel;
+  void _verdictAccessory;
   const panelRef = useRef<HTMLDivElement>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
@@ -284,17 +295,33 @@ export default function FactsheetPanel({
         <div className="factsheet-panel__body">
           {mythContentEntry ? (
             <>
-              {/* 1. Myth statement */}
-              <p className={`factsheet-panel__statement statement--${classificationKey}`}>{mythContentEntry.title}</p>
+              {/* 1. Myth statement carries the verdict (v3, 2026-05-13).
+                  Bold + verdict color + trailing arrow. */}
+              <VerdictStatement
+                statement={mythContentEntry.title}
+                verdict={classificationKey as CorrectnessClass}
+                as="p"
+                className="factsheet-panel__statement"
+                arrowSize={18}
+              />
 
-              {/* 2. Evidence-based verdict */}
-              <div className="factsheet-panel__classification">
-                <span className="factsheet-panel__label">{verdictLabel}</span>
-                <span className={`classification classification--${classificationKey}`}>
-                  {classificationLabel}
-                </span>
-                {verdictAccessory}
-              </div>
+              {/* 2. "Wissenschaftlich: <pill>" line (Fedor 2026-05-14).
+                  Sits directly under the statement and names the
+                  scientific verdict explicitly — the colored statement
+                  alone left some users unsure whether the verdict was
+                  Richtig or Falsch. Uses the canonical VerdictPill so
+                  the label tracks across surfaces (Quiz, Daten-Explorer,
+                  Fakten-Karten). "Wissenschaftlich" (not "Wissenschaftliches
+                  Urteil") follows the BugHerd #30 UI-label rule. */}
+              <p className="factsheet-panel__verdict-line">
+                <span className="factsheet-panel__verdict-label">
+                  Wissenschaftlich:
+                </span>{' '}
+                <VerdictPill
+                  verdict={classificationKey as CorrectnessClass}
+                  size="md"
+                />
+              </p>
 
               {/* 3-7. Ordered sections (markdown table hidden when bars wired) */}
               {orderedSections.map((section, i) => renderSection(section, i))}
@@ -319,16 +346,26 @@ export default function FactsheetPanel({
             </>
           ) : (
             <>
-              {/* Fallback if no pre-rendered content */}
-              <p className={`factsheet-panel__statement statement--${classificationKey}`}>{mythText}</p>
+              {/* Fallback if no pre-rendered content. Same v3 pattern as
+                  the primary branch above — statement carries the verdict. */}
+              <VerdictStatement
+                statement={mythText}
+                verdict={classificationKey as CorrectnessClass}
+                as="p"
+                className="factsheet-panel__statement"
+                arrowSize={18}
+              />
 
-              <div className="factsheet-panel__classification">
-                <span className="factsheet-panel__label">{verdictLabel}</span>
-                <span className={`classification classification--${classificationKey}`}>
-                  {classificationLabel}
-                </span>
-                {verdictAccessory}
-              </div>
+              {/* Mirror of the primary branch's "Wissenschaftlich:" row. */}
+              <p className="factsheet-panel__verdict-line">
+                <span className="factsheet-panel__verdict-label">
+                  Wissenschaftlich:
+                </span>{' '}
+                <VerdictPill
+                  verdict={classificationKey as CorrectnessClass}
+                  size="md"
+                />
+              </p>
 
               {fallbackExplanation && (
                 <div className="factsheet-panel__section">

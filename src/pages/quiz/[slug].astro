@@ -112,9 +112,19 @@ if (theme) {
         const refMatch = fullHtml.match(/<li>/g);
         const refCount = refMatch ? refMatch.length : 0;
 
+        // Strip "Mythos N:" / "Mythos N/M:" prefix AND trailing terminal
+        // punctuation (.!?) so the popup heading reads as a clean
+        // statement. Mirrors the Fakten-Karten + Daten-Explorer fix —
+        // the myth-number is editorial metadata, not part of the
+        // user-facing statement.
+        const rawMythTitle = mythEntry.title as string;
+        const cleanMythTitle = rawMythTitle
+          .replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "")
+          .replace(/[.!?]+$/u, "");
+
         mythContentMap[myth.id] = {
           html: fullHtml,
-          title: mythEntry.title as string,
+          title: cleanMythTitle,
           classification: mythEntry.classification as string,
           classificationLabel: mythEntry.classificationLabel as string,
           refCount,

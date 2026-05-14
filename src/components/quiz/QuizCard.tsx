@@ -36,6 +36,7 @@ import {
 } from "./usePointerSwipe";
 import VerdictScale from "./VerdictScale";
 import StreakChip from "./StreakChip";
+import VerdictPill from "../shared/VerdictPill";
 import { trackCardSwiped } from "./matomo";
 
 /** Stable hash for deterministic randomization. */
@@ -334,20 +335,22 @@ export default function QuizCard({
                   <span className="quiz-card__answer-label">
                     {t("ui.yourAnswerLabel")}:
                   </span>{" "}
-                  <span
-                    className={`quiz-card__answer-chip classification classification--${answer.chosenClassification}`}
-                  >
-                    {t(`classification.${answer.chosenClassification}`)}
-                  </span>
+                  <VerdictPill
+                    verdict={answer.chosenClassification}
+                    label={t(`classification.${answer.chosenClassification}`)}
+                    size="sm"
+                    className="quiz-card__answer-chip"
+                  />
                   <span className="quiz-card__answer-vs"> · </span>
                   <span className="quiz-card__answer-label">
                     {t("classification.scientific")}:
                   </span>{" "}
-                  <span
-                    className={`quiz-card__answer-chip classification classification--${myth.correctClassification}`}
-                  >
-                    {t(`classification.${myth.correctClassification}`)}
-                  </span>
+                  <VerdictPill
+                    verdict={myth.correctClassification}
+                    label={t(`classification.${myth.correctClassification}`)}
+                    size="sm"
+                    className="quiz-card__answer-chip"
+                  />
                 </p>
 
                 {/* 3 — Schritte verdict — large, colored by Schritte band. */}

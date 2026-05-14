@@ -11,6 +11,7 @@ steps:
 
 
       Das Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD) wollte es genau wissen: Was glaubt die Bevölkerung wirklich über Cannabis — und wie viel davon stimmt?
+    legend: "★ Projektzeitraum CaRM-Studie · April 2024 bis September 2026"
     hint: ""
   - heading: |-
       Jede:r in Deutschland
@@ -20,6 +21,7 @@ steps:
 
 
       Manches klingt plausibel, manches widersprüchlich. Was davon stimmt eigentlich? Genau das wollten wir herausfinden.
+    legend: "7.408 Aussagen · 53 Themenfelder · 42 prüfbare Thesen"
     hint: "Tippe auf eine Stimme, um sie zu lesen. ↓"
   - heading: |-
       Aus tausenden Stimmen
@@ -34,15 +36,15 @@ steps:
       Jede These wurde
       gegen die Forschungsliteratur geprüft.
     bodyText: |-
-      Jede der 42 Thesen geprüft — gegen die aktuelle wissenschaftliche Evidenz. Vierstufige Skala: richtig, eher richtig, eher falsch, falsch.
+      Jede der 42 Thesen geprüft — gegen die aktuelle wissenschaftliche Evidenz. Vierstufige Skala: falsch, eher falsch, eher richtig, richtig.
 
-      ↑ 16 stimmen.
-      ↗ 6 stimmen eher.
-      ↙ 11 stimmen eher nicht.
-      ↓ 7 stimmen nicht.
-      — Bei 2 Thesen lässt die Forschungslage keine eindeutige Aussage zu.
-
-      Grundlage: 548 wissenschaftliche Quellen aus PubMed, PsychInfo, SocIndex und Google Scholar (Stand: September 2025).
+      {↓ falsch} 7 stimmen nicht.
+      {↙ eher falsch} 11 stimmen eher nicht.
+      {↗ eher richtig} 6 stimmen eher.
+      {↑ richtig} 16 stimmen.
+      {— keine Aussage} Bei 2 Thesen lässt die Forschungslage keine eindeutige Aussage zu.
+    legend: >-
+      548 wissenschaftliche Quellen — systematische Literaturrecherche in PubMed, PsychInfo, SocIndex, Google Scholar (Stand 09/2025).
     hint: "Tippe auf eine Karte, um sie zu lesen. ↓"
   - heading: |-
       Dann fragten wir 2.795 Menschen,
@@ -57,31 +59,41 @@ steps:
       Was sie wissen.
       Was sie glauben.
     bodyText: |-
-      **Kenntnis** — 77 % der Konsumierenden kennen „Cannabis lindert Schmerzen" [↙ eher falsch]. „Cannabis ist ein Allheilmittel" [↓ falsch] kennen dagegen nur 12 % der Erwachsenen.
+      Für jede These haben wir drei Werte gemessen.
 
-      **Bedeutung** — was Menschen kennen, wiegt für sie meist auch schwerer. Beide Werte laufen eng zusammen.
+      **Kenntnis** — wer hat die Aussage schon einmal gehört? „Cannabis lindert Schmerzen" [↙ eher falsch] kennen 77 % der Konsumierenden, „Cannabis ist ein Allheilmittel" [↓ falsch] nur 12 % der Erwachsenen.
 
-      **Richtigkeit** — „Cannabis gefährdet die Verkehrssicherheit" [↑ richtig] kommt bei Erwachsenen auf 92 von 100, fast Konsens. „Cannabis verursacht Motivationsverlust" [↓ falsch] nur 25 — die Mehrheit liegt daneben.
+      **Bedeutung** — wie stark prägt die Aussage das eigene Verhalten? Was Menschen kennen, wiegt für sie meist auch schwerer; beide Werte laufen eng zusammen.
 
-      **Präventionsbedeutung** — wo prägt ein falsches Bild Verhalten? Genau dort lohnt sich Aufklärung am meisten.
+      **Richtigkeit** — wie nahe liegt die Einschätzung an der Wissenschaft? „Cannabis gefährdet die Verkehrssicherheit" [↑ richtig] erreicht bei Erwachsenen 92 von 100, „Cannabis verursacht Motivationsverlust" [↓ falsch] nur 25. Die Mehrheit liegt also daneben.
+    hint: ""
+  - heading: |-
+      Wo Aufklärung
+      am meisten bewegt.
+    bodyText: |-
+      Aus diesen drei Werten lassen sich zwei weitere ableiten.
 
-      **Bevölkerungsrisiko** — ein verbreiteter Halbmythos erreicht mehr Köpfe als ein obskurer. Sinnvoll nur für Voll- und Minderjährige.
+      **Präventionsbedeutung** verbindet Bedeutung und Wissenslücke. Sie zeigt, wo Aufklärung am meisten bewegt: dort, wo ein falsches Bild das Verhalten prägt.
+
+      **Bevölkerungsrisiko** wiegt zusätzlich die Reichweite mit ein — ein weit bekannter Halbmythos erreicht mehr Menschen als ein obskurer. Sinnvoll ist diese Kennzahl nur für Voll- und Minderjährige; die anderen Gruppen sind zu klein für eine belastbare Hochrechnung.
     hint: ""
   - heading: |-
       Wo wir suchen.
       Wem wir vertrauen.
     bodyText: |-
-      **Suche** — Apotheken und Arztpraxen führen bei Erwachsenen (60 %). Minderjährige greifen dort nur zu 37 % zu und fragen lieber Angehörige (53 %). Foren und Influencer:innen sind vor allem für jüngere Gruppen relevant.
+      Wo suchen Menschen aktiv nach Informationen zu Cannabis — und wem vertrauen sie dabei?
 
-      **Vertrauen** — Apotheken erreichen 92 Punkte, in allen Zielgruppen. Doch wer dort vertraut, sucht nicht zwangsläufig dort. Die Lücke zwischen Vertrauen und Nutzung ist der eigentliche Befund.
+      Erwachsene gehen am häufigsten in die Apotheke oder Arztpraxis (60 %). Minderjährige greifen dort nur zu 37 % zu und fragen lieber Angehörige (53 %). Foren und Influencer:innen spielen vor allem in jüngeren Zielgruppen eine Rolle.
+
+      Beim Vertrauen liegen Apotheken über alle Gruppen vorn (92 von 100). Doch wer vertraut, sucht nicht zwangsläufig dort — die Lücke zwischen Vertrauen und Nutzung ist der eigentliche Befund.
     hint: ""
   - heading: |-
       Was uns nebenbei erreicht.
       Wo Aufklärung am meisten bewegt.
     bodyText: |-
-      **Wahrnehmung** — Nicht aktiv gesuchten Informationen begegnen wir in Radio, Fernsehen, auf Plakaten und Infoscreens. Wir vertrauen ihnen weniger, sie erreichen uns trotzdem.
+      Andere Quellen erreichen uns ohne aktive Suche: Radio, Fernsehen, Plakate, Infoscreens. Diesen Quellen vertrauen Menschen weniger als der Apotheke — sie erreichen uns trotzdem.
 
-      **Prävention** — Wahrnehmung × Vertrauen ergibt das Präventionspotenzial. Die größten Hebel liegen dort, wo Reichweite und Vertrauen zusammenfallen — nicht dort, wo Information am häufigsten landet.
+      Wahrnehmung × Vertrauen ergibt das Präventionspotenzial: der größte Hebel liegt dort, wo Reichweite und Glaubwürdigkeit zusammenfallen, nicht dort, wo Information am häufigsten landet.
     hint: ""
   - heading: Was wir daraus gemacht haben.
     bodyText: |-
@@ -170,32 +182,6 @@ namedExperts:
     context: Hat ihre Expertise in die Befragung von Präventionsfachkräften eingebracht.
 landesstellenCredit: >-
   Mit Unterstützung der Landesstellen Schleswig-Holstein, Mecklenburg-Vorpommern, Berlin und regionaler Koordinationsstellen.
-methodikPhases:
-  - label: Phase 1
-    title: Empirische Erfassung der Überzeugungen
-    body: >-
-      Drei Quellen liefen parallel: eine offene Online-Befragung von 1.041 Personen aus dem Payback-Panel (August bis Oktober 2024), Fragebögen von 60 Präventionsfachkräften aus mehreren Bundesländern und eine systematische Analyse einschlägiger (Online-)Medien.
-
-
-      In Summe entstanden 7.408 frei formulierte Aussagen. Sie wurden zu 100 Themenfeldern verdichtet und auf 53 Themenfelder gebündelt — Grundlage für 42 prüfbare Thesen.
-  - label: Phase 2
-    title: Wissenschaftliche Literaturanalyse
-    body: >-
-      Jede der 42 Thesen wurde gegen 548 Quellen aus PubMed, Web of Science, dem Xchange-Präventionsregister und der EUDA geprüft. Die Recherche lief im Januar und Februar 2025.
-
-
-      Daraus entstand die vierstufige Einordnung: richtig, eher richtig, eher falsch, falsch — plus „keine Aussage möglich", wenn die Evidenzlage keine eindeutige Einordnung erlaubt.
-  - label: Phase 3
-    title: Quantitative Bevölkerungsbefragung
-    body: >-
-      Im Sommer 2025 wurden 2.097 Erwachsene (18–70 Jahre) im Payback-Panel befragt, quotiert nach Konsumstatus. Hinzu kamen 555 Minderjährige (16–17 Jahre) über das Horizoom-Panel und 143 Mitglieder von Cannabis-Anbauvereinigungen — insgesamt 2.795 Personen.
-
-
-      Für jede These wurden fünf Indikatoren erhoben: Kenntnis, Bedeutung, Richtigkeit, Präventionsbedeutung und Bevölkerungsrisiko. Zusätzlich wurden Informationsquellen und deren Vertrauenswürdigkeit untersucht.
-  - label: "Expert:innenrunde"
-    title: November 2025
-    body: >-
-      In einer interdisziplinären Expert:innendiskussion wurden Literaturanalyse und quantitative Erhebung zusammengeführt. Hier wurde die endgültige Klassifikation der 42 Thesen festgelegt.
 footerKontakt:
   label: Kontakt
   lines:
@@ -215,3 +201,9 @@ footerAbschlussbericht:
     Schütze, C., Schulte, B., Buth, S., Degkwitz, P., Rosenkranz, M., & Lahusen, H. (2026). Cannabiskonsum — Risiken und Mythen (CaRM): Abschlussbericht. ISD Hamburg.
 internalNotes: >-
   Iter-4 production migration (2026-05-11). All German strings AI-drafted from the legacy /ueber-uns/{projekt,methodik,team,klassifikation}.mdoc files. Pending ISD review per Asana task https://app.asana.com/1/1214692075439040/project/1214704634010891/task/1214715500051497. Open numerical questions also tracked there (n=2.795 vs 2.777; Klassifikation counts 16/6/11/7/2 vs 15/5/11/9/2; 39 vs 42 Fact-Sheets; Dr. Rosenkranz title; bio lines).
+
+
+  Iter-9 (2026-05-14) — Schritte 6, 7, 8 konsolidiert. Schritt 6 wurde von fünf Sub-Phasen auf zwei reduziert: Phase 1 zeigt die drei direkt gemessenen Indikatoren (Kenntnis, Bedeutung, Richtigkeit) gemeinsam, Phase 2 die zwei daraus abgeleiteten (Präventionsbedeutung, Bevölkerungsrisiko) als Synthese-Beat. Schritte 7 und 8 haben statt zwei Phasen je eine zusammengeführte Aussage. Die neuen deutschen Texte sind hier im Keystatic-Editor unter „Über uns Scrollytelling" → Felder steps[5..7].bodyText direkt bearbeitbar — keine Code-Änderung nötig. Zahlen (77 %, 92, 25, 60 %, 37 %, 53 %, 92 von 100) stammen aus dem CaRM-Endbericht; bei Korrekturen bitte hier ändern.
+
+
+  Iter-10 (2026-05-14) — Synthese als eigener Schritt 7. Die zwei abgeleiteten Indikatoren (Präventionsbedeutung, Bevölkerungsrisiko) leben jetzt in einem eigenen Schritt mit eigener Überschrift, statt als Phase-2 innerhalb Schritt 6. Sources (Suche/Vertrauen, Wahrnehmung/Prävention) wandern zu Schritten 8 + 9, CTA zu Schritt 10, Team zu Schritt 11. Insgesamt 11 Schritte. Bearbeitbar wie zuvor im Keystatic-Editor.
