@@ -130,6 +130,35 @@ html, body {
 }
 #root { min-height: 100vh; }
 
+/* ── Dark site header on /ueber-uns/ ────────────────────────────
+   The global site header (BaseLayout) defaults to a light beige
+   glass. On the scrollytelling page that backdrop reads light-on-
+   light against the dark body. Override with a dark glass tuned
+   to match the page's --bg, plus lighter nav text. */
+body:has(.scrolly) > header {
+  background: rgba(15, 19, 24, 0.85);
+  border-bottom-color: rgba(45, 55, 72, 0.55);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
+}
+
+body:has(.scrolly) header nav a {
+  color: var(--fg-muted);
+}
+
+body:has(.scrolly) header nav a:first-child {
+  color: var(--fg);
+}
+
+body:has(.scrolly) header nav a:hover {
+  color: var(--fg);
+}
+
+body:has(.scrolly) header nav a[aria-current="page"],
+body:has(.scrolly) header nav a.active {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
+}
+
 /* ════════════════════════════════════════════════════════════════
    Viewer layout (from prototypes/scrollytelling-v3/src/styles/viewer.css)
    ════════════════════════════════════════════════════════════════ */
