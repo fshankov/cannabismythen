@@ -11,17 +11,19 @@
  * surface independent of the main site's lighter background.
  */
 
-/* Design tokens — kept in sync with src/styles/global.css when porting back. */
+/* Design tokens — scoped to `body:has(.scrolly)` so they apply page-wide on
+ * /ueber-uns/ (where the html/body rule below paints the dark backdrop) but
+ * cannot leak to other pages even if this stylesheet is loaded elsewhere.
+ *
+ * Tokens that match global.css exactly (`--classification-richtig` etc., the
+ * tighter spacing scale, the radius scale) are intentionally NOT redeclared
+ * here — they inherit from `:root` in global.css.
+ *
+ * Tokens that DIFFER from global.css are kept and explained inline. */
 
-:root {
-  /* Classification verdicts (matches main repo --classification-*) */
-  --classification-richtig: #047857;
-  --classification-eher-richtig: #4d7c0f;
-  --classification-eher-falsch: #b45309;
-  --classification-falsch: #be123c;
-  --classification-keine-aussage: #6b7280;
-
-  /* Faded backgrounds for cells in resting state */
+body:has(.scrolly) {
+  /* Faded backgrounds for cells in resting state — saturated tints (vs the
+     pastel tints in global.css); intentional for this page's dark backdrop. */
   --classification-richtig-bg: #d1fae5;
   --classification-eher-richtig-bg: #ecfccb;
   --classification-eher-falsch-bg: #fed7aa;
@@ -49,22 +51,16 @@
   --fg-dim: #6b7280;
   --border: #2d3748;
 
-  /* Typography */
+  /* Typography — different stacks from global.css. Editorial/research voice:
+     Georgia for display headers, Inter for body. */
   --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: 'Georgia', 'DM Serif Display', serif;
   --font-mono: 'SF Mono', 'Monaco', monospace;
 
-  /* Spacing */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
+  /* Spacing — looser than global.css (--space-lg=1.5rem, --space-xl=2rem in
+     global). This stretches the scrollytelling step rhythm. */
   --space-lg: 2rem;
   --space-xl: 4rem;
-
-  /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
 
   /* Shadows */
   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -88,7 +84,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  body:has(.scrolly) {
     --anim-stagger: 0ms;
     --anim-entry-dur: 0ms;
     --anim-hover-dur: 0ms;
@@ -97,7 +93,8 @@
     --anim-step-fade-dur: 0ms;
   }
 }
-[data-reduced-motion="true"] {
+body:has(.scrolly)[data-reduced-motion="true"],
+body:has(.scrolly) [data-reduced-motion="true"] {
   --anim-stagger: 0ms;
   --anim-entry-dur: 0ms;
   --anim-hover-dur: 0ms;
@@ -108,7 +105,7 @@
 
 /* Themenfeld pastels — backgrounds for myth-grid cells (resting state).
    Mapped from category_id values 1–9 in carm-data.json. */
-:root {
+body:has(.scrolly) {
   --theme-1: #2b3a3a;  /* Medizinisch / therapeutisch */
   --theme-2: #3a2b3a;  /* Risiken Körper/Entwicklung */
   --theme-3: #2b3a2e;  /* Psychische Effekte */
@@ -204,6 +201,15 @@ html, body {
   color: var(--fg);
 }
 
+/* Inline verdict glyph rendered by `{↑ richtig}` markers in body copy
+   (Step 4 tally list etc.). Sit on the text baseline with a tiny
+   trailing space so the count reads as a single phrase. */
+.scrolly__body-arrow {
+  display: inline-block;
+  vertical-align: -2px;
+  margin-right: 0.35em;
+}
+
 .scrolly__step-label {
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -236,38 +242,9 @@ html, body {
   font-style: italic;
 }
 
-/* Verdict tag — bracketed inline pill that colors the [↑ richtig] / [↓ falsch]
-   spans in body text using the design system's classification tokens. */
-.verdict-tag {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 3px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 0.95em;
-  white-space: nowrap;
-}
-.verdict-tag--richtig {
-  color: #34d399; /* emerald-400 — lifted for dark bg */
-  background: rgba(4, 120, 87, 0.18);
-}
-.verdict-tag--eher-richtig {
-  color: #a3e635; /* lime-400 */
-  background: rgba(77, 124, 15, 0.18);
-}
-.verdict-tag--eher-falsch {
-  color: #fbbf24; /* amber-400 */
-  background: rgba(180, 83, 9, 0.18);
-}
-.verdict-tag--falsch {
-  color: #fb7185; /* rose-400 */
-  background: rgba(190, 18, 60, 0.18);
-}
-.verdict-tag--keine-aussage {
-  color: #9ca3af; /* gray-400 */
-  background: rgba(107, 114, 128, 0.18);
-}
+/* Bracketed inline verdict pills [↑ richtig] / [↓ falsch] now use the
+   unified <VerdictPill> component (pill.* rules in global.css). The
+   legacy .verdict-tag* rules were dropped in the v3 sweep. */
 
 .scrolly__cta {
   display: inline-block;
