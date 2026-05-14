@@ -255,16 +255,14 @@ export async function getMythIdToSlugMap(): Promise<Map<string, string>> {
       const norm = normalizeMythId(e.mythId);
       if (norm) map.set(norm, slug);
     }
-    // Combined factsheets may map two myth numbers to one slug.
-    // The slug itself encodes "m31-m32-…" — capture both numbers.
-    const matches = slug.match(/m(\d{2})/g);
-    if (matches) {
-      for (const m of matches) {
-        const num = parseInt(m.slice(1), 10);
-        if (Number.isFinite(num)) {
-          map.set(`m${num}`, slug);
-          map.set(`m${num.toString().padStart(2, "0")}`, slug);
-        }
+    // Fallback: extract the myth number from the slug prefix (e.g. "m31"
+    // from "m31-entspannt"). Used when mythId is missing on the entry.
+    const prefixMatch = slug.match(/^m(\d+)/);
+    if (prefixMatch) {
+      const num = parseInt(prefixMatch[1], 10);
+      if (Number.isFinite(num)) {
+        map.set(`m${num}`, slug);
+        map.set(`m${num.toString().padStart(2, "0")}`, slug);
       }
     }
   }

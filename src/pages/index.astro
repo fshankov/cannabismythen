@@ -32,12 +32,12 @@ type MythRecord = {
 const mythRecords: MythRecord[] = [];
 
 for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
-  // Slug prefixes look like "m01" or dual myths like "m31-m32".
-  const prefixMatch = slug.match(/^(m\d+-m\d+|m\d+)/);
+  // Slug prefixes look like "m01".
+  const prefixMatch = slug.match(/^m\d+/);
   if (!prefixMatch) continue;
   const e = entry as { classification: string; title?: string; cardSummary?: string };
   mythRecords.push({
-    prefix: prefixMatch[1],
+    prefix: prefixMatch[0],
     classification: e.classification,
     heroLabel: deriveHeroLabel(e.title ?? ""),
     cardSummary: e.cardSummary ?? "",

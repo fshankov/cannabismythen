@@ -28,11 +28,10 @@ const allSlugs = await reader.collections.zahlenUndFakten.list();
 for (const slug of allSlugs) {
   const entry = await reader.collections.zahlenUndFakten.read(slug);
   if (!entry) continue;
-  // Extract the myth ID prefix from the slug (e.g. "m01" from "m01-allheilmittel",
-  // or "m31-m32" from "m31-m32-entspannt-aggressiv").
-  const prefixMatch = slug.match(/^(m\d+-m\d+|m\d+)/);
+  // Extract the myth ID prefix from the slug (e.g. "m01" from "m01-allheilmittel").
+  const prefixMatch = slug.match(/^m\d+/);
   if (prefixMatch) {
-    clsBySlugPrefix.set(prefixMatch[1], entry.classification);
+    clsBySlugPrefix.set(prefixMatch[0], entry.classification);
   }
 }
 
