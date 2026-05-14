@@ -21,6 +21,14 @@
   --color-accent-hover: #1f4f3a;
   --color-accent-light: #e8f5ef;
 
+  /* Legacy aliases for the accent — `--color-primary*` was the original
+     dashboard naming; consolidated here so dashboard.css and its modal
+     don't need their own local declarations. Prefer `--color-accent*`
+     in new code. */
+  --color-primary: var(--color-accent);
+  --color-primary-hover: var(--color-accent-hover);
+  --color-primary-light: var(--color-accent-light);
+
   /* Classification verdicts — Unified Emerald/Lime/Amber/Rose palette
      (Decision A: deuteranopia-safe, avoids traffic-light associations).
      The canonical token names use the `--classification-` prefix; the
@@ -57,6 +65,7 @@
   --color-border-strong: #cbd5e1;    /* Emphasized borders */
   --color-text-inverse: #ffffff;     /* Text on dark backgrounds */
   --color-accent-muted: #95c4ad;     /* Disabled accent / decorative */
+  --color-primary-muted: var(--color-accent-muted); /* legacy alias */
 
   /* Spacing scale */
   --space-xs: 0.25rem;
@@ -474,6 +483,10 @@ a.version-card:hover {
 
 
 /* ── Classification Badges ──────────────────────────────────── */
+/* Text-only label pill. Used by FaqVerdictPill and legacy verdict
+   surfaces. Uniform tinted pill — no more dashed/dotted/double border
+   side-bars (deuteranopia redundancy is now carried by the verdict
+   arrow direction in <VerdictArrow>). */
 
 .classification {
   display: inline-block;
@@ -481,47 +494,115 @@ a.version-card:hover {
   font-size: 0.825rem;
   font-weight: 600;
   padding: 0.25em 0.7em;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   line-height: 1.4;
   white-space: nowrap;
 }
 
 .classification--richtig {
-  background: var(--color-richtig-bg);
-  color: var(--color-richtig);
-  border-left: 3px solid var(--color-richtig);
+  background: var(--classification-richtig-bg);
+  color: var(--classification-richtig);
 }
 
 .classification--eher_richtig {
-  background: var(--color-eher-richtig-bg);
-  color: var(--color-eher-richtig);
-  border-left: 3px dashed var(--color-eher-richtig);
+  background: var(--classification-eher-richtig-bg);
+  color: var(--classification-eher-richtig);
 }
 
 .classification--eher_falsch {
-  background: var(--color-eher-falsch-bg);
-  color: var(--color-eher-falsch);
-  border-left: 3px dotted var(--color-eher-falsch);
+  background: var(--classification-eher-falsch-bg);
+  color: var(--classification-eher-falsch);
 }
 
 .classification--falsch {
-  background: var(--color-falsch-bg);
-  color: var(--color-falsch);
-  border-left: 3px double var(--color-falsch);
+  background: var(--classification-falsch-bg);
+  color: var(--classification-falsch);
 }
 
-.classification--keine_aussage {
-  background: var(--color-keine-aussage-bg);
-  color: var(--color-keine-aussage);
+.classification--keine_aussage,
+.classification--no_classification,
+.classification--n_a {
+  background: var(--classification-keine-aussage-bg);
+  color: var(--classification-keine-aussage);
+}
+
+
+/* ── Verdict Pill ─────────────────────────────────────────────
+   The unified verdict marker for the v3 system: icon + label inside
+   one tinted pill, the icon's arrow inherits its own colors from
+   <VerdictArrow>. Used by VerdictPill, VerdictFilterButton, quiz
+   reveal chips, dashboard verdict tags, legends.
+
+   Lighter / hover / pressed tint pairs follow the same 50/100/200
+   Tailwind-style progression as the base bg tokens.                  */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px 4px 9px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  letter-spacing: -0.003em;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.pill__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.pill--sm { font-size: 0.76rem; padding: 3px 9px 3px 7px; gap: 4px; }
+.pill--lg { font-size: 0.95rem; padding: 5px 13px 5px 11px; gap: 6px; }
+
+.pill--richtig       { background: var(--classification-richtig-bg);       color: var(--classification-richtig); }
+.pill--eher_richtig  { background: var(--classification-eher-richtig-bg);  color: var(--classification-eher-richtig); }
+.pill--eher_falsch   { background: var(--classification-eher-falsch-bg);   color: var(--classification-eher-falsch); }
+.pill--falsch        { background: var(--classification-falsch-bg);        color: var(--classification-falsch); }
+.pill--keine_aussage,
+.pill--no_classification {
+  background: var(--classification-keine-aussage-bg);
+  color: var(--classification-keine-aussage);
+}
+
+/* Button-version: hover deepens the tint; active (aria-pressed) adds
+   a 1px verdict-colored ring and bolder weight. Sibling .pill buttons
+   inside a `.pill-group--has-active` parent dim to 0.42 opacity so the
+   selected filter pops. */
+button.pill {
+  cursor: pointer;
+  font: inherit;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.84rem;
+}
+button.pill:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+button.pill[aria-pressed="true"] {
+  font-weight: 700;
+  border-color: currentColor;
+}
+.pill-group--has-active button.pill:not([aria-pressed="true"]) {
+  opacity: 0.42;
 }
 
 
 /* ── Myth-statement verdict tint ─────────────────────────────
    Subtle text-color tint applied to the *statement* itself — the
-   factsheet H1, the Streifen / FaktenCard / Quiz card titles. Pairs
-   with the verdict arrow + canonical label so the statement reads
-   the same on every surface. NEVER strikethrough or background-fill
-   the statement: the visual treatment is intentionally subtle. */
+   factsheet H1, the Streifen / FaktenCard / Quiz card titles. Legacy
+   class kept for surfaces that should NOT bold the statement (e.g.
+   neutral lists, body-copy inline). For the v3 "title carries verdict"
+   pattern, use <VerdictStatement> / .stmt instead. */
 
 .statement--richtig          { color: var(--classification-richtig); }
 .statement--eher-richtig,
@@ -531,6 +612,60 @@ a.version-card:hover {
 .statement--falsch           { color: var(--classification-falsch); }
 .statement--no-classification,
 .statement--no_classification { color: var(--color-text); }
+
+
+/* ── Bold verdict statement + trailing arrow (v3) ────────────
+   The "title carries the verdict" pattern. The myth statement is
+   rendered fontWeight:700 in the verdict color; an inline <VerdictArrow>
+   sits at the end. Wrap the last word + arrow in a <span class="stmt-tail">
+   so a line break never orphans the arrow on its own line.
+
+   Use this via <VerdictStatement> rather than hand-rolling the markup. */
+
+/* Use compound selectors (.stmt.stmt--<verdict>) so the rule has 0,2,0
+   specificity — high enough to win against per-page rules like
+   .quiz-card__statement (0,1,0) in quiz.css that load after global.css. */
+.stmt {
+  font-family: var(--font-display);
+  line-height: 1.3;
+  letter-spacing: -0.012em;
+  margin: 0;
+}
+
+.stmt.stmt--richtig {
+  font-weight: 700;
+  color: var(--classification-richtig);
+}
+.stmt.stmt--eher_richtig {
+  font-weight: 700;
+  color: var(--classification-eher-richtig);
+}
+.stmt.stmt--eher_falsch {
+  font-weight: 700;
+  color: var(--classification-eher-falsch);
+}
+.stmt.stmt--falsch {
+  font-weight: 700;
+  color: var(--classification-falsch);
+}
+.stmt.stmt--keine_aussage,
+.stmt.stmt--no_classification {
+  font-weight: 700;
+  color: var(--classification-keine-aussage);
+}
+
+.stmt-tail {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.stmt-tail .stmt-arrow {
+  display: inline-block;
+  width: 0.82em;
+  height: 0.82em;
+  margin-left: 0.18em;
+  vertical-align: -0.02em;
+}
 
 
 /* ── Version Label (Scrollytelling) ─────────────────────────── */
