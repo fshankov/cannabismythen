@@ -233,10 +233,10 @@ function clearProgress(slug: string): void {
 /** Per-quiz accent token (one of the four classification colours) used to
  *  tint the progress bar fill, the dot ring, and the next-question CTA. */
 const QUIZ_ACCENT: Record<string, string> = {
-  "quiz-medizinischer-nutzen": "var(--color-richtig)",
-  "quiz-risiken-koerper-psyche": "var(--color-falsch)",
-  "quiz-stimmung-wahrnehmung": "var(--color-eher-richtig)",
-  "quiz-gefaehrlichkeit": "var(--color-eher-falsch)",
+  "quiz-medizinischer-nutzen": "var(--classification-richtig)",
+  "quiz-risiken-koerper-psyche": "var(--classification-falsch)",
+  "quiz-stimmung-wahrnehmung": "var(--classification-eher-richtig)",
+  "quiz-gefaehrlichkeit": "var(--classification-eher-falsch)",
   "quiz-soziales-bevoelkerung": "var(--color-accent)",
 };
 
