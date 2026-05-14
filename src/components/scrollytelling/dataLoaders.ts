@@ -1,5 +1,6 @@
 import type {
   CarmData,
+  CorrectnessClass,
   GroupId,
   Indicator,
   InformationSourcesData,
@@ -85,3 +86,101 @@ export const INDICATOR_LABEL_DE: Record<Indicator, string> = {
   prevention_significance: 'Präventionsbedeutung',
   population_relevance: 'Bevölkerungsrisiko',
 };
+
+/* ──────────────────────────────────────────────────────────────────
+ * Iter-11: shared verdict + theme helpers.
+ *
+ * Both VizMythGrid (right viz column, classified + themed modes) and
+ * ScrollytellingViewer (left text column, in-body legends rendered
+ * when step.gridMode is set) consume the same category list, colour
+ * tokens, and verdict counts. Hoisting these here keeps one source
+ * of truth for the Step 3 + Step 4 visuals.
+ * ────────────────────────────────────────────────────────────────── */
+
+/** Per-verdict CSS-var lookup. Hex tokens live in global.css; this
+ *  map just hands them out for inline-style backgrounds (e.g. the
+ *  classified grid cell + the in-body verdict puck). */
+export const VERDICT_COLOR: Record<CorrectnessClass, string> = {
+  richtig: 'var(--classification-richtig)',
+  eher_richtig: 'var(--classification-eher-richtig)',
+  eher_falsch: 'var(--classification-eher-falsch)',
+  falsch: 'var(--classification-falsch)',
+  no_classification: 'var(--classification-keine-aussage)',
+};
+
+/** Step 4 / in-body legend uses the canonical verdict names (richtig,
+ *  eher richtig, …) — not the "stimmt / stimmt nicht" pill-phrasing
+ *  used in dashboard filters. Per Fedor's Iter-11 clarification. */
+export const VERDICT_LABEL_DE: Record<CorrectnessClass, string> = {
+  richtig: 'richtig',
+  eher_richtig: 'eher richtig',
+  eher_falsch: 'eher falsch',
+  falsch: 'falsch',
+  no_classification: 'keine Aussage',
+};
+
+/** Display order — falsch → richtig (matches the daten-explorer
+ *  filter row site-wide). `no_classification` lands last. */
+export const VERDICT_ORDER: CorrectnessClass[] = [
+  'falsch',
+  'eher_falsch',
+  'eher_richtig',
+  'richtig',
+  'no_classification',
+];
+
+/** Override for the verdict glyph when it renders ON a verdict-colored
+ *  background (classified grid cell, verdict puck). White stroke on
+ *  top of the background colour. */
+export const ON_VERDICT_BG_GLYPH = {
+  main: '#ffffff',
+  shadow: 'rgba(255, 255, 255, 0.55)',
+} as const;
+
+/** Dark themed-cell background per category. The integer category_id
+ *  is mapped onto a 9-step palette of muted darks (themes 1-9). */
+export function themeColorFor(catId: number | null): string {
+  if (catId === null) return 'var(--bg-elev)';
+  const idx = ((catId - 1) % 9) + 1;
+  return `var(--theme-${idx})`;
+}
+
+/** Ordered, deduplicated list of categories that appear in the first
+ *  42 myths (sorted-by-category-then-id). Same logic the grid uses to
+ *  render the cells, so the legend matches what's on screen. */
+export function orderedCategoriesFromData(
+  data: CarmData,
+): { id: number; name: string }[] {
+  const myths = sortedMyths(data).slice(0, 42);
+  const seen = new Set<number>();
+  const out: { id: number; name: string }[] = [];
+  for (const m of myths) {
+    if (m.category_id !== null && !seen.has(m.category_id)) {
+      seen.add(m.category_id);
+      const cat = data.categories.find((c) => c.id === m.category_id);
+      out.push({
+        id: m.category_id,
+        name: cat?.name_de ?? `Kategorie ${m.category_id}`,
+      });
+    }
+  }
+  return out;
+}
+
+/** Verdict-count tally across the first 42 myths. Used by the in-body
+ *  classified legend (Step 4). */
+export function verdictCountsFromData(
+  data: CarmData,
+): Record<CorrectnessClass, number> {
+  const counts: Record<CorrectnessClass, number> = {
+    richtig: 0,
+    eher_richtig: 0,
+    eher_falsch: 0,
+    falsch: 0,
+    no_classification: 0,
+  };
+  for (const m of sortedMyths(data).slice(0, 42)) {
+    counts[m.correctness_class]++;
+  }
+  return counts;
+}

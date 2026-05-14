@@ -83,13 +83,16 @@ body:has(.scrolly) {
   --viz-text-secondary: 11px;  /* units, dates, mini-defs — mono */
   --viz-text-micro: 10px;      /* tick labels, smallest annotations */
 
-  /* Iter-10 — staggered-reveal rhythm. Each revealable element in
+  /* Iter-10/12 — staggered-reveal rhythm. Each revealable element in
      VizSampleAndRanked (strips) and VizSourcesStrips (columns) sets
      `--reveal-idx` to its position in the CURRENT reveal cascade
      (rebased to 0 at each step entry, so newly-revealed strips don't
-     inherit huge delays from their absolute index). The transition-
-     delay = max(--reveal-idx, 0) * --viz-reveal-stagger. */
+     inherit huge delays from their absolute index). Iter-12: switched
+     from CSS `transition` to CSS `animation` so first-entry mounts
+     animate too (transitions only fire on property CHANGES; mount with
+     `opacity: 1` already applied wouldn't trigger one). */
   --viz-reveal-stagger: 200ms;
+  --viz-reveal-dur: 420ms;
 
   /* Source category palette (info-sources.json colors) */
   --source-cat-institutional: #2563eb;
@@ -256,6 +259,85 @@ body:has(.scrolly) header nav a.active {
   margin-right: 0.35em;
 }
 
+/* Iter-11 — verdict PUCK variant for <VerdictPill variant="puck">.
+   A small colored circle (verdict color) with a WHITE arrow inside,
+   no label. Used everywhere on the scrollytelling where the inline
+   verdict marker appears (`[↑ richtig]` in body copy + the Step 4
+   tally legend rendered in the left text column). */
+.verdict-puck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  vertical-align: -3px;
+  border: 1px solid rgba(15, 19, 24, 0.5);
+}
+.verdict-puck--sm { width: 18px; height: 18px; }
+.verdict-puck--md { width: 22px; height: 22px; }
+.verdict-puck--lg { width: 28px; height: 28px; }
+.verdict-puck--richtig      { background: var(--classification-richtig); }
+.verdict-puck--eher_richtig { background: var(--classification-eher-richtig); }
+.verdict-puck--eher_falsch  { background: var(--classification-eher-falsch); }
+.verdict-puck--falsch       { background: var(--classification-falsch); }
+.verdict-puck--no_classification { background: var(--classification-keine-aussage); }
+
+/* In-body Themenfelder legend (Step 3) — small colored swatches +
+   names, wrapping inline. Replaces the legend block that used to sit
+   below the grid in the viz column. */
+.scrolly__theme-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: var(--space-md) 0 0 0;
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+  line-height: 1.5;
+}
+.scrolly__theme-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.scrolly__theme-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.scrolly__theme-name {
+  white-space: nowrap;
+}
+
+/* In-body classified verdict tally (Step 4) — 5 rows, each:
+   [colored puck] + verdict label + (count) on ONE line. Replaces
+   the legend that used to sit below the classified grid. */
+.scrolly__verdict-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: var(--space-md) 0 0 0;
+  font-size: 0.95rem;
+}
+.scrolly__verdict-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.6em;
+  color: var(--fg);
+  white-space: nowrap;
+}
+.scrolly__verdict-label {
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.scrolly__verdict-count {
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
 /* Small-print legend line below the body text — for source attributions,
    project timeframe, sample-size totals. Visually separated by a top
    border + muted color so it reads as metadata, not as part of the
@@ -337,7 +419,11 @@ body:has(.scrolly) header nav a.active {
   align-items: center;
   justify-content: center;
   padding: var(--space-md);
-  contain: layout;
+  /* Iter-14: removed `contain: layout`. It established a containing
+     block for position:fixed descendants, so the hover tooltips
+     (positioned via `useFlipPosition` with viewport coords) ended up
+     placed relative to this column instead of the viewport — bleeding
+     off the right edge. */
 }
 
 /* Viz "stage" — cross-fade between unrelated viz families
@@ -350,9 +436,13 @@ body:has(.scrolly) header nav a.active {
   justify-content: center;
   animation: scrolly-stage-in var(--anim-step-fade-dur, 500ms) ease both;
 }
+/* Iter-13: pure opacity fade, no translateY. Fedor reported the
+   "comes from below" jump on step transitions; that was this
+   keyframe's translateY(8px) → 0 firing when vizFamilyKey changed
+   (mythGrid → sampleAndRanked, sampleAndRanked → sourcesStrips, …). */
 @keyframes scrolly-stage-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .scrolly__viz-mobile {
@@ -414,10 +504,12 @@ body:has(.scrolly) header nav a.active {
   margin: 0 auto;
 }
 
-/* ───── Reusable entry animations ───── */
+/* ───── Reusable entry animations ─────
+   Iter-13: opacity-only (was translateY 8px → 0). Several viz pieces
+   reuse `viz-fade-up` — keeping the name for compat but no movement. */
 @keyframes viz-fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 @keyframes viz-fade-in {
   from { opacity: 0; }
@@ -454,97 +546,120 @@ body:has(.scrolly) header nav a.active {
   50%      { transform: scale(1.4); opacity: 0; }
 }
 
-/* ───── VizTimeline (vertical, Iter-10) ─────
-   Two-column grid: 60 px track on the left (line + dots + period bars),
-   labels-and-year-markers on the right. Both columns are full-height of
-   the same container so absolute-positioned children share one y-axis
-   (`top: <pct>%` for each anchor / year / period bar).
-*/
+/* Iter-12: viz reveal-in keyframe — applied to strips, columns, slope
+   segments, and arrow pucks when they FIRST become revealed during a
+   forward step transition. Used as `animation` (not `transition`) so
+   the reveal fires on initial-mount-with-already-revealed-state, e.g.
+   when the user opens /ueber-uns/ already scrolled past Step 5. */
+@keyframes viz-reveal-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ───── VizTimeline — Step 1 (Iter-15 rewrite) ─────
+   Six anchors stacked as document-flow rows. Each row is a 3-cell
+   grid: [left-cell | track-cell (80px) | right-cell]. Labels
+   alternate L/R per i % 2 (i=0 right, i=1 left, i=2 right, …).
+   A continuous green line is absolutely positioned behind the rows;
+   the line tip is the drawn-line tip. Container height adapts to
+   content — no fixed height or absolute-positioned entries. */
 .viz-timeline-v {
   position: relative;
   width: 100%;
-  max-width: 520px;
+  max-width: 720px;
   margin: 0 auto;
-}
-.viz-timeline-v__grid {
-  display: grid;
-  grid-template-columns: 60px 1fr;
-  column-gap: 1.5rem;
-  height: clamp(560px, 78vh, 760px);
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
 }
 
-/* — Track column (left) — */
-.viz-timeline-v__track-col {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-.viz-timeline-v__track-bg {
+/* Continuous line behind the rows. */
+.viz-timeline-v__line-bg,
+.viz-timeline-v__line-fg {
   position: absolute;
   left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1.5px;
-  background: var(--border);
-  transform: translateX(-50%);
+  width: 2px;
   border-radius: 1px;
-}
-.viz-timeline-v__track-fg {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 2.5px;
-  background: #3a8c5a;
-  transform: translateX(-50%);
-  border-radius: 1px;
-  box-shadow: 0 0 8px rgba(58, 140, 90, 0.45);
-}
-.viz-timeline-v__period-bar {
-  position: absolute;
-  left: 50%;
-  width: 8px;
-  background: rgba(58, 140, 90, 0.28);
-  border-radius: 2px;
   transform: translateX(-50%);
   pointer-events: none;
+  z-index: 0;
 }
-.viz-timeline-v__year-tick {
+.viz-timeline-v__line-bg {
+  top: 0;
+  bottom: 0;
+  background: var(--border);
+}
+.viz-timeline-v__line-fg {
+  top: 0;
+  background: #3a8c5a;
+  box-shadow: 0 0 8px rgba(58, 140, 90, 0.45);
+  /* height set inline (drawn × 100%) */
+}
+.viz-timeline-v__locator {
   position: absolute;
   left: 50%;
   width: 14px;
-  height: 1px;
-  background: var(--fg-dim);
+  height: 14px;
+  border-radius: 50%;
+  background: #f5c542;
   transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 12px rgba(245, 197, 66, 0.7),
+    0 0 24px rgba(245, 197, 66, 0.35);
   pointer-events: none;
+  z-index: 3;
+  transition: top 80ms linear;
 }
-.viz-timeline-v__dot-wrap {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
+
+/* One row per anchor — 3-cell grid. minmax(0, 1fr) lets the fr cells
+   shrink properly when a long unbreakable word appears in the OTHER
+   cell. align-items: center vertically aligns the dot with the label. */
+.viz-timeline-v__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr);
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  transition: opacity 280ms ease;
+}
+.viz-timeline-v__row-cell {
+  min-width: 0;
+}
+.viz-timeline-v__row-cell--left {
+  text-align: right;
+  padding-right: 1rem;
+}
+.viz-timeline-v__row-cell--right {
+  text-align: left;
+  padding-left: 1rem;
+}
+.viz-timeline-v__row-cell--track {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 220ms ease;
+  position: relative;
 }
+
+/* Dot + hit area inside the track cell */
 .viz-timeline-v__dot {
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #3a8c5a;
   border: 2px solid var(--bg);
   box-shadow: 0 0 0 1px rgba(58, 140, 90, 0.4);
-  transition: width 160ms ease, height 160ms ease, background 160ms ease;
+  transition: width 160ms ease, height 160ms ease;
+  z-index: 2;
+  position: relative;
 }
-.viz-timeline-v__dot-wrap--highlight .viz-timeline-v__dot {
+.viz-timeline-v__row--highlight .viz-timeline-v__dot {
   background: #f5c542;
   box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.5);
 }
-.viz-timeline-v__dot-wrap--hovered .viz-timeline-v__dot {
-  width: 14px;
-  height: 14px;
+.viz-timeline-v__row--hovered .viz-timeline-v__dot {
+  width: 15px;
+  height: 15px;
 }
 .viz-timeline-v__dot-pulse {
   position: absolute;
@@ -558,7 +673,7 @@ body:has(.scrolly) header nav a.active {
 }
 .viz-timeline-v__dot-hit {
   position: absolute;
-  inset: -8px;
+  inset: -6px;
   background: transparent;
   border: 0;
   padding: 0;
@@ -570,52 +685,30 @@ body:has(.scrolly) header nav a.active {
   outline-offset: 2px;
 }
 
-/* — Labels column (right) — */
-.viz-timeline-v__labels-col {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-.viz-timeline-v__year-label {
-  position: absolute;
-  left: 0;
-  transform: translateY(-50%);
-  font-family: var(--font-mono);
-  font-size: var(--viz-text-secondary);
-  color: var(--fg-dim);
-  letter-spacing: 0.05em;
+/* Label text styles — title → date → subtitle. No white-space:nowrap;
+   the row-cell has min-width:0 so wide titles or subtitles wrap
+   naturally inside their cell on narrow viewports. */
+.viz-timeline-v__label-title {
+  font-family: var(--font-display);
+  font-size: var(--viz-text-primary);
+  color: var(--fg);
   font-weight: 600;
-  pointer-events: none;
-}
-.viz-timeline-v__label {
-  position: absolute;
-  left: 0;
-  right: 0;
-  /* transform + opacity set inline based on `visible` */
-  transition: opacity 320ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
-  line-height: 1.35;
-  padding-left: 2.75rem; /* leave room for the year label on the same y */
+  line-height: 1.3;
 }
 .viz-timeline-v__label-date {
   font-family: var(--font-mono);
   font-size: var(--viz-text-secondary);
   color: var(--fg-muted);
   letter-spacing: 0.02em;
-  margin-bottom: 2px;
-}
-.viz-timeline-v__label-title {
-  font-family: var(--font-display);
-  font-size: var(--viz-text-primary);
-  color: var(--fg);
-  font-weight: 600;
+  margin-top: 4px;
 }
 .viz-timeline-v__label-subtitle {
   font-family: var(--font-mono);
   font-size: var(--viz-text-secondary);
-  color: var(--fg-muted);
+  color: var(--fg-dim);
   margin-top: 2px;
 }
-.viz-timeline-v__label--highlight .viz-timeline-v__label-title {
+.viz-timeline-v__row--highlight .viz-timeline-v__label-title {
   color: #f5c542;
 }
 
@@ -1067,24 +1160,35 @@ body:has(.scrolly) header nav a.active {
   letter-spacing: 0.05em;
 }
 
-/* Sample panel (step 5) */
+/* Iter-15: stacking wrapper around sample + ranked panels. Both
+   panels occupy the same grid cell so they overlay; transitioning
+   between them is pure opacity crossfade — no max-height collapse,
+   no translateY slide. Matches the smoothness of Step 7→8 (which
+   has only one panel rendered, opacity-only). */
+.viz-sr__panels-stack {
+  position: relative;
+  display: grid;
+  grid-template-areas: 'stack';
+  grid-template-columns: 1fr;
+}
+.viz-sr__panels-stack > .viz-sr__sample,
+.viz-sr__panels-stack > .viz-sr__ranked {
+  grid-area: stack;
+}
+
+/* Sample panel (step 5) — opacity crossfade only. */
 .viz-sr__sample {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-  transition: opacity 400ms ease, transform 400ms ease, max-height 600ms ease;
-  overflow: hidden;
+  transition: opacity 400ms ease;
 }
 .viz-sr__sample[data-active='false'] {
   opacity: 0;
-  max-height: 0;
-  transform: translateY(-12px);
   pointer-events: none;
 }
 .viz-sr__sample[data-active='true'] {
   opacity: 1;
-  max-height: 1200px;
-  transform: translateY(0);
 }
 .viz-sr__panel {
   padding: var(--space-md) 0;
@@ -1169,23 +1273,21 @@ body:has(.scrolly) header nav a.active {
 }
 
 /* Ranked panel (step 6) */
+/* Iter-15: ranked panel — opacity crossfade only, mirror of the
+   sample panel. The two share `.viz-sr__panels-stack` so they
+   overlay (grid-area: stack). No translateY, no max-height. */
 .viz-sr__ranked {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-  transition: opacity 400ms ease, transform 400ms ease, max-height 600ms ease;
-  overflow: hidden;
+  transition: opacity 400ms ease;
 }
 .viz-sr__ranked[data-active='false'] {
   opacity: 0;
-  max-height: 0;
-  transform: translateY(12px);
   pointer-events: none;
 }
 .viz-sr__ranked[data-active='true'] {
   opacity: 1;
-  max-height: 4000px;
-  transform: translateY(0);
 }
 .viz-sr__phase-pills {
   display: flex;

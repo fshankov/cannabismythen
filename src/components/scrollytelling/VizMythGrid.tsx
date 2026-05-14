@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CarmData, CorrectnessClass, Myth } from './types';
-import { sortedMyths } from './dataLoaders';
+import {
+  ON_VERDICT_BG_GLYPH,
+  VERDICT_COLOR,
+  sortedMyths,
+  themeColorFor,
+} from './dataLoaders';
 import { MehrPopover } from './MehrPopover';
 import VerdictArrow from '../shared/VerdictArrow';
 
@@ -10,47 +15,20 @@ interface Props {
   mode: 'themed' | 'classified';
 }
 
-const VERDICT_COLOR: Record<CorrectnessClass, string> = {
-  richtig: 'var(--classification-richtig)',
-  eher_richtig: 'var(--classification-eher-richtig)',
-  eher_falsch: 'var(--classification-eher-falsch)',
-  falsch: 'var(--classification-falsch)',
-  no_classification: 'var(--classification-keine-aussage)',
-};
-
-const VERDICT_LABEL: Record<CorrectnessClass, string> = {
+// Iter-11: VERDICT_COLOR / VERDICT_LABEL / VERDICT_ORDER / themeColorFor /
+// ON_VERDICT_BG_GLYPH all hoisted to `dataLoaders.ts` and shared with the
+// in-body legend rendering in ScrollytellingViewer. The hover-card and
+// detail-popover paths below still use VERDICT_LABEL with the legacy
+// "stimmt nicht" phrasing because they document the verdict in
+// long-form (matching the daten-explorer); the in-body legend uses
+// VERDICT_LABEL_DE ("richtig / eher richtig / …") via the shared helper.
+const VERDICT_LABEL_LONG: Record<CorrectnessClass, string> = {
   richtig: 'stimmt',
   eher_richtig: 'stimmt eher',
   eher_falsch: 'stimmt eher nicht',
   falsch: 'stimmt nicht',
   no_classification: 'keine Aussage',
 };
-
-// Site-wide convention is falsch → richtig (matches the daten-explorer
-// verdict-tags filter row and the fakten-karten sort). Keeps the legend
-// reading direction consistent with the rest of the site.
-const VERDICT_ORDER: CorrectnessClass[] = [
-  'falsch',
-  'eher_falsch',
-  'eher_richtig',
-  'richtig',
-  'no_classification',
-];
-
-/** Glyph color override for surfaces where the BACKGROUND is the verdict
- *  color (Step 4 grid cells, legend pills). The per-verdict main/shadow
- *  colors disappear into a same-color bg; white-on-color keeps the
- *  chevron direction legible while the bg carries the verdict signal. */
-const ON_VERDICT_BG_GLYPH = {
-  main: '#ffffff',
-  shadow: 'rgba(255, 255, 255, 0.55)',
-} as const;
-
-function themeColorFor(catId: number | null): string {
-  if (catId === null) return 'var(--bg-elev)';
-  const idx = ((catId - 1) % 9) + 1;
-  return `var(--theme-${idx})`;
-}
 
 interface MythSummary {
   summary_de: string;
@@ -81,29 +59,9 @@ export function VizMythGrid({ data, mode }: Props) {
     };
   }, []);
 
-  // Build ordered list of unique categories for the themed legend (step 3).
-  const seenCats = new Set<number>();
-  const orderedCats: { id: number; name: string }[] = [];
-  for (const m of myths) {
-    if (m.category_id !== null && !seenCats.has(m.category_id)) {
-      seenCats.add(m.category_id);
-      const cat = data.categories.find((c) => c.id === m.category_id);
-      orderedCats.push({
-        id: m.category_id,
-        name: cat?.name_de ?? `Kategorie ${m.category_id}`,
-      });
-    }
-  }
-
-  // Verdict counts for the classified legend (step 4).
-  const counts: Record<CorrectnessClass, number> = {
-    richtig: 0,
-    eher_richtig: 0,
-    eher_falsch: 0,
-    falsch: 0,
-    no_classification: 0,
-  };
-  for (const m of myths) counts[m.correctness_class]++;
+  // Iter-11: themed-legend (orderedCats) + classified counts (counts)
+  // are now derived in ScrollytellingViewer via shared helpers in
+  // dataLoaders.ts. The viz column itself no longer renders them.
 
   const hoveredMyth = hoverId !== null ? myths.find((m) => m.id === hoverId) ?? null : null;
   const hoveredSummary = hoveredMyth && summaries ? summaries[String(hoveredMyth.id)] : null;
@@ -168,7 +126,7 @@ export function VizMythGrid({ data, mode }: Props) {
               }}
               aria-label={
                 mode === 'classified'
-                  ? `${m.text_de} — ${VERDICT_LABEL[m.correctness_class]} — Details öffnen`
+                  ? `${m.text_de} — ${VERDICT_LABEL_LONG[m.correctness_class]} — Details öffnen`
                   : m.text_de
               }
             >
@@ -206,47 +164,9 @@ export function VizMythGrid({ data, mode }: Props) {
         )}
       </div>
 
-      {mode === 'themed' && (
-        <div className="viz-grid__theme-legend" aria-label="Themenfelder">
-          <span className="viz-grid__theme-legend-title">Themenfelder:</span>
-          {orderedCats.map((c) => (
-            <span key={c.id} className="viz-grid__theme-chip">
-              <span
-                className="viz-grid__theme-swatch"
-                style={{ background: themeColorFor(c.id) }}
-                aria-hidden="true"
-              />
-              {c.name}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {mode === 'classified' && (
-        <>
-          <div className="viz-grid__verdict-legend" aria-label="Klassifikationen">
-            {VERDICT_ORDER.filter((c) => counts[c] > 0).map((c) => (
-              <span key={c} className="viz-grid__verdict-item">
-                <span
-                  className="viz-grid__verdict-pill"
-                  style={{ background: VERDICT_COLOR[c] }}
-                >
-                  <VerdictArrow
-                    verdict={c}
-                    size={12}
-                    strokeWidth={2.5}
-                    colorOverride={ON_VERDICT_BG_GLYPH}
-                  />
-                </span>
-                {VERDICT_LABEL[c]} ({counts[c]})
-              </span>
-            ))}
-          </div>
-          {/* Iter-9: source attribution legend moved to the left text
-              column as `editorial.legend` so the viz column stays purely
-              visual. */}
-        </>
-      )}
+      {/* Iter-11: theme + verdict legends moved to the LEFT text
+          column (rendered by ScrollytellingViewer based on step.gridMode).
+          The viz column now shows ONLY the data — no metadata blocks. */}
 
       <MehrPopover
         open={openMyth !== null}
@@ -260,7 +180,7 @@ export function VizMythGrid({ data, mode }: Props) {
               className="mehr-popover__verdict-pill"
               style={{ background: VERDICT_COLOR[openMyth.correctness_class] }}
             >
-              {VERDICT_LABEL[openMyth.correctness_class]}
+              {VERDICT_LABEL_LONG[openMyth.correctness_class]}
             </div>
             {(() => {
               const summary = summaries?.[String(openMyth.id)];
@@ -313,7 +233,7 @@ function MythHoverCard({ myth, mode, summary, x, y, categoryName }: HoverCardPro
       {mode === 'classified' && (
         <div className="viz-grid__hover-verdict" style={{ color: verdictColor }}>
           <VerdictArrow verdict={myth.correctness_class} size={14} strokeWidth={2.5} />
-          <span>{VERDICT_LABEL[myth.correctness_class]}</span>
+          <span>{VERDICT_LABEL_LONG[myth.correctness_class]}</span>
         </div>
       )}
       {mode === 'themed' && categoryName && (

@@ -22,30 +22,21 @@ steps:
 
       Manches klingt plausibel, manches widersprüchlich. Was davon stimmt eigentlich? Genau das wollten wir herausfinden.
     legend: "7.408 Aussagen · 53 Themenfelder · 42 prüfbare Thesen"
-    hint: "Tippe auf eine Stimme, um sie zu lesen. ↓"
+    hint: ""
   - heading: |-
       Aus tausenden Stimmen
       blieben 42 prüfbare Thesen.
     bodyText: >-
-      Drei Quellen, gegeneinander abgeglichen: Online-Befragung, Fachgespräche, Medienanalyse. Aussagen, die immer wieder auftauchten, wurden gebündelt und zu prüfbaren Thesen verdichtet. Dann thematisch sortiert: medizinisch, körperlich, psychisch, kombiniert, sozial, rechtlich.
-
-
-      42 Thesen blieben übrig. Manche stimmen, manche nicht.
+      Drei Quellen, gegeneinander abgeglichen: Online-Befragung, Fachgespräche, Medienanalyse. Was immer wieder auftauchte, haben wir gebündelt und zu **42 prüfbaren Thesen** verdichtet — thematisch sortiert.
     hint: ""
   - heading: |-
       Jede These wurde
       gegen die Forschungsliteratur geprüft.
-    bodyText: |-
-      Jede der 42 Thesen geprüft — gegen die aktuelle wissenschaftliche Evidenz. Vierstufige Skala: falsch, eher falsch, eher richtig, richtig.
-
-      {↓ falsch} 7 stimmen nicht.
-      {↙ eher falsch} 11 stimmen eher nicht.
-      {↗ eher richtig} 6 stimmen eher.
-      {↑ richtig} 16 stimmen.
-      {— keine Aussage} Bei 2 Thesen lässt die Forschungslage keine eindeutige Aussage zu.
+    bodyText: >-
+      Jede der 42 Thesen — abgeglichen mit der aktuellen wissenschaftlichen Evidenz. Vierstufige Skala von **falsch** bis **richtig**, plus „keine Aussage", wenn die Forschungslage uneindeutig bleibt.
     legend: >-
       548 wissenschaftliche Quellen — systematische Literaturrecherche in PubMed, PsychInfo, SocIndex, Google Scholar (Stand 09/2025).
-    hint: "Tippe auf eine Karte, um sie zu lesen. ↓"
+    hint: ""
   - heading: |-
       Dann fragten wir 2.795 Menschen,
       was sie für richtig halten.

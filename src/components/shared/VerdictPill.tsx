@@ -39,6 +39,12 @@ interface VerdictPillProps {
   label?: string;
   /** Pill size: `sm` for inline / dense lists, `md` (default), `lg` for hero placements. */
   size?: 'sm' | 'md' | 'lg';
+  /** Visual variant:
+   *   - `pill` (default): rounded-rect with tinted bg, icon + label
+   *   - `puck`: small verdict-colored CIRCLE with WHITE arrow inside,
+   *     no label. Used in the /ueber-uns/ scrollytelling for inline
+   *     verdict markers in body text + the Step 4 tally list. */
+  variant?: 'pill' | 'puck';
   /** When `true`, renders as a `<button>` (use VerdictFilterButton for the full button pattern). */
   as?: 'span' | 'button';
   /** Extra class names appended to the pill. */
@@ -59,10 +65,24 @@ const ICON_SIZE: Record<NonNullable<VerdictPillProps['size']>, number> = {
   lg: 15,
 };
 
+/** Puck variant: same size keys but tuned to read at the smaller
+ *  glyph-only footprint (no label sitting next to it). */
+const PUCK_ICON_SIZE: Record<NonNullable<VerdictPillProps['size']>, number> = {
+  sm: 12,
+  md: 14,
+  lg: 18,
+};
+
+const WHITE_GLYPH = {
+  main: '#ffffff',
+  shadow: 'rgba(255, 255, 255, 0.55)',
+} as const;
+
 export default function VerdictPill({
   verdict,
   label,
   size = 'md',
+  variant = 'pill',
   as = 'span',
   className,
   onClick,
@@ -71,6 +91,47 @@ export default function VerdictPill({
   type,
 }: VerdictPillProps) {
   const text = label ?? DEFAULT_LABEL[verdict];
+
+  // Puck variant — colored circle + white arrow, no label.
+  if (variant === 'puck') {
+    const puckClasses = [
+      'verdict-puck',
+      `verdict-puck--${size}`,
+      `verdict-puck--${verdict}`,
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ');
+    const a11yLabel = ariaLabel ?? text;
+    const glyph = (
+      <VerdictArrow
+        verdict={verdict}
+        size={PUCK_ICON_SIZE[size]}
+        strokeWidth={2.5}
+        colorOverride={WHITE_GLYPH}
+      />
+    );
+    if (as === 'button') {
+      return (
+        <button
+          type={type ?? 'button'}
+          className={puckClasses}
+          onClick={onClick}
+          aria-pressed={ariaPressed}
+          aria-label={a11yLabel}
+        >
+          {glyph}
+        </button>
+      );
+    }
+    return (
+      <span className={puckClasses} role="img" aria-label={a11yLabel}>
+        {glyph}
+      </span>
+    );
+  }
+
+  // Pill variant — default.
   const sizeClass = size === 'md' ? '' : `pill--${size}`;
   const classes = ['pill', `pill--${verdict}`, sizeClass, className]
     .filter(Boolean)

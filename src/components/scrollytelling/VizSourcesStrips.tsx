@@ -100,15 +100,16 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
   const [hoverId, setHoverId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Iter-10 staggered reveal: track previous revealedColumns so each
-  // newly-revealed column fades in 0/200 ms apart, not at its absolute
-  // column index. Step 8 entry: cols 0/1 (delays 0/200). Step 9 entry:
-  // cols 2/3 (rebased delays 0/200).
-  const prevRevealedRef = useRef(revealedColumns);
+  // Iter-11 staggered reveal — init to 0 (was: `useRef(revealedColumns)`)
+  // so the FIRST entry to Step 8 (revealedColumns 0 → 2) staggers from
+  // 0/200 ms, not collapsed-to-0 by a prev === current. Also gate stagger
+  // to forward direction so backward scroll snaps.
+  const prevRevealedRef = useRef(0);
   useEffect(() => {
     prevRevealedRef.current = revealedColumns;
   }, [revealedColumns]);
   const prevRevealed = prevRevealedRef.current;
+  const isForward = revealedColumns >= prevRevealed;
 
   // Iter-10 hover tooltip — anchored to the hovered source dot via
   // useFlipPosition. Replaces the previous static info-pill below the
@@ -224,15 +225,25 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
           const isRevealed = i < revealedColumns;
           // Iter-10 stagger — rebase the delay so newly-revealed columns
           // fade in 0/200 ms apart, not at their absolute column index.
-          const revealIdx = isRevealed && i >= prevRevealed ? i - prevRevealed : 0;
+          // Iter-12: CSS keyframe animation (not transition) for the
+          // first-entry stagger — fires on mount even if isRevealed is
+          // already true.
+          const isNewlyRevealed =
+            isForward && isRevealed && i >= prevRevealed;
+          const revealIdx = isNewlyRevealed ? i - prevRevealed : 0;
+          const colStyle: React.CSSProperties = isNewlyRevealed
+            ? {
+                animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                animationDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
+              }
+            // Iter-13: unrevealed columns hidden entirely (was 0.45
+            // faint placeholder). In Step 8, cols 3+4 (Wahrnehmung,
+            // Prävention) are fully invisible until Step 9 reveals them.
+            : { opacity: isRevealed ? 1 : 0 };
           return (
             <g
               key={metric}
-              opacity={isRevealed ? 1 : 0.45}
-              style={{
-                transition: 'opacity 360ms ease',
-                transitionDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
-              }}
+              style={colStyle}
             >
               <rect
                 x={x}
@@ -296,16 +307,25 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
           );
         })}
 
-        {/* Slope lines — only between consecutive REVEALED columns. */}
+        {/* Slope lines — fade in with the LATER column they bridge. */}
         <g className="viz-strips__pairs" style={{ pointerEvents: 'none' }}>
           {slopeSegments.map((segPairs, segIdx) => {
-            const segVisible = segIdx + 1 < revealedColumns;
+            const laterIdx = segIdx + 1;
+            const segVisible = laterIdx < revealedColumns;
+            // Iter-12: segments share the column-stagger rhythm so the
+            // WHOLE column (header + dots + segments INTO it) arrives
+            // as a single visual beat. CSS keyframe = first-entry safe.
+            const isNewlyRevealed =
+              isForward && segVisible && laterIdx >= prevRevealed;
+            const segRevealIdx = isNewlyRevealed ? laterIdx - prevRevealed : 0;
+            const segGroupStyle: React.CSSProperties = isNewlyRevealed
+              ? {
+                  animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                  animationDelay: `calc(${segRevealIdx} * var(--viz-reveal-stagger))`,
+                }
+              : { opacity: segVisible ? 1 : 0 };
             return (
-              <g
-                key={`seg-${segIdx}`}
-                opacity={segVisible ? 1 : 0}
-                style={{ transition: 'opacity 320ms ease' }}
-              >
+              <g key={`seg-${segIdx}`} style={segGroupStyle}>
                 {segPairs.map((p) => {
                   const isHovered = hoverId === p.id;
                   const isDimmed = hoverId !== null && !isHovered;
@@ -331,18 +351,22 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         {/* Dots per column — fade in when that column is revealed. */}
         {positionsByColumn.map((dots, colIdx) => {
           const isRevealed = colIdx < revealedColumns;
-          // Iter-10 stagger — dots inherit the same rhythm as the column
-          // wrappers above so headers and dots arrive in sync.
-          const revealIdx =
-            isRevealed && colIdx >= prevRevealed ? colIdx - prevRevealed : 0;
+          // Iter-12 stagger — dots inherit the same rhythm as the
+          // column wrappers above so headers and dots arrive in sync.
+          // CSS keyframe = first-entry safe.
+          const isNewlyRevealed =
+            isForward && isRevealed && colIdx >= prevRevealed;
+          const revealIdx = isNewlyRevealed ? colIdx - prevRevealed : 0;
+          const dotsColStyle: React.CSSProperties = isNewlyRevealed
+            ? {
+                animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                animationDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
+              }
+            : { opacity: isRevealed ? 1 : 0 };
           return (
             <g
               key={`col-${colIdx}`}
-              opacity={isRevealed ? 1 : 0}
-              style={{
-                transition: 'opacity 360ms ease',
-                transitionDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
-              }}
+              style={dotsColStyle}
               aria-hidden={!isRevealed}
             >
               {dots.map((d) => (

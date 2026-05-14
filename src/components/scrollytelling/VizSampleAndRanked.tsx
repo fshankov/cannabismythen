@@ -9,6 +9,7 @@ import type {
 import {
   ACTIVE_GROUPS,
   GROUP_LABEL_DE,
+  ON_VERDICT_BG_GLYPH,
   getMetric,
 } from './dataLoaders';
 import VerdictPill from '../shared/VerdictPill';
@@ -136,6 +137,11 @@ export function VizSampleAndRanked({ data, mode }: Props) {
 
   return (
     <div className="viz viz-sr" data-mode={mode}>
+      {/* Iter-15: sample + ranked panels overlay in the same grid cell.
+          When `mode` changes, the two panels crossfade by opacity only —
+          no max-height collapse, no translateY slide. Same rhythm as
+          the Step 7→8 column reveal. */}
+      <div className="viz-sr__panels-stack">
       {/* SAMPLE PANEL — visible only in sample mode */}
       <div className="viz-sr__sample" aria-hidden={!isSample} data-active={isSample}>
         <div className="viz-sr__panel">
@@ -189,6 +195,7 @@ export function VizSampleAndRanked({ data, mode }: Props) {
             revealedStrips={REVEALED_STRIPS_BY_PHASE[phase]}
           />
         )}
+      </div>
       </div>
     </div>
   );
@@ -254,15 +261,21 @@ function ExampleMythStrips({
     setHoveredId(null);
   }
 
-  // Iter-10 staggered reveal: track the previous revealedStrips count so
-  // each newly-revealed strip can stagger its fade-in from delay 0, not
-  // from its absolute index. Strips that were already revealed don't
-  // re-animate (their opacity doesn't change).
-  const prevRevealedRef = useRef(revealedStrips);
+  // Iter-11 staggered reveal — refined from Iter-10 to fix two bugs:
+  //   (a) `useRef(revealedStrips)` initialized to the current post-entry
+  //       value on mount, so on FIRST entry to Steps 6 or 8 the prev ===
+  //       current and revealIdx collapsed to 0 for every strip → no
+  //       stagger. Switch to `useRef(0)` so the very first reveal on the
+  //       viz's lifetime always cascades from delay 0.
+  //   (b) Backward scroll (Step 7 → Step 6) should SNAP — strips 4/5
+  //       hide immediately, no reverse stagger. Detected via
+  //       `isForward = revealedStrips >= prevRevealedRef.current`.
+  const prevRevealedRef = useRef(0);
   useEffect(() => {
     prevRevealedRef.current = revealedStrips;
   }, [revealedStrips]);
   const prevRevealed = prevRevealedRef.current;
+  const isForward = revealedStrips >= prevRevealed;
 
 
   // Build a value matrix: myths × indicators × selected group. Bev.risiko
@@ -404,20 +417,27 @@ function ExampleMythStrips({
           const isRevealed = i < revealedStrips;
           const isBevRisikoStrip = ind.key === 'population_relevance';
           const bevRisikoDimmed = isBevRisikoStrip && !BEV_RISIKO_VALID_GROUPS.has(activeGroup);
-          const axisOpacity = isRevealed ? (bevRisikoDimmed ? 0.55 : 1) : 0.45;
-          // Iter-10 stagger: rebase the delay so newly-revealed strips
-          // fade in 0/200/400 ms apart, not at their absolute strip index.
-          const revealIdx = isRevealed && i >= prevRevealed ? i - prevRevealed : 0;
+          const settledOpacity = bevRisikoDimmed ? 0.55 : 1;
+          // Iter-12 reveal — use CSS keyframe animation (not transition)
+          // so first-entry mounts fire too. `isNewlyRevealed` = strip
+          // crossed the reveal threshold on THIS render's forward
+          // transition (or first mount). Settled strips and unrevealed
+          // strips use inline opacity directly.
+          const isNewlyRevealed =
+            isForward && isRevealed && i >= prevRevealed;
+          const revealIdx = isNewlyRevealed ? i - prevRevealed : 0;
+          const stripStyle: React.CSSProperties = isNewlyRevealed
+            ? {
+                animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                animationDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
+              }
+            : { opacity: isRevealed ? settledOpacity : 0 };
           return (
             <g
               key={`axis-${ind.name}`}
               className="viz-sr__strip-axis"
               data-revealed={isRevealed}
-              style={{
-                transition: 'opacity 360ms ease',
-                transitionDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
-              }}
-              opacity={axisOpacity}
+              style={stripStyle}
             >
               {/* Axis line */}
               <line
@@ -447,37 +467,56 @@ function ExampleMythStrips({
           );
         })}
 
-        {/* Connecting polylines — one per myth. Only the revealed segments
-            are drawn (slice to revealedStrips). Colored by verdict. Lines
-            skip strips where the value is null (e.g., Bev.risiko for
-            non-applicable groups) — they bridge across the gap so the path
-            still reads as one myth. Stroke-width is fixed across hover/non-
-            hover so the chart doesn't visibly shift on hover. */}
+        {/* Iter-11: connecting segments rendered as INDIVIDUAL <line>s
+            (one per adjacent-strip pair) so each can opacity-gate by its
+            own reveal-index. The whole strip — axis + text + slope
+            segments INTO this strip + arrows ON this strip — staggers in
+            as a single visual unit. Bridging across null values still
+            works because the segment between strip i and strip i+1 only
+            renders if BOTH endpoints are non-null. */}
         {mythPoints.map(({ myth, points }) => {
-          const visible = points.slice(0, revealedStrips).filter((p) => p.v !== null);
-          if (visible.length < 2) return null;
           const isHovered = hoveredId === myth.id;
           const isDimmed = hoveredId !== null && !isHovered;
           const color = CORRECTNESS_PATH_COLOR[myth.correctness_class] ?? 'var(--fg-muted)';
-          const d = visible.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-          // (Iter-10) Tooltip is now anchored to the DOM element via
-          // useFlipPosition — no need to pre-compute a midpoint here.
-          return (
-            <path
-              key={`path-${myth.id}`}
-              d={d}
-              fill="none"
-              stroke={color}
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity={isHovered ? 0.95 : isDimmed ? 0.18 : 0.55}
-              style={{ transition: 'opacity 180ms ease' }}
-              onMouseEnter={(e) => openMythTooltip(myth.id, e.currentTarget)}
-              onMouseLeave={closeMythTooltip}
-              pointerEvents="stroke"
-            />
-          );
+          const baseOpacity = isHovered ? 0.95 : isDimmed ? 0.18 : 0.55;
+          return points.slice(0, -1).map((p, segIdx) => {
+            const next = points[segIdx + 1];
+            if (p.v == null || next.v == null) return null;
+            // Segment between strip[segIdx] and strip[segIdx+1] becomes
+            // visible when strip[segIdx+1] is revealed. Iter-12: CSS
+            // keyframe animation (not transition) so first-entry mounts
+            // fire too.
+            const laterIdx = segIdx + 1;
+            const segIsRevealed = laterIdx < revealedStrips;
+            const isNewlyRevealed =
+              isForward && segIsRevealed && laterIdx >= prevRevealed;
+            const segRevealIdx = isNewlyRevealed ? laterIdx - prevRevealed : 0;
+            const segStyle: React.CSSProperties = isNewlyRevealed
+              ? {
+                  animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                  animationDelay: `calc(${segRevealIdx} * var(--viz-reveal-stagger))`,
+                }
+              : {
+                  opacity: segIsRevealed ? baseOpacity : 0,
+                  transition: 'opacity 180ms ease',
+                };
+            return (
+              <line
+                key={`seg-${myth.id}-${segIdx}`}
+                x1={p.x.toFixed(1)}
+                y1={p.y.toFixed(1)}
+                x2={next.x.toFixed(1)}
+                y2={next.y.toFixed(1)}
+                stroke={color}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                style={segStyle}
+                onMouseEnter={(e) => openMythTooltip(myth.id, e.currentTarget)}
+                onMouseLeave={closeMythTooltip}
+                pointerEvents="stroke"
+              />
+            );
+          });
         })}
 
         {/* Iter-6: text labels rendered AFTER slope lines so they paint on
@@ -491,7 +530,7 @@ function ExampleMythStrips({
           const isRevealed = i < revealedStrips;
           const isBevRisikoStrip = ind.key === 'population_relevance';
           const bevRisikoDimmed = isBevRisikoStrip && !BEV_RISIKO_VALID_GROUPS.has(activeGroup);
-          const axisOpacity = isRevealed ? (bevRisikoDimmed ? 0.55 : 1) : 0.45;
+          const settledOpacity = bevRisikoDimmed ? 0.55 : 1;
           const unitText = bevRisikoDimmed ? 'nur Voll- + Minderjährige' : ind.unit;
           // Approximate text widths so the dark backing rect snugly hugs
           // each text element. Slight overestimate keeps text comfortably
@@ -499,18 +538,21 @@ function ExampleMythStrips({
           const nameW = ind.name.length * 7 + 6;
           const unitW = unitText.length * 6 + 6;
           const miniW = ind.mini.length * 5.2 + 8;
-          // Iter-10 stagger — same rhythm as the axis layer above.
-          const revealIdx = isRevealed && i >= prevRevealed ? i - prevRevealed : 0;
+          const isNewlyRevealed =
+            isForward && isRevealed && i >= prevRevealed;
+          const revealIdx = isNewlyRevealed ? i - prevRevealed : 0;
+          const textStyle: React.CSSProperties = isNewlyRevealed
+            ? {
+                animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                animationDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
+              }
+            : { opacity: isRevealed ? settledOpacity : 0 };
           return (
             <g
               key={`text-${ind.name}`}
               className="viz-sr__strip-text"
               data-revealed={isRevealed}
-              style={{
-                transition: 'opacity 360ms ease',
-                transitionDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
-              }}
-              opacity={axisOpacity}
+              style={textStyle}
             >
               {/* Strip header — name + unit, both with dark backing. The
                   name uses pure-white + heavier weight to match Step 7/8's
@@ -603,64 +645,82 @@ function ExampleMythStrips({
           );
         })}
 
-        {/* Plot markers — colored verdict arrows (↑/↗/↙/↓/—) drawn as inline
-            SVG paths (NOT foreignObject) so they paint on top of the slope
-            lines in every browser. Geometry is fixed across hover/non-hover
-            (the only change is opacity); a transparent hit-area rect around
-            each arrow absorbs sub-pixel mouse jitter. */}
+        {/* Iter-11: arrow puck — verdict-colored CIRCLE backing + WHITE
+            chevron inside. Rendered for every (myth, strip) pair (not
+            sliced) so the per-arrow opacity transitions can fire as
+            each strip is revealed, staggered with the rest of the
+            strip's content. Hit-area is a wider circle for sub-pixel
+            mouse jitter. */}
         {mythPoints.map(({ myth, points }) =>
-          points.slice(0, revealedStrips).map((p, i) => {
+          points.map((p, i) => {
             if (p.v == null) return null;
             const isHovered = hoveredId === myth.id;
             const isDimmed = hoveredId !== null && !isHovered;
             // <VerdictGlyphPaths> uses a 24×24 user-space; scale to ARROW_SIZE.
             const scale = ARROW_SIZE / 24;
+            const stripIsRevealed = i < revealedStrips;
+            const isNewlyRevealed =
+              isForward && stripIsRevealed && i >= prevRevealed;
+            const stripRevealIdx = isNewlyRevealed ? i - prevRevealed : 0;
+            // Settled target opacity (0/1, or 0.3 if dimmed-by-hover).
+            // Iter-12: reveal uses CSS keyframe so first-entry mounts
+            // fire too; settled state uses transition for hover.
+            const settledOpacity = stripIsRevealed
+              ? isDimmed
+                ? 0.3
+                : 1
+              : 0;
+            const stripFill =
+              CORRECTNESS_PATH_COLOR[myth.correctness_class] ??
+              'var(--fg-muted)';
+            const arrowStyle: React.CSSProperties = isNewlyRevealed
+              ? {
+                  cursor: 'pointer',
+                  pointerEvents: 'auto',
+                  animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                  animationDelay: `calc(${stripRevealIdx} * var(--viz-reveal-stagger))`,
+                }
+              : {
+                  cursor: stripIsRevealed ? 'pointer' : 'default',
+                  pointerEvents: stripIsRevealed ? 'auto' : 'none',
+                  opacity: settledOpacity,
+                  transition: 'opacity 180ms ease',
+                };
             return (
               <g
                 key={`arrow-${myth.id}-${i}`}
-                transform={`translate(${(p.x - ARROW_SIZE / 2).toFixed(1)}, ${(p.y - ARROW_SIZE / 2).toFixed(1)})`}
-                opacity={isDimmed ? 0.3 : 1}
-                style={{
-                  cursor: 'pointer',
-                  transition: 'opacity 180ms ease',
-                }}
+                transform={`translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)})`}
+                style={arrowStyle}
               >
-                {/* Transparent hit area — wider than the visible arrow so
-                    sub-pixel mouse jitter doesn't flip hover state. */}
-                <rect
-                  x={-ARROW_HIT_PAD}
-                  y={-ARROW_HIT_PAD}
-                  width={ARROW_SIZE + ARROW_HIT_PAD * 2}
-                  height={ARROW_SIZE + ARROW_HIT_PAD * 2}
+                {/* Transparent hit zone — wider than the puck. */}
+                <circle
+                  r={ARROW_SIZE / 2 + ARROW_HIT_PAD}
                   fill="transparent"
                   onMouseEnter={(e) => openMythTooltip(myth.id, e.currentTarget)}
                   onMouseLeave={closeMythTooltip}
                   onFocus={(e) => openMythTooltip(myth.id, e.currentTarget)}
                   onBlur={closeMythTooltip}
-                  tabIndex={0}
+                  tabIndex={stripIsRevealed ? 0 : -1}
                   role="img"
                   aria-label={`${myth.text_short_de} · ${INDICATORS[i].name}: ${Math.round(p.v)}`}
                 />
-                {/* Dark backing rect so the arrow stays legible against the
-                    strip's tick line behind it. */}
-                <rect
-                  x={-1}
-                  y={-1}
-                  width={ARROW_SIZE + 2}
-                  height={ARROW_SIZE + 2}
-                  rx={3}
-                  fill="#0f1318"
-                  opacity={0.85}
+                {/* Verdict-colored circle backing (puck), white glyph
+                    inside — same visual unit as Step 4 grid cells. */}
+                <circle
+                  r={ARROW_SIZE / 2 + 1}
+                  fill={stripFill}
+                  stroke="#0f1318"
+                  strokeWidth={1}
                   pointerEvents="none"
                 />
-                {/* The verdict glyph — chevron + shaft (main color) + horizontal
-                    shadow line (lighter color), rendered from the canonical
-                    site-wide spec in `shared/verdictGlyph`. Edits to that
-                    module update every verdict surface on the site. */}
-                <g transform={`scale(${scale})`} pointerEvents="none">
+                <g
+                  transform={`translate(${-ARROW_SIZE / 2}, ${-ARROW_SIZE / 2}) scale(${scale})`}
+                  pointerEvents="none"
+                >
                   <VerdictGlyphPaths
                     verdict={myth.correctness_class as CorrectnessClass}
-                    strokeWidth={2.25}
+                    strokeWidth={2.5}
+                    colorOverride={ON_VERDICT_BG_GLYPH}
                   />
                 </g>
               </g>

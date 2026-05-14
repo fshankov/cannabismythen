@@ -20,7 +20,15 @@ import type {
   ScrollyContent,
 } from './types';
 import { STEP_DEFINITIONS, type StepStructure } from './stepDefinitions';
-import { loadCarmData, loadInformationSources } from './dataLoaders';
+import {
+  loadCarmData,
+  loadInformationSources,
+  orderedCategoriesFromData,
+  themeColorFor,
+  verdictCountsFromData,
+  VERDICT_ORDER,
+  VERDICT_LABEL_DE,
+} from './dataLoaders';
 import { VizTimeline } from './VizTimeline';
 import { VizPeopleVoices } from './VizPeopleVoices';
 import { VizMythGrid } from './VizMythGrid';
@@ -60,10 +68,20 @@ function renderBodyWithVerdicts(text: string): ReactNode[] {
       out.push(<Fragment key={key++}>{text.slice(lastIndex, start)}</Fragment>);
     }
     if (match[1]) {
-      // `[↑ richtig]` — pill (icon + label)
+      // `[↑ richtig]` — Iter-11: now renders as a small COLORED PUCK
+      // (verdict-colored circle + white arrow inside, no label) so
+      // inline body copy carries the verdict signal without the
+      // tinted-rounded-rect-with-text look of the daten-explorer pill.
       const verdict = VERDICT_LABEL_TO_CLASS[match[2]];
       if (verdict) {
-        out.push(<VerdictPill key={key++} verdict={verdict} size="sm" />);
+        out.push(
+          <VerdictPill
+            key={key++}
+            verdict={verdict}
+            size="sm"
+            variant="puck"
+          />,
+        );
       }
     } else if (match[3]) {
       // `{↑ richtig}` — bare verdict glyph, inline with surrounding text
@@ -291,6 +309,63 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                       {renderBodyWithVerdicts(para)}
                     </p>
                   ))}
+                  {/* Iter-11: themed grid (Step 3) gets a Themenfelder
+                      legend in the LEFT text column instead of below
+                      the viz. Inline-wrap of swatch + name, smaller
+                      print than body. */}
+                  {step.gridMode === 'themed' && (
+                    <div
+                      className="scrolly__theme-legend"
+                      aria-label="Themenfelder"
+                    >
+                      {orderedCategoriesFromData(data).map((c) => (
+                        <span
+                          key={c.id}
+                          className="scrolly__theme-chip"
+                        >
+                          <span
+                            className="scrolly__theme-swatch"
+                            style={{ background: themeColorFor(c.id) }}
+                            aria-hidden="true"
+                          />
+                          <span className="scrolly__theme-name">{c.name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Iter-11: classified grid (Step 4) gets a verdict
+                      tally in the LEFT text column. Each row =
+                      colored puck + verdict name + (count), in
+                      falsch → richtig order. Replaces the old
+                      `{verb} stimmen` lines + the viz-column legend. */}
+                  {step.gridMode === 'classified' && (() => {
+                    const counts = verdictCountsFromData(data);
+                    return (
+                      <div
+                        className="scrolly__verdict-legend"
+                        aria-label="Klassifikationen"
+                      >
+                        {VERDICT_ORDER.filter((v) => counts[v] > 0).map((v) => (
+                          <div
+                            key={v}
+                            className="scrolly__verdict-row"
+                          >
+                            <VerdictPill
+                              verdict={v}
+                              size="sm"
+                              variant="puck"
+                            />
+                            <span className="scrolly__verdict-label">
+                              {VERDICT_LABEL_DE[v]}
+                            </span>
+                            <span className="scrolly__verdict-count">
+                              ({counts[v]})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   {editorial.legend && (
                     <p className="scrolly__legend">{editorial.legend}</p>
                   )}
