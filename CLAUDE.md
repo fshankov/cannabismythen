@@ -151,13 +151,36 @@ thresholds, and where new copy lands (per-card vs. per-page vs. global) are
 decisions, not implementation details. **Pay extra care for design** — many past
 mistakes have come from acting on assumed taste; verify, don't assume.
 
-**Language note for communication:** Fedor's first language is neither English nor
-German. He may slip in Russian words mid-message or use English phrasings that need
-clarification — when something is ambiguous, prefer the AskUserQuestion tool over
-guessing. The website itself is fully in **German**, but Fedor doesn't speak German;
-when you're discussing or proposing German copy with him, **always include a brief
-English translation in parentheses or as a follow-up line** so he can confirm tone
-and meaning. Never propose German copy without a translation.
+**Language note for communication (HARD):** Fedor's first language is neither
+English nor German. He may slip in Russian words mid-message, write in
+sentence fragments, or use English phrasings whose intent is ambiguous to a
+native English reader. Pattern-matching on English idioms WILL mislead you.
+
+**The rule: when the request is even slightly ambiguous, paraphrase your
+understanding back to Fedor and ask via AskUserQuestion BEFORE acting.**
+Do this even if you feel 80–90 % sure. Cost of confirming = 1 round-trip;
+cost of acting on a misread = re-doing work, frustration, lost trust.
+
+Concrete shape of the paraphrase: "Just to make sure — you want X to happen
+(not Y), correct?" Then offer options. Do not assume that because a phrase
+"sounds like" English idiom Z, Fedor meant Z.
+
+Examples of past misinterpretations to internalise:
+
+- 2026-05-14 (Session A audit): Fedor wrote "make sure the links are same as
+  section names — i.e. now it is ueber-projekt (but make it look good)".
+  Claude assumed he meant "rename the nav LABEL to match the URL slug" and
+  changed "Über das Projekt" → "Über uns". Fedor actually meant the
+  OPPOSITE — keep the label "Über das Projekt", rename the URL to match
+  the label. A single AskUserQuestion before acting would have avoided
+  reverting the work.
+
+- (Add new examples here when they happen — institutional memory matters.)
+
+**German copy: always include a brief English gloss** in parentheses or
+as a follow-up line. Fedor doesn't speak German fluently — he can't
+sanity-check tone without the gloss. Never propose German copy without
+a translation.
 
 Pure technical decisions with no user-visible effect (file naming inside a
 folder, type names, refactor patterns, internal helper signatures) don't need
