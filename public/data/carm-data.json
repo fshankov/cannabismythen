@@ -2,549 +2,423 @@
   "myths": [
     {
       "id": 1,
-      "text_de": "Cannabis = Allheilmittel",
-      "text_en": "Cannabis is a cure-all",
+      "text_de": "Cannabis ist ein Allheilmittel.",
       "classification_de": "4 - falsch",
       "correctness_class": "falsch",
       "scientifically_checked": true,
       "category_id": 1,
       "category_de": "Medizinischer und therapeutischer Nutzen",
-      "category_en": "Medical and Therapeutic Benefits",
-      "text_short_de": "Allheilmittel",
-      "text_short_en": "Cure-all"
+      "text_short_de": "Allheilmittel"
     },
     {
       "id": 2,
-      "text_de": "Konsum ist harmlos",
-      "text_en": "Use is harmless",
+      "text_de": "Cannabiskonsum ist harmlos.",
       "classification_de": "4 - falsch",
       "correctness_class": "falsch",
       "scientifically_checked": true,
-      "category_id": 7,
+      "category_id": 8,
       "category_de": "Allgemeine Einschätzung der Gefährlichkeit",
-      "category_en": "General Risk Assessment",
-      "text_short_de": "Harmlos",
-      "text_short_en": "Harmless"
+      "text_short_de": "Harmlos"
     },
     {
       "id": 3,
-      "text_de": "Konsum durch Heranwachsende führt - stärker als bei Erwachsenen - zu gesundheitlichen Schäden",
-      "text_en": "Use by adolescents leads to greater health damage than in adults",
+      "text_de": "Cannabiskonsum durch Heranwachsende führt in stärkerem Maße als bei Erwachsenen zu gesundheitlichen Schäden.",
       "classification_de": "2 - eher richtig",
       "correctness_class": "eher_richtig",
       "scientifically_checked": true,
-      "category_id": 2,
-      "category_de": "Risiken für den Körper und die Entwicklung",
-      "category_en": "Physical and Developmental Risks",
-      "text_short_de": "Schädigt Heranwachsende stärker",
-      "text_short_en": "Harms adolescents more than adults"
+      "category_id": 8,
+      "category_de": "Allgemeine Einschätzung der Gefährlichkeit",
+      "text_short_de": "Schädigt Heranwachsende stärker"
     },
     {
       "id": 4,
-      "text_de": "Weniger schädlich als Alkohol",
-      "text_en": "Less harmful than alcohol",
+      "text_de": "Cannabis ist weniger schädlich als Alkohol.",
       "classification_de": "1 - richtig",
       "correctness_class": "richtig",
       "scientifically_checked": true,
-      "category_id": 7,
+      "category_id": 8,
       "category_de": "Allgemeine Einschätzung der Gefährlichkeit",
-      "category_en": "General Risk Assessment",
-      "text_short_de": "Weniger schädlich als Alkohol",
-      "text_short_en": "Less harmful than alcohol"
+      "text_short_de": "Weniger schädlich als Alkohol"
     },
     {
       "id": 5,
-      "text_de": "Schwierig zu dosieren",
-      "text_en": "Difficult to dose",
+      "text_de": "Cannabis ist schwierig zu dosieren.",
       "classification_de": "1 - richtig",
       "correctness_class": "richtig",
       "scientifically_checked": true,
-      "category_id": 5,
+      "category_id": 6,
       "category_de": "Risiken durch Dosierung und Qualität",
-      "category_en": "Dosage and Quality Risks",
-      "text_short_de": "Schwierig zu dosieren",
-      "text_short_en": "Difficult to dose"
+      "text_short_de": "Schwierig zu dosieren"
     },
     {
       "id": 6,
-      "text_de": "Mischkonsum ist besonders risikoreich",
-      "text_en": "Poly-substance use is particularly risky",
+      "text_de": "Mischkonsum von Cannabis mit anderen Substanzen ist besonders risikoreich.",
       "classification_de": "1 - richtig",
       "correctness_class": "richtig",
       "scientifically_checked": true,
-      "category_id": 5,
+      "category_id": 6,
       "category_de": "Risiken durch Dosierung und Qualität",
-      "category_en": "Dosage and Quality Risks",
-      "text_short_de": "Mischkonsum besonders risikoreich",
-      "text_short_en": "Poly-substance use particularly risky"
+      "text_short_de": "Mischkonsum risikoreicher"
     },
     {
       "id": 7,
-      "text_de": "Zusätze führen zu erhöhten Gesundheitsrisiken",
-      "text_en": "Additives lead to increased health risks",
+      "text_de": "Zusätze im Cannabis führen zu erhöhten Gesundheitsrisiken.",
       "classification_de": "1 - richtig",
       "correctness_class": "richtig",
       "scientifically_checked": true,
-      "category_id": 5,
+      "category_id": 6,
       "category_de": "Risiken durch Dosierung und Qualität",
-      "category_en": "Dosage and Quality Risks",
-      "text_short_de": "Zusätze erhöhen Gesundheitsrisiken",
-      "text_short_en": "Additives increase health risks"
+      "text_short_de": "Zusätze steigern Risiken"
     },
     {
       "id": 8,
-      "text_de": "Konsum schädigt den Fötus",
-      "text_en": "Use harms the fetus",
+      "text_de": "Cannabiskonsum schädigt den Fötus.",
       "classification_de": "1 - richtig",
       "correctness_class": "richtig",
       "scientifically_checked": true,
       "category_id": 2,
       "category_de": "Risiken für den Körper und die Entwicklung",
-      "category_en": "Physical and Developmental Risks",
-      "text_short_de": "Schädigt den Fötus",
-      "text_short_en": "Harms the fetus"
+      "text_short_de": "Schädigt Fötus"
     },
     {
       "id": 9,
-      "text_de": "Überdosierung führt nicht zum Tod",
-      "text_en": "Overdose does not lead to death",
+      "text_de": "Eine Überdosierung von Cannabis führt nicht zum Tod.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 6,
+      "category_de": "Risiken durch Dosierung und Qualität",
+      "text_short_de": "Überdosierung nicht tödlich"
+    },
+    {
+      "id": 10,
+      "text_de": "Cannabis wirkt gegen Schmerzen.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "text_short_de": "Wirkt gegen Schmerzen"
+    },
+    {
+      "id": 11,
+      "text_de": "Cannabiskonsum bewirkt Übelkeit und Erbrechen.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "text_short_de": "Bewirkt Übelkeit / Erbrechen"
+    },
+    {
+      "id": 12,
+      "text_de": "Cannabis hemmt Entzündungen.",
+      "classification_de": "keine Aussage möglich",
+      "correctness_class": "no_classification",
+      "scientifically_checked": false,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "text_short_de": "Hemmt Entzündungen"
+    },
+    {
+      "id": 13,
+      "text_de": "Cannabiskonsum löst Spasmen.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "text_short_de": "Löst Spasmen"
+    },
+    {
+      "id": 14,
+      "text_de": "Cannabiskonsum verursacht Herz-Kreislauferkrankungen.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "text_short_de": "Verursacht Herz-Kreislauferkrankungen"
+    },
+    {
+      "id": 15,
+      "text_de": "Inhalativer Cannabiskonsum bewirkt Atemwegserkrankungen.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "text_short_de": "Atemwegserkrankungen durch Inhalation"
+    },
+    {
+      "id": 16,
+      "text_de": "Cannabiskonsum verursacht Krebserkrankungen.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 2,
+      "category_de": "Risiken für den Körper und die Entwicklung",
+      "text_short_de": "Verursacht Krebserkrankungen"
+    },
+    {
+      "id": 17,
+      "text_de": "Cannabiskonsum hilft beim Abnehmen.",
+      "classification_de": "keine Aussage möglich",
+      "correctness_class": "no_classification",
+      "scientifically_checked": false,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "text_short_de": "Hilft beim Abnehmen"
+    },
+    {
+      "id": 18,
+      "text_de": "Cannabiskonsum hilft bei Schlafproblemen.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "text_short_de": "Hilft bei Schlafproblemen"
+    },
+    {
+      "id": 19,
+      "text_de": "Cannabiskonsum verändert die Wahrnehmungen.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "text_short_de": "Verändert Wahrnehmungen"
+    },
+    {
+      "id": 20,
+      "text_de": "Cannabiskonsum beeinträchtigt kognitive Fähigkeiten.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "text_short_de": "Beeinträchtigt kognitive Fähigkeiten"
+    },
+    {
+      "id": 21,
+      "text_de": "Cannabiskonsum gefährdet die Verkehrssicherheit.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "text_short_de": "Gefährdet Verkehrssicherheit"
+    },
+    {
+      "id": 22,
+      "text_de": "Cannabis ist eine Einstiegsdroge.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "text_short_de": "Einstiegsdroge"
+    },
+    {
+      "id": 23,
+      "text_de": "Cannabis verursacht keine Abhängigkeit.",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "text_short_de": "Verursacht keine Abhängigkeit"
+    },
+    {
+      "id": 24,
+      "text_de": "Cannabiskonsum verursacht Psychosen.",
+      "classification_de": "1 - richtig",
+      "correctness_class": "richtig",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "text_short_de": "Verursacht Psychosen"
+    },
+    {
+      "id": 25,
+      "text_de": "Cannabiskonsum wirkt gegen Angst.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "text_short_de": "Wirkt gegen Angst"
+    },
+    {
+      "id": 26,
+      "text_de": "Cannabiskonsum wirkt gegen Depressionen.",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "text_short_de": "Wirkt gegen Depressionen"
+    },
+    {
+      "id": 27,
+      "text_de": "Cannabiskonsum wirkt gegen ADHS.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 1,
+      "category_de": "Medizinischer und therapeutischer Nutzen",
+      "text_short_de": "Wirkt gegen ADHS"
+    },
+    {
+      "id": 28,
+      "text_de": "Cannabiskonsum verursacht einen generellen Motivationsverlust.",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "text_short_de": "Verursacht generellen Motivationsverlust"
+    },
+    {
+      "id": 29,
+      "text_de": "Cannabiskonsum verbessert die Gemütslage.",
+      "classification_de": "2 - eher richtig",
+      "correctness_class": "eher_richtig",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "text_short_de": "Verbessert Gemütslage"
+    },
+    {
+      "id": 30,
+      "text_de": "Cannabiskonsum führt zu Suizidgedanken.",
+      "classification_de": "2 - eher richtig",
+      "correctness_class": "eher_richtig",
+      "scientifically_checked": true,
+      "category_id": 3,
+      "category_de": "Risiken für die psychische Gesundheit",
+      "text_short_de": "Führt zu Suizidgedanken"
+    },
+    {
+      "id": 31,
+      "text_de": "Cannabiskonsum entspannt.",
+      "classification_de": "2 - eher richtig",
+      "correctness_class": "eher_richtig",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "text_short_de": "Entspannt"
+    },
+    {
+      "id": 32,
+      "text_de": "Cannabiskonsum macht nicht aggressiv.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 4,
+      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
+      "text_short_de": "Macht nicht aggressiv"
+    },
+    {
+      "id": 33,
+      "text_de": "Cannabiskonsum macht kreativ.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "text_short_de": "Macht kreativ"
+    },
+    {
+      "id": 34,
+      "text_de": "Cannabiskonsum schädigt soziale Beziehungen.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "text_short_de": "Schädigt soziale Beziehungen"
+    },
+    {
+      "id": 35,
+      "text_de": "Cannabiskonsument:innen halten sich in geringerem Maße an soziale Regeln.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "text_short_de": "Geringere Beachtung sozialer Regeln"
+    },
+    {
+      "id": 36,
+      "text_de": "Cannabiskonsum führt zu niedrigen Leistungen.",
+      "classification_de": "3 - eher falsch",
+      "correctness_class": "eher_falsch",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "text_short_de": "Führt zu niedrigen Leistungen"
+    },
+    {
+      "id": 37,
+      "text_de": "Cannabiskonsum geht einher mit einem niedrigen sozialen Niveau.",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "text_short_de": "Niedriges soziales Niveau"
+    },
+    {
+      "id": 38,
+      "text_de": "Cannabiskonsum ist cool.",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 5,
+      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
+      "text_short_de": "Cool"
+    },
+    {
+      "id": 39,
+      "text_de": "Ein großer Teil der Bevölkerung konsumiert Cannabis.",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 7,
+      "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
+      "text_short_de": "Großteil konsumiert"
+    },
+    {
+      "id": 40,
+      "text_de": "Cannabiskonsum ist nun für alle überall erlaubt.",
+      "classification_de": "4 - falsch",
+      "correctness_class": "falsch",
+      "scientifically_checked": true,
+      "category_id": 7,
+      "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
+      "text_short_de": "Nun für alle überall erlaubt"
+    },
+    {
+      "id": 41,
+      "text_de": "Die Teillegalisierung wird zu einem Anstieg des Cannabiskonsums führen.",
       "classification_de": "1 - richtig",
       "correctness_class": "richtig",
       "scientifically_checked": true,
       "category_id": 7,
-      "category_de": "Allgemeine Einschätzung der Gefährlichkeit",
-      "category_en": "General Risk Assessment",
-      "text_short_de": "Überdosierung führt nicht zum Tod",
-      "text_short_en": "Overdose does not lead to death"
-    },
-    {
-      "id": 10,
-      "text_de": "Cannabis lindert Schmerzen",
-      "text_en": "Cannabis relieves pain",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 1,
-      "category_de": "Medizinischer und therapeutischer Nutzen",
-      "category_en": "Medical and Therapeutic Benefits",
-      "text_short_de": "Lindert Schmerzen",
-      "text_short_en": "Relieves pain"
-    },
-    {
-      "id": 11,
-      "text_de": "Konsum bewirkt Übelkeit und Erbrechen",
-      "text_en": "Use causes nausea and vomiting",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 2,
-      "category_de": "Risiken für den Körper und die Entwicklung",
-      "category_en": "Physical and Developmental Risks",
-      "text_short_de": "Verursacht Übelkeit und Erbrechen",
-      "text_short_en": "Causes nausea and vomiting"
-    },
-    {
-      "id": 12,
-      "text_de": "Cannabis hemmt Entzündungen",
-      "text_en": "Cannabis inhibits inflammation",
-      "classification_de": "keine Aussage möglich",
-      "correctness_class": "no_classification",
-      "scientifically_checked": false,
-      "category_id": 1,
-      "category_de": "Medizinischer und therapeutischer Nutzen",
-      "category_en": "Medical and Therapeutic Benefits",
-      "text_short_de": "Hemmt Entzündungen",
-      "text_short_en": "Inhibits inflammation"
-    },
-    {
-      "id": 13,
-      "text_de": "Konsum lindert Spastiken",
-      "text_en": "Use relieves spasticity",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 1,
-      "category_de": "Medizinischer und therapeutischer Nutzen",
-      "category_en": "Medical and Therapeutic Benefits",
-      "text_short_de": "Lindert Spastiken",
-      "text_short_en": "Relieves spasticity"
-    },
-    {
-      "id": 14,
-      "text_de": "Konsum bewirkt Herz-Kreislaufkrankheiten",
-      "text_en": "Use causes cardiovascular diseases",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 2,
-      "category_de": "Risiken für den Körper und die Entwicklung",
-      "category_en": "Physical and Developmental Risks",
-      "text_short_de": "Bewirkt Herz-Kreislaufkrankheiten",
-      "text_short_en": "Causes cardiovascular diseases"
-    },
-    {
-      "id": 15,
-      "text_de": "Inhalativer Konsum bewirkt Atemwegserkrankungen",
-      "text_en": "Inhalation causes respiratory diseases",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 2,
-      "category_de": "Risiken für den Körper und die Entwicklung",
-      "category_en": "Physical and Developmental Risks",
-      "text_short_de": "Inhalation bewirkt Atemwegserkrankungen",
-      "text_short_en": "Inhalation causes respiratory diseases"
-    },
-    {
-      "id": 16,
-      "text_de": "Konsum verursacht Krebserkrankungen",
-      "text_en": "Use causes cancer",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 2,
-      "category_de": "Risiken für den Körper und die Entwicklung",
-      "category_en": "Physical and Developmental Risks",
-      "text_short_de": "Verursacht Krebserkrankungen",
-      "text_short_en": "Causes cancer"
-    },
-    {
-      "id": 17,
-      "text_de": "Konsum hilft beim Abnehmen",
-      "text_en": "Use helps with weight loss",
-      "classification_de": "keine Aussage möglich",
-      "correctness_class": "no_classification",
-      "scientifically_checked": false,
-      "category_id": 1,
-      "category_de": "Medizinischer und therapeutischer Nutzen",
-      "category_en": "Medical and Therapeutic Benefits",
-      "text_short_de": "Hilft beim Abnehmen",
-      "text_short_en": "Helps with weight loss"
-    },
-    {
-      "id": 18,
-      "text_de": "Konsum hilft bei Schlafproblemen",
-      "text_en": "Use helps with sleep problems",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 1,
-      "category_de": "Medizinischer und therapeutischer Nutzen",
-      "category_en": "Medical and Therapeutic Benefits",
-      "text_short_de": "Hilft bei Schlafproblemen",
-      "text_short_en": "Helps with sleep problems"
-    },
-    {
-      "id": 19,
-      "text_de": "Konsum verändert die Wahrnehmungen",
-      "text_en": "Use alters perceptions",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
-      "category_en": "Effects on Mood and Perception",
-      "text_short_de": "Verändert Wahrnehmungen",
-      "text_short_en": "Alters perceptions"
-    },
-    {
-      "id": 20,
-      "text_de": "Konsum beeinträchtigt kognitive Fähigkeiten",
-      "text_en": "Use impairs cognitive abilities",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 3,
-      "category_de": "Risiken für die psychische Gesundheit",
-      "category_en": "Mental Health Risks",
-      "text_short_de": "Beeinträchtigt kognitive Fähigkeiten",
-      "text_short_en": "Impairs cognitive abilities"
-    },
-    {
-      "id": 21,
-      "text_de": "Konsum gefährdet die Verkehrssicherheit",
-      "text_en": "Use endangers road safety",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
-      "category_en": "Social Effects and Performance",
-      "text_short_de": "Gefährdet die Verkehrssicherheit",
-      "text_short_en": "Endangers road safety"
-    },
-    {
-      "id": 22,
-      "text_de": "Cannabis ist eine Einstiegsdroge",
-      "text_en": "Cannabis is a gateway drug",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 3,
-      "category_de": "Risiken für die psychische Gesundheit",
-      "category_en": "Mental Health Risks",
-      "text_short_de": "Einstiegsdroge",
-      "text_short_en": "Gateway drug"
-    },
-    {
-      "id": 23,
-      "text_de": "Cannabis verursacht keine Abhängigkeit",
-      "text_en": "Cannabis does not cause addiction",
-      "classification_de": "4 - falsch",
-      "correctness_class": "falsch",
-      "scientifically_checked": true,
-      "category_id": 3,
-      "category_de": "Risiken für die psychische Gesundheit",
-      "category_en": "Mental Health Risks",
-      "text_short_de": "Verursacht keine Abhängigkeit",
-      "text_short_en": "Does not cause addiction"
-    },
-    {
-      "id": 24,
-      "text_de": "Konsum löst Psychosen aus",
-      "text_en": "Use triggers psychosis",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 3,
-      "category_de": "Risiken für die psychische Gesundheit",
-      "category_en": "Mental Health Risks",
-      "text_short_de": "Löst Psychosen aus",
-      "text_short_en": "Triggers psychosis"
-    },
-    {
-      "id": 25,
-      "text_de": "Konsum hilft gegen Angst",
-      "text_en": "Use helps against anxiety",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 1,
-      "category_de": "Medizinischer und therapeutischer Nutzen",
-      "category_en": "Medical and Therapeutic Benefits",
-      "text_short_de": "Hilft gegen Angst",
-      "text_short_en": "Helps against anxiety"
-    },
-    {
-      "id": 26,
-      "text_de": "Konsum hilft gegen Depressionen",
-      "text_en": "Use helps against depression",
-      "classification_de": "4 - falsch",
-      "correctness_class": "falsch",
-      "scientifically_checked": true,
-      "category_id": 1,
-      "category_de": "Medizinischer und therapeutischer Nutzen",
-      "category_en": "Medical and Therapeutic Benefits",
-      "text_short_de": "Hilft gegen Depressionen",
-      "text_short_en": "Helps against depression"
-    },
-    {
-      "id": 27,
-      "text_de": "Konsum hilft bei ADHS",
-      "text_en": "Use helps with ADHD",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 1,
-      "category_de": "Medizinischer und therapeutischer Nutzen",
-      "category_en": "Medical and Therapeutic Benefits",
-      "text_short_de": "Hilft bei ADHS",
-      "text_short_en": "Helps with ADHD"
-    },
-    {
-      "id": 28,
-      "text_de": "Konsum verursacht einen generellen Motivationsverlust",
-      "text_en": "Use causes general loss of motivation",
-      "classification_de": "4 - falsch",
-      "correctness_class": "falsch",
-      "scientifically_checked": true,
-      "category_id": 3,
-      "category_de": "Risiken für die psychische Gesundheit",
-      "category_en": "Mental Health Risks",
-      "text_short_de": "Genereller Motivationsverlust",
-      "text_short_en": "General loss of motivation"
-    },
-    {
-      "id": 29,
-      "text_de": "Konsum verbessert die Gemütslage",
-      "text_en": "Use improves mood",
-      "classification_de": "2 - eher richtig",
-      "correctness_class": "eher_richtig",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
-      "category_en": "Effects on Mood and Perception",
-      "text_short_de": "Verbessert die Gemütslage",
-      "text_short_en": "Improves mood"
-    },
-    {
-      "id": 30,
-      "text_de": "Konsum führt zu Suizidgedanken",
-      "text_en": "Use leads to suicidal thoughts",
-      "classification_de": "2 - eher richtig",
-      "correctness_class": "eher_richtig",
-      "scientifically_checked": true,
-      "category_id": 3,
-      "category_de": "Risiken für die psychische Gesundheit",
-      "category_en": "Mental Health Risks",
-      "text_short_de": "Führt zu Suizidgedanken",
-      "text_short_en": "Leads to suicidal thoughts"
-    },
-    {
-      "id": 31,
-      "text_de": "Konsum entspannt",
-      "text_en": "Use is relaxing",
-      "classification_de": "2 - eher richtig",
-      "correctness_class": "eher_richtig",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
-      "category_en": "Effects on Mood and Perception",
-      "text_short_de": "Entspannt",
-      "text_short_en": "Relaxing"
-    },
-    {
-      "id": 32,
-      "text_de": "Konsum macht nicht aggressiv",
-      "text_en": "Use does not make aggressive",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
-      "category_en": "Effects on Mood and Perception",
-      "text_short_de": "Macht nicht aggressiv",
-      "text_short_en": "Not aggressive"
-    },
-    {
-      "id": 33,
-      "text_de": "Konsum macht kreativ",
-      "text_en": "Use makes creative",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Einfluss auf Stimmung und Wahrnehmung",
-      "category_en": "Effects on Mood and Perception",
-      "text_short_de": "Macht kreativ",
-      "text_short_en": "Makes creative"
-    },
-    {
-      "id": 34,
-      "text_de": "Konsum schädigt soziale Beziehungen",
-      "text_en": "Use damages social relationships",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
-      "category_en": "Social Effects and Performance",
-      "text_short_de": "Schädigt soziale Beziehungen",
-      "text_short_en": "Damages social relationships"
-    },
-    {
-      "id": 35,
-      "text_de": "Konsument*innen halten sich in geringerem Maße an soziale Regeln",
-      "text_en": "Users comply less with social rules",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
-      "category_en": "Social Effects and Performance",
-      "text_short_de": "Geringere Regeltreue",
-      "text_short_en": "Less compliance with social rules"
-    },
-    {
-      "id": 36,
-      "text_de": "Konsum führt zu niedrigen Leistungen",
-      "text_en": "Use leads to low performance",
-      "classification_de": "3 - eher falsch",
-      "correctness_class": "eher_falsch",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
-      "category_en": "Social Effects and Performance",
-      "text_short_de": "Führt zu niedrigen Leistungen",
-      "text_short_en": "Leads to low performance"
-    },
-    {
-      "id": 37,
-      "text_de": "Konsum geht einher mit einem niedrigen sozialen Niveau",
-      "text_en": "Use is associated with low social status",
-      "classification_de": "4 - falsch",
-      "correctness_class": "falsch",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
-      "category_en": "Social Effects and Performance",
-      "text_short_de": "Niedriges soziales Niveau",
-      "text_short_en": "Low social status"
-    },
-    {
-      "id": 38,
-      "text_de": "Konsum ist cool",
-      "text_en": "Use is cool",
-      "classification_de": "4 - falsch",
-      "correctness_class": "falsch",
-      "scientifically_checked": true,
-      "category_id": 4,
-      "category_de": "Soziale Auswirkungen und Leistungsfähigkeit",
-      "category_en": "Social Effects and Performance",
-      "text_short_de": "Ist cool",
-      "text_short_en": "Is cool"
-    },
-    {
-      "id": 39,
-      "text_de": "Ein großer Teil der Bevölkerung konsumiert Cannabis",
-      "text_en": "A large part of the population uses cannabis",
-      "classification_de": "4 - falsch",
-      "correctness_class": "falsch",
-      "scientifically_checked": true,
-      "category_id": 6,
       "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
-      "category_en": "Prevalence and Legislation",
-      "text_short_de": "Großteil der Bevölkerung konsumiert",
-      "text_short_en": "Large part of population uses it"
-    },
-    {
-      "id": 40,
-      "text_de": "Konsum ist nun für alle überall erlaubt",
-      "text_en": "Use is now allowed for everyone everywhere",
-      "classification_de": "4 - falsch",
-      "correctness_class": "falsch",
-      "scientifically_checked": true,
-      "category_id": 6,
-      "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
-      "category_en": "Prevalence and Legislation",
-      "text_short_de": "Nun für alle überall erlaubt",
-      "text_short_en": "Now allowed for everyone everywhere"
-    },
-    {
-      "id": 41,
-      "text_de": "Neues Gesetz wird Anstieg des Cannabiskonsums bewirken",
-      "text_en": "New law will increase cannabis use",
-      "classification_de": "1 - richtig",
-      "correctness_class": "richtig",
-      "scientifically_checked": true,
-      "category_id": 6,
-      "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
-      "category_en": "Prevalence and Legislation",
-      "text_short_de": "Neues Gesetz erhöht Konsum",
-      "text_short_en": "New law increases use"
+      "text_short_de": "Teillegalisierung steigert Konsum"
     },
     {
       "id": 42,
-      "text_de": "Neues Gesetz wird Anstieg des Cannabiskonsums bei Minderjährigen bewirken",
-      "text_en": "New law will increase cannabis use among minors",
+      "text_de": "Die Teillegalisierung wird zu einem Anstieg des Cannabiskonsums unter Minderjährigen führen.",
       "classification_de": "3 - eher falsch",
       "correctness_class": "eher_falsch",
       "scientifically_checked": true,
-      "category_id": 6,
+      "category_id": 7,
       "category_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
-      "category_en": "Prevalence and Legislation",
-      "text_short_de": "Neues Gesetz erhöht Konsum bei Minderjährigen",
-      "text_short_en": "New law increases use among minors"
+      "text_short_de": "Teillegalisierung steigert Konsum  Minderjähriger"
     }
   ],
   "metrics": [
@@ -2821,108 +2695,88 @@
     {
       "id": "general_population",
       "name_de": "Gesamtbevölkerung (16–70)",
-      "name_en": "General Population (16–70)",
-      "description_de": "Alle Befragten (Volljährige und Minderjährige kombiniert).",
-      "description_en": "All respondents (adults and minors combined)."
+      "description_de": "Alle Befragten (Volljährige und Minderjährige kombiniert)."
     },
     {
       "id": "adults",
       "name_de": "Erwachsene (18–70)",
-      "name_en": "Adults (18–70)",
       "n": 2097,
-      "description_de": "Repräsentative Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund.",
-      "description_en": "Representative sample of the population (18–70 yrs), weighted by gender, age, education, and migration background."
+      "description_de": "Repräsentative Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund."
     },
     {
       "id": "minors",
       "name_de": "Minderjährige (16–17)",
-      "name_en": "Minors (16–17)",
       "n": 555,
-      "description_de": "Repräsentative Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel.",
-      "description_en": "Representative sample of 16–17-year-olds from the Horizoom youth panel."
+      "description_de": "Repräsentative Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel."
     },
     {
       "id": "consumers",
       "name_de": "Konsumierende",
-      "name_en": "Consumers (past 30 days)",
       "n": 358,
-      "description_de": "Personen mit Cannabis-Konsum in den letzten 30 Tagen (30-Tage-Prävalenz).",
-      "description_en": "Persons who consumed cannabis in the past 30 days (30-day prevalence)."
+      "description_de": "Personen mit Cannabis-Konsum in den letzten 30 Tagen (30-Tage-Prävalenz)."
     },
     {
       "id": "young_adults",
       "name_de": "Junge Erwachsene (18–26)",
-      "name_en": "Young Adults (18–26)",
       "n": 333,
-      "description_de": "Teilgruppe der Volljährigen im Alter von 18–26 Jahren.",
-      "description_en": "Subgroup of adults aged 18–26 years."
+      "description_de": "Teilgruppe der Volljährigen im Alter von 18–26 Jahren."
     },
     {
       "id": "parents",
       "name_de": "Eltern",
-      "name_en": "Parents",
       "n": 539,
-      "description_de": "Volljährige mit mindestens einem Kind unter 18 Jahren.",
-      "description_en": "Adults with at least one child under 18 years of age."
+      "description_de": "Volljährige mit mindestens einem Kind unter 18 Jahren."
     }
   ],
   "categories": [
     {
       "id": 1,
-      "name_de": "Medizinischer und therapeutischer Nutzen",
-      "name_en": "Medical and Therapeutic Benefits"
+      "name_de": "Medizinischer und therapeutischer Nutzen"
     },
     {
       "id": 2,
-      "name_de": "Risiken für den Körper und die Entwicklung",
-      "name_en": "Physical and Developmental Risks"
+      "name_de": "Risiken für den Körper und die Entwicklung"
     },
     {
       "id": 3,
-      "name_de": "Risiken für die psychische Gesundheit",
-      "name_en": "Mental Health Risks"
+      "name_de": "Risiken für die psychische Gesundheit"
     },
     {
       "id": 4,
-      "name_de": "Einfluss auf Stimmung und Wahrnehmung",
-      "name_en": "Effects on Mood and Perception"
+      "name_de": "Einfluss auf Stimmung und Wahrnehmung"
     },
     {
       "id": 5,
-      "name_de": "Risiken durch Dosierung und Qualität",
-      "name_en": "Dosage and Quality Risks"
+      "name_de": "Soziale Auswirkungen und Leistungsfähigkeit"
     },
     {
       "id": 6,
-      "name_de": "Verbreitung in der Bevölkerung und Gesetzgebung",
-      "name_en": "Prevalence and Legislation"
+      "name_de": "Risiken durch Dosierung und Qualität"
     },
     {
       "id": 7,
-      "name_de": "Allgemeine Einschätzung der Gefährlichkeit",
-      "name_en": "General Risk Assessment"
+      "name_de": "Verbreitung in der Bevölkerung und Gesetzgebung"
+    },
+    {
+      "id": 8,
+      "name_de": "Allgemeine Einschätzung der Gefährlichkeit"
     }
   ],
   "correctness_classes": {
     "richtig": {
-      "de": "Richtig",
-      "en": "Correct"
+      "de": "Richtig"
     },
     "eher_richtig": {
-      "de": "Eher richtig",
-      "en": "Rather correct"
+      "de": "Eher richtig"
     },
     "eher_falsch": {
-      "de": "Eher falsch",
-      "en": "Rather incorrect"
+      "de": "Eher falsch"
     },
     "falsch": {
-      "de": "Falsch",
-      "en": "Incorrect"
+      "de": "Falsch"
     },
     "no_classification": {
-      "de": "Keine Aussage möglich",
-      "en": "No classification possible"
+      "de": "Keine Aussage möglich"
     }
   }
 }
