@@ -129,7 +129,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // If no SITE_PASSWORD is configured, the site is publicly accessible.
   // Set SITE_PASSWORD in your environment (Netlify dashboard or local .env)
   // to enable password protection.
-  const password = import.meta.env.SITE_PASSWORD;
+  //
+  // Note: we use a tiny indirection (the `passwordEnv` const) so Vite's
+  // build-time replacement of `import.meta.env.SITE_PASSWORD` doesn't
+  // dead-code-eliminate the "no password configured" branch. Without
+  // this indirection, when SITE_PASSWORD is set at build time, the
+  // bundle becomes a literal that short-circuits the early return and
+  // leaves no graceful path if the env later resolves differently.
+  const passwordEnv = import.meta.env.SITE_PASSWORD;
+  const password = typeof passwordEnv === "string" ? passwordEnv : "";
   if (!password) {
     return next();
   }
@@ -140,6 +148,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  // Not authenticated — redirect to login
-  return context.redirect("/login");
+  // Not authenticated — redirect to login. We use `Response.redirect`
+  // here instead of `context.redirect` so the function behaves
+  // identically to the dozen other redirects above and doesn't depend
+  // on the Astro context's `redirect` helper being present in every
+  // edge runtime (Netlify Edge Functions, Vercel Edge, etc.).
+  return Response.redirect(new URL("/login", context.url), 302);
 });
