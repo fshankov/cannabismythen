@@ -52,11 +52,11 @@ steps:
     bodyText: |-
       Für jede These haben wir drei Werte gemessen.
 
-      **Kenntnis** — wer hat die Aussage schon einmal gehört? „Cannabis lindert Schmerzen" [↙ eher falsch] kennen 77 % der Konsumierenden, „Cannabis ist ein Allheilmittel" [↓ falsch] nur 12 % der Erwachsenen.
+      **Kenntnis** — wer hat die Aussage schon einmal gehört? „Cannabis wirkt gegen Schmerzen" [↙ eher falsch] kennen 77 % der Konsumierenden, „Cannabis ist ein Allheilmittel" [↓ falsch] nur 12 % der Erwachsenen.
 
       **Bedeutung** — wie stark prägt die Aussage das eigene Verhalten? Was Menschen kennen, wiegt für sie meist auch schwerer; beide Werte laufen eng zusammen.
 
-      **Richtigkeit** — wie nahe liegt die Einschätzung an der Wissenschaft? „Cannabis gefährdet die Verkehrssicherheit" [↑ richtig] erreicht bei Erwachsenen 92 von 100, „Cannabis verursacht Motivationsverlust" [↓ falsch] nur 25. Die Mehrheit liegt also daneben.
+      **Richtigkeit** — wie nahe liegt die Einschätzung an der Wissenschaft? „Cannabiskonsum gefährdet die Verkehrssicherheit" [↑ richtig] erreicht bei Erwachsenen 92 von 100, „Cannabiskonsum verursacht einen generellen Motivationsverlust" [↓ falsch] nur 25. Die Mehrheit liegt also daneben.
     hint: ""
   - heading: |-
       Wo Aufklärung
