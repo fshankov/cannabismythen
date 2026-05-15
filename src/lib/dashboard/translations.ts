@@ -242,6 +242,7 @@ const translations = {
   'view.spannweite': { de: 'Spannweite', en: 'Range' },
   'view.tabelle': { de: 'Tabelle', en: 'Table' },
   'view.quellen': { de: 'Informationsquellen', en: 'Information Sources' },
+  'view.quellen2': { de: 'Informationsquellen 2', en: 'Information Sources 2' },
   'igs.indicator.legend': { de: 'Indikator', en: 'Indicator' },
   'igs.group.legend': { de: 'Bevölkerungsgruppe', en: 'Population group' },
   'igs.group.adults': { de: 'Volljährige (18–70)', en: 'Adults (18–70)' },
@@ -373,22 +374,12 @@ const translations = {
     en: 'Each row is one myth, each column an indicator or population group. Pick the value at the top. The arrow marks the value for each myth, the tinted bar shows the 0–100 % scale. Click for the factsheet.',
   },
   'spannweite.title': { de: 'Mythen-Spannweite', en: 'Myth range' },
-  // User-friendly hover tooltips. Drafted German, awaiting ISD review.
+  // User-friendly hover tooltip. Drafted German, awaiting ISD review.
+  // Used both in the toolbar A-Z control (legacy v3.x) and the
+  // A-Z button in the MYTHEN column header (v4+).
   'spannweite.sort.alpha.tooltip': {
     de: 'Mythen alphabetisch sortieren (A → Z)',
     en: 'Sort myths alphabetically (A → Z)',
-  },
-  'spannweite.sort.verdict.r-to-f.tooltip': {
-    de: 'Sortiert nach wissenschaftlichem Urteil: wissenschaftlich richtige Mythen oben, falsche unten. Erneut klicken zum Umkehren.',
-    en: 'Sorted by scientific verdict: scientifically correct myths at the top, incorrect at the bottom. Click again to reverse.',
-  },
-  'spannweite.sort.verdict.f-to-r.tooltip': {
-    de: 'Sortiert nach wissenschaftlichem Urteil: wissenschaftlich falsche Mythen oben, richtige unten. Erneut klicken zum Umkehren.',
-    en: 'Sorted by scientific verdict: scientifically incorrect myths at the top, correct at the bottom. Click again to reverse.',
-  },
-  'spannweite.sort.verdict.activate.tooltip': {
-    de: 'Nach wissenschaftlichem Urteil sortieren (richtig oben, falsch unten). Erneut klicken zum Umkehren.',
-    en: 'Sort by scientific verdict (correct at the top, incorrect at the bottom). Click again to reverse.',
   },
   // Per-column value sort tooltips (Spannweite v3.3).
   'spannweite.sort.col.activate.tooltip': {
@@ -400,6 +391,28 @@ const translations = {
     en: 'Sorted by {col} — low values first. Click again: high values first.',
   },
   'spannweite.sort.col.desc.tooltip': {
+    de: 'Sortiert nach {col} — hohe Werte oben. Erneut klicken: niedrige Werte oben.',
+    en: 'Sorted by {col} — high values first. Click again: low values first.',
+  },
+  // Informationsquellen-Spannweite — AI-drafted German, awaiting ISD review.
+  'howto.sources2': {
+    de: 'Jede Zeile eine Informationsquelle, jede Spalte ein Wert oder eine Bevölkerungsgruppe. Wählen Sie oben den Bezug. Der Punkt markiert den Wert je Quelle, der getönte Balken zeigt die Skala 0–100 %. Klick auf das Pfeilsymbol blendet Unterquellen ein.',
+    en: 'Each row is an information source, each column a value or population group. Pick the reference at the top. The dot marks each source’s value, the tinted bar shows the 0–100 % scale. Click the chevron to reveal sub-sources.',
+  },
+  'sources2.title': { de: 'Informationsquellen-Spannweite', en: 'Information-sources range' },
+  'sources.sort.alpha.tooltip': {
+    de: 'Quellen alphabetisch sortieren (A → Z)',
+    en: 'Sort sources alphabetically (A → Z)',
+  },
+  'sources.sort.col.activate.tooltip': {
+    de: 'Nach {col} sortieren (niedrige Werte oben). Erneut klicken: hohe Werte oben.',
+    en: 'Sort by {col} (low values first). Click again: high values first.',
+  },
+  'sources.sort.col.asc.tooltip': {
+    de: 'Sortiert nach {col} — niedrige Werte oben. Erneut klicken: hohe Werte oben.',
+    en: 'Sorted by {col} — low values first. Click again: high values first.',
+  },
+  'sources.sort.col.desc.tooltip': {
     de: 'Sortiert nach {col} — hohe Werte oben. Erneut klicken: niedrige Werte oben.',
     en: 'Sorted by {col} — high values first. Click again: low values first.',
   },

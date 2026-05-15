@@ -81,23 +81,24 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'balken' | 'balken2' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'spannweite' | 'sources';
+export type ViewTab = 'balken' | 'balken2' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'spannweite' | 'sources' | 'sources2';
 
-/** Spannweite view sort key.
- *  - 'a-z' — alphabetical by short text.
- *  - 'verdict-r-to-f' / 'verdict-f-to-r' — by scientific verdict rank,
- *    toggle direction. Icon = Lucide ArrowDownToLine variant with the
- *    bottom rule recoloured per direction (red when falsch is at the
- *    bottom; green when richtig is at the bottom).
- *  - 'value-asc' / 'value-desc' — per-column numeric sort. The
- *    column whose values drive the sort is stored separately in
+/** Spannweite view sort key (v4 — dropped verdict-rank toggles).
+ *  - 'a-z' — alphabetical by short text. Lives in the MYTHEN column
+ *    header (upper-right), styled identically to the per-column
+ *    value-sort icons on the data columns.
+ *  - 'value-asc' / 'value-desc' — per-column numeric sort. The column
+ *    whose values drive the sort is stored separately in
  *    `spannweiteSortColumn`. */
-export type SpannweiteSort =
-  | 'a-z'
-  | 'verdict-r-to-f'
-  | 'verdict-f-to-r'
-  | 'value-asc'
-  | 'value-desc';
+export type SpannweiteSort = 'a-z' | 'value-asc' | 'value-desc';
+
+/** Informationsquellen-Spannweite view sort key.
+ *  No verdict-rank — sources aren't classified.
+ *  - 'a-z' — alphabetical by source name.
+ *  - 'value-asc' / 'value-desc' — per-column numeric sort. The column
+ *    whose values drive the sort is stored separately in
+ *    `sourcesSpannweiteSortColumn`. Nulls always sort last. */
+export type SourcesSpannweiteSort = 'a-z' | 'value-asc' | 'value-desc';
 
 /** Information-sources Streifen view — pivot mirrors the Mythen-Streifen idiom.
  *  - 'metric' → 4 strips (Suche / Wahrnehmung / Vertrauen / Prävention),
@@ -227,6 +228,16 @@ export interface AppState {
    *  'value-desc', the column ID (indicator slug or group slug) whose
    *  values drive the row ordering. null otherwise. */
   spannweiteSortColumn: string | null;
+  /** Informationsquellen-Spannweite view sort key. */
+  sourcesSpannweiteSort: SourcesSpannweiteSort;
+  /** Informationsquellen-Spannweite view: when sort is 'value-asc' or
+   *  'value-desc', the column ID (SourceMetricType when pivot is 'metric',
+   *  SourceGroupId when pivot is 'group') driving the row ordering.
+   *  null otherwise. */
+  sourcesSpannweiteSortColumn: string | null;
+  /** Informationsquellen-Spannweite view: parent source IDs currently
+   *  expanded to show their child sub-sources. */
+  sourcesSpannweiteExpanded: number[];
   /** Individually selected myth IDs from the unified Filter drawer.
    *  When non-empty (alone or together with `categoryIds`), the dashboard
    *  shows only the union of "myths in selected categories" + "myths in

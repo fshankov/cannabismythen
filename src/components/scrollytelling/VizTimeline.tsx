@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { TimelineTooltip } from './types';
 import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
 
@@ -93,11 +93,53 @@ export function VizTimeline({ active, tooltips }: Props) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const rafRef = useRef<number | null>(null);
 
+  // Iter-18: measure first/last dot positions so the green line spans
+  // exactly first-dot-center → last-dot-center regardless of how tall
+  // the timeline container ends up. The Iter-17 CSS-only fix
+  // (`height: auto` override of `.viz { height: 100% }`) wasn't
+  // robust — depended on source-order specificity AND on the user's
+  // dev server picking up the change. JS-measured positions are
+  // immune to either.
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const dotRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [lineGeom, setLineGeom] = useState<{
+    top: number;
+    height: number;
+  } | null>(null);
+
   const tooltipMap = useMemo(() => {
     const m: Record<string, string> = {};
     for (const t of tooltips) m[t.anchorDate] = t.body;
     return m;
   }, [tooltips]);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const first = dotRefs.current[0];
+    const last = dotRefs.current[ANCHORS.length - 1];
+    if (!container || !first || !last) return;
+
+    function measure() {
+      // Re-read after a possible layout shift. `container` is captured
+      // and was confirmed non-null on entry.
+      if (!container || !first || !last) return;
+      const c = container.getBoundingClientRect();
+      const f = first.getBoundingClientRect();
+      const l = last.getBoundingClientRect();
+      const top = f.top + f.height / 2 - c.top;
+      const bottom = l.top + l.height / 2 - c.top;
+      setLineGeom({ top, height: bottom - top });
+    }
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(container);
+    // Observe each dot too — if a row reflows (label wraps to a new
+    // line on narrow viewports) the dot Y shifts and the line needs
+    // to re-anchor.
+    for (const d of dotRefs.current) if (d) ro.observe(d);
+    return () => ro.disconnect();
+  }, []);
 
   const {
     triggerRef,
@@ -151,23 +193,48 @@ export function VizTimeline({ active, tooltips }: Props) {
     setHoveredIdx(null);
   }
 
+  // Inline styles for the three line-related elements, based on the
+  // measured first/last dot positions. Until the first measurement
+  // commits (one paint frame) we render the line at zero height,
+  // hidden — avoids a flash of full-height line on initial mount.
+  const lineBgStyle = lineGeom
+    ? { top: lineGeom.top, height: lineGeom.height, bottom: 'auto' as const }
+    : { top: 0, height: 0, bottom: 'auto' as const };
+  const lineFgStyle = lineGeom
+    ? {
+        top: lineGeom.top,
+        height: drawn * lineGeom.height,
+        bottom: 'auto' as const,
+      }
+    : { top: 0, height: 0, bottom: 'auto' as const };
+  const locatorStyle = lineGeom
+    ? { top: lineGeom.top + drawn * lineGeom.height }
+    : { top: 0 };
+
   return (
     <div
+      ref={containerRef}
       className="viz viz-timeline-v"
       role="img"
       aria-label="Zeitlicher Ablauf der CaRM-Studie"
     >
-      {/* Continuous line behind the rows */}
-      <div className="viz-timeline-v__line-bg" aria-hidden="true" />
+      {/* Continuous line — spans first dot to last dot via JS-measured
+          coordinates. `bottom: auto` overrides the CSS `bottom: 0` from
+          the bg rule so inline `top + height` win. */}
       <div
-        className="viz-timeline-v__line-fg"
-        style={{ height: `${(drawn * 100).toFixed(2)}%` }}
+        className="viz-timeline-v__line-bg"
+        style={lineBgStyle}
         aria-hidden="true"
       />
-      {drawn > 0.01 && drawn < 1 && (
+      <div
+        className="viz-timeline-v__line-fg"
+        style={lineFgStyle}
+        aria-hidden="true"
+      />
+      {drawn > 0.01 && drawn < 1 && lineGeom && (
         <div
           className="viz-timeline-v__locator"
-          style={{ top: `${(drawn * 100).toFixed(2)}%` }}
+          style={locatorStyle}
           aria-hidden="true"
         />
       )}
@@ -199,7 +266,12 @@ export function VizTimeline({ active, tooltips }: Props) {
                   aria-hidden="true"
                 />
               )}
-              <span className="viz-timeline-v__dot" />
+              <span
+                className="viz-timeline-v__dot"
+                ref={(el) => {
+                  dotRefs.current[i] = el;
+                }}
+              />
               <button
                 type="button"
                 className="viz-timeline-v__dot-hit"

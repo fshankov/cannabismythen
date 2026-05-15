@@ -15,11 +15,12 @@ import type {
   QuizThemeSlug,
   BalkenSort,
   SpannweiteSort,
+  SourcesSpannweiteSort,
 } from './types';
 
 const ALL_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 const ALL_INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
-const ALL_VIEWS: ViewTab[] = ['balken', 'balken2', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'spannweite', 'sources'];
+const ALL_VIEWS: ViewTab[] = ['balken', 'balken2', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'spannweite', 'sources', 'sources2'];
 const ALL_VERDICTS: CorrectnessClass[] = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
 const ALL_SOURCE_METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
 const ALL_SOURCE_GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
@@ -30,8 +31,9 @@ const ALL_QUIZ_THEME_SLUGS: QuizThemeSlug[] = ['quiz-gefaehrlichkeit', 'quiz-med
 const ALL_STRIPS_SORT_AXES: StripsSortAxis[] = [...ALL_INDICATORS, ...ALL_GROUP_IDS] as StripsSortAxis[];
 const ALL_STRIPS_DIRS: StripsSortDir[] = ['asc', 'desc'];
 const ALL_BALKEN_SORTS: BalkenSort[] = ['value-desc', 'value-asc', 'verdict-rank'];
-const ALL_SPANNWEITE_SORTS: SpannweiteSort[] = [
-  'a-z', 'verdict-r-to-f', 'verdict-f-to-r', 'value-asc', 'value-desc',
+const ALL_SPANNWEITE_SORTS: SpannweiteSort[] = ['a-z', 'value-asc', 'value-desc'];
+const ALL_SOURCES_SPANNWEITE_SORTS: SourcesSpannweiteSort[] = [
+  'a-z', 'value-asc', 'value-desc',
 ];
 
 /** Public view aliases. The four published tabs use German URL keys; legacy/internal
@@ -42,6 +44,7 @@ const VIEW_DE: Partial<Record<ViewTab, string>> = {
   spannweite: 'spannweite',
   table: 'tabelle',
   sources: 'quellen',
+  sources2: 'quellen2',
 };
 const VIEW_FROM_DE: Record<string, ViewTab> = Object.fromEntries(
   Object.entries(VIEW_DE).map(([k, v]) => [v as string, k as ViewTab]),
@@ -92,6 +95,9 @@ const DEFAULTS: AppState = {
   balkenSort: 'value-desc',
   spannweiteSort: 'a-z',
   spannweiteSortColumn: null,
+  sourcesSpannweiteSort: 'a-z',
+  sourcesSpannweiteSortColumn: null,
+  sourcesSpannweiteExpanded: [],
   mythIds: [],
 };
 
@@ -129,6 +135,15 @@ export function stateToUrl(state: Partial<AppState>): string {
     params.set('spsort', state.spannweiteSort);
 
   if (state.spannweiteSortColumn) params.set('spcol', state.spannweiteSortColumn);
+
+  if (state.sourcesSpannweiteSort && state.sourcesSpannweiteSort !== DEFAULTS.sourcesSpannweiteSort)
+    params.set('s2sort', state.sourcesSpannweiteSort);
+
+  if (state.sourcesSpannweiteSortColumn)
+    params.set('s2col', state.sourcesSpannweiteSortColumn);
+
+  if (state.sourcesSpannweiteExpanded && state.sourcesSpannweiteExpanded.length > 0)
+    params.set('s2exp', state.sourcesSpannweiteExpanded.join(','));
 
   if (state.mythIds && state.mythIds.length > 0)
     params.set('myths', state.mythIds.join(','));
@@ -232,15 +247,39 @@ export function urlToState(): Partial<AppState> {
   const spsort = params.get('spsort');
   if (spsort && ALL_SPANNWEITE_SORTS.includes(spsort as SpannweiteSort)) {
     state.spannweiteSort = spsort as SpannweiteSort;
-  } else if (spsort === 'median-desc' || spsort === 'z-a') {
-    // Legacy URLs: v2 'median-desc' (row-median sort), v3.1 'z-a'
-    // (reverse alpha). Both retired. Snap to default A-Z so old
-    // share-links still resolve cleanly.
+  } else if (
+    spsort === 'median-desc' ||
+    spsort === 'z-a' ||
+    spsort === 'verdict-r-to-f' ||
+    spsort === 'verdict-f-to-r'
+  ) {
+    // Legacy URLs from earlier Spannweite iterations:
+    //   - v2  'median-desc' (row-median sort)
+    //   - v3.1 'z-a'        (reverse alphabetical)
+    //   - v3.2 'verdict-r-to-f' / 'verdict-f-to-r' (verdict-rank,
+    //          dropped in v4 when the toolbar sort group was retired)
+    // All retired. Snap to default A-Z so old share-links still resolve.
     state.spannweiteSort = 'a-z';
   }
 
   const spcol = params.get('spcol');
   if (spcol) state.spannweiteSortColumn = spcol;
+
+  const s2sort = params.get('s2sort');
+  if (s2sort && ALL_SOURCES_SPANNWEITE_SORTS.includes(s2sort as SourcesSpannweiteSort)) {
+    state.sourcesSpannweiteSort = s2sort as SourcesSpannweiteSort;
+  }
+
+  const s2col = params.get('s2col');
+  if (s2col) state.sourcesSpannweiteSortColumn = s2col;
+
+  const s2exp = params.get('s2exp');
+  if (s2exp) {
+    state.sourcesSpannweiteExpanded = s2exp
+      .split(',')
+      .map((tok) => Number.parseInt(tok, 10))
+      .filter((n) => Number.isFinite(n) && n > 0);
+  }
 
   const myths = params.get('myths');
   if (myths) {

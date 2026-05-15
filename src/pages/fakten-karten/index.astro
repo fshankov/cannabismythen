@@ -15,6 +15,13 @@ import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
 // so the relative walk-up resolved to a non-existent path.
 import carmRawJson from "../../../public/data/carm-data.json";
 import "../../styles/quiz.css";
+// Brings in the .carm-filter-search-row* rules so the autocomplete
+// search input on this page is the visually identical sibling of the
+// Daten-Explorer filter drawer's search element. Lifted back in
+// 2026-05-15 per Fedor's "same element as the search in the filter"
+// note. If the Daten-Explorer search visual diverges later, fork
+// these rules into quiz.css with a `.fakten-search-row__*` prefix.
+import "../../styles/dashboard.css";
 
 const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
 

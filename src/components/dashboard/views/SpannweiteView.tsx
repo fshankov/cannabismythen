@@ -30,7 +30,7 @@ import type { ReactNode } from 'react';
 import {
   Eye, EyeOff, TrendingUp, Target, Shield, Globe,
   Users, Baby, Cannabis, GraduationCap, UsersRound,
-  ArrowDown01, ArrowDown10,
+  ArrowDown01, ArrowDown10, ArrowDownAZ,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type {
@@ -118,16 +118,6 @@ const GROUP_SHORT_EN: Record<GroupId, string> = {
 export interface SpannweiteViewHandle {
   getSvgElement: () => SVGSVGElement | null;
 }
-
-/** Verdict rank order — richtig at top (lowest index), keine_aussage
- *  at bottom. Used by the verdict-rank sort. */
-const VERDICT_RANK: Record<CorrectnessClass, number> = {
-  richtig: 0,
-  eher_richtig: 1,
-  eher_falsch: 2,
-  falsch: 3,
-  no_classification: 4,
-};
 
 const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function SpannweiteView(
   { myths, metrics, groups, state, update, onSelectMyth, definitions },
@@ -246,10 +236,8 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
     [mode, metrics, pickedGroup, pickedIndicator],
   );
 
-  /** Sort: 5-way.
-   *   - 'a-z'                   — alphabetical by short text
-   *   - 'verdict-r-to-f'        — richtig → falsch (A-Z tie-break)
-   *   - 'verdict-f-to-r'        — falsch → richtig (A-Z tie-break)
+  /** Sort: 3-way (v4 — verdict-rank dropped).
+   *   - 'a-z'                   — alphabetical by short text (default)
    *   - 'value-asc'/'value-desc' — by the value in `sortColumn` for
    *     each row's picked off-axis dim. Nulls sort to the bottom in
    *     both directions. A-Z tie-break. */
@@ -258,15 +246,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
     const cmpAz = (a: Myth, b: Myth) =>
       getMythShortText(a, lang).localeCompare(getMythShortText(b, lang), 'de');
 
-    if (sort === 'verdict-r-to-f' || sort === 'verdict-f-to-r') {
-      const dir = sort === 'verdict-r-to-f' ? 1 : -1;
-      rows.sort((a, b) => {
-        const ra = VERDICT_RANK[a.correctness_class] ?? VERDICT_RANK.no_classification;
-        const rb = VERDICT_RANK[b.correctness_class] ?? VERDICT_RANK.no_classification;
-        if (ra !== rb) return dir * (ra - rb);
-        return cmpAz(a, b);
-      });
-    } else if ((sort === 'value-asc' || sort === 'value-desc') && sortColumn) {
+    if ((sort === 'value-asc' || sort === 'value-desc') && sortColumn) {
       const dir = sort === 'value-asc' ? 1 : -1;
       rows.sort((a, b) => {
         const va = cellValue(a.id, sortColumn);
@@ -366,15 +346,37 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
           style={{ gridTemplateColumns: gridTemplate }}
           role="grid"
         >
-          {/* Header row */}
-          <div
-            className="carm-spannweite__cell carm-spannweite__cell--header carm-spannweite__cell--label"
-            role="columnheader"
-          >
-            <span className="carm-spannweite__header-text">
-              {t('misc.myths', lang)}
-            </span>
-          </div>
+          {/* Header row — MYTHEN column. Holds the A-Z sort affordance
+              (upper-right) so all sort controls live in column headers
+              now. Styled identically to the per-column value-sort
+              buttons via `.carm-spannweite__col-sort-btn`. */}
+          {(() => {
+            const isAzActive = sort === 'a-z';
+            const azTooltip = t('spannweite.sort.alpha.tooltip', lang);
+            return (
+              <div
+                className="carm-spannweite__cell carm-spannweite__cell--header carm-spannweite__cell--label"
+                role="columnheader"
+              >
+                <span className="carm-spannweite__header-text">
+                  {t('misc.myths', lang)}
+                </span>
+                <button
+                  type="button"
+                  className={`carm-spannweite__col-sort-btn${isAzActive ? ' is-active' : ''}`}
+                  onClick={() => {
+                    update('spannweiteSort', 'a-z');
+                    update('spannweiteSortColumn', null);
+                  }}
+                  aria-pressed={isAzActive}
+                  aria-label={azTooltip}
+                  title={azTooltip}
+                >
+                  <ArrowDownAZ size={14} strokeWidth={2} aria-hidden="true" />
+                </button>
+              </div>
+            );
+          })()}
           {columns.map((col) => {
             if (isHidden(col.id)) {
               return (

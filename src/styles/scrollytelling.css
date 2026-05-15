@@ -571,7 +571,18 @@ body:has(.scrolly) header nav a.active {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 1.5rem 0;
+  /* Iter-17: override `.viz { height: 100% }` so the timeline
+     container hugs its content (sum of 6 rows + gaps) instead of
+     filling the 100vh viz column. Previously the absolutely
+     positioned line `top:0; bottom:0` spanned the whole viewport
+     because the container inherited 100% height from `.viz`. With
+     `height: auto`, the parent flex (.viz-stage, align-items: center)
+     vertically centers the intrinsic-height timeline and the line
+     spans only the row stack.
+     `padding: 0` keeps the line flush with the first/last row so it
+     ends near the top/bottom dot rather than 24 px past it. */
+  height: auto;
+  padding: 0;
 }
 
 /* Continuous line behind the rows. */
@@ -768,10 +779,15 @@ body:has(.scrolly) header nav a.active {
 .viz-voices {
   position: relative;
   width: 100%;
-  max-height: 600px;
+  /* Iter-16: removed conflicting `max-height: 600px` — the JSX sets an
+     inline `height: 640px`, and the prior `max-height: 600` capped the
+     real container height to 600, which left the JS sim measuring 600
+     but expecting 640. Now the container is exactly the inline height. */
 }
 @keyframes viz-voice-card-in {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
+  /* Iter-16: subtler scale (0.96 vs 0.92) so the entrance reads as a
+     gentle pop rather than a bounce. */
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
   to   { opacity: var(--card-opacity, 1); transform: translate(-50%, -50%) scale(1); }
 }
 
@@ -808,7 +824,10 @@ body:has(.scrolly) header nav a.active {
   will-change: transform, opacity;
 }
 .viz-voice-card--in {
-  animation: viz-voice-card-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Iter-16: 380 ms → 200 ms. Combined with the tighter per-card
+     stagger (4 ms × 30 = 120 ms) the cloud is fully visible in
+     ≈320 ms after `settled` flips — vs ≈1.1 s before. */
+  animation: viz-voice-card-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .viz-voice-card:hover,
 .viz-voice-card:focus {

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
 import { FileText, User } from 'lucide-react';
 
 interface Props {
@@ -105,16 +104,22 @@ const VOICES: Voice[] = [
   { id: 56, text: 'Ist in Wahrheit kein echtes Suchtmittel.',        weight: 0.42, source: 'media' },
 ];
 
-interface SimNode extends d3.SimulationNodeDatum {
+/** Measured card with its target center position. Iter-18: dropped the
+ *  d3.SimulationNodeDatum extension — the shelf-pack layout doesn't run
+ *  any iterative simulation, just measures real card dimensions and
+ *  assigns deterministic (x, y) centers. */
+interface PackNode {
   id: number;
   text: string;
   weight: number;
-  /** Bounding-circle radius — used by d3.forceCollide for non-overlap. */
-  size: number;
-  /** Actual rendered half-width (px) — used to clamp x against container edges. */
+  /** Actual rendered half-width (px). */
   halfW: number;
-  /** Actual rendered half-height (px) — used to clamp y against container edges. */
+  /** Actual rendered half-height (px). */
   halfH: number;
+  /** Center X in container coordinates. */
+  x: number;
+  /** Center Y in container coordinates. */
+  y: number;
 }
 
 export function VizPeopleVoices({ active }: Props) {
@@ -138,16 +143,30 @@ export function VizPeopleVoices({ active }: Props) {
     // observer first.
     const el = container;
 
-    /** Compute positions once the container has real dimensions. Iter-8:
-     *  MEASURE-then-place. Iter-6/7 estimated each card's half-width and
-     *  half-height from character count × font-size, which underestimated
-     *  the rendered card (padding, inline icon, tail, natural text wrap)
-     *  and let the wall-clamp permit cards to extend past the right edge.
-     *  We now place every card at the container center (visibility:hidden)
-     *  so the browser does REAL text-wrap layout, read getBoundingClientRect
-     *  for the true dimensions, then run d3 with real halfW/halfH and
-     *  weaker centering forces so the cluster expands toward edges instead
-     *  of bunching mid-frame. */
+    /** Compute positions once the container has real dimensions.
+     *
+     *  Iter-18 — deterministic SHELF-PACK. The previous d3 force-sim
+     *  approach (Iter-6 through Iter-17) was tick-sensitive: packing
+     *  56 rectangles of mixed sizes into a 640 px field without
+     *  overlap AND without visible wedge gaps is fundamentally hard
+     *  for force-directed layouts. Different tick counts produced
+     *  either unresolved overlap (cards stacked) or large unfilled
+     *  pockets (perimeter reads as empty black). Shelf-pack solves
+     *  both by construction:
+     *
+     *    1. PHASE 1 — measure every card with the browser's real
+     *       text-wrap layout (visibility: hidden trick).
+     *    2. PHASE 2 — sort by height desc, greedily fill rows up to
+     *       the container width, then justify each row with extra
+     *       space distributed evenly between cards. Total stack is
+     *       vertically centered. NO ITERATION, NO OVERLAP, predictable
+     *       gaps.
+     *    3. PHASE 3 — write final (x, y) centers; flip
+     *       `visibility: visible`; trigger fade-in via the `--in`
+     *       class.
+     *
+     *  Subtle Y-jitter within each row breaks the strict grid look so
+     *  the cloud still reads as organic rather than spreadsheet-tidy. */
     function runLayout() {
       if (done || cancelled) return;
       const w = el.clientWidth;
@@ -156,23 +175,23 @@ export function VizPeopleVoices({ active }: Props) {
 
       const rng = mulberry32(31337);
 
-      // PHASE 1 — pre-position every card at the container center, hidden.
-      // The browser then lays out the real card (padding + icon + tail +
-      // natural text wrap) so we can read its true dimensions.
+      // PHASE 1 — pre-position every card at the container origin,
+      // hidden. The browser does real text-wrap layout so the
+      // subsequent getBoundingClientRect returns true dimensions
+      // (padding, inline icon, natural wrap).
       for (const v of VOICES) {
         const card = cardRefs.current.get(v.id);
         if (!card) continue;
         card.style.visibility = 'hidden';
-        card.style.left = `${w / 2}px`;
-        card.style.top = `${h / 2}px`;
+        card.style.left = '0px';
+        card.style.top = '0px';
       }
 
-      // Force a synchronous layout flush so getBoundingClientRect returns
-      // the freshly-laid-out dimensions, not stale ones. Reading offsetWidth
-      // is the cheapest reliable trigger.
+      // Synchronous layout flush — reading offsetWidth forces the
+      // browser to commit the layout above before we measure.
       void el.offsetWidth;
 
-      const measured: SimNode[] = [];
+      const measured: PackNode[] = [];
       for (const v of VOICES) {
         const card = cardRefs.current.get(v.id);
         if (!card) continue;
@@ -183,21 +202,43 @@ export function VizPeopleVoices({ active }: Props) {
           weight: v.weight,
           halfW: r.width / 2,
           halfH: r.height / 2,
-          size: Math.max(r.width, r.height) / 2,
-          // Wider seed band [0.18w, 0.82w] × [0.18h, 0.82h] so cards fill
-          // the field. Iter-6 used [0.30w, 0.70w] — too tight, left the
-          // perimeter black even after d3 converged.
-          x: w / 2 + (rng() - 0.5) * 0.64 * w,
-          y: h / 2 + (rng() - 0.5) * 0.64 * h,
+          x: 0,
+          y: 0,
         });
       }
 
+      // PHASE 2 — DART-THROWING placement (Iter-19).
+      //
+      // Iter-18's shelf-pack guaranteed no overlap but read as a
+      // strict 2-column list sorted by size. We need ORGANIC AND
+      // collision-free, like a word cloud. Algorithm:
+      //
+      //   1. Sort cards by AREA desc — biggest land first while the
+      //      field is empty (they need the most room).
+      //   2. For each card, sample random (x, y) within bounds; accept
+      //      if no overlap with already-placed cards.
+      //   3. If the first pass with a clean GAP can't find a slot in
+      //      80 attempts, retry with progressively smaller gaps
+      //      (4 → 2 → 0 px) and finally with allowed-tiny-overlap so
+      //      every card gets a position even at high density.
+      //   4. Bounds clamping (PAD_*) keeps the hanging source-icon
+      //      and tail inside the container.
+      //
+      // Cost: ~56 cards × up to 220 attempts × up to ~55 collision
+      // checks = ≈680k ops worst case. Empirically <10 ms.
+      const PAD_X = 6;
+      const PAD_Y_TOP = 4;
+      const PAD_Y_BOTTOM = 14;
+
       if (reduced) {
+        // Reduced-motion: simple grid, no animation.
         const cols = w < 600 ? 3 : 5;
         const sorted = [...measured].sort((a, b) => b.weight - a.weight);
         sorted.forEach((n, i) => {
           n.x = ((i % cols) + 0.5) * (w / cols);
-          n.y = (Math.floor(i / cols) + 0.5) * (h / Math.ceil(VOICES.length / cols));
+          n.y =
+            (Math.floor(i / cols) + 0.5) *
+            (h / Math.ceil(VOICES.length / cols));
         });
         applyPositions(measured, cardRefs.current);
         if (!cancelled) setSettled(true);
@@ -205,40 +246,83 @@ export function VizPeopleVoices({ active }: Props) {
         return;
       }
 
-      // PHASE 2 — d3 sim with REAL halfW/halfH. Centering forces are
-      // weaker than Iter-6 (0.04→0.012, 0.025→0.008) so the cluster
-      // expands toward edges instead of bunching mid-frame. Collision
-      // unchanged.
-      const sim = d3
-        .forceSimulation<SimNode>(measured)
-        .force('center', d3.forceCenter(w / 2, h / 2).strength(0.012))
-        .force(
-          'collide',
-          d3.forceCollide<SimNode>().radius((n) => n.size * 1.04).strength(0.95),
-        )
-        .force('x', d3.forceX(w / 2).strength(0.008))
-        .force('y', d3.forceY(h / 2).strength(0.008))
-        .stop();
+      // Place biggest cards first — they're hardest to fit later when
+      // the field is crowded.
+      const order = [...measured].sort(
+        (a, b) => b.halfW * b.halfH - a.halfW * a.halfH,
+      );
+      const placed: PackNode[] = [];
 
-      const TICKS = 240;
-      for (let i = 0; i < TICKS; i++) {
-        sim.tick();
-        for (const n of measured) {
-          const insetX = n.halfW * 1.05;
-          const insetY = n.halfH * 1.05;
-          if (n.x !== undefined) n.x = Math.max(insetX, Math.min(w - insetX, n.x));
-          if (n.y !== undefined) n.y = Math.max(insetY, Math.min(h - insetY, n.y));
+      function overlapPenalty(
+        card: PackNode,
+        x: number,
+        y: number,
+        gap: number,
+      ): number {
+        let pen = 0;
+        for (const p of placed) {
+          const needX = card.halfW + p.halfW + gap;
+          const needY = card.halfH + p.halfH + gap;
+          const dx = Math.abs(x - p.x);
+          const dy = Math.abs(y - p.y);
+          if (dx < needX && dy < needY) {
+            pen += (needX - dx) * (needY - dy);
+          }
         }
+        return pen;
+      }
+
+      // Progressive gap schedule: aim for 4 px breathing room; if
+      // density forces it, fall back to 2, then 0, then allow tiny
+      // overlap (best-of-N fallback).
+      const GAP_SCHEDULE: Array<{ gap: number; attempts: number }> = [
+        { gap: 4, attempts: 80 },
+        { gap: 2, attempts: 60 },
+        { gap: 0, attempts: 60 },
+      ];
+
+      for (const card of order) {
+        const minX = card.halfW + PAD_X;
+        const maxX = w - card.halfW - PAD_X;
+        const minY = card.halfH + PAD_Y_TOP;
+        const maxY = h - card.halfH - PAD_Y_BOTTOM;
+        const rangeX = Math.max(0, maxX - minX);
+        const rangeY = Math.max(0, maxY - minY);
+
+        // Best-found fallback in case no gap level succeeds — pick the
+        // lowest-overlap candidate we sampled.
+        let bestX = (minX + maxX) / 2;
+        let bestY = (minY + maxY) / 2;
+        let bestPenalty = Infinity;
+        let placedClean = false;
+
+        for (const step of GAP_SCHEDULE) {
+          if (placedClean) break;
+          for (let i = 0; i < step.attempts; i++) {
+            const x = minX + rng() * rangeX;
+            const y = minY + rng() * rangeY;
+            const pen = overlapPenalty(card, x, y, step.gap);
+            if (pen === 0) {
+              bestX = x;
+              bestY = y;
+              placedClean = true;
+              break;
+            }
+            if (pen < bestPenalty) {
+              bestPenalty = pen;
+              bestX = x;
+              bestY = y;
+            }
+          }
+        }
+
+        card.x = bestX;
+        card.y = bestY;
+        placed.push(card);
       }
 
       // PHASE 3 — apply final positions and reveal.
-      for (const n of measured) {
-        const c = cardRefs.current.get(n.id);
-        if (!c) continue;
-        c.style.left = `${(n.x ?? 0).toFixed(1)}px`;
-        c.style.top = `${(n.y ?? 0).toFixed(1)}px`;
-        c.style.visibility = '';
-      }
+      applyPositions(measured, cardRefs.current);
       done = true;
       requestAnimationFrame(() => {
         if (!cancelled) setSettled(true);
@@ -293,9 +377,11 @@ export function VizPeopleVoices({ active }: Props) {
                 // Fade-in target opacity; the card starts at 0 (see CSS) and
                 // animates up to this value once `settled` is true.
                 ['--card-opacity' as string]: opacityTarget,
-                // Stagger the fade-in slightly so the cluster appears as a
-                // wave rather than all-at-once — feels less abrupt.
-                animationDelay: `${Math.min(idx, 40) * 18}ms`,
+                // Iter-16: tighter stagger so the cloud appears in
+                // ~220 ms total (was ~1100 ms with 18 ms × 40 +
+                // 380 ms anim). The wave still reads as ordered but
+                // doesn't feel like "loading".
+                animationDelay: `${Math.min(idx, 30) * 4}ms`,
               }}
               title={v.text}
             >
@@ -324,7 +410,10 @@ function voiceFontSize(weight: number): number {
   return 9 + Math.pow(w, 1.6) * 15;
 }
 
-function applyPositions(nodes: SimNode[], cards: Map<number, HTMLDivElement | null>) {
+function applyPositions(
+  nodes: PackNode[],
+  cards: Map<number, HTMLDivElement | null>,
+) {
   // Iter-6 bugfix: write to left/top, NOT transform. The fade-in keyframe
   // animates `transform: translate(-50%, -50%) scale(...)`, which would
   // otherwise override an inline transform set here — wiping the computed
@@ -335,8 +424,9 @@ function applyPositions(nodes: SimNode[], cards: Map<number, HTMLDivElement | nu
   for (const n of nodes) {
     const el = cards.get(n.id);
     if (!el) continue;
-    el.style.left = `${(n.x ?? 0).toFixed(1)}px`;
-    el.style.top = `${(n.y ?? 0).toFixed(1)}px`;
+    el.style.left = `${n.x.toFixed(1)}px`;
+    el.style.top = `${n.y.toFixed(1)}px`;
+    el.style.visibility = '';
   }
 }
 

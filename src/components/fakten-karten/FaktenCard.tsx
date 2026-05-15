@@ -1,22 +1,22 @@
 /**
- * FaktenCard — Educational flip card for the Fakten-Karten grid.
+ * FaktenCard — editorial card surface on /fakten-karten/.
  *
- * No quiz interaction (no 4-button answer mechanic).
- * Tap/click flips between front (statement + verdict) and back (summary + link).
- * Reuses quiz card structural CSS for the 3D flip.
+ * Single `<button>` that opens the FactsheetPanel popup on click. On
+ * desktop hover the card performs a 3D flip on the Y axis: the front
+ * face (statement + category footer) rotates out and the back face
+ * (cardSummary + "Tippen für mehr →" CTA) rotates in. Touch / no-hover
+ * devices skip the flip entirely (handled in CSS) and tap goes
+ * straight to the popup.
  *
- * The card uses the canonical verdict iconography (`<VerdictArrow>`) and
- * canonical labels (Richtig / Eher richtig / Eher falsch / Falsch) so the
- * card matches every other verdict surface on the site. The conversational
- * `classificationLabel` field on each myth's `.mdoc` is intentionally
- * IGNORED here in favour of the canonical label — see Stage 1 of the
- * Daten-Explorer refactor.
+ * Statistics live ONLY inside the FactsheetPanel popup — cards never
+ * show data viz.
  */
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import VerdictStatement from "../shared/VerdictStatement";
+import CategoryFooter from "./CategoryFooter";
+import { getCategoryMeta } from "../../lib/fakten-karten/categories";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
-import type { MythContentEntry } from "../shared/FactsheetPanel";
 
 export interface FaktenCardMyth {
   mythNumber: number;
@@ -24,10 +24,7 @@ export interface FaktenCardMyth {
   classification: string;
   /**
    * Conversational label from Keystatic (e.g. "Das stimmt nicht.").
-   * Retained on the type for backwards compatibility but not rendered —
-   * Stage 1 of the Daten-Explorer refactor unified all verdict labels;
-   * v3 (2026-05-13) moved the verdict signal entirely into the colored
-   * statement + trailing arrow rendered via <VerdictStatement>.
+   * Retained on the type for backwards compatibility; not rendered.
    */
   classificationLabel: string;
   cardSummary: string;
@@ -36,7 +33,8 @@ export interface FaktenCardMyth {
 
 interface FaktenCardProps {
   myth: FaktenCardMyth;
-  mythContentEntry?: MythContentEntry;
+  /** Required for category coloring + footer rendering. */
+  categoryGroup: string;
   onShowFactsheet?: (slug: string) => void;
 }
 
@@ -56,65 +54,57 @@ function toVerdict(raw: string): CorrectnessClass {
 
 export default function FaktenCard({
   myth,
+  categoryGroup,
   onShowFactsheet,
 }: FaktenCardProps) {
-  const [flipped, setFlipped] = useState(false);
   const verdict = toVerdict(myth.classification);
+  const meta = getCategoryMeta(categoryGroup);
 
-  const handleFlip = useCallback(() => {
-    setFlipped((prev) => !prev);
-  }, []);
+  const handleClick = useCallback(() => {
+    if (onShowFactsheet) onShowFactsheet(myth.slug);
+  }, [onShowFactsheet, myth.slug]);
+
+  // Both faces render their own left-edge stripe so the category color
+  // signal stays continuous across the flip — without it, the back of
+  // the card would lose its category identity mid-rotation.
+  const stripe = (
+    <span
+      className="fakten-card__stripe"
+      style={{ background: meta.strip }}
+      aria-hidden="true"
+    />
+  );
 
   return (
     <div className="quiz-card__cell">
-      <div
-        className={`quiz-card fakten-card ${flipped ? "quiz-card--flipped" : ""}`}
-        onClick={handleFlip}
-        tabIndex={0}
-        role="button"
-        aria-label={`${myth.title} — ${flipped ? "Erklärung" : "Karte umdrehen"}`}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleFlip();
-          }
-        }}
+      <button
+        type="button"
+        className="fakten-card"
+        onClick={handleClick}
+        aria-label={`${myth.title} — Factsheet öffnen`}
       >
-        <div className="quiz-card__inner">
-          {/* ── FRONT FACE — statement carries the verdict (v3) ── */}
-          <div className="quiz-card__face quiz-card__front fakten-card__front">
-            <VerdictStatement
-              statement={myth.title}
-              verdict={verdict}
-              as="p"
-              className="quiz-card__statement fakten-card__statement"
-            />
-            <span className="fakten-card__flip-hint">
-              {"↩"} Erklärung
-            </span>
+        <div className="fakten-card__inner">
+          <div className="fakten-card__face fakten-card__face--front">
+            {stripe}
+            <div className="fakten-card__face-body">
+              <VerdictStatement
+                statement={myth.title}
+                verdict={verdict}
+                as="p"
+                className="fakten-card__statement"
+              />
+              <CategoryFooter categoryGroup={categoryGroup} />
+            </div>
           </div>
-
-          {/* ── BACK FACE ── */}
-          <div className="quiz-card__face quiz-card__back fakten-card__back">
-            <p className="fakten-card__summary">
-              {myth.cardSummary}
-            </p>
-            <button
-              type="button"
-              className="quiz-card__more-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onShowFactsheet) onShowFactsheet(myth.slug);
-              }}
-            >
-              mehr erfahren &rarr;
-            </button>
-            <span className="fakten-card__flip-hint">
-              {"↩"} zurück
-            </span>
+          <div className="fakten-card__face fakten-card__face--back">
+            {stripe}
+            <div className="fakten-card__face-body">
+              <p className="fakten-card__summary">{myth.cardSummary}</p>
+              <span className="fakten-card__cta">Tippen für mehr →</span>
+            </div>
           </div>
         </div>
-      </div>
+      </button>
     </div>
   );
 }

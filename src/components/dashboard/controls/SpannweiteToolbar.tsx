@@ -1,26 +1,24 @@
 /**
- * SpannweiteToolbar — dashboard toolbar for the Spannweite view (v3.1).
+ * SpannweiteToolbar — dashboard toolbar for the Spannweite view (v4).
  *
- * Two toggleable sort buttons:
- *   - Alphabetisch: A→Z ↔ Z→A (Lucide ArrowDownAZ / ArrowDownZA)
- *   - Verdict-Rang: Richtig→Falsch ↔ Falsch→Richtig
- *     (custom gradient arrow icon: emerald → rose / rose → emerald)
+ * No sort controls — sorting lives in the column headers now:
+ *   - A→Z in the MYTHEN column header (upper-right)
+ *   - Value asc/desc in each data column's header (upper-right)
  *
- * Plus the Punktwolke-shared PivotToggle (Indikatoren ↔ Gruppen) and
- * "Wert für" DataPicker that drives the off-axis dimension each cell
- * reads from. Filter + Export pass through via `sharedActions`.
+ * The toolbar renders the shared PivotToggle (Indikatoren ↔ Gruppen)
+ * + "Wert für" DataPicker that drives the off-axis dimension each
+ * cell reads from. Filter + Export pass through via `sharedActions`.
  */
 
 import type { ReactNode } from 'react';
 import {
   Eye, TrendingUp, Target, Shield, Globe,
   Users, Baby, Cannabis, GraduationCap, UsersRound,
-  ArrowDownAZ,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type {
   AppState, Group, GroupId, Indicator, StripsMode,
-  DashboardDefinitions, SpannweiteSort,
+  DashboardDefinitions,
 } from '../../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../../lib/dashboard/translations';
 import PivotToggle from './PivotToggle';
@@ -59,79 +57,10 @@ interface Props {
   sharedActions?: ReactNode;
 }
 
-/** Custom verdict-rank sort icon — based on Lucide `ArrowDownToLine`.
- *  The vertical shaft + chevron use currentColor (matching the
- *  button's text colour); the BOTTOM HORIZONTAL RULE is recoloured to
- *  signal which verdict ends up at the bottom of the sort:
- *    - direction='r-to-f' (richtig → falsch) → bottom line ROSE-700
- *    - direction='f-to-r' (falsch → richtig) → bottom line EMERALD-700
- *  When the verdict sort is inactive, the icon still renders so the
- *  button reads the same — clicking it activates the saved direction.
- */
-function VerdictArrowDownToLine({
-  direction,
-  size = 16,
-}: {
-  direction: 'r-to-f' | 'f-to-r';
-  size?: number;
-}) {
-  // Bottom rule colour follows the verdict that ends up at the BOTTOM
-  // of the sort (i.e. where the arrow's tip points).
-  const lineColor = direction === 'r-to-f' ? '#be123c' : '#047857';
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      {/* Vertical shaft + chevron — use currentColor. */}
-      <path d="M12 17V3" />
-      <path d="m6 11 6 6 6-6" />
-      {/* Bottom horizontal rule — verdict-coloured. */}
-      <path d="M19 21H5" stroke={lineColor} />
-    </svg>
-  );
-}
-
 export default function SpannweiteToolbar({
   state, update, groups, definitions, sharedActions,
 }: Props) {
   const mode: StripsMode = state.stripsMode;
-  const sort: SpannweiteSort = state.spannweiteSort ?? 'a-z';
-
-  const isAlpha = sort === 'a-z';
-  const isVerdict = sort === 'verdict-r-to-f' || sort === 'verdict-f-to-r';
-
-  // Verdict button "remembers" its last-active direction so users see
-  // the same colour cue every time they look at the button. Falls back
-  // to richtig→falsch when verdict mode has never been used.
-  const verdictDirection: 'r-to-f' | 'f-to-r' =
-    sort === 'verdict-f-to-r' ? 'f-to-r' : 'r-to-f';
-
-  /** Activate alphabetical sort. No-op if already active. */
-  const onClickAlpha = () => {
-    if (!isAlpha) update('spannweiteSort', 'a-z');
-  };
-  /** Activate or flip verdict-rank sort. */
-  const onClickVerdict = () => {
-    if (sort === 'verdict-r-to-f') update('spannweiteSort', 'verdict-f-to-r');
-    else if (sort === 'verdict-f-to-r') update('spannweiteSort', 'verdict-r-to-f');
-    else update('spannweiteSort', 'verdict-r-to-f');
-  };
-
-  const alphaTip = t('spannweite.sort.alpha.tooltip', state.lang);
-  const verdictTip = isVerdict
-    ? (verdictDirection === 'r-to-f'
-        ? t('spannweite.sort.verdict.r-to-f.tooltip', state.lang)
-        : t('spannweite.sort.verdict.f-to-r.tooltip', state.lang))
-    : t('spannweite.sort.verdict.activate.tooltip', state.lang);
 
   // "Wert für" picker options swap with the pivot — same pattern as
   // StripsToolbar. When columns are indicators, the picker selects the
@@ -182,34 +111,6 @@ export default function SpannweiteToolbar({
   return (
     <ToolbarRow
       aria-label={t('strips.compare.label', state.lang)}
-      pivot={
-        <div
-          className="carm-sort-group carm-sort-group--icon"
-          role="group"
-          aria-label={t('sort.label', state.lang)}
-        >
-          <button
-            type="button"
-            className={`carm-btn carm-sort-btn carm-sort-btn--icon${isAlpha ? ' carm-sort-btn--active' : ''}`}
-            onClick={onClickAlpha}
-            aria-pressed={isAlpha}
-            aria-label={alphaTip}
-            title={alphaTip}
-          >
-            <ArrowDownAZ size={16} strokeWidth={2} aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            className={`carm-btn carm-sort-btn carm-sort-btn--icon${isVerdict ? ' carm-sort-btn--active' : ''}`}
-            onClick={onClickVerdict}
-            aria-pressed={isVerdict}
-            aria-label={verdictTip}
-            title={verdictTip}
-          >
-            <VerdictArrowDownToLine direction={verdictDirection} />
-          </button>
-        </div>
-      }
       pickers={[
         <PivotToggle<StripsMode>
           key="mode"

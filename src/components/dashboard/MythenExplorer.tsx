@@ -37,6 +37,7 @@ import LadderView from './views/LadderView';
 import StripsView, { type StripsViewHandle } from './views/StripsView';
 import SpannweiteView, { type SpannweiteViewHandle } from './views/SpannweiteView';
 import SourcesStripsView, { type SourcesStripsViewHandle } from './views/SourcesStripsView';
+import SourcesSpannweiteView, { type SourcesSpannweiteViewHandle } from './views/SourcesSpannweiteView';
 import BalkenView, { type BalkenViewHandle } from './views/BalkenView';
 import BalkenView2 from './views/BalkenView2';
 import type { ChartHandle } from '../../lib/dashboard/export';
@@ -46,6 +47,7 @@ import DataPicker, { type DataPickerOption } from './controls/DataPicker';
 import ToolbarRow from './controls/ToolbarRow';
 import StripsToolbar from './controls/StripsToolbar';
 import SpannweiteToolbar from './controls/SpannweiteToolbar';
+import SourcesSpannweiteToolbar from './controls/SourcesSpannweiteToolbar';
 import FactsheetPanel from './FactsheetPanel';
 import DashboardOnboarding from './DashboardOnboarding';
 import type { MythContentEntry } from './FactsheetPanel';
@@ -123,6 +125,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   const stripsRef = useRef<StripsViewHandle>(null);
   const spannweiteRef = useRef<SpannweiteViewHandle>(null);
   const sourcesRef = useRef<SourcesStripsViewHandle>(null);
+  const sources2Ref = useRef<SourcesSpannweiteViewHandle>(null);
 
   /**
    * `getActiveChart()` — the canonical lookup the ExportDrawer uses to
@@ -142,6 +145,8 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         return spannweiteRef.current?.getSvgElement() ?? null;
       case 'sources':
         return sourcesRef.current?.getSvgElement() ?? null;
+      case 'sources2':
+        return sources2Ref.current?.getSvgElement() ?? null;
       case 'table':
       default:
         return null;
@@ -619,11 +624,21 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           />
         )}
 
+        {state.view === 'sources2' && (
+          <SourcesSpannweiteToolbar
+            state={state}
+            update={update}
+            definitions={defs}
+            sharedActions={exportOnlyAction}
+          />
+        )}
+
         {/* Legacy <FilterBar /> rendered for the retired views
          *  (scatter / lollipop / overview / circular / ladder) so
          *  share-links still resolve. The four public tabs no longer
          *  use it — they pick up the unified Filter drawer instead. */}
         {state.view !== 'sources' &&
+          state.view !== 'sources2' &&
           state.view !== 'strips' &&
           state.view !== 'spannweite' &&
           !isModernView && (
@@ -640,8 +655,11 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             there too. Vollbild was dropped (browser-native F11 covers
             the same use case for the rare power user). */}
 
-        {state.view !== 'strips' && state.view !== 'sources' && (
+        {state.view !== 'strips' && state.view !== 'sources' && state.view !== 'sources2' && (
           <p className="howto-microcopy">{t(`howto.${state.view}` as never, 'de')}</p>
+        )}
+        {state.view === 'sources2' && (
+          <p className="howto-microcopy">{t('howto.sources2', 'de')}</p>
         )}
 
         <div
@@ -651,6 +669,14 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             {state.view === 'sources' ? (
               <SourcesStripsView
                 ref={sourcesRef}
+                state={state}
+                update={update}
+                definitions={defs}
+                sharedActions={exportOnlyAction}
+              />
+            ) : state.view === 'sources2' ? (
+              <SourcesSpannweiteView
+                ref={sources2Ref}
                 state={state}
                 update={update}
                 definitions={defs}
@@ -752,7 +778,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           </div>
         </div>
 
-        {!isModernView && state.view !== 'sources' && state.view !== 'strips' && state.view !== 'spannweite' && (
+        {!isModernView && state.view !== 'sources' && state.view !== 'sources2' && state.view !== 'strips' && state.view !== 'spannweite' && (
           <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
         )}
 
@@ -820,7 +846,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                   : t('strips.mode.group', 'de'),
             };
           }
-          if (state.view === 'sources') {
+          if (state.view === 'sources' || state.view === 'sources2') {
             // Session 4b (BugHerd #55): subtitle now reflects the active
             // pivot + the picker selection so the exported chart is
             // self-describing. metric pivot → Indikatoren · {Gruppe};
@@ -848,7 +874,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
               ? `Indikatoren · ${SOURCES_GROUP_LABEL[state.sourceGroup] ?? state.sourceGroup}`
               : `Gruppen · ${SOURCES_METRIC_LABEL[state.sourceMetric] ?? state.sourceMetric}`;
             return {
-              title: 'Informationsquellen',
+              title: state.view === 'sources2'
+                ? t('sources2.title', 'de')
+                : 'Informationsquellen',
               subtitle,
             };
           }

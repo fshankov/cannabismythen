@@ -1,30 +1,41 @@
 /**
  * FaktenFilterBar — inline filter row above the Fakten-Karten grid.
  *
- * One horizontal row with two controls:
- *   1. Search input — diacritic-insensitive live-filters by myth title.
- *   2. Categories dropdown — single pill button "Kategorien (N)" opens a
- *      small popover panel anchored below it, with 8 checkbox rows
- *      (one per categoryGroup) and per-category myth counts. Multi-
- *      select.
+ * Three slots:
+ *   1. Count chip (left)        — "X von 42 Mythen" / "42 Mythen".
+ *   2. Search autocomplete      — visually identical to the Daten-Explorer
+ *      (centre, ~440px max)         FilterDrawer search input
+ *                                  (`.carm-filter-search-row__*` from
+ *                                  dashboard.css). On focus, a panel
+ *                                  appears below with one row per
+ *                                  matching myth: checkbox + verdict
+ *                                  statement + tiny category icon +
+ *                                  category name. Tick rows to filter
+ *                                  the grid live (AND-composed with
+ *                                  category ticks).
+ *   3. Categories dropdown      — same dropdown as before, but each
+ *      (right)                       row now shows the category's
+ *                                  Lucide icon + name in the xxx-700
+ *                                  color used on the cards.
  *
- * No drawer, no slide-out. Everything stays visible inline so the user
- * sees the filter affordances without an extra click.
- *
- * CSS uses the `.fakten-filter-*` namespace (in src/styles/quiz.css) so
- * the visual language can evolve independently from the Daten-Explorer's
- * `.carm-filter-*` family. Fedor's call (2026-05-14): the two pages may
- * use similar elements today but should not share CSS so future design
- * changes on one don't cross-affect the other.
+ * Search behaves as an autocomplete + multi-select combobox: typing
+ * narrows the list of myths in the panel; ticking persists the
+ * selection across closes. Clearing the search resets the visible list
+ * to all 42 (so the user can browse + pick without typing).
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, X, ChevronDown } from 'lucide-react';
-import { normalize } from '../../lib/text-normalize';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import VerdictStatement from "../shared/VerdictStatement";
+import CategoryFooter from "./CategoryFooter";
+import { getCategoryMeta } from "../../lib/fakten-karten/categories";
+import { normalize } from "../../lib/text-normalize";
+import type { CorrectnessClass } from "../../lib/dashboard/types";
 
 interface MythLike {
   mythNumber: number;
   title: string;
+  classification: string;
   categoryGroup: string;
 }
 
@@ -32,26 +43,51 @@ interface Props {
   categoryGroups: readonly string[];
   myths: MythLike[];
   selectedGroups: Set<string>;
+  selectedMyths: Set<number>;
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onToggleGroup: (group: string) => void;
+  onToggleMyth: (mythNumber: number) => void;
   onReset: () => void;
+  totalCount: number;
+  filteredCount: number;
+}
+
+const VALID_VERDICTS: ReadonlySet<CorrectnessClass> = new Set([
+  "richtig",
+  "eher_richtig",
+  "eher_falsch",
+  "falsch",
+  "no_classification",
+]);
+
+function toVerdict(raw: string): CorrectnessClass {
+  return VALID_VERDICTS.has(raw as CorrectnessClass)
+    ? (raw as CorrectnessClass)
+    : "no_classification";
 }
 
 export default function FaktenFilterBar({
   categoryGroups,
   myths,
   selectedGroups,
+  selectedMyths,
   searchQuery,
   onSearchChange,
   onToggleGroup,
+  onToggleMyth,
   onReset,
+  totalCount,
+  filteredCount,
 }: Props) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownContainerRef = useRef<HTMLDivElement | null>(null);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [catDropdownOpen, setCatDropdownOpen] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement | null>(null);
+  const catContainerRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const catTriggerRef = useRef<HTMLButtonElement | null>(null);
 
-  // Counts per group for the dropdown badges.
+  // Counts per category for the Kategorien dropdown badges.
   const groupCounts = useMemo(() => {
     const map = new Map<string, number>();
     for (const g of categoryGroups) map.set(g, 0);
@@ -61,86 +97,241 @@ export default function FaktenFilterBar({
     return map;
   }, [categoryGroups, myths]);
 
-  // Click-outside + Escape close the dropdown. Mirrors how OWID
-  // grapher and most native menus behave.
+  // Matches for the search autocomplete panel. Empty query → all
+  // myths so the panel doubles as a browseable multi-pick list.
+  const searchMatches = useMemo(() => {
+    const q = normalize(searchQuery.trim());
+    const sorted = [...myths].sort((a, b) => a.mythNumber - b.mythNumber);
+    if (q.length === 0) return sorted;
+    return sorted.filter((m) => normalize(m.title).includes(q));
+  }, [myths, searchQuery]);
+
+  // Click-outside + Escape close each open dropdown.
   useEffect(() => {
-    if (!dropdownOpen) return;
+    if (!searchOpen && !catDropdownOpen) return;
     const handlePointer = (e: MouseEvent) => {
-      const container = dropdownContainerRef.current;
-      if (!container) return;
-      if (!container.contains(e.target as Node)) {
-        setDropdownOpen(false);
+      const target = e.target as Node;
+      if (
+        searchOpen &&
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(target)
+      ) {
+        setSearchOpen(false);
+      }
+      if (
+        catDropdownOpen &&
+        catContainerRef.current &&
+        !catContainerRef.current.contains(target)
+      ) {
+        setCatDropdownOpen(false);
       }
     };
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setDropdownOpen(false);
-        triggerRef.current?.focus();
+      if (e.key !== "Escape") return;
+      if (catDropdownOpen) {
+        setCatDropdownOpen(false);
+        catTriggerRef.current?.focus();
+        return;
+      }
+      if (searchOpen) {
+        setSearchOpen(false);
+        searchInputRef.current?.blur();
       }
     };
-    window.addEventListener('mousedown', handlePointer);
-    window.addEventListener('keydown', handleKey);
+    window.addEventListener("mousedown", handlePointer);
+    window.addEventListener("keydown", handleKey);
     return () => {
-      window.removeEventListener('mousedown', handlePointer);
-      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener("mousedown", handlePointer);
+      window.removeEventListener("keydown", handleKey);
     };
-  }, [dropdownOpen]);
+  }, [searchOpen, catDropdownOpen]);
 
-  const selectedCount = selectedGroups.size;
+  const isFiltered = filteredCount !== totalCount;
+  const countLabel = isFiltered
+    ? `${filteredCount} von ${totalCount} Mythen`
+    : `${totalCount} Mythen`;
+
+  const selectedGroupCount = selectedGroups.size;
   const hasActiveFilter =
-    selectedCount > 0 || normalize(searchQuery).length > 0;
+    selectedGroupCount > 0 ||
+    selectedMyths.size > 0 ||
+    normalize(searchQuery).length > 0;
+
+  const hitsHint =
+    searchQuery.trim().length > 0
+      ? `${searchMatches.length} ${searchMatches.length === 1 ? "Treffer" : "Treffer"} · Auswahl per Klick`
+      : `${totalCount} Mythen · zum Filtern anklicken`;
 
   return (
     <div className="fakten-filter-bar" role="search">
-      <div className="fakten-filter-search">
-        <Search
-          size={16}
-          strokeWidth={2}
-          aria-hidden="true"
-          className="fakten-filter-search__icon"
-        />
-        <input
-          type="search"
-          className="fakten-filter-search__input"
-          placeholder="Mythen suchen …"
-          aria-label="Mythen suchen"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-        />
-        {searchQuery.length > 0 && (
-          <button
-            type="button"
-            className="fakten-filter-search__clear"
-            aria-label="Suche zurücksetzen"
-            onClick={() => onSearchChange('')}
+      <div className="fakten-filter-bar__left">
+        <span
+          className={`fakten-filter-count${
+            isFiltered ? " fakten-filter-count--filtered" : ""
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          {countLabel}
+        </span>
+      </div>
+
+      <div className="fakten-filter-bar__center" ref={searchContainerRef}>
+        <div className="carm-filter-search-row fakten-search">
+          <span
+            className="carm-filter-search-row__icon"
+            aria-hidden="true"
           >
-            <X size={14} strokeWidth={2} aria-hidden="true" />
-          </button>
+            {/* Inline SVG mirrors Lucide `Search` — keeps the visual
+                identical to the Daten-Explorer drawer search. */}
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+          </span>
+          <input
+            ref={searchInputRef}
+            type="search"
+            className="carm-filter-search-row__input"
+            placeholder="Mythen suchen …"
+            aria-label="Mythen suchen"
+            aria-expanded={searchOpen}
+            aria-controls="fakten-search-panel"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onFocus={() => setSearchOpen(true)}
+            onClick={() => setSearchOpen(true)}
+          />
+          {searchQuery.length > 0 && (
+            <button
+              type="button"
+              className="carm-filter-search-row__clear"
+              aria-label="Suche zurücksetzen"
+              onClick={() => onSearchChange("")}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {searchOpen && (
+          <div
+            id="fakten-search-panel"
+            className="fakten-search__panel"
+            role="listbox"
+            aria-label="Mythen auswählen"
+          >
+            <p className="fakten-search__hint">{hitsHint}</p>
+            {searchMatches.length === 0 ? (
+              <p className="fakten-search__empty">Keine Treffer</p>
+            ) : (
+              <ul className="fakten-search__list" role="presentation">
+                {searchMatches.map((m) => {
+                  const checked = selectedMyths.has(m.mythNumber);
+                  const meta = getCategoryMeta(m.categoryGroup);
+                  const Icon = meta.icon;
+                  return (
+                    <li
+                      key={m.mythNumber}
+                      className="fakten-search__row"
+                      role="option"
+                      aria-selected={checked}
+                    >
+                      <label className="fakten-search__label">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => onToggleMyth(m.mythNumber)}
+                        />
+                        <VerdictStatement
+                          statement={m.title}
+                          verdict={toVerdict(m.classification)}
+                          as="span"
+                          className="fakten-search__statement"
+                        />
+                        {/* Category icon only — no text. Sits to the
+                            right of the verdict statement so the row
+                            stays compact. Uses CATEGORY_META.label
+                            color so it ties back to the card footer. */}
+                        <span
+                          className="fakten-search__cat-icon"
+                          style={{ color: meta.label }}
+                          aria-label={`Kategorie: ${m.categoryGroup}`}
+                          title={m.categoryGroup}
+                        >
+                          <Icon
+                            size={14}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {hasActiveFilter && (
+              <div className="fakten-search__footer">
+                <button
+                  type="button"
+                  className="fakten-search__reset"
+                  onClick={() => {
+                    onReset();
+                    setSearchOpen(false);
+                  }}
+                >
+                  Filter zurücksetzen
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
       <div
-        className="fakten-filter-dropdown"
-        ref={dropdownContainerRef}
+        className="fakten-filter-bar__right fakten-filter-dropdown"
+        ref={catContainerRef}
       >
         <button
-          ref={triggerRef}
+          ref={catTriggerRef}
           type="button"
           className={`fakten-filter-dropdown__trigger${
-            dropdownOpen ? ' is-open' : ''
+            catDropdownOpen ? " is-open" : ""
           }`}
           aria-haspopup="true"
-          aria-expanded={dropdownOpen}
-          onClick={() => setDropdownOpen((v) => !v)}
+          aria-expanded={catDropdownOpen}
+          onClick={() => setCatDropdownOpen((v) => !v)}
         >
           <span className="fakten-filter-dropdown__label">
             Kategorien
-            {selectedCount > 0 && (
+            {selectedGroupCount > 0 && (
               <span
                 className="fakten-filter-dropdown__count"
-                aria-label={`${selectedCount} ausgewählt`}
+                aria-label={`${selectedGroupCount} ausgewählt`}
               >
-                ({selectedCount})
+                ({selectedGroupCount})
               </span>
             )}
           </span>
@@ -152,7 +343,7 @@ export default function FaktenFilterBar({
           />
         </button>
 
-        {dropdownOpen && (
+        {catDropdownOpen && (
           <div
             className="fakten-filter-dropdown__panel"
             role="menu"
@@ -174,9 +365,10 @@ export default function FaktenFilterBar({
                         checked={checked}
                         onChange={() => onToggleGroup(group)}
                       />
-                      <span className="fakten-filter-checkbox__label">
-                        {group}
-                      </span>
+                      <CategoryFooter
+                        categoryGroup={group}
+                        className="fakten-filter-checkbox__cat"
+                      />
                       <span className="fakten-filter-checkbox__count">
                         ({count})
                       </span>
@@ -192,10 +384,10 @@ export default function FaktenFilterBar({
                   className="fakten-filter-dropdown__reset"
                   onClick={() => {
                     onReset();
-                    setDropdownOpen(false);
+                    setCatDropdownOpen(false);
                   }}
                 >
-                  Zurücksetzen
+                  Filter zurücksetzen
                 </button>
               </div>
             )}

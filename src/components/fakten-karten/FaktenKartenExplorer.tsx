@@ -72,6 +72,11 @@ export default function FaktenKartenExplorer({
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(
     () => new Set(),
   );
+  /** Individual myths the user has ticked in the search autocomplete
+   *  dropdown. AND-composed with selectedGroups (see filteredMyths). */
+  const [selectedMyths, setSelectedMyths] = useState<Set<number>>(
+    () => new Set(),
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [factsheetMyth, setFactsheetMyth] = useState<string | null>(null);
 
@@ -109,24 +114,48 @@ export default function FaktenKartenExplorer({
     });
   }, []);
 
+  const toggleMyth = useCallback((mythNumber: number) => {
+    setSelectedMyths((prev) => {
+      const next = new Set(prev);
+      if (next.has(mythNumber)) next.delete(mythNumber);
+      else next.add(mythNumber);
+      return next;
+    });
+  }, []);
+
   const resetFilters = useCallback(() => {
     setSelectedGroups(new Set());
+    setSelectedMyths(new Set());
     setSearchQuery("");
   }, []);
 
+  /** AND-logic between search ticks and category ticks.
+   *
+   *  - No ticks anywhere → all 42 visible.
+   *  - Only myth ticks  → grid shows ticked myths only.
+   *  - Only category ticks → grid shows myths in those categories.
+   *  - Both → intersection (myth must be in selected categories AND in
+   *    selected myths).
+   *
+   *  The bare search query (when no ticks are present) still live-filters
+   *  the grid as a fallback so the user can preview the search before
+   *  committing via checkbox.
+   */
   const filteredMyths = useMemo(() => {
     const q = normalize(searchQuery.trim());
-    const noSelection = selectedGroups.size === 0;
+    const hasGroupTicks = selectedGroups.size > 0;
+    const hasMythTicks = selectedMyths.size > 0;
     const list = allMyths.filter((m) => {
-      if (q.length > 0) {
-        // Search bypasses the category filter — show all title matches.
+      if (hasMythTicks && !selectedMyths.has(m.mythNumber)) return false;
+      if (hasGroupTicks && !selectedGroups.has(m.categoryGroup)) return false;
+      // If no ticks yet, fall back to the live search preview.
+      if (!hasMythTicks && !hasGroupTicks && q.length > 0) {
         return normalize(m.title).includes(q);
       }
-      if (noSelection) return true;
-      return selectedGroups.has(m.categoryGroup);
+      return true;
     });
     return list.sort((a, b) => a.mythNumber - b.mythNumber);
-  }, [allMyths, selectedGroups, searchQuery]);
+  }, [allMyths, selectedGroups, selectedMyths, searchQuery]);
 
   const handleShowFactsheet = useCallback((slug: string) => {
     setFactsheetMyth(slug);
@@ -151,29 +180,39 @@ export default function FaktenKartenExplorer({
         categoryGroups={CATEGORY_GROUPS}
         myths={allMyths}
         selectedGroups={selectedGroups}
+        selectedMyths={selectedMyths}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onToggleGroup={toggleGroup}
+        onToggleMyth={toggleMyth}
         onReset={resetFilters}
+        totalCount={allMyths.length}
+        filteredCount={filteredMyths.length}
       />
 
-      <p className="fakten-explorer__count">
-        {filteredMyths.length} Mythen{" "}
-        {selectedGroups.size > 0 || searchQuery.trim().length > 0
-          ? "ausgewählt"
-          : "insgesamt"}
-      </p>
-
-      <div className="fakten-grid">
-        {filteredMyths.map((myth) => (
-          <FaktenCard
-            key={myth.mythNumber}
-            myth={myth}
-            mythContentEntry={mythContentMap[myth.mythNumber]}
-            onShowFactsheet={handleShowFactsheet}
-          />
-        ))}
-      </div>
+      {filteredMyths.length === 0 ? (
+        <p className="fakten-empty">
+          Keine Treffer für die aktuelle Auswahl.{" "}
+          <button
+            type="button"
+            className="fakten-empty__reset"
+            onClick={resetFilters}
+          >
+            Filter zurücksetzen
+          </button>
+        </p>
+      ) : (
+        <div className="fakten-grid">
+          {filteredMyths.map((myth) => (
+            <FaktenCard
+              key={myth.mythNumber}
+              myth={myth}
+              categoryGroup={myth.categoryGroup}
+              onShowFactsheet={handleShowFactsheet}
+            />
+          ))}
+        </div>
+      )}
 
       {openMyth && (() => {
         // The popup heading uses the unified VerdictStatement (statement

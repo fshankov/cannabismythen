@@ -7,7 +7,7 @@ import { t, type TranslationKey } from '../../lib/dashboard/translations';
 // "visualisation type" to "content type". Old views (bar/scatter/lollipop/
 // overview/circular/ladder) stay registered in MythenExplorer so legacy
 // share-links keep resolving; url-state.ts redirects retired ones to balken.
-const TABS: ViewTab[] = ['balken', 'balken2', 'strips', 'spannweite', 'table', 'sources'];
+const TABS: ViewTab[] = ['balken', 'balken2', 'strips', 'spannweite', 'table', 'sources', 'sources2'];
 
 const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
   balken: 'view.balken',
@@ -16,6 +16,7 @@ const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
   spannweite: 'view.spannweite',
   table: 'view.tabelle',
   sources: 'view.quellen',
+  sources2: 'view.quellen2',
   // Retired views — never shown in the tab bar; keys present so the type
   // remains exhaustive and url-state redirects don't crash on lookup.
   bar: null,
