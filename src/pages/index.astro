@@ -1,12 +1,11 @@
 ---
 export const prerender = true;
 
+import "../styles/home-hero-frage.css";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader, getPublishedEntries } from "@lib/content";
-import { deriveHeroLabel } from "@lib/myth";
-import { HeroBlock } from "@components/hero/HeroBlock";
-import { mythPositions } from "@components/hero/mythPositions";
-import type { HeroMyth } from "@components/hero/HeroBlock";
+import HeroFrageBlock from "@components/home/HeroFrageBlock";
+import type { HeroPair, HeroVerdict } from "@components/home/HeroFrageBlock";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
 import AudienceShortcutBlock from "@components/home/AudienceShortcutBlock.astro";
@@ -15,50 +14,40 @@ import type { PreviewMyth } from "@components/home/previews/FaktenKartenPreviewT
 import type { AudienceChip } from "@components/home/previews/MeineInteressenPreviewTile.astro";
 import { getAllAudiences } from "@lib/faq";
 
-// ── Hero content from Keystatic (legacy schema — replaced in step 5) ────────
+// ── Hero content from Keystatic ─────────────────────────────────────────────
 const heroBlockData = await reader.singletons.heroBlock.read();
-const headline1 = heroBlockData?.headline1 ?? "Was glauben wir zu wissen —";
-const headline2 = heroBlockData?.headline2 ?? "und was stimmt wirklich?";
-const heroEyebrow = heroBlockData?.eyebrow ??
-  "ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft";
 
-// ── Read all myth entries once — fuel the hero + the Fakten-Karten preview ──
-type MythRecord = {
-  prefix: string;
-  classification: string;
-  heroLabel: string;
-};
+const heroPairs: HeroPair[] = (heroBlockData?.pairs ?? []).map((p) => ({
+  belief: p.belief,
+  science: p.science,
+  mythSlug: p.mythSlug,
+  verdict: p.verdict as HeroVerdict,
+}));
 
+const heroBackgroundQuestions: string[] = [...(heroBlockData?.backgroundQuestions ?? [])];
+
+// ── Fakten-Karten preview: pick three short representative myths ───────────
+type MythRecord = { prefix: string; classification: string; title: string };
 const mythRecords: MythRecord[] = [];
 
 for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
   const prefixMatch = slug.match(/^m\d+/);
   if (!prefixMatch) continue;
   const e = entry as { classification: string; title?: string };
-  mythRecords.push({
-    prefix: prefixMatch[0],
-    classification: e.classification,
-    heroLabel: deriveHeroLabel(e.title ?? ""),
-  });
+  // Strip the "Mythos N: " prefix and trailing period so the title alone
+  // fits the small preview-card stripes.
+  const title = (e.title ?? "")
+    .replace(/^Mythos\s+\d+(?:\/\d+)?\s*:\s*/i, "")
+    .replace(/\s*\([a-z]\)/gi, "")
+    .replace(/[.\s]+$/, "")
+    .trim();
+  mythRecords.push({ prefix: prefixMatch[0], classification: e.classification, title });
 }
 
-const recordByPrefix = new Map(mythRecords.map((r) => [r.prefix, r]));
-
-const heroMyths: HeroMyth[] = mythPositions.map((pos) => {
-  const rec = recordByPrefix.get(pos.id);
-  return {
-    id: pos.id,
-    text: rec?.heroLabel || pos.text,
-    classification: rec?.classification ?? "keine_aussage",
-    position: pos,
-  };
-});
-
-// ── Fakten-Karten preview: pick three short representative myths ───────────
 function pickShortest(cls: string): MythRecord | undefined {
   return mythRecords
     .filter((r) => r.classification === cls)
-    .sort((a, b) => a.heroLabel.length - b.heroLabel.length)[0];
+    .sort((a, b) => a.title.length - b.title.length)[0];
 }
 
 const previewMyths: PreviewMyth[] = [
@@ -67,7 +56,7 @@ const previewMyths: PreviewMyth[] = [
   pickShortest("falsch"),
 ]
   .filter((r): r is MythRecord => r !== undefined)
-  .map((r) => ({ text: r.heroLabel, classification: r.classification }));
+  .map((r) => ({ text: r.title, classification: r.classification }));
 
 // ── Editorial section content ──────────────────────────────────────────────
 const numbersStripData = await reader.singletons.numbersStrip.read();
@@ -103,13 +92,21 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
 ---
 
 <BaseLayout title="Startseite" heroMode={true}>
-  <HeroBlock
-    myths={heroMyths}
-    headline1={headline1}
-    headline2={headline2}
-    eyebrow={heroEyebrow}
-    client:load
-  />
+  {heroBlockData && heroPairs.length > 0 && (
+    <HeroFrageBlock
+      eyebrow={heroBlockData.eyebrow}
+      beliefLabel={heroBlockData.beliefLabel}
+      scienceLabel={heroBlockData.scienceLabel}
+      backgroundQuestions={heroBackgroundQuestions}
+      pairs={heroPairs}
+      rotationSeconds={heroBlockData.rotationSeconds ?? 6}
+      primaryCtaLabel={heroBlockData.primaryCtaLabel}
+      primaryCtaUrl={heroBlockData.primaryCtaUrl}
+      secondaryCtaLabel={heroBlockData.secondaryCtaLabel}
+      secondaryCtaUrl={heroBlockData.secondaryCtaUrl}
+      client:load
+    />
+  )}
 
   {numbersStripData && (
     <NumbersStripBlock
