@@ -1176,6 +1176,131 @@ const quizHookBlock = singleton({
   },
 });
 
+// ─── Homepage v2 (landing-page redesign) editorial sections ────────────────
+// Stage-4 redesign of the Startseite. These three singletons feed the new
+// blocks (NumbersStripBlock, AudienceShortcutBlock, ProjectStripBlock). The
+// hero and headline-finding singletons above remain in place; they are
+// replaced/trimmed in later commits of the redesign series.
+
+const numbersStrip = singleton({
+  label: "🔢 Forschung in Zahlen – Startseite",
+  path: "src/content/numbers-strip",
+  format: { data: "yaml" },
+  schema: {
+    eyebrow: fields.text({
+      label: "Eyebrow",
+      defaultValue: "So ist diese Seite entstanden",
+    }),
+    numerals: fields.array(
+      fields.object({
+        value: fields.integer({
+          label: "Zahl",
+          description: "Endwert. Wird beim Eintreten in den Sichtbereich von 0 hochgezählt.",
+        }),
+        suffix: fields.text({
+          label: "Suffix (optional)",
+          description: 'z. B. "+" oder "k". Leer lassen für reine Zahl.',
+          defaultValue: "",
+        }),
+        label: fields.text({
+          label: "Beschriftung",
+          description: "Kurze Zeile unmittelbar unter der Zahl.",
+        }),
+        description: fields.text({
+          label: "Erläuterung",
+          multiline: true,
+          description: "Eine ergänzende Detailzeile.",
+        }),
+      }),
+      {
+        label: "Zahlen",
+        itemLabel: (p) => `${p.fields.value.value} ${p.fields.label.value}`,
+      },
+    ),
+    subline: fields.text({
+      label: "Unterzeile",
+      multiline: true,
+      description: "Kontext zur quantitativen Validierungs-Befragung (2.795 Personen).",
+      defaultValue:
+        "Quantitative Validierungs-Befragung: 2.795 Personen — 2.097 Erwachsene (18–70), 555 Minderjährige (16–17), 143 Mitglieder einer Anbauvereinigung. Erhebung August 2025.",
+    }),
+    linkLabel: fields.text({
+      label: "Link-Text",
+      defaultValue: "Mehr über das Projekt",
+    }),
+    linkUrl: fields.text({
+      label: "Link-Ziel",
+      defaultValue: "/projekt/",
+    }),
+  },
+});
+
+const audienceShortcut = singleton({
+  label: "🧭 Dein Einstieg – Startseite (Audience-Shortcut)",
+  path: "src/content/audience-shortcut",
+  format: { data: "yaml" },
+  schema: {
+    eyebrow: fields.text({ label: "Eyebrow", defaultValue: "Schon eine Idee?" }),
+    headline: fields.text({ label: "Überschrift", defaultValue: "Dein Einstieg" }),
+    lede: fields.text({
+      label: "Untertitel",
+      multiline: true,
+      defaultValue: "Wenn du schon weißt, was du suchst — hier geht's direkt los.",
+    }),
+    cards: fields.array(
+      fields.object({
+        audienceId: fields.select({
+          label: "Zielgruppe",
+          description: "Emoji + Akzent-Farbe werden automatisch aus faq/audiences.yaml übernommen.",
+          options: [
+            { label: "Eltern", value: "eltern" },
+            { label: "Jugendliche", value: "jugendliche" },
+            { label: "Konsumierende", value: "konsumierende" },
+            { label: "Lehrkräfte", value: "lehrkraefte" },
+            { label: "Fachkräfte", value: "fachkraefte" },
+          ],
+          defaultValue: "eltern",
+        }),
+        recommendation: fields.text({
+          label: "Empfehlung",
+          description: "Eine Zeile — was die Audience tun soll.",
+        }),
+        targetUrl: fields.text({
+          label: "Ziel-URL",
+          description: "Ziel des Klicks (intern oder extern).",
+        }),
+      }),
+      {
+        label: "Audience-Karten",
+        itemLabel: (p) => `${p.fields.audienceId.value} → ${p.fields.targetUrl.value}`,
+      },
+    ),
+  },
+});
+
+const projectStrip = singleton({
+  label: "🏛️ Über das Projekt – Streifen Startseite",
+  path: "src/content/project-strip",
+  format: { data: "yaml" },
+  schema: {
+    credit: fields.text({
+      label: "Träger-Hinweis",
+      description: "Einzeiliger Credit unten auf der Startseite.",
+      defaultValue: "Ein Projekt vom ISD Hamburg · CaRM-Studie · Stand 11/2025",
+    }),
+    links: fields.array(
+      fields.object({
+        label: fields.text({ label: "Beschriftung" }),
+        url: fields.text({ label: "URL" }),
+      }),
+      {
+        label: "Links",
+        itemLabel: (p) => p.fields.label.value || "Link",
+      },
+    ),
+  },
+});
+
 // Stage 7 — Global default share/comparison copy. Used when a quiz
 // module's `shareCopy.{band}` cell is empty. Per-module overrides win.
 const shareCopy = singleton({
@@ -1244,6 +1369,9 @@ export default config({
     credibilityBlock,
     headlineFinding,
     quizHookBlock,
+    numbersStrip,
+    audienceShortcut,
+    projectStrip,
     dashboardDefinitionen,
     faqAudiences,
     shareCopy,

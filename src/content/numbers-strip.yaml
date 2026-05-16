@@ -1,0 +1,21 @@
+eyebrow: 'So ist diese Seite entstanden'
+numerals:
+  - value: 1041
+    suffix: ''
+    label: 'Befragte'
+    description: 'in einer ersten qualitativen Erhebung — sie lieferten die Aussagen, mit denen alles begann.'
+  - value: 7408
+    suffix: ''
+    label: 'Aussagen'
+    description: 'aus Befragungen, Expertinnen-Gesprächen und Medienanalyse — verdichtet zu prüfbaren Mythen.'
+  - value: 42
+    suffix: ''
+    label: 'prüfbare Mythen'
+    description: 'wurden für die Faktenkarten ausgewählt und einzeln wissenschaftlich eingeordnet.'
+  - value: 548
+    suffix: ''
+    label: 'wissenschaftliche Quellen'
+    description: 'aus PubMed, PsychInfo, SocIndex und Google Scholar (Stand September 2025).'
+subline: 'Quantitative Validierungs-Befragung: 2.795 Personen — 2.097 Erwachsene (18–70), 555 Minderjährige (16–17) und 143 Mitglieder einer Anbauvereinigung. Erhebung August 2025, gewichtet nach Geschlecht, Alter und Bildung.'
+linkLabel: 'Mehr über das Projekt'
+linkUrl: '/projekt/'
