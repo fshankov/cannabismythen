@@ -295,6 +295,14 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.exploreData": "Daten-Explorer \u00f6ffnen",
     "ui.shareResultHeading": "Ergebnis teilen",
     "ui.openMythDetail": "Mehr auf der Fakten-Karte \u2192",
+    // Stage B (2026-05-16) \u2014 4-column comparison table on the result screen.
+    "ui.resultTable.statement": "Aussage",
+    "ui.resultTable.yourAnswer": "Deine Antwort",
+    "ui.resultTable.scientific": "Wissenschaftlich",
+    "ui.resultTable.populationAvg": "Bev\u00f6lkerung \u00d8",
+    "ui.resultTable.populationAvgCaption":
+      "\u00d8 \u2014 Anteil der Erwachsenen (18\u201370), die diese Aussage in einer Bev\u00f6lkerungsbefragung in Deutschland im Schnitt genau richtig eingeordnet haben.",
+    "ui.resultTable.jump": "Zur Frage",
   },
 
   // ── English (placeholder — to be filled) ──────────────────────────

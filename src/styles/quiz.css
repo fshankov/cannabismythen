@@ -2196,6 +2196,164 @@
   gap: 4px;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Stage B (2026-05-16) — 4-column comparison table.
+   Replaces the Stage A retrospective <ol> (.quiz-result__list /
+   .quiz-result__item*). Those legacy rules above remain inert; Stage 9
+   cleans them up alongside the other Stage 5 dead code.
+   ══════════════════════════════════════════════════════════════════ */
+
+.quiz-result__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+
+.quiz-result__table th,
+.quiz-result__table td {
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.quiz-result__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.quiz-result__table th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--color-surface-alt, #fafaf6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.quiz-result__table td:first-child {
+  width: 50%;
+}
+
+.quiz-result__table-cell--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.quiz-result__table-statement {
+  display: block;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+/* Band-tinted inset left edge per row — secondary cue to the verdict
+   pills in cols 2/3. box-shadow keeps border-collapse intact. */
+.quiz-result__row--exact {
+  box-shadow: inset 4px 0 0 0 var(--classification-richtig);
+}
+.quiz-result__row--near {
+  box-shadow: inset 4px 0 0 0 var(--classification-eher-richtig);
+}
+.quiz-result__row--off {
+  box-shadow: inset 4px 0 0 0 var(--classification-eher-falsch);
+}
+.quiz-result__row--far {
+  box-shadow: inset 4px 0 0 0 var(--classification-falsch);
+}
+
+.quiz-result__jump {
+  display: inline-block;
+  margin-top: var(--space-xs);
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.quiz-result__jump:hover {
+  text-decoration-thickness: 2px;
+}
+
+.quiz-result__table-caption {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin: var(--space-sm) 0 var(--space-xl);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Mobile (≤ 640 px): collapse to stacked cards. <table> stays in DOM
+   so screen-reader semantics still apply; visual <thead> is sr-only. */
+@media (max-width: 640px) {
+  .quiz-result__table,
+  .quiz-result__table tbody,
+  .quiz-result__table tr,
+  .quiz-result__table td {
+    display: block;
+    width: auto;
+  }
+  .quiz-result__table {
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+  .quiz-result__table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .quiz-result__table tr {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    background: var(--color-surface);
+  }
+  .quiz-result__table td {
+    padding: var(--space-xs) 0;
+    border-bottom: 0;
+  }
+  .quiz-result__table td::before {
+    content: attr(data-label) ":\00a0";
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-right: var(--space-xs);
+  }
+  .quiz-result__table td:first-child {
+    width: auto;
+  }
+  .quiz-result__table td:first-child::before {
+    /* Statement is the row anchor, not a labelled field. */
+    content: "";
+  }
+  .quiz-result__table-cell--num {
+    text-align: left;
+  }
+}
+
 /* 8 — CTAs */
 .quiz-result__cta {
   display: inline-block;
