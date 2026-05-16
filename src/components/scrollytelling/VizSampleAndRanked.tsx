@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { User } from 'lucide-react';
+import {
+  AUDIENCE_ICONS_BY_GROUP,
+  IconVolljaehrige,
+  IconMinderjaehrige,
+  IconKonsumierende,
+  type IconComponent,
+} from '../../lib/icons';
 import type {
   CarmData,
   GroupId,
@@ -22,11 +28,20 @@ interface Props {
   mode: SampleRankedMode;
 }
 
-const SAMPLE_GROUPS = [
-  { id: 'adults', label: 'Erwachsene 18–70', n: 2097, iconCount: 210, color: 'var(--group-adults)' },
-  { id: 'minors', label: 'Minderjährige 16–17', n: 555, iconCount: 56, color: 'var(--group-minors)' },
-  { id: 'clubs', label: 'Anbauvereinigungs-Mitglieder', n: 143, iconCount: 14, color: 'var(--group-consumers)' },
-] as const;
+interface SampleGroup {
+  id: 'adults' | 'minors' | 'clubs';
+  label: string;
+  n: number;
+  iconCount: number;
+  color: string;
+  Icon: IconComponent;
+}
+
+const SAMPLE_GROUPS: readonly SampleGroup[] = [
+  { id: 'adults', label: 'Erwachsene 18–70',           n: 2097, iconCount: 210, color: 'var(--group-adults)',    Icon: IconVolljaehrige },
+  { id: 'minors', label: 'Minderjährige 16–17',         n: 555,  iconCount: 56,  color: 'var(--group-minors)',    Icon: IconMinderjaehrige },
+  { id: 'clubs',  label: 'Anbauvereinigungs-Mitglieder', n: 143,  iconCount: 14,  color: 'var(--group-consumers)', Icon: IconKonsumierende },
+];
 
 type IndicatorKey =
   | 'awareness'
@@ -160,7 +175,7 @@ export function VizSampleAndRanked({ data, mode }: Props) {
                 </div>
                 <div className="viz-sr__icon-row" aria-hidden="true">
                   {Array.from({ length: g.iconCount }, (_, i) => (
-                    <User
+                    <g.Icon
                       key={i}
                       size={12}
                       strokeWidth={2}
@@ -371,6 +386,7 @@ function ExampleMythStrips({
       <div className="viz-sr__example-picker" role="tablist" aria-label="Zielgruppe">
         {ACTIVE_GROUPS.map((g) => {
           const isActive = activeGroup === g;
+          const Icon = AUDIENCE_ICONS_BY_GROUP[g];
           return (
             <button
               key={g}
@@ -380,8 +396,8 @@ function ExampleMythStrips({
               onClick={() => setActiveGroup(g)}
               className={`viz-sr__example-pick ${isActive ? 'viz-sr__example-pick--active' : ''}`}
             >
-              <User
-                size={12}
+              <Icon
+                size={14}
                 strokeWidth={2}
                 color={GROUP_COLOR[g]}
                 aria-hidden="true"

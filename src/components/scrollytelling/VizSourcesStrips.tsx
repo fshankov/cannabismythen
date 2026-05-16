@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { User } from 'lucide-react';
+import { AUDIENCE_ICONS_BY_GROUP } from '../../lib/icons';
 import type {
   GroupId,
   InformationSource,
@@ -187,27 +187,31 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         <span className="viz-strips__header-list">{UNIFIED_HEADER}</span>
       </div>
 
-      {/* Group picker — colored User-icon affordance shared with step 6. */}
+      {/* Group picker — registry audience icons in the local --group-* palette
+          (shared with step 6 via the same icon registry). */}
       <div className="viz-strips__picker" role="tablist" aria-label="Zielgruppe">
-        {GROUP_OPTIONS.map((g) => (
-          <button
-            key={g.id}
-            role="tab"
-            aria-selected={activeGroup === g.id}
-            className={`viz-strips__pick ${activeGroup === g.id ? 'viz-strips__pick--active' : ''}`}
-            onClick={() => setActiveGroup(g.id)}
-            type="button"
-          >
-            <User
-              size={12}
-              strokeWidth={2}
-              color={GROUP_COLOR[g.id]}
-              aria-hidden="true"
-              style={{ flexShrink: 0 }}
-            />
-            {g.label}
-          </button>
-        ))}
+        {GROUP_OPTIONS.map((g) => {
+          const Icon = AUDIENCE_ICONS_BY_GROUP[g.id];
+          return (
+            <button
+              key={g.id}
+              role="tab"
+              aria-selected={activeGroup === g.id}
+              className={`viz-strips__pick ${activeGroup === g.id ? 'viz-strips__pick--active' : ''}`}
+              onClick={() => setActiveGroup(g.id)}
+              type="button"
+            >
+              <Icon
+                size={14}
+                strokeWidth={2}
+                color={GROUP_COLOR[g.id]}
+                aria-hidden="true"
+                style={{ flexShrink: 0 }}
+              />
+              {g.label}
+            </button>
+          );
+        })}
       </div>
 
       <svg
