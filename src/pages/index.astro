@@ -10,6 +10,9 @@ import type { HeroMyth } from "@components/hero/HeroBlock";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import HeadlineFindingBlock from "@components/home/HeadlineFindingBlock.astro";
 import QuizHookBlock from "@components/home/QuizHookBlock.astro";
+import AudienceShortcutBlock from "@components/home/AudienceShortcutBlock.astro";
+import type { AudienceCard } from "@components/home/AudienceShortcutBlock.astro";
+import { getAllAudiences } from "@lib/faq";
 import type { CorrectnessClass } from "@lib/dashboard/types";
 
 // ── Hero content from Keystatic ─────────────────────────────────────────────
@@ -99,6 +102,28 @@ const previewCards = [
 const numbersStripData = await reader.singletons.numbersStrip.read();
 const headlineFinding = await reader.singletons.headlineFinding.read();
 const quizHook = await reader.singletons.quizHookBlock.read();
+const audienceShortcutData = await reader.singletons.audienceShortcut.read();
+
+// Merge audience-shortcut cards with FAQ audience metadata
+// (emoji + accentColor + cardLabel come from src/content/faq/audiences.yaml).
+const audienceMetaList = await getAllAudiences();
+const audienceMetaById = new Map(audienceMetaList.map((a) => [a.id, a]));
+
+const audienceCards: AudienceCard[] = (audienceShortcutData?.cards ?? [])
+  .flatMap((card): AudienceCard[] => {
+    const meta = audienceMetaById.get(card.audienceId as never);
+    if (!meta) return [];
+    return [
+      {
+        audienceId: card.audienceId,
+        recommendation: card.recommendation,
+        targetUrl: card.targetUrl,
+        cardLabel: meta.cardLabel,
+        emoji: meta.emoji,
+        accentColor: meta.accentColor,
+      },
+    ];
+  });
 ---
 
 <BaseLayout title="Startseite" heroMode={true}>
@@ -148,6 +173,15 @@ const quizHook = await reader.singletons.quizHookBlock.read();
       primaryCtaUrl={quizHook.primaryCtaUrl}
       secondaryCtaLabel={quizHook.secondaryCtaLabel}
       secondaryCtaUrl={quizHook.secondaryCtaUrl}
+    />
+  )}
+
+  {audienceShortcutData && audienceCards.length > 0 && (
+    <AudienceShortcutBlock
+      eyebrow={audienceShortcutData.eyebrow}
+      headline={audienceShortcutData.headline}
+      lede={audienceShortcutData.lede}
+      cards={audienceCards}
     />
   )}
 </BaseLayout>

@@ -1,0 +1,165 @@
+/* ═══════════════════════════════════════════════════════════════
+   Dein Einstieg — audience-shortcut block on the new home page.
+   Five compact cards routing each audience to its best entry
+   point. Desktop = 5-column row. Mobile = scroll-snap horizontal.
+   ═══════════════════════════════════════════════════════════════ */
+
+.audience-shortcut {
+  background: var(--color-bg);
+  padding: clamp(4rem, 9vw, 7rem) clamp(1.25rem, 4vw, 3rem);
+}
+
+.audience-shortcut__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.audience-shortcut__intro {
+  text-align: center;
+  margin: 0 auto clamp(2.5rem, 5vw, 4rem);
+  max-width: 56ch;
+}
+
+.audience-shortcut__eyebrow {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.6px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0 0 1rem 0;
+}
+
+.audience-shortcut__headline {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(28px, 4.4vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.2px;
+  color: var(--color-text);
+  margin: 0 0 1rem 0;
+}
+
+.audience-shortcut__lede {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.audience-shortcut__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(0.75rem, 1.6vw, 1.25rem);
+}
+
+@media (max-width: 900px) {
+  .audience-shortcut__grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(72%, 12rem);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1rem;
+    padding: 0.25rem 1rem 1rem;
+    margin: 0 -1rem;
+    /* hide scrollbar but keep functionality */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  .audience-shortcut__item {
+    scroll-snap-align: start;
+  }
+}
+
+.audience-shortcut__item {
+  display: flex;
+}
+
+.audience-card {
+  --audience-color: var(--color-accent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 13rem;
+  padding: 1.25rem 1rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--audience-color);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  text-decoration: none;
+  text-align: left;
+  position: relative;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.audience-card:hover,
+.audience-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--audience-color);
+  box-shadow: var(--shadow-md);
+  outline: none;
+}
+
+.audience-card__emoji {
+  font-size: 1.875rem;
+  line-height: 1;
+}
+
+.audience-card__label {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.audience-card__rec {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  margin-top: auto;
+}
+
+.audience-card__arrow {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1rem;
+  color: var(--audience-color);
+  opacity: 0.55;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.audience-card:hover .audience-card__arrow,
+.audience-card:focus-visible .audience-card__arrow {
+  transform: translateX(3px);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audience-card,
+  .audience-card__arrow {
+    transition: none;
+  }
+  .audience-card:hover,
+  .audience-card:focus-visible {
+    transform: none;
+  }
+  .audience-card:hover .audience-card__arrow,
+  .audience-card:focus-visible .audience-card__arrow {
+    transform: none;
+  }
+}
