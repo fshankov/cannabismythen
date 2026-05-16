@@ -1,0 +1,42 @@
+---
+export interface AudienceChip {
+  emoji: string;
+  cardLabel: string;
+  accentColor: string;
+}
+
+export interface Props {
+  title: string;
+  description: string;
+  ctaLabel: string;
+  targetUrl: string;
+  chips: ReadonlyArray<AudienceChip>;
+}
+
+const { title, description, ctaLabel, targetUrl, chips } = Astro.props;
+---
+
+<a class="path-tile path-tile--meine" href={targetUrl}>
+  <div class="path-tile__preview">
+    <div class="meine-preview" aria-hidden="true">
+      {chips.map((chip) => (
+        <span
+          class="meine-preview__chip"
+          style={`--audience-color: ${chip.accentColor}`}
+        >
+          <span class="meine-preview__emoji">{chip.emoji}</span>
+          <span class="meine-preview__label">{chip.cardLabel}</span>
+        </span>
+      ))}
+    </div>
+  </div>
+
+  <div class="path-tile__body">
+    <h3 class="path-tile__title">
+      {title}
+      <span class="path-tile__title-arrow" aria-hidden="true">→</span>
+    </h3>
+    <p class="path-tile__description">{description}</p>
+    <p class="path-tile__cta">{ctaLabel}</p>
+  </div>
+</a>

@@ -1,0 +1,71 @@
+---
+import "../../styles/home-four-paths.css";
+import QuizPreviewTile from "./previews/QuizPreviewTile.astro";
+import FaktenKartenPreviewTile from "./previews/FaktenKartenPreviewTile.astro";
+import DatenExplorerPreviewTile from "./previews/DatenExplorerPreviewTile";
+import MeineInteressenPreviewTile from "./previews/MeineInteressenPreviewTile.astro";
+import type { PreviewMyth } from "./previews/FaktenKartenPreviewTile.astro";
+import type { AudienceChip } from "./previews/MeineInteressenPreviewTile.astro";
+
+export interface HookQuote {
+  eyebrow: string;
+  leadClause: string;
+  counterClause: string;
+  counterClassification: string;
+}
+
+export interface TileBase {
+  title: string;
+  description: string;
+  ctaLabel: string;
+  targetUrl: string;
+}
+
+export interface QuizTileConfig extends TileBase {
+  sampleEyebrow: string;
+  sampleMythText: string;
+  sampleMythClassification: "falsch" | "eher_falsch" | "eher_richtig" | "richtig";
+}
+
+export interface Props {
+  hookQuote: HookQuote;
+  quizTile: QuizTileConfig;
+  faktenKartenTile: TileBase;
+  datenExplorerTile: TileBase;
+  meineInteressenTile: TileBase;
+  previewMyths: ReadonlyArray<PreviewMyth>;
+  audienceChips: ReadonlyArray<AudienceChip>;
+}
+
+const {
+  hookQuote,
+  quizTile,
+  faktenKartenTile,
+  datenExplorerTile,
+  meineInteressenTile,
+  previewMyths,
+  audienceChips,
+} = Astro.props;
+---
+
+<section class="four-paths" aria-labelledby="four-paths-quote">
+  <div class="four-paths__inner">
+    <blockquote class="four-paths__quote" id="four-paths-quote">
+      <span class="four-paths__quote-eyebrow">{hookQuote.eyebrow}</span>
+      <span class="four-paths__quote-lead">{hookQuote.leadClause}</span>{" "}
+      <span
+        class="four-paths__quote-counter"
+        data-classification={hookQuote.counterClassification}
+      >
+        {hookQuote.counterClause}
+      </span>
+    </blockquote>
+
+    <div class="four-paths__grid">
+      <QuizPreviewTile {...quizTile} />
+      <FaktenKartenPreviewTile {...faktenKartenTile} previewMyths={previewMyths} />
+      <DatenExplorerPreviewTile {...datenExplorerTile} client:visible />
+      <MeineInteressenPreviewTile {...meineInteressenTile} chips={audienceChips} />
+    </div>
+  </div>
+</section>

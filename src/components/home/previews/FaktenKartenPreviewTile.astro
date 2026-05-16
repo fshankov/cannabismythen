@@ -1,0 +1,43 @@
+---
+export interface PreviewMyth {
+  text: string;
+  classification: string;
+}
+
+export interface Props {
+  title: string;
+  description: string;
+  ctaLabel: string;
+  targetUrl: string;
+  previewMyths: ReadonlyArray<PreviewMyth>;
+}
+
+const { title, description, ctaLabel, targetUrl, previewMyths } = Astro.props;
+
+// We want exactly three peeking cards. If the page passes fewer, leave gaps;
+// if more, take the first three.
+const cards = previewMyths.slice(0, 3);
+const positions = ["back", "mid", "front"] as const;
+---
+
+<a class="path-tile path-tile--karten" href={targetUrl}>
+  <div class="path-tile__preview">
+    <div class="karten-preview" aria-hidden="true">
+      {cards.map((card, i) => (
+        <div class={`karten-preview__card karten-preview__card--${positions[i] ?? "front"}`}>
+          <span class="karten-preview__strip" data-classification={card.classification}></span>
+          <span class="karten-preview__text">{card.text}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="path-tile__body">
+    <h3 class="path-tile__title">
+      {title}
+      <span class="path-tile__title-arrow" aria-hidden="true">→</span>
+    </h3>
+    <p class="path-tile__description">{description}</p>
+    <p class="path-tile__cta">{ctaLabel}</p>
+  </div>
+</a>

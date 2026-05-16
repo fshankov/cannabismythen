@@ -8,104 +8,74 @@ import { HeroBlock } from "@components/hero/HeroBlock";
 import { mythPositions } from "@components/hero/mythPositions";
 import type { HeroMyth } from "@components/hero/HeroBlock";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
-import HeadlineFindingBlock from "@components/home/HeadlineFindingBlock.astro";
-import QuizHookBlock from "@components/home/QuizHookBlock.astro";
+import FourPathsBlock from "@components/home/FourPathsBlock.astro";
 import AudienceShortcutBlock from "@components/home/AudienceShortcutBlock.astro";
 import type { AudienceCard } from "@components/home/AudienceShortcutBlock.astro";
+import type { PreviewMyth } from "@components/home/previews/FaktenKartenPreviewTile.astro";
+import type { AudienceChip } from "@components/home/previews/MeineInteressenPreviewTile.astro";
 import { getAllAudiences } from "@lib/faq";
-import type { CorrectnessClass } from "@lib/dashboard/types";
 
-// ── Hero content from Keystatic ─────────────────────────────────────────────
+// ── Hero content from Keystatic (legacy schema — replaced in step 5) ────────
 const heroBlockData = await reader.singletons.heroBlock.read();
 const headline1 = heroBlockData?.headline1 ?? "Was glauben wir zu wissen —";
 const headline2 = heroBlockData?.headline2 ?? "und was stimmt wirklich?";
-const eyebrow   = heroBlockData?.eyebrow   ?? "ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft";
+const heroEyebrow = heroBlockData?.eyebrow ??
+  "ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft";
 
-// ── Read all myth entries once — title + classification + summary ──────────
-// We use this single read to drive: (1) the hero labels (real statements),
-// (2) the classification distribution counts on the Headline-Finding block,
-// (3) the 3 representative preview cards on the Fakten-Karten teaser.
+// ── Read all myth entries once — fuel the hero + the Fakten-Karten preview ──
 type MythRecord = {
   prefix: string;
   classification: string;
   heroLabel: string;
-  cardSummary: string;
 };
 
 const mythRecords: MythRecord[] = [];
 
 for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
-  // Slug prefixes look like "m01".
   const prefixMatch = slug.match(/^m\d+/);
   if (!prefixMatch) continue;
-  const e = entry as { classification: string; title?: string; cardSummary?: string };
+  const e = entry as { classification: string; title?: string };
   mythRecords.push({
     prefix: prefixMatch[0],
     classification: e.classification,
     heroLabel: deriveHeroLabel(e.title ?? ""),
-    cardSummary: e.cardSummary ?? "",
   });
 }
 
 const recordByPrefix = new Map(mythRecords.map((r) => [r.prefix, r]));
 
-// ── Hero myth field — real titles where available ──────────────────────────
 const heroMyths: HeroMyth[] = mythPositions.map((pos) => {
   const rec = recordByPrefix.get(pos.id);
   return {
     id: pos.id,
-    text: rec?.heroLabel || pos.text, // fall back to curated short text if no .mdoc
+    text: rec?.heroLabel || pos.text,
     classification: rec?.classification ?? "keine_aussage",
     position: pos,
   };
 });
 
-// ── Classification distribution for HeadlineFindingBlock ───────────────────
-const counts: Record<CorrectnessClass, number> = {
-  richtig: 0,
-  eher_richtig: 0,
-  eher_falsch: 0,
-  falsch: 0,
-  no_classification: 0,
-};
-
-for (const r of mythRecords) {
-  switch (r.classification) {
-    case "richtig":      counts.richtig++; break;
-    case "eher_richtig": counts.eher_richtig++; break;
-    case "eher_falsch":  counts.eher_falsch++; break;
-    case "falsch":       counts.falsch++; break;
-    default:             counts.no_classification++; break;
-  }
-}
-
-// ── Pick 3 representative preview myths (one per core verdict) ─────────────
-// Prefer myths whose title is short-ish so the deck previews stay legible.
-function pickRepresentative(cls: string): MythRecord | undefined {
-  const candidates = mythRecords
+// ── Fakten-Karten preview: pick three short representative myths ───────────
+function pickShortest(cls: string): MythRecord | undefined {
+  return mythRecords
     .filter((r) => r.classification === cls)
-    .sort((a, b) => a.heroLabel.length - b.heroLabel.length);
-  return candidates[0];
+    .sort((a, b) => a.heroLabel.length - b.heroLabel.length)[0];
 }
 
-const previewRichtig    = pickRepresentative("richtig");
-const previewEherFalsch = pickRepresentative("eher_falsch");
-const previewFalsch     = pickRepresentative("falsch");
+const previewMyths: PreviewMyth[] = [
+  pickShortest("richtig"),
+  pickShortest("eher_falsch"),
+  pickShortest("falsch"),
+]
+  .filter((r): r is MythRecord => r !== undefined)
+  .map((r) => ({ text: r.heroLabel, classification: r.classification }));
 
-const previewCards = [
-  previewRichtig    && { cls: "richtig"     as CorrectnessClass, label: "Richtig",     text: previewRichtig.heroLabel },
-  previewEherFalsch && { cls: "eher_falsch" as CorrectnessClass, label: "Eher falsch", text: previewEherFalsch.heroLabel },
-  previewFalsch     && { cls: "falsch"      as CorrectnessClass, label: "Falsch",      text: previewFalsch.heroLabel },
-].filter(Boolean) as Array<{ cls: CorrectnessClass; label: string; text: string }>;
-
-// ── Editorial section content ───────────────────────────────────────────────
+// ── Editorial section content ──────────────────────────────────────────────
 const numbersStripData = await reader.singletons.numbersStrip.read();
 const headlineFinding = await reader.singletons.headlineFinding.read();
-const quizHook = await reader.singletons.quizHookBlock.read();
+const fourPathsData = await reader.singletons.fourPaths.read();
 const audienceShortcutData = await reader.singletons.audienceShortcut.read();
 
-// Merge audience-shortcut cards with FAQ audience metadata
-// (emoji + accentColor + cardLabel come from src/content/faq/audiences.yaml).
+// Audience metadata for the audience-shortcut block AND the Meine-Interessen tile.
 const audienceMetaList = await getAllAudiences();
 const audienceMetaById = new Map(audienceMetaList.map((a) => [a.id, a]));
 
@@ -124,6 +94,12 @@ const audienceCards: AudienceCard[] = (audienceShortcutData?.cards ?? [])
       },
     ];
   });
+
+const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
+  emoji: a.emoji,
+  cardLabel: a.cardLabel,
+  accentColor: a.accentColor,
+}));
 ---
 
 <BaseLayout title="Startseite" heroMode={true}>
@@ -131,7 +107,7 @@ const audienceCards: AudienceCard[] = (audienceShortcutData?.cards ?? [])
     myths={heroMyths}
     headline1={headline1}
     headline2={headline2}
-    eyebrow={eyebrow}
+    eyebrow={heroEyebrow}
     client:load
   />
 
@@ -145,34 +121,20 @@ const audienceCards: AudienceCard[] = (audienceShortcutData?.cards ?? [])
     />
   )}
 
-  {headlineFinding && (
-    <HeadlineFindingBlock
-      eyebrow={headlineFinding.eyebrow}
-      leadClause={headlineFinding.leadClause}
-      counterClause={headlineFinding.counterClause}
-      counterClassification={headlineFinding.counterClassification as CorrectnessClass}
-      dashboardCardTitle={headlineFinding.dashboardCardTitle}
-      dashboardCardBody={headlineFinding.dashboardCardBody}
-      dashboardCtaLabel={headlineFinding.dashboardCtaLabel}
-      faktenKartenCardTitle={headlineFinding.faktenKartenCardTitle}
-      faktenKartenCardBody={headlineFinding.faktenKartenCardBody}
-      faktenKartenCtaLabel={headlineFinding.faktenKartenCtaLabel}
-      classificationCounts={counts}
-      previewCards={previewCards}
-    />
-  )}
-
-  {quizHook && (
-    <QuizHookBlock
-      eyebrow={quizHook.eyebrow}
-      headline={quizHook.headline}
-      subhead={quizHook.subhead}
-      sampleMythText={quizHook.sampleMythText}
-      sampleMythClassification={quizHook.sampleMythClassification as "falsch" | "eher_falsch" | "eher_richtig" | "richtig"}
-      primaryCtaLabel={quizHook.primaryCtaLabel}
-      primaryCtaUrl={quizHook.primaryCtaUrl}
-      secondaryCtaLabel={quizHook.secondaryCtaLabel}
-      secondaryCtaUrl={quizHook.secondaryCtaUrl}
+  {headlineFinding && fourPathsData && (
+    <FourPathsBlock
+      hookQuote={{
+        eyebrow: headlineFinding.eyebrow,
+        leadClause: headlineFinding.leadClause,
+        counterClause: headlineFinding.counterClause,
+        counterClassification: headlineFinding.counterClassification,
+      }}
+      quizTile={fourPathsData.quizTile}
+      faktenKartenTile={fourPathsData.faktenKartenTile}
+      datenExplorerTile={fourPathsData.datenExplorerTile}
+      meineInteressenTile={fourPathsData.meineInteressenTile}
+      previewMyths={previewMyths}
+      audienceChips={audienceChips}
     />
   )}
 

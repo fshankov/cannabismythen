@@ -1,0 +1,23 @@
+quizTile:
+  title: 'Quiz'
+  description: '≈3 Minuten · Sofort-Feedback · 10 Fragen aus den 42 Mythen'
+  ctaLabel: 'Quiz starten'
+  targetUrl: '/quiz/'
+  sampleEyebrow: 'Beispielfrage'
+  sampleMythText: 'Cannabis ist weniger schädlich als Alkohol.'
+  sampleMythClassification: 'eher_falsch'
+faktenKartenTile:
+  title: 'Fakten-Karten'
+  description: 'Alle 42 Mythen als umdrehbare Karte — vorn der Mythos, hinten die Einordnung der Wissenschaft.'
+  ctaLabel: 'Karten durchstöbern'
+  targetUrl: '/fakten-karten/'
+datenExplorerTile:
+  title: 'Daten-Explorer'
+  description: '5 Indikatoren · 5 Zielgruppen · die ganze Datenbasis hinter den 42 Mythen.'
+  ctaLabel: 'Daten erkunden'
+  targetUrl: '/daten-explorer/'
+meineInteressenTile:
+  title: 'Meine Interessen'
+  description: 'Antworten für deine Rolle — von Eltern bis Fachkräften, kuratiert aus der CaRM-Studie.'
+  ctaLabel: 'Themen auswählen'
+  targetUrl: '/meine-interessen/'

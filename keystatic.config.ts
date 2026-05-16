@@ -1050,86 +1050,80 @@ const headlineFinding = singleton({
       ],
       defaultValue: "falsch",
     }),
-    dashboardCardTitle: fields.text({
-      label: "Karte A – Titel",
-      defaultValue: "Alle 42 Mythen im Überblick",
-    }),
-    dashboardCardBody: fields.text({
-      label: "Karte A – Beschreibung",
-      multiline: true,
-      defaultValue:
-        "Filtere nach Zielgruppe, sortiere nach Evidenz, entdecke, welche Annahmen die größte Diskrepanz zur Forschung zeigen.",
-    }),
-    dashboardCtaLabel: fields.text({
-      label: "Karte A – CTA",
-      defaultValue: "Zum Daten-Explorer",
-    }),
-    faktenKartenCardTitle: fields.text({
-      label: "Karte B – Titel",
-      defaultValue: "Die Fakten-Karten",
-    }),
-    faktenKartenCardBody: fields.text({
-      label: "Karte B – Beschreibung",
-      multiline: true,
-      defaultValue:
-        "Jede Aussage als umdrehbare Karte — vorne der Mythos, hinten die wissenschaftliche Einordnung in einem Satz.",
-    }),
-    faktenKartenCtaLabel: fields.text({
-      label: "Karte B – CTA",
-      defaultValue: "Zu den Fakten-Karten",
-    }),
   },
 });
 
-const quizHookBlock = singleton({
-  label: "🧪 Quiz-Hook – Startseite",
-  path: "src/content/quiz-hook-block",
+const fourPaths = singleton({
+  label: "🧭 Vier Wege ins Thema – Startseite",
+  path: "src/content/four-paths",
   format: { data: "yaml" },
   schema: {
-    eyebrow: fields.text({
-      label: "Eyebrow",
-      defaultValue: "10 Fragen · ca. 3 Minuten · wissenschaftlich eingeordnet",
-    }),
-    headline: fields.text({
-      label: "Überschrift",
-      defaultValue: "Wie viele Mythen erkennst du?",
-    }),
-    subhead: fields.text({
-      label: "Unterzeile",
-      multiline: true,
-      defaultValue:
-        "Teste dein Bauchgefühl gegen die Evidenz. Am Ende erfährst du, welche Mythen dich überrascht haben.",
-    }),
-    sampleMythText: fields.text({
-      label: "Beispielmythos (auf der Vorschau-Karte)",
-      defaultValue: "Cannabis ist weniger schädlich als Alkohol.",
-    }),
-    sampleMythClassification: fields.select({
-      label: "Klassifikation des Beispielmythos",
-      options: [
-        { label: "Richtig", value: "richtig" },
-        { label: "Eher richtig", value: "eher_richtig" },
-        { label: "Eher falsch", value: "eher_falsch" },
-        { label: "Falsch", value: "falsch" },
-      ],
-      defaultValue: "eher_falsch",
-    }),
-    primaryCtaLabel: fields.text({
-      label: "Primärer CTA",
-      defaultValue: "Quiz starten",
-    }),
-    primaryCtaUrl: fields.text({
-      label: "Primärer CTA – Link",
-      defaultValue: "/quiz/",
-    }),
-    secondaryCtaLabel: fields.text({
-      label: "Sekundärer CTA",
-      defaultValue: "Zur Dashboard-Analyse",
-    }),
-    secondaryCtaUrl: fields.text({
-      label: "Sekundärer CTA – Link",
-      defaultValue: "/daten-explorer/",
-    }),
+    quizTile: fields.object(
+      {
+        title: fields.text({ label: "Titel", defaultValue: "Quiz" }),
+        description: fields.text({
+          label: "Beschreibung",
+          defaultValue: "≈3 Minuten · Sofort-Feedback",
+        }),
+        ctaLabel: fields.text({ label: "CTA-Text", defaultValue: "Quiz starten" }),
+        targetUrl: fields.text({ label: "Ziel-URL", defaultValue: "/quiz/" }),
+        sampleEyebrow: fields.text({
+          label: "Vorschau-Karte: Eyebrow",
+          defaultValue: "Beispielfrage",
+        }),
+        sampleMythText: fields.text({
+          label: "Vorschau-Karte: Beispiel-Mythos",
+          defaultValue: "Cannabis ist weniger schädlich als Alkohol.",
+        }),
+        sampleMythClassification: fields.select({
+          label: "Vorschau-Karte: Klassifikation",
+          options: [
+            { label: "Richtig", value: "richtig" },
+            { label: "Eher richtig", value: "eher_richtig" },
+            { label: "Eher falsch", value: "eher_falsch" },
+            { label: "Falsch", value: "falsch" },
+          ],
+          defaultValue: "eher_falsch",
+        }),
+      },
+      { label: "Quiz-Kachel" },
+    ),
+    faktenKartenTile: fields.object(
+      {
+        title: fields.text({ label: "Titel", defaultValue: "Fakten-Karten" }),
+        description: fields.text({
+          label: "Beschreibung",
+          defaultValue: "42 Mythen · mit einem Klick umdrehen",
+        }),
+        ctaLabel: fields.text({ label: "CTA-Text", defaultValue: "Karten durchstöbern" }),
+        targetUrl: fields.text({ label: "Ziel-URL", defaultValue: "/fakten-karten/" }),
+      },
+      { label: "Fakten-Karten-Kachel" },
+    ),
+    datenExplorerTile: fields.object(
+      {
+        title: fields.text({ label: "Titel", defaultValue: "Daten-Explorer" }),
+        description: fields.text({
+          label: "Beschreibung",
+          defaultValue: "5 Indikatoren · 5 Zielgruppen · 42 Mythen",
+        }),
+        ctaLabel: fields.text({ label: "CTA-Text", defaultValue: "Daten erkunden" }),
+        targetUrl: fields.text({ label: "Ziel-URL", defaultValue: "/daten-explorer/" }),
+      },
+      { label: "Daten-Explorer-Kachel" },
+    ),
+    meineInteressenTile: fields.object(
+      {
+        title: fields.text({ label: "Titel", defaultValue: "Meine Interessen" }),
+        description: fields.text({
+          label: "Beschreibung",
+          defaultValue: "Antworten für deine Rolle — Eltern, Lehrkräfte, Fachkräfte u. v. m.",
+        }),
+        ctaLabel: fields.text({ label: "CTA-Text", defaultValue: "Themen auswählen" }),
+        targetUrl: fields.text({ label: "Ziel-URL", defaultValue: "/meine-interessen/" }),
+      },
+      { label: "Meine-Interessen-Kachel" },
+    ),
   },
 });
 
@@ -1324,7 +1318,7 @@ export default config({
   singletons: {
     heroBlock,
     headlineFinding,
-    quizHookBlock,
+    fourPaths,
     numbersStrip,
     audienceShortcut,
     projectStrip,
