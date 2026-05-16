@@ -774,38 +774,83 @@ const changelog = collection({
 // ─── Singletons ─────────────────────────────────────────────────────────────
 
 const heroBlock = singleton({
-  label: "🏔️ Hero-Block – Startseite",
+  label: "🏔️ Hero-Block – Startseite (Frage & Kontrast)",
   path: "src/content/hero-block",
   format: { data: "yaml" },
   schema: {
-    headline1: fields.text({
-      label: "Headline Zeile 1",
-      description: "Erste Zeile der Hauptüberschrift. Inter fett, Off-White.",
-      defaultValue: "Was glauben wir zu wissen —",
-    }),
-    headline2: fields.text({
-      label: "Headline Zeile 2",
-      description: "Zweite Zeile der Hauptüberschrift. DM Serif Display, kursiv, Salbei-Grün.",
-      defaultValue: "und was stimmt wirklich?",
-    }),
     eyebrow: fields.text({
-      label: "Eyebrow-Label",
-      description: "Kleiner Claim über der Überschrift (Kapitälchen).",
-      defaultValue: "cannabismythen.de · 42 Mythen · wissenschaftlich geprüft",
+      label: "Eyebrow",
+      description: "Kleines Kapitälchen-Label über dem Vergleichs-Karten-Stack.",
+      defaultValue: "Was viele glauben — was die Wissenschaft zeigt",
     }),
-    hoverHint: fields.text({
-      label: "Hover-Hinweis",
-      description: "Kurztext der den interaktiven Nebel-Effekt erklärt (Desktop). Wird auf Touch-Geräten versteckt.",
-      defaultValue: "Bewege die Maus — hebe den Nebel und entdecke die Mythen",
+    beliefLabel: fields.text({
+      label: "Linke Karten-Beschriftung",
+      defaultValue: "Was viele glauben",
     }),
-    ctaLabel: fields.text({
-      label: "CTA Button-Text",
-      description: "Beschriftung des Call-to-Action-Buttons unter dem Hinweis. Leer lassen = kein Button.",
-      defaultValue: "Mythen entdecken",
+    scienceLabel: fields.text({
+      label: "Rechte Karten-Beschriftung",
+      defaultValue: "Was die Wissenschaft zeigt",
     }),
-    ctaUrl: fields.text({
-      label: "CTA Button-Link",
-      description: "Ziel-URL des CTA-Buttons.",
+    backgroundQuestions: fields.array(
+      fields.text({ label: "Frage" }),
+      {
+        label: "Hintergrund-Fragen",
+        description: "Leichte Fragen, die dezent hinter dem Karten-Stack stehen. 4–8 empfohlen.",
+        itemLabel: (p) => p.value || "Frage",
+      },
+    ),
+    pairs: fields.array(
+      fields.object({
+        belief: fields.text({
+          label: "Volksglaube",
+          multiline: true,
+          description: "Was viele glauben (kurzer Satz).",
+        }),
+        science: fields.text({
+          label: "Wissenschaftliche Einordnung",
+          multiline: true,
+          description: "Was die Wissenschaft zeigt (kurzer Satz, kondensiert aus dem cardSummary des Mythos).",
+        }),
+        mythSlug: fields.text({
+          label: "Mythos-ID",
+          description: "z. B. m04 — für die Traceability; verlinkt nicht automatisch.",
+        }),
+        verdict: fields.select({
+          label: "Klassifikation",
+          options: [
+            { label: "Richtig", value: "richtig" },
+            { label: "Eher richtig", value: "eher_richtig" },
+            { label: "Eher falsch", value: "eher_falsch" },
+            { label: "Falsch", value: "falsch" },
+            { label: "Keine Aussage", value: "keine_aussage" },
+          ],
+          defaultValue: "falsch",
+        }),
+      }),
+      {
+        label: "Vergleichs-Paare (Glaube ↔ Wissenschaft)",
+        itemLabel: (p) => p.fields.belief.value || "Paar",
+      },
+    ),
+    rotationSeconds: fields.integer({
+      label: "Rotations-Intervall (Sekunden)",
+      description: "Wie oft das Paar wechselt.",
+      defaultValue: 6,
+    }),
+    primaryCtaLabel: fields.text({
+      label: "Primärer CTA – Text",
+      defaultValue: "Quiz starten — 3 Min",
+    }),
+    primaryCtaUrl: fields.text({
+      label: "Primärer CTA – Ziel",
+      defaultValue: "/quiz/",
+    }),
+    secondaryCtaLabel: fields.text({
+      label: "Sekundärer CTA – Text",
+      defaultValue: "Alle 42 Mythen",
+    }),
+    secondaryCtaUrl: fields.text({
+      label: "Sekundärer CTA – Ziel",
       defaultValue: "/fakten-karten/",
     }),
   },

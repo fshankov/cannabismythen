@@ -1,6 +1,48 @@
-headline1: 'Was glauben wir zu wissen —'
-headline2: 'und was stimmt wirklich?'
-eyebrow: 'ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft'
-hoverHint: 'Bewegen Sie die Maus — heben Sie den Nebel und entdecken Sie die Mythen'
-ctaLabel: 'Mythen entdecken'
-ctaUrl: '/fakten-karten/'
+# Hero block — Frage & Kontrast (landing-page redesign).
+# Each pair condenses the cardSummary of a real Mythos .mdoc into one
+# short belief line + one short science line. AI draft pending ISD
+# editorial review — see internalNotes patterns elsewhere in the repo.
+
+eyebrow: 'Was viele glauben — was die Wissenschaft zeigt'
+beliefLabel: 'Was viele glauben'
+scienceLabel: 'Was die Wissenschaft zeigt'
+
+backgroundQuestions:
+  - 'Ist Cannabis harmloser als Alkohol?'
+  - 'Macht Cannabis abhängig?'
+  - 'Ist Cannabis eine Einstiegsdroge?'
+  - 'Hilft Cannabis bei Schmerzen?'
+  - 'Ist Cannabis wirklich harmlos?'
+  - 'Macht Cannabis psychisch krank?'
+
+pairs:
+  - belief: 'Cannabis ist weniger schädlich als Alkohol.'
+    science: 'Stimmt. Cannabis verursacht laut Forschung deutlich weniger körperliche und soziale Schäden als Alkohol.'
+    mythSlug: 'm04'
+    verdict: 'richtig'
+
+  - belief: 'Cannabis ist eine Einstiegsdroge.'
+    science: 'Eher nein. Alkohol und Nikotin sind die primären Einstiegssubstanzen — die Gateway-These ist nicht haltbar.'
+    mythSlug: 'm22'
+    verdict: 'eher_falsch'
+
+  - belief: 'Cannabis macht nicht abhängig.'
+    science: 'Doch. Bei frühem Einstieg und häufigem Konsum steigt das Risiko einer Cannabisgebrauchsstörung deutlich.'
+    mythSlug: 'm23'
+    verdict: 'falsch'
+
+  - belief: 'Cannabis hilft zuverlässig gegen Schmerzen.'
+    science: 'Nur eingeschränkt. Bei wenigen chronischen Schmerzformen zeigen sich geringe Effekte — teils auf Placebo zurückzuführen.'
+    mythSlug: 'm10'
+    verdict: 'eher_falsch'
+
+  - belief: 'Cannabiskonsum ist harmlos.'
+    science: 'Nicht ganz. Studien belegen Risiken für Psyche, Körper und Sozialleben — besonders bei frühem und häufigem Konsum.'
+    mythSlug: 'm02'
+    verdict: 'falsch'
+
+rotationSeconds: 6
+primaryCtaLabel: 'Quiz starten — 3 Min'
+primaryCtaUrl: '/quiz/'
+secondaryCtaLabel: 'Alle 42 Mythen'
+secondaryCtaUrl: '/fakten-karten/'
