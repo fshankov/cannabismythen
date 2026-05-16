@@ -2,6 +2,9 @@
    Dein Einstieg — audience-shortcut block on the new home page.
    Five compact cards routing each audience to its best entry
    point. Desktop = 5-column row. Mobile = scroll-snap horizontal.
+   Card shell mirrors the canonical .fakten-card__face surface
+   (white bg, light border, 12 px radius, shadow-md) with the
+   audience color as a top accent stripe.
    ═══════════════════════════════════════════════════════════════ */
 
 .audience-shortcut {
@@ -21,7 +24,7 @@
 }
 
 .audience-shortcut__eyebrow {
-  font-family: var(--font-display);
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 2.6px;
@@ -42,7 +45,7 @@
 }
 
 .audience-shortcut__lede {
-  font-family: var(--font-display);
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
   font-size: 1rem;
   line-height: 1.55;
   color: var(--color-text-secondary);
@@ -55,7 +58,7 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: clamp(0.75rem, 1.6vw, 1.25rem);
+  gap: clamp(0.875rem, 1.8vw, 1.25rem);
 }
 
 @media (max-width: 900px) {
@@ -69,7 +72,6 @@
     scroll-padding-inline: 1rem;
     padding: 0.25rem 1rem 1rem;
     margin: 0 -1rem;
-    /* hide scrollbar but keep functionality */
     scrollbar-width: thin;
     scrollbar-color: var(--color-border) transparent;
   }
@@ -83,33 +85,47 @@
   display: flex;
 }
 
+/* Card shell — mirrors .fakten-card__face: white surface, light border,
+   12 px radius, shadow-md. Audience accent lives on a 3 px top stripe. */
 .audience-card {
   --audience-color: var(--color-accent);
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  gap: 0.75rem;
   width: 100%;
-  min-height: 13rem;
-  padding: 1.25rem 1rem 1rem;
+  min-height: 13.5rem;
+  padding: 1.5rem 1.25rem 1.25rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-top: 3px solid var(--audience-color);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   color: var(--color-text);
   text-decoration: none;
   text-align: left;
-  position: relative;
+  overflow: hidden;
   transition:
     transform var(--transition-fast),
     border-color var(--transition-fast),
     box-shadow var(--transition-fast);
 }
 
+/* Top accent stripe — solid bar in the audience accent color, 3 px tall. */
+.audience-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--audience-color);
+}
+
 .audience-card:hover,
 .audience-card:focus-visible {
   transform: translateY(-3px);
   border-color: var(--audience-color);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   outline: none;
 }
 
@@ -119,14 +135,15 @@
 }
 
 .audience-card__label {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 700;
   color: var(--color-text);
+  letter-spacing: -0.005em;
 }
 
 .audience-card__rec {
-  font-family: var(--font-display);
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
   font-size: 0.875rem;
   line-height: 1.45;
   color: var(--color-text-secondary);
@@ -135,11 +152,11 @@
 
 .audience-card__arrow {
   position: absolute;
-  top: 1rem;
+  top: 1.25rem;
   right: 1rem;
   font-size: 1rem;
   color: var(--audience-color);
-  opacity: 0.55;
+  opacity: 0.65;
   transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
 
