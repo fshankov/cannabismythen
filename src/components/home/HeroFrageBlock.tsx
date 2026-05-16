@@ -1,18 +1,15 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import type { CSSProperties, MouseEvent } from "react";
-
-export type HeroVerdict =
-  | "richtig"
-  | "eher_richtig"
-  | "eher_falsch"
-  | "falsch"
-  | "keine_aussage";
+import type { CSSProperties, KeyboardEvent } from "react";
+import VerdictArrow from "../shared/VerdictArrow";
+import VerdictPill from "../shared/VerdictPill";
+import type { CorrectnessClass } from "../../lib/dashboard/types";
 
 export interface HeroPair {
   belief: string;
   science: string;
   mythSlug: string;
-  verdict: HeroVerdict;
+  /** Verdict key — matches CorrectnessClass site-wide. */
+  verdict: CorrectnessClass;
 }
 
 export interface Props {
@@ -28,29 +25,26 @@ export interface Props {
   secondaryCtaUrl: string;
 }
 
-const VERDICT_LABEL: Record<HeroVerdict, string> = {
-  richtig: "Richtig",
-  eher_richtig: "Eher richtig",
-  eher_falsch: "Eher falsch",
-  falsch: "Falsch",
-  keine_aussage: "Keine Aussage",
-};
+/** Time the auto-rotate pauses after a manual click before resuming. */
+const RESUME_AFTER_INTERACTION_MS = 10_000;
 
-const VERDICT_COLOR_VAR: Record<HeroVerdict, string> = {
-  richtig: "--classification-richtig",
-  eher_richtig: "--classification-eher-richtig",
-  eher_falsch: "--classification-eher-falsch",
-  falsch: "--classification-falsch",
-  keine_aussage: "--classification-keine-aussage",
-};
+/** Fold a positive offset into a symmetric range around 0.
+ *  e.g. for length 5: 0→0, 1→1, 2→2, 3→-2, 4→-1. */
+function symmetricOffset(idx: number, activeIdx: number, length: number): number {
+  const raw = (idx - activeIdx + length) % length;
+  return raw > length / 2 ? raw - length : raw;
+}
 
-const VERDICT_BG_VAR: Record<HeroVerdict, string> = {
-  richtig: "--classification-richtig-bg",
-  eher_richtig: "--classification-eher-richtig-bg",
-  eher_falsch: "--classification-eher-falsch-bg",
-  falsch: "--classification-falsch-bg",
-  keine_aussage: "--classification-keine-aussage-bg",
-};
+/** CSS variables that the fan stylesheet reads to position each card. */
+function fanStyle(offset: number, totalPairs: number): CSSProperties {
+  const abs = Math.abs(offset);
+  return {
+    ["--card-offset" as string]: String(offset),
+    ["--card-abs" as string]: String(abs),
+    ["--card-sign" as string]: String(offset === 0 ? 0 : offset / abs),
+    ["--card-z" as string]: String(totalPairs - abs),
+  } as CSSProperties;
+}
 
 export default function HeroFrageBlock({
   eyebrow,
@@ -64,57 +58,83 @@ export default function HeroFrageBlock({
   secondaryCtaLabel,
   secondaryCtaUrl,
 }: Props) {
-  const [idx, setIdx] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const pausedRef = useRef(false);
-  pausedRef.current = paused;
+  const [activeIdx, setActiveIdx] = useState(0);
+  const lastInteractionRef = useRef<number>(0);
 
   const advance = useCallback(() => {
-    if (pairs.length === 0) return;
-    setIdx((i) => (i + 1) % pairs.length);
+    setActiveIdx((i) => (i + 1) % pairs.length);
   }, [pairs.length]);
 
+  // Auto-rotation. No hover-pause (that was the v1 bug). We only pause
+  // briefly after an explicit click/keypress so manual nav isn't fought
+  // by the timer.
   useEffect(() => {
     if (pairs.length < 2) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
 
-    const ms = Math.max(2000, rotationSeconds * 1000);
+    const periodMs = Math.max(2500, rotationSeconds * 1000);
     const id = window.setInterval(() => {
-      if (!pausedRef.current) advance();
-    }, ms);
-
+      const sinceInteraction = performance.now() - lastInteractionRef.current;
+      if (sinceInteraction >= RESUME_AFTER_INTERACTION_MS) {
+        advance();
+      }
+    }, periodMs);
     return () => window.clearInterval(id);
   }, [advance, rotationSeconds, pairs.length]);
 
+  const setActive = useCallback((next: number) => {
+    lastInteractionRef.current = performance.now();
+    setActiveIdx(((next % pairs.length) + pairs.length) % pairs.length);
+  }, [pairs.length]);
+
+  const handleCardKey = (e: KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive(activeIdx + 1);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive(activeIdx - 1);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setActive(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setActive(pairs.length - 1);
+    }
+  };
+
+  // Touch swipe support for mobile. We track horizontal delta on touchmove
+  // and commit a swipe at touchend.
+  const touchStartXRef = useRef<number | null>(null);
+  const SWIPE_THRESHOLD_PX = 40;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0]?.clientX ?? null;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const startX = touchStartXRef.current;
+    touchStartXRef.current = null;
+    if (startX === null) return;
+    const endX = e.changedTouches[0]?.clientX ?? startX;
+    const dx = endX - startX;
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX) return;
+    setActive(activeIdx + (dx < 0 ? 1 : -1));
+  };
+
   if (pairs.length === 0) return null;
 
-  const pair = pairs[idx];
-  const verdict = pair.verdict;
-  const cardStyle = {
-    ["--science-color" as string]: `var(${VERDICT_COLOR_VAR[verdict]})`,
-    ["--science-color-bg" as string]: `var(${VERDICT_BG_VAR[verdict]})`,
-  } as CSSProperties;
-
-  const handleDotClick = (i: number) => (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    setIdx(i);
-  };
+  const activePair = pairs[activeIdx];
 
   return (
     <section
       className="hero-frage"
-      aria-label="Cannabis-Mythen — Glaube und Wissenschaft"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
+      aria-label="Cannabis-Mythen — Glaube und Befund"
     >
-      <div className="hero-frage__fog hero-frage__fog--a" aria-hidden="true" />
-      <div className="hero-frage__fog hero-frage__fog--b" aria-hidden="true" />
+      <div className="hero-frage__fog" aria-hidden="true" />
 
       <div className="hero-frage__bg" aria-hidden="true">
-        {backgroundQuestions.slice(0, 8).map((q, i) => (
+        {backgroundQuestions.slice(0, 2).map((q, i) => (
           <span key={i} className={`hero-frage__question hero-frage__question--p${i}`}>
             {q}
           </span>
@@ -124,49 +144,68 @@ export default function HeroFrageBlock({
       <div className="hero-frage__foreground">
         <p className="hero-frage__eyebrow">{eyebrow}</p>
 
-        <article
-          className="hero-frage__card"
-          style={cardStyle}
+        {/* Mobile-only progress bar */}
+        <div
+          className="hero-frage__segments"
+          aria-hidden="true"
+          data-active={activeIdx}
+        >
+          {pairs.map((_, i) => (
+            <span
+              key={i}
+              className="hero-frage__segment"
+              data-active={i === activeIdx ? "true" : "false"}
+            />
+          ))}
+        </div>
+
+        <div
+          className="hero-frage__stage"
           aria-live="polite"
           aria-atomic="true"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
-          <div className="hero-frage__half hero-frage__half--belief">
-            <span className="hero-frage__half-label">{beliefLabel}</span>
-            <p className="hero-frage__statement" key={`b-${idx}`}>
-              „{pair.belief}"
-            </p>
-          </div>
+          {pairs.map((p, i) => {
+            const offset = symmetricOffset(i, activeIdx, pairs.length);
+            const isFront = offset === 0;
+            return (
+              <button
+                key={i}
+                type="button"
+                className={`hero-frage__card hero-frage__card--${p.verdict}`}
+                style={fanStyle(offset, pairs.length)}
+                data-front={isFront ? "true" : "false"}
+                aria-current={isFront ? "true" : undefined}
+                aria-hidden={Math.abs(offset) > 1 ? "true" : undefined}
+                tabIndex={isFront ? 0 : -1}
+                onClick={() => setActive(i)}
+                onKeyDown={handleCardKey}
+                aria-label={`Mythos ${i + 1} von ${pairs.length}: ${p.belief}. Befund: ${p.science}.`}
+              >
+                <span className="hero-frage__verdict-icon" aria-hidden="true">
+                  <VerdictArrow verdict={p.verdict} size={44} strokeWidth={2} />
+                </span>
 
-          <div className="hero-frage__divider" aria-hidden="true">
-            <span className="hero-frage__divider-chevron">→</span>
-          </div>
+                <span className="hero-frage__half-label hero-frage__half-label--belief">
+                  {beliefLabel}
+                </span>
+                <p className="hero-frage__belief">„{p.belief}"</p>
 
-          <div className="hero-frage__half hero-frage__half--science">
-            <span className="hero-frage__half-label">{scienceLabel}</span>
-            <p className="hero-frage__statement" key={`s-${idx}`}>
-              {pair.science}
-            </p>
-            <span className="hero-frage__verdict-chip">
-              {VERDICT_LABEL[verdict]}
-            </span>
-          </div>
-        </article>
+                <span className="hero-frage__divider" data-verdict={p.verdict} aria-hidden="true" />
 
-        {pairs.length > 1 && (
-          <ol className="hero-frage__dots" role="tablist" aria-label="Vergleichs-Paar wählen">
-            {pairs.map((_, i) => (
-              <li key={i}>
-                <button
-                  type="button"
-                  className="hero-frage__dot"
-                  aria-current={i === idx ? "true" : "false"}
-                  aria-label={`Paar ${i + 1} von ${pairs.length}`}
-                  onClick={handleDotClick(i)}
-                />
-              </li>
-            ))}
-          </ol>
-        )}
+                <span className="hero-frage__half-label hero-frage__half-label--science">
+                  {scienceLabel}
+                </span>
+                <p className="hero-frage__science">{p.science}</p>
+
+                <span className="hero-frage__pill-anchor">
+                  <VerdictPill verdict={p.verdict} size="sm" />
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
         <div className="hero-frage__ctas">
           <a className="hero-frage__cta-primary" href={primaryCtaUrl}>
@@ -177,8 +216,6 @@ export default function HeroFrageBlock({
             {secondaryCtaLabel}
           </a>
         </div>
-
-        <span className="hero-frage__scroll-cue" aria-hidden="true" />
       </div>
     </section>
   );

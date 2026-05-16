@@ -1,28 +1,27 @@
-# Hero block — Frage & Kontrast (landing-page redesign).
-# Each pair condenses the cardSummary of a real Mythos .mdoc into one
-# short belief line + one short science line. AI draft pending ISD
-# editorial review — see internalNotes patterns elsewhere in the repo.
+# AI-drafted native rewrite (2026-05-16). Anchored to the canonical
+# .mdoc copy for the 5 referenced myths. Awaiting ISD editorial review
+# before merge to main.
 
-eyebrow: 'Was viele glauben — was die Wissenschaft zeigt'
-beliefLabel: 'Was viele glauben'
-scienceLabel: 'Was die Wissenschaft zeigt'
+eyebrow: 'Was viele glauben — was die Wissenschaft sagt'
+beliefLabel: 'Mythos'
+scienceLabel: 'Befund'
 
 backgroundQuestions:
-  - 'Ist Cannabis harmloser als Alkohol?'
   - 'Macht Cannabis abhängig?'
+  - 'Ist Cannabis harmloser als Alkohol?'
   - 'Ist Cannabis eine Einstiegsdroge?'
   - 'Hilft Cannabis bei Schmerzen?'
-  - 'Ist Cannabis wirklich harmlos?'
+  - 'Ist Cannabiskonsum harmlos?'
   - 'Macht Cannabis psychisch krank?'
 
 pairs:
   - belief: 'Cannabis ist weniger schädlich als Alkohol.'
-    science: 'Stimmt. Cannabis verursacht laut Forschung deutlich weniger körperliche und soziale Schäden als Alkohol.'
+    science: 'Stimmt — die Forschung belegt deutlich geringere körperliche und soziale Schäden als bei Alkohol.'
     mythSlug: 'm04'
     verdict: 'richtig'
 
   - belief: 'Cannabis ist eine Einstiegsdroge.'
-    science: 'Eher nein. Alkohol und Nikotin sind die primären Einstiegssubstanzen — die Gateway-These ist nicht haltbar.'
+    science: 'Eher nein. Wenn überhaupt, sind Nikotin und Alkohol die ersten Substanzen — die Gateway-These hält der Forschung nicht stand.'
     mythSlug: 'm22'
     verdict: 'eher_falsch'
 
@@ -32,16 +31,16 @@ pairs:
     verdict: 'falsch'
 
   - belief: 'Cannabis hilft zuverlässig gegen Schmerzen.'
-    science: 'Nur eingeschränkt. Bei wenigen chronischen Schmerzformen zeigen sich geringe Effekte — teils auf Placebo zurückzuführen.'
+    science: 'Nur bedingt. Bei wenigen chronischen Schmerzformen zeigen sich kleine Effekte, oft kaum vom Placebo zu trennen.'
     mythSlug: 'm10'
     verdict: 'eher_falsch'
 
   - belief: 'Cannabiskonsum ist harmlos.'
-    science: 'Nicht ganz. Studien belegen Risiken für Psyche, Körper und Sozialleben — besonders bei frühem und häufigem Konsum.'
+    science: 'Nein. Vor allem bei frühem oder häufigem Konsum belegen Studien klare Risiken für Psyche, Körper und Sozialleben.'
     mythSlug: 'm02'
     verdict: 'falsch'
 
-rotationSeconds: 6
+rotationSeconds: 5
 primaryCtaLabel: 'Quiz starten — 3 Min'
 primaryCtaUrl: '/quiz/'
 secondaryCtaLabel: 'Alle 42 Mythen'
