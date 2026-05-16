@@ -94,72 +94,9 @@
   flex-shrink: 0;
 }
 
-/* ── Score Pill ───────────────────────────────────────────────── */
-
-.quiz-score {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  border-radius: var(--radius-full);
-  padding: 2px 10px;
-  transition: transform 0.15s ease, background 0.3s ease;
-}
-
-.quiz-score__value {
-  font-size: 0.78rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-}
-
-.quiz-score__value--positive {
-  color: var(--classification-richtig);
-}
-
-.quiz-score__value--negative {
-  color: var(--classification-falsch);
-}
-
-.quiz-score__value--neutral {
-  color: var(--color-text-muted);
-}
-
-/* Flash animations on score change */
-.quiz-score--flash-great {
-  animation: scoreFlashGreat 0.6s ease;
-}
-
-.quiz-score--flash-good {
-  animation: scoreFlashGood 0.6s ease;
-}
-
-.quiz-score--flash-warn {
-  animation: scoreFlashWarn 0.6s ease;
-}
-
-.quiz-score--flash-bad {
-  animation: scoreFlashBad 0.6s ease;
-}
-
-@keyframes scoreFlashGreat {
-  0% { background: rgba(22, 163, 74, 0.25); transform: scale(1.18); }
-  100% { background: transparent; transform: scale(1); }
-}
-
-@keyframes scoreFlashGood {
-  0% { background: rgba(77, 124, 15, 0.2); transform: scale(1.1); }
-  100% { background: transparent; transform: scale(1); }
-}
-
-@keyframes scoreFlashWarn {
-  0% { background: rgba(180, 83, 9, 0.2); transform: scale(1.1); }
-  100% { background: transparent; transform: scale(1); }
-}
-
-@keyframes scoreFlashBad {
-  0% { background: rgba(220, 38, 38, 0.25); transform: scale(1.18); }
-  100% { background: transparent; transform: scale(1); }
-}
+/* Stage A (2026-05-16) — the live-score pill (.quiz-score and its
+   flash keyframes) was removed. The header bar now carries title +
+   progress fill + "Aussage X von Y" counter only (Pew minimalism). */
 
 
 /* ── Card Grid (legacy, used by fakten-karten) ─────────────────── */
@@ -2299,36 +2236,9 @@
   margin-top: var(--space-sm);
 }
 
-/* Remediation 3 — unified ShareCard hero (verdict + percentage + share). */
-.share-card__score-unit {
-  font-size: 0.55em;
-  font-weight: 700;
-  vertical-align: 0.25em;
-  margin-left: 0.04em;
-  opacity: 0.9;
-}
-
-/* BugHerd #37 + #38: absolute "X,Y von Z möglichen Punkten" sits
-   between the % hero and the breakdown line. Smaller weight than the
-   percentage but heavier than the breakdown — it's a secondary anchor
-   that puts the raw score in concrete numbers for readers who don't
-   parse percentages well. */
-.share-card__absolute-score {
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0 0 4px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.share-card__breakdown {
-  font-size: 0.92rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 4px 0 var(--space-md);
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
+/* Stage A (2026-05-16) — the .share-card__score-unit / __absolute-score
+   / __breakdown rules were removed alongside the medal/% hero. The
+   result-screen ShareCard now leads with the Keystatic verdict block. */
 
 .share-card__verdict {
   margin: var(--space-md) auto 0;
@@ -2493,49 +2403,20 @@
   color: #fff;
 }
 
-/* CSS medal badge */
-.share-card__medal {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  border: 3px solid rgba(255, 255, 255, 0.35);
-  margin-bottom: var(--space-md);
-}
+/* Stage A (2026-05-16) — the medal/emoji circle, big-% hero
+   (.share-card__score / __pct / __percentile / __tier-title) were
+   removed. The result hero is now verdict-led: title + body + user
+   score sentence + population sentence. */
 
-.share-card__emoji {
-  font-size: 2rem;
-}
-
-.share-card__tier-title {
-  font-size: 1.15rem;
+.share-card__user-line {
+  margin: var(--space-md) auto 0;
+  max-width: 44ch;
+  text-align: center;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #fff;
-  margin-bottom: var(--space-sm);
-}
-
-.share-card__score {
-  font-size: 2.8rem;
-  font-weight: 800;
+  line-height: 1.45;
   color: #fff;
   font-variant-numeric: tabular-nums;
-  margin-bottom: var(--space-xs);
-  line-height: 1.1;
-}
-
-.share-card__pct {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: var(--space-xs);
-}
-
-.share-card__percentile {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: var(--space-lg);
 }
 
 .share-card__branding {
@@ -2886,7 +2767,6 @@
   .quiz-card__buttons,
   .quiz-card__pop-bar-fill,
   .quiz-progress__fill,
-  .quiz-score,
   .share-card__btn,
   .quiz-modal__backdrop,
   .quiz-modal__panel,
@@ -2936,14 +2816,6 @@
 
   .quiz-progress__label {
     font-size: 0.68rem;
-  }
-
-  .quiz-score__value {
-    font-size: 0.72rem;
-  }
-
-  .quiz-score {
-    padding: 1px 7px;
   }
 
   .quiz-player__grid {
@@ -3005,10 +2877,6 @@
 
   .quiz-modal__score-number {
     font-size: 2.2rem;
-  }
-
-  .share-card__score {
-    font-size: 2rem;
   }
 }
 
@@ -3163,23 +3031,41 @@
   letter-spacing: 0.02em;
 }
 
-/* BugHerd #37b (Session 3b, 2026-05-07): per-tile last-score chip. The
-   element is hidden by default so tiles look unchanged when localStorage
-   is empty; the inline script in /quiz/index.astro reveals it once a
-   matching cm-quiz-score-{slug} entry is found. Sits below the question-
-   count pill, smaller and quieter so it doesn't compete with the title. */
-.quiz-select-card__last-score {
-  display: none;
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  margin-top: 6px;
-  letter-spacing: 0.01em;
+/* Stage A (2026-05-16) — band-color completion dot. Hidden by default;
+   the inline script in /quiz/index.astro reads cm-quiz-score-{slug}
+   from localStorage, derives the band via scoreBand() thresholds, and
+   reveals the dot via the data-band attribute (which also tints the
+   tile's border). Single 10×10 dot in the top-right corner. */
+.quiz-select-card__band-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 2px var(--color-surface);
+  /* Invisible until [data-band] is set by the inline script. */
 }
 
-.quiz-select-card__last-score--has-data {
-  display: inline-block;
+.quiz-select-card__band-dot[data-band="profi"]    { background: var(--classification-richtig); }
+.quiz-select-card__band-dot[data-band="guterweg"] { background: var(--classification-eher-richtig); }
+.quiz-select-card__band-dot[data-band="gehtnoch"] { background: var(--classification-eher-falsch); }
+.quiz-select-card__band-dot[data-band="erwischt"] { background: var(--classification-falsch); }
+
+/* On the featured Schnellcheck tile the "Mix" chip already lives in
+   the top-right corner; shift the dot to the top-left so they don't
+   overlap. */
+.quiz-select-card--featured .quiz-select-card__band-dot {
+  right: auto;
+  left: 10px;
 }
+
+/* Subtle tile-border tint mirrors the dot — readable at a glance. */
+.quiz-select-card[data-band="profi"]    { border-color: var(--classification-richtig); }
+.quiz-select-card[data-band="guterweg"] { border-color: var(--classification-eher-richtig); }
+.quiz-select-card[data-band="gehtnoch"] { border-color: var(--classification-eher-falsch); }
+.quiz-select-card[data-band="erwischt"] { border-color: var(--classification-falsch); }
 
 /* Stage 6 — Featured Schnellcheck tile. Subtle dotted border + "Mix"
    chip in the top-right corner so it reads as the cross-thematic
