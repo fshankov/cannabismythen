@@ -1,0 +1,56 @@
+---
+export interface Props {
+  title: string;
+  description: string;
+  ctaLabel: string;
+  targetUrl: string;
+  sampleEyebrow: string;
+  sampleMythText: string;
+  sampleMythClassification: "falsch" | "eher_falsch" | "eher_richtig" | "richtig";
+}
+
+const {
+  title,
+  description,
+  ctaLabel,
+  targetUrl,
+  sampleEyebrow,
+  sampleMythText,
+  sampleMythClassification,
+} = Astro.props;
+
+const pills = [
+  { key: "falsch",       label: "Falsch" },
+  { key: "eher_falsch",  label: "Eher falsch" },
+  { key: "eher_richtig", label: "Eher richtig" },
+  { key: "richtig",      label: "Richtig" },
+] as const;
+---
+
+<a class="path-tile path-tile--quiz" href={targetUrl}>
+  <div class="path-tile__preview">
+    <div class="quiz-preview" aria-hidden="true">
+      <p class="quiz-preview__eyebrow">{sampleEyebrow}</p>
+      <p class="quiz-preview__myth">„{sampleMythText}"</p>
+      <div class="quiz-preview__pills">
+        {pills.map((p) => (
+          <span
+            class="quiz-preview__pill"
+            data-correct={p.key === sampleMythClassification ? "true" : "false"}
+          >
+            {p.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div class="path-tile__body">
+    <h3 class="path-tile__title">
+      {title}
+      <span class="path-tile__title-arrow" aria-hidden="true">→</span>
+    </h3>
+    <p class="path-tile__description">{description}</p>
+    <p class="path-tile__cta">{ctaLabel}</p>
+  </div>
+</a>
