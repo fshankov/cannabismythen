@@ -1017,49 +1017,6 @@ const dashboardDefinitionen = singleton({
 
 // ─── Homepage editorial sections ───────────────────────────────────────────
 
-const credibilityBlock = singleton({
-  label: "🛡️ Credibility-Block – Startseite",
-  path: "src/content/credibility-block",
-  format: { data: "yaml" },
-  schema: {
-    eyebrow: fields.text({
-      label: "Eyebrow",
-      description: "Kleines Kapitälchen-Label über der Überschrift.",
-      defaultValue: "Woher die Zahlen kommen",
-    }),
-    headline: fields.text({
-      label: "Überschrift",
-      description: "Serifen-Überschrift (DM Serif Display, kursiv).",
-      defaultValue: "Eine Bevölkerungs­befragung, wissenschaftlich eingeordnet.",
-    }),
-    lede: fields.text({
-      label: "Einleitender Absatz",
-      multiline: true,
-      description: "Kurzer Text unter der Überschrift (2–3 Sätze).",
-      defaultValue:
-        "Unsere 42 Aussagen stammen aus einer repräsentativen Befragung in Deutschland. Jede wird von Wissenschaftler:innen auf Basis der aktuellen Evidenz eingeordnet — transparent, nachvollziehbar, aktualisiert.",
-    }),
-    row1Label: fields.text({ label: "Zeile 1 – Label", defaultValue: "ISD Hamburg" }),
-    row1Value: fields.text({
-      label: "Zeile 1 – Wert",
-      defaultValue: "Institut für Interdisziplinäre Sucht- und Drogenforschung",
-    }),
-    row1Link: fields.text({ label: "Zeile 1 – Link (optional)", defaultValue: "https://isd-hamburg.de" }),
-    row2Label: fields.text({ label: "Zeile 2 – Label", defaultValue: "Bevölkerungsbefragung" }),
-    row2Value: fields.text({
-      label: "Zeile 2 – Wert",
-      defaultValue: "n = 2.097 Erwachsene · Deutschland 2024 · gewichtet nach Geschlecht, Alter, Bildung",
-    }),
-    row2Link: fields.text({ label: "Zeile 2 – Link (optional)", defaultValue: "/ueber-uns/" }),
-    row3Label: fields.text({ label: "Zeile 3 – Label", defaultValue: "Wissenschaftlich geprüft" }),
-    row3Value: fields.text({
-      label: "Zeile 3 – Wert",
-      defaultValue: "Letzte Prüfung der Einordnungen: April 2026",
-    }),
-    row3Link: fields.text({ label: "Zeile 3 – Link (optional)", defaultValue: "/ueber-uns/" }),
-  },
-});
-
 const headlineFinding = singleton({
   label: "📢 Schlüsselbefund – Startseite",
   path: "src/content/headline-finding",
@@ -1366,7 +1323,6 @@ export default config({
   },
   singletons: {
     heroBlock,
-    credibilityBlock,
     headlineFinding,
     quizHookBlock,
     numbersStrip,
