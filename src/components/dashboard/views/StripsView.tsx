@@ -28,11 +28,12 @@
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from 'react';
 import type { ReactNode } from 'react';
 import * as d3 from 'd3';
+import { EyeOff } from 'lucide-react';
 import {
-  Eye, EyeOff, TrendingUp, Target, Shield, Globe,
-  Users, Baby, Cannabis, GraduationCap, UsersRound,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+  INDICATOR_ICONS,
+  AUDIENCE_ICONS_BY_GROUP,
+  type IconComponent,
+} from '../../../lib/icons';
 import type {
   Myth, Metric, Group, GroupId, AppState, Indicator,
   StripsMode, QuizThemeSlug, DashboardDefinitions,
@@ -74,21 +75,10 @@ interface Props {
 const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
 const STRIP_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 
-const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
-  awareness: Eye,
-  significance: TrendingUp,
-  correctness: Target,
-  prevention_significance: Shield,
-  population_relevance: Globe,
-};
-
-const GROUP_ICONS: Record<GroupId, LucideIcon> = {
-  adults: Users,
-  minors: Baby,
-  consumers: Cannabis,
-  young_adults: GraduationCap,
-  parents: UsersRound,
-};
+// INDICATOR_ICONS comes from the central registry (@/lib/icons).
+// Keep a local alias for GROUP_ICONS so the rest of the view reads as
+// before — the registry's AUDIENCE_ICONS_BY_GROUP is the source of truth.
+const GROUP_ICONS: Record<GroupId, IconComponent> = AUDIENCE_ICONS_BY_GROUP;
 
 /** Short aliases for population groups on narrow viewports. */
 const GROUP_SHORT_DE: Record<GroupId, string> = {
@@ -122,7 +112,7 @@ interface ColumnData {
   label: string;
   shortLabel: string;
   /** Either a Lucide icon (groups / indicators) or an emoji string (themes). */
-  Icon?: LucideIcon;
+  Icon?: IconComponent;
   emoji?: string;
   defLabel?: string;
   defText?: string;
@@ -489,7 +479,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
   // ── Three rows: Themen / Gruppen / Indikatoren ───────────────────
   type RowItem = {
     id: string;
-    Icon?: LucideIcon;
+    Icon?: IconComponent;
     emoji?: string;
     label: string;
     shortLabel: string;

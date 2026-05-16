@@ -1,6 +1,12 @@
 import { useState } from 'react';
-import { Eye, TrendingUp, Target, Shield, ChevronDown, ChevronUp } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  IconKenntnis,
+  IconBedeutung,
+  IconRichtigkeit,
+  IconPraevention,
+  type IconComponent,
+} from '../../lib/icons';
 import type { AppState, CarmData, DashboardDefinitions, Indicator } from '../../lib/dashboard/types';
 import { t } from '../../lib/dashboard/translations';
 import InfoTooltip from './InfoTooltip';
@@ -18,11 +24,11 @@ interface Props {
   hideCategories?: boolean;
 }
 
-const INDICATORS: { id: Indicator; Icon: LucideIcon }[] = [
-  { id: 'awareness', Icon: Eye },
-  { id: 'significance', Icon: TrendingUp },
-  { id: 'correctness', Icon: Target },
-  { id: 'prevention_significance', Icon: Shield },
+const INDICATORS: { id: Indicator; Icon: IconComponent }[] = [
+  { id: 'awareness', Icon: IconKenntnis },
+  { id: 'significance', Icon: IconBedeutung },
+  { id: 'correctness', Icon: IconRichtigkeit },
+  { id: 'prevention_significance', Icon: IconPraevention },
 ];
 
 export default function FilterBar({ state, data, update, definitions, hideIndicators, hideGroups, hideCategories }: Props) {

@@ -1038,14 +1038,42 @@ button.pill[aria-pressed="true"] {
 }
 
 
-/* ── FAQ – audience-first restructure (Phase 1) ─────────────── */
+/* ── Audience colour tokens ───────────────────────────────────
+   Two surfaces use these:
+     • dashboard data-slices (5 keys = GroupId in dashboard/types.ts):
+         volljaehrige · minderjaehrige · konsumierende ·
+         junge-erwachsene · eltern
+     • Meine Interessen FAQ audiences (5 keys):
+         eltern · jugendliche · konsumierende · lehrkraefte · fachkraefte
+   Where the audience is shared (eltern, konsumierende) the tokens
+   resolve to the same hex by design. `jugendliche` shares
+   `minderjaehrige`'s value and SVG (icon registry alias) per Phase 2
+   sign-off. Old `accentColor` fields in audiences.yaml are deprecated —
+   resolve via `var(--audience-{id})` instead.
+   ────────────────────────────────────────────────────────────── */
 
 :root {
-  --audience-eltern:        #4f46e5;
-  --audience-jugendliche:   #f97316;
-  --audience-konsumierende: #16a34a;
-  --audience-lehrkraefte:   #0891b2;
-  --audience-fachkraefte:   #7c3aed;
+  /* Dashboard data-slice audiences */
+  --audience-volljaehrige:    #475569;   /* slate-600 — neutral default adult */
+  --audience-minderjaehrige:  #d946ef;   /* fuchsia-500 — distinct from jugendliche legacy orange */
+  --audience-junge-erwachsene:#0d9488;   /* teal-600 — fresh, headphones+phone cohort */
+
+  /* Meine Interessen FAQ audiences */
+  --audience-eltern:        #4f46e5;     /* indigo-600 */
+  --audience-jugendliche:   #d946ef;     /* fuchsia-500 — SHIFTED to alias --audience-minderjaehrige */
+  --audience-konsumierende: #16a34a;     /* green-600 */
+  --audience-lehrkraefte:   #0891b2;     /* cyan-700 */
+  --audience-fachkraefte:   #7c3aed;     /* violet-600 */
+
+  /* Source-category tokens (new — previously hex-only in JSON).
+     `social_media` and `traditional_media` were SHIFTED in Phase 2 to
+     resolve cross-family clashes with audience colours. */
+  --source-institutionell: #2563eb;   /* blue-600 */
+  --source-internet:       #8b5cf6;   /* violet-500 */
+  --source-soziale-medien: #0ea5e9;   /* sky-500 — SHIFTED from #06b6d4 */
+  --source-traditionelle:  #f59e0b;   /* amber-500 — SHIFTED from #f97316 */
+  --source-print:          #ec4899;   /* pink-500 */
+  --source-persoenlich:    #6b7280;   /* gray-500 */
 }
 
 /* Hub */
@@ -1086,7 +1114,10 @@ button.pill[aria-pressed="true"] {
   align-items: center;
   gap: var(--space-sm);
 }
-.faq-hub-card__emoji { font-size: 1.7rem; }
+.faq-hub-card__icon {
+  color: var(--audience-accent);
+  flex-shrink: 0;
+}
 .faq-hub-card__title {
   font-size: 1.15rem;
   margin: 0;
@@ -1195,10 +1226,13 @@ button.pill[aria-pressed="true"] {
   border-left: 4px solid var(--audience-accent);
   padding-left: var(--space-sm);
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
 }
-.faq-audience-header__emoji { font-size: 1.2rem; }
+.faq-audience-header__icon {
+  color: var(--audience-accent);
+  flex-shrink: 0;
+}
 .faq-audience-header__note {
   margin-top: var(--space-sm);
   background: color-mix(in srgb, var(--audience-accent) 6%, var(--color-surface));
@@ -1540,6 +1574,10 @@ button.pill[aria-pressed="true"] {
 .faq-also-see__list a:hover {
   border-color: var(--audience-accent);
 }
+.faq-also-see__icon {
+  color: var(--audience-accent);
+  flex-shrink: 0;
+}
 
 /* Factsheet → FAQ backlinks */
 .faq-backlinks {
@@ -1583,6 +1621,12 @@ button.pill[aria-pressed="true"] {
   letter-spacing: 0.04em;
   color: var(--audience-accent);
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.faq-backlinks__icon {
+  flex-shrink: 0;
 }
 .faq-backlinks__question {
   font-size: 0.95rem;
@@ -1602,8 +1646,8 @@ button.pill[aria-pressed="true"] {
     grid-column: 1 / -1;
     justify-self: start;
   }
-  .faq-audience-header__title { font-size: 1.25rem; padding-left: var(--space-xs); }
-  .faq-audience-header__emoji { font-size: 1.05rem; }
+  .faq-audience-header__title { font-size: 1.25rem; padding-left: var(--space-xs); gap: 8px; }
+  .faq-audience-header__icon { width: 22px; height: 22px; }
   .faq-audience-header__bar {
     flex-direction: row;
     flex-wrap: wrap;
