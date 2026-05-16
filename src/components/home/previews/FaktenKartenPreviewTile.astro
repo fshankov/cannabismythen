@@ -1,4 +1,7 @@
 ---
+import VerdictArrow from "@components/shared/VerdictArrow";
+import type { CorrectnessClass } from "@lib/dashboard/types";
+
 export interface PreviewMyth {
   text: string;
   classification: string;
@@ -14,10 +17,29 @@ export interface Props {
 
 const { title, description, ctaLabel, targetUrl, previewMyths } = Astro.props;
 
-// We want exactly three peeking cards. If the page passes fewer, leave gaps;
-// if more, take the first three.
-const cards = previewMyths.slice(0, 3);
+// The Keystatic classification value can also be "no_classification"; cast
+// safely at the boundary.
+function toCorrectness(c: string): CorrectnessClass {
+  if (c === "richtig" || c === "eher_richtig" || c === "eher_falsch" || c === "falsch") {
+    return c;
+  }
+  return "no_classification";
+}
+
+const cards = previewMyths.slice(0, 3).map((m) => ({
+  text: m.text,
+  verdict: toCorrectness(m.classification),
+}));
+
 const positions = ["back", "mid", "front"] as const;
+
+const STRIPE_COLOR: Record<CorrectnessClass, string> = {
+  richtig: "var(--classification-richtig)",
+  eher_richtig: "var(--classification-eher-richtig)",
+  eher_falsch: "var(--classification-eher-falsch)",
+  falsch: "var(--classification-falsch)",
+  no_classification: "var(--classification-keine-aussage)",
+};
 ---
 
 <a class="path-tile path-tile--karten" href={targetUrl}>
@@ -25,8 +47,16 @@ const positions = ["back", "mid", "front"] as const;
     <div class="karten-preview" aria-hidden="true">
       {cards.map((card, i) => (
         <div class={`karten-preview__card karten-preview__card--${positions[i] ?? "front"}`}>
-          <span class="karten-preview__strip" data-classification={card.classification}></span>
-          <span class="karten-preview__text">{card.text}</span>
+          <span
+            class="karten-preview__stripe"
+            style={`background: ${STRIPE_COLOR[card.verdict]}`}
+          ></span>
+          <span class="karten-preview__arrow">
+            <VerdictArrow verdict={card.verdict} size={18} strokeWidth={2.25} />
+          </span>
+          <p class={`karten-preview__statement karten-preview__statement--${card.verdict}`}>
+            {card.text}
+          </p>
         </div>
       ))}
     </div>

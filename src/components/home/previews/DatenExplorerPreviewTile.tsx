@@ -10,23 +10,28 @@ export interface Props {
 
 interface Group {
   label: string;
-  /** Share (%) per verdict in the order of VERDICTS below. */
+  /** Share (%) per verdict in the order of VERDICTS below. Adds up to ~100. */
   values: readonly [number, number, number, number, number];
 }
 
+/** Illustrative distributions — visually plausible, not real data.
+ *  These convey "the data shifts when you switch Zielgruppe" without
+ *  needing the full CaRM dataset on the homepage. */
 const GROUPS: ReadonlyArray<Group> = [
-  { label: "Alle (Erwachsene 18–70)", values: [22, 28, 25, 18, 7] },
+  { label: "Alle (18–70)",            values: [22, 28, 25, 18, 7] },
   { label: "Konsumierende",            values: [35, 30, 18, 12, 5] },
   { label: "Junge Erwachsene (18–26)", values: [15, 25, 30, 25, 5] },
   { label: "Eltern",                   values: [20, 30, 28, 17, 5] },
 ];
 
+/** Verdict order matches the canonical site order (richtig at top).
+ *  Color tokens are the site-wide --classification-* variables. */
 const VERDICTS = [
-  { key: "richtig",        label: "Richtig",        cssVar: "--classification-richtig" },
-  { key: "eher_richtig",   label: "Eher richtig",   cssVar: "--classification-eher-richtig" },
-  { key: "eher_falsch",    label: "Eher falsch",    cssVar: "--classification-eher-falsch" },
-  { key: "falsch",         label: "Falsch",         cssVar: "--classification-falsch" },
-  { key: "keine_aussage",  label: "Keine Aussage",  cssVar: "--classification-keine-aussage" },
+  { key: "richtig",       label: "Richtig",       cssVar: "--classification-richtig" },
+  { key: "eher_richtig",  label: "Eher richtig",  cssVar: "--classification-eher-richtig" },
+  { key: "eher_falsch",   label: "Eher falsch",   cssVar: "--classification-eher-falsch" },
+  { key: "falsch",        label: "Falsch",        cssVar: "--classification-falsch" },
+  { key: "keine_aussage", label: "Keine Aussage", cssVar: "--classification-keine-aussage" },
 ] as const;
 
 const SWITCH_MS = 3000;
@@ -61,20 +66,24 @@ export default function DatenExplorerPreviewTile({
             <span className="daten-preview__chip">{group.label}</span>
           </div>
           <div className="daten-preview__bars">
-            {VERDICTS.map((v, i) => (
-              <div className="daten-preview__bar-row" key={v.key}>
-                <span className="daten-preview__bar-label">{v.label}</span>
-                <div className="daten-preview__bar-track">
-                  <div
-                    className="daten-preview__bar-fill"
-                    style={{
-                      width: `${group.values[i]}%`,
-                      backgroundColor: `var(${v.cssVar})`,
-                    } as CSSProperties}
-                  />
+            {VERDICTS.map((v, i) => {
+              const pct = group.values[i];
+              return (
+                <div className="daten-preview__bar-row" key={v.key}>
+                  <span className="daten-preview__bar-label">{v.label}</span>
+                  <div className="daten-preview__bar-track">
+                    <div
+                      className="daten-preview__bar-fill"
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: `var(${v.cssVar})`,
+                      } as CSSProperties}
+                    />
+                  </div>
+                  <span className="daten-preview__bar-value">{pct} %</span>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

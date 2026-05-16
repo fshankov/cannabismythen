@@ -1,4 +1,7 @@
 ---
+import VerdictPill from "@components/shared/VerdictPill";
+import type { CorrectnessClass } from "@lib/dashboard/types";
+
 export interface Props {
   title: string;
   description: string;
@@ -19,12 +22,14 @@ const {
   sampleMythClassification,
 } = Astro.props;
 
-const pills = [
-  { key: "falsch",       label: "Falsch" },
-  { key: "eher_falsch",  label: "Eher falsch" },
-  { key: "eher_richtig", label: "Eher richtig" },
-  { key: "richtig",      label: "Richtig" },
-] as const;
+// Order matches the canonical VerdictScale row used inside the quiz
+// (falsch → eher_falsch → eher_richtig → richtig).
+const VERDICT_ORDER: CorrectnessClass[] = [
+  "falsch",
+  "eher_falsch",
+  "eher_richtig",
+  "richtig",
+];
 ---
 
 <a class="path-tile path-tile--quiz" href={targetUrl}>
@@ -33,15 +38,20 @@ const pills = [
       <p class="quiz-preview__eyebrow">{sampleEyebrow}</p>
       <p class="quiz-preview__myth">„{sampleMythText}"</p>
       <div class="quiz-preview__pills">
-        {pills.map((p) => (
-          <span
-            class="quiz-preview__pill"
-            data-correct={p.key === sampleMythClassification ? "true" : "false"}
-          >
-            {p.label}
-          </span>
+        {VERDICT_ORDER.map((v) => (
+          <VerdictPill
+            verdict={v}
+            size="sm"
+            className={v === sampleMythClassification ? "is-correct" : undefined}
+          />
         ))}
       </div>
+      <p class="quiz-preview__hint">Wissenschaftliche Einordnung: <strong>{
+        sampleMythClassification === "richtig"      ? "Richtig" :
+        sampleMythClassification === "eher_richtig" ? "Eher richtig" :
+        sampleMythClassification === "eher_falsch"  ? "Eher falsch" :
+        "Falsch"
+      }</strong></p>
     </div>
   </div>
 
