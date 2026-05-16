@@ -244,72 +244,75 @@ export default function ResultScreen({
           {t("ui.retrospectiveTitle")}
         </h2>
         <p className="quiz-result__retrospective-intro">{reviewIntro}</p>
-        <ol className="quiz-result__list" role="list">
-          {reviewRows.map((row) => {
-            const { myth, answer, schritte: s, visibleIdx } = row;
-            const statement =
-              quizTextMap[myth.id]?.statement || t(myth.statementKey);
-            const bandModifier = ["exact", "near", "off", "far"][s];
-            return (
-              <li
-                key={myth.id}
-                className={`quiz-result__item quiz-result__item--${bandModifier}`}
-              >
-                <div className="quiz-result__item-row">
-                  {/* BugHerd #42: chip showing the schritte number ("0..3")
-                      and the colored left frame on the row both removed —
-                      the verdict colour on the actual answer/science chips
-                      below already communicates the band; the extra step-
-                      count chip felt arithmetic. Kept invisibly for screen
-                      readers. */}
-                  <span
-                    className="sr-only"
-                    aria-label={schritteLabel(s)}
-                  >
-                    {schritteLabel(s)}
-                  </span>
-                  <p className="quiz-result__item-statement">{statement}</p>
-                </div>
-                {/* BugHerd #24 + #40 — line order swapped (Wissenschaftlich
-                    first, then Ihre Antwort) per the 2026-05-07 ruling so the
-                    user reads "truth, then their answer" rather than the
-                    other way around. CSS adds a blank-line spacer between
-                    the two pairs (.quiz-result__item-meta gap). */}
-                <div className="quiz-result__item-meta">
-                  <span className="quiz-result__item-pair">
-                    <span className="quiz-result__item-meta-label">
-                      Wissenschaftlich:
-                    </span>{" "}
-                    <VerdictPill
-                      verdict={myth.correctClassification}
-                      label={t(`classification.${myth.correctClassification}`)}
-                      size="sm"
-                    />
-                  </span>
-                  <span className="quiz-result__item-pair">
-                    <span className="quiz-result__item-meta-label">
-                      {t("ui.yourAnswerLabel")}:
-                    </span>{" "}
+        {/* Stage B (2026-05-16) — 4-column comparison table replaces the
+            Stage A retrospective <ol>. The new column 4 (Bevölkerung Ø)
+            shows each myth's populationCorrectPct so the user can see how
+            their answers stack up against the public average. Mobile
+            collapse is via display:block + data-label::before — the
+            <table> stays semantic for screen readers. */}
+        <table className="quiz-result__table">
+          <thead>
+            <tr>
+              <th scope="col">{t("ui.resultTable.statement")}</th>
+              <th scope="col">{t("ui.resultTable.yourAnswer")}</th>
+              <th scope="col">{t("ui.resultTable.scientific")}</th>
+              <th scope="col" className="quiz-result__table-cell--num">
+                {t("ui.resultTable.populationAvg")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {reviewRows.map((row) => {
+              const { myth, answer, schritte: s, visibleIdx } = row;
+              const statement =
+                quizTextMap[myth.id]?.statement || t(myth.statementKey);
+              const bandModifier = ["exact", "near", "off", "far"][s];
+              return (
+                <tr
+                  key={myth.id}
+                  className={`quiz-result__row quiz-result__row--${bandModifier}`}
+                >
+                  <td>
+                    <span className="sr-only">{schritteLabel(s)}</span>
+                    <span className="quiz-result__table-statement">
+                      {statement}
+                    </span>
+                    <button
+                      type="button"
+                      className="quiz-result__jump"
+                      onClick={() => onJumpToQuestion(visibleIdx)}
+                    >
+                      {t("ui.resultTable.jump")}
+                    </button>
+                  </td>
+                  <td data-label={t("ui.resultTable.yourAnswer")}>
                     <VerdictPill
                       verdict={answer.chosenClassification}
                       label={t(`classification.${answer.chosenClassification}`)}
                       size="sm"
                     />
-                  </span>
-                </div>
-                <div className="quiz-result__item-actions">
-                  <button
-                    type="button"
-                    className="quiz-result__item-link"
-                    onClick={() => onJumpToQuestion(visibleIdx)}
+                  </td>
+                  <td data-label={t("ui.resultTable.scientific")}>
+                    <VerdictPill
+                      verdict={myth.correctClassification}
+                      label={t(`classification.${myth.correctClassification}`)}
+                      size="sm"
+                    />
+                  </td>
+                  <td
+                    data-label={t("ui.resultTable.populationAvg")}
+                    className="quiz-result__table-cell--num"
                   >
-                    Zur Frage
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
+                    {myth.populationCorrectPct} %
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <p className="quiz-result__table-caption">
+          {t("ui.resultTable.populationAvgCaption")}
+        </p>
       </div>
 
       {/* Action buttons — exactly two primary actions in matching size,
