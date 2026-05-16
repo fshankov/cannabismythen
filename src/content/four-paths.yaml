@@ -1,23 +1,27 @@
+# AI-drafted native rewrite (2026-05-16). Tile descriptions condensed
+# to one punchy line each. Awaiting ISD editorial review before merge
+# to main.
+
 quizTile:
   title: 'Quiz'
-  description: '≈3 Minuten · Sofort-Feedback · 10 Fragen aus den 42 Mythen'
+  description: '10 Fragen aus den 42 Mythen — in 3 Minuten ein Bild deines Wissens.'
   ctaLabel: 'Quiz starten'
   targetUrl: '/quiz/'
   sampleEyebrow: 'Beispielfrage'
   sampleMythText: 'Cannabis ist weniger schädlich als Alkohol.'
-  sampleMythClassification: 'eher_falsch'
+  sampleMythClassification: 'richtig'
 faktenKartenTile:
   title: 'Fakten-Karten'
-  description: 'Alle 42 Mythen als umdrehbare Karte — vorn der Mythos, hinten die Einordnung der Wissenschaft.'
+  description: 'Alle 42 Aussagen, einzeln umdrehbar: vorn der Mythos, hinten die Einordnung der Forschung.'
   ctaLabel: 'Karten durchstöbern'
   targetUrl: '/fakten-karten/'
 datenExplorerTile:
   title: 'Daten-Explorer'
-  description: '5 Indikatoren · 5 Zielgruppen · die ganze Datenbasis hinter den 42 Mythen.'
+  description: 'Wer glaubt was — 5 Indikatoren über 5 Zielgruppen, vergleichbar gemacht.'
   ctaLabel: 'Daten erkunden'
   targetUrl: '/daten-explorer/'
 meineInteressenTile:
   title: 'Meine Interessen'
-  description: 'Antworten für deine Rolle — von Eltern bis Fachkräften, kuratiert aus der CaRM-Studie.'
+  description: 'Antworten sortiert nach Rolle — von Eltern bis Fachkräften.'
   ctaLabel: 'Themen auswählen'
   targetUrl: '/meine-interessen/'

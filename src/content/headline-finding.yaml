@@ -1,4 +1,12 @@
+# AI-drafted native rewrite (2026-05-16). Replaces the previous
+# alcohol-comparison claim (which contradicts the current m04
+# classification: richtig) with the Motivationsverlust finding
+# documented in src/content/ueber-uns-scrolly.yaml line 59
+# ("Cannabiskonsum verursacht einen generellen Motivationsverlust"
+# — verdict falsch, Richtigkeits-Score 25/100, Mehrheit liegt daneben).
+# Awaiting ISD editorial confirmation before merge to main.
+
 eyebrow: 'Ein Schlüsselbefund'
-leadClause: '„3 von 4 Befragten glaubten, Cannabis sei weniger schädlich als Alkohol —'
-counterClause: 'die wissenschaftliche Evidenz zeigt das Gegenteil."'
+leadClause: '„Beim »Cannabis macht antriebslos«-Mythos liegen nur 25 von 100 Erwachsenen richtig —'
+counterClause: 'die Mehrheit übersieht, was die Forschung zeigt."'
 counterClassification: 'falsch'
