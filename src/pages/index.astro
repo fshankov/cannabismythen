@@ -5,7 +5,8 @@ import "../styles/home-hero-frage.css";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader, getPublishedEntries } from "@lib/content";
 import HeroFrageBlock from "@components/home/HeroFrageBlock";
-import type { HeroPair, HeroVerdict } from "@components/home/HeroFrageBlock";
+import type { HeroPair } from "@components/home/HeroFrageBlock";
+import type { CorrectnessClass } from "@lib/dashboard/types";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
 import AudienceShortcutBlock from "@components/home/AudienceShortcutBlock.astro";
@@ -18,11 +19,22 @@ import { getAllAudiences } from "@lib/faq";
 // ── Hero content from Keystatic ─────────────────────────────────────────────
 const heroBlockData = await reader.singletons.heroBlock.read();
 
+// The Keystatic schema uses `keine_aussage` for the no-classification option;
+// the rest of the site uses the canonical `no_classification` key. Translate
+// once at the boundary so HeroFrageBlock can speak the same type everywhere.
+const YAML_TO_CORRECTNESS: Record<string, CorrectnessClass> = {
+  richtig: "richtig",
+  eher_richtig: "eher_richtig",
+  eher_falsch: "eher_falsch",
+  falsch: "falsch",
+  keine_aussage: "no_classification",
+};
+
 const heroPairs: HeroPair[] = (heroBlockData?.pairs ?? []).map((p) => ({
   belief: p.belief,
   science: p.science,
   mythSlug: p.mythSlug,
-  verdict: p.verdict as HeroVerdict,
+  verdict: YAML_TO_CORRECTNESS[p.verdict] ?? "no_classification",
 }));
 
 const heroBackgroundQuestions: string[] = [...(heroBlockData?.backgroundQuestions ?? [])];

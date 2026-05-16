@@ -1,23 +1,42 @@
 /* ═══════════════════════════════════════════════════════════════
-   Hero – Frage & Kontrast (landing-page redesign).
-   A quiet, question-driven hero. Background = tinted questions
-   on forest green. Foreground = one belief↔science card that
-   crossfades through ~5 pairs.
+   Hero – Frage & Befund (landing-page redesign v2).
+   Five myth cards arranged in a fan on forest green. Top card
+   full-saturation; ±1 and ±2 cards stack behind at slight angles
+   with reduced opacity. Auto-rotates which card is on top every
+   ~5 s; pauses only briefly after a manual click/keypress.
    ═══════════════════════════════════════════════════════════════ */
 
 .hero-frage {
   position: relative;
   isolation: isolate;
-  background: var(--color-accent-hover); /* #1f4f3a */
+  background: var(--color-accent-hover);            /* #1f4f3a */
   color: #f4f4f0;
-  min-height: clamp(36rem, 84svh, 48rem);
+  min-height: clamp(40rem, 84svh, 52rem);
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: 1fr;
   overflow: hidden;
-  padding: clamp(6rem, 12vw, 9rem) clamp(1.25rem, 4vw, 3rem) clamp(3rem, 6vw, 5rem);
+  padding: clamp(5rem, 11vw, 8rem) clamp(1.25rem, 4vw, 3rem) clamp(3rem, 6vw, 5rem);
 }
 
-/* ── Background questions ───────────────────────────────────── */
+/* ── Background atmosphere ──────────────────────────────────── */
+
+.hero-frage__fog {
+  position: absolute;
+  border-radius: 50%;
+  width: 32rem;
+  height: 32rem;
+  bottom: -10rem;
+  right: -8rem;
+  background: radial-gradient(circle, #95c4ad 0%, transparent 65%);
+  opacity: 0.16;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-frage__fog { display: none; }
+}
 
 .hero-frage__bg {
   position: absolute;
@@ -29,65 +48,22 @@
 
 .hero-frage__question {
   position: absolute;
-  font-family: var(--font-display);
+  font-family: 'DM Serif Display', Georgia, serif;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(15px, 1.6vw, 22px);
-  line-height: 1.25;
-  letter-spacing: -0.2px;
-  color: rgba(255, 255, 255, 0.085);
-  white-space: nowrap;
-  max-width: 26ch;
+  font-size: clamp(20px, 2.2vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  color: rgba(255, 255, 255, 0.10);
+  max-width: 22ch;
   user-select: none;
 }
 
-/* Six deterministic positions — feel placed, not random. Tweak in CSS only. */
-.hero-frage__question--p0 { top:  9%; left:  6%; }
-.hero-frage__question--p1 { top: 18%; right:  7%; }
-.hero-frage__question--p2 { top: 36%; left:  3%; }
-.hero-frage__question--p3 { top: 58%; right:  4%; }
-.hero-frage__question--p4 { top: 74%; left:  9%; }
-.hero-frage__question--p5 { top: 86%; right: 11%; }
-.hero-frage__question--p6 { top: 50%; left: 38%; opacity: 0.6; }
-.hero-frage__question--p7 { top: 28%; left: 44%; opacity: 0.6; }
+.hero-frage__question--p0 { top:  9%; left:  4%; }
+.hero-frage__question--p1 { bottom: 9%; right: 4%; text-align: right; }
 
 @media (max-width: 768px) {
-  .hero-frage__question { font-size: 14px; max-width: 18ch; white-space: normal; }
-  /* Hide the inner-middle questions on mobile (less crowding). */
-  .hero-frage__question--p6,
-  .hero-frage__question--p7,
-  .hero-frage__question--p5 { display: none; }
-}
-
-/* Two soft fog blobs (way fewer than the old hero's six). */
-.hero-frage__fog {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.35;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.hero-frage__fog--a {
-  width: 32rem;
-  height: 32rem;
-  top: -8rem;
-  left: -10rem;
-  background: radial-gradient(circle, #2d6a4f 0%, transparent 65%);
-}
-
-.hero-frage__fog--b {
-  width: 28rem;
-  height: 28rem;
-  bottom: -6rem;
-  right: -6rem;
-  background: radial-gradient(circle, #95c4ad 0%, transparent 65%);
-  opacity: 0.18;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-frage__fog { display: none; }
+  .hero-frage__bg { display: none; }
 }
 
 /* ── Foreground stack ───────────────────────────────────────── */
@@ -98,16 +74,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
-  gap: clamp(1.5rem, 3vw, 2.5rem);
+  gap: clamp(1.25rem, 2.5vw, 2rem);
   margin: 0 auto;
   width: 100%;
-  max-width: 1040px;
+  max-width: 1200px;
 }
 
 .hero-frage__eyebrow {
-  font-family: var(--font-display);
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 2.6px;
@@ -116,161 +91,227 @@
   margin: 0;
 }
 
-/* ── The rotating card ──────────────────────────────────────── */
+/* ── Segment bar (mobile primary, desktop quiet) ────────────── */
 
-.hero-frage__card {
-  position: relative;
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: stretch;
-  gap: 0;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: var(--radius-lg);
-  padding: clamp(1.5rem, 3.2vw, 2.5rem) clamp(1.25rem, 3vw, 2.25rem);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+.hero-frage__segments {
+  display: none;
+  gap: 0.4rem;
+  width: min(28rem, 80vw);
+}
+
+.hero-frage__segment {
+  flex: 1 1 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  transition: background-color var(--transition-fast);
+}
+
+.hero-frage__segment[data-active="true"] {
+  background: #f4f4f0;
 }
 
 @media (max-width: 768px) {
+  .hero-frage__segments { display: flex; }
+}
+
+/* ── The fan stage ──────────────────────────────────────────── */
+
+.hero-frage__stage {
+  position: relative;
+  width: 100%;
+  height: clamp(20rem, 36vw, 24rem);
+  perspective: 1200px;
+  /* Allow card transforms to escape the stage box horizontally. */
+  overflow: visible;
+}
+
+/* ── A single card ──────────────────────────────────────────── */
+
+.hero-frage__card {
+  --card-w: clamp(20rem, 28vw, 24rem);
+  --card-h: clamp(18rem, 26vw, 22rem);
+  --tint:        var(--classification-keine-aussage);
+  --tint-bg:     var(--classification-keine-aussage-bg);
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--card-w);
+  height: var(--card-h);
+  margin: calc(var(--card-h) / -2) 0 0 calc(var(--card-w) / -2);
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.45rem;
+  padding: 1.4rem 1.5rem 1.25rem;
+
+  font-family: inherit;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  appearance: none;
+
+  /* Fan position is derived from --card-offset / --card-abs / --card-sign /
+     --card-z provided by the React component. The math here lets the same
+     CSS work for 3, 5, or 7 cards. */
+  transform:
+    translateX(calc(var(--card-sign) * (52px * var(--card-abs))))
+    translateY(calc(14px * var(--card-abs)))
+    rotate(calc(var(--card-sign) * (6deg * var(--card-abs))))
+    scale(calc(1 - 0.06 * var(--card-abs)));
+
+  opacity: calc(1 - 0.24 * var(--card-abs));
+  z-index: var(--card-z, 1);
+
+  transition:
+    transform 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity   600ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
   .hero-frage__card {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto 1fr;
+    transition: none;
   }
 }
 
-.hero-frage__half {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 0 clamp(1rem, 2.5vw, 2rem);
-  text-align: left;
+/* Per-verdict tint override for the front card border/accent. */
+.hero-frage__card--richtig      { --tint: var(--classification-richtig);      --tint-bg: var(--classification-richtig-bg); }
+.hero-frage__card--eher_richtig { --tint: var(--classification-eher-richtig); --tint-bg: var(--classification-eher-richtig-bg); }
+.hero-frage__card--eher_falsch  { --tint: var(--classification-eher-falsch);  --tint-bg: var(--classification-eher-falsch-bg); }
+.hero-frage__card--falsch       { --tint: var(--classification-falsch);       --tint-bg: var(--classification-falsch-bg); }
+.hero-frage__card--no_classification { --tint: var(--classification-keine-aussage); --tint-bg: var(--classification-keine-aussage-bg); }
+
+.hero-frage__card[data-front="true"] {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.30);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.32);
+}
+
+.hero-frage__card:focus-visible {
+  outline: 2px solid #f4f4f0;
+  outline-offset: 3px;
+}
+
+.hero-frage__card[data-front="false"]:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Inside-card elements ------------------------------------------------ */
+
+.hero-frage__verdict-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--tint);
+}
+
+/* The shared VerdictArrow paints with currentColor for its main glyph.
+   The card's --tint sets that color so the icon picks up the verdict
+   tint over the dark hero background. */
+.hero-frage__verdict-icon svg {
+  color: var(--tint);
 }
 
 .hero-frage__half-label {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 2.6px;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
   text-transform: uppercase;
 }
 
-.hero-frage__half--belief .hero-frage__half-label { color: #f4f4f0; opacity: 0.75; }
-.hero-frage__half--science .hero-frage__half-label { color: var(--science-color, #95c4ad); }
+.hero-frage__half-label--belief {
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 0.25rem;
+}
 
-.hero-frage__statement {
+.hero-frage__half-label--science {
+  color: var(--tint);
+}
+
+.hero-frage__belief {
   font-family: 'DM Serif Display', Georgia, serif;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(1.125rem, 2.4vw, 1.625rem);
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
   line-height: 1.3;
   color: #f4f4f0;
   margin: 0;
-  transition: opacity 600ms ease-in-out;
-}
-
-.hero-frage__half--science .hero-frage__statement {
-  font-style: normal;
-  font-family: var(--font-display);
-  font-weight: 500;
-}
-
-.hero-frage__verdict-chip {
-  margin-top: auto;
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.625rem;
-  border-radius: var(--radius-full);
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  background: var(--science-color-bg, rgba(255, 255, 255, 0.10));
-  color: var(--science-color, #95c4ad);
-  transition: background-color 600ms ease-in-out, color 600ms ease-in-out;
-}
-
-.hero-frage__verdict-chip::before {
-  content: "";
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background: currentColor;
-  flex-shrink: 0;
 }
 
 .hero-frage__divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  color: rgba(255, 255, 255, 0.4);
-  padding: 0 0.5rem;
+  display: block;
+  width: 36px;
+  height: 2px;
+  background: var(--tint);
+  border-radius: 2px;
+  opacity: 0.7;
+  margin: 0.25rem 0;
 }
 
-.hero-frage__divider::before {
-  content: "";
-  position: absolute;
-  inset: 10% auto 10% 50%;
-  width: 1px;
-  background: rgba(255, 255, 255, 0.18);
-  transform: translateX(-50%);
+.hero-frage__science {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: clamp(0.85rem, 1vw, 0.95rem);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+  /* Constrain science to 4 lines max so taller paragraphs don't blow
+     out the card height. */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.hero-frage__divider-chevron {
-  position: relative;
-  z-index: 1;
-  background: var(--color-accent-hover);
-  padding: 0.375rem 0.25rem;
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.5);
+.hero-frage__pill-anchor {
+  margin-top: auto;
 }
+
+/* Behind cards are visually unreachable — dim their inner content extra
+   so the front card reads as primary. */
+.hero-frage__card[data-front="false"] .hero-frage__science {
+  opacity: 0.6;
+}
+
+/* ── Mobile fallback: single card, swipe ─────────────────────── */
 
 @media (max-width: 768px) {
-  .hero-frage__divider::before {
-    inset: 50% 10% auto 10%;
-    height: 1px;
-    width: auto;
-    transform: translateY(-50%);
+  .hero-frage__stage {
+    height: clamp(22rem, 80vw, 28rem);
+    perspective: none;
   }
-  .hero-frage__divider-chevron {
-    padding: 0.25rem 0.5rem;
-    transform: rotate(90deg);
+
+  /* Show only the front card on mobile — others are accessible via swipe. */
+  .hero-frage__card {
+    --card-w: min(22rem, 88vw);
+    --card-h: clamp(20rem, 78vw, 26rem);
+    transform: translateX(0) translateY(0) rotate(0) scale(1);
+    opacity: 1;
+    pointer-events: none;
+    visibility: hidden;
   }
-}
 
-/* ── Dot indicators ─────────────────────────────────────────── */
-
-.hero-frage__dots {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.hero-frage__dot {
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
-}
-
-.hero-frage__dot[aria-current="true"] {
-  background: #95c4ad;
-  transform: scale(1.3);
-}
-
-.hero-frage__dot:hover {
-  background: rgba(255, 255, 255, 0.55);
+  .hero-frage__card[data-front="true"] {
+    pointer-events: auto;
+    visibility: visible;
+  }
 }
 
 /* ── CTAs ───────────────────────────────────────────────────── */
@@ -279,7 +320,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: clamp(0.75rem, 2vw, 1.5rem);
+  gap: clamp(0.75rem, 2vw, 1.75rem);
   flex-wrap: wrap;
 }
 
@@ -287,12 +328,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 1.65rem;
   border-radius: var(--radius-full);
   background: #f4f4f0;
   color: var(--color-accent-hover);
-  font-family: var(--font-display);
-  font-size: 0.9375rem;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
   transition: background-color var(--transition-fast), transform var(--transition-fast);
@@ -309,8 +350,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  font-family: var(--font-display);
-  font-size: 0.875rem;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.9rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
@@ -324,23 +365,4 @@
   color: #ffffff;
   border-color: #ffffff;
   outline: none;
-}
-
-/* Scroll cue */
-.hero-frage__scroll-cue {
-  display: block;
-  margin: 0.25rem auto 0;
-  width: 1px;
-  height: 2rem;
-  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.4));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-frage__statement,
-  .hero-frage__verdict-chip,
-  .hero-frage__cta-primary,
-  .hero-frage__cta-secondary,
-  .hero-frage__dot {
-    transition: none;
-  }
 }
