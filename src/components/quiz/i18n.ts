@@ -219,9 +219,11 @@ const translations: Record<Lang, Record<string, string>> = {
 
     // ── Population comparison strings ─────────────────────────────────
     // ── UI strings ────────────────────────────────────────────────────
-    "ui.progress": "{answered} von {total} beantwortet",
-    // BugHerd #13 — Sie form (sentence case). Session 1 sweep missed this key.
-    "ui.resultTitle": "Ihr Ergebnis",
+    // Stage A (2026-05-16): counter wording matches Pew's "Question X
+    // of Y" and the on-card `ui.questionLabel` so the vocabulary is
+    // consistent header ↔ card.
+    "ui.progress": "Aussage {answered} von {total}",
+    "ui.resultTitle": "Dein Ergebnis",
     "ui.shareButton": "Ergebnis teilen",
     "ui.copiedToClipboard": "Link kopiert! \u2713",
     "ui.shareTitle": "Mein Cannabis-Quiz Ergebnis",
@@ -266,12 +268,11 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.classificationPhrase.eher_falsch": "eher falsch",
     "ui.classificationPhrase.falsch": "falsch",
     "ui.correctAnswer": "Wissenschaftliche Bewertung:",
-    // BugHerd #13 + #23 — "Deine" → "Ihre" (Sie form, sentence case).
-    // Session 1's sweep missed these two i18n keys; caught in Session 2
-    // when chasing the "IHRE" pin (which turned out to be the per-row
-    // label, not an uppercase issue).
-    "ui.yourAnswer": "Ihre Antwort:",
-    "ui.yourAnswerLabel": "Ihre Antwort",
+    // Stage A (2026-05-16): touched-string Sie → Du sweep. The full
+    // Sie → Du site flip lives in its own session (CLAUDE.md "Sie/Du
+    // baseline"); Stage A only flips strings already in the diff.
+    "ui.yourAnswer": "Deine Antwort:",
+    "ui.yourAnswerLabel": "Deine Antwort",
     "classification.scientific": "Wissenschaftlich",
     "ui.correctAnswerLabel": "Richtige Antwort",
     "ui.swipeHint": "oder nach links wischen",
@@ -286,14 +287,14 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.previousQuestion": "Zur\u00fcck",
     "ui.finishQuiz": "Ergebnis ansehen",
     "ui.persistenceNotice":
-      "Wir speichern Ihren Fortschritt nur in diesem Browser.",
+      "Wir speichern deinen Fortschritt nur in diesem Browser.",
     "ui.progressRestored":
       "Fortschritt wiederhergestellt.",
     "ui.resetProgress": "Quiz zur\u00fccksetzen",
-    "ui.retrospectiveTitle": "Ihre Antworten im \u00dcberblick",
+    "ui.retrospectiveTitle": "Deine Antworten im \u00dcberblick",
     "ui.exploreData": "Daten-Explorer \u00f6ffnen",
     "ui.shareResultHeading": "Ergebnis teilen",
-    "ui.openMythDetail": "Details zu dieser Aussage \u2192",
+    "ui.openMythDetail": "Mehr auf der Fakten-Karte \u2192",
   },
 
   // ── English (placeholder — to be filled) ──────────────────────────

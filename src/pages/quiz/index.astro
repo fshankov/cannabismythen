@@ -48,16 +48,16 @@ const tiles = quizzes.map(([slug, entry]) => {
 
 <BaseLayout
   title="Quiz"
-  description="Testen Sie Ihr Wissen über Cannabis-Mythen"
+  description="Teste dein Wissen über Cannabis-Mythen"
   ogImage="/og/quiz/index.png"
 >
-  <h1>Quiz: Was wissen Sie über Cannabis?</h1>
+  <h1>Quiz: Was weißt du über Cannabis?</h1>
 
   <div class="quiz-index__intro">
     <p>
-      Testen Sie Ihr Wissen in fünf thematischen Quiz-Modulen oder im
+      Teste dein Wissen in fünf thematischen Quiz-Modulen oder im
       Schnellcheck mit zufälligen Aussagen aus allen Themen. Jede Aussage
-      ist mit dem Stand der Forschung erklärt; Ihre Einschätzungen
+      ist mit dem Stand der Forschung erklärt; deine Einschätzungen
       vergleichen wir mit denen der Erwachsenen (18–70) in einer
       Bevölkerungsbefragung in Deutschland.
     </p>
@@ -77,13 +77,14 @@ const tiles = quizzes.map(([slug, entry]) => {
         </span>
         <h2 class="quiz-select-card__title">{tile.title}</h2>
         <span class="quiz-select-card__count">{tile.count} Fragen</span>
-        {/* BugHerd #37b (Session 3b, 2026-05-07): per-tile last-score
-            chip. Hidden until the inline script below finds a matching
-            cm-quiz-score-{slug} entry in localStorage and fills it in. */}
+        {/* Stage A (2026-05-16) — band-color completion dot. Hidden by
+            default; the inline script below reveals it once it finds a
+            matching cm-quiz-score-{slug} entry in localStorage and
+            derives the score band. */}
         <span
-          class="quiz-select-card__last-score"
+          class="quiz-select-card__band-dot"
           data-quiz-slug={tile.slug}
-          aria-live="polite"
+          aria-hidden="true"
         ></span>
         {tile.featured && (
           <span class="quiz-select-card__chip">Mix</span>
@@ -92,31 +93,32 @@ const tiles = quizzes.map(([slug, entry]) => {
     ))}
   </section>
 
-  {/* BugHerd #37b — read each tile's last score from localStorage and
-      render it as a small chip below the question count. Inline so it
-      runs before the user can scroll; per-browser only, no cookies. */}
+  {/* Stage A — read each tile's last score from localStorage, derive the
+      band (≥80 profi · ≥60 guterweg · ≥40 gehtnoch · else erwischt) and
+      reveal a colored dot + tint the tile border. Per-browser only, no
+      cookies. */}
   <script is:inline>
     (function () {
       if (typeof window === "undefined" || !window.localStorage) return;
-      var nodes = document.querySelectorAll("[data-quiz-slug]");
-      for (var i = 0; i < nodes.length; i++) {
-        var el = nodes[i];
-        var slug = el.getAttribute("data-quiz-slug");
+      function bandFor(score) {
+        if (score >= 80) return "profi";
+        if (score >= 60) return "guterweg";
+        if (score >= 40) return "gehtnoch";
+        return "erwischt";
+      }
+      var dots = document.querySelectorAll(".quiz-select-card__band-dot");
+      for (var i = 0; i < dots.length; i++) {
+        var dot = dots[i];
+        var slug = dot.getAttribute("data-quiz-slug");
         if (!slug) continue;
         try {
           var raw = window.localStorage.getItem("cm-quiz-score-" + slug);
           if (!raw) continue;
           var data = JSON.parse(raw);
-          if (
-            typeof data.moduleScore !== "number" ||
-            typeof data.correctCount !== "number" ||
-            typeof data.totalQuestions !== "number"
-          ) continue;
-          var pct = Math.round(data.moduleScore);
-          el.textContent =
-            "Zuletzt: " + data.correctCount + "/" + data.totalQuestions +
-            " · " + pct + " %";
-          el.classList.add("quiz-select-card__last-score--has-data");
+          if (typeof data.moduleScore !== "number") continue;
+          var band = bandFor(data.moduleScore);
+          dot.setAttribute("data-band", band);
+          dot.parentNode.setAttribute("data-band", band);
         } catch (e) {
           // ignore parse errors / disabled storage
         }
