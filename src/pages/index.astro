@@ -10,6 +10,7 @@ import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
 import AudienceShortcutBlock from "@components/home/AudienceShortcutBlock.astro";
 import type { AudienceCard } from "@components/home/AudienceShortcutBlock.astro";
+import ProjectStripBlock from "@components/home/ProjectStripBlock.astro";
 import type { PreviewMyth } from "@components/home/previews/FaktenKartenPreviewTile.astro";
 import type { AudienceChip } from "@components/home/previews/MeineInteressenPreviewTile.astro";
 import { getAllAudiences } from "@lib/faq";
@@ -63,6 +64,7 @@ const numbersStripData = await reader.singletons.numbersStrip.read();
 const headlineFinding = await reader.singletons.headlineFinding.read();
 const fourPathsData = await reader.singletons.fourPaths.read();
 const audienceShortcutData = await reader.singletons.audienceShortcut.read();
+const projectStripData = await reader.singletons.projectStrip.read();
 
 // Audience metadata for the audience-shortcut block AND the Meine-Interessen tile.
 const audienceMetaList = await getAllAudiences();
@@ -142,5 +144,9 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
       lede={audienceShortcutData.lede}
       cards={audienceCards}
     />
+  )}
+
+  {projectStripData && (
+    <ProjectStripBlock credit={projectStripData.credit} links={projectStripData.links} />
   )}
 </BaseLayout>
