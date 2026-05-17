@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
 export interface Props {
@@ -43,22 +43,51 @@ export default function DatenExplorerPreviewTile({
   targetUrl,
 }: Props) {
   const [idx, setIdx] = useState(0);
+  const wrapperRef = useRef<HTMLAnchorElement | null>(null);
 
+  // Gate the auto-cycle on visibility. Without this the interval keeps
+  // ticking while the tile is scrolled off the mobile carousel, which
+  // shows up as a visible "skip" when the tile re-enters the viewport.
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;
 
-    const id = window.setInterval(() => {
-      setIdx((i) => (i + 1) % GROUPS.length);
-    }, SWITCH_MS);
+    const root = wrapperRef.current;
+    if (!root) return;
 
-    return () => window.clearInterval(id);
+    let interval: number | null = null;
+    const start = () => {
+      if (interval !== null) return;
+      interval = window.setInterval(() => {
+        setIdx((i) => (i + 1) % GROUPS.length);
+      }, SWITCH_MS);
+    };
+    const stop = () => {
+      if (interval !== null) {
+        window.clearInterval(interval);
+        interval = null;
+      }
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) start();
+        else stop();
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(root);
+
+    return () => {
+      io.disconnect();
+      stop();
+    };
   }, []);
 
   const group = GROUPS[idx];
 
   return (
-    <a className="path-tile path-tile--daten" href={targetUrl}>
+    <a ref={wrapperRef} className="path-tile path-tile--daten" href={targetUrl}>
       <div className="path-tile__preview">
         <div className="daten-preview" aria-hidden="true">
           <div className="daten-preview__chip-row">
