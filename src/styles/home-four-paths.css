@@ -83,7 +83,12 @@
     margin: 0 -1rem;
     scrollbar-width: thin;
   }
-  .four-paths__grid > * {
+  /* Snap on the tile itself rather than on `> *` — the React tile is
+     wrapped in <astro-island> (display: contents), so a `>*` selector
+     would attach the snap point to a boxless wrapper and the swipe
+     would skip the tile entirely. Targeting .path-tile puts the snap
+     point on the actual <a> regardless of wrapper. */
+  .four-paths__grid .path-tile {
     scroll-snap-align: start;
   }
 }
