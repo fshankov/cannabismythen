@@ -228,6 +228,20 @@
   outline-offset: -1.5px;
 }
 
+/* Narrow viewports: 4-pill flex wrap pushes the `.is-correct` outlined
+   pill onto its own row. Switch to a 2×2 grid so the verdict tier is
+   readable at any width. */
+@media (max-width: 400px) {
+  .quiz-preview__pills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .quiz-preview__pills .pill {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
 .quiz-preview__hint {
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
   font-size: 0.6875rem;
@@ -336,12 +350,17 @@
   color: var(--color-text-muted);
 }
 
-/* Mirror of the dashboard's .indicator-tag style (the FilterBar pill). */
+/* Mirror of the dashboard's .indicator-tag style (the FilterBar pill).
+   min-width holds the chip steady across the four Zielgruppe labels —
+   their natural widths vary from "Eltern" to "Junge Erwachsene (18–26)",
+   which would cause the right edge to jump every 3 s without it. */
 .daten-preview__chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   padding: 4px 12px;
+  min-width: 11rem;
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-full);
   background: var(--color-primary);
