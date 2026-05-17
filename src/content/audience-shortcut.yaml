@@ -7,7 +7,7 @@ headline: 'Dein Einstieg'
 lede: "Du weißt schon, was du brauchst? Hier geht's direkt los."
 cards:
   - audienceId: 'jugendliche'
-    recommendation: 'Mach den 3-Min-Quiz'
+    recommendation: 'Direkt zum Quiz.'
     targetUrl: '/quiz/'
   - audienceId: 'eltern'
     recommendation: 'Antworten für den Familienalltag'
@@ -16,7 +16,7 @@ cards:
     recommendation: 'Material und Hintergrund für den Unterricht'
     targetUrl: '/meine-interessen/lehrkraefte/'
   - audienceId: 'konsumierende'
-    recommendation: 'Was zeigt die Forschung wirklich?'
+    recommendation: 'Was die Forschung zeigt.'
     targetUrl: '/meine-interessen/konsumierende/'
   - audienceId: 'fachkraefte'
     recommendation: 'Daten und Indikatoren erkunden'

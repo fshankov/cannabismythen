@@ -7,11 +7,11 @@ numerals:
   - value: 1041
     suffix: ''
     label: 'Befragte'
-    description: 'aus der qualitativen Vorstudie — der Anfang.'
+    description: 'aus der qualitativen Vorstudie.'
   - value: 7408
     suffix: ''
     label: 'Aussagen'
-    description: 'aus Umfragen, Expertinnen-Gesprächen und Medienanalysen.'
+    description: 'aus Umfragen, Fachgesprächen und Medienanalysen.'
   - value: 42
     suffix: ''
     label: 'prüfbare Mythen'

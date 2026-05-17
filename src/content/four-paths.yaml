@@ -8,7 +8,7 @@ quizTile:
   ctaLabel: 'Quiz starten'
   targetUrl: '/quiz/'
   sampleEyebrow: 'Beispielfrage'
-  sampleMythText: 'Cannabis ist weniger schädlich als Alkohol.'
+  sampleMythText: 'Cannabiskonsum beeinträchtigt kognitive Fähigkeiten.'
   sampleMythClassification: 'richtig'
 faktenKartenTile:
   title: 'Fakten-Karten'
@@ -17,11 +17,11 @@ faktenKartenTile:
   targetUrl: '/fakten-karten/'
 datenExplorerTile:
   title: 'Daten-Explorer'
-  description: 'Wer glaubt was — 5 Indikatoren über 5 Zielgruppen, vergleichbar gemacht.'
+  description: 'Wer glaubt was — 5 Indikatoren über 5 Zielgruppen, direkt nebeneinander.'
   ctaLabel: 'Daten erkunden'
   targetUrl: '/daten-explorer/'
 meineInteressenTile:
   title: 'Meine Interessen'
-  description: 'Antworten sortiert nach Rolle — von Eltern bis Fachkräften.'
+  description: 'Antworten, passend zu deiner Rolle — von Eltern bis Fachkräften.'
   ctaLabel: 'Themen auswählen'
   targetUrl: '/meine-interessen/'
