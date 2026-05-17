@@ -397,11 +397,13 @@ export default function QuizCard({
                 )}
 
                 {/* 6 — Action row pinned to the bottom.
-                    BugHerd #34 (Session 3a, 2026-05-07): on the LAST
-                    question we hide the in-card "Ergebnis ansehen →" CTA
-                    so it doesn't duplicate the standalone finish-row
-                    rendered just below the card by QuizPlayer. On
-                    earlier cards the in-card "Nächste Frage →" stays. */}
+                    Stage C (2026-05-17): the in-card forward CTA now
+                    renders on every card. On the LAST card the label
+                    switches to "Ergebnis ansehen →"; the click handler
+                    is the same `onNext`, which `handleNext()` in
+                    QuizPlayer routes to `setFinished(true)` when at the
+                    last index. The standalone finish-row below the card
+                    is gone — single, consistent CTA path. */}
                 <div className="quiz-card__back-actions">
                   {onShowFactsheet && (
                     <button
@@ -412,16 +414,17 @@ export default function QuizCard({
                       {t("ui.openMythDetail")}
                     </button>
                   )}
-                  {!isLastQuestion && (
-                    <button
-                      type="button"
-                      className="quiz-card__next-btn"
-                      onClick={onNext}
-                      autoFocus
-                    >
-                      {t("ui.nextQuestion")} →
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className="quiz-card__next-btn"
+                    onClick={onNext}
+                    autoFocus
+                  >
+                    {isLastQuestion
+                      ? t("ui.finishQuiz")
+                      : t("ui.nextQuestion")}{" "}
+                    →
+                  </button>
                 </div>
 
                 <p className="quiz-card__swipe-hint" aria-hidden="true">

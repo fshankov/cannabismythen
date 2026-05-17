@@ -877,25 +877,13 @@ function QuizPlayerInner({
               The persistence notice + reset link below remains the only
               footer chrome. */}
 
-          {/* BugHerd #34 (Session 3a, 2026-05-07): the standalone
-              finish-row is now the canonical "Ergebnis ansehen →" CTA
-              whenever every question is answered. The in-card back-face
-              CTA is suppressed on the LAST question (see QuizCard.tsx
-              `!isLastQuestion`) so they no longer duplicate. The
-              standalone row stays visible on every card position
-              (mid-deck and last alike) so the user always has a
-              path to the result. */}
-          {allAnswered && !showResults && (
-            <div className="quiz-player__finish-row">
-              <button
-                type="button"
-                className="quiz-card__next-btn"
-                onClick={() => setFinished(true)}
-              >
-                {t("ui.finishQuiz")} →
-              </button>
-            </div>
-          )}
+          {/* Stage C (2026-05-17): the BugHerd #34 standalone finish-row
+              was removed. The last card's back face now hosts the
+              "Ergebnis ansehen →" CTA in the same position earlier cards
+              use for "Nächste Frage →" — see QuizCard.tsx. Users
+              re-answering an earlier question still reach the result by
+              advancing through the deck the normal way (handleNext
+              routes to setFinished on the last index). */}
 
           <div className="quiz-player__notice" role="note">
             <span aria-hidden="true">🔒</span>{" "}
