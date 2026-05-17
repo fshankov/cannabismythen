@@ -144,18 +144,29 @@ export default function HeroFrageBlock({
       <div className="hero-frage__foreground">
         <p className="hero-frage__eyebrow">{eyebrow}</p>
 
-        {/* Mobile-only progress bar */}
+        {/* Mobile-only verdict-icon indicator. Each pip carries its
+            pair's verdict glyph so the indicator means something rather
+            than just showing position. Buttons jump to that card on
+            tap; auto-rotate resumes after the standard idle window. */}
         <div
-          className="hero-frage__segments"
-          aria-hidden="true"
-          data-active={activeIdx}
+          className="hero-frage__indicator"
+          role="tablist"
+          aria-label="Mythos auswählen"
         >
-          {pairs.map((_, i) => (
-            <span
+          {pairs.map((p, i) => (
+            <button
               key={i}
-              className="hero-frage__segment"
+              type="button"
+              role="tab"
+              className={`hero-frage__pip hero-frage__pip--${p.verdict}`}
               data-active={i === activeIdx ? "true" : "false"}
-            />
+              aria-selected={i === activeIdx}
+              aria-label={`Mythos ${i + 1} von ${pairs.length}`}
+              tabIndex={i === activeIdx ? 0 : -1}
+              onClick={() => setActive(i)}
+            >
+              <VerdictArrow verdict={p.verdict} size={20} strokeWidth={2.25} />
+            </button>
           ))}
         </div>
 
