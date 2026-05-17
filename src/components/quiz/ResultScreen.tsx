@@ -238,6 +238,65 @@ export default function ResultScreen({
         populationLine={populationLine}
       />
 
+      {/* Stage C (2026-05-17) — compact "Du vs. Ø Bevölkerung" stats
+          grid. Pulls the headline numbers up so they read at a glance
+          before the user scrolls into the per-question retrospective.
+          CaRM only exposes the population's "% genau richtig" per myth,
+          not a 4-Schritte breakdown, so the grid is intentionally two
+          rows (Genau-richtig count + overall share %). The full
+          Schritte band breakdown for the user lives inside the
+          retrospective table below. */}
+      <table
+        className="quiz-result__summary"
+        aria-label={t("ui.resultSummary.title")}
+      >
+        <thead>
+          <tr>
+            <th scope="col" className="quiz-result__summary-rowlabel">
+              {t("ui.resultSummary.title")}
+            </th>
+            <th scope="col">{t("ui.resultSummary.colYou")}</th>
+            <th scope="col">{t("ui.resultSummary.colPopulation")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row" className="quiz-result__summary-rowlabel">
+              {t("ui.resultSummary.rowExact")}
+            </th>
+            <td className="quiz-result__summary-num">
+              {result.breakdown.exact}
+              <span className="quiz-result__summary-denom">
+                {" / "}
+                {result.totalQuestions}
+              </span>
+            </td>
+            <td className="quiz-result__summary-num quiz-result__summary-num--muted">
+              {populationStats.absolutePoints}
+              <span className="quiz-result__summary-denom">
+                {" / "}
+                {populationStats.questionCount}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row" className="quiz-result__summary-rowlabel">
+              {t("ui.resultSummary.rowShare")}
+            </th>
+            <td
+              className={`quiz-result__summary-num quiz-result__summary-num--band quiz-result__summary-num--band-${band}`}
+            >
+              {result.moduleScore}
+              <span className="quiz-result__summary-denom"> %</span>
+            </td>
+            <td className="quiz-result__summary-num quiz-result__summary-num--muted">
+              {populationStats.percent}
+              <span className="quiz-result__summary-denom"> %</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
       {/* Module review, worst-first */}
       <div className="quiz-result__retrospective">
         <h2 className="quiz-result__retrospective-title">

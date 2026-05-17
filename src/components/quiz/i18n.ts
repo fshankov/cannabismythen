@@ -303,6 +303,13 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.resultTable.populationAvgCaption":
       "\u00d8 \u2014 Anteil der Erwachsenen (18\u201370), die diese Aussage in einer Bev\u00f6lkerungsbefragung in Deutschland im Schnitt genau richtig eingeordnet haben.",
     "ui.resultTable.jump": "Zur Frage",
+    // Stage C (2026-05-17) — compact "Du vs. Ø Bevölkerung" summary
+    // grid above the per-question table. AI draft, awaiting ISD review.
+    "ui.resultSummary.title": "Auf einen Blick",
+    "ui.resultSummary.colYou": "Du",
+    "ui.resultSummary.colPopulation": "Ø Bevölkerung",
+    "ui.resultSummary.rowExact": "Genau richtig",
+    "ui.resultSummary.rowShare": "Anteil insgesamt",
   },
 
   // ── English (placeholder — to be filled) ──────────────────────────
