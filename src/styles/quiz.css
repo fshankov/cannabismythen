@@ -213,13 +213,10 @@
   }
 }
 
-/* Stage 4 — "Ergebnis ansehen" finish-row, only shown after all
-   questions are answered (and the deck hasn't auto-flipped to results). */
-.quiz-player__finish-row {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-md);
-}
+/* Stage C (2026-05-17): the `.quiz-player__finish-row` selector is
+   retired. The "Ergebnis ansehen →" CTA now lives on the back face of
+   the last card (see `.quiz-card__back-actions .quiz-card__next-btn`).
+   No styles needed here. */
 
 /* Two pseudo-elements that look like the next cards in the deck.
    They fan VERTICALLY below the active card with a clear shadow stack
@@ -2194,6 +2191,139 @@
   display: inline-flex;
   align-items: baseline;
   gap: 4px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Stage C (2026-05-17) — Polish pass.
+
+   1) Summary stats grid ("Du vs. Ø Bevölkerung"). Compact 3-column
+      table that sits between the ShareCard hero and the per-question
+      retrospective so the headline numbers read at a glance.
+   2) Top divider on the retrospective wrapper so the per-question
+      table separates visually from the ShareCard above.
+   3) Desktop max-width bump (760 → 880 px at ≥ 1024 px) so the wider
+      table doesn't feel cramped on big screens.
+   ══════════════════════════════════════════════════════════════════ */
+
+.quiz-result__summary {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.quiz-result__summary thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  text-align: right;
+  padding: 0 var(--space-md) var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.quiz-result__summary thead th:first-child {
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-text);
+}
+
+.quiz-result__summary tbody th {
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  padding: var(--space-md) var(--space-md) var(--space-md) 0;
+}
+
+.quiz-result__summary tbody td {
+  text-align: right;
+  padding: var(--space-md) var(--space-md);
+  vertical-align: baseline;
+}
+
+.quiz-result__summary tbody tr + tr th,
+.quiz-result__summary tbody tr + tr td {
+  border-top: 1px solid var(--color-border);
+}
+
+.quiz-result__summary-num {
+  font-family: var(--font-display, inherit);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.quiz-result__summary-num--muted {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.quiz-result__summary-denom {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-left: 2px;
+}
+
+/* Band-tinted user "Anteil insgesamt" cell — green/yellow/orange/red
+   per Schritte band. Uses the same classification tokens as the
+   verdict pills and retrospective row tints. */
+.quiz-result__summary-num--band {
+  color: var(--color-text);
+}
+.quiz-result__summary-num--band-profi {
+  color: var(--classification-richtig);
+}
+.quiz-result__summary-num--band-guterweg {
+  color: var(--classification-eher-richtig);
+}
+.quiz-result__summary-num--band-gehtnoch {
+  color: var(--classification-eher-falsch);
+}
+.quiz-result__summary-num--band-erwischt {
+  color: var(--classification-falsch);
+}
+
+@media (max-width: 640px) {
+  .quiz-result__summary thead th {
+    font-size: 0.68rem;
+    padding: 0 var(--space-sm) var(--space-xs);
+  }
+  .quiz-result__summary thead th:first-child {
+    font-size: 0.9rem;
+  }
+  .quiz-result__summary tbody th,
+  .quiz-result__summary tbody td {
+    padding: var(--space-sm) var(--space-sm);
+  }
+  .quiz-result__summary tbody th {
+    padding-left: 0;
+    font-size: 0.85rem;
+  }
+  .quiz-result__summary-num {
+    font-size: 1.2rem;
+  }
+  .quiz-result__summary-denom {
+    font-size: 0.85rem;
+  }
+}
+
+.quiz-result__retrospective {
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (min-width: 1024px) {
+  .quiz-result {
+    max-width: 880px;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════
