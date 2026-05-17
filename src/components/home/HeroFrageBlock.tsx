@@ -195,7 +195,7 @@ export default function HeroFrageBlock({
                 aria-label={`Mythos ${i + 1} von ${pairs.length}: ${p.belief}. Befund: ${p.science}.`}
               >
                 <span className="hero-frage__verdict-icon" aria-hidden="true">
-                  <VerdictArrow verdict={p.verdict} size={44} strokeWidth={2} />
+                  <VerdictArrow verdict={p.verdict} size={28} strokeWidth={2.25} />
                 </span>
 
                 <span className="hero-frage__half-label hero-frage__half-label--belief">

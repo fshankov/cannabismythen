@@ -1,6 +1,9 @@
-# AI-drafted native rewrite (2026-05-16). Anchored to the canonical
-# .mdoc copy for the 5 referenced myths. Awaiting ISD editorial review
-# before merge to main.
+# AI-drafted native rewrite (2026-05-17). 5 pairs cover one each of
+# richtig | eher_richtig | eher_falsch | falsch | keine_aussage so the
+# hero showcases the full 4-level classification scale (plus the
+# "no scientific verdict" case). Anchored to the canonical cardSummary
+# of each referenced myth. Awaiting ISD editorial review before merge
+# to main.
 
 eyebrow: 'Was viele glauben — was die Wissenschaft sagt'
 beliefLabel: 'Mythos'
@@ -8,17 +11,22 @@ scienceLabel: 'Befund'
 
 backgroundQuestions:
   - 'Macht Cannabis abhängig?'
-  - 'Ist Cannabis harmloser als Alkohol?'
+  - 'Macht Cannabis Psychosen?'
+  - 'Wirkt Cannabis entspannend?'
   - 'Ist Cannabis eine Einstiegsdroge?'
-  - 'Hilft Cannabis bei Schmerzen?'
-  - 'Ist Cannabiskonsum harmlos?'
-  - 'Macht Cannabis psychisch krank?'
+  - 'Hilft Cannabis beim Abnehmen?'
+  - 'Hemmt Cannabis Entzündungen?'
 
 pairs:
-  - belief: 'Cannabis ist weniger schädlich als Alkohol.'
-    science: 'Stimmt — die Forschung belegt deutlich geringere körperliche und soziale Schäden als bei Alkohol.'
-    mythSlug: 'm04'
+  - belief: 'Cannabis verursacht Psychosen.'
+    science: 'Stimmt. Besonders bei Jugendlichen und hochpotentem Cannabis erhöht der Konsum das Psychose-Risiko deutlich.'
+    mythSlug: 'm24'
     verdict: 'richtig'
+
+  - belief: 'Cannabis entspannt.'
+    science: 'Im Grundsatz ja. Viele berichten von Stressabbau — die Wirkung hängt aber stark von Dosis, Sorte und persönlicher Verfassung ab.'
+    mythSlug: 'm31'
+    verdict: 'eher_richtig'
 
   - belief: 'Cannabis ist eine Einstiegsdroge.'
     science: 'Eher nein. Wenn überhaupt, sind Nikotin und Alkohol die ersten Substanzen — die Gateway-These hält der Forschung nicht stand.'
@@ -30,15 +38,10 @@ pairs:
     mythSlug: 'm23'
     verdict: 'falsch'
 
-  - belief: 'Cannabis hilft zuverlässig gegen Schmerzen.'
-    science: 'Nur bedingt. Bei wenigen chronischen Schmerzformen zeigen sich kleine Effekte, oft kaum vom Placebo zu trennen.'
-    mythSlug: 'm10'
-    verdict: 'eher_falsch'
-
-  - belief: 'Cannabiskonsum ist harmlos.'
-    science: 'Nein. Vor allem bei frühem oder häufigem Konsum belegen Studien klare Risiken für Psyche, Körper und Sozialleben.'
-    mythSlug: 'm02'
-    verdict: 'falsch'
+  - belief: 'Cannabis hilft beim Abnehmen.'
+    science: 'Unklar. Die Studienlage ist widersprüchlich — eine eindeutige Aussage lässt sich derzeit nicht treffen.'
+    mythSlug: 'm17'
+    verdict: 'keine_aussage'
 
 rotationSeconds: 5
 primaryCtaLabel: 'Quiz starten — 3 Min'

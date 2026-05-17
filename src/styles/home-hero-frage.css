@@ -248,8 +248,13 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.08);
+  /* Off-white disc so the verdict tint inside (Emerald-700, Rose-700,
+     Amber-700, Lime-700, Gray-500) reads cleanly against the dark
+     forest-green card. The translucent backdrop it replaced rendered
+     the mid-dark glyph colors as a faint glow. */
+  background: #f4f4f0;
   color: var(--tint);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
 }
 
 /* The shared VerdictArrow paints with currentColor for its main glyph.
