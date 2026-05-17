@@ -1,16 +1,16 @@
 /**
- * ShareCard — unified result hero (Remediation 3).
+ * ShareCard — result-hero card.
  *
- * Replaces the old "verdict box + separate green share card" duplication
- * with one card that:
- *   • shows the band-coloured percentage hero
- *   • carries the breakdown line (X genau richtig · …)
- *   • renders the Keystatic verdict title + body inside a translucent
- *     band so editors keep their voice
- *   • shows the honest banded population sentence
- *   • carries a single share button (Web Share API + clipboard fallback)
+ * Stage A (2026-05-16) — Pew minimalism rebuild:
+ *   • Verdict title + body (Keystatic) sits in a translucent panel.
+ *   • User score line: "Du hast X von Y Aussagen genau richtig
+ *     eingeordnet (Z %)."
+ *   • Population reference line, parallel format, partial-credit-honest.
+ *   • Share button (Web Share API + clipboard fallback).
+ *   • Per-band tinted background (richtig/eher-richtig/eher-falsch/falsch).
  *
- * Visually it's still the green forest card but now it earns its place.
+ * Dropped vs. Session-3 ShareCard: the medal/emoji circle, the big
+ * percentage hero, the breakdown line, the absolute-points sub-line.
  */
 
 import { useCallback, useState } from "react";
@@ -25,20 +25,12 @@ interface ShareCardProps {
   moduleTitle: string;
   verdictTitle: string;
   verdictBody: string;
-  /** "X genau richtig · Y nah dran · …" — only bands with count > 0. */
-  breakdownLine: string;
-  /** Honest banded population sentence (already interpolated). */
+  /** Pre-rendered user-score sentence (German, no English fallback). */
+  userScoreLine: string;
+  /** Pre-rendered population reference sentence (German). */
   populationLine: string;
   variant?: "square" | "vertical";
 }
-
-/** Band → emoji for the medal. */
-const BAND_EMOJI: Record<ScoreBand, string> = {
-  profi: "\u{1F3C6}",
-  guterweg: "\u{2B50}",
-  gehtnoch: "\u{1F4A1}",
-  erwischt: "\u{1F331}",
-};
 
 /** Render the verdict body with the substring "Fakten-Karten" wrapped as a
  *  link to /fakten-karten/ (BugHerd #36 — reviewer wanted that phrase to be
@@ -74,39 +66,12 @@ export default function ShareCard({
   moduleTitle,
   verdictTitle,
   verdictBody,
-  breakdownLine,
+  userScoreLine,
   populationLine,
   variant = "square",
 }: ShareCardProps) {
   const [copied, setCopied] = useState(false);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
-  const emoji = BAND_EMOJI[band];
-
-  // BugHerd #37 + #38 — show absolute score below the percentage hero.
-  // Reviewer wanted "X von Y möglichen Punkten" (X of Y possible points).
-  // Recompute raw points from the breakdown counts so we don't rely on
-  // a new field in QuizResult: each "exact" (0 Schritte) = 1 pt, "near"
-  // (1) = 0.66 pt, "off" (2) = 0.33 pt, "far" (3) = 0 pt — matches
-  // pointsForSchritte() in quizData.ts. Total questions answered = sum
-  // of the four counts; max points = that × 1.
-  const breakdown = result.breakdown ?? {
-    exact: 0,
-    near: 0,
-    off: 0,
-    far: 0,
-  };
-  const totalAnswered =
-    breakdown.exact + breakdown.near + breakdown.off + breakdown.far;
-  const rawPoints =
-    breakdown.exact * 1 + breakdown.near * 0.66 + breakdown.off * 0.33;
-  // BugHerd #31 — round-to-int site-wide. Confirmed in the 2026-05-07
-  // session: percentages and absolute scores both round to the nearest
-  // integer (no decimals). 2.66 → 3; 2.33 → 2.
-  const formattedPoints = String(Math.round(rawPoints));
-  const absoluteScoreLine =
-    totalAnswered > 0
-      ? `${formattedPoints} von ${totalAnswered} möglichen Punkten`
-      : "";
 
   const shareText = `Ich habe ${result.moduleScore} % beim Quiz „${moduleTitle}" auf cannabismythen.de erreicht.`;
   const fullShareText = `${shareText} ${quizUrl}`;
@@ -148,35 +113,14 @@ export default function ShareCard({
   return (
     <div className={`share-card share-card--${variant} share-card--${band}`}>
       <div className="share-card__visual">
-        <div className="share-card__medal">
-          <span className="share-card__emoji" aria-hidden="true">
-            {emoji}
-          </span>
-        </div>
-
-        <div
-          className="share-card__score"
-          aria-label={`${result.moduleScore} Prozent`}
-        >
-          {result.moduleScore}
-          <span className="share-card__score-unit">&nbsp;%</span>
-        </div>
-
-        {/* BugHerd #37 + #38: absolute score directly below the % hero. */}
-        {absoluteScoreLine && (
-          <p className="share-card__absolute-score">{absoluteScoreLine}</p>
-        )}
-
-        {breakdownLine && (
-          <p className="share-card__breakdown">{breakdownLine}</p>
-        )}
-
         <div className="share-card__verdict">
           <h2 className="share-card__verdict-title">{verdictTitle}</h2>
           <p className="share-card__verdict-body">
             {renderBodyWithFaktenKartenLink(verdictBody)}
           </p>
         </div>
+
+        <p className="share-card__user-line">{userScoreLine}</p>
 
         <p className="share-card__pop-line">{populationLine}</p>
 

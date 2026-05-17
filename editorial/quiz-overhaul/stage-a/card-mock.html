@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<title>Stage A · Card back face — Direction 1 (Pew minimalism)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  /* Mirror of the live tokens (src/styles/global.css). Mock only.
+     Internal review artifact — never linked from the live site. */
+  :root {
+    --color-bg: #f4f4f0;
+    --color-surface: #ffffff;
+    --color-text: #1a1a2e;
+    --color-text-muted: #718096;
+    --color-border: #e2e8f0;
+    --color-accent: #2d6a4f;
+    --color-accent-light: #e8f5ef;
+    --classification-richtig: #047857;
+    --classification-eher-richtig: #4d7c0f;
+    --classification-eher-falsch: #b45309;
+    --classification-falsch: #be123c;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-full: 999px;
+  }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: "Inter", system-ui, sans-serif;
+    line-height: 1.5;
+    padding: 24px 16px 64px;
+  }
+  .mock-meta {
+    max-width: 520px;
+    margin: 0 auto 24px;
+    padding: 12px 16px;
+    background: #fffbe6;
+    border: 1px solid #f0d973;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: #5b4708;
+  }
+  .mock-meta strong { color: #3b2f06; }
+
+  /* Header (ProgressBar) — simplified for the mock. */
+  .quiz-header-bar {
+    max-width: 520px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 10px 16px;
+  }
+  .quiz-header-bar__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+  .quiz-progress {
+    flex: 1;
+    min-width: 0;
+  }
+  .quiz-progress__bar {
+    height: 5px;
+    background: rgba(45,106,79,.08);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+  .quiz-progress__fill {
+    height: 100%;
+    width: 42%;
+    background: linear-gradient(90deg, var(--color-accent), #40916c);
+    border-radius: var(--radius-full);
+  }
+  .quiz-progress__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Card */
+  .quiz-card {
+    max-width: 520px;
+    margin: 0 auto;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    padding: 24px 24px 20px;
+    box-shadow: 0 2px 14px rgba(26,26,46,.06);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .quiz-card__topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+
+  .quiz-card__statement--back {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.35;
+    padding-left: 10px;
+    border-left: 4px solid var(--classification-eher-richtig);
+  }
+
+  .quiz-card__answer-note {
+    margin: 0;
+    font-size: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .pill--eher_richtig { background: #f7fee7; color: var(--classification-eher-richtig); }
+  .pill--eher_falsch { background: #fffbeb; color: var(--classification-eher-falsch); }
+  .quiz-card__answer-vs { color: var(--color-text-muted); }
+  .quiz-card__answer-label { color: var(--color-text-muted); font-size: 13px; }
+
+  .quiz-card__verdict-line {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+  }
+
+  .quiz-card__explanation {
+    margin: 0;
+    font-size: 15px;
+    color: #2d3748;
+    line-height: 1.55;
+  }
+
+  .quiz-card__pop-line {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    padding: 12px 14px;
+    background: var(--color-accent-light);
+    border-radius: var(--radius-md);
+  }
+  .quiz-card__pop-line strong {
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .quiz-card__back-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .quiz-card__more-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-accent);
+    cursor: pointer;
+  }
+  .quiz-card__next-btn {
+    background: var(--color-accent);
+    border: 0;
+    border-radius: var(--radius-md);
+    padding: 10px 18px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="mock-meta">
+  <strong>Mock — Stage A · Direction 1 (Pew minimalism).</strong>
+  Sample data: Modul "Medizinischer Nutzen", Aussage m10 (Cannabis lindert
+  Schmerzen.). Internal review artifact; never linked from the live site.
+  Open in a browser; resize to phone width to sanity-check stacking.
+</div>
+
+<!-- Header (ProgressBar) — note: no score pill, counter reads
+     "Aussage 3 von 7". -->
+<div class="quiz-header-bar">
+  <span class="quiz-header-bar__title">Medizinischer Nutzen</span>
+  <div class="quiz-progress" role="progressbar" aria-valuenow="3" aria-valuemin="0" aria-valuemax="7">
+    <div class="quiz-progress__bar"><div class="quiz-progress__fill"></div></div>
+  </div>
+  <span class="quiz-progress__label">Aussage 3 von 7</span>
+</div>
+
+<!-- Card back face -->
+<div class="quiz-card" aria-label="Aussage 3 von 7">
+  <div class="quiz-card__topbar">
+    <span>03 / 07</span>
+  </div>
+
+  <p class="quiz-card__statement--back">Cannabis lindert Schmerzen</p>
+
+  <p class="quiz-card__answer-note">
+    <span class="quiz-card__answer-label">Deine Antwort:</span>
+    <span class="pill pill--eher_richtig">Eher richtig</span>
+    <span class="quiz-card__answer-vs">·</span>
+    <span class="quiz-card__answer-label">Wissenschaftlich:</span>
+    <span class="pill pill--eher_falsch">Eher falsch</span>
+  </p>
+
+  <p class="quiz-card__verdict-line">Nah dran</p>
+
+  <p class="quiz-card__explanation">
+    Cannabinoide zeigen nur bei bestimmten chronischen Schmerzen für einen
+    kleinen Teil der Patient:innen geringe positive Effekte. Selbstbeobachtete
+    Schmerzlinderung wird oft auf den Placebo-Effekt zurückgeführt.
+  </p>
+
+  <!-- Per-card population line — new wording. Honest about partial
+       credit (the % is a CaRM Richtigkeit mean, not "% of respondents
+       who got it right"). -->
+  <p class="quiz-card__pop-line">
+    Erwachsene (18–70) in einer Bevölkerungsbefragung in Deutschland
+    ordneten diese Aussage im Schnitt zu <strong>34 %</strong> genau
+    richtig ein.
+  </p>
+
+  <div class="quiz-card__back-actions">
+    <button type="button" class="quiz-card__more-btn">Mehr auf der Fakten-Karte →</button>
+    <button type="button" class="quiz-card__next-btn">Nächste Frage →</button>
+  </div>
+</div>
+
+</body>
+</html>

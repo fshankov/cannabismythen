@@ -1,18 +1,18 @@
 /**
- * ResultScreen — Per-module result page (Stage 5 rebuild).
+ * ResultScreen — Per-module result page (Stage A rebuild).
  *
  * Top-to-bottom order:
- *   1) Header: "Ihr Ergebnis — {module title}"  (Sie form, BugHerd #13)
- *   2) Hero number: Schritte percentage in 60/80/96 px clamp, coloured by band
- *   3) Breakdown line: "X genau richtig · Y nah dran · Z daneben · W komplett daneben"
- *      (only bands with count > 0)
- *   4) Verdict block: title + body from Keystatic verdicts.{band}
- *   5) Population comparison: honest banded sentence; never claims
- *      "you know more than X %" when the user got most wrong.
- *   6) Module review (worst-first): Schritte chip per row, weakSpotIntro
- *      or strongPerformanceIntro at the top.
- *   7) Share section: refreshed ShareCard + Web Share / clipboard fallback
- *   8) CTAs: Fakten-Karten · Nächstes Modul · Quiz zurücksetzen · Alle Module
+ *   1) Header: "Dein Ergebnis — {module title}"
+ *   2) Hero card (ShareCard): Keystatic verdict title + body + user score
+ *      sentence + population reference sentence + share button.
+ *      Band-tinted background.
+ *   3) Module review (worst-first): per-myth answer/science pills +
+ *      "Zur Frage" link. weakSpotIntro / strongPerformanceIntro intro.
+ *   4) Action stack: Fakten-Karten · Nächstes Modul · Daten-Explorer ·
+ *      Meine Interessen · Quiz zurücksetzen · Alle Module.
+ *
+ * Dropped in Stage A: medal/emoji + big-% hero, breakdown line, per-myth
+ * "Zur Karte →" link. Sie → Du sweep on touched strings.
  */
 
 import { useEffect, useMemo, useRef } from "react";
@@ -44,64 +44,29 @@ interface ResultScreenProps {
   shareCopy: QuizShareCopyEntry;
   onRestart: () => void;
   onJumpToQuestion: (idx: number) => void;
-  onShowFactsheet: (myth: QuizMyth) => void;
 }
 
 /** Stage 5 — fallback verdict copy used when a Keystatic cell is empty.
- *  These are intentionally generic; Keystatic copy should always win. */
+ *  These are intentionally generic; Keystatic copy should always win.
+ *  Stage A (2026-05-16) — Sie → Du flip on touched fallbacks. */
 const VERDICT_FALLBACK: Record<ScoreBand, { title: string; body: string }> = {
   profi: {
     title: "Mythen-Profi",
-    body: "Sie erkennen die Cannabis-Mythen klar als das, was sie sind — Halbwahrheiten oder Mythen.",
+    body: "Du erkennst die Cannabis-Mythen klar als das, was sie sind — Halbwahrheiten oder Mythen.",
   },
   guterweg: {
     title: "Auf dem richtigen Weg",
-    body: "Bei den meisten Aussagen liegen Sie richtig. Ein paar Details lohnen einen zweiten Blick.",
+    body: "Bei den meisten Aussagen liegst du richtig. Ein paar Details lohnen einen zweiten Blick.",
   },
   gehtnoch: {
     title: "Da geht noch was",
-    body: "Manche Mythen sind hartnäckig. In den Fakten-Karten finden Sie die Forschung dahinter.",
+    body: "Manche Mythen sind hartnäckig. In den Fakten-Karten findest du die Forschung dahinter.",
   },
   erwischt: {
-    title: "Mythen haben Sie erwischt",
+    title: "Mythen haben dich erwischt",
     body: "Die Forschung sagt häufig etwas anderes als die Alltagserzählung. Zeit für eine Tour durch die Fakten-Karten.",
   },
 };
-
-/** BugHerd #29 + #38 + #39 — canonical population framing (2026-05-07).
- *  Replaces the previous banded user-vs-population comparison with a
- *  factual statement about the population's average score for the module:
- *  "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen
- *  Punkten erreicht ({pct} %)."
- *
- *  Three-tier copy resolution:
- *    1. per-module Keystatic override (`shareCopy[band]`)
- *    2. global default singleton (merged into `shareCopy` by the Astro page)
- *    3. hardcoded fallback below (final defence so layout never breaks)
- *
- *  Placeholder semantics (changed in 2026-05-07 session):
- *    - {x}    → population's average absolute points for THIS module (int)
- *    - {z}    → number of myths in THIS module (int)
- *    - {pct}  → population's average percentage for THIS module (int, 0–100)
- *  Note: {pct} previously meant the user's percentile; legacy per-module
- *  overrides in `.mdoc` may need editorial refresh (flagged in
- *  internalNotes for ISD review).
- */
-function bandedPopulationLine(
-  band: ScoreBand,
-  populationStats: PopulationStats,
-  shareCopy: QuizShareCopyEntry
-): string {
-  const override = (shareCopy[band] ?? "").trim();
-  const usable =
-    override && !/^PLACEHOLDER\b/i.test(override)
-      ? override
-      : HARDCODED_FALLBACK[band];
-  return usable
-    .replace(/\{x\}/g, String(populationStats.absolutePoints))
-    .replace(/\{z\}/g, String(populationStats.questionCount))
-    .replace(/\{pct\}/g, String(populationStats.percent));
-}
 
 interface PopulationStats {
   /** Population's average absolute points for the module, rounded
@@ -129,24 +94,6 @@ function computePopulationStats(myths: QuizMyth[]): PopulationStats {
     percent: Math.round(sumPct / myths.length),
   };
 }
-
-/** Final-defence fallback in case both the per-module override AND the
- *  global singleton are empty. CaRM IS a methodologically representative
- *  German sample (n=2.097, weighted by sex/age/education), but the word
- *  "repräsentativ" is dropped from user-visible copy per editorial ruling
- *  2026-05-06; the data framing remains accurate. All four bands now
- *  share the canonical sentence per the 2026-05-07 session — banded
- *  differentiation moves to the verdict block (Keystatic verdicts.{band}). */
-const HARDCODED_FALLBACK: Record<ScoreBand, string> = {
-  profi:
-    "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).",
-  guterweg:
-    "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).",
-  gehtnoch:
-    "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).",
-  erwischt:
-    "Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).",
-};
 
 /** Schritte → German label, no period (matches the back-of-card verdict). */
 function schritteLabel(s: 0 | 1 | 2 | 3): string {
@@ -176,7 +123,6 @@ export default function ResultScreen({
   shareCopy,
   onRestart,
   onJumpToQuestion,
-  onShowFactsheet,
 }: ResultScreenProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
@@ -243,25 +189,26 @@ export default function ResultScreen({
   const hasWeakSpot = reviewRows.some((r) => r.schritte >= 2);
   const reviewIntro = hasWeakSpot
     ? realCopy(intros.weakSpotIntro) ||
-      "Hier sind Ihre Antworten — sortiert nach Abstand zur Wissenschaft."
+      "Hier sind deine Antworten — sortiert nach Abstand zur Wissenschaft."
     : realCopy(intros.strongPerformanceIntro) ||
-      "Sie lagen bei jeder Aussage nah dran. Hier zur Erinnerung der Stand der Forschung.";
-
-  // ── Breakdown line (only bands with count > 0).
-  const breakdownParts: string[] = [];
-  if (result.breakdown.exact > 0)
-    breakdownParts.push(`${result.breakdown.exact} ${t("schritte.exact").toLowerCase()}`);
-  if (result.breakdown.near > 0)
-    breakdownParts.push(`${result.breakdown.near} ${t("schritte.near").toLowerCase()}`);
-  if (result.breakdown.off > 0)
-    breakdownParts.push(`${result.breakdown.off} ${t("schritte.off").toLowerCase()}`);
-  if (result.breakdown.far > 0)
-    breakdownParts.push(`${result.breakdown.far} ${t("schritte.far").toLowerCase()}`);
-  const breakdownLine = breakdownParts.join(" · ");
+      "Du lagst bei jeder Aussage nah dran. Hier zur Erinnerung der Stand der Forschung.";
 
   // Population reference for the canonical sentence (BugHerd #29/#38/#39).
   // Computed from each myth's populationCorrectPct; rounded per #31.
   const populationStats = computePopulationStats(theme.myths);
+
+  // Stage A (2026-05-16) — Pew minimalism hero. The two sentences are
+  // composed inline because they're structural, not banded copy. The
+  // share-copy.yaml singleton is kept in sync for future re-engagement
+  // (see editorial/quiz-overhaul/stage-a/spec.md §4).
+  const userScoreLine =
+    `Du hast ${result.breakdown.exact} von ${result.totalQuestions} ` +
+    `Aussagen genau richtig eingeordnet (${result.moduleScore} %).`;
+  const populationLine =
+    `Erwachsene (18–70) in einer Bevölkerungsbefragung in Deutschland ` +
+    `ordneten im Schnitt ${populationStats.absolutePoints} von ` +
+    `${populationStats.questionCount} Aussagen genau richtig ein ` +
+    `(${populationStats.percent} %).`;
 
   return (
     <section
@@ -277,20 +224,78 @@ export default function ResultScreen({
         </h1>
       </header>
 
-      {/* Remediation 3 — single hero card. Combines the percentage,
-          band verdict (Keystatic), banded population sentence, and the
-          share button. Replaces the old "verdict box + green ShareCard"
-          duplication. The card is colored by band so the user reads
-          their result at a glance. */}
+      {/* Stage A (2026-05-16) — Pew minimalism hero. Verdict title +
+          body (Keystatic) carry the warmth; the two new lines below
+          carry the numbers. The medal/big-% pair was dropped. The
+          card is still tinted by band so the result reads at a glance. */}
       <ShareCard
         result={result}
         quizUrl={quizUrl}
         moduleTitle={t(theme.titleKey)}
         verdictTitle={verdictTitle}
         verdictBody={verdictBody}
-        breakdownLine={breakdownLine}
-        populationLine={bandedPopulationLine(band, populationStats, shareCopy)}
+        userScoreLine={userScoreLine}
+        populationLine={populationLine}
       />
+
+      {/* Stage C (2026-05-17) — compact "Du vs. Ø Bevölkerung" stats
+          grid. Pulls the headline numbers up so they read at a glance
+          before the user scrolls into the per-question retrospective.
+          CaRM only exposes the population's "% genau richtig" per myth,
+          not a 4-Schritte breakdown, so the grid is intentionally two
+          rows (Genau-richtig count + overall share %). The full
+          Schritte band breakdown for the user lives inside the
+          retrospective table below. */}
+      <table
+        className="quiz-result__summary"
+        aria-label={t("ui.resultSummary.title")}
+      >
+        <thead>
+          <tr>
+            <th scope="col" className="quiz-result__summary-rowlabel">
+              {t("ui.resultSummary.title")}
+            </th>
+            <th scope="col">{t("ui.resultSummary.colYou")}</th>
+            <th scope="col">{t("ui.resultSummary.colPopulation")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row" className="quiz-result__summary-rowlabel">
+              {t("ui.resultSummary.rowExact")}
+            </th>
+            <td className="quiz-result__summary-num">
+              {result.breakdown.exact}
+              <span className="quiz-result__summary-denom">
+                {" / "}
+                {result.totalQuestions}
+              </span>
+            </td>
+            <td className="quiz-result__summary-num quiz-result__summary-num--muted">
+              {populationStats.absolutePoints}
+              <span className="quiz-result__summary-denom">
+                {" / "}
+                {populationStats.questionCount}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row" className="quiz-result__summary-rowlabel">
+              {t("ui.resultSummary.rowShare")}
+            </th>
+            <td
+              className={`quiz-result__summary-num quiz-result__summary-num--band quiz-result__summary-num--band-${band}`}
+            >
+              {result.moduleScore}
+              <span className="quiz-result__summary-denom"> %</span>
+            </td>
+            <td className="quiz-result__summary-num quiz-result__summary-num--muted">
+              {populationStats.percent}
+              <span className="quiz-result__summary-denom"> %</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       {/* Module review, worst-first */}
       <div className="quiz-result__retrospective">
@@ -298,79 +303,75 @@ export default function ResultScreen({
           {t("ui.retrospectiveTitle")}
         </h2>
         <p className="quiz-result__retrospective-intro">{reviewIntro}</p>
-        <ol className="quiz-result__list" role="list">
-          {reviewRows.map((row) => {
-            const { myth, answer, schritte: s, visibleIdx } = row;
-            const statement =
-              quizTextMap[myth.id]?.statement || t(myth.statementKey);
-            const bandModifier = ["exact", "near", "off", "far"][s];
-            return (
-              <li
-                key={myth.id}
-                className={`quiz-result__item quiz-result__item--${bandModifier}`}
-              >
-                <div className="quiz-result__item-row">
-                  {/* BugHerd #42: chip showing the schritte number ("0..3")
-                      and the colored left frame on the row both removed —
-                      the verdict colour on the actual answer/science chips
-                      below already communicates the band; the extra step-
-                      count chip felt arithmetic. Kept invisibly for screen
-                      readers. */}
-                  <span
-                    className="sr-only"
-                    aria-label={schritteLabel(s)}
-                  >
-                    {schritteLabel(s)}
-                  </span>
-                  <p className="quiz-result__item-statement">{statement}</p>
-                </div>
-                {/* BugHerd #24 + #40 — line order swapped (Wissenschaftlich
-                    first, then Ihre Antwort) per the 2026-05-07 ruling so the
-                    user reads "truth, then their answer" rather than the
-                    other way around. CSS adds a blank-line spacer between
-                    the two pairs (.quiz-result__item-meta gap). */}
-                <div className="quiz-result__item-meta">
-                  <span className="quiz-result__item-pair">
-                    <span className="quiz-result__item-meta-label">
-                      Wissenschaftlich:
-                    </span>{" "}
-                    <VerdictPill
-                      verdict={myth.correctClassification}
-                      label={t(`classification.${myth.correctClassification}`)}
-                      size="sm"
-                    />
-                  </span>
-                  <span className="quiz-result__item-pair">
-                    <span className="quiz-result__item-meta-label">
-                      {t("ui.yourAnswerLabel")}:
-                    </span>{" "}
+        {/* Stage B (2026-05-16) — 4-column comparison table replaces the
+            Stage A retrospective <ol>. The new column 4 (Bevölkerung Ø)
+            shows each myth's populationCorrectPct so the user can see how
+            their answers stack up against the public average. Mobile
+            collapse is via display:block + data-label::before — the
+            <table> stays semantic for screen readers. */}
+        <table className="quiz-result__table">
+          <thead>
+            <tr>
+              <th scope="col">{t("ui.resultTable.statement")}</th>
+              <th scope="col">{t("ui.resultTable.yourAnswer")}</th>
+              <th scope="col">{t("ui.resultTable.scientific")}</th>
+              <th scope="col" className="quiz-result__table-cell--num">
+                {t("ui.resultTable.populationAvg")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {reviewRows.map((row) => {
+              const { myth, answer, schritte: s, visibleIdx } = row;
+              const statement =
+                quizTextMap[myth.id]?.statement || t(myth.statementKey);
+              const bandModifier = ["exact", "near", "off", "far"][s];
+              return (
+                <tr
+                  key={myth.id}
+                  className={`quiz-result__row quiz-result__row--${bandModifier}`}
+                >
+                  <td>
+                    <span className="sr-only">{schritteLabel(s)}</span>
+                    <span className="quiz-result__table-statement">
+                      {statement}
+                    </span>
+                    <button
+                      type="button"
+                      className="quiz-result__jump"
+                      onClick={() => onJumpToQuestion(visibleIdx)}
+                    >
+                      {t("ui.resultTable.jump")}
+                    </button>
+                  </td>
+                  <td data-label={t("ui.resultTable.yourAnswer")}>
                     <VerdictPill
                       verdict={answer.chosenClassification}
                       label={t(`classification.${answer.chosenClassification}`)}
                       size="sm"
                     />
-                  </span>
-                </div>
-                <div className="quiz-result__item-actions">
-                  <button
-                    type="button"
-                    className="quiz-result__item-link"
-                    onClick={() => onJumpToQuestion(visibleIdx)}
+                  </td>
+                  <td data-label={t("ui.resultTable.scientific")}>
+                    <VerdictPill
+                      verdict={myth.correctClassification}
+                      label={t(`classification.${myth.correctClassification}`)}
+                      size="sm"
+                    />
+                  </td>
+                  <td
+                    data-label={t("ui.resultTable.populationAvg")}
+                    className="quiz-result__table-cell--num"
                   >
-                    Zur Frage
-                  </button>
-                  <button
-                    type="button"
-                    className="quiz-result__item-link"
-                    onClick={() => onShowFactsheet(myth)}
-                  >
-                    Zur Karte →
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
+                    {myth.populationCorrectPct} %
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <p className="quiz-result__table-caption">
+          {t("ui.resultTable.populationAvgCaption")}
+        </p>
       </div>
 
       {/* Action buttons — exactly two primary actions in matching size,

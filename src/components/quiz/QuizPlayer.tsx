@@ -43,8 +43,6 @@ import {
   computePercentile,
   moduleScore as computeModuleScore,
   pickSchnellcheckMyths,
-  pointsForSchritte,
-  schritte,
   scoreBand,
 } from "./quizData";
 import { t } from "./i18n";
@@ -405,7 +403,6 @@ function QuizPlayerInner({
 
   const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [lastScoreDelta, setLastScoreDelta] = useState(0);
   const [restoredNotice, setRestoredNotice] = useState<boolean>(() => {
     const saved = loadProgress(quizSlug);
     return Boolean(saved && Object.keys(saved.answers).length > 0);
@@ -531,14 +528,6 @@ function QuizPlayerInner({
   const answeredCount = Object.keys(answers).length;
   const allAnswered = answeredCount === totalQuestions;
 
-  /** Live module score expressed as the Schritte-based percentage. Equal
-   *  to the final `moduleScore` once every question has been answered;
-   *  scales linearly with answered questions before that. The header
-   *  pill renders this as a percent. */
-  const totalScore = useMemo(() => {
-    return computeModuleScore(Object.values(answers), theme.myths);
-  }, [answers, theme.myths]);
-
   const result: QuizResult | null = useMemo(() => {
     if (!allAnswered) return null;
     const answersList = Object.values(answers);
@@ -591,12 +580,6 @@ function QuizPlayerInner({
       if (!myth || answers[mythId]) return;
 
       const isCorrect = chosen === myth.correctClassification;
-      // Score delta = points awarded for THIS answer, on the same 0–100
-      // scale as the running total. Drives the brief flash animation.
-      const points = pointsForSchritte(
-        schritte(chosen, myth.correctClassification)
-      );
-      setLastScoreDelta(Math.round(points * 100));
 
       const newAnswer: CardAnswer = {
         mythId,
@@ -645,7 +628,6 @@ function QuizPlayerInner({
 
   const handleRestart = useCallback(() => {
     setAnswers({});
-    setLastScoreDelta(0);
     setCurrentIndex(0);
     setFinished(false);
     setRestoredNotice(false);
@@ -830,15 +812,13 @@ function QuizPlayerInner({
   ]);
 
   // Quiet single-line header bar — module title + thin progress fill +
-  // small score chip + "X von Y beantwortet" label. Restored from the
-  // briefly-tried Stage 4 pill row (rolled back on user feedback).
+  // "Aussage X von Y" counter. Stage A (2026-05-16) dropped the
+  // live-score pill (Pew minimalism).
   const progressBarContent = (
     <ProgressBar
       quizTitle={t(theme.titleKey)}
       answered={answeredCount}
       total={totalQuestions}
-      score={totalScore}
-      lastScoreDelta={lastScoreDelta}
     />
   );
 
@@ -897,25 +877,13 @@ function QuizPlayerInner({
               The persistence notice + reset link below remains the only
               footer chrome. */}
 
-          {/* BugHerd #34 (Session 3a, 2026-05-07): the standalone
-              finish-row is now the canonical "Ergebnis ansehen →" CTA
-              whenever every question is answered. The in-card back-face
-              CTA is suppressed on the LAST question (see QuizCard.tsx
-              `!isLastQuestion`) so they no longer duplicate. The
-              standalone row stays visible on every card position
-              (mid-deck and last alike) so the user always has a
-              path to the result. */}
-          {allAnswered && !showResults && (
-            <div className="quiz-player__finish-row">
-              <button
-                type="button"
-                className="quiz-card__next-btn"
-                onClick={() => setFinished(true)}
-              >
-                {t("ui.finishQuiz")} →
-              </button>
-            </div>
-          )}
+          {/* Stage C (2026-05-17): the BugHerd #34 standalone finish-row
+              was removed. The last card's back face now hosts the
+              "Ergebnis ansehen →" CTA in the same position earlier cards
+              use for "Nächste Frage →" — see QuizCard.tsx. Users
+              re-answering an earlier question still reach the result by
+              advancing through the deck the normal way (handleNext
+              routes to setFinished on the last index). */}
 
           <div className="quiz-player__notice" role="note">
             <span aria-hidden="true">🔒</span>{" "}
@@ -952,7 +920,6 @@ function QuizPlayerInner({
             setFinished(false);
             setCurrentIndex(idx);
           }}
-          onShowFactsheet={handleShowFactsheet}
         />
       )}
 
