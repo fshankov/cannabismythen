@@ -151,7 +151,9 @@
 .hero-frage__stage {
   position: relative;
   width: 100%;
-  height: clamp(20rem, 36vw, 24rem);
+  /* Stage holds a portrait card + the ±28 px translateY of the
+     back-cards, so it needs more height than a landscape stage. */
+  height: clamp(26rem, 42vw, 32rem);
   perspective: 1200px;
   /* Allow card transforms to escape the stage box horizontally. */
   overflow: visible;
@@ -160,44 +162,48 @@
 /* ── A single card ──────────────────────────────────────────── */
 
 .hero-frage__card {
-  --card-w: clamp(20rem, 28vw, 24rem);
-  --card-h: clamp(18rem, 26vw, 22rem);
   --tint:        var(--classification-keine-aussage);
   --tint-bg:     var(--classification-keine-aussage-bg);
 
   position: absolute;
   top: 50%;
   left: 50%;
-  width: var(--card-w);
-  height: var(--card-h);
-  margin: calc(var(--card-h) / -2) 0 0 calc(var(--card-w) / -2);
+  /* Width narrower than the old landscape (was 20-24 rem); height
+     derives from the canonical --card-aspect-ratio so the hero
+     fan re-proportions with every other home-page card if the
+     token changes. */
+  width: clamp(14rem, 22vw, 18rem);
+  aspect-ratio: var(--card-aspect-ratio);
 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
   gap: 0.45rem;
-  padding: 1.4rem 1.5rem 1.25rem;
+  padding: var(--card-padding);
 
   font-family: inherit;
   color: inherit;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: var(--radius-lg);
+  border-radius: var(--card-radius);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
   cursor: pointer;
   appearance: none;
 
-  /* Fan position is derived from --card-offset / --card-abs / --card-sign /
-     --card-z provided by the React component. The math here lets the same
-     CSS work for 3, 5, or 7 cards. */
+  /* Centering + fan position. translate(-50%, -50%) lands the card
+     dead-centre relative to top:50%/left:50% so we don't need a
+     hardcoded height-aware negative margin. Fan offsets compose
+     after (leftmost), so rotations / scales pivot around the card's
+     own centre. */
   transform:
-    translateX(calc(var(--card-sign) * (52px * var(--card-abs))))
+    translateX(calc(var(--card-sign) * (40px * var(--card-abs))))
     translateY(calc(14px * var(--card-abs)))
     rotate(calc(var(--card-sign) * (6deg * var(--card-abs))))
-    scale(calc(1 - 0.06 * var(--card-abs)));
+    scale(calc(1 - 0.06 * var(--card-abs)))
+    translate(-50%, -50%);
 
   opacity: calc(1 - 0.24 * var(--card-abs));
   z-index: var(--card-z, 1);
@@ -330,15 +336,19 @@
 
 @media (max-width: 768px) {
   .hero-frage__stage {
-    height: clamp(22rem, 80vw, 28rem);
+    /* Mobile portrait card width ≈ 70 % vw, height = width × 1.4 + a
+       little stage padding so the card has breathing room above/below. */
+    height: clamp(24rem, calc(75vw * 1.4 + 2rem), 30rem);
     perspective: none;
   }
 
   /* Show only the front card on mobile — others are accessible via swipe. */
   .hero-frage__card {
-    --card-w: min(22rem, 88vw);
-    --card-h: clamp(20rem, 78vw, 26rem);
-    transform: translateX(0) translateY(0) rotate(0) scale(1);
+    width: min(16rem, 70vw);
+    /* aspect-ratio + the desktop centering transform still apply; we
+       only zero out the fan offsets so the front card sits dead
+       centre instead of being pushed by translateX/Y. */
+    transform: translate(-50%, -50%);
     opacity: 1;
     pointer-events: none;
     visibility: hidden;
