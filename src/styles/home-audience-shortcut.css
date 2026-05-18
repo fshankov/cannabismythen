@@ -138,9 +138,11 @@
   outline: none;
 }
 
-.audience-card__emoji {
-  font-size: 1.875rem;
-  line-height: 1;
+.audience-card__icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: var(--audience-color);
 }
 
 .audience-card__label {

@@ -1,5 +1,10 @@
 ---
 import "../../styles/home-audience-shortcut.css";
+import {
+  AUDIENCE_ICONS_BY_FAQ_ID,
+  AUDIENCE_COLOR_VAR_BY_FAQ_ID,
+  type FaqAudienceId,
+} from "@lib/icons";
 
 export interface AudienceCard {
   audienceId: string;
@@ -7,8 +12,6 @@ export interface AudienceCard {
   targetUrl: string;
   /** Merged from faq/audiences.yaml at the call site. */
   cardLabel: string;
-  emoji: string;
-  accentColor: string;
 }
 
 export interface Props {
@@ -32,20 +35,27 @@ const { eyebrow, headline, lede, cards } = Astro.props;
     </div>
 
     <ol class="audience-shortcut__grid">
-      {cards.map((card) => (
-        <li class="audience-shortcut__item">
-          <a
-            class="audience-card"
-            href={card.targetUrl}
-            style={`--audience-color: ${card.accentColor}`}
-          >
-            <span class="audience-card__emoji" aria-hidden="true">{card.emoji}</span>
-            <span class="audience-card__label">{card.cardLabel}</span>
-            <span class="audience-card__rec">{card.recommendation}</span>
-            <span class="audience-card__arrow" aria-hidden="true">→</span>
-          </a>
-        </li>
-      ))}
+      {cards.map((card) => {
+        const audienceId = card.audienceId as FaqAudienceId;
+        const Icon = AUDIENCE_ICONS_BY_FAQ_ID[audienceId];
+        const accentVar = AUDIENCE_COLOR_VAR_BY_FAQ_ID[audienceId];
+        return (
+          <li class="audience-shortcut__item">
+            <a
+              class="audience-card"
+              href={card.targetUrl}
+              style={`--audience-color: var(${accentVar})`}
+            >
+              {Icon && (
+                <Icon size={28} className="audience-card__icon" aria-hidden="true" />
+              )}
+              <span class="audience-card__label">{card.cardLabel}</span>
+              <span class="audience-card__rec">{card.recommendation}</span>
+              <span class="audience-card__arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        );
+      })}
     </ol>
   </div>
 </section>

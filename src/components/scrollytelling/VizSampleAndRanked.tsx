@@ -396,7 +396,7 @@ function ExampleMythStrips({
               onClick={() => setActiveGroup(g)}
               className={`viz-sr__example-pick ${isActive ? 'viz-sr__example-pick--active' : ''}`}
             >
-              <User
+              <Icon
                 size="1em"
                 strokeWidth={2}
                 color={GROUP_COLOR[g]}

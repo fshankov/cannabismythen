@@ -92,16 +92,13 @@ const audienceCards: AudienceCard[] = (audienceShortcutData?.cards ?? [])
         recommendation: card.recommendation,
         targetUrl: card.targetUrl,
         cardLabel: meta.cardLabel,
-        emoji: meta.emoji,
-        accentColor: meta.accentColor,
       },
     ];
   });
 
 const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
-  emoji: a.emoji,
+  audienceId: a.id,
   cardLabel: a.cardLabel,
-  accentColor: a.accentColor,
 }));
 ---
 
