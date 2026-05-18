@@ -1330,6 +1330,13 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   overflow: hidden;
+  /* iOS momentum-scroll hint (docs/ai-pipeline/known-quirks.md
+     quirk #7). The property is a no-op on iOS 13+ where momentum is
+     default, but flagged as the canonical recipe; the actual long-
+     statement scroll issue today is handled by `-webkit-line-clamp`
+     truncation + the "Mehr" button, not by inner scroll. Kept for
+     defensive compatibility with older WebView. */
+  -webkit-overflow-scrolling: touch;
   padding: var(--space-lg);
   box-sizing: border-box;
 }
