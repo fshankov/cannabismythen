@@ -14,10 +14,10 @@
 
 import type { ReactNode } from 'react';
 import {
-  Search, Eye, ShieldCheck, Sparkles,
-  Users, Baby, Cannabis, GraduationCap, UsersRound,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+  SOURCE_METRIC_ICONS,
+  AUDIENCE_ICONS_BY_GROUP,
+  type IconComponent,
+} from '../../../lib/icons';
 import type {
   AppState,
   DashboardDefinitions,
@@ -40,12 +40,7 @@ const METRIC_LABELS: Record<SourceMetricType, string> = {
   prevention: 'Prävention',
 };
 
-const METRIC_ICONS: Record<SourceMetricType, LucideIcon> = {
-  search: Search,
-  perception: Eye,
-  trust: ShieldCheck,
-  prevention: Sparkles,
-};
+const METRIC_ICONS: Record<SourceMetricType, IconComponent> = SOURCE_METRIC_ICONS;
 
 const GROUP_LABELS: Record<SourceGroupId, string> = {
   adults: 'Volljährige (18–70)',
@@ -55,13 +50,7 @@ const GROUP_LABELS: Record<SourceGroupId, string> = {
   parents: 'Eltern',
 };
 
-const GROUP_ICONS: Record<SourceGroupId, LucideIcon> = {
-  adults: Users,
-  minors: Baby,
-  consumers: Cannabis,
-  young_adults: GraduationCap,
-  parents: UsersRound,
-};
+const GROUP_ICONS: Record<SourceGroupId, IconComponent> = AUDIENCE_ICONS_BY_GROUP;
 
 interface Props {
   state: AppState;

@@ -1,9 +1,23 @@
 ---
+/**
+ * AudienceHubGrid — Meine Interessen hub.
+ *
+ * Visually mirrors the Quiz deck-card pattern (`/quiz/` index): each
+ * audience is a poker-card-proportioned tile with a coloured top band,
+ * a deterministic idle-tilt, and a fanned "deck" behind it whose depth
+ * reflects the question count. The icon comes from the central icon
+ * registry (`@/lib/icons` → AUDIENCE_ICONS_BY_FAQ_ID); the top-band uses
+ * each audience's CSS accent token. Per Fedor 2026-05-15, the icon
+ * itself renders in neutral text colour — colour wayfinding is carried
+ * by the band, not the SVG stroke.
+ */
+
 import type { FaqAudienceMeta, FaqQuestion } from "@lib/faq";
 import {
   AUDIENCE_ICONS_BY_FAQ_ID,
   AUDIENCE_COLOR_VAR_BY_FAQ_ID,
   type FaqAudienceId,
+  type IconComponent,
 } from "@lib/icons";
 
 interface AudienceHubItem {
@@ -17,42 +31,94 @@ interface Props {
 }
 
 const { items } = Astro.props;
+
+/**
+ * Deterministic tilt — same hash function as `/quiz/index.astro`, so
+ * the hub feels like a hand-laid spread rather than an evenly-aligned
+ * grid. Range: roughly −1.6° to +1.6°.
+ */
+function hashCode(input: string): number {
+  let h = 0;
+  for (let i = 0; i < input.length; i++) {
+    h = (((h << 5) - h) + input.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+/** Deck-thickness ladder (mirrors quiz tile rule): ≤6 → 1, 7–9 → 2, ≥10 → 3. */
+function deckDepthForCount(count: number): number {
+  return count >= 10 ? 3 : count >= 7 ? 2 : 1;
+}
+
+interface ResolvedTile {
+  audience: FaqAudienceMeta;
+  count: number;
+  Icon: IconComponent;
+  accentVar: string;
+  deckDepth: number;
+  tilt: string;
+}
+
+const tiles: ResolvedTile[] = items.map((item) => {
+  const id = item.audience.id as FaqAudienceId;
+  const accentToken = AUDIENCE_COLOR_VAR_BY_FAQ_ID[id];
+  return {
+    audience: item.audience,
+    count: item.count,
+    Icon: AUDIENCE_ICONS_BY_FAQ_ID[id],
+    accentVar: `var(${accentToken})`,
+    deckDepth: deckDepthForCount(item.count),
+    tilt: (((hashCode(id) % 1000) / 1000) * 3.2 - 1.6).toFixed(2),
+  };
+});
 ---
 
-<div class="faq-hub-grid">
-  {items.map((item) => {
-    const teaser = item.topQuestion?.leadAnswer
-      ? item.topQuestion.leadAnswer.length > 110
-        ? item.topQuestion.leadAnswer.slice(0, 107).replace(/\s+\S*$/, "") + "…"
-        : item.topQuestion.leadAnswer
-      : "";
-    const audienceId = item.audience.id as FaqAudienceId;
-    const Icon = AUDIENCE_ICONS_BY_FAQ_ID[audienceId];
-    const accentVar = AUDIENCE_COLOR_VAR_BY_FAQ_ID[audienceId];
-    return (
-      <a
-        class="faq-hub-card"
-        href={`/meine-interessen/${item.audience.id}/`}
-        style={`--audience-accent: var(${accentVar})`}
-      >
-        <div class="faq-hub-card__top">
-          <Icon size={28} className="faq-hub-card__icon" aria-hidden="true" />
-          <h2 class="faq-hub-card__title">{item.audience.cardLabel}</h2>
-        </div>
-        <p class="faq-hub-card__count">{item.count} Fragen</p>
-        {item.audience.description && (
-          <p class="faq-hub-card__description">{item.audience.description}</p>
-        )}
-        {item.topQuestion && (
-          <div class="faq-hub-card__top-question">
-            <p class="faq-hub-card__top-q">{item.topQuestion.questionLong}</p>
-            {teaser && <p class="faq-hub-card__top-teaser">{teaser}</p>}
-          </div>
-        )}
-        <span class="faq-hub-card__cta" aria-hidden="true">
-          Fragen ansehen →
-        </span>
-      </a>
-    );
-  })}
-</div>
+<section class="quiz-selection mi-hub" aria-label="Audiences">
+  {tiles.map((tile) => (
+    <a
+      href={`/meine-interessen/${tile.audience.id}/`}
+      class="quiz-select-card mi-hub-card"
+      data-deck={tile.deckDepth}
+      style={`--card-tilt: ${tile.tilt}deg; --tile-strip: ${tile.accentVar}; --tile-label: ${tile.accentVar};`}
+    >
+      <span class="quiz-select-card__band" aria-hidden="true"></span>
+      <span class="quiz-select-card__icon mi-hub-card__icon" aria-hidden="true">
+        <tile.Icon size={44} strokeWidth={1.75} />
+      </span>
+      <h2 class="quiz-select-card__title">{tile.audience.cardLabel}</h2>
+      <span class="quiz-select-card__count">
+        {tile.count} {tile.count === 1 ? "Frage" : "Fragen"}
+      </span>
+      {tile.audience.description && (
+        <p class="mi-hub-card__description">{tile.audience.description}</p>
+      )}
+    </a>
+  ))}
+</section>
+
+<style>
+  /* Audience-card overrides on top of .quiz-select-card.
+     The base structural rules (aspect-ratio, deck pseudos, idle-tilt,
+     hover-lift, mobile snap-carousel) come from quiz.css, imported by
+     the parent page. The rules below only specialise where Meine
+     Interessen wants to differ from quiz tiles. */
+
+  /* Per Fedor 2026-05-15: audience icons render in plain text colour,
+     not in --tile-label. The coloured top band carries the wayfinding. */
+  .mi-hub-card__icon {
+    color: var(--color-text);
+  }
+
+  /* Optional one-line description, sits under the count pill. */
+  .mi-hub-card__description {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin: var(--space-sm) 0 0;
+    line-height: 1.45;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
