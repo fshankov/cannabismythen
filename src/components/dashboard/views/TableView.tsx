@@ -158,13 +158,13 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth 
                     aria-label={`${t('column.hide', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
                     title={`${t('column.hide', state.lang)} — ${t(`indicator.${col.key}.short` as any, state.lang)}`}
                   >
-                    <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
+                    <EyeOff size="1em" strokeWidth={2} aria-hidden="true" />
                   </button>
                   <span
                     className="data-table__th-label"
                     onClick={() => toggleSort(col.key)}
                   >
-                    <span className="th-icon"><col.Icon size={14} strokeWidth={1.75} aria-hidden="true" /></span>{' '}
+                    <span className="th-icon"><col.Icon size="1em" strokeWidth={1.75} aria-hidden="true" /></span>{' '}
                     {t(`indicator.${col.key}.short` as any, state.lang)} {renderSortArrow(col.key)}
                   </span>
                 </th>

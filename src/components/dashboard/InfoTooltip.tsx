@@ -65,7 +65,7 @@ export default function InfoTooltip({ title, definition, scale, sampleSize }: In
           }
         }}
       >
-        <Info size={13} aria-hidden="true" />
+        <Info size="1em" aria-hidden="true" />
       </button>
 
       <div

@@ -37,8 +37,10 @@ import { t, type TranslationKey } from '../../lib/dashboard/translations';
 interface Props {
   verdict: CorrectnessClass;
   /** Pixel size of the rendered SVG. Default 14 matches the legacy
-   *  legend swatch dimensions. */
-  size?: number;
+   *  legend swatch dimensions. Accepts a number (pixels) or a CSS string
+   *  like "1em" so the glyph can scale with surrounding text
+   *  (quirk #8 — chip/label icons follow zoom). */
+  size?: number | string;
   /** Stroke width passed to the Lucide icon. */
   strokeWidth?: number;
   /** Optional className applied to the trigger button so callers can

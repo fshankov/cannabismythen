@@ -61,7 +61,7 @@ export default function FilterBar({ state, data, update, definitions, hideIndica
                   className={`indicator-tag ${state.indicator === id ? 'active' : ''}`}
                   onClick={() => update('indicator', id)}
                 >
-                  <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
+                  <Icon size="1em" strokeWidth={1.75} aria-hidden="true" />
                   {t(`indicator.${id}.short` as any, state.lang)}
                   {def && (
                     <InfoTooltip
@@ -119,8 +119,8 @@ export default function FilterBar({ state, data, update, definitions, hideIndica
               </span>
             )}
             {categoriesOpen
-              ? <ChevronUp size={14} strokeWidth={2} aria-hidden="true" />
-              : <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+              ? <ChevronUp size="1em" strokeWidth={2} aria-hidden="true" />
+              : <ChevronDown size="1em" strokeWidth={2} aria-hidden="true" />
             }
           </button>
           {categoriesOpen && (

@@ -199,7 +199,7 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
             type="button"
           >
             <User
-              size={12}
+              size="1em"
               strokeWidth={2}
               color={GROUP_COLOR[g.id]}
               aria-hidden="true"

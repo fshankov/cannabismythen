@@ -30,8 +30,10 @@ import { VerdictGlyphPaths, type VerdictColorOverride } from './verdictGlyph';
 
 interface VerdictArrowProps {
   verdict: CorrectnessClass;
-  /** Pixel size of the rendered SVG. Default 14 matches the legend swatch. */
-  size?: number;
+  /** Pixel size of the rendered SVG. Default 14 matches the legend swatch.
+   *  Accepts a number (pixels) or a CSS string like "1em" so the glyph can
+   *  scale with surrounding text (quirk #8 — chip/label icons follow zoom). */
+  size?: number | string;
   /** Stroke width in SVG user units (24×24 viewBox). Default 2. */
   strokeWidth?: number;
   /** Set to `false` if the icon is the only label for its meaning. Default `true`. */

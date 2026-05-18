@@ -607,7 +607,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                   >
                     <VerdictArrowWithInfo
                       verdict={v}
-                      size={14}
+                      size="1em"
                       strokeWidth={2.5}
                     />
                   </span>
@@ -999,7 +999,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                     aria-label={`${t('column.hide', state.lang)} — ${col.label}`}
                     title={`${t('column.hide', state.lang)} — ${col.label}`}
                   >
-                    <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
+                    <EyeOff size="1em" strokeWidth={2} aria-hidden="true" />
                   </button>
                   <div className="strips-svg-header__inner">
                     {col.emoji ? (
@@ -1103,7 +1103,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 >
                   <VerdictArrowWithInfo
                     verdict={selectedMyth.correctness_class as CorrectnessClass}
-                    size={14}
+                    size="1em"
                     strokeWidth={2.5}
                   />
                 </span>

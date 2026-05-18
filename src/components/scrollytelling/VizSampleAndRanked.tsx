@@ -162,7 +162,7 @@ export function VizSampleAndRanked({ data, mode }: Props) {
                   {Array.from({ length: g.iconCount }, (_, i) => (
                     <User
                       key={i}
-                      size={12}
+                      size="1em"
                       strokeWidth={2}
                       color={g.color}
                       style={{
@@ -381,7 +381,7 @@ function ExampleMythStrips({
               className={`viz-sr__example-pick ${isActive ? 'viz-sr__example-pick--active' : ''}`}
             >
               <User
-                size={12}
+                size="1em"
                 strokeWidth={2}
                 color={GROUP_COLOR[g]}
                 aria-hidden="true"

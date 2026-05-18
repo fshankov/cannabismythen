@@ -193,7 +193,7 @@ export default function DataPicker<T extends string>({
           {searchable && (
             <div className="carm-picker__search">
               <Search
-                size={14}
+                size="1em"
                 strokeWidth={2}
                 aria-hidden="true"
                 className="carm-picker__search-icon"

@@ -1106,7 +1106,7 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                       aria-label={`${t('column.hide', 'de')} — ${col.label}`}
                       title={`${t('column.hide', 'de')} — ${col.label}`}
                     >
-                      <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
+                      <EyeOff size="1em" strokeWidth={2} aria-hidden="true" />
                     </button>
                     <div className="strips-svg-header__inner">
                       {col.Icon ? (
