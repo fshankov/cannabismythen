@@ -5,6 +5,8 @@
    login page (#2d6a4f forest green, #f4f4f0 warm off-white).
    ═══════════════════════════════════════════════════════════════ */
 
+@import "./peek-stack.css";
+
 /* ── Design Tokens ──────────────────────────────────────────── */
 
 :root {
@@ -108,6 +110,17 @@
   --dur-flip: 600ms;
   --dur-slide: 320ms;
   --lift-md: 6px;
+
+  /* Canonical card surface — the Fakten-Karten card is the source of
+     truth for every card-shaped surface on the home page. Change one
+     value here and the hero fan, four-paths tiles, audience shortcut
+     and inner-preview decks re-proportion together. */
+  --card-aspect-ratio: 1 / 1.4;
+  --card-width-max: 280px;
+  --card-padding: var(--space-lg);
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-md);
+  --card-border-color: var(--color-border);
 }
 
 
