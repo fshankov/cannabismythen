@@ -53,7 +53,7 @@
   outline: none;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) /* --bp-sm (snapped from 600px) */ {
   .project-strip__inner {
     flex-direction: column;
     align-items: flex-start;

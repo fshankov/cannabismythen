@@ -70,7 +70,7 @@
   gap: clamp(1rem, 2.4vw, 1.75rem);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) /* --bp-md (snapped from 700px) */ {
   .four-paths__grid {
     grid-template-columns: none;
     grid-auto-flow: column;
@@ -236,7 +236,7 @@
 /* Narrow viewports: 4-pill flex wrap pushes the `.is-correct` outlined
    pill onto its own row. Switch to a 2×2 grid so the verdict tier is
    readable at any width. */
-@media (max-width: 400px) {
+@media (max-width: 400px) /* below --bp-sm — ultra-narrow Android target */ {
   .quiz-preview__pills {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

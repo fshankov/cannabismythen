@@ -1603,10 +1603,10 @@ button.pill[aria-pressed="true"] {
 }
 
 /* Mobile */
-@media (max-width: 900px) {
+@media (max-width: 1024px) /* --bp-lg */ {
   .faq-hub-grid { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-width: 599px) {
+@media (max-width: 480px) /* --bp-sm */ {
   .faq-hub-grid { grid-template-columns: 1fr; }
   .faq-question__summary {
     grid-template-columns: auto 1fr auto;
@@ -1650,7 +1650,7 @@ button.pill[aria-pressed="true"] {
 
 /* ── Responsive ─────────────────────────────────────────────── */
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md */ {
   :root {
     --space-lg: 1.25rem;
     --space-xl: 1.5rem;
@@ -1712,7 +1712,7 @@ button.pill[aria-pressed="true"] {
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 400px) /* below --bp-sm — ultra-narrow Android target */ {
   header nav {
     padding: var(--space-sm) var(--space-md);
   }
@@ -1730,7 +1730,7 @@ button.pill[aria-pressed="true"] {
   display: none;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1023px) /* --bp-lg boundary */ {
   /* On mobile the bottom mobile-tab-bar covers all site navigation, so the
      top header is redundant — hide it site-wide and reclaim the vertical space
      the fixed header would otherwise reserve at the top of <main>. */
@@ -2339,7 +2339,7 @@ button.pill[aria-pressed="true"] {
 
 /* ── Responsive: Mobile ─────────────────────────────────────── */
 
-@media (max-width: 1023px) {
+@media (max-width: 1023px) /* --bp-lg boundary */ {
   .scrollytelling__container {
     flex-direction: column;
   }
@@ -2411,7 +2411,7 @@ button.pill[aria-pressed="true"] {
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767px) /* --bp-md boundary */ {
   .scrollytelling__viz-mobile {
     height: 38vh;
     min-height: 240px;

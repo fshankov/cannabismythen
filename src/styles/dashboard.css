@@ -131,7 +131,7 @@ main:has(.carm-explorer) {
    stacks just under it. The howto-microcopy line below the toolbar is
    NOT sticky (it's documentation, not control). Background is the
    page color so content scrolls under cleanly. */
-@media (max-width: 768px) {
+@media (max-width: 768px) /* --bp-md */ {
   .carm-explorer .tabs-bar {
     position: sticky;
     top: 0;
@@ -239,7 +239,7 @@ main:has(.carm-explorer) {
 
 /* Mobile: keep the chip square (icon-only) so the tab row can still
    scroll horizontally without the chip eating tab width. */
-@media (max-width: 639px) {
+@media (max-width: 768px) /* --bp-md (snapped from 639px) */ {
   .carm-explorer .tabs-bar__rundgang {
     padding: 0 10px;
   }
@@ -1080,7 +1080,7 @@ main:has(.carm-explorer) {
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .overview-tiles {
     grid-template-columns: 1fr;
   }
@@ -1336,7 +1336,7 @@ main:has(.carm-explorer) {
 }
 
 /* Mobile: bottom sheet style */
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .factsheet-panel {
     top: auto;
     bottom: 0;
@@ -1496,7 +1496,7 @@ main:has(.carm-explorer) {
 }
 
 /* ==================== RESPONSIVE ==================== */
-@media (max-width: 1024px) {
+@media (max-width: 1024px) /* --bp-lg */ {
   .carm-explorer .tab-btn {
     padding: 10px 12px;
     font-size: 0.78rem;
@@ -1516,7 +1516,7 @@ main:has(.carm-explorer) {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   /* Ensure all pill buttons meet 44px touch target */
   .carm-explorer .indicator-tag,
   .carm-explorer .filter-cat-chip {
@@ -1603,7 +1603,7 @@ main:has(.carm-explorer) {
   font-style: italic;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) /* --bp-md (snapped from 720px) */ {
   .sources-v2-label {
     min-width: 100%;
   }
@@ -1749,7 +1749,7 @@ main:has(.carm-explorer) {
   outline-offset: 2px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .population-pill {
     font-size: 0.74rem;
     padding: 7px 12px;
@@ -2166,7 +2166,7 @@ main:has(.carm-explorer) {
   outline-offset: 2px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .strips-mode-btn {
     padding: 6px 10px;
     font-size: 0.74rem;
@@ -2262,7 +2262,7 @@ main:has(.carm-explorer) {
   white-space: nowrap;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 480px) /* --bp-sm */ {
   .strips-legend {
     font-size: 0.74rem;
     gap: 4px 10px;
@@ -2581,7 +2581,7 @@ main:has(.carm-explorer) {
   border-right: 1px dashed var(--color-border, #cbd5e1);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .strips-svg-header--hidden__label {
     /* Mobile: shorter strip means less rotated-label room. */
     margin-top: 18px;
@@ -2890,7 +2890,7 @@ main:has(.carm-explorer) {
   color: white;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .strips-picker__caption {
     font-size: 0.74rem;
   }
@@ -3003,7 +3003,7 @@ main:has(.carm-explorer) {
   color: var(--color-accent, #2d6a4f);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .strips-pill-bar__label {
     font-size: 0.74rem;
   }
@@ -3060,7 +3060,7 @@ main:has(.carm-explorer) {
   outline-offset: 2px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .strips-cat-pill {
     font-size: 0.7rem;
     padding: 4px 10px;
@@ -3208,7 +3208,7 @@ main:has(.carm-explorer) {
 
 /* Tight viewports: drop the dropdown captions on row 2 so both triggers
    still fit on one line on mobile. */
-@media (max-width: 720px) {
+@media (max-width: 768px) /* --bp-md (snapped from 720px) */ {
   .strips-controls-row--dropdowns .strips-picker__caption {
     display: none;
   }
@@ -3476,7 +3476,7 @@ main:has(.carm-explorer) {
   z-index: 50;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .strips-pivot-pill {
     width: 22px;
     min-width: 22px;
@@ -3989,7 +3989,7 @@ body.carm-modal-open {
 .carm-tour-popover.driver-popover { z-index: 100002; }
 
 /* ---------- Mobile tweaks ---------- */
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .carm-onboarding-card {
     padding: 14px 14px 14px;
     /* Slightly shorter line so headlines never collide with the X. */
@@ -4074,7 +4074,7 @@ body.carm-modal-open {
 }
 
 /* Very narrow phones (<= 380 px): tighten further to keep tap targets ≥40 px. */
-@media (max-width: 380px) {
+@media (max-width: 380px) /* below --bp-sm — ultra-narrow Android target */ {
   .carm-onboarding-card {
     padding: 12px 12px;
   }
@@ -4119,7 +4119,7 @@ body.carm-modal-open {
 }
 
 /* Desktop layout — slide-out from right or left */
-@media (min-width: 1024px) {
+@media (min-width: 1024px) /* --bp-lg */ {
   .carm-drawer {
     height: 100%;
     margin-left: auto;
@@ -4137,7 +4137,7 @@ body.carm-modal-open {
 }
 
 /* Mobile layout — bottom-sheet, ignores `side` prop */
-@media (max-width: 1023px) {
+@media (max-width: 1023px) /* --bp-lg boundary */ {
   .carm-drawer-root {
     align-items: flex-end;
   }
@@ -4154,7 +4154,7 @@ body.carm-modal-open {
 /* Modal variant — centered on desktop (≥1024px), bottom-sheet below.
    Stage 3 of the Daten-Explorer refactor used this for the OWID-style
    ExportDrawer dialog. */
-@media (min-width: 1024px) {
+@media (min-width: 1024px) /* --bp-lg */ {
   .carm-drawer-root--modal {
     align-items: center;
     justify-content: center;
@@ -4306,7 +4306,7 @@ body.carm-modal-open {
   margin-bottom: var(--space-md, 16px);
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) /* --bp-lg */ {
   .carm-sticky-toolbar {
     top: var(--carm-sticky-top-desktop);
   }
@@ -4341,7 +4341,7 @@ body.carm-modal-open {
 
 .carm-igs__desktop { display: none; }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) /* --bp-lg */ {
   .carm-igs__mobile { display: none; }
   .carm-igs__desktop {
     display: flex;
@@ -4471,7 +4471,7 @@ body.carm-modal-open {
   animation: carm-snackbar-in 180ms ease-out both;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) /* --bp-lg */ {
   .carm-snackbar {
     bottom: var(--space-xl, 32px);
   }
@@ -5056,7 +5056,7 @@ body.carm-modal-open {
   overflow-wrap: anywhere;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .carm-balken2__text {
     font-size: 0.85rem;
   }
@@ -5114,7 +5114,7 @@ body.carm-modal-open {
 .chart-area__legend--mobile { display: block; }
 .chart-area__legend--sidebar { display: none; }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) /* --bp-lg */ {
   .chart-area--with-legend {
     grid-template-columns: minmax(0, 1fr) 220px;
     grid-template-areas: 'chart legend';
@@ -5540,7 +5540,7 @@ body.carm-modal-open {
   margin-right: 4px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .carm-picker__caption {
     font-size: 0.74rem;
   }
@@ -5593,7 +5593,7 @@ body.carm-modal-open {
    distributed equally so each is ≥44px tap target. Below desktop,
    the natural flex-wrap fragmented into 3+ uneven rows; this rule
    forces a clean 2-row grouping at every viewport width below 1024. */
-@media (max-width: 1024px) {
+@media (max-width: 1024px) /* --bp-lg */ {
   .carm-toolbar-row {
     flex-wrap: wrap;
     gap: 8px;
@@ -5651,7 +5651,7 @@ body.carm-modal-open {
 /* Phone-narrow (≤640px) — make every picker chip take its own row so
    the 3 dropdowns stack vertically when the device is too narrow for
    them to fit inline. Above 640 (tablet/laptop), they share a row. */
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .carm-toolbar-row__picker {
     flex: 1 1 100%;
   }
@@ -5865,7 +5865,7 @@ body.carm-modal-open {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 480px) /* --bp-sm */ {
   /* Tight viewport: the badge can drop the "ausgewählt" suffix to fit. */
   .carm-filter-count__suffix {
     display: none;
@@ -6207,7 +6207,7 @@ body.carm-modal-open {
   color: var(--color-text, #0f172a);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 480px) /* --bp-sm */ {
   .factsheet-group-bars__row {
     grid-template-columns: minmax(90px, 42%) 1fr 40px;
     gap: 8px;
@@ -6683,21 +6683,24 @@ body.carm-modal-open {
 /* Progressive header collapse for narrow viewports — step the label
    text down in size, then hide it entirely while keeping the indicator
    icon and the InfoTooltip "ⓘ" visible (so meaning is never lost,
-   only abbreviated). The sort + hide buttons in the corners stay put. */
-@media (max-width: 1100px) {
+   only abbreviated). The sort + hide buttons in the corners stay put.
+   The 1100/960/840/720 literals below are a 4-step cascade for chart-bar
+   density — kept as-is rather than collapsed to tokens because each step
+   targets a distinct visual transition. */
+@media (max-width: 1100px) /* literal — multi-step cascade, see comment above */ {
   .carm-spannweite__header-text { font-size: 0.72rem; }
 }
-@media (max-width: 960px) {
+@media (max-width: 960px) /* literal — multi-step cascade, see comment above */ {
   .carm-spannweite__header-text { font-size: 0.66rem; }
 }
-@media (max-width: 840px) {
+@media (max-width: 840px) /* literal — multi-step cascade, see comment above */ {
   /* Hide the textual label. Indicator icon + InfoTooltip "ⓘ" remain
      so the column is still identifiable on hover/click. */
   .carm-spannweite__header-text { display: none; }
   .carm-spannweite__header-inner { gap: 0.25rem; padding: 0 18px; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 720px) /* literal — multi-step cascade, see comment above */ {
   .carm-spannweite {
     --carm-spannweite-label-col: 150px;
     --carm-spannweite-row-h: 30px;

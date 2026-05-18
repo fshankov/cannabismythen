@@ -61,7 +61,7 @@
   gap: clamp(0.875rem, 1.8vw, 1.25rem);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) /* --bp-lg (snapped from 900px) */ {
   .audience-shortcut__grid {
     grid-template-columns: none;
     grid-auto-flow: column;
