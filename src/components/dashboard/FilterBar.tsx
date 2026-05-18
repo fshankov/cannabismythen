@@ -1,12 +1,6 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import {
-  IconKenntnis,
-  IconBedeutung,
-  IconRichtigkeit,
-  IconPraevention,
-  type IconComponent,
-} from '../../lib/icons';
+import { Eye, TrendingUp, Target, Shield, ChevronDown, ChevronUp } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { AppState, CarmData, DashboardDefinitions, Indicator } from '../../lib/dashboard/types';
 import { t } from '../../lib/dashboard/translations';
 import InfoTooltip from './InfoTooltip';
@@ -24,11 +18,11 @@ interface Props {
   hideCategories?: boolean;
 }
 
-const INDICATORS: { id: Indicator; Icon: IconComponent }[] = [
-  { id: 'awareness', Icon: IconKenntnis },
-  { id: 'significance', Icon: IconBedeutung },
-  { id: 'correctness', Icon: IconRichtigkeit },
-  { id: 'prevention_significance', Icon: IconPraevention },
+const INDICATORS: { id: Indicator; Icon: LucideIcon }[] = [
+  { id: 'awareness', Icon: Eye },
+  { id: 'significance', Icon: TrendingUp },
+  { id: 'correctness', Icon: Target },
+  { id: 'prevention_significance', Icon: Shield },
 ];
 
 export default function FilterBar({ state, data, update, definitions, hideIndicators, hideGroups, hideCategories }: Props) {
@@ -67,7 +61,7 @@ export default function FilterBar({ state, data, update, definitions, hideIndica
                   className={`indicator-tag ${state.indicator === id ? 'active' : ''}`}
                   onClick={() => update('indicator', id)}
                 >
-                  <Icon size="1em" strokeWidth={1.75} aria-hidden="true" />
+                  <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
                   {t(`indicator.${id}.short` as any, state.lang)}
                   {def && (
                     <InfoTooltip
@@ -125,8 +119,8 @@ export default function FilterBar({ state, data, update, definitions, hideIndica
               </span>
             )}
             {categoriesOpen
-              ? <ChevronUp size="1em" strokeWidth={2} aria-hidden="true" />
-              : <ChevronDown size="1em" strokeWidth={2} aria-hidden="true" />
+              ? <ChevronUp size={14} strokeWidth={2} aria-hidden="true" />
+              : <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
             }
           </button>
           {categoriesOpen && (

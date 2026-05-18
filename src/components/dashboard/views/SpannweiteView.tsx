@@ -372,7 +372,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                   aria-label={azTooltip}
                   title={azTooltip}
                 >
-                  <ArrowDownAZ size="1em" strokeWidth={2} aria-hidden="true" />
+                  <ArrowDownAZ size={14} strokeWidth={2} aria-hidden="true" />
                 </button>
               </div>
             );
@@ -417,7 +417,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                   aria-label={`${t('column.hide', lang)} — ${col.fullLabel}`}
                   title={`${t('column.hide', lang)} — ${col.fullLabel}`}
                 >
-                  <EyeOff size="1em" strokeWidth={2} aria-hidden="true" />
+                  <EyeOff size={11} strokeWidth={2} aria-hidden="true" />
                 </button>
                 {/* Centered: indicator/group icon + label + inline "i"
                     InfoTooltip. The whole cluster acts as one hover
@@ -428,7 +428,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                   className="carm-spannweite__header-inner"
                   title={col.defText ? `${col.fullLabel} — ${col.defText}` : col.fullLabel}
                 >
-                  <Icon size="1em" strokeWidth={1.75} aria-hidden="true" />
+                  <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
                   <span className="carm-spannweite__header-text">{col.label}</span>
                   {col.defTitle && col.defText && (
                     <span className="carm-spannweite__info-inline">
@@ -452,9 +452,9 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                   title={colSortTooltip}
                 >
                   {isDesc ? (
-                    <ArrowDown10 size="1em" strokeWidth={2} aria-hidden="true" />
+                    <ArrowDown10 size={14} strokeWidth={2} aria-hidden="true" />
                   ) : (
-                    <ArrowDown01 size="1em" strokeWidth={2} aria-hidden="true" />
+                    <ArrowDown01 size={14} strokeWidth={2} aria-hidden="true" />
                   )}
                 </button>
               </div>

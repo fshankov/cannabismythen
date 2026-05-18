@@ -54,7 +54,7 @@
   gap: clamp(1.5rem, 3.5vw, 3rem);
 }
 
-@media (max-width: 768px) /* --bp-md */ {
+@media (max-width: 768px) {
   .numbers-strip__grid {
     grid-template-columns: 1fr 1fr;
     gap: 2rem 1.5rem;

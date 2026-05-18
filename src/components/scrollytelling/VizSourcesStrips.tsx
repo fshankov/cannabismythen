@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { User } from 'lucide-react';
 import { AUDIENCE_ICONS_BY_GROUP } from '../../lib/icons';
 import type {
   GroupId,
@@ -210,7 +211,8 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
             />
             {g.label}
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <svg

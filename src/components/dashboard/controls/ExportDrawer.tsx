@@ -231,7 +231,7 @@ export default function ExportDrawer({
             disabled={!hasChart}
             previewDataUrl={previewDataUrl}
             previewAlt={t('export.preview.label', 'de')}
-            icon={<FileImage size="1em" strokeWidth={2} aria-hidden="true" />}
+            icon={<FileImage size={20} strokeWidth={2} />}
             title={t('export.png.title', 'de')}
             desc={t('export.png.desc', 'de')}
             onClick={handlePng}
@@ -240,7 +240,7 @@ export default function ExportDrawer({
             disabled={!hasChart}
             previewDataUrl={previewDataUrl}
             previewAlt={t('export.preview.label', 'de')}
-            icon={<FileImage size="1em" strokeWidth={2} aria-hidden="true" />}
+            icon={<FileImage size={20} strokeWidth={2} />}
             title={t('export.svg.title', 'de')}
             desc={t('export.svg.desc', 'de')}
             onClick={handleSvg}
@@ -251,7 +251,7 @@ export default function ExportDrawer({
       {tab === 'data' && (
         <ul className="carm-export-list" role="list">
           <ExportRow
-            icon={<LinkIcon size="1em" strokeWidth={2} aria-hidden="true" />}
+            icon={<LinkIcon size={20} strokeWidth={2} />}
             title={
               linkCopied
                 ? t('export.link.copied', 'de')
@@ -261,18 +261,18 @@ export default function ExportDrawer({
             onClick={handleCopyLink}
             cta={
               linkCopied ? (
-                <Check size="1em" strokeWidth={2.5} aria-hidden="true" />
+                <Check size={18} strokeWidth={2.5} aria-hidden="true" />
               ) : undefined
             }
           />
           <ExportRow
-            icon={<FileText size="1em" strokeWidth={2} aria-hidden="true" />}
+            icon={<FileText size={20} strokeWidth={2} />}
             title={t('export.csv.title', 'de')}
             desc={t('export.csv.desc', 'de')}
             onClick={handleCsv}
           />
           <ExportRow
-            icon={<FileJson size="1em" strokeWidth={2} aria-hidden="true" />}
+            icon={<FileJson size={20} strokeWidth={2} />}
             title={t('export.json.title', 'de')}
             desc={t('export.json.desc', 'de')}
             onClick={handleJson}
@@ -338,7 +338,7 @@ function ExportRow({
           <span className="carm-export-row__desc">{desc}</span>
         </span>
         <span className="carm-export-row__cta" aria-hidden="true">
-          {cta ?? <Download size="1em" strokeWidth={2} aria-hidden="true" />}
+          {cta ?? <Download size={18} strokeWidth={2} />}
         </span>
       </button>
     </li>

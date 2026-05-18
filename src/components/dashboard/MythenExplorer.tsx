@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { Download, Filter } from 'lucide-react';
-import { INDICATOR_ICONS, AUDIENCE_ICONS_BY_GROUP, type IconComponent } from '../../lib/icons';
+import {
+  Download, Filter,
+  Eye, TrendingUp, Target, Shield, Globe,
+  Users, Baby, Cannabis, GraduationCap, UsersRound,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type {
   CarmData,
   AppState,
@@ -64,10 +68,24 @@ const GROUPS: GroupId[] = [
   'parents',
 ];
 
-/** Icon registry handles INDICATOR_ICONS for us; we alias here so the
- *  rest of the file reads as before. GROUP_ICONS becomes the registry's
- *  AUDIENCE_ICONS_BY_GROUP lookup. */
-const GROUP_ICONS: Record<GroupId, IconComponent> = AUDIENCE_ICONS_BY_GROUP;
+/** Icons mirror the Streifen view's INDICATOR_ICONS / GROUP_ICONS so
+ *  the same indicator/group reads identically across every dashboard
+ *  tab. */
+const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
+  awareness: Eye,
+  significance: TrendingUp,
+  correctness: Target,
+  prevention_significance: Shield,
+  population_relevance: Globe,
+};
+
+const GROUP_ICONS: Record<GroupId, LucideIcon> = {
+  adults: Users,
+  minors: Baby,
+  consumers: Cannabis,
+  young_adults: GraduationCap,
+  parents: UsersRound,
+};
 
 export type { MythContentEntry };
 
@@ -332,7 +350,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       onClick={() => setExportDrawerOpen(true)}
       aria-label={t('export.button', 'de')}
     >
-      <Download size="1em" strokeWidth={2} aria-hidden="true" />
+      <Download size={14} strokeWidth={2} aria-hidden="true" />
       {t('export.button', 'de')}
     </button>
   );
@@ -345,7 +363,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         onClick={() => setFilterDrawerOpen(true)}
         aria-label={t('filter.button', 'de')}
       >
-        <Filter size="1em" strokeWidth={2} aria-hidden="true" />
+        <Filter size={14} strokeWidth={2} aria-hidden="true" />
         {t('filter.button', 'de')}
         {activeFilterCount > 0 && (
           <span

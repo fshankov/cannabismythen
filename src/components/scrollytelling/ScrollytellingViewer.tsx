@@ -91,7 +91,7 @@ function renderBodyWithVerdicts(text: string): ReactNode[] {
           <VerdictArrow
             key={key++}
             verdict={verdict}
-            size="1em"
+            size={14}
             strokeWidth={2.25}
             className="scrolly__body-arrow"
           />,

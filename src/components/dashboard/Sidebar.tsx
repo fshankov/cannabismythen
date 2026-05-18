@@ -36,7 +36,7 @@ export default function Sidebar({ state, data, update, definitions }: Props) {
       {/* Categories */}
       <div className="sidebar-section">
         <h3 className="sidebar-heading">
-          <Tag size="1em" strokeWidth={2} aria-hidden="true" className="sidebar-icon" />
+          <Tag size={13} strokeWidth={2} aria-hidden="true" className="sidebar-icon" />
           {t('sidebar.categories', state.lang)}
         </h3>
         <div className="sidebar-check-actions">
@@ -84,7 +84,7 @@ export default function Sidebar({ state, data, update, definitions }: Props) {
       {/* Population Groups */}
       <div className="sidebar-section">
         <h3 className="sidebar-heading">
-          <Users size="1em" strokeWidth={2} aria-hidden="true" className="sidebar-icon" />
+          <Users size={13} strokeWidth={2} aria-hidden="true" className="sidebar-icon" />
           {t('sidebar.groups', state.lang)}
           <InfoTooltip
             title={t('sidebar.groups', state.lang)}
@@ -150,7 +150,7 @@ export default function Sidebar({ state, data, update, definitions }: Props) {
                   checked={state.indicator === id}
                   onChange={() => update('indicator', id)}
                 />
-                <Icon size="1em" strokeWidth={1.75} aria-hidden="true" className="sidebar-ind-icon" />
+                <Icon size={14} strokeWidth={1.75} aria-hidden="true" className="sidebar-ind-icon" />
                 <span className="sidebar-group-label">
                   <span className="sidebar-group-name">
                     {t(`indicator.${id}` as any, state.lang)}

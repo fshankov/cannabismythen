@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { User } from 'lucide-react';
 import {
   AUDIENCE_ICONS_BY_GROUP,
   IconVolljaehrige,

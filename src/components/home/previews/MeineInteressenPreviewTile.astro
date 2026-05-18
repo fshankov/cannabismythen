@@ -1,9 +1,10 @@
 ---
-export interface AudienceChip {
-  emoji: string;
-  cardLabel: string;
-  accentColor: string;
-}
+import MeineInteressenPreviewDeck from "./MeineInteressenPreviewDeck";
+import type { AudienceDeckEntry } from "./MeineInteressenPreviewDeck";
+
+/* The chip / deck-entry shape stays exported under the old name so
+   `src/pages/index.astro` doesn't have to chase the rename. */
+export type AudienceChip = AudienceDeckEntry;
 
 export interface Props {
   title: string;
@@ -18,17 +19,7 @@ const { title, description, ctaLabel, targetUrl, chips } = Astro.props;
 
 <a class="path-tile path-tile--meine" href={targetUrl}>
   <div class="path-tile__preview">
-    <div class="meine-preview" aria-hidden="true">
-      {chips.map((chip) => (
-        <span
-          class="meine-preview__chip"
-          style={`--audience-color: ${chip.accentColor}`}
-        >
-          <span class="meine-preview__emoji">{chip.emoji}</span>
-          <span class="meine-preview__label">{chip.cardLabel}</span>
-        </span>
-      ))}
-    </div>
+    <MeineInteressenPreviewDeck audiences={chips} client:visible />
   </div>
 
   <div class="path-tile__body">

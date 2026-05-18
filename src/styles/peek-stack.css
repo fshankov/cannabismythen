@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════════════════════
+   .peek-stack — reusable quiz-style "deck" wrapper.
+
+   Renders one card visible up front with two ::before / ::after
+   pseudo-elements stacked behind it, scaled down and offset, so the
+   surface reads as a deck with more cards queued. Used by the Quiz
+   and Meine-Interessen preview tiles on the home page; the live
+   QuizPlayer keeps its own deck rules (quiz.css:287-324) for now
+   since they also count down to zero as the user advances. The
+   pseudo-elements here are static.
+
+   The aspect ratio and border/shadow follow the canonical card
+   tokens from global.css, so a change to --card-aspect-ratio
+   re-proportions every deck on the page.
+   ═══════════════════════════════════════════════════════════════ */
+
+.peek-stack {
+  position: relative;
+  aspect-ratio: var(--card-aspect-ratio);
+  width: 100%;
+  max-width: var(--card-width-max);
+  /* Reserve top + bottom space so the offset pseudo-cards (peek_below)
+     don't collide with sibling content. The 16 px matches the max
+     translate(y) on ::after. */
+  margin-block: 0 16px;
+}
+
+.peek-stack::before,
+.peek-stack::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  background: var(--color-surface);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
+  z-index: 0;
+}
+
+.peek-stack::before {
+  transform: translate(0, 8px) scale(0.965);
+}
+
+.peek-stack::after {
+  transform: translate(0, 16px) scale(0.93);
+  opacity: 0.55;
+}
+
+/* The front face — same surface as ::before/::after but on top, with
+   content visible. Consumers add their own padding / layout inside. */
+.peek-stack__face {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Reduced motion: keep the layout but flatten the depth cue so users
+   sensitive to motion or visual layering see a single surface. */
+@media (prefers-reduced-motion: reduce) {
+  .peek-stack::before,
+  .peek-stack::after {
+    display: none;
+  }
+}

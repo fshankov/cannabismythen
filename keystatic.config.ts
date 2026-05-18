@@ -315,6 +315,14 @@ const faqAudiences = singleton({
           label: "Hub-Karten-Label",
           description: 'Kurzform für die Hub-Karte, z. B. "Eltern".',
         }),
+        emoji: fields.text({
+          label: "Emoji für Hub-Karte",
+          description: "Single emoji oder Lucide-Icon-Name (Phase 2).",
+        }),
+        accentColor: fields.text({
+          label: "Akzentfarbe (CSS hex)",
+          description: 'z. B. "#4f46e5"',
+        }),
         description: fields.text({
           label: "Audience-Beschreibung",
           multiline: true,

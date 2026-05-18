@@ -64,7 +64,7 @@ export default function ViewTabs({ view, lang, onChange, onRundgang }: Props) {
           onClick={onRundgang}
           aria-label={t('rundgang.label', lang)}
         >
-          <MapPin size="1em" strokeWidth={2} aria-hidden="true" />
+          <MapPin size={14} strokeWidth={2} aria-hidden="true" />
           <span className="tabs-bar__rundgang-label">
             {t('rundgang.label', lang)}
           </span>

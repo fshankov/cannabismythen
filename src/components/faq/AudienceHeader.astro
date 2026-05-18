@@ -1,11 +1,6 @@
 ---
 import Markdoc from "@markdoc/markdoc";
 import type { FaqAudienceMeta } from "@lib/faq";
-import {
-  AUDIENCE_ICONS_BY_FAQ_ID,
-  AUDIENCE_COLOR_VAR_BY_FAQ_ID,
-  type FaqAudienceId,
-} from "@lib/icons";
 
 interface Props {
   audience: FaqAudienceMeta;
@@ -22,12 +17,10 @@ if (audience.introNote) {
   );
 }
 
-const audienceId = audience.id as FaqAudienceId;
-const Icon = AUDIENCE_ICONS_BY_FAQ_ID[audienceId];
-const accentVar = AUDIENCE_COLOR_VAR_BY_FAQ_ID[audienceId];
+const accent = audience.accentColor;
 ---
 
-<header class="faq-audience-header" style={`--audience-accent: var(${accentVar})`}>
+<header class="faq-audience-header" style={`--audience-accent: ${accent}`}>
   <div class="faq-audience-header__bar">
     <nav class="faq-audience-header__crumbs" aria-label="Brotkrumen">
       <a href="/meine-interessen/">Meine Interessen</a>
@@ -40,7 +33,7 @@ const accentVar = AUDIENCE_COLOR_VAR_BY_FAQ_ID[audienceId];
   </div>
 
   <h1 class="faq-audience-header__title">
-    <Icon size={28} className="faq-audience-header__icon" aria-hidden="true" />
+    <span class="faq-audience-header__emoji" aria-hidden="true">{audience.emoji}</span>
     {audience.title}
   </h1>
 

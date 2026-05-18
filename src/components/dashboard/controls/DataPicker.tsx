@@ -27,16 +27,13 @@ import {
 } from 'react';
 import { Search } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { IconComponent } from '../../../lib/icons';
 import InfoTooltip from '../InfoTooltip';
 
 export interface DataPickerOption<T extends string> {
   value: T;
   label: string;
-  /** Icon component for the leading visual. Accepts both Lucide icons
-   *  and registry icons (`@/lib/icons`), since the dashboard mixes
-   *  both during the icon-registry rollout. */
-  Icon?: LucideIcon | IconComponent;
+  /** Lucide icon component for the leading visual. */
+  Icon?: LucideIcon;
   /** Emoji string used in place of an icon (e.g. Themen). */
   emoji?: string;
   /** Greyed-and-blocked. The trigger title surfaces `disabledReason`. */
@@ -196,7 +193,7 @@ export default function DataPicker<T extends string>({
           {searchable && (
             <div className="carm-picker__search">
               <Search
-                size="1em"
+                size={14}
                 strokeWidth={2}
                 aria-hidden="true"
                 className="carm-picker__search-icon"

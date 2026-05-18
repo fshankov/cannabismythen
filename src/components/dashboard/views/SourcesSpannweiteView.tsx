@@ -421,7 +421,7 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                 aria-label={t('sources.sort.alpha.tooltip', lang)}
                 title={t('sources.sort.alpha.tooltip', lang)}
               >
-                <ArrowDownAZ size="1em" strokeWidth={2} aria-hidden="true" />
+                <ArrowDownAZ size={14} strokeWidth={2} aria-hidden="true" />
               </button>
             </div>
             {columns.map((col) => {
@@ -463,13 +463,13 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                     aria-label={`${t('column.hide', lang)} — ${col.fullLabel}`}
                     title={`${t('column.hide', lang)} — ${col.fullLabel}`}
                   >
-                    <EyeOff size="1em" strokeWidth={2} aria-hidden="true" />
+                    <EyeOff size={11} strokeWidth={2} aria-hidden="true" />
                   </button>
                   <span
                     className="carm-spannweite__header-inner"
                     title={col.defText ? `${col.fullLabel} — ${col.defText}` : col.fullLabel}
                   >
-                    <Icon size="1em" strokeWidth={1.75} aria-hidden="true" />
+                    <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
                     <span className="carm-spannweite__header-text">{col.label}</span>
                     {col.defTitle && col.defText && (
                       <span className="carm-spannweite__info-inline">
@@ -491,9 +491,9 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                     title={colSortTooltip}
                   >
                     {isDesc ? (
-                      <ArrowDown10 size="1em" strokeWidth={2} aria-hidden="true" />
+                      <ArrowDown10 size={14} strokeWidth={2} aria-hidden="true" />
                     ) : (
-                      <ArrowDown01 size="1em" strokeWidth={2} aria-hidden="true" />
+                      <ArrowDown01 size={14} strokeWidth={2} aria-hidden="true" />
                     )}
                   </button>
                 </div>
@@ -543,9 +543,9 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                         }
                       >
                         {isExpanded ? (
-                          <ChevronDown size="1em" strokeWidth={2} aria-hidden="true" />
+                          <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
                         ) : (
-                          <ChevronRight size="1em" strokeWidth={2} aria-hidden="true" />
+                          <ChevronRight size={14} strokeWidth={2} aria-hidden="true" />
                         )}
                       </button>
                     ) : (

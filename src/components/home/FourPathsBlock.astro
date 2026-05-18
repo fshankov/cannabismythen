@@ -21,10 +21,15 @@ export interface TileBase {
   targetUrl: string;
 }
 
+/* Legacy alias — the sampleX fields the old static QuizPreviewTile took
+ * are now baked into the rotating <QuizPreviewDeck> component, but the
+ * Keystatic YAML still carries them so editors don't see schema churn
+ * on every refactor. We accept the wider shape and only forward the
+ * TileBase fields to the new tile. */
 export interface QuizTileConfig extends TileBase {
-  sampleEyebrow: string;
-  sampleMythText: string;
-  sampleMythClassification: "falsch" | "eher_falsch" | "eher_richtig" | "richtig";
+  sampleEyebrow?: string;
+  sampleMythText?: string;
+  sampleMythClassification?: "falsch" | "eher_falsch" | "eher_richtig" | "richtig";
 }
 
 export interface Props {
@@ -62,7 +67,12 @@ const {
     </blockquote>
 
     <div class="four-paths__grid">
-      <QuizPreviewTile {...quizTile} />
+      <QuizPreviewTile
+        title={quizTile.title}
+        description={quizTile.description}
+        ctaLabel={quizTile.ctaLabel}
+        targetUrl={quizTile.targetUrl}
+      />
       <FaktenKartenPreviewTile {...faktenKartenTile} previewMyths={previewMyths} />
       <DatenExplorerPreviewTile {...datenExplorerTile} client:visible />
       <MeineInteressenPreviewTile {...meineInteressenTile} chips={audienceChips} />

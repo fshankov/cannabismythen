@@ -47,6 +47,8 @@ export interface FaqAudienceMeta {
   id: FaqAudienceId;
   title: string;
   cardLabel: string;
+  emoji: string;
+  accentColor: string;
   description: string;
   introNote: string;
   weiterfuehrend: { label: string; url: string }[];
@@ -176,6 +178,8 @@ interface FaqAudiencesSingleton {
     id?: string | null;
     title?: string | null;
     cardLabel?: string | null;
+    emoji?: string | null;
+    accentColor?: string | null;
     description?: string | null;
     introNote?: string | null;
     weiterfuehrend?:
@@ -204,6 +208,8 @@ export async function getAllAudiences(): Promise<FaqAudienceMeta[]> {
         id,
         title: a.title ?? "",
         cardLabel: a.cardLabel ?? id,
+        emoji: a.emoji ?? "",
+        accentColor: a.accentColor ?? "#2d6a4f",
         description: a.description ?? "",
         introNote: a.introNote ?? "",
         weiterfuehrend: (a.weiterfuehrend ?? [])

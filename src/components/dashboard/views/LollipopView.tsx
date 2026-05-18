@@ -4,7 +4,6 @@ import type { Myth, Metric, Group, AppState } from '../../../lib/dashboard/types
 import { getMythMetric, getIndicatorValue, getMythShortText, buildTooltipHtml } from '../../../lib/dashboard/data';
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
 import { t } from '../../../lib/dashboard/translations';
-import { useViewportWidth } from '../../../lib/dashboard/useViewportWidth';
 
 interface Props {
   myths: Myth[];
@@ -23,8 +22,6 @@ function jitter(mythId: number): number {
 export default function LollipopView({ myths, metrics, groups, state, update, onSelectMyth }: Props) {
   const indicator = state.indicator;
   const selectedMythId = state.selectedMythId;
-  const viewportW = useViewportWidth();
-  const isNarrow = viewportW !== undefined && viewportW < 480;
 
   const chartData = useMemo(() => {
     const result: Array<{
@@ -114,7 +111,7 @@ export default function LollipopView({ myths, metrics, groups, state, update, on
         type: 'category' as const,
         data: yCategories,
         axisLabel: {
-          fontSize: isNarrow ? 10 : 11,
+          fontSize: 11,
           width: 180,
           overflow: 'truncate' as const,
         },
@@ -143,7 +140,7 @@ export default function LollipopView({ myths, metrics, groups, state, update, on
       }],
       animationDuration: 300,
     };
-  }, [chartData, groups, state.lang, indicator, selectedMythId, isNarrow]);
+  }, [chartData, groups, state.lang, indicator, selectedMythId]);
 
   const handleClick = useCallback((params: any) => {
     const mythId = params.data?.mythId;
@@ -167,12 +164,7 @@ export default function LollipopView({ myths, metrics, groups, state, update, on
     <div>
       <ReactECharts
         option={option}
-        style={{
-          height: Math.max(
-            isNarrow ? 220 : 300,
-            groups.length * (isNarrow ? 60 : 80) + 60,
-          ),
-        }}
+        style={{ height: Math.max(300, groups.length * 80 + 60) }}
         onEvents={{ click: handleClick, dblclick: handleDblClick }}
         opts={{ renderer: 'svg' }}
       />

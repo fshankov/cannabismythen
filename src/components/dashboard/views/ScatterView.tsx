@@ -4,7 +4,6 @@ import type { Myth, Metric, AppState, Indicator } from '../../../lib/dashboard/t
 import { getMythMetric, getIndicatorValue, buildTooltipHtml, formatValue } from '../../../lib/dashboard/data';
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
 import { t } from '../../../lib/dashboard/translations';
-import { useViewportWidth } from '../../../lib/dashboard/useViewportWidth';
 
 interface Props {
   myths: Myth[];
@@ -18,8 +17,6 @@ const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'pr
 
 export default function ScatterView({ myths, metrics, state, update, onSelectMyth }: Props) {
   const groupId = state.groupIds[0] || 'adults';
-  const viewportW = useViewportWidth();
-  const isNarrow = viewportW !== undefined && viewportW < 480;
 
   const groupName = useMemo(() => {
     const groups = [
@@ -126,7 +123,7 @@ export default function ScatterView({ myths, metrics, state, update, onSelectMyt
           </select>
         </div>
       </div>
-      <ReactECharts option={option} style={{ height: isNarrow ? 260 : 500 }} onEvents={{ click: handleClick }} opts={{ renderer: 'svg' }} />
+      <ReactECharts option={option} style={{ height: 500 }} onEvents={{ click: handleClick }} opts={{ renderer: 'svg' }} />
     </div>
   );
 }

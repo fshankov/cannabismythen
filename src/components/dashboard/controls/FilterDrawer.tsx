@@ -268,7 +268,7 @@ export default function FilterDrawer({
     >
       <div className="carm-filter-search-row">
         <Search
-          size="1em"
+          size={14}
           strokeWidth={2}
           aria-hidden="true"
           className="carm-filter-search-row__icon"
@@ -289,7 +289,7 @@ export default function FilterDrawer({
             aria-label={t('filter.reset', 'de')}
             onClick={() => setQuery('')}
           >
-            <X size="1em" strokeWidth={2} aria-hidden="true" />
+            <X size={14} strokeWidth={2} aria-hidden="true" />
           </button>
         )}
       </div>
@@ -344,7 +344,7 @@ export default function FilterDrawer({
                         aria-label={`Auswahl entfernen: ${txt}`}
                         title={`Auswahl entfernen: ${txt}`}
                       >
-                        <X size="1em" strokeWidth={2.5} aria-hidden="true" />
+                        <X size={11} strokeWidth={2.5} aria-hidden="true" />
                       </button>
                     </span>
                   </li>
@@ -417,7 +417,7 @@ export default function FilterDrawer({
                         </span>
                       </span>
                       <ChevronRight
-                        size="1em"
+                        size={16}
                         strokeWidth={2}
                         aria-hidden="true"
                         className="carm-filter-accordion__chevron"

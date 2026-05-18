@@ -49,7 +49,7 @@ export default function FactsheetPanel({
       verdictAccessory={
         <VerdictArrowWithInfo
           verdict={myth.correctness_class}
-          size="1em"
+          size={14}
           strokeWidth={2.25}
         />
       }
