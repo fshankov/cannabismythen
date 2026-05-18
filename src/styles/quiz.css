@@ -3311,19 +3311,19 @@
   display: flex;
   flex-direction: column;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--card-radius);
   /* Always-on shadow on each face so the card looks lifted even
      while idle. The shadow flips with the card because it lives on
      the face, not the outer button. */
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--card-shadow);
   overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   /* Right-pad the body to match the left padding offset, so the
      content area is symmetric across the 6-px stripe. */
-  padding: var(--space-lg) var(--space-lg) var(--space-lg)
-    calc(var(--space-lg) + 6px);
+  padding: var(--card-padding) var(--card-padding) var(--card-padding)
+    calc(var(--card-padding) + 6px);
 }
 
 .fakten-card__face--back {
@@ -3828,7 +3828,7 @@
    plenty of breathing room. Tablet → 2 col, phone → 1 col centered. */
 .fakten-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 280px));
+  grid-template-columns: repeat(auto-fill, minmax(200px, var(--card-width-max)));
   justify-content: center;
   row-gap: var(--space-xl);
   column-gap: var(--space-lg);
@@ -3836,8 +3836,8 @@
 }
 
 .fakten-grid .quiz-card__cell {
-  aspect-ratio: 1 / 1.4;
-  max-width: 280px;
+  aspect-ratio: var(--card-aspect-ratio);
+  max-width: var(--card-width-max);
   width: 100%;
   /* Release the generic `.quiz-card__cell { min-height: 340px }` rule
      (line ~1226) so narrow viewports honour the aspect ratio instead
@@ -3847,10 +3847,10 @@
 
 @media (min-width: 1024px) {
   .fakten-grid {
-    /* Exactly three 280-px tracks; justify-content distributes the
+    /* Exactly three card-width tracks; justify-content distributes the
        remaining horizontal space as equal gaps so the outer cards
        sit flush to the container edges. */
-    grid-template-columns: repeat(3, 280px);
+    grid-template-columns: repeat(3, var(--card-width-max));
     justify-content: space-between;
   }
 }
