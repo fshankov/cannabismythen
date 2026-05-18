@@ -66,15 +66,29 @@
 
 .four-paths__grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* Desktop: 4 portrait tiles in a row — same aspect / max-width as a
+     Fakten-Karten card, so the row reads as 4 mini decks lined up. */
+  grid-template-columns: repeat(4, 1fr);
   gap: clamp(1rem, 2.4vw, 1.75rem);
+  /* Cap the grid width to 4 card-widths + 3 gaps so tiles don't stretch
+     beyond the canonical card width on very wide viewports. */
+  max-width: calc(4 * var(--card-width-max) + 3 * 1.75rem);
+  margin-inline: auto;
+}
+
+@media (max-width: 1099px) {
+  .four-paths__grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: calc(2 * var(--card-width-max) + 1.75rem);
+  }
 }
 
 @media (max-width: 700px) {
   .four-paths__grid {
     grid-template-columns: none;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(82%, 22rem);
+    grid-auto-columns: minmax(70%, calc(var(--card-width-max) - 1rem));
+    max-width: none;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
@@ -102,11 +116,15 @@
   text-decoration: none;
   color: inherit;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--card-radius);
   overflow: hidden;
-  min-height: 22rem;
-  box-shadow: var(--shadow-sm);
+  /* Portrait aspect — matches the canonical Fakten-Karten card. The
+     preview area on top + body underneath share this footprint. */
+  aspect-ratio: var(--card-aspect-ratio);
+  width: 100%;
+  max-width: var(--card-width-max);
+  box-shadow: var(--card-shadow);
   transition:
     transform var(--transition-fast),
     border-color var(--transition-fast),
@@ -117,7 +135,7 @@
 .path-tile:focus-visible {
   transform: translateY(-3px);
   border-color: var(--tile-accent);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   outline: none;
 }
 
@@ -126,24 +144,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem 1.25rem;
+  padding: 1rem 0.875rem;
   background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--card-border-color);
   position: relative;
   overflow: hidden;
-  min-height: 14rem;
 }
 
 .path-tile__body {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 1.25rem 1.5rem 1.5rem;
+  gap: 0.35rem;
+  padding: 0.875rem 1rem 1rem;
 }
 
 .path-tile__title {
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-text);
   display: flex;
@@ -168,10 +185,16 @@
 
 .path-tile__description {
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-size: 0.875rem;
-  line-height: 1.55;
+  font-size: 0.8125rem;
+  line-height: 1.45;
   color: var(--color-text-secondary);
   margin: 0;
+  /* Two-line clamp keeps the body height predictable across tiles
+     with naturally different description lengths. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .path-tile__cta {
@@ -260,31 +283,37 @@
 
 .karten-preview {
   position: relative;
-  width: 14rem;
-  height: 10rem;
+  width: clamp(8rem, 18vw, 10rem);
+  /* Portrait, matching the canonical card. Height derives from the
+     shared --card-aspect-ratio so a global proportion change flips
+     these mini cards too. */
+  aspect-ratio: var(--card-aspect-ratio);
 }
 
-/* Mini variant of the canonical .fakten-card__face surface. */
+/* Mini variant of the canonical .fakten-card__face surface, scaled
+   for the inside-tile preview area. Tokens drive radius / shadow /
+   border so this stays in sync with the real Fakten-Karten card. */
 .karten-preview__card {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
   padding: 0.7rem 0.85rem 0.85rem;
   overflow: hidden;
 }
 
-/* Category stripe like the real fakten card. */
+/* Category stripe — same 6 px width as the real fakten card so the
+   mini deck reads as the canonical card at a smaller scale. */
 .karten-preview__stripe {
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
-  width: 4px;
+  width: 6px;
   background: var(--color-accent-muted);
 }
 
@@ -313,10 +342,11 @@
   font-size: 0.7rem;
   line-height: 1.3;
   letter-spacing: -0.005em;
-  margin: 0.4rem 0 0 0.5rem;
-  /* truncate to 3 lines */
+  /* Portrait cards have more vertical room than the old 10rem-tall
+     landscape mini-cards, so the title can breathe more. */
+  margin: 0.6rem 0 0 0.6rem;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
