@@ -11,6 +11,7 @@ import {
 } from '../../../lib/dashboard/data';
 import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
 import { t } from '../../../lib/dashboard/translations';
+import { useViewportWidth } from '../../../lib/dashboard/useViewportWidth';
 
 interface Props {
   myths: Myth[];
@@ -77,6 +78,8 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
   }));
 
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const viewportW = useViewportWidth();
+  const isNarrow = viewportW !== undefined && viewportW < 480;
 
   /**
    * Stage 4 — chart height adapts to the available viewport instead of
@@ -259,7 +262,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
           // 232 = grid.left (248) − 16 pill horizontal padding.
           width: 232,
           overflow: 'truncate' as const,
-          fontSize: 12,
+          fontSize: isNarrow ? 10 : 12,
           color: '#1e293b',
           // Widen the click target so tapping the y-axis myth label
           // opens the factsheet, not just the bar itself.
@@ -305,7 +308,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
         },
       ],
     };
-  }, [data, state.indicator, groupName]);
+  }, [data, state.indicator, groupName, isNarrow]);
 
   // Sort UI now lives in the shared dashboard toolbar (`<SortToggle>`);
   // the inline chips that used to render here were removed when the
@@ -356,7 +359,9 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
    * window) and clamps at fullChartHeight so no empty bottom appears
    * when the data fits comfortably.
    */
-  const ROW_HEIGHT = 28;
+  // Narrower row at <--bp-sm to keep mobile charts compact
+  // (docs/ai-pipeline/known-quirks.md quirk #5).
+  const ROW_HEIGHT = isNarrow ? 22 : 28;
   // 40px top padding (xAxis title + line) + 16px bottom = 56px chrome.
   const AXIS_CHROME = 56;
   const fullChartHeight = data.length * ROW_HEIGHT + AXIS_CHROME;

@@ -56,9 +56,13 @@
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--color-accent);
-  white-space: nowrap;
+  /* Allow wrap on narrow viewports — long module names like
+     "Medizinischer Nutzen" overflow otherwise
+     (docs/ai-pipeline/known-quirks.md quirk #11). */
+  text-wrap: balance;
   letter-spacing: -0.01em;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 /* ── Progress Bar ──────────────────────────────────────────────── */
@@ -260,7 +264,7 @@
   right: -22px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   /* Tuck edge arrows just inside the card edge on phones so they don't
      fall off the viewport. Smaller hit-box too. */
   .quiz-card__edge-arrow {
@@ -581,7 +585,7 @@
 
 /* Sub-380 px viewports (iPhone SE-class): drop to 2×2 so each segment has
    room for its glyph + label without truncation. */
-@media (max-width: 380px) {
+@media (max-width: 380px) /* below --bp-sm — ultra-narrow Android target */ {
   .verdict-scale__row {
     grid-template-columns: 1fr 1fr;
   }
@@ -832,7 +836,7 @@
   margin: 0;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .quiz-card__answer-chips {
     flex-direction: column;
     gap: var(--space-sm);
@@ -1044,7 +1048,7 @@
   padding: 14px 32px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .quiz-card__title-heading {
     font-size: 1.45rem;
   }
@@ -1064,7 +1068,7 @@
   letter-spacing: 0.02em;
 }
 
-@media (hover: none) and (pointer: coarse) and (max-width: 640px) {
+@media (hover: none) and (pointer: coarse) and (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .quiz-card__swipe-hint {
     display: block;
   }
@@ -1330,6 +1334,13 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   overflow: hidden;
+  /* iOS momentum-scroll hint (docs/ai-pipeline/known-quirks.md
+     quirk #7). The property is a no-op on iOS 13+ where momentum is
+     default, but flagged as the canonical recipe; the actual long-
+     statement scroll issue today is handled by `-webkit-line-clamp`
+     truncation + the "Mehr" button, not by inner scroll. Kept for
+     defensive compatibility with older WebView. */
+  -webkit-overflow-scrolling: touch;
   padding: var(--space-lg);
   box-sizing: border-box;
 }
@@ -2064,7 +2075,7 @@
   border-top: 1px solid var(--color-border);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .quiz-result__item-meta,
   .quiz-result__item-actions {
     padding-left: 0;
@@ -2824,7 +2835,7 @@
 }
 
 /* Mobile: bottom sheet style */
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .factsheet-panel {
     top: auto;
     bottom: 0;
@@ -2914,14 +2925,14 @@
    Responsive
    ═══════════════════════════════════════════════════════════════ */
 
-@media (max-width: 1023px) {
+@media (max-width: 1023px) /* --bp-lg boundary */ {
   .quiz-player__grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: var(--space-md);
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   /* v2: the .quiz-selection mobile rules now live in the snap-carousel
      block further down. Intentionally no .quiz-selection rule here. */
 
@@ -3012,7 +3023,7 @@
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 400px) /* below --bp-sm — ultra-narrow Android target */ {
   .quiz-card__statement {
     font-size: 0.95rem;
   }
@@ -3205,7 +3216,7 @@
 }
 
 /* Mobile: snap-carousel instead of a vertical wall of tall tiles. */
-@media (max-width: 640px) {
+@media (max-width: 768px) /* --bp-md (snapped from 640px) */ {
   .quiz-selection {
     grid-auto-flow: column;
     grid-auto-columns: 78%;
@@ -3225,6 +3236,15 @@
     scroll-snap-align: start;
     min-height: 140px;
     padding: var(--space-md);
+  }
+
+  /* iOS Safari rubber-band breaks `mandatory` snap mid-scroll
+     (docs/ai-pipeline/known-quirks.md quirk #6). Downgrade to
+     `proximity` on iOS only. */
+  @supports (-webkit-touch-callout: none) {
+    .quiz-selection {
+      scroll-snap-type: x proximity;
+    }
   }
 
   .quiz-select-card__emoji {
@@ -3808,7 +3828,7 @@
   outline: none;
 }
 
-@media (max-width: 519px) {
+@media (max-width: 480px) /* --bp-sm (snapped from 519px) */ {
   /* On phones the dropdown panel pins to the page edge so the long
      German category names don't overflow the trigger. */
   .fakten-filter-dropdown__panel {
@@ -3845,7 +3865,7 @@
   min-height: 0;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) /* --bp-lg */ {
   .fakten-grid {
     /* Exactly three 280-px tracks; justify-content distributes the
        remaining horizontal space as equal gaps so the outer cards
@@ -3856,7 +3876,7 @@
 }
 
 /* ── Mobile filter bar: collapse to a clean two-row stack ──────── */
-@media (max-width: 720px) {
+@media (max-width: 768px) /* --bp-md (snapped from 720px) */ {
   .fakten-filter-bar {
     grid-template-columns: 1fr auto;
     grid-template-areas:
@@ -4070,7 +4090,7 @@
   color: #fff;
 }
 
-@media (min-width: 720px) {
+@media (min-width: 768px) /* --bp-md (snapped from 720px) */ {
   .deck-overview {
     align-items: center;
   }
@@ -4610,7 +4630,7 @@
   color: var(--color-text);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 480px) /* --bp-sm */ {
   .factsheet-group-bars__row {
     grid-template-columns: minmax(90px, 42%) 1fr 40px;
     gap: 8px;

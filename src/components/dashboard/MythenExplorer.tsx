@@ -332,7 +332,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       onClick={() => setExportDrawerOpen(true)}
       aria-label={t('export.button', 'de')}
     >
-      <Download size={14} strokeWidth={2} aria-hidden="true" />
+      <Download size="1em" strokeWidth={2} aria-hidden="true" />
       {t('export.button', 'de')}
     </button>
   );
@@ -345,7 +345,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         onClick={() => setFilterDrawerOpen(true)}
         aria-label={t('filter.button', 'de')}
       >
-        <Filter size={14} strokeWidth={2} aria-hidden="true" />
+        <Filter size="1em" strokeWidth={2} aria-hidden="true" />
         {t('filter.button', 'de')}
         {activeFilterCount > 0 && (
           <span
