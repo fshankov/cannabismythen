@@ -56,9 +56,13 @@
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--color-accent);
-  white-space: nowrap;
+  /* Allow wrap on narrow viewports — long module names like
+     "Medizinischer Nutzen" overflow otherwise
+     (docs/ai-pipeline/known-quirks.md quirk #11). */
+  text-wrap: balance;
   letter-spacing: -0.01em;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 /* ── Progress Bar ──────────────────────────────────────────────── */

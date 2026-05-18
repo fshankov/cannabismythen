@@ -1477,6 +1477,11 @@ body:has(.scrolly) header nav a.active {
   transform: translateY(-1px);
   outline: none;
 }
+/* a11y: keyboard focus ring (docs/ai-pipeline/known-quirks.md quirk #9). */
+.viz-sr__example-cta:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
 /* Iter-6: pickers for Step 6 and Step 7/8 share identical typography +
    layout so they read as one design system. All 5 group pills (Volljährige
    · Minderjährige · Konsumierende · junge Erwachsene · Eltern) fit on a
@@ -1839,6 +1844,11 @@ body:has(.scrolly) header nav a.active {
   border-color: var(--classification-richtig);
   background: var(--bg-elev-2);
   outline: none;
+}
+/* a11y: keyboard focus ring (docs/ai-pipeline/known-quirks.md quirk #9). */
+.viz-cta__card:focus-visible {
+  outline: 2px solid var(--classification-richtig);
+  outline-offset: 3px;
 }
 .viz-cta__card-icon {
   display: inline-flex;
