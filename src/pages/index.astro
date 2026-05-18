@@ -15,6 +15,33 @@ import ProjectStripBlock from "@components/home/ProjectStripBlock.astro";
 import type { PreviewMyth } from "@components/home/previews/FaktenKartenPreviewTile.astro";
 import type { AudienceChip } from "@components/home/previews/MeineInteressenPreviewTile.astro";
 import { getAllAudiences } from "@lib/faq";
+import { AUDIENCE_COLOR_VAR_BY_FAQ_ID } from "@lib/icons/lookups";
+import type { FaqAudienceId } from "@lib/icons/lookups";
+
+/* The icon-registry refactor (commit 4e08023) removed `emoji` and
+ * `accentColor` from the FAQ audience meta — those now live as Lucide
+ * icon components and CSS custom properties. The Round-1 home page
+ * still wants string-shaped values for emoji + color so it can pass
+ * them through Astro/JSX props without forwarding React components.
+ *
+ * Map per-audience-id to fallback strings here. When the home page
+ * gets the icon-swap pass too, this map disappears in favour of
+ * <Icon /> components and `var(--audience-{id})` references. */
+const AUDIENCE_EMOJI_BY_ID: Record<FaqAudienceId, string> = {
+  eltern: "👨‍👩‍👧",
+  jugendliche: "🧒",
+  konsumierende: "🌿",
+  lehrkraefte: "🏫",
+  fachkraefte: "🩺",
+};
+
+function audienceAccentColor(id: string): string {
+  const v = AUDIENCE_COLOR_VAR_BY_FAQ_ID[id as FaqAudienceId];
+  return v ? `var(${v})` : "var(--color-accent)";
+}
+function audienceEmoji(id: string): string {
+  return AUDIENCE_EMOJI_BY_ID[id as FaqAudienceId] ?? "•";
+}
 
 // ── Hero content from Keystatic ─────────────────────────────────────────────
 const heroBlockData = await reader.singletons.heroBlock.read();
@@ -92,8 +119,8 @@ const audienceCards: AudienceCard[] = (audienceShortcutData?.cards ?? [])
         recommendation: card.recommendation,
         targetUrl: card.targetUrl,
         cardLabel: meta.cardLabel,
-        emoji: meta.emoji,
-        accentColor: meta.accentColor,
+        emoji: audienceEmoji(card.audienceId),
+        accentColor: audienceAccentColor(card.audienceId),
       },
     ];
   });
@@ -107,9 +134,9 @@ const recommendationByAudienceId = new Map(
   (audienceShortcutData?.cards ?? []).map((c) => [c.audienceId, c.recommendation]),
 );
 const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
-  emoji: a.emoji,
+  emoji: audienceEmoji(a.id),
   cardLabel: a.cardLabel,
-  accentColor: a.accentColor,
+  accentColor: audienceAccentColor(a.id),
   recommendation: recommendationByAudienceId.get(a.id as never) ?? "",
 }));
 ---

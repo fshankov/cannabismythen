@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { User } from 'lucide-react';
+import { AUDIENCE_ICONS_BY_GROUP } from '../../lib/icons';
 import type {
   GroupId,
   InformationSource,
@@ -187,9 +188,12 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         <span className="viz-strips__header-list">{UNIFIED_HEADER}</span>
       </div>
 
-      {/* Group picker — colored User-icon affordance shared with step 6. */}
+      {/* Group picker — registry audience icons in the local --group-* palette
+          (shared with step 6 via the same icon registry). */}
       <div className="viz-strips__picker" role="tablist" aria-label="Zielgruppe">
-        {GROUP_OPTIONS.map((g) => (
+        {GROUP_OPTIONS.map((g) => {
+          const Icon = AUDIENCE_ICONS_BY_GROUP[g.id];
+          return (
           <button
             key={g.id}
             role="tab"
@@ -199,7 +203,7 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
             type="button"
           >
             <User
-              size={12}
+              size="1em"
               strokeWidth={2}
               color={GROUP_COLOR[g.id]}
               aria-hidden="true"
@@ -207,7 +211,8 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
             />
             {g.label}
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <svg

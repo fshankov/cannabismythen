@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz-Modul-Kachel · Redesign-Optionen</title>
+<style>
+  :root {
+    --color-surface: #ffffff;
+    --color-border: #e3e3e3;
+    --color-text: #1a1a2e;
+    --color-text-secondary: #555;
+    --color-text-muted: #888;
+    --color-accent: #1f8a70;
+    --color-accent-light: #e6f4ee;
+    --color-accent-muted: #aac8b9;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px rgba(26,26,46,.06), 0 1px 4px rgba(26,26,46,.04);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: #f5f5f3;
+    color: var(--color-text);
+    margin: 0;
+    padding: 32px 48px 120px;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; margin: 0 0 0.5rem; }
+  h2 { font-size: 1.2rem; margin: 3rem 0 0.25rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+  h2 .en { display: block; font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); font-style: italic; margin-top: 2px;}
+  .intro { color: var(--color-text-secondary); max-width: 760px; }
+  .intro em { color: var(--color-text-muted); }
+  .gloss { color: var(--color-text-muted); font-style: italic; margin: 0 0 1.25rem; font-size: 0.92rem; }
+
+  /* ───────── tile (shared) ───────── */
+  .tile {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px 16px 18px;
+    width: 200px;
+    aspect-ratio: 1 / 1.4;
+    box-shadow: var(--shadow-sm);
+    transform: rotate(var(--card-tilt, 0deg));
+  }
+  .tile::before,
+  .tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    z-index: -1;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(26,26,46,.06);
+  }
+  .tile::before { transform: translate(6px, 8px) rotate(2deg); }
+  .tile::after  { transform: translate(-6px, 12px) rotate(-2.5deg); }
+  .tile__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    color: var(--tile-label);
+  }
+  .tile__icon svg { width: 40px; height: 40px; }
+  .tile__title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+    line-height: 1.25;
+    color: var(--color-text);
+  }
+  .tile__count {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    background: var(--color-accent-light);
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ───────── layout variants ───────── */
+  /* A: top band, front only */
+  .tile--A .tile__band {
+    position: absolute; top: 0; left: 0; right: 0; height: 7px;
+    background: var(--tile-strip);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+    z-index: 0;
+  }
+  /* B: left edge stripe, front only */
+  .tile--B { border-left: 6px solid var(--tile-strip); padding-left: 11px; }
+
+  /* C: left edge stripe on ALL deck cards (recommended per your note) */
+  .tile--C { border-left: 6px solid var(--tile-strip); padding-left: 11px; }
+  .tile--C::before, .tile--C::after { border-left: 6px solid var(--tile-strip); }
+
+  /* D: top band on ALL deck cards */
+  .tile--D .tile__band {
+    position: absolute; top: 0; left: 0; right: 0; height: 7px;
+    background: var(--tile-strip);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+    z-index: 0;
+  }
+  .tile--D::before, .tile--D::after { border-top: 7px solid var(--tile-strip); }
+
+  /* ───────── variant row ───────── */
+  .variant-row {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding: 32px 0;
+  }
+  .variant-cell { width: 220px; text-align: center; }
+  .variant-cell .variant-label {
+    display: block;
+    margin-top: 26px;
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 0.9rem;
+  }
+  .variant-cell .variant-note {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+  }
+  .variant-cell.recommended .variant-label::before {
+    content: "★ ";
+    color: var(--color-accent);
+  }
+
+  /* ───────── icon grid ───────── */
+  .icon-row {
+    display: grid;
+    grid-template-columns: 260px repeat(4, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .icon-row__name { font-weight: 700; font-size: 0.95rem; }
+  .icon-row__gloss {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    font-weight: 400;
+    margin-top: 2px;
+    font-style: italic;
+  }
+  .icon-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    border: 1.5px dashed transparent;
+    border-radius: 10px;
+    background: var(--color-surface);
+  }
+  .icon-cell.recommended {
+    border-color: var(--color-accent);
+    background: rgba(31,138,112,0.06);
+  }
+  .icon-cell svg { width: 32px; height: 32px; color: var(--icon-tint, #333); }
+  .icon-cell__name { margin-top: 6px; font-size: 0.74rem; color: var(--color-text-secondary); }
+  .icon-cell__german { display: block; font-size: 0.68rem; color: var(--color-text-muted); }
+
+  /* ───────── mix chip ───────── */
+  .featured-tile { border-style: dashed; border-color: var(--color-accent-muted); }
+  .featured-tile .tile__band {
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 25%, #eab308 50%, #6366f1 75%, #f97316 100%) !important;
+  }
+  .mix-chip {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent);
+    background: var(--color-accent-light);
+    border-radius: 999px;
+  }
+  .mix-S { font-size: 0.65rem; padding: 2px 8px; }
+  .mix-M { font-size: 0.78rem; padding: 4px 11px; }
+  .mix-L { font-size: 0.92rem; padding: 6px 14px; }
+
+  /* ───────── final grid ───────── */
+  .final-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 56px 24px;
+    padding: 32px 0;
+    max-width: 900px;
+  }
+  .final-grid .tile { width: 100%; max-width: 220px; margin: 0 auto; }
+
+  .legend-key {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    color: var(--color-accent);
+    background: var(--color-accent-light);
+    margin-right: 8px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<h1>Quiz-Modul-Kachel · Redesign-Optionen</h1>
+<p class="gloss">Quiz module tile redesign — visual options to discuss before applying to the site.</p>
+
+<p class="intro">
+  Vier Entscheidungen unten. Die <strong>grün umrandeten</strong> Felder
+  sind meine Empfehlungen — du kannst zustimmen oder pivotieren.
+  <br><em>(Four decisions below. Green-outlined cells are my recommendations — agree or pivot.)</em>
+</p>
+
+<!-- ═══════════════════════════════════════════════════════════
+     1. LAYOUT — wo lebt die Farbe?
+     ═══════════════════════════════════════════════════════════ -->
+<h2>1. Layout — wo lebt die Farbe?
+  <span class="en">Where does the color live? Same tile (Medizin) rendered four ways.</span>
+</h2>
+
+<p class="gloss">
+  Dein Punkt: wenn die Kachel ein Stapel ist, sollten die Karten dahinter
+  die gleiche Farbe tragen. Sonst sieht nur die oberste Karte "themed" aus.
+  <br><em>Your point: if the tile is a deck, the cards behind should share the color — otherwise only the top card looks themed.</em>
+</p>
+
+<div class="variant-row">
+  <div class="variant-cell">
+    <div class="tile tile--A" data-deck="2" style="--card-tilt:-0.3deg; --tile-strip:#3b82f6; --tile-label:#1d4ed8;">
+      <span class="tile__band" aria-hidden="true"></span>
+      <span class="tile__icon"><i data-lucide="briefcase-medical"></i></span>
+      <h3 class="tile__title">Medizinischer Nutzen</h3>
+      <span class="tile__count">7 Fragen</span>
+    </div>
+    <span class="variant-label">A · Top-Band, nur Frontkarte</span>
+    <span class="variant-note">Top band, front card only — what's currently on /quiz/. Only the front card is themed; the deck cards behind are plain white.</span>
+  </div>
+
+  <div class="variant-cell">
+    <div class="tile tile--B" data-deck="2" style="--card-tilt:-0.3deg; --tile-strip:#3b82f6; --tile-label:#1d4ed8;">
+      <span class="tile__icon"><i data-lucide="briefcase-medical"></i></span>
+      <h3 class="tile__title">Medizinischer Nutzen</h3>
+      <span class="tile__count">7 Fragen</span>
+    </div>
+    <span class="variant-label">B · Linke Kante, nur Frontkarte</span>
+    <span class="variant-note">Left edge stripe, front card only. Same inconsistency as A — only one card is themed.</span>
+  </div>
+
+  <div class="variant-cell recommended">
+    <div class="tile tile--C" data-deck="2" style="--card-tilt:-0.3deg; --tile-strip:#3b82f6; --tile-label:#1d4ed8;">
+      <span class="tile__icon"><i data-lucide="briefcase-medical"></i></span>
+      <h3 class="tile__title">Medizinischer Nutzen</h3>
+      <span class="tile__count">7 Fragen</span>
+    </div>
+    <span class="variant-label">C · Linke Kante, ganzes Deck</span>
+    <span class="variant-note"><strong>Recommended.</strong> Left edge on all 3 cards — a colored "edge of the deck" that reads as one themed stack.</span>
+  </div>
+
+  <div class="variant-cell">
+    <div class="tile tile--D" data-deck="2" style="--card-tilt:-0.3deg; --tile-strip:#3b82f6; --tile-label:#1d4ed8;">
+      <span class="tile__band" aria-hidden="true"></span>
+      <span class="tile__icon"><i data-lucide="briefcase-medical"></i></span>
+      <h3 class="tile__title">Medizinischer Nutzen</h3>
+      <span class="tile__count">7 Fragen</span>
+    </div>
+    <span class="variant-label">D · Top-Band, ganzes Deck</span>
+    <span class="variant-note">Top band on all 3 cards. Visually heaviest — three stripes stacking diagonally as the deck fans.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     2. ICON-OPTIONEN PRO MODUL
+     ═══════════════════════════════════════════════════════════ -->
+<h2>2. Icon pro Modul
+  <span class="en">Icon options per module. Green-outlined cell = recommended (= your stated choice for Stimmung and Gefährlichkeit).</span>
+</h2>
+
+<p class="gloss">
+  Jede Zeile = ein Quiz-Modul. Die grün umrandete Option ist mein Vorschlag.
+  <br><em>Each row = one quiz module. Green outline = my proposal.</em>
+</p>
+
+<div class="icon-row">
+  <div class="icon-row__name">
+    Medizinischer und therapeutischer Nutzen
+    <span class="icon-row__gloss">Medicinal and therapeutic benefit · Blue</span>
+  </div>
+  <div class="icon-cell recommended" style="--icon-tint:#1d4ed8;">
+    <i data-lucide="briefcase-medical"></i>
+    <span class="icon-cell__name">briefcase-medical</span>
+    <span class="icon-cell__german">Arztkoffer · FK-Match</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#1d4ed8;">
+    <i data-lucide="stethoscope"></i>
+    <span class="icon-cell__name">stethoscope</span>
+    <span class="icon-cell__german">Stethoskop</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#1d4ed8;">
+    <i data-lucide="pill"></i>
+    <span class="icon-cell__name">pill</span>
+    <span class="icon-cell__german">Pille</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#1d4ed8;">
+    <i data-lucide="syringe"></i>
+    <span class="icon-cell__name">syringe</span>
+    <span class="icon-cell__german">Spritze</span>
+  </div>
+</div>
+
+<div class="icon-row">
+  <div class="icon-row__name">
+    Risiken für Entwicklung, Körper und Psyche
+    <span class="icon-row__gloss">Risks for development, body, and mind · Violet</span>
+  </div>
+  <div class="icon-cell recommended" style="--icon-tint:#6d28d9;">
+    <i data-lucide="brain"></i>
+    <span class="icon-cell__name">brain</span>
+    <span class="icon-cell__german">Gehirn · FK-Match</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#6d28d9;">
+    <i data-lucide="heart-pulse"></i>
+    <span class="icon-cell__name">heart-pulse</span>
+    <span class="icon-cell__german">Herzschlag</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#6d28d9;">
+    <i data-lucide="shield-alert"></i>
+    <span class="icon-cell__name">shield-alert</span>
+    <span class="icon-cell__german">Warnschild</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#6d28d9;">
+    <i data-lucide="activity"></i>
+    <span class="icon-cell__name">activity</span>
+    <span class="icon-cell__german">EKG-Linie</span>
+  </div>
+</div>
+
+<div class="icon-row">
+  <div class="icon-row__name">
+    Wirkung auf Stimmung und Wahrnehmung
+    <span class="icon-row__gloss">Effect on mood and perception · Yellow</span>
+  </div>
+  <div class="icon-cell recommended" style="--icon-tint:#a16207;">
+    <i data-lucide="meh"></i>
+    <span class="icon-cell__name">meh</span>
+    <span class="icon-cell__german">neutrales Gesicht · FK-Match</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#a16207;">
+    <i data-lucide="sparkles"></i>
+    <span class="icon-cell__name">sparkles</span>
+    <span class="icon-cell__german">Funkeln</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#a16207;">
+    <i data-lucide="smile"></i>
+    <span class="icon-cell__name">smile</span>
+    <span class="icon-cell__german">Lächeln</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#a16207;">
+    <i data-lucide="cloud"></i>
+    <span class="icon-cell__name">cloud</span>
+    <span class="icon-cell__german">Wolke</span>
+  </div>
+</div>
+
+<div class="icon-row">
+  <div class="icon-row__name">
+    Soziales, Bevölkerung und Gesetzgebung
+    <span class="icon-row__gloss">Society, population, and legislation · Indigo</span>
+  </div>
+  <div class="icon-cell recommended" style="--icon-tint:#4338ca;">
+    <i data-lucide="landmark"></i>
+    <span class="icon-cell__name">landmark</span>
+    <span class="icon-cell__german">Behörde/Gericht · FK-Match</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#4338ca;">
+    <i data-lucide="users"></i>
+    <span class="icon-cell__name">users</span>
+    <span class="icon-cell__german">Personen</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#4338ca;">
+    <i data-lucide="building-2"></i>
+    <span class="icon-cell__name">building-2</span>
+    <span class="icon-cell__german">Gebäude</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#4338ca;">
+    <i data-lucide="network"></i>
+    <span class="icon-cell__name">network</span>
+    <span class="icon-cell__german">Netzwerk</span>
+  </div>
+</div>
+
+<div class="icon-row">
+  <div class="icon-row__name">
+    Allgemeine Einschätzung der Gefährlichkeit
+    <span class="icon-row__gloss">General risk assessment · Orange</span>
+  </div>
+  <div class="icon-cell recommended" style="--icon-tint:#c2410c;">
+    <i data-lucide="shield-alert"></i>
+    <span class="icon-cell__name">shield-alert</span>
+    <span class="icon-cell__german">Warnschild · deine Wahl</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#c2410c;">
+    <i data-lucide="circle-alert"></i>
+    <span class="icon-cell__name">circle-alert</span>
+    <span class="icon-cell__german">Warnzeichen rund · FK-Match</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#c2410c;">
+    <i data-lucide="triangle-alert"></i>
+    <span class="icon-cell__name">triangle-alert</span>
+    <span class="icon-cell__german">Warndreieck</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#c2410c;">
+    <i data-lucide="octagon-alert"></i>
+    <span class="icon-cell__name">octagon-alert</span>
+    <span class="icon-cell__german">Stoppschild-Form</span>
+  </div>
+</div>
+
+<div class="icon-row">
+  <div class="icon-row__name">
+    Schnellcheck
+    <span class="icon-row__gloss">Quick-check (wildcard module) · slate / multi-hue</span>
+  </div>
+  <div class="icon-cell recommended" style="--icon-tint:#334155;">
+    <i data-lucide="shuffle"></i>
+    <span class="icon-cell__name">shuffle</span>
+    <span class="icon-cell__german">Mischen-Pfeile</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#334155;">
+    <i data-lucide="dices"></i>
+    <span class="icon-cell__name">dices</span>
+    <span class="icon-cell__german">Würfel · entspricht aktuellem 🎲</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#334155;">
+    <i data-lucide="wand-2"></i>
+    <span class="icon-cell__name">wand-2</span>
+    <span class="icon-cell__german">Zauberstab</span>
+  </div>
+  <div class="icon-cell" style="--icon-tint:#334155;">
+    <i data-lucide="sparkles"></i>
+    <span class="icon-cell__name">sparkles</span>
+    <span class="icon-cell__german">Funkeln</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     3. MIX CHIP GRÖSSEN
+     ═══════════════════════════════════════════════════════════ -->
+<h2>3. "Mix"-Chip-Größen (Schnellcheck)
+  <span class="en">Mix chip size on the Schnellcheck tile — three sizes side by side.</span>
+</h2>
+
+<p class="gloss">
+  Du wolltest den Mix-Chip größer. Hier drei Größen zum Vergleich.
+  <br><em>You wanted the Mix chip larger. Three sizes for comparison.</em>
+</p>
+
+<div class="variant-row">
+  <div class="variant-cell">
+    <div class="tile featured-tile" data-deck="2" style="--card-tilt:0deg;">
+      <span class="tile__band" aria-hidden="true"></span>
+      <span class="mix-chip mix-S">Mix</span>
+      <span class="tile__icon" style="--tile-label:#334155;"><i data-lucide="shuffle"></i></span>
+      <h3 class="tile__title">Schnellcheck</h3>
+      <span class="tile__count">7 Fragen</span>
+    </div>
+    <span class="variant-label">S · klein (aktuell)</span>
+    <span class="variant-note">0.65rem · current size. Reads quiet.</span>
+  </div>
+  <div class="variant-cell recommended">
+    <div class="tile featured-tile" data-deck="2" style="--card-tilt:0deg;">
+      <span class="tile__band" aria-hidden="true"></span>
+      <span class="mix-chip mix-M">Mix</span>
+      <span class="tile__icon" style="--tile-label:#334155;"><i data-lucide="shuffle"></i></span>
+      <h3 class="tile__title">Schnellcheck</h3>
+      <span class="tile__count">7 Fragen</span>
+    </div>
+    <span class="variant-label">M · mittel</span>
+    <span class="variant-note"><strong>Recommended.</strong> 0.78rem — clearly visible without out-shouting the title.</span>
+  </div>
+  <div class="variant-cell">
+    <div class="tile featured-tile" data-deck="2" style="--card-tilt:0deg;">
+      <span class="tile__band" aria-hidden="true"></span>
+      <span class="mix-chip mix-L">Mix</span>
+      <span class="tile__icon" style="--tile-label:#334155;"><i data-lucide="shuffle"></i></span>
+      <h3 class="tile__title">Schnellcheck</h3>
+      <span class="tile__count">7 Fragen</span>
+    </div>
+    <span class="variant-label">L · groß</span>
+    <span class="variant-note">0.92rem — feels like a "NEU" sticker. Might compete with the title.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     4. FINAL VORSCHLAG
+     ═══════════════════════════════════════════════════════════ -->
+<h2>4. Vorschlag (Stand jetzt, mit deinen Korrekturen)
+  <span class="en">Current proposal with all your corrections: Meh for Stimmung, ShieldAlert for Gefährlichkeit, M-size Mix chip, layout C (left edge on whole deck).</span>
+</h2>
+
+<p class="gloss">
+  Wenn du Layout C + die grün markierten Icons + Mix-Chip M bestätigst, übertrage ich
+  diese Variante 1:1 in den Site-Code.
+  <br><em>Confirm layout C + green-outlined icons + Mix-chip M and I'll port this combo to the site code.</em>
+</p>
+
+<div class="final-grid">
+  <div class="tile tile--C" data-deck="2" style="--card-tilt:-0.66deg; --tile-strip:#3b82f6; --tile-label:#1d4ed8;">
+    <span class="tile__icon"><i data-lucide="briefcase-medical"></i></span>
+    <h3 class="tile__title">Medizinischer und therapeutischer Nutzen</h3>
+    <span class="tile__count">7 Fragen</span>
+  </div>
+
+  <div class="tile tile--C" data-deck="3" style="--card-tilt:0.8deg; --tile-strip:#8b5cf6; --tile-label:#6d28d9;">
+    <span class="tile__icon"><i data-lucide="brain"></i></span>
+    <h3 class="tile__title">Risiken für Entwicklung, Körper und Psyche</h3>
+    <span class="tile__count">10 Fragen</span>
+  </div>
+
+  <div class="tile tile--C" data-deck="1" style="--card-tilt:0.76deg; --tile-strip:#eab308; --tile-label:#a16207;">
+    <span class="tile__icon"><i data-lucide="meh"></i></span>
+    <h3 class="tile__title">Wirkung auf Stimmung und Wahrnehmung</h3>
+    <span class="tile__count">6 Fragen</span>
+  </div>
+
+  <div class="tile tile--C" data-deck="3" style="--card-tilt:-0.43deg; --tile-strip:#6366f1; --tile-label:#4338ca;">
+    <span class="tile__icon"><i data-lucide="landmark"></i></span>
+    <h3 class="tile__title">Soziales, Bevölkerung und Gesetzgebung</h3>
+    <span class="tile__count">10 Fragen</span>
+  </div>
+
+  <div class="tile tile--C" data-deck="2" style="--card-tilt:-0.28deg; --tile-strip:#f97316; --tile-label:#c2410c;">
+    <span class="tile__icon"><i data-lucide="shield-alert"></i></span>
+    <h3 class="tile__title">Allgemeine Einschätzung der Gefährlichkeit</h3>
+    <span class="tile__count">7 Fragen</span>
+  </div>
+
+  <!-- Schnellcheck: layout C uses left edge, but Schnellcheck gets a gradient. Apply gradient as left edge gradient. -->
+  <div class="tile featured-tile" data-deck="2" style="--card-tilt:-1.08deg; --tile-label:#334155;
+    border-left: 6px solid transparent;
+    border-image: linear-gradient(180deg, #3b82f6 0%, #8b5cf6 25%, #eab308 50%, #6366f1 75%, #f97316 100%) 1;
+    padding-left: 11px;">
+    <span class="mix-chip mix-M">Mix</span>
+    <span class="tile__icon"><i data-lucide="shuffle"></i></span>
+    <h3 class="tile__title">Schnellcheck</h3>
+    <span class="tile__count">7 Fragen</span>
+  </div>
+</div>
+
+<p class="gloss" style="margin-top: 24px;">
+  Hinweis: Bei Schnellcheck (Wildcard-Kachel) wird die linke Kante zu einem
+  vertikalen 5-Farben-Gradient (Blau → Violett → Gelb → Indigo → Orange) —
+  liest als "alle Themen gemischt".
+  <br><em>Note: Schnellcheck's left edge becomes a vertical 5-color gradient (blue→violet→yellow→indigo→orange), reading as "all themes mixed".</em>
+</p>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+  if (window.lucide && lucide.createIcons) { lucide.createIcons(); }
+</script>
+</body>
+</html>
