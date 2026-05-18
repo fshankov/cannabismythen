@@ -368,21 +368,24 @@ export default function QuizCard({
                   </div>
                 </div>
 
-                {/* 6 — Population stat (always shown). Wording:
-                    "Bevölkerungsbefragung in Deutschland" — same data
-                    (CaRM IS that sample), with "repräsentativ" dropped
-                    from user-visible copy per editorial ruling 2026-05-06. */}
+                {/* 5 — Population stat. Stage A (2026-05-16) wording —
+                    partial-credit-honest: populationCorrectPct is a CaRM
+                    Richtigkeit mean, not the "% of respondents who
+                    answered correctly". "Im Schnitt zu X % genau
+                    richtig" reads as "on average X % correctly" without
+                    implying the binary count. */}
                 {hasPopData && (
                   <div
                     className="quiz-card__pop-bar"
                     role="img"
-                    aria-label={`${popPct} Prozent der Erwachsenen 18 bis 70 in einer Bevölkerungsbefragung in Deutschland haben diesen Mythos genau richtig eingeschätzt`}
+                    aria-label={`${popPct} Prozent — durchschnittliche Trefferquote von Erwachsenen 18 bis 70 in einer Bevölkerungsbefragung in Deutschland für diese Aussage.`}
                   >
                     <p className="quiz-card__pop-bar-text">
-                      <strong>{popPct}&nbsp;%</strong> der Erwachsenen
-                      (18–70) in einer Bevölkerungsbefragung in
-                      Deutschland haben diesen Mythos genau richtig
-                      eingeschätzt.
+                      Erwachsene (18–70) in einer
+                      Bevölkerungsbefragung in Deutschland ordneten
+                      diese Aussage im Schnitt zu{" "}
+                      <strong>{popPct}&nbsp;%</strong> genau richtig
+                      ein.
                     </p>
                     <div className="quiz-card__pop-bar-track">
                       <div
