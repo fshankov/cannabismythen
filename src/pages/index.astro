@@ -98,10 +98,19 @@ const audienceCards: AudienceCard[] = (audienceShortcutData?.cards ?? [])
     ];
   });
 
+/* The Meine-Interessen tile rotates one card at a time and shows the
+ * audience-shortcut recommendation underneath the name, so we join the
+ * audience meta with the recommendation from the shortcut YAML. If a
+ * meta entry isn't covered by a card, we fall back to the empty string
+ * — the tile then shows just emoji + label for that audience. */
+const recommendationByAudienceId = new Map(
+  (audienceShortcutData?.cards ?? []).map((c) => [c.audienceId, c.recommendation]),
+);
 const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
   emoji: a.emoji,
   cardLabel: a.cardLabel,
   accentColor: a.accentColor,
+  recommendation: recommendationByAudienceId.get(a.id as never) ?? "",
 }));
 ---
 
