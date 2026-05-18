@@ -30,12 +30,12 @@
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from 'react';
 import type { ReactNode } from 'react';
 import * as d3 from 'd3';
+import { Layers, EyeOff } from 'lucide-react';
 import {
-  Search, Eye, ShieldCheck, Sparkles,
-  Users, Baby, Cannabis, GraduationCap, UsersRound,
-  Layers, EyeOff,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+  SOURCE_METRIC_ICONS,
+  AUDIENCE_ICONS_BY_GROUP,
+  type IconComponent,
+} from '../../../lib/icons';
 import type {
   AppState,
   DashboardDefinitions,
@@ -84,29 +84,16 @@ const METRIC_SHORT: Record<SourceMetricType, string> = {
 };
 
 /**
- * Information-source metric icons. Chosen so they read as "rhymes" of
- * the Mythen `INDICATOR_ICONS` (`StripsView.tsx`) without colliding —
- * a Sources strip and a Mythen strip never share the same glyph.
- *
- *   search     → Search       — "the user actively searches"
- *   perception → Eye          — "the user passively perceives"
- *                              (Mythen's `awareness` also uses Eye, but
- *                               those tabs never co-render and the verb
- *                               relationship is intentional)
- *   trust      → ShieldCheck  — replaces the older `Shield` so it
- *                              doesn't collide with Mythen's
- *                              `prevention_significance` = `Shield`
- *   prevention → Sparkles     — Mythen's `prevention_significance` is
- *                              Shield; Sources' synthetic prevention
- *                              metric uses Sparkles to read as "spark
- *                              of insight" rather than "armoured"
+ * Source-axis metric icons — sourced from the central registry so the
+ * same indicator reads identically everywhere it appears. Per Phase 2:
+ *   search     → IconSuche        (Lucide Search)
+ *   perception → IconWahrnehmung  (custom antenna with waves)
+ *   trust      → IconVertrauen    (Lucide BadgeCheck)
+ *   prevention → IconPraevention  (Lucide ShieldCheck) — SHARED with
+ *                                 the Mythen `prevention_significance`
+ *                                 indicator. Single icon, single token.
  */
-const METRIC_ICONS: Record<SourceMetricType, LucideIcon> = {
-  search: Search,
-  perception: Eye,
-  trust: ShieldCheck,
-  prevention: Sparkles,
-};
+const METRIC_ICONS: Record<SourceMetricType, IconComponent> = SOURCE_METRIC_ICONS;
 
 const GROUP_LABELS: Record<SourceGroupId, string> = {
   adults: 'Volljährige (18–70)',
@@ -124,13 +111,7 @@ const GROUP_SHORT: Record<SourceGroupId, string> = {
   parents: 'Eltern',
 };
 
-const GROUP_ICONS: Record<SourceGroupId, LucideIcon> = {
-  adults: Users,
-  minors: Baby,
-  consumers: Cannabis,
-  young_adults: GraduationCap,
-  parents: UsersRound,
-};
+const GROUP_ICONS: Record<SourceGroupId, IconComponent> = AUDIENCE_ICONS_BY_GROUP;
 
 type ColumnId = SourceMetricType | SourceGroupId;
 
@@ -148,7 +129,7 @@ interface ColumnData {
   id: ColumnId;
   label: string;
   shortLabel: string;
-  Icon?: LucideIcon;
+  Icon?: IconComponent;
   defLabel?: string;
   defText?: string;
   scale?: string;
@@ -531,7 +512,7 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
   //    drop-in. ─────────────────────────────────────────────────────────
   type RowItem = {
     id: string;
-    Icon?: LucideIcon;
+    Icon?: IconComponent;
     label: string;
     shortLabel: string;
     active: boolean;

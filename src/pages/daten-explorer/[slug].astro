@@ -8,6 +8,11 @@ import { getQuestionsForMyth, getAudience } from "@lib/faq";
 import Lesebeispiel from "@components/dashboard/Lesebeispiel";
 import VerdictStatement from "@components/shared/VerdictStatement";
 import type { CorrectnessClass, Metric } from "@lib/dashboard/types";
+import {
+  AUDIENCE_ICONS_BY_FAQ_ID,
+  AUDIENCE_COLOR_VAR_BY_FAQ_ID,
+  type FaqAudienceId,
+} from "@lib/icons";
 // Direct JSON import — see /quiz/[slug].astro for the rationale.
 import carmRawJson from "../../../public/data/carm-data.json";
 
@@ -84,10 +89,8 @@ if (Number.isFinite(mythNumber)) {
 // references this myth, then group by audience for display.
 const faqMatches = meta.mythId ? await getQuestionsForMyth(meta.mythId) : [];
 type FaqBacklink = {
-  audienceId: string;
+  audienceId: FaqAudienceId;
   audienceLabel: string;
-  audienceColor: string;
-  audienceEmoji: string;
   url: string;
   questionLong: string;
 };
@@ -103,8 +106,6 @@ for (const q of faqMatches) {
     faqBacklinks.push({
       audienceId: audId,
       audienceLabel: audienceMeta.cardLabel,
-      audienceColor: audienceMeta.accentColor,
-      audienceEmoji: audienceMeta.emoji,
       url: `/meine-interessen/${audId}/#faq-${q.slug}`,
       questionLong: q.questionLong,
     });
@@ -152,16 +153,20 @@ for (const q of faqMatches) {
       <aside class="faq-backlinks">
         <h2>Diese Frage in unseren FAQ</h2>
         <ul class="faq-backlinks__list">
-          {faqBacklinks.map((b) => (
-            <li>
-              <a href={b.url} class="faq-backlinks__link" style={`--audience-accent: ${b.audienceColor}`}>
-                <span class="faq-backlinks__audience">
-                  <span aria-hidden="true">{b.audienceEmoji}</span> {b.audienceLabel}
-                </span>
-                <span class="faq-backlinks__question">{b.questionLong}</span>
-              </a>
-            </li>
-          ))}
+          {faqBacklinks.map((b) => {
+            const Icon = AUDIENCE_ICONS_BY_FAQ_ID[b.audienceId];
+            const accentVar = AUDIENCE_COLOR_VAR_BY_FAQ_ID[b.audienceId];
+            return (
+              <li>
+                <a href={b.url} class="faq-backlinks__link" style={`--audience-accent: var(${accentVar})`}>
+                  <span class="faq-backlinks__audience">
+                    <Icon size={14} className="faq-backlinks__icon" aria-hidden="true" /> {b.audienceLabel}
+                  </span>
+                  <span class="faq-backlinks__question">{b.questionLong}</span>
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </aside>
     )}

@@ -10,6 +10,11 @@ import {
   type FaqQuestion,
 } from "@lib/faq";
 import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
+import {
+  AUDIENCE_ICONS_BY_FAQ_ID,
+  AUDIENCE_COLOR_VAR_BY_FAQ_ID,
+  type FaqAudienceId,
+} from "@lib/icons";
 
 export async function getStaticPaths() {
   const all = await loadAllQuestions();
@@ -57,13 +62,18 @@ const description =
       <aside class="faq-also-see">
         <h2 class="faq-also-see__heading">Diese Frage erscheint auch unter:</h2>
         <ul class="faq-also-see__list">
-          {audiencesForLinks.map((a) => (
-            <li>
-              <a href={`/meine-interessen/${a.id}/#faq-${q.slug}`} style={`--audience-accent: ${a.accentColor}`}>
-                <span aria-hidden="true">{a.emoji}</span> {a.cardLabel}
-              </a>
-            </li>
-          ))}
+          {audiencesForLinks.map((a) => {
+            const audienceId = a.id as FaqAudienceId;
+            const Icon = AUDIENCE_ICONS_BY_FAQ_ID[audienceId];
+            const accentVar = AUDIENCE_COLOR_VAR_BY_FAQ_ID[audienceId];
+            return (
+              <li>
+                <a href={`/meine-interessen/${a.id}/#faq-${q.slug}`} style={`--audience-accent: var(${accentVar})`}>
+                  <Icon size={14} className="faq-also-see__icon" aria-hidden="true" /> {a.cardLabel}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </aside>
     )}
