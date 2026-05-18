@@ -85,8 +85,11 @@
   display: flex;
 }
 
-/* Card shell — mirrors .fakten-card__face: white surface, light border,
-   12 px radius, shadow-md. Audience accent lives on a 3 px top stripe. */
+/* Card shell — mirrors .fakten-card__face via the shared --card-*
+   tokens. The 3 px audience-color top stripe stays intentionally
+   thinner than the 6 px Fakten-Karten category stripe; the
+   audience colors are softer markers and a fat bar fights with
+   the row layout. */
 .audience-card {
   --audience-color: var(--color-accent);
   position: relative;
@@ -94,12 +97,13 @@
   flex-direction: column;
   gap: 0.75rem;
   width: 100%;
-  min-height: 13.5rem;
-  padding: 1.5rem 1.25rem 1.25rem;
+  max-width: var(--card-width-max);
+  aspect-ratio: var(--card-aspect-ratio);
+  padding: var(--card-padding);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
   color: var(--color-text);
   text-decoration: none;
   text-align: left;
@@ -152,8 +156,8 @@
 
 .audience-card__arrow {
   position: absolute;
-  top: 1.25rem;
-  right: 1rem;
+  top: var(--card-padding);
+  right: var(--card-padding);
   font-size: 1rem;
   color: var(--audience-color);
   opacity: 0.65;
