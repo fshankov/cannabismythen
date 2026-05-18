@@ -352,6 +352,7 @@ main:has(.carm-explorer) {
   border: none;
   border-radius: 0;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ==================== VERDICT TAGS — removed in v3 ====================
@@ -3610,6 +3611,7 @@ body.carm-modal-open {
   /* Wider on overlay so the 3 action buttons fit comfortably in one row. */
   max-width: 620px;
   max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
   overflow-y: auto;
   box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25), 0 6px 14px rgba(15, 23, 42, 0.12);
   position: relative;
@@ -4142,6 +4144,7 @@ body.carm-modal-open {
   .carm-drawer {
     width: 100%;
     max-height: calc(100vh - 56px - env(safe-area-inset-top, 0px));
+    max-height: calc(100dvh - 56px - env(safe-area-inset-top, 0px));
     border-top-left-radius: var(--radius-lg, 12px);
     border-top-right-radius: var(--radius-lg, 12px);
     animation: carm-bottom-sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -4160,6 +4163,7 @@ body.carm-modal-open {
     width: 100%;
     max-width: 720px;
     max-height: calc(100vh - 96px);
+    max-height: calc(100dvh - 96px);
     height: auto;
     margin: 0;
     border-radius: var(--radius-lg, 12px);
@@ -4175,6 +4179,7 @@ body.carm-modal-open {
 .carm-drawer--bottom-sheet {
   width: 100%;
   max-height: calc(100vh - 56px - env(safe-area-inset-top, 0px));
+  max-height: calc(100dvh - 56px - env(safe-area-inset-top, 0px));
   border-top-left-radius: var(--radius-lg, 12px);
   border-top-right-radius: var(--radius-lg, 12px);
   animation: carm-bottom-sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;

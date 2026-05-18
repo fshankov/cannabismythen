@@ -108,6 +108,19 @@
   --dur-flip: 600ms;
   --dur-slide: 320ms;
   --lift-md: 6px;
+
+  /* Responsive breakpoint tokens — Phase 0a of the AI pipeline
+     (docs/ai-pipeline/known-quirks.md quirk #1). Reference values for
+     `@media` queries across this codebase. CSS variables cannot appear
+     inside `@media` conditions in older Safari, so authors should write
+     the literal value next to a comment that names the token, e.g.
+       @media (max-width: 480px) /* --bp-sm */
+     A follow-up snap pass migrates the remaining ~22 ad-hoc literals
+     down to these four canonical values. */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1440px;
 }
 
 
@@ -1902,6 +1915,7 @@ button.pill[aria-pressed="true"] {
   position: sticky;
   top: 80px;
   height: calc(100vh - 100px);
+  height: calc(100dvh - 100px);
   display: flex;
   align-items: center;
   justify-content: center;
