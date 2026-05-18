@@ -91,6 +91,16 @@
   .four-paths__grid .path-tile {
     scroll-snap-align: start;
   }
+
+  /* iOS Safari rubber-band breaks `mandatory` snap mid-scroll
+     (docs/ai-pipeline/known-quirks.md quirk #6). Downgrade to
+     `proximity` on iOS only, detected via the WebKit-only
+     `-webkit-touch-callout` feature. */
+  @supports (-webkit-touch-callout: none) {
+    .four-paths__grid {
+      scroll-snap-type: x proximity;
+    }
+  }
 }
 
 /* ── Shared tile shell (mirrors .fakten-card__face) ─────────── */

@@ -79,6 +79,15 @@
   .audience-shortcut__item {
     scroll-snap-align: start;
   }
+
+  /* iOS Safari rubber-band breaks `mandatory` snap mid-scroll
+     (docs/ai-pipeline/known-quirks.md quirk #6). Downgrade to
+     `proximity` on iOS only. */
+  @supports (-webkit-touch-callout: none) {
+    .audience-shortcut__grid {
+      scroll-snap-type: x proximity;
+    }
+  }
 }
 
 .audience-shortcut__item {

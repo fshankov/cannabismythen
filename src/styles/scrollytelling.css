@@ -2241,7 +2241,16 @@ body:has(.scrolly) header nav a.active {
   cursor: pointer;
   pointer-events: all;
 }
-.viz-timeline__hotspot:focus { outline: none; }
+/* Keyboard a11y fix (docs/ai-pipeline/known-quirks.md quirk #9).
+   The previous `outline: none` on `:focus` stripped the ring for
+   keyboard users too, leaving timeline hotspots invisible to tab
+   navigation. Strip the ring only for mouse focus, restore a visible
+   2 px outline for `:focus-visible` using the accent token. */
+.viz-timeline__hotspot:focus:not(:focus-visible) { outline: none; }
+.viz-timeline__hotspot:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
 
 /* ───── VizTeamRow — expanded layout (Iter-4) ───── */
 .viz-team {

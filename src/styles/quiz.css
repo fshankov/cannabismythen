@@ -3227,6 +3227,15 @@
     padding: var(--space-md);
   }
 
+  /* iOS Safari rubber-band breaks `mandatory` snap mid-scroll
+     (docs/ai-pipeline/known-quirks.md quirk #6). Downgrade to
+     `proximity` on iOS only. */
+  @supports (-webkit-touch-callout: none) {
+    .quiz-selection {
+      scroll-snap-type: x proximity;
+    }
+  }
+
   .quiz-select-card__emoji {
     font-size: 1.7rem;
     margin-bottom: 4px;
