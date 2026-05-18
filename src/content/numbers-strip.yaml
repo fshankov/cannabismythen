@@ -1,0 +1,25 @@
+# AI-drafted native rewrite (2026-05-16). Numbers verified against
+# src/content/ueber-uns-scrolly.yaml. Awaiting ISD editorial review
+# before merge to main.
+
+eyebrow: 'Forschung in Zahlen'
+numerals:
+  - value: 1041
+    suffix: ''
+    label: 'Befragte'
+    description: 'aus der qualitativen Vorstudie.'
+  - value: 7408
+    suffix: ''
+    label: 'Aussagen'
+    description: 'aus Umfragen, Fachgesprächen und Medienanalysen.'
+  - value: 42
+    suffix: ''
+    label: 'prüfbare Mythen'
+    description: 'einzeln wissenschaftlich eingeordnet.'
+  - value: 548
+    suffix: ''
+    label: 'wissenschaftliche Quellen'
+    description: 'aus PubMed, PsychInfo, SocIndex und Google Scholar (Stand 09/2025).'
+subline: 'Quantitative Validierung 2025: 2.795 Befragte — 2.097 Erwachsene (18–70), 555 Minderjährige (16–17) und 143 Anbau-Mitglieder. Gewichtet nach Geschlecht, Alter und Bildung.'
+linkLabel: 'Mehr über das Projekt'
+linkUrl: '/projekt/'

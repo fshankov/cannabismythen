@@ -766,38 +766,83 @@ const changelog = collection({
 // ─── Singletons ─────────────────────────────────────────────────────────────
 
 const heroBlock = singleton({
-  label: "🏔️ Hero-Block – Startseite",
+  label: "🏔️ Hero-Block – Startseite (Frage & Kontrast)",
   path: "src/content/hero-block",
   format: { data: "yaml" },
   schema: {
-    headline1: fields.text({
-      label: "Headline Zeile 1",
-      description: "Erste Zeile der Hauptüberschrift. Inter fett, Off-White.",
-      defaultValue: "Was glauben wir zu wissen —",
-    }),
-    headline2: fields.text({
-      label: "Headline Zeile 2",
-      description: "Zweite Zeile der Hauptüberschrift. DM Serif Display, kursiv, Salbei-Grün.",
-      defaultValue: "und was stimmt wirklich?",
-    }),
     eyebrow: fields.text({
-      label: "Eyebrow-Label",
-      description: "Kleiner Claim über der Überschrift (Kapitälchen).",
-      defaultValue: "cannabismythen.de · 42 Mythen · wissenschaftlich geprüft",
+      label: "Eyebrow",
+      description: "Kleines Kapitälchen-Label über dem Vergleichs-Karten-Stack.",
+      defaultValue: "Was viele glauben — was die Wissenschaft zeigt",
     }),
-    hoverHint: fields.text({
-      label: "Hover-Hinweis",
-      description: "Kurztext der den interaktiven Nebel-Effekt erklärt (Desktop). Wird auf Touch-Geräten versteckt.",
-      defaultValue: "Bewege die Maus — hebe den Nebel und entdecke die Mythen",
+    beliefLabel: fields.text({
+      label: "Linke Karten-Beschriftung",
+      defaultValue: "Was viele glauben",
     }),
-    ctaLabel: fields.text({
-      label: "CTA Button-Text",
-      description: "Beschriftung des Call-to-Action-Buttons unter dem Hinweis. Leer lassen = kein Button.",
-      defaultValue: "Mythen entdecken",
+    scienceLabel: fields.text({
+      label: "Rechte Karten-Beschriftung",
+      defaultValue: "Was die Wissenschaft zeigt",
     }),
-    ctaUrl: fields.text({
-      label: "CTA Button-Link",
-      description: "Ziel-URL des CTA-Buttons.",
+    backgroundQuestions: fields.array(
+      fields.text({ label: "Frage" }),
+      {
+        label: "Hintergrund-Fragen",
+        description: "Leichte Fragen, die dezent hinter dem Karten-Stack stehen. 4–8 empfohlen.",
+        itemLabel: (p) => p.value || "Frage",
+      },
+    ),
+    pairs: fields.array(
+      fields.object({
+        belief: fields.text({
+          label: "Volksglaube",
+          multiline: true,
+          description: "Was viele glauben (kurzer Satz).",
+        }),
+        science: fields.text({
+          label: "Wissenschaftliche Einordnung",
+          multiline: true,
+          description: "Was die Wissenschaft zeigt (kurzer Satz, kondensiert aus dem cardSummary des Mythos).",
+        }),
+        mythSlug: fields.text({
+          label: "Mythos-ID",
+          description: "z. B. m04 — für die Traceability; verlinkt nicht automatisch.",
+        }),
+        verdict: fields.select({
+          label: "Klassifikation",
+          options: [
+            { label: "Richtig", value: "richtig" },
+            { label: "Eher richtig", value: "eher_richtig" },
+            { label: "Eher falsch", value: "eher_falsch" },
+            { label: "Falsch", value: "falsch" },
+            { label: "Keine Aussage", value: "keine_aussage" },
+          ],
+          defaultValue: "falsch",
+        }),
+      }),
+      {
+        label: "Vergleichs-Paare (Glaube ↔ Wissenschaft)",
+        itemLabel: (p) => p.fields.belief.value || "Paar",
+      },
+    ),
+    rotationSeconds: fields.integer({
+      label: "Rotations-Intervall (Sekunden)",
+      description: "Wie oft das Paar wechselt.",
+      defaultValue: 6,
+    }),
+    primaryCtaLabel: fields.text({
+      label: "Primärer CTA – Text",
+      defaultValue: "Quiz starten — 3 Min",
+    }),
+    primaryCtaUrl: fields.text({
+      label: "Primärer CTA – Ziel",
+      defaultValue: "/quiz/",
+    }),
+    secondaryCtaLabel: fields.text({
+      label: "Sekundärer CTA – Text",
+      defaultValue: "Alle 42 Mythen",
+    }),
+    secondaryCtaUrl: fields.text({
+      label: "Sekundärer CTA – Ziel",
       defaultValue: "/fakten-karten/",
     }),
   },
@@ -1009,49 +1054,6 @@ const dashboardDefinitionen = singleton({
 
 // ─── Homepage editorial sections ───────────────────────────────────────────
 
-const credibilityBlock = singleton({
-  label: "🛡️ Credibility-Block – Startseite",
-  path: "src/content/credibility-block",
-  format: { data: "yaml" },
-  schema: {
-    eyebrow: fields.text({
-      label: "Eyebrow",
-      description: "Kleines Kapitälchen-Label über der Überschrift.",
-      defaultValue: "Woher die Zahlen kommen",
-    }),
-    headline: fields.text({
-      label: "Überschrift",
-      description: "Serifen-Überschrift (DM Serif Display, kursiv).",
-      defaultValue: "Eine Bevölkerungs­befragung, wissenschaftlich eingeordnet.",
-    }),
-    lede: fields.text({
-      label: "Einleitender Absatz",
-      multiline: true,
-      description: "Kurzer Text unter der Überschrift (2–3 Sätze).",
-      defaultValue:
-        "Unsere 42 Aussagen stammen aus einer repräsentativen Befragung in Deutschland. Jede wird von Wissenschaftler:innen auf Basis der aktuellen Evidenz eingeordnet — transparent, nachvollziehbar, aktualisiert.",
-    }),
-    row1Label: fields.text({ label: "Zeile 1 – Label", defaultValue: "ISD Hamburg" }),
-    row1Value: fields.text({
-      label: "Zeile 1 – Wert",
-      defaultValue: "Institut für Interdisziplinäre Sucht- und Drogenforschung",
-    }),
-    row1Link: fields.text({ label: "Zeile 1 – Link (optional)", defaultValue: "https://isd-hamburg.de" }),
-    row2Label: fields.text({ label: "Zeile 2 – Label", defaultValue: "Bevölkerungsbefragung" }),
-    row2Value: fields.text({
-      label: "Zeile 2 – Wert",
-      defaultValue: "n = 2.097 Erwachsene · Deutschland 2024 · gewichtet nach Geschlecht, Alter, Bildung",
-    }),
-    row2Link: fields.text({ label: "Zeile 2 – Link (optional)", defaultValue: "/ueber-uns/" }),
-    row3Label: fields.text({ label: "Zeile 3 – Label", defaultValue: "Wissenschaftlich geprüft" }),
-    row3Value: fields.text({
-      label: "Zeile 3 – Wert",
-      defaultValue: "Letzte Prüfung der Einordnungen: April 2026",
-    }),
-    row3Link: fields.text({ label: "Zeile 3 – Link (optional)", defaultValue: "/ueber-uns/" }),
-  },
-});
-
 const headlineFinding = singleton({
   label: "📢 Schlüsselbefund – Startseite",
   path: "src/content/headline-finding",
@@ -1085,86 +1087,205 @@ const headlineFinding = singleton({
       ],
       defaultValue: "falsch",
     }),
-    dashboardCardTitle: fields.text({
-      label: "Karte A – Titel",
-      defaultValue: "Alle 42 Mythen im Überblick",
-    }),
-    dashboardCardBody: fields.text({
-      label: "Karte A – Beschreibung",
-      multiline: true,
-      defaultValue:
-        "Filtere nach Zielgruppe, sortiere nach Evidenz, entdecke, welche Annahmen die größte Diskrepanz zur Forschung zeigen.",
-    }),
-    dashboardCtaLabel: fields.text({
-      label: "Karte A – CTA",
-      defaultValue: "Zum Daten-Explorer",
-    }),
-    faktenKartenCardTitle: fields.text({
-      label: "Karte B – Titel",
-      defaultValue: "Die Fakten-Karten",
-    }),
-    faktenKartenCardBody: fields.text({
-      label: "Karte B – Beschreibung",
-      multiline: true,
-      defaultValue:
-        "Jede Aussage als umdrehbare Karte — vorne der Mythos, hinten die wissenschaftliche Einordnung in einem Satz.",
-    }),
-    faktenKartenCtaLabel: fields.text({
-      label: "Karte B – CTA",
-      defaultValue: "Zu den Fakten-Karten",
-    }),
   },
 });
 
-const quizHookBlock = singleton({
-  label: "🧪 Quiz-Hook – Startseite",
-  path: "src/content/quiz-hook-block",
+const fourPaths = singleton({
+  label: "🧭 Vier Wege ins Thema – Startseite",
+  path: "src/content/four-paths",
+  format: { data: "yaml" },
+  schema: {
+    quizTile: fields.object(
+      {
+        title: fields.text({ label: "Titel", defaultValue: "Quiz" }),
+        description: fields.text({
+          label: "Beschreibung",
+          defaultValue: "≈3 Minuten · Sofort-Feedback",
+        }),
+        ctaLabel: fields.text({ label: "CTA-Text", defaultValue: "Quiz starten" }),
+        targetUrl: fields.text({ label: "Ziel-URL", defaultValue: "/quiz/" }),
+        sampleEyebrow: fields.text({
+          label: "Vorschau-Karte: Eyebrow",
+          defaultValue: "Beispielfrage",
+        }),
+        sampleMythText: fields.text({
+          label: "Vorschau-Karte: Beispiel-Mythos",
+          defaultValue: "Cannabis ist weniger schädlich als Alkohol.",
+        }),
+        sampleMythClassification: fields.select({
+          label: "Vorschau-Karte: Klassifikation",
+          options: [
+            { label: "Richtig", value: "richtig" },
+            { label: "Eher richtig", value: "eher_richtig" },
+            { label: "Eher falsch", value: "eher_falsch" },
+            { label: "Falsch", value: "falsch" },
+          ],
+          defaultValue: "eher_falsch",
+        }),
+      },
+      { label: "Quiz-Kachel" },
+    ),
+    faktenKartenTile: fields.object(
+      {
+        title: fields.text({ label: "Titel", defaultValue: "Fakten-Karten" }),
+        description: fields.text({
+          label: "Beschreibung",
+          defaultValue: "42 Mythen · mit einem Klick umdrehen",
+        }),
+        ctaLabel: fields.text({ label: "CTA-Text", defaultValue: "Karten durchstöbern" }),
+        targetUrl: fields.text({ label: "Ziel-URL", defaultValue: "/fakten-karten/" }),
+      },
+      { label: "Fakten-Karten-Kachel" },
+    ),
+    datenExplorerTile: fields.object(
+      {
+        title: fields.text({ label: "Titel", defaultValue: "Daten-Explorer" }),
+        description: fields.text({
+          label: "Beschreibung",
+          defaultValue: "5 Indikatoren · 5 Zielgruppen · 42 Mythen",
+        }),
+        ctaLabel: fields.text({ label: "CTA-Text", defaultValue: "Daten erkunden" }),
+        targetUrl: fields.text({ label: "Ziel-URL", defaultValue: "/daten-explorer/" }),
+      },
+      { label: "Daten-Explorer-Kachel" },
+    ),
+    meineInteressenTile: fields.object(
+      {
+        title: fields.text({ label: "Titel", defaultValue: "Meine Interessen" }),
+        description: fields.text({
+          label: "Beschreibung",
+          defaultValue: "Antworten für deine Rolle — Eltern, Lehrkräfte, Fachkräfte u. v. m.",
+        }),
+        ctaLabel: fields.text({ label: "CTA-Text", defaultValue: "Themen auswählen" }),
+        targetUrl: fields.text({ label: "Ziel-URL", defaultValue: "/meine-interessen/" }),
+      },
+      { label: "Meine-Interessen-Kachel" },
+    ),
+  },
+});
+
+// ─── Homepage v2 (landing-page redesign) editorial sections ────────────────
+// Stage-4 redesign of the Startseite. These three singletons feed the new
+// blocks (NumbersStripBlock, AudienceShortcutBlock, ProjectStripBlock). The
+// hero and headline-finding singletons above remain in place; they are
+// replaced/trimmed in later commits of the redesign series.
+
+const numbersStrip = singleton({
+  label: "🔢 Forschung in Zahlen – Startseite",
+  path: "src/content/numbers-strip",
   format: { data: "yaml" },
   schema: {
     eyebrow: fields.text({
       label: "Eyebrow",
-      defaultValue: "10 Fragen · ca. 3 Minuten · wissenschaftlich eingeordnet",
+      defaultValue: "So ist diese Seite entstanden",
     }),
-    headline: fields.text({
-      label: "Überschrift",
-      defaultValue: "Wie viele Mythen erkennst du?",
-    }),
-    subhead: fields.text({
+    numerals: fields.array(
+      fields.object({
+        value: fields.integer({
+          label: "Zahl",
+          description: "Endwert. Wird beim Eintreten in den Sichtbereich von 0 hochgezählt.",
+        }),
+        suffix: fields.text({
+          label: "Suffix (optional)",
+          description: 'z. B. "+" oder "k". Leer lassen für reine Zahl.',
+          defaultValue: "",
+        }),
+        label: fields.text({
+          label: "Beschriftung",
+          description: "Kurze Zeile unmittelbar unter der Zahl.",
+        }),
+        description: fields.text({
+          label: "Erläuterung",
+          multiline: true,
+          description: "Eine ergänzende Detailzeile.",
+        }),
+      }),
+      {
+        label: "Zahlen",
+        itemLabel: (p) => `${p.fields.value.value} ${p.fields.label.value}`,
+      },
+    ),
+    subline: fields.text({
       label: "Unterzeile",
       multiline: true,
+      description: "Kontext zur quantitativen Validierungs-Befragung (2.795 Personen).",
       defaultValue:
-        "Teste dein Bauchgefühl gegen die Evidenz. Am Ende erfährst du, welche Mythen dich überrascht haben.",
+        "Quantitative Validierungs-Befragung: 2.795 Personen — 2.097 Erwachsene (18–70), 555 Minderjährige (16–17), 143 Mitglieder einer Anbauvereinigung. Erhebung August 2025.",
     }),
-    sampleMythText: fields.text({
-      label: "Beispielmythos (auf der Vorschau-Karte)",
-      defaultValue: "Cannabis ist weniger schädlich als Alkohol.",
+    linkLabel: fields.text({
+      label: "Link-Text",
+      defaultValue: "Mehr über das Projekt",
     }),
-    sampleMythClassification: fields.select({
-      label: "Klassifikation des Beispielmythos",
-      options: [
-        { label: "Richtig", value: "richtig" },
-        { label: "Eher richtig", value: "eher_richtig" },
-        { label: "Eher falsch", value: "eher_falsch" },
-        { label: "Falsch", value: "falsch" },
-      ],
-      defaultValue: "eher_falsch",
+    linkUrl: fields.text({
+      label: "Link-Ziel",
+      defaultValue: "/projekt/",
     }),
-    primaryCtaLabel: fields.text({
-      label: "Primärer CTA",
-      defaultValue: "Quiz starten",
+  },
+});
+
+const audienceShortcut = singleton({
+  label: "🧭 Dein Einstieg – Startseite (Audience-Shortcut)",
+  path: "src/content/audience-shortcut",
+  format: { data: "yaml" },
+  schema: {
+    eyebrow: fields.text({ label: "Eyebrow", defaultValue: "Schon eine Idee?" }),
+    headline: fields.text({ label: "Überschrift", defaultValue: "Dein Einstieg" }),
+    lede: fields.text({
+      label: "Untertitel",
+      multiline: true,
+      defaultValue: "Wenn du schon weißt, was du suchst — hier geht's direkt los.",
     }),
-    primaryCtaUrl: fields.text({
-      label: "Primärer CTA – Link",
-      defaultValue: "/quiz/",
+    cards: fields.array(
+      fields.object({
+        audienceId: fields.select({
+          label: "Zielgruppe",
+          description: "Emoji + Akzent-Farbe werden automatisch aus faq/audiences.yaml übernommen.",
+          options: [
+            { label: "Eltern", value: "eltern" },
+            { label: "Jugendliche", value: "jugendliche" },
+            { label: "Konsumierende", value: "konsumierende" },
+            { label: "Lehrkräfte", value: "lehrkraefte" },
+            { label: "Fachkräfte", value: "fachkraefte" },
+          ],
+          defaultValue: "eltern",
+        }),
+        recommendation: fields.text({
+          label: "Empfehlung",
+          description: "Eine Zeile — was die Audience tun soll.",
+        }),
+        targetUrl: fields.text({
+          label: "Ziel-URL",
+          description: "Ziel des Klicks (intern oder extern).",
+        }),
+      }),
+      {
+        label: "Audience-Karten",
+        itemLabel: (p) => `${p.fields.audienceId.value} → ${p.fields.targetUrl.value}`,
+      },
+    ),
+  },
+});
+
+const projectStrip = singleton({
+  label: "🏛️ Über das Projekt – Streifen Startseite",
+  path: "src/content/project-strip",
+  format: { data: "yaml" },
+  schema: {
+    credit: fields.text({
+      label: "Träger-Hinweis",
+      description: "Einzeiliger Credit unten auf der Startseite.",
+      defaultValue: "Ein Projekt vom ISD Hamburg · CaRM-Studie · Stand 11/2025",
     }),
-    secondaryCtaLabel: fields.text({
-      label: "Sekundärer CTA",
-      defaultValue: "Zur Dashboard-Analyse",
-    }),
-    secondaryCtaUrl: fields.text({
-      label: "Sekundärer CTA – Link",
-      defaultValue: "/daten-explorer/",
-    }),
+    links: fields.array(
+      fields.object({
+        label: fields.text({ label: "Beschriftung" }),
+        url: fields.text({ label: "URL" }),
+      }),
+      {
+        label: "Links",
+        itemLabel: (p) => p.fields.label.value || "Link",
+      },
+    ),
   },
 });
 
@@ -1233,9 +1354,11 @@ export default config({
   },
   singletons: {
     heroBlock,
-    credibilityBlock,
     headlineFinding,
-    quizHookBlock,
+    fourPaths,
+    numbersStrip,
+    audienceShortcut,
+    projectStrip,
     dashboardDefinitionen,
     faqAudiences,
     shareCopy,

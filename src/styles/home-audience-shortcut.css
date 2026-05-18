@@ -1,0 +1,182 @@
+/* ═══════════════════════════════════════════════════════════════
+   Dein Einstieg — audience-shortcut block on the new home page.
+   Five compact cards routing each audience to its best entry
+   point. Desktop = 5-column row. Mobile = scroll-snap horizontal.
+   Card shell mirrors the canonical .fakten-card__face surface
+   (white bg, light border, 12 px radius, shadow-md) with the
+   audience color as a top accent stripe.
+   ═══════════════════════════════════════════════════════════════ */
+
+.audience-shortcut {
+  background: var(--color-bg);
+  padding: clamp(4rem, 9vw, 7rem) clamp(1.25rem, 4vw, 3rem);
+}
+
+.audience-shortcut__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.audience-shortcut__intro {
+  text-align: center;
+  margin: 0 auto clamp(2.5rem, 5vw, 4rem);
+  max-width: 56ch;
+}
+
+.audience-shortcut__eyebrow {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.6px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0 0 1rem 0;
+}
+
+.audience-shortcut__headline {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(28px, 4.4vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.2px;
+  color: var(--color-text);
+  margin: 0 0 1rem 0;
+}
+
+.audience-shortcut__lede {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.audience-shortcut__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(0.875rem, 1.8vw, 1.25rem);
+}
+
+@media (max-width: 900px) {
+  .audience-shortcut__grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(72%, 12rem);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1rem;
+    padding: 0.25rem 1rem 1rem;
+    margin: 0 -1rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  .audience-shortcut__item {
+    scroll-snap-align: start;
+  }
+}
+
+.audience-shortcut__item {
+  display: flex;
+}
+
+/* Card shell — mirrors .fakten-card__face: white surface, light border,
+   12 px radius, shadow-md. Audience accent lives on a 3 px top stripe. */
+.audience-card {
+  --audience-color: var(--color-accent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 13.5rem;
+  padding: 1.5rem 1.25rem 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  text-decoration: none;
+  text-align: left;
+  overflow: hidden;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+/* Top accent stripe — solid bar in the audience accent color, 3 px tall. */
+.audience-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--audience-color);
+}
+
+.audience-card:hover,
+.audience-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--audience-color);
+  box-shadow: var(--shadow-lg);
+  outline: none;
+}
+
+.audience-card__emoji {
+  font-size: 1.875rem;
+  line-height: 1;
+}
+
+.audience-card__label {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.005em;
+}
+
+.audience-card__rec {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  margin-top: auto;
+}
+
+.audience-card__arrow {
+  position: absolute;
+  top: 1.25rem;
+  right: 1rem;
+  font-size: 1rem;
+  color: var(--audience-color);
+  opacity: 0.65;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.audience-card:hover .audience-card__arrow,
+.audience-card:focus-visible .audience-card__arrow {
+  transform: translateX(3px);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audience-card,
+  .audience-card__arrow {
+    transition: none;
+  }
+  .audience-card:hover,
+  .audience-card:focus-visible {
+    transform: none;
+  }
+  .audience-card:hover .audience-card__arrow,
+  .audience-card:focus-visible .audience-card__arrow {
+    transform: none;
+  }
+}

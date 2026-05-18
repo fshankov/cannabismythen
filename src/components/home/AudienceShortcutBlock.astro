@@ -1,0 +1,51 @@
+---
+import "../../styles/home-audience-shortcut.css";
+
+export interface AudienceCard {
+  audienceId: string;
+  recommendation: string;
+  targetUrl: string;
+  /** Merged from faq/audiences.yaml at the call site. */
+  cardLabel: string;
+  emoji: string;
+  accentColor: string;
+}
+
+export interface Props {
+  eyebrow: string;
+  headline: string;
+  lede: string;
+  cards: ReadonlyArray<AudienceCard>;
+}
+
+const { eyebrow, headline, lede, cards } = Astro.props;
+---
+
+<section class="audience-shortcut" aria-labelledby="audience-shortcut-heading">
+  <div class="audience-shortcut__inner">
+    <div class="audience-shortcut__intro">
+      <p class="audience-shortcut__eyebrow">{eyebrow}</p>
+      <h2 id="audience-shortcut-heading" class="audience-shortcut__headline">
+        {headline}
+      </h2>
+      <p class="audience-shortcut__lede">{lede}</p>
+    </div>
+
+    <ol class="audience-shortcut__grid">
+      {cards.map((card) => (
+        <li class="audience-shortcut__item">
+          <a
+            class="audience-card"
+            href={card.targetUrl}
+            style={`--audience-color: ${card.accentColor}`}
+          >
+            <span class="audience-card__emoji" aria-hidden="true">{card.emoji}</span>
+            <span class="audience-card__label">{card.cardLabel}</span>
+            <span class="audience-card__rec">{card.recommendation}</span>
+            <span class="audience-card__arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

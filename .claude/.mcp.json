@@ -1,0 +1,9 @@
+{
+  "$comment": "Project-level MCP servers for the cannabismythen cross-browser/mobile adaptation pipeline. User-level MCPs (GitHub, Asana, Figma, Netlify, Astro docs, Gmail labels) are configured separately on Fedor's machine.",
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }
+  }
+}

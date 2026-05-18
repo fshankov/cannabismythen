@@ -1,0 +1,477 @@
+/* ═══════════════════════════════════════════════════════════════
+   Vier Wege ins Thema — third block on the new home page.
+   Hook quote on top + four equally-weighted preview tiles
+   (Quiz, Fakten-Karten, Daten-Explorer, Meine Interessen) below.
+   Each tile previews its target page using the canonical site
+   primitives (<VerdictPill>, <VerdictArrow>, <VerdictStatement>,
+   fakten-card-shaped surfaces, dashboard-matched bars).
+   ═══════════════════════════════════════════════════════════════ */
+
+.four-paths {
+  background: var(--color-surface);
+  padding: clamp(4rem, 9vw, 7rem) clamp(1.25rem, 4vw, 3rem);
+}
+
+.four-paths__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* ── Hook quote ──────────────────────────────────────────────── */
+
+.four-paths__quote {
+  text-align: center;
+  margin: 0 auto clamp(3rem, 6vw, 4.5rem);
+  max-width: 60ch;
+}
+
+.four-paths__quote-eyebrow {
+  display: block;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.6px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0 0 1.25rem 0;
+}
+
+.four-paths__quote-lead {
+  display: inline;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(22px, 3.4vw, 32px);
+  line-height: 1.3;
+  color: var(--color-accent);
+}
+
+.four-paths__quote-counter {
+  display: inline;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(22px, 3.4vw, 32px);
+  line-height: 1.3;
+  color: var(--color-text);
+  margin-left: 0.25em;
+}
+
+.four-paths__quote-counter[data-classification="falsch"]      { box-shadow: inset 0 -0.25em 0 var(--classification-falsch-bg); }
+.four-paths__quote-counter[data-classification="eher_falsch"] { box-shadow: inset 0 -0.25em 0 var(--classification-eher-falsch-bg); }
+.four-paths__quote-counter[data-classification="eher_richtig"]{ box-shadow: inset 0 -0.25em 0 var(--classification-eher-richtig-bg); }
+.four-paths__quote-counter[data-classification="richtig"]     { box-shadow: inset 0 -0.25em 0 var(--classification-richtig-bg); }
+.four-paths__quote-counter[data-classification="no_classification"] { box-shadow: inset 0 -0.25em 0 var(--classification-keine-aussage-bg); }
+
+/* ── Tile grid ───────────────────────────────────────────────── */
+
+.four-paths__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(1rem, 2.4vw, 1.75rem);
+}
+
+@media (max-width: 700px) {
+  .four-paths__grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(82%, 22rem);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1rem;
+    padding: 0.25rem 1rem 1rem;
+    margin: 0 -1rem;
+    scrollbar-width: thin;
+  }
+  /* Snap on the tile itself rather than on `> *` — the React tile is
+     wrapped in <astro-island> (display: contents), so a `>*` selector
+     would attach the snap point to a boxless wrapper and the swipe
+     would skip the tile entirely. Targeting .path-tile puts the snap
+     point on the actual <a> regardless of wrapper. */
+  .four-paths__grid .path-tile {
+    scroll-snap-align: start;
+  }
+}
+
+/* ── Shared tile shell (mirrors .fakten-card__face) ─────────── */
+
+.path-tile {
+  --tile-accent: var(--color-accent);
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  min-height: 22rem;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.path-tile:hover,
+.path-tile:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--tile-accent);
+  box-shadow: var(--shadow-md);
+  outline: none;
+}
+
+.path-tile__preview {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1.25rem;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+  min-height: 14rem;
+}
+
+.path-tile__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.path-tile__title {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+
+.path-tile__title-arrow {
+  color: var(--tile-accent);
+  opacity: 0.65;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.path-tile:hover .path-tile__title-arrow,
+.path-tile:focus-visible .path-tile__title-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.path-tile__description {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.path-tile__cta {
+  margin-top: 0.25rem;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tile-accent);
+}
+
+/* ── Quiz preview ────────────────────────────────────────────── */
+
+.path-tile--quiz { --tile-accent: var(--classification-eher-richtig); }
+
+.quiz-preview {
+  width: 100%;
+  max-width: 22rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.quiz-preview__eyebrow {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.quiz-preview__myth {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.35;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.quiz-preview__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.quiz-preview__pills .pill {
+  /* Pills inherit canonical .pill styles from global.css; mark the
+     correct one with a stronger border + font-weight, matching the
+     aria-pressed treatment of VerdictPill buttons. */
+  opacity: 0.7;
+}
+
+.quiz-preview__pills .pill.is-correct {
+  opacity: 1;
+  font-weight: 700;
+  outline: 1.5px solid currentColor;
+  outline-offset: -1.5px;
+}
+
+/* Narrow viewports: 4-pill flex wrap pushes the `.is-correct` outlined
+   pill onto its own row. Switch to a 2×2 grid so the verdict tier is
+   readable at any width. */
+@media (max-width: 400px) {
+  .quiz-preview__pills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .quiz-preview__pills .pill {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+.quiz-preview__hint {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  margin: 0.1rem 0 0;
+}
+
+/* ── Fakten-Karten preview (3 stacked mini-cards) ────────────── */
+
+.path-tile--karten { --tile-accent: var(--classification-eher-falsch); }
+
+.karten-preview {
+  position: relative;
+  width: 14rem;
+  height: 10rem;
+}
+
+/* Mini variant of the canonical .fakten-card__face surface. */
+.karten-preview__card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 0.7rem 0.85rem 0.85rem;
+  overflow: hidden;
+}
+
+/* Category stripe like the real fakten card. */
+.karten-preview__stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--color-accent-muted);
+}
+
+.karten-preview__card--back  { transform: rotate(-7deg) translate(-14px, 6px); z-index: 1; }
+.karten-preview__card--mid   { transform: rotate(3deg) translate(6px, -3px);   z-index: 2; }
+.karten-preview__card--front { transform: rotate(-1deg);                       z-index: 3; }
+
+.karten-preview__arrow {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.7rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.karten-preview__arrow svg {
+  display: block;
+}
+
+.karten-preview__statement {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  margin: 0.4rem 0 0 0.5rem;
+  /* truncate to 3 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.karten-preview__statement--richtig      { color: var(--classification-richtig); }
+.karten-preview__statement--eher_richtig { color: var(--classification-eher-richtig); }
+.karten-preview__statement--eher_falsch  { color: var(--classification-eher-falsch); }
+.karten-preview__statement--falsch       { color: var(--classification-falsch); }
+.karten-preview__statement--no_classification { color: var(--classification-keine-aussage); }
+
+/* ── Daten-Explorer preview ─────────────────────────────────── */
+
+.path-tile--daten { --tile-accent: var(--classification-falsch); }
+
+.daten-preview {
+  width: 100%;
+  max-width: 22rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.daten-preview__chip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+}
+
+.daten-preview__chip-label {
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Mirror of the dashboard's .indicator-tag style (the FilterBar pill).
+   min-width holds the chip steady across the four Zielgruppe labels —
+   their natural widths vary from "Eltern" to "Junge Erwachsene (18–26)",
+   which would cause the right edge to jump every 3 s without it. */
+.daten-preview__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 12px;
+  min-width: 11rem;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: white;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+}
+
+.daten-preview__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* Mirror of dashboard's .balken-view bar row: label on the left, bar
+   stretching right. Bar fill uses the verdict color tokens already
+   defined in global.css. */
+.daten-preview__bar-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr 2.25rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.daten-preview__bar-label {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}
+
+.daten-preview__bar-track {
+  height: 0.55rem;
+  background: var(--color-bg-subtle);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.daten-preview__bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.daten-preview__bar-value {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--transition-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .daten-preview__bar-fill {
+    transition: none;
+  }
+}
+
+/* ── Meine Interessen preview ───────────────────────────────── */
+
+.path-tile--meine { --tile-accent: #4f46e5; }
+
+.meine-preview {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+  padding: 0 0.25rem;
+}
+
+/* Mini variant of fakten-card__face for audience chips. */
+.meine-preview__chip {
+  --audience-color: var(--color-accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.65rem 0.4rem 0.55rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--audience-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+
+.meine-preview__emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.meine-preview__label {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
+  letter-spacing: -0.005em;
+  /* clip overflow on long labels rather than breaking the chip width */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

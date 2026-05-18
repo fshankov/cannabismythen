@@ -1,6 +1,50 @@
-headline1: 'Was glauben wir zu wissen —'
-headline2: 'und was stimmt wirklich?'
-eyebrow: 'ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft'
-hoverHint: 'Bewegen Sie die Maus — heben Sie den Nebel und entdecken Sie die Mythen'
-ctaLabel: 'Mythen entdecken'
-ctaUrl: '/fakten-karten/'
+# AI-drafted native rewrite (2026-05-17). 5 pairs cover one each of
+# richtig | eher_richtig | eher_falsch | falsch | keine_aussage so the
+# hero showcases the full 4-level classification scale (plus the
+# "no scientific verdict" case). Anchored to the canonical cardSummary
+# of each referenced myth. Awaiting ISD editorial review before merge
+# to main.
+
+eyebrow: 'Was viele glauben — was die Wissenschaft sagt'
+beliefLabel: 'Mythos'
+scienceLabel: 'Befund'
+
+backgroundQuestions:
+  - 'Macht Cannabis abhängig?'
+  - 'Macht Cannabis Psychosen?'
+  - 'Wirkt Cannabis entspannend?'
+  - 'Ist Cannabis eine Einstiegsdroge?'
+  - 'Hilft Cannabis beim Abnehmen?'
+  - 'Hemmt Cannabis Entzündungen?'
+
+pairs:
+  - belief: 'Cannabis verursacht Psychosen.'
+    science: 'Stimmt. Besonders bei Jugendlichen und hochpotentem Cannabis erhöht der Konsum das Psychose-Risiko deutlich.'
+    mythSlug: 'm24'
+    verdict: 'richtig'
+
+  - belief: 'Cannabis entspannt.'
+    science: 'Im Grundsatz ja. Viele berichten von Stressabbau — die Wirkung hängt aber stark von Dosis, Sorte und persönlicher Verfassung ab.'
+    mythSlug: 'm31'
+    verdict: 'eher_richtig'
+
+  - belief: 'Cannabis ist eine Einstiegsdroge.'
+    science: 'Eher nein. Wenn überhaupt, sind Nikotin und Alkohol die ersten Substanzen — die Gateway-These hält der Forschung nicht stand.'
+    mythSlug: 'm22'
+    verdict: 'eher_falsch'
+
+  - belief: 'Cannabis macht nicht abhängig.'
+    science: 'Doch. Bei frühem Einstieg und häufigem Konsum steigt das Risiko einer Cannabisgebrauchsstörung deutlich.'
+    mythSlug: 'm23'
+    verdict: 'falsch'
+
+  - belief: 'Cannabis hilft beim Abnehmen.'
+    science: 'Unklar. Die Studienlage ist widersprüchlich — eine eindeutige Aussage lässt sich derzeit nicht treffen.'
+    mythSlug: 'm17'
+    verdict: 'keine_aussage'
+
+rotationSeconds: 5
+primaryCtaLabel: 'Quiz starten — 3 Min'
+primaryCtaUrl: '/quiz/'
+secondaryCtaLabel: 'Alle 42 Mythen'
+secondaryCtaUrl: '/fakten-karten/'

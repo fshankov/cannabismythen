@@ -1,0 +1,109 @@
+---
+import "../../styles/home-numbers-strip.css";
+
+export interface Numeral {
+  value: number | null;
+  suffix?: string | null;
+  label: string;
+  description: string;
+}
+
+export interface Props {
+  eyebrow: string;
+  numerals: ReadonlyArray<Numeral>;
+  subline: string;
+  linkLabel: string;
+  linkUrl: string;
+}
+
+const { eyebrow, numerals, subline, linkLabel, linkUrl } = Astro.props;
+
+const formatter = new Intl.NumberFormat("de-DE");
+
+// Keystatic integer fields can be null when the editor leaves them empty;
+// silently skip such rows so editorial typos don't crash the build.
+const validNumerals = numerals.filter(
+  (n): n is Numeral & { value: number } => typeof n.value === "number",
+);
+
+function suffixOf(n: { suffix?: string | null }) {
+  return n.suffix ?? "";
+}
+---
+
+<section class="numbers-strip" aria-labelledby="numbers-strip-eyebrow">
+  <div class="numbers-strip__inner">
+    <p id="numbers-strip-eyebrow" class="numbers-strip__eyebrow">{eyebrow}</p>
+
+    <ol class="numbers-strip__grid">
+      {validNumerals.map((n) => (
+        <li class="numbers-strip__item">
+          <span
+            class="numbers-strip__numeral"
+            data-final={String(n.value)}
+            data-suffix={suffixOf(n)}
+            aria-label={`${formatter.format(n.value)}${suffixOf(n)} ${n.label}`}
+          >
+            {formatter.format(n.value)}{suffixOf(n)}
+          </span>
+          <span class="numbers-strip__label">{n.label}</span>
+          <span class="numbers-strip__description">{n.description}</span>
+        </li>
+      ))}
+    </ol>
+
+    <p class="numbers-strip__subline">{subline}</p>
+
+    <a class="numbers-strip__link" href={linkUrl}>
+      {linkLabel}
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<script>
+  /* Count-up animation triggered when the strip scrolls into view.
+     SSR ships the final number, so the no-JS / reduced-motion path
+     already shows the right value. */
+  const numerals = document.querySelectorAll<HTMLElement>(".numbers-strip__numeral");
+  if (numerals.length > 0 && "IntersectionObserver" in window) {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!reduceMotion) {
+      const fmt = new Intl.NumberFormat("de-DE");
+      const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+      const duration = 1000;
+
+      const animate = (el: HTMLElement) => {
+        const final = Number(el.dataset.final);
+        const suffix = el.dataset.suffix ?? "";
+        if (!Number.isFinite(final)) return;
+
+        el.textContent = "0" + suffix;
+        const start = performance.now();
+
+        const step = (now: number) => {
+          const progress = Math.min((now - start) / duration, 1);
+          const current = Math.round(final * easeOut(progress));
+          el.textContent = fmt.format(current) + suffix;
+          if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              animate(entry.target as HTMLElement);
+              obs.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.4 },
+      );
+
+      numerals.forEach((el) => observer.observe(el));
+    }
+  }
+</script>
