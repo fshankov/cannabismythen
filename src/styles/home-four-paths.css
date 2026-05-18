@@ -211,9 +211,11 @@
 
 /* Front-face layout — eyebrow, rotating myth statement, 4 pills.
    The .peek-stack base from peek-stack.css supplies the aspect-ratio,
-   border, radius, shadow and pseudo-card peeks behind. */
+   border, radius, shadow and pseudo-card peeks behind. Width is
+   capped so the portrait deck (height = width × 1.4) plus the 16 px
+   peek margin fits inside .path-tile__preview without overflowing. */
 .quiz-preview-deck {
-  width: clamp(8rem, 18vw, 11rem);
+  width: clamp(7rem, 16vw, 9rem);
 }
 
 .quiz-preview-deck__face {
@@ -470,7 +472,9 @@
 
 .meine-preview-deck {
   --audience-color: var(--color-accent);
-  width: clamp(8rem, 18vw, 11rem);
+  /* Same width-cap reasoning as .quiz-preview-deck: the deck's
+     portrait height + peek margin must fit inside the preview area. */
+  width: clamp(7rem, 16vw, 9rem);
 }
 
 .meine-preview-deck__face {
