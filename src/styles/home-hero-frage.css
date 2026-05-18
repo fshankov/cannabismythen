@@ -62,7 +62,7 @@
 .hero-frage__question--p0 { top:  9%; left:  4%; }
 .hero-frage__question--p1 { bottom: 9%; right: 4%; text-align: right; }
 
-@media (max-width: 768px) {
+@media (max-width: 768px) /* --bp-md */ {
   .hero-frage__bg { display: none; }
 }
 
@@ -142,7 +142,7 @@
   .hero-frage__pip { transition: none; }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px) /* --bp-md */ {
   .hero-frage__indicator { display: flex; }
 }
 
@@ -328,7 +328,7 @@
 
 /* ── Mobile fallback: single card, swipe ─────────────────────── */
 
-@media (max-width: 768px) {
+@media (max-width: 768px) /* --bp-md */ {
   .hero-frage__stage {
     height: clamp(22rem, 80vw, 28rem);
     perspective: none;

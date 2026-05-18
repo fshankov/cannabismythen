@@ -70,7 +70,7 @@
   gap: clamp(1rem, 2.4vw, 1.75rem);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) /* --bp-md (snapped from 700px) */ {
   .four-paths__grid {
     grid-template-columns: none;
     grid-auto-flow: column;
@@ -90,6 +90,16 @@
      point on the actual <a> regardless of wrapper. */
   .four-paths__grid .path-tile {
     scroll-snap-align: start;
+  }
+
+  /* iOS Safari rubber-band breaks `mandatory` snap mid-scroll
+     (docs/ai-pipeline/known-quirks.md quirk #6). Downgrade to
+     `proximity` on iOS only, detected via the WebKit-only
+     `-webkit-touch-callout` feature. */
+  @supports (-webkit-touch-callout: none) {
+    .four-paths__grid {
+      scroll-snap-type: x proximity;
+    }
   }
 }
 
@@ -236,7 +246,7 @@
 /* Narrow viewports: 4-pill flex wrap pushes the `.is-correct` outlined
    pill onto its own row. Switch to a 2×2 grid so the verdict tier is
    readable at any width. */
-@media (max-width: 400px) {
+@media (max-width: 400px) /* below --bp-sm — ultra-narrow Android target */ {
   .quiz-preview__pills {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

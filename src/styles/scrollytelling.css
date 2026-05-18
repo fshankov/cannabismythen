@@ -148,7 +148,7 @@ html, body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
-#root { min-height: 100vh; }
+#root { min-height: 100vh; min-height: 100dvh; }
 
 /* ── Dark site header on /projekt/ ──────────────────────────────
    The global site header (BaseLayout) defaults to a light beige
@@ -415,6 +415,7 @@ body:has(.scrolly) header nav a.active {
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -450,7 +451,7 @@ body:has(.scrolly) header nav a.active {
 }
 
 /* Mobile: viz sticky-top, text scrolls */
-@media (max-width: 1023px) {
+@media (max-width: 1023px) /* --bp-lg boundary */ {
   .scrolly__container {
     grid-template-columns: 1fr;
   }
@@ -1504,6 +1505,11 @@ body:has(.scrolly) header nav a.active {
   transform: translateY(-1px);
   outline: none;
 }
+/* a11y: keyboard focus ring (docs/ai-pipeline/known-quirks.md quirk #9). */
+.viz-sr__example-cta:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
 /* Iter-6: pickers for Step 6 and Step 7/8 share identical typography +
    layout so they read as one design system. All 5 group pills (Volljährige
    · Minderjährige · Konsumierende · junge Erwachsene · Eltern) fit on a
@@ -1867,6 +1873,11 @@ body:has(.scrolly) header nav a.active {
   background: var(--bg-elev-2);
   outline: none;
 }
+/* a11y: keyboard focus ring (docs/ai-pipeline/known-quirks.md quirk #9). */
+.viz-cta__card:focus-visible {
+  outline: 2px solid var(--classification-richtig);
+  outline-offset: 3px;
+}
 .viz-cta__card-icon {
   display: inline-flex;
   align-items: center;
@@ -1963,7 +1974,7 @@ body:has(.scrolly) header nav a.active {
 }
 
 /* ───── Mobile ───── */
-@media (max-width: 768px) {
+@media (max-width: 768px) /* --bp-md */ {
   .viz-grid { max-width: 100%; }
   .viz-grid__cell-text { font-size: 0.5625rem; }
   .viz-grid__cell--classified { font-size: 0.625rem; }
@@ -2173,7 +2184,7 @@ body:has(.scrolly) header nav a.active {
   text-decoration: none;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) /* --bp-sm (snapped from 600px) */ {
   .mehr-popover {
     max-width: 100%;
     max-height: 92vh;
@@ -2268,7 +2279,16 @@ body:has(.scrolly) header nav a.active {
   cursor: pointer;
   pointer-events: all;
 }
-.viz-timeline__hotspot:focus { outline: none; }
+/* Keyboard a11y fix (docs/ai-pipeline/known-quirks.md quirk #9).
+   The previous `outline: none` on `:focus` stripped the ring for
+   keyboard users too, leaving timeline hotspots invisible to tab
+   navigation. Strip the ring only for mouse focus, restore a visible
+   2 px outline for `:focus-visible` using the accent token. */
+.viz-timeline__hotspot:focus:not(:focus-visible) { outline: none; }
+.viz-timeline__hotspot:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
 
 /* ───── VizTeamRow — expanded layout (Iter-4) ───── */
 .viz-team {

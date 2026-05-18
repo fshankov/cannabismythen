@@ -134,7 +134,7 @@ export function VizMythGrid({ data, mode }: Props) {
                 <VerdictArrow
                   verdict={m.correctness_class}
                   className="viz-grid__cell-icon"
-                  size={14}
+                  size="1em"
                   strokeWidth={2.5}
                   colorOverride={ON_VERDICT_BG_GLYPH}
                 />
@@ -228,7 +228,7 @@ function MythHoverCard({ myth, mode, summary, x, y, categoryName }: HoverCardPro
       <p className="viz-grid__hover-statement">{myth.text_de}</p>
       {mode === 'classified' && (
         <div className="viz-grid__hover-verdict" style={{ color: verdictColor }}>
-          <VerdictArrow verdict={myth.correctness_class} size={14} strokeWidth={2.5} />
+          <VerdictArrow verdict={myth.correctness_class} size="1em" strokeWidth={2.5} />
           <span>{VERDICT_LABEL_DE[myth.correctness_class]}</span>
         </div>
       )}

@@ -281,7 +281,7 @@ export default function FaktenFilterBar({
                           title={m.categoryGroup}
                         >
                           <Icon
-                            size={14}
+                            size="1em"
                             strokeWidth={2}
                             aria-hidden="true"
                           />
@@ -336,7 +336,7 @@ export default function FaktenFilterBar({
             )}
           </span>
           <ChevronDown
-            size={14}
+            size="1em"
             strokeWidth={2}
             aria-hidden="true"
             className="fakten-filter-dropdown__chevron"

@@ -193,25 +193,24 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         {GROUP_OPTIONS.map((g) => {
           const Icon = AUDIENCE_ICONS_BY_GROUP[g.id];
           return (
-            <button
-              key={g.id}
-              role="tab"
-              aria-selected={activeGroup === g.id}
-              className={`viz-strips__pick ${activeGroup === g.id ? 'viz-strips__pick--active' : ''}`}
-              onClick={() => setActiveGroup(g.id)}
-              type="button"
-            >
-              <Icon
-                size={14}
-                strokeWidth={2}
-                color={GROUP_COLOR[g.id]}
-                aria-hidden="true"
-                style={{ flexShrink: 0 }}
-              />
-              {g.label}
-            </button>
-          );
-        })}
+          <button
+            key={g.id}
+            role="tab"
+            aria-selected={activeGroup === g.id}
+            className={`viz-strips__pick ${activeGroup === g.id ? 'viz-strips__pick--active' : ''}`}
+            onClick={() => setActiveGroup(g.id)}
+            type="button"
+          >
+            <User
+              size="1em"
+              strokeWidth={2}
+              color={GROUP_COLOR[g.id]}
+              aria-hidden="true"
+              style={{ flexShrink: 0 }}
+            />
+            {g.label}
+          </button>
+        ))}
       </div>
 
       <svg
