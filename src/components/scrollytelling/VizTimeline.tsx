@@ -193,10 +193,10 @@ export function VizTimeline({ active, tooltips }: Props) {
     setHoveredIdx(null);
   }
 
-  // Inline styles for the three line-related elements, based on the
-  // measured first/last dot positions. Until the first measurement
-  // commits (one paint frame) we render the line at zero height,
-  // hidden — avoids a flash of full-height line on initial mount.
+  // Inline styles for the line-related elements, based on the measured
+  // first/last dot positions. Until the first measurement commits (one
+  // paint frame) we render the line at zero height, hidden — avoids a
+  // flash of full-height line on initial mount.
   const lineBgStyle = lineGeom
     ? { top: lineGeom.top, height: lineGeom.height, bottom: 'auto' as const }
     : { top: 0, height: 0, bottom: 'auto' as const };
@@ -207,9 +207,13 @@ export function VizTimeline({ active, tooltips }: Props) {
         bottom: 'auto' as const,
       }
     : { top: 0, height: 0, bottom: 'auto' as const };
-  const locatorStyle = lineGeom
-    ? { top: lineGeom.top + drawn * lineGeom.height }
-    : { top: 0 };
+  // Glyph (yellow Falsch-shape: chevron + vertical shaft + horizontal
+  // shadow line) sits at the bottom endpoint of the green line. The
+  // shadow line at SVG-y=16/24 anchors the chevron tip — we translate
+  // the wrapper so that point coincides with the line endpoint.
+  const glyphStyle = lineGeom
+    ? { top: lineGeom.top + lineGeom.height }
+    : null;
 
   return (
     <div
@@ -231,12 +235,34 @@ export function VizTimeline({ active, tooltips }: Props) {
         style={lineFgStyle}
         aria-hidden="true"
       />
-      {drawn > 0.01 && drawn < 1 && lineGeom && (
+      {glyphStyle && (
         <div
-          className="viz-timeline-v__locator"
-          style={locatorStyle}
+          className="viz-timeline-v__glyph"
+          style={glyphStyle}
           aria-hidden="true"
-        />
+        >
+          <svg
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <g
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+            >
+              <path
+                className="viz-timeline-v__glyph-shadow"
+                d="M2 16h20"
+              />
+              <g className="viz-timeline-v__glyph-arrow">
+                <path d="M12 2v14" />
+                <path d="m5 9 7 7 7-7" />
+              </g>
+            </g>
+          </svg>
+        </div>
       )}
 
       {ANCHORS.map((a, i) => {

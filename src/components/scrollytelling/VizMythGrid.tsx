@@ -3,6 +3,7 @@ import type { CarmData, CorrectnessClass, Myth } from './types';
 import {
   ON_VERDICT_BG_GLYPH,
   VERDICT_COLOR,
+  VERDICT_LABEL_DE,
   sortedMyths,
   themeColorFor,
 } from './dataLoaders';
@@ -15,20 +16,15 @@ interface Props {
   mode: 'themed' | 'classified';
 }
 
-// Iter-11: VERDICT_COLOR / VERDICT_LABEL / VERDICT_ORDER / themeColorFor /
-// ON_VERDICT_BG_GLYPH all hoisted to `dataLoaders.ts` and shared with the
-// in-body legend rendering in ScrollytellingViewer. The hover-card and
-// detail-popover paths below still use VERDICT_LABEL with the legacy
-// "stimmt nicht" phrasing because they document the verdict in
-// long-form (matching the daten-explorer); the in-body legend uses
-// VERDICT_LABEL_DE ("richtig / eher richtig / …") via the shared helper.
-const VERDICT_LABEL_LONG: Record<CorrectnessClass, string> = {
-  richtig: 'stimmt',
-  eher_richtig: 'stimmt eher',
-  eher_falsch: 'stimmt eher nicht',
-  falsch: 'stimmt nicht',
-  no_classification: 'keine Aussage',
-};
+// Iter-20: hover-card, detail popover, and aria-label all use the
+// canonical 4-level verdict labels — `richtig / eher richtig / eher
+// falsch / falsch` — keyed by `correctness_class` from
+// `public/data/carm-data.json`. Previously a local
+// `VERDICT_LABEL_LONG` map rendered "stimmt / stimmt eher / stimmt
+// eher nicht / stimmt nicht" which Fedor flagged as inconsistent
+// with the rest of the site (step-4 legend, daten-explorer filters,
+// myth factsheet headings all use the canonical names). Now we
+// import the single source of truth from `dataLoaders.ts`.
 
 interface MythSummary {
   summary_de: string;
@@ -126,7 +122,7 @@ export function VizMythGrid({ data, mode }: Props) {
               }}
               aria-label={
                 mode === 'classified'
-                  ? `${m.text_de} — ${VERDICT_LABEL_LONG[m.correctness_class]} — Details öffnen`
+                  ? `${m.text_de} — ${VERDICT_LABEL_DE[m.correctness_class]} — Details öffnen`
                   : m.text_de
               }
             >
@@ -180,7 +176,7 @@ export function VizMythGrid({ data, mode }: Props) {
               className="mehr-popover__verdict-pill"
               style={{ background: VERDICT_COLOR[openMyth.correctness_class] }}
             >
-              {VERDICT_LABEL_LONG[openMyth.correctness_class]}
+              {VERDICT_LABEL_DE[openMyth.correctness_class]}
             </div>
             {(() => {
               const summary = summaries?.[String(openMyth.id)];
@@ -233,7 +229,7 @@ function MythHoverCard({ myth, mode, summary, x, y, categoryName }: HoverCardPro
       {mode === 'classified' && (
         <div className="viz-grid__hover-verdict" style={{ color: verdictColor }}>
           <VerdictArrow verdict={myth.correctness_class} size={14} strokeWidth={2.5} />
-          <span>{VERDICT_LABEL_LONG[myth.correctness_class]}</span>
+          <span>{VERDICT_LABEL_DE[myth.correctness_class]}</span>
         </div>
       )}
       {mode === 'themed' && categoryName && (
