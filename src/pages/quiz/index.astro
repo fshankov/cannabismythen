@@ -3,27 +3,13 @@ export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getPublishedEntries } from "@lib/content";
+import { getQuizThemeMeta } from "@lib/quiz/categories";
 import "../../styles/quiz.css";
 
 const entries = await getPublishedEntries("quiz");
 
 // Filter out feedback-texte for the quiz index (it's not a playable quiz)
 const quizzes = entries.filter(([slug]) => slug !== "feedback-texte");
-
-// Quiz card data: emoji + question count.
-// Session 1 of 2026-05 — slugs renamed to match the docx 5-cat taxonomy
-// (Kategorisierung_2026 05 06.docx). m03 moved from quiz-risiken to
-// quiz-gefaehrlichkeit per the same docx, hence risiken 11→10 and
-// gefaehrlichkeit 6→7.
-const quizMeta: Record<string, { emoji: string; count: number; featured?: boolean }> = {
-  "quiz-medizinischer-nutzen":  { emoji: "💊", count: 7  },
-  "quiz-risiken-koerper-psyche": { emoji: "⚠️",  count: 10 },
-  "quiz-stimmung-wahrnehmung":  { emoji: "🧠", count: 6  },
-  "quiz-soziales-bevoelkerung": { emoji: "🏛️", count: 10 },
-  "quiz-gefaehrlichkeit":       { emoji: "🚨",  count: 7  },
-  // Stage 6 — Schnellcheck. Dynamic 7-myth deck, re-rolled per visit.
-  "quiz-schnellcheck":          { emoji: "🎲", count: 7, featured: true },
-};
 
 // Remediation 6 — precompute per-tile values in the frontmatter (pure TS).
 // Doing this inline inside the JSX expression confused Astro's template
@@ -42,18 +28,20 @@ function hashCode(input: string): number {
 
 const tiles = quizzes.map(([slug, entry]) => {
   const e = entry as { title: string; questionCount?: number };
-  const meta = quizMeta[slug as string];
-  const count = (meta?.count || e.questionCount || 7) as number;
+  const meta = getQuizThemeMeta(slug as string);
+  const count = (meta.count || e.questionCount || 7) as number;
   const deckDepth = count >= 10 ? 3 : count >= 7 ? 2 : 1;
   const tilt = ((hashCode(slug as string) % 1000) / 1000) * 3.2 - 1.6;
   return {
     slug: slug as string,
     title: e.title,
-    emoji: meta?.emoji || "📋",
+    Icon: meta.icon,
+    strip: meta.strip,
+    label: meta.label,
     count,
     deckDepth,
     tilt: tilt.toFixed(2),
-    featured: Boolean(meta?.featured),
+    featured: Boolean(meta.featured),
   };
 });
 ---
@@ -81,9 +69,12 @@ const tiles = quizzes.map(([slug, entry]) => {
         href={`/quiz/${tile.slug}/`}
         class={`quiz-select-card ${tile.featured ? "quiz-select-card--featured" : ""}`}
         data-deck={tile.deckDepth}
-        style={`--card-tilt: ${tile.tilt}deg`}
+        style={`--card-tilt: ${tile.tilt}deg; --tile-strip: ${tile.strip}; --tile-label: ${tile.label};`}
       >
-        <span class="quiz-select-card__emoji">{tile.emoji}</span>
+        <span class="quiz-select-card__band" aria-hidden="true"></span>
+        <span class="quiz-select-card__icon" aria-hidden="true">
+          <tile.Icon size={44} strokeWidth={1.75} />
+        </span>
         <h2 class="quiz-select-card__title">{tile.title}</h2>
         <span class="quiz-select-card__count">{tile.count} Fragen</span>
         {/* BugHerd #37b (Session 3b, 2026-05-07): per-tile last-score

@@ -3065,7 +3065,11 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg) var(--space-md);
+  /* Extra top padding leaves room for the 7-px colored band so the
+     icon doesn't sit right against it. The band has matching
+     top-corner radii — no overflow:hidden, because the deck
+     pseudo-elements need to render outside the front tile. */
+  padding: calc(var(--space-lg) + 4px) var(--space-md) var(--space-lg);
   /* Same poker-card proportions as the in-quiz card; capped width
      keeps the deck silhouette intact even at full-width breakpoints. */
   width: 100%;
@@ -3105,7 +3109,14 @@
   position: absolute;
   inset: 0;
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  /* Layout D — every card in the deck carries the same 7-px colored
+     top band so the colored "edge of the deck" cascades as the cards
+     fan out. The background is layered: a 7-px gradient strip at the
+     top using the theme's --tile-strip, plus the surface color below. */
+  background:
+    linear-gradient(var(--tile-strip, transparent), var(--tile-strip, transparent))
+      top / 100% 7px no-repeat,
+    var(--color-surface);
   border: 1px solid var(--color-border);
   z-index: -1;
   pointer-events: none;
@@ -3137,11 +3148,36 @@
   opacity: 0.7;
 }
 
-.quiz-select-card__emoji {
-  font-size: 2.5rem;
+/* Colored top band — 6-px stripe in the theme's xxx-500 (or a
+   5-stop gradient for Schnellcheck). Translates Fakten-Karten's
+   vertical left stripe onto the poker-card-proportioned quiz tile.
+   The band's top corners match the card's border-radius so the
+   stripe sits flush with the rounded corner. */
+.quiz-select-card__band {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 7px;
+  background: var(--tile-strip, var(--color-border));
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  pointer-events: none;
+  /* Above the deck pseudos (z-index: -1) but below the card content. */
+  z-index: 0;
+}
+
+.quiz-select-card__icon {
   margin-bottom: var(--space-md);
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+  color: var(--tile-label, var(--color-text-secondary));
+}
+
+.quiz-select-card__icon svg {
+  display: block;
 }
 
 .quiz-select-card__title {
@@ -3190,17 +3226,52 @@
   border-color: var(--color-accent-muted);
 }
 
+/* Schnellcheck-only: paint the band as a 5-stop linear gradient
+   through the module hues so it reads as "all themes shuffled".
+   Icon is tinted slate-700 so it doesn't fight the gradient. */
+.quiz-select-card--featured .quiz-select-card__band {
+  background: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #8b5cf6 25%,
+    #eab308 50%,
+    #6366f1 75%,
+    #f97316 100%
+  );
+}
+
+/* Layout D for Schnellcheck — the deck cards behind share the same
+   gradient top band, painted via the pseudo-element background layer. */
+.quiz-select-card--featured::before,
+.quiz-select-card--featured::after {
+  background:
+    linear-gradient(
+      90deg,
+      #3b82f6 0%,
+      #8b5cf6 25%,
+      #eab308 50%,
+      #6366f1 75%,
+      #f97316 100%
+    ) top / 100% 7px no-repeat,
+    var(--color-surface);
+}
+
+.quiz-select-card--featured .quiz-select-card__icon {
+  color: #334155; /* Slate-700 */
+}
+
 .quiz-select-card__chip {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 0.65rem;
+  /* Mix chip size L — visible, declarative, on par with the title. */
+  font-size: 0.92rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-accent);
   background: var(--color-accent-light);
-  padding: 2px 8px;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
 }
 
@@ -3227,9 +3298,13 @@
     padding: var(--space-md);
   }
 
-  .quiz-select-card__emoji {
-    font-size: 1.7rem;
+  .quiz-select-card__icon {
     margin-bottom: 4px;
+  }
+
+  .quiz-select-card__icon svg {
+    width: 28px;
+    height: 28px;
   }
 
   .quiz-select-card__title {
