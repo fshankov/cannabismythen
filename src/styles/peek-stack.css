@@ -19,6 +19,10 @@
   aspect-ratio: var(--card-aspect-ratio);
   width: 100%;
   max-width: var(--card-width-max);
+  /* Reserve top + bottom space so the offset pseudo-cards (peek_below)
+     don't collide with sibling content. The 16 px matches the max
+     translate(y) on ::after. */
+  margin-block: 0 16px;
 }
 
 .peek-stack::before,
@@ -30,7 +34,7 @@
   background: var(--color-surface);
   border: 1px solid var(--card-border-color);
   box-shadow: var(--card-shadow);
-  z-index: -1;
+  z-index: 0;
 }
 
 .peek-stack::before {
@@ -40,6 +44,22 @@
 .peek-stack::after {
   transform: translate(0, 16px) scale(0.93);
   opacity: 0.55;
+}
+
+/* The front face — same surface as ::before/::after but on top, with
+   content visible. Consumers add their own padding / layout inside. */
+.peek-stack__face {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Reduced motion: keep the layout but flatten the depth cue so users
