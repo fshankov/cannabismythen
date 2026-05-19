@@ -53,7 +53,7 @@
    sits where the first started, so the eye sees an endless ribbon.
    Left column scrolls DOWN (content moves into view from above);
    right column scrolls UP (content moves out of view upward).
-   Slow period (90 s) so the motion reads as ambient depth rather
+   Slow period (150 s) so the motion reads as ambient depth rather
    than a ticker fighting the card fan for attention. Disabled
    entirely for prefers-reduced-motion. */
 
@@ -62,22 +62,26 @@
   top: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(1.25rem, 2vw, 2rem);
-  width: min(22ch, 28vw);
+  gap: clamp(0.9rem, 1.4vw, 1.4rem);
+  /* Wider than the v1 22 ch so the longer questions ("Beeinträchtigt
+     Cannabis die kognitiven Fähigkeiten?", "Steigt der Konsum bei
+     Minderjährigen durch die Teillegalisierung?") fit on a single
+     line on desktop. Shorter ones leave a touch of trailing space. */
+  width: min(32ch, 30vw);
   pointer-events: none;
   will-change: transform;
 }
 
 .hero-frage__column--left {
-  left: clamp(0.5rem, 3vw, 2.5rem);
+  left: clamp(0.5rem, 2.5vw, 2rem);
   text-align: left;
-  animation: hero-scroll-down 90s linear infinite;
+  animation: hero-scroll-down 150s linear infinite;
 }
 
 .hero-frage__column--right {
-  right: clamp(0.5rem, 3vw, 2.5rem);
+  right: clamp(0.5rem, 2.5vw, 2rem);
   text-align: right;
-  animation: hero-scroll-up 90s linear infinite;
+  animation: hero-scroll-up 150s linear infinite;
 }
 
 @keyframes hero-scroll-down {
@@ -112,14 +116,18 @@
   font-family: 'DM Serif Display', Georgia, serif;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(18px, 1.9vw, 26px);
-  line-height: 1.2;
+  /* Smaller than the v1 18–26 px range so each question reads as a
+     compact one-liner inside the wider column. */
+  font-size: clamp(14px, 1.5vw, 19px);
+  line-height: 1.25;
   letter-spacing: -0.3px;
-  color: rgba(255, 255, 255, 0.10);
-  /* Soft blur so the questions read as atmospheric depth rather
-     than rivaling the card-fan typography for attention. */
-  filter: blur(2px);
-  max-width: 22ch;
+  /* Brightness preset B1 (Subtle lift): 0.18 opacity + 0.5 px blur.
+     Sharper and more visible than the v1 0.10 / blur(2 px) — readers
+     can scan the questions but they still sit behind the card fan
+     in the visual hierarchy. */
+  color: rgba(255, 255, 255, 0.18);
+  filter: blur(0.5px);
+  max-width: 32ch;
   user-select: none;
   flex: 0 0 auto;
 }

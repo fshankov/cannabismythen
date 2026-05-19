@@ -796,7 +796,7 @@ const heroBlock = singleton({
       {
         label: "Hintergrund-Fragen",
         description:
-          "Mythen-Fragen, die dezent hinter dem Karten-Stack scrollen. 30 empfohlen (15 pro Spalte). Erste Hälfte = linke Spalte (scrollt nach unten); zweite Hälfte = rechte Spalte (scrollt nach oben, rechtsbündig). Gesamtzahl gerade halten für balancierte Spalten.",
+          "Mythen-Fragen, die dezent hinter dem Karten-Stack scrollen. 42 empfohlen (21 pro Spalte) — eine Frage pro Mythos, auf Basis der vollständigen Mythos-Aussagen formuliert. Erste Hälfte = linke Spalte (scrollt nach unten); zweite Hälfte = rechte Spalte (scrollt nach oben, rechtsbündig). Gesamtzahl gerade halten für balancierte Spalten.",
         itemLabel: (p) => p.value || "Frage",
       },
     ),
