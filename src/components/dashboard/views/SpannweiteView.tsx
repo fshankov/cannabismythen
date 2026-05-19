@@ -28,11 +28,14 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Eye, EyeOff, TrendingUp, Target, Shield, Globe,
-  Users, Baby, Cannabis, GraduationCap, UsersRound,
+  EyeOff,
   ArrowDown01, ArrowDown10, ArrowDownAZ,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import {
+  INDICATOR_ICONS,
+  AUDIENCE_ICONS_BY_GROUP,
+  type IconComponent,
+} from '../../../lib/icons';
 import type {
   Myth, Metric, Group, GroupId, AppState, Indicator,
   StripsMode, DashboardDefinitions, SpannweiteSort,
@@ -84,21 +87,10 @@ const INDICATORS: Indicator[] = [
 ];
 const GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 
-const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
-  awareness: Eye,
-  significance: TrendingUp,
-  correctness: Target,
-  prevention_significance: Shield,
-  population_relevance: Globe,
-};
-
-const GROUP_ICONS: Record<GroupId, LucideIcon> = {
-  adults: Users,
-  minors: Baby,
-  consumers: Cannabis,
-  young_adults: GraduationCap,
-  parents: UsersRound,
-};
+// INDICATOR_ICONS is now imported directly from @/lib/icons.
+// GROUP_ICONS aliases the central registry so the rest of the file
+// reads as before.
+const GROUP_ICONS: Record<GroupId, IconComponent> = AUDIENCE_ICONS_BY_GROUP;
 
 const GROUP_SHORT_DE: Record<GroupId, string> = {
   adults: 'Erw.',

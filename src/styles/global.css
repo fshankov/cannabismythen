@@ -1066,82 +1066,11 @@ button.pill[aria-pressed="true"] {
   max-width: var(--max-width-prose);
   margin: 0 auto;
 }
-.faq-hub-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-lg);
-  margin-bottom: var(--space-2xl);
-}
-.faq-hub-card {
-  --audience-accent: var(--color-accent);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-top: 4px solid var(--audience-accent);
-  border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  text-decoration: none;
-  color: inherit;
-  transition:
-    box-shadow var(--transition),
-    transform var(--transition),
-    border-color var(--transition);
-}
-.faq-hub-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-  border-color: var(--audience-accent);
-}
-.faq-hub-card__top {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-.faq-hub-card__emoji { font-size: 1.7rem; }
-.faq-hub-card__title {
-  font-size: 1.15rem;
-  margin: 0;
-  color: var(--color-text);
-}
-.faq-hub-card__count {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--audience-accent);
-  margin: 0;
-}
-.faq-hub-card__description {
-  color: var(--color-text-muted);
-  font-size: 0.92rem;
-  line-height: 1.5;
-  margin: 0;
-}
-.faq-hub-card__top-question {
-  margin-top: auto;
-  padding: var(--space-sm) 0 0;
-  border-top: 1px solid var(--color-border);
-}
-.faq-hub-card__top-q {
-  font-size: 0.92rem;
-  color: var(--color-text);
-  font-weight: 500;
-  margin: 0 0 4px;
-}
-.faq-hub-card__top-teaser {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  margin: 0;
-}
-.faq-hub-card__cta {
-  margin-top: var(--space-xs);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--audience-accent);
-}
+/* NOTE: .faq-hub-grid and .faq-hub-card* removed 2026-05-18 after
+   AudienceHubGrid.astro switched to the canonical .quiz-select-card
+   pattern (.quiz-selection.mi-hub). The layout + tile styling now
+   come from quiz.css; only the wrapper .faq-hub and the methodology
+   expandable .faq-hub__methode remain here. */
 .faq-hub__methode {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
@@ -1603,11 +1532,7 @@ button.pill[aria-pressed="true"] {
 }
 
 /* Mobile */
-@media (max-width: 900px) {
-  .faq-hub-grid { grid-template-columns: repeat(2, 1fr); }
-}
 @media (max-width: 599px) {
-  .faq-hub-grid { grid-template-columns: 1fr; }
   .faq-question__summary {
     grid-template-columns: auto 1fr auto;
   }

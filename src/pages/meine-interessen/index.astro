@@ -10,6 +10,11 @@ import {
   type FaqQuestion,
 } from "@lib/faq";
 
+// Quiz-deck tile styles (.quiz-selection / .quiz-select-card / deck
+// pseudo-elements / mobile snap-carousel). AudienceHubGrid layers a
+// small set of `.mi-hub-card` overrides on top.
+import "../../styles/quiz.css";
+
 const audiences = await getAllAudiences();
 
 const items: { audience: FaqAudienceMeta; count: number; topQuestion: FaqQuestion | null }[] =

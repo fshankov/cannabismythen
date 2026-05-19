@@ -12,10 +12,10 @@
 
 import type { ReactNode } from 'react';
 import {
-  Eye, TrendingUp, Target, Shield, Globe,
-  Users, Baby, Cannabis, GraduationCap, UsersRound,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+  INDICATOR_ICONS as ICONS_INDICATOR,
+  AUDIENCE_ICONS_BY_GROUP,
+  type IconComponent,
+} from '../../../lib/icons';
 import type {
   AppState, Group, GroupId, Indicator, StripsMode,
   DashboardDefinitions,
@@ -33,21 +33,8 @@ const STRIP_GROUP_IDS: GroupId[] = [
   'adults', 'minors', 'consumers', 'young_adults', 'parents',
 ];
 
-const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
-  awareness: Eye,
-  significance: TrendingUp,
-  correctness: Target,
-  prevention_significance: Shield,
-  population_relevance: Globe,
-};
-
-const GROUP_ICONS: Record<GroupId, LucideIcon> = {
-  adults: Users,
-  minors: Baby,
-  consumers: Cannabis,
-  young_adults: GraduationCap,
-  parents: UsersRound,
-};
+const INDICATOR_ICONS: Record<Indicator, IconComponent> = ICONS_INDICATOR;
+const GROUP_ICONS: Record<GroupId, IconComponent> = AUDIENCE_ICONS_BY_GROUP;
 
 interface Props {
   state: AppState;

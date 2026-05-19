@@ -1,6 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Eye, EyeOff, TrendingUp, Target, Shield } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { EyeOff } from 'lucide-react';
+import {
+  IconKenntnis,
+  IconBedeutung,
+  IconRichtigkeit,
+  IconPraevention,
+  type IconComponent,
+} from '../../../lib/icons';
 import type { Myth, Metric, AppState, Indicator } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythShortText, formatValue } from '../../../lib/dashboard/data';
 import { getCorrectnessBgColor } from '../../../lib/dashboard/colors';
@@ -23,11 +29,11 @@ interface Props {
 type SortKey = 'myth' | 'verdict' | 'awareness' | 'significance' | 'correctness' | 'prevention_significance' | 'population_relevance';
 type SortDir = 'asc' | 'desc';
 
-const INDICATOR_COLS: { key: Indicator; Icon: LucideIcon }[] = [
-  { key: 'awareness', Icon: Eye },
-  { key: 'significance', Icon: TrendingUp },
-  { key: 'correctness', Icon: Target },
-  { key: 'prevention_significance', Icon: Shield },
+const INDICATOR_COLS: { key: Indicator; Icon: IconComponent }[] = [
+  { key: 'awareness', Icon: IconKenntnis },
+  { key: 'significance', Icon: IconBedeutung },
+  { key: 'correctness', Icon: IconRichtigkeit },
+  { key: 'prevention_significance', Icon: IconPraevention },
 ];
 
 // VERDICT_OPTIONS lived here for the inline header `<select>` — moved
