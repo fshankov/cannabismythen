@@ -26,14 +26,16 @@ import {
   type ReactElement,
 } from 'react';
 import { Search } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import type { IconComponent } from '@lib/icons';
 import InfoTooltip from '../InfoTooltip';
 
 export interface DataPickerOption<T extends string> {
   value: T;
   label: string;
-  /** Lucide icon component for the leading visual. */
-  Icon?: LucideIcon;
+  /** Leading-visual icon. Accepts both Lucide icons and the custom
+   *  IconComponent registry (audience / indicator / source SVGs), since
+   *  LucideIcon is structurally assignable to ComponentType<IconProps>. */
+  Icon?: IconComponent;
   /** Emoji string used in place of an icon (e.g. Themen). */
   emoji?: string;
   /** Greyed-and-blocked. The trigger title surfaces `disabledReason`. */
