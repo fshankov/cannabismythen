@@ -1213,13 +1213,6 @@ const numbersStrip = singleton({
         itemLabel: (p) => `${p.fields.value.value} ${p.fields.label.value}`,
       },
     ),
-    subline: fields.text({
-      label: "Unterzeile",
-      multiline: true,
-      description: "Kontext zur quantitativen Validierungs-Befragung (2.795 Personen).",
-      defaultValue:
-        "Quantitative Validierungs-Befragung: 2.795 Personen — 2.097 Erwachsene (18–70), 555 Minderjährige (16–17), 143 Mitglieder einer Anbauvereinigung. Erhebung August 2025.",
-    }),
     linkLabel: fields.text({
       label: "Link-Text",
       defaultValue: "Mehr über das Projekt",
