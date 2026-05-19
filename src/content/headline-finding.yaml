@@ -1,12 +1,17 @@
-# AI-drafted native rewrite (2026-05-16). Replaces the previous
-# alcohol-comparison claim (which contradicts the current m04
-# classification: richtig) with the Motivationsverlust finding
-# documented in src/content/ueber-uns-scrolly.yaml line 59
-# ("Cannabiskonsum verursacht einen generellen Motivationsverlust"
-# — verdict falsch, Richtigkeits-Score 25/100, Mehrheit liegt daneben).
+# AI-drafted native rewrite (2026-05-19, Round-5). The headline-finding
+# singleton now feeds the four-paths INTRO (not a standalone
+# Schlüsselbefund block — that role was conflated with the four-paths
+# hookQuote since Round-1). Repurposed as a navigational nudge so the
+# 2×2 paths grid below has a clear "what next?" framing. The previous
+# Motivationsverlust finding is dropped from the homepage (still lives
+# in src/content/ueber-uns-scrolly.yaml line 59 for the scrollytelling).
 # Awaiting ISD editorial confirmation before merge to main.
+#
+# NOTE: the Keystatic singleton label still reads "Schlüsselbefund –
+# Startseite". A schema-label rename to "Vier Wege – Intro" is queued
+# for the next schema-touching session.
 
-eyebrow: 'Ein Schlüsselbefund'
-leadClause: '„Beim »Cannabis macht antriebslos«-Mythos liegen nur 25 von 100 Erwachsenen richtig —'
-counterClause: 'die Mehrheit liegt daneben."'
-counterClassification: 'falsch'
+eyebrow: 'Vier Wege'
+leadClause: 'Was interessiert dich?'
+counterClause: 'Vier Wege in die Forschung.'
+counterClassification: 'no_classification'
