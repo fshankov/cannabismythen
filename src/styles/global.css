@@ -117,6 +117,10 @@
      and inner-preview decks re-proportion together. */
   --card-aspect-ratio: 1 / 1.4;
   --card-width-max: 280px;
+  /* Square variant used by the four-paths 2×2 mid-viewport layout (701–1023 px).
+     Slightly wider than the portrait max so the square tile carries the bigger
+     peek-stack inside without feeling cramped. */
+  --card-width-max-square: 360px;
   --card-padding: var(--space-lg);
   --card-radius: var(--radius-lg);
   --card-shadow: var(--shadow-md);
