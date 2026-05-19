@@ -10,12 +10,41 @@ beliefLabel: 'Mythos'
 scienceLabel: 'Befund'
 
 backgroundQuestions:
-  - 'Macht Cannabis abhängig?'
-  - 'Macht Cannabis Psychosen?'
-  - 'Wirkt Cannabis entspannend?'
+  # 30 questions drawn from the 42 myth statements with varied verbs.
+  # First half (1–15) renders in the left column (scrolls down,
+  # left-aligned). Second half (16–30) renders in the right column
+  # (scrolls up, right-aligned). Keep the array length even so the
+  # two columns stay balanced. AI-drafted German awaiting ISD review.
+  - 'Ist Cannabis ein Allheilmittel?'
+  - 'Schadet Cannabis Jugendlichen besonders?'
+  - 'Ist Cannabis harmlos?'
+  - 'Ist Cannabis weniger schädlich als Alkohol?'
+  - 'Lässt sich Cannabis schwer dosieren?'
+  - 'Ist Mischkonsum besonders riskant?'
+  - 'Schadet Cannabis dem Fötus?'
+  - 'Kann man an Cannabis sterben?'
+  - 'Wirkt Cannabis gegen Schmerzen?'
+  - 'Bewirkt Cannabis Übelkeit?'
+  - 'Schadet Cannabis dem Herz-Kreislauf?'
+  - 'Schadet Cannabis-Rauchen den Atemwegen?'
+  - 'Hilft Cannabis bei Spastiken?'
+  - 'Hilft Cannabis beim Einschlafen?'
   - 'Ist Cannabis eine Einstiegsdroge?'
   - 'Hilft Cannabis beim Abnehmen?'
   - 'Hemmt Cannabis Entzündungen?'
+  - 'Verändert Cannabis die Wahrnehmung?'
+  - 'Verursacht Cannabis Krebs?'
+  - 'Macht Cannabis abhängig?'
+  - 'Gefährdet Cannabis die Verkehrssicherheit?'
+  - 'Beeinträchtigt Cannabis das Gedächtnis?'
+  - 'Wirkt Cannabis gegen Depressionen?'
+  - 'Wirkt Cannabis gegen Angst?'
+  - 'Verursacht Cannabis Psychosen?'
+  - 'Erhöht Cannabis das Suizidrisiko?'
+  - 'Hebt Cannabis die Stimmung?'
+  - 'Wirkt Cannabis entspannend?'
+  - 'Macht Cannabis antriebslos?'
+  - 'Macht Cannabis kreativ?'
 
 pairs:
   - belief: 'Cannabis verursacht Psychosen.'

@@ -46,23 +46,88 @@
   overflow: hidden;
 }
 
-.hero-frage__question {
+/* Two scrolling columns of mythen-questions flanking the fan.
+   Each column is an absolutely-positioned tall flex stack whose
+   slice of questions is duplicated in the DOM so the CSS keyframe
+   (translateY 0 ↔ -50%) loops seamlessly: at -50% the second copy
+   sits where the first started, so the eye sees an endless ribbon.
+   Left column scrolls DOWN (content moves into view from above);
+   right column scrolls UP (content moves out of view upward).
+   Slow period (90 s) so the motion reads as ambient depth rather
+   than a ticker fighting the card fan for attention. Disabled
+   entirely for prefers-reduced-motion. */
+
+.hero-frage__column {
   position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2vw, 2rem);
+  width: min(22ch, 28vw);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hero-frage__column--left {
+  left: clamp(0.5rem, 3vw, 2.5rem);
+  text-align: left;
+  animation: hero-scroll-down 90s linear infinite;
+}
+
+.hero-frage__column--right {
+  right: clamp(0.5rem, 3vw, 2.5rem);
+  text-align: right;
+  animation: hero-scroll-up 90s linear infinite;
+}
+
+@keyframes hero-scroll-down {
+  /* Column starts shifted up by half its own height — the second
+     copy of the question slice is visible inside the hero. As the
+     animation progresses the column slides DOWN to translateY(0),
+     by which point the first copy is back in view and the second
+     has slid out of frame below. Snap restart is invisible. */
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes hero-scroll-up {
+  /* Mirror of hero-scroll-down: starts at 0, ends at -50%. The
+     first copy of the slice scrolls UP and out of frame; by -50%
+     the second copy occupies the original visible window. */
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-frage__column {
+    animation: none;
+    /* With animation off the column sits at translateY(0). The
+       first half of the duplicated slice is in view; the second
+       extends below the hero crop, hidden by overflow: hidden
+       on .hero-frage. Reads as a static stacked list. */
+  }
+}
+
+.hero-frage__question {
   font-family: 'DM Serif Display', Georgia, serif;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(20px, 2.2vw, 30px);
+  font-size: clamp(18px, 1.9vw, 26px);
   line-height: 1.2;
   letter-spacing: -0.3px;
   color: rgba(255, 255, 255, 0.10);
+  /* Soft blur so the questions read as atmospheric depth rather
+     than rivaling the card-fan typography for attention. */
+  filter: blur(2px);
   max-width: 22ch;
   user-select: none;
+  flex: 0 0 auto;
 }
 
-.hero-frage__question--p0 { top:  9%; left:  4%; }
-.hero-frage__question--p1 { bottom: 9%; right: 4%; text-align: right; }
-
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
+  /* On narrower viewports the card fan grows wider relative to the
+     hero, the side margins shrink, and the columns start crowding
+     the card edges. Hide them and let the fan breathe. */
   .hero-frage__bg { display: none; }
 }
 

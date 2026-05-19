@@ -795,7 +795,8 @@ const heroBlock = singleton({
       fields.text({ label: "Frage" }),
       {
         label: "Hintergrund-Fragen",
-        description: "Leichte Fragen, die dezent hinter dem Karten-Stack stehen. 4–8 empfohlen.",
+        description:
+          "Mythen-Fragen, die dezent hinter dem Karten-Stack scrollen. 30 empfohlen (15 pro Spalte). Erste Hälfte = linke Spalte (scrollt nach unten); zweite Hälfte = rechte Spalte (scrollt nach oben, rechtsbündig). Gesamtzahl gerade halten für balancierte Spalten.",
         itemLabel: (p) => p.value || "Frage",
       },
     ),
