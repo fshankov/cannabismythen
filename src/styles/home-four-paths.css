@@ -76,24 +76,9 @@
   margin-inline: auto;
 }
 
-/* Tablet / small laptop 701–1023 px: 2×2 square matrix.
-   Tiles flip from portrait to square here because at this width the
-   2-column layout gives each tile ~46 % viewport (≈450 px) — a
-   square footprint reads as a balanced grid, while keeping the
-   portrait ratio would leave very tall tiles and a lot of dead
-   vertical space below the preview. Peek-stack widths grow with
-   the tile (see the per-preview rules further down). */
-@media (min-width: 701px) and (max-width: 1023px) {
-  .four-paths__grid {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: calc(2 * var(--card-width-max-square) + 1.75rem);
-  }
-
-  .path-tile {
-    aspect-ratio: 1 / 1;
-    max-width: var(--card-width-max-square);
-  }
-}
+/* (The 701–1023 px tablet / small-laptop 2×2 square matrix rules live
+   at the END of this file so the .path-tile overrides win the cascade
+   against the regular .path-tile default a bit further down.) */
 
 @media (max-width: 700px) {
   .four-paths__grid {
@@ -548,12 +533,24 @@
   overflow: hidden;
 }
 
-/* ── 2×2 square mode: bump preview widths ──────────────────────── */
-/* At 701–1023 px the tiles flip to a square 2-column grid and end up
-   roughly 60 % larger than in the desktop 4-col layout. Without these
-   overrides the peek-stack decks (sized off vw / a small rem cap) keep
-   their desktop footprint and read as lost inside the bigger tile. */
+/* ── 2×2 square mode: grid + tile + preview overrides ──────────── */
+/* 701–1023 px: tablet / small-laptop. The desktop 4-col portrait grid
+   flips to a 2-col square matrix here. Tile aspect goes square so the
+   bigger tiles don't leave dead vertical space below the preview;
+   peek-stack decks grow so they fill the bigger preview area. These
+   rules sit at the END of the file so the .path-tile override beats
+   the regular .path-tile default earlier in the cascade. */
 @media (min-width: 701px) and (max-width: 1023px) {
+  .four-paths__grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: calc(2 * var(--card-width-max-square) + 1.75rem);
+  }
+
+  .path-tile {
+    aspect-ratio: 1 / 1;
+    max-width: var(--card-width-max-square);
+  }
+
   .quiz-preview-deck   { width: clamp(8.5rem, 22vw, 15rem); }
   .meine-preview-deck  { width: clamp(8.5rem, 22vw, 15rem); }
   .karten-preview      { width: clamp(10rem,  24vw, 16rem); }
