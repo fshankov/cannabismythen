@@ -85,28 +85,26 @@
   display: flex;
 }
 
-/* Card shell — mirrors .fakten-card__face via the shared --card-*
-   tokens. The 3 px audience-color top stripe stays intentionally
-   thinner than the 6 px Fakten-Karten category stripe; the
-   audience colors are softer markers and a fat bar fights with
-   the row layout. */
+/* Card shell — wraps the primary CTA anchor + an optional pill-row
+   of additional targets. Aspect-ratio is intentionally NOT set on
+   the shell: when additionalTargets are present the card grows to
+   fit the pill row, and grid stretch keeps all five cards the same
+   final height anyway. A min-height matched to the canonical
+   portrait card-width × aspect-ratio prevents cards without
+   additionals from shrinking below the old footprint. */
 .audience-card {
   --audience-color: var(--color-accent);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
   width: 100%;
   max-width: var(--card-width-max);
-  aspect-ratio: var(--card-aspect-ratio);
-  padding: var(--card-padding);
+  min-height: calc(var(--card-width-max) * 1.4);
   background: var(--color-surface);
   border: 1px solid var(--card-border-color);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
   color: var(--color-text);
-  text-decoration: none;
-  text-align: left;
   overflow: hidden;
   transition:
     transform var(--transition-fast),
@@ -123,14 +121,36 @@
   right: 0;
   height: 3px;
   background: var(--audience-color);
+  z-index: 1;
 }
 
+/* Lift fires on any hover inside the card (primary link OR a pill).
+   :focus-within picks up keyboard focus too. */
 .audience-card:hover,
-.audience-card:focus-visible {
+.audience-card:focus-within {
   transform: translateY(-3px);
   border-color: var(--audience-color);
   box-shadow: var(--shadow-lg);
-  outline: none;
+}
+
+/* Primary CTA — top portion of the card, fills available space so
+   the additionals pill row sticks to the bottom. */
+.audience-card__primary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1 1 auto;
+  padding: var(--card-padding);
+  color: inherit;
+  text-decoration: none;
+  text-align: left;
+  position: relative;
+}
+
+.audience-card__primary:focus-visible {
+  outline: 2px solid var(--audience-color);
+  outline-offset: -3px;
+  border-radius: var(--card-radius);
 }
 
 .audience-card__emoji {
@@ -165,22 +185,82 @@
 }
 
 .audience-card:hover .audience-card__arrow,
-.audience-card:focus-visible .audience-card__arrow {
+.audience-card:focus-within .audience-card__arrow {
   transform: translateX(3px);
   opacity: 1;
 }
 
+/* Additional-targets pill row — sits at the bottom of the card with
+   a hairline divider in the audience color. The row is a small
+   horizontal flex; pills wrap to a second line when there's no room
+   (e.g. on narrow mobile cards). */
+.audience-card__additionals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.5rem;
+  padding: 0.65rem var(--card-padding) var(--card-padding);
+  border-top: 1px solid color-mix(in srgb, var(--audience-color) 18%, transparent);
+  background: color-mix(in srgb, var(--audience-color) 4%, transparent);
+}
+
+.audience-card__additionals-label {
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  flex: 0 0 auto;
+}
+
+.audience-card__pills {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.audience-card__pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--audience-color);
+  text-decoration: none;
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--audience-color) 35%, transparent);
+  border-radius: var(--radius-full);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.audience-card__pill:hover,
+.audience-card__pill:focus-visible {
+  background: color-mix(in srgb, var(--audience-color) 12%, var(--color-surface));
+  border-color: var(--audience-color);
+  outline: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .audience-card,
-  .audience-card__arrow {
+  .audience-card__arrow,
+  .audience-card__pill {
     transition: none;
   }
   .audience-card:hover,
-  .audience-card:focus-visible {
+  .audience-card:focus-within {
     transform: none;
   }
   .audience-card:hover .audience-card__arrow,
-  .audience-card:focus-visible .audience-card__arrow {
+  .audience-card:focus-within .audience-card__arrow {
     transform: none;
   }
 }

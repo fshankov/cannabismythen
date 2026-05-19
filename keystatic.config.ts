@@ -1258,6 +1258,24 @@ const audienceShortcut = singleton({
           label: "Ziel-URL",
           description: "Ziel des Klicks (intern oder extern).",
         }),
+        additionalTargets: fields.array(
+          fields.object({
+            label: fields.text({
+              label: "Beschriftung",
+              description: "Kurzer Pill-Text (1–3 Wörter ideal).",
+            }),
+            url: fields.text({
+              label: "Ziel-URL",
+              description: "Tieflink zur passenden Sektion (intern oder extern).",
+            }),
+          }),
+          {
+            label: "Weitere Ziele (Pill-Row)",
+            description:
+              "Optionale Liste tiefer Verweise pro Audience. Erscheinen als kleine Pill-Links unter der primären CTA. 0–3 Einträge empfohlen.",
+            itemLabel: (p) => p.fields.label.value || "Pill",
+          },
+        ),
       }),
       {
         label: "Audience-Karten",
