@@ -47,6 +47,7 @@ const myths: {
   classification: string;
   classificationLabel: string;
   cardSummary: string;
+  cardShortSummary: string;
   categoryGroup: string;
   slug: string;
 }[] = [];
@@ -72,6 +73,7 @@ for (const [slug, entry] of factsheetEntries) {
     classification: e.classification || "",
     classificationLabel: e.classificationLabel || "",
     cardSummary: e.cardSummary || "",
+    cardShortSummary: e.cardShortSummary || "",
     categoryGroup: e.categoryGroup || "",
     slug,
   });

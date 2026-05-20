@@ -27,7 +27,12 @@ export interface FaktenCardMyth {
    * Retained on the type for backwards compatibility; not rendered.
    */
   classificationLabel: string;
+  /** Popup "Synthese" copy. Read by FactsheetPanel, NOT by the card back. */
   cardSummary: string;
+  /** ISD-finalised short summary (Zusammenfassung 2026-05-20). Rendered on
+   *  the card back; intentionally distinct from cardSummary so the popup
+   *  shows a different perspective when the user taps in. */
+  cardShortSummary: string;
   slug: string;
 }
 
@@ -99,7 +104,9 @@ export default function FaktenCard({
           <div className="fakten-card__face fakten-card__face--back">
             {stripe}
             <div className="fakten-card__face-body">
-              <p className="fakten-card__summary">{myth.cardSummary}</p>
+              <p className="fakten-card__summary">
+                {myth.cardShortSummary || myth.cardSummary}
+              </p>
               <span className="fakten-card__cta">Tippen für mehr →</span>
             </div>
           </div>

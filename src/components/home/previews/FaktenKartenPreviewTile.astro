@@ -5,6 +5,10 @@ import type { CorrectnessClass } from "@lib/dashboard/types";
 export interface PreviewMyth {
   text: string;
   classification: string;
+  /** ISD-finalised short summary, rendered under the title on the preview
+   *  card. Optional — older callers may not supply it; the JSX below skips
+   *  the paragraph cleanly when empty. */
+  summary?: string;
 }
 
 export interface Props {
@@ -28,6 +32,7 @@ function toCorrectness(c: string): CorrectnessClass {
 
 const cards = previewMyths.slice(0, 3).map((m) => ({
   text: m.text,
+  summary: m.summary ?? "",
   verdict: toCorrectness(m.classification),
 }));
 
@@ -57,6 +62,9 @@ const STRIPE_COLOR: Record<CorrectnessClass, string> = {
           <p class={`karten-preview__statement karten-preview__statement--${card.verdict}`}>
             {card.text}
           </p>
+          {card.summary && (
+            <p class="karten-preview__summary">{card.summary}</p>
+          )}
         </div>
       ))}
     </div>

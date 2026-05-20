@@ -3342,11 +3342,14 @@
 }
 
 /* Face body — flex column. Statement / Summary anchor to the top;
-   CategoryFooter / CTA anchor to the bottom via margin-top: auto. */
+   CategoryFooter / CTA anchor to the bottom via margin-top: auto.
+   Gap is intentionally tight on the back face so the ISD short-summary
+   (cardShortSummary, up to ~450 chars) has more room before bumping into
+   the CTA. */
 .fakten-card__face-body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   height: 100%;
 }
 
@@ -3358,11 +3361,14 @@
   letter-spacing: -0.005em;
 }
 
-/* Back face content */
+/* Back face content. Sized to fit the longest ISD short-summary (m05,
+   452 chars) at the canonical 280-px card width without overflow. The
+   slight font + line-height reduction vs. the front statement keeps the
+   text readable while restoring vertical headroom for the CTA. */
 .fakten-card__summary {
   margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.55;
+  font-size: 0.82rem;
+  line-height: 1.5;
   color: var(--color-text-secondary);
 }
 
@@ -3836,7 +3842,12 @@
 }
 
 .fakten-grid .quiz-card__cell {
-  aspect-ratio: var(--card-aspect-ratio);
+  /* Scoped override of the global --card-aspect-ratio (1 / 1.4). The
+     fakten-card back face hosts the ISD short-summary (up to ~452 chars)
+     and needs more vertical room than the hero / four-paths preview
+     cards. Other --card-aspect-ratio consumers (home hero, audience
+     shortcut, four-paths tiles) stay at the global proportion. */
+  aspect-ratio: 1 / 1.6;
   max-width: var(--card-width-max);
   width: 100%;
   /* Release the generic `.quiz-card__cell { min-height: 340px }` rule

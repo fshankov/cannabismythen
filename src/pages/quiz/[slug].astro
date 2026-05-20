@@ -130,6 +130,18 @@ if (theme) {
           refCount,
         };
 
+        // Overlay the ISD-finalised cardShortSummary onto the reveal
+        // card's explanation. Quiz mdoc's `explanation` stays as the
+        // fallback for myths where the new summary hasn't been added
+        // yet (and is preserved in the schema for archival reasons).
+        const mythCardShortSummary = (mythEntry as { cardShortSummary?: string }).cardShortSummary;
+        if (mythCardShortSummary && quizTextMap[myth.id]) {
+          quizTextMap[myth.id] = {
+            ...quizTextMap[myth.id],
+            explanation: mythCardShortSummary,
+          };
+        }
+
         // mNN → numeric id ("m01" → 1). The mythNumber field on the
         // .mdoc is the canonical conversion; falling back to a regex on
         // the id keeps things safe if the field is somehow missing.

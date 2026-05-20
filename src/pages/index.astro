@@ -67,13 +67,18 @@ const heroPairs: HeroPair[] = (heroBlockData?.pairs ?? []).map((p) => ({
 const heroBackgroundQuestions: string[] = [...(heroBlockData?.backgroundQuestions ?? [])];
 
 // ── Fakten-Karten preview: pick three short representative myths ───────────
-type MythRecord = { prefix: string; classification: string; title: string };
+type MythRecord = {
+  prefix: string;
+  classification: string;
+  title: string;
+  summary: string;
+};
 const mythRecords: MythRecord[] = [];
 
 for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
   const prefixMatch = slug.match(/^m\d+/);
   if (!prefixMatch) continue;
-  const e = entry as { classification: string; title?: string };
+  const e = entry as { classification: string; title?: string; cardShortSummary?: string };
   // Strip the "Mythos N: " prefix and trailing period so the title alone
   // fits the small preview-card stripes.
   const title = (e.title ?? "")
@@ -81,7 +86,12 @@ for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
     .replace(/\s*\([a-z]\)/gi, "")
     .replace(/[.\s]+$/, "")
     .trim();
-  mythRecords.push({ prefix: prefixMatch[0], classification: e.classification, title });
+  mythRecords.push({
+    prefix: prefixMatch[0],
+    classification: e.classification,
+    title,
+    summary: e.cardShortSummary ?? "",
+  });
 }
 
 function pickShortest(cls: string): MythRecord | undefined {
@@ -96,7 +106,7 @@ const previewMyths: PreviewMyth[] = [
   pickShortest("falsch"),
 ]
   .filter((r): r is MythRecord => r !== undefined)
-  .map((r) => ({ text: r.title, classification: r.classification }));
+  .map((r) => ({ text: r.title, classification: r.classification, summary: r.summary }));
 
 // ── Editorial section content ──────────────────────────────────────────────
 const numbersStripData = await reader.singletons.numbersStrip.read();
