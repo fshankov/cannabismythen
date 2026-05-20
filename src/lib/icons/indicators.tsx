@@ -20,7 +20,7 @@ import { forwardRef } from 'react';
 import {
   Eye,
   Bookmark,
-  Target,
+  LocateFixed,
   ShieldCheck,
   Globe,
   Search,
@@ -58,7 +58,7 @@ IconBedeutung.displayName = 'IconBedeutung';
 
 export const IconRichtigkeit = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
-    <Target ref={ref as never} size={size} {...rest} />
+    <LocateFixed ref={ref as never} size={size} {...rest} />
   ),
 );
 IconRichtigkeit.displayName = 'IconRichtigkeit';

@@ -1,27 +1,28 @@
 /**
  * Source-category icons — 6 channels from CaRM Tab. 4.12/4.13.
  *
- * Locked variants from Phase 2:
- *   • Institutionell     → Lucide Building2
- *   • Internet           → Lucide AppWindow      (browser-window read)
+ * Locked variants (Phase 3h, Fedor 2026-05-16):
+ *   • Institutionell     → Lucide Hospital   (was Building2; Hospital is
+ *                                             health-coded — better fit for
+ *                                             Arzt/Apotheke/Krankenkasse)
+ *   • Internet           → Lucide AppWindow
  *   • Soziale Medien     → Lucide MessageCircle
  *   • Traditionelle      → Lucide Tv
- *   • Print / Physisch   → Lucide FileText       (sheet of paper, NOT building)
- *   • Persönliches Umfeld → custom: two figures side by side, no connecting line
- *
- * Persönliches Umfeld is custom because Lucide Users / UsersRound are
- * already in use elsewhere (Volljährige uses UsersRound) and would visually
- * collide if reused here.
+ *   • Print / Physisch   → Lucide FileText
+ *   • Persönliches Umfeld → Lucide Handshake (was custom two-figures; Handshake
+ *                                             reads as "interpersonal" + no
+ *                                             collision with Volljährige group)
  */
 
 import type { SVGProps } from 'react';
 import { forwardRef } from 'react';
 import {
-  Building2,
+  Hospital,
   AppWindow,
   MessageCircle,
   Tv,
   FileText,
+  Handshake,
 } from 'lucide-react';
 
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
@@ -39,7 +40,7 @@ const baseProps = {
 
 export const IconSrcInstitutionell = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
-    <Building2 ref={ref as never} size={size} {...rest} />
+    <Hospital ref={ref as never} size={size} {...rest} />
   ),
 );
 IconSrcInstitutionell.displayName = 'IconSrcInstitutionell';
@@ -72,16 +73,12 @@ export const IconSrcPrintPhysisch = forwardRef<SVGSVGElement, IconProps>(
 );
 IconSrcPrintPhysisch.displayName = 'IconSrcPrintPhysisch';
 
-/** Persönliches Umfeld — custom: two figures, no line. Distinct from
- *  Volljährige (UsersRound = asymmetric 1+partial) by composition. */
+/** Persönliches Umfeld — Lucide Handshake. Reads as "interpersonal /
+ *  relational" (Angehörige + person-side of Arzt/Apotheke/Beratung).
+ *  No collision with Volljährige's group composition. */
 export const IconSrcPersoenlich = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
-    <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      <circle cx="8" cy="8" r="2.4" />
-      <circle cx="16" cy="8" r="2.4" />
-      <path d="M3 20a4.5 4.5 0 0 1 9 0" />
-      <path d="M12 20a4.5 4.5 0 0 1 9 0" />
-    </svg>
+    <Handshake ref={ref as never} size={size} {...rest} />
   ),
 );
 IconSrcPersoenlich.displayName = 'IconSrcPersoenlich';

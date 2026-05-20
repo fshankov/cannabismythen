@@ -159,22 +159,30 @@ export const IconEltern = forwardRef<SVGSVGElement, IconProps>(
 IconEltern.displayName = 'IconEltern';
 
 /* ------------------------------------------------------------------ */
-/* Lehrkräfte — locked v5 (Fedor's custom paths).
- * Head r=3.2 (slightly bigger than base), circle glasses r=1.9 with
- * temples sticking out beyond the head edges so the lenses read at
- * 16 px. Pointer stick diagonal from hand to upper right.            */
+/* Lehrkräfte — locked v7 (Lucide-Glasses-style spectacles).
+ * Head r=3.2 + glasses styled after Lucide Glasses: round lenses with
+ * a small dipping bridge between them, and temples curving up and out
+ * toward where the ears would be (instead of the flat horizontal
+ * temples used in v5). The pointer stick stays diagonal from hand to
+ * upper-right.                                                        */
 /* ------------------------------------------------------------------ */
 export const IconLehrkraefte = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
+      {/* head */}
       <circle cx="12" cy="7.2" r="3.2" />
-      <circle cx="9.2" cy="7.2" r="1.9" />
-      <circle cx="14.8" cy="7.2" r="1.9" />
-      <path d="M11.1 7.2h1.8" />
-      <path d="M7.3 7.2H6.2" />
-      <path d="M17.8 7.2h-1.1" />
+      {/* glasses — lenses */}
+      <circle cx="9.2" cy="7.5" r="1.6" />
+      <circle cx="14.8" cy="7.5" r="1.6" />
+      {/* glasses — dipping bridge (Lucide style: arc dipping down) */}
+      <path d="M13.2 7.5 a1 1 0 0 0 -1.2 -0.8 a1 1 0 0 0 -1.2 0.8" />
+      {/* glasses — temples curving up and out toward the ears */}
+      <path d="M7.6 7 6.2 5.4 c-0.35 -0.4 -0.7 -0.6 -1.2 -0.6" />
+      <path d="M16.4 7 17.8 5.4 c0.35 -0.4 0.7 -0.6 1.2 -0.6" />
+      {/* torso */}
       <path d="M7 21v-4.1c0-2.8 2-4.7 5-4.7s5 1.9 5 4.7V21" />
       <path d="M7.7 21h8.6" />
+      {/* pointer stick */}
       <path d="M16.9 13.1 20.8 9.2" />
     </svg>
   ),
