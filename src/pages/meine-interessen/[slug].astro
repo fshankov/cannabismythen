@@ -6,13 +6,21 @@ import { getPublishedEntries } from "@lib/content";
 import {
   getAudience,
   getQuestionsByAudience,
+  loadMythPopupData,
   VALID_AUDIENCES,
   type FaqAudienceId,
 } from "@lib/faq";
+import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
+import carmRawJson from "../../../public/data/carm-data.json";
 import AudienceHeader from "@components/faq/AudienceHeader.astro";
 import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
 import HelplineBox from "@components/faq/HelplineBox.astro";
 import WeiterfuehrendList from "@components/faq/WeiterfuehrendList.astro";
+import MythPopupHost from "@components/faq/MythPopupHost";
+// quiz.css carries the .factsheet-panel__* rules the shared FactsheetPanel
+// component depends on. Pulled in here so the popup renders correctly on
+// FAQ pages (same approach as fakten-karten/index.astro).
+import "../../styles/quiz.css";
 
 // Legacy theme slugs (`/meine-interessen/gesundheit/`, etc.) are redirected to
 // the appropriate audience page via `astro.config.mjs#redirects`.
@@ -39,6 +47,11 @@ for (const [qSlug, e] of quizEntries) {
   const title = (e as { title?: string }).title;
   if (title) quizTitles[qSlug] = title;
 }
+
+// Build the popup data once per page. Powers the slide-in FactsheetPanel
+// that opens when readers click an inline myth link inside an FAQ answer.
+const { mythIndex, mythContentMap } = await loadMythPopupData();
+const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
 
 const pageTitle = audience.title;
 const pageDescription = audience.description;
@@ -92,6 +105,13 @@ const pageDescription = audience.description;
       <a href="/meine-interessen/">← Alle Zielgruppen</a>
     </footer>
   </article>
+
+  <MythPopupHost
+    client:load
+    mythIndex={JSON.stringify(mythIndex)}
+    mythContent={JSON.stringify(mythContentMap)}
+    groupMetrics={JSON.stringify(groupMetricsByMyth)}
+  />
 </BaseLayout>
 
 <script is:inline>

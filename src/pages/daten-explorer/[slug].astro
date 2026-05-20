@@ -94,21 +94,20 @@ type FaqBacklink = {
 const faqBacklinks: FaqBacklink[] = [];
 const seen = new Set<string>();
 for (const q of faqMatches) {
-  for (const audId of q.audiences) {
-    const key = `${audId}::${q.slug}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    const audienceMeta = await getAudience(audId);
-    if (!audienceMeta) continue;
-    faqBacklinks.push({
-      audienceId: audId,
-      audienceLabel: audienceMeta.cardLabel,
-      audienceColor: audienceMeta.accentColor,
-      audienceEmoji: audienceMeta.emoji,
-      url: `/meine-interessen/${audId}/#faq-${q.slug}`,
-      questionLong: q.questionLong,
-    });
-  }
+  const audId = q.audience;
+  const key = `${audId}::${q.slug}`;
+  if (seen.has(key)) continue;
+  seen.add(key);
+  const audienceMeta = await getAudience(audId);
+  if (!audienceMeta) continue;
+  faqBacklinks.push({
+    audienceId: audId,
+    audienceLabel: audienceMeta.cardLabel,
+    audienceColor: audienceMeta.accentColor,
+    audienceEmoji: audienceMeta.emoji,
+    url: `/meine-interessen/${audId}/#faq-${q.slug}`,
+    questionLong: q.questionLong,
+  });
 }
 ---
 

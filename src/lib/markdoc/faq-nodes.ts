@@ -26,6 +26,13 @@ import Markdoc, {
   type RenderableTreeNode,
 } from "@markdoc/markdoc";
 
+/**
+ * Sentinel emitted by the {% factsheet-link %} tag. The page-level post-
+ * processor (resolveFactsheetLinkPlaceholders in src/lib/faq.ts) swaps it
+ * for the cleaned myth statement at build time. Format: __FAQ_MYTH_TITLE:mNN__
+ */
+const MYTH_TITLE_PLACEHOLDER = (id: string) => `__FAQ_MYTH_TITLE:${id}__`;
+
 const factsheetLink: Schema = {
   attributes: {
     id: { type: String, required: true },
@@ -34,18 +41,25 @@ const factsheetLink: Schema = {
   selfClosing: true,
   transform(node) {
     const id = String(node.attributes.id ?? "").trim();
-    const label = node.attributes.label
+    // If the editor passed an explicit `label`, use it verbatim. Otherwise
+    // emit a sentinel that the audience page replaces with the actual myth
+    // statement (e.g. "Cannabis ist eine Einstiegsdroge") once we have
+    // build-time access to the zahlenUndFakten collection.
+    const visibleText = node.attributes.label
       ? String(node.attributes.label)
-      : `Mythen-Factsheet ${id.replace(/^m/, "#")}`;
-    // Audience page resolves data-faq-myth → real factsheet URL post-render.
+      : MYTH_TITLE_PLACEHOLDER(id);
+    // <button> not <a>: the popup host (MythPopupHost.tsx) listens for
+    // clicks on [data-faq-myth-id] and opens the shared FactsheetPanel
+    // (same slide-in popup used in Daten-Explorer / Quiz / Fakten-Karten).
     return new Markdoc.Tag(
-      "a",
+      "button",
       {
-        class: "faq-inline-myth",
-        "data-faq-myth": id,
-        href: `/daten-explorer/?myth=${id}`,
+        type: "button",
+        class: "faq-myth-link",
+        "data-faq-myth-id": id,
+        "aria-haspopup": "dialog",
       },
-      [label],
+      [visibleText],
     );
   },
 };

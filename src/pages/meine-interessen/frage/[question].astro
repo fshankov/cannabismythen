@@ -6,10 +6,17 @@ import { getPublishedEntries } from "@lib/content";
 import {
   loadAllQuestions,
   getQuestionBySlug,
+  getQuestionsForMyth,
   getAudience,
+  loadMythPopupData,
+  type FaqAudienceMeta,
   type FaqQuestion,
 } from "@lib/faq";
+import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
+import carmRawJson from "../../../../public/data/carm-data.json";
 import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
+import MythPopupHost from "@components/faq/MythPopupHost";
+import "../../../styles/quiz.css";
 
 export async function getStaticPaths() {
   const all = await loadAllQuestions();
@@ -20,6 +27,9 @@ const { question: slug } = Astro.params;
 const q = await getQuestionBySlug(slug!);
 if (!q) return Astro.redirect("/meine-interessen/");
 
+// Resolve current audience meta for the breadcrumb.
+const currentAudience = await getAudience(q.audience);
+
 // Pre-compute quiz titles for the related rail.
 const quizTitles: Record<string, string> = {};
 const quizEntries = await getPublishedEntries("quiz");
@@ -28,11 +38,24 @@ for (const [qSlug, e] of quizEntries) {
   if (title) quizTitles[qSlug] = title;
 }
 
-// Resolve audience labels for the "auch unter" hint.
-const audienceMetas = await Promise.all(q.audiences.map((a) => getAudience(a)));
-const audiencesForLinks = audienceMetas.filter(
-  (a): a is NonNullable<typeof a> => a !== null,
-);
+// Find sibling questions in OTHER audiences that share the same primaryMyth —
+// the new schema gives one file per audience-question, so audience-specific
+// framing of the same myth lives in different files. Surface those as a rail.
+type Sibling = { question: FaqQuestion; audience: FaqAudienceMeta };
+const siblings: Sibling[] = [];
+if (q.primaryMyth) {
+  const related = await getQuestionsForMyth(q.primaryMyth);
+  for (const other of related) {
+    if (other.slug === q.slug) continue;
+    if (other.audience === q.audience) continue;
+    const aMeta = await getAudience(other.audience);
+    if (aMeta) siblings.push({ question: other, audience: aMeta });
+  }
+}
+
+// Popup data for inline myth links (same data the audience page uses).
+const { mythIndex, mythContentMap } = await loadMythPopupData();
+const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
 
 const description =
   q.leadAnswer.slice(0, 160) || `Antwort zu: ${q.questionLong}`;
@@ -42,6 +65,12 @@ const description =
   <article class="faq-single-question">
     <nav class="faq-audience-header__crumbs" aria-label="Brotkrumen">
       <a href="/meine-interessen/">Meine Interessen</a>
+      {currentAudience && (
+        <>
+          <span aria-hidden="true">›</span>
+          <a href={`/meine-interessen/${currentAudience.id}/`}>{currentAudience.cardLabel}</a>
+        </>
+      )}
       <span aria-hidden="true">›</span>
       <span aria-current="page">Einzelne Frage</span>
     </nav>
@@ -53,14 +82,21 @@ const description =
       quizTitles={quizTitles}
     />
 
-    {audiencesForLinks.length > 0 && (
+    {siblings.length > 0 && (
       <aside class="faq-also-see">
-        <h2 class="faq-also-see__heading">Diese Frage erscheint auch unter:</h2>
+        <h2 class="faq-also-see__heading">
+          Andere Zielgruppen zu diesem Thema:
+        </h2>
         <ul class="faq-also-see__list">
-          {audiencesForLinks.map((a) => (
+          {siblings.map(({ question: sib, audience: a }) => (
             <li>
-              <a href={`/meine-interessen/${a.id}/#faq-${q.slug}`} style={`--audience-accent: ${a.accentColor}`}>
-                <span aria-hidden="true">{a.emoji}</span> {a.cardLabel}
+              <a
+                href={`/meine-interessen/frage/${sib.slug}/`}
+                style={`--audience-accent: ${a.accentColor}`}
+              >
+                <span aria-hidden="true">{a.emoji}</span>{" "}
+                <span class="faq-also-see__audience">{a.cardLabel}:</span>{" "}
+                <span class="faq-also-see__question">{sib.questionLong}</span>
               </a>
             </li>
           ))}
@@ -72,4 +108,11 @@ const description =
       <a href="/meine-interessen/">← Alle Zielgruppen</a>
     </footer>
   </article>
+
+  <MythPopupHost
+    client:load
+    mythIndex={JSON.stringify(mythIndex)}
+    mythContent={JSON.stringify(mythContentMap)}
+    groupMetrics={JSON.stringify(groupMetricsByMyth)}
+  />
 </BaseLayout>

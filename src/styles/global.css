@@ -1249,7 +1249,8 @@ button.pill[aria-pressed="true"] {
   padding: 0.18em 0.55em;
 }
 
-/* Inline myth pill (Markdoc factsheet-link tag) */
+/* Inline myth pill (Markdoc factsheet-link tag) — legacy <a> style kept for
+   any cached/rendered HTML. New FAQ pages render <button class="faq-myth-link"> */
 .faq-inline-myth {
   display: inline-block;
   font-family: var(--font-mono, ui-monospace, monospace);
@@ -1264,6 +1265,37 @@ button.pill[aria-pressed="true"] {
 }
 .faq-inline-myth:hover {
   border-bottom-color: var(--color-accent);
+}
+
+/* Clickable inline myth statement — opens the shared FactsheetPanel via
+   MythPopupHost. Reads as a textual link inside the answer prose rather
+   than a tag pill: the FULL myth statement IS the link text. */
+.faq-myth-link {
+  display: inline;
+  font: inherit;
+  color: var(--color-accent);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  transition: text-decoration-color 120ms ease-out, color 120ms ease-out;
+}
+.faq-myth-link:hover,
+.faq-myth-link:focus-visible {
+  color: var(--color-accent-strong, var(--color-accent));
+  text-decoration-color: var(--color-accent);
+  outline: none;
+}
+.faq-myth-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* Data-callout (Markdoc data-callout tag) */

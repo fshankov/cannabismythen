@@ -25,12 +25,37 @@ export type FaqClassification =
   | "keine_aussage"
   | "n_a";
 
+export type FaqVizType =
+  | "none"
+  | "bars-top-myths"
+  | "bars-correctness"
+  | "grouped-bars-groups"
+  | "donut-correctness"
+  | "ranking-channels"
+  | "scatter-trust-usage"
+  | "table-comparison";
+
+export type FaqVizPlacement =
+  | "after-lead"
+  | "before-data"
+  | "after-data"
+  | "end";
+
+export interface FaqVizSpec {
+  vizType: FaqVizType;
+  vizSource: string;
+  vizDescription: string;
+  /** Optional JSON blob with viz-type-specific parameters. Stage 3 reads this. */
+  vizConfig: string;
+  vizPlacement: FaqVizPlacement;
+}
+
 export interface FaqQuestion {
   slug: string;
   title: string;
   questionLong: string;
-  audiences: FaqAudienceId[];
-  sortByAudience: { audience: FaqAudienceId; order: number }[];
+  audience: FaqAudienceId;
+  sortOrder: number;
   classification: FaqClassification;
   classificationLabel: string;
   leadAnswer: string;
@@ -39,6 +64,7 @@ export interface FaqQuestion {
   relatedQuiz: string[];
   relatedDashboard: string[];
   helpline: { label: string; title: string; url: string } | null;
+  vizSpec: FaqVizSpec | null;
   /** A reader handle to the parsed Markdoc body. Call to materialize the AST. */
   answer: () => Promise<{ node: unknown }>;
 }
@@ -58,10 +84,8 @@ export interface FaqAudienceMeta {
 interface FaqQuestionRaw {
   title: string;
   questionLong: string;
-  audiences?: readonly string[] | null;
-  sortByAudience?:
-    | readonly { audience?: string | null; order?: number | null }[]
-    | null;
+  audience?: string | null;
+  sortOrder?: number | null;
   classification: string;
   classificationLabel?: string | null;
   leadAnswer?: string | null;
@@ -72,6 +96,13 @@ interface FaqQuestionRaw {
   helplineLabel?: string | null;
   helplineTitle?: string | null;
   helplineUrl?: string | null;
+  vizSpec?: {
+    vizType?: string | null;
+    vizSource?: string | null;
+    vizDescription?: string | null;
+    vizConfig?: string | null;
+    vizPlacement?: string | null;
+  } | null;
   status: string;
   internalNotes?: string | null;
   answer: () => Promise<{ node: unknown }>;
@@ -91,20 +122,26 @@ function asAudience(v: string | null | undefined): FaqAudienceId | null {
     : null;
 }
 
-function normalizeQuestion(slug: string, raw: FaqQuestionRaw): FaqQuestion {
-  const audiences = (raw.audiences ?? [])
-    .map((a) => asAudience(a))
-    .filter((a): a is FaqAudienceId => a !== null);
+const VALID_VIZ_TYPES: FaqVizType[] = [
+  "none",
+  "bars-top-myths",
+  "bars-correctness",
+  "grouped-bars-groups",
+  "donut-correctness",
+  "ranking-channels",
+  "scatter-trust-usage",
+  "table-comparison",
+];
 
-  const sortByAudience = (raw.sortByAudience ?? [])
-    .map((s) => ({
-      audience: asAudience(s.audience),
-      order: typeof s.order === "number" ? s.order : 999,
-    }))
-    .filter(
-      (s): s is { audience: FaqAudienceId; order: number } =>
-        s.audience !== null,
-    );
+const VALID_VIZ_PLACEMENTS: FaqVizPlacement[] = [
+  "after-lead",
+  "before-data",
+  "after-data",
+  "end",
+];
+
+function normalizeQuestion(slug: string, raw: FaqQuestionRaw): FaqQuestion {
+  const audience = asAudience(raw.audience) ?? "eltern";
 
   const helpline =
     raw.helplineLabel || raw.helplineTitle || raw.helplineUrl
@@ -115,12 +152,32 @@ function normalizeQuestion(slug: string, raw: FaqQuestionRaw): FaqQuestion {
         }
       : null;
 
+  const rawViz = raw.vizSpec;
+  const vizType =
+    rawViz && VALID_VIZ_TYPES.includes(rawViz.vizType as FaqVizType)
+      ? (rawViz.vizType as FaqVizType)
+      : "none";
+  const vizSpec: FaqVizSpec | null =
+    rawViz && vizType !== "none"
+      ? {
+          vizType,
+          vizSource: rawViz.vizSource ?? "",
+          vizDescription: rawViz.vizDescription ?? "",
+          vizConfig: rawViz.vizConfig ?? "",
+          vizPlacement: VALID_VIZ_PLACEMENTS.includes(
+            rawViz.vizPlacement as FaqVizPlacement,
+          )
+            ? (rawViz.vizPlacement as FaqVizPlacement)
+            : "after-data",
+        }
+      : null;
+
   return {
     slug,
     title: raw.title,
     questionLong: raw.questionLong,
-    audiences,
-    sortByAudience,
+    audience,
+    sortOrder: typeof raw.sortOrder === "number" ? raw.sortOrder : 99,
     classification: (raw.classification as FaqClassification) ?? "n_a",
     classificationLabel: raw.classificationLabel ?? "",
     leadAnswer: raw.leadAnswer ?? "",
@@ -129,15 +186,17 @@ function normalizeQuestion(slug: string, raw: FaqQuestionRaw): FaqQuestion {
     relatedQuiz: [...(raw.relatedQuiz ?? [])],
     relatedDashboard: [...(raw.relatedDashboard ?? [])],
     helpline,
+    vizSpec,
     answer: raw.answer,
   };
 }
 
 let cachedQuestions: FaqQuestion[] | null = null;
 
-/** Load all published FAQ questions. Cached per-process. */
+/** Load all published FAQ questions. Cached per-process in production —
+ *  bypassed in dev so editor edits to .mdoc files reflect on reload. */
 export async function loadAllQuestions(): Promise<FaqQuestion[]> {
-  if (cachedQuestions) return cachedQuestions;
+  if (cachedQuestions && import.meta.env?.PROD) return cachedQuestions;
   const slugs = await reader.collections.faqQuestions.list();
   const out: FaqQuestion[] = [];
   for (const slug of slugs) {
@@ -153,13 +212,9 @@ export async function getQuestionsByAudience(
   audienceId: FaqAudienceId,
 ): Promise<FaqQuestion[]> {
   const all = await loadAllQuestions();
-  const matching = all.filter((q) => q.audiences.includes(audienceId));
+  const matching = all.filter((q) => q.audience === audienceId);
   return matching.sort((a, b) => {
-    const oa =
-      a.sortByAudience.find((s) => s.audience === audienceId)?.order ?? 999;
-    const ob =
-      b.sortByAudience.find((s) => s.audience === audienceId)?.order ?? 999;
-    if (oa !== ob) return oa - ob;
+    if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
     return a.questionLong.localeCompare(b.questionLong, "de");
   });
 }
@@ -234,6 +289,146 @@ export async function getAudience(
 ): Promise<FaqAudienceMeta | null> {
   const all = await getAllAudiences();
   return all.find((a) => a.id === audienceId) ?? null;
+}
+
+/**
+ * Pre-rendered factsheet HTML + classification metadata, mirroring the
+ * MythContentEntry interface from src/components/shared/FactsheetPanel.tsx.
+ * Imported lazily by the popup-data builder so the type stays in one place.
+ */
+export interface FaqMythContentEntry {
+  html: string;
+  title: string;
+  classification: string;
+  classificationLabel: string;
+  refCount: number;
+}
+
+/** Compact metadata for one myth, populates the popup header. */
+export interface FaqMythPopupIndexEntry {
+  mythNumber: number;
+  title: string;
+  classification: string;
+  classificationLabel: string;
+  slug: string;
+}
+
+export interface FaqMythPopupData {
+  /** Keyed by myth ID ("m22"). */
+  mythIndex: Record<string, FaqMythPopupIndexEntry>;
+  /** Keyed by mythNumber (22). Matches the shape FactsheetPanel expects. */
+  mythContentMap: Record<number, FaqMythContentEntry>;
+  /**
+   * Replace `__FAQ_MYTH_TITLE:mNN__` placeholders left by the
+   * {% factsheet-link %} Markdoc tag with each myth's cleaned statement.
+   */
+  resolveTitlesInHtml(html: string): string;
+}
+
+/** Strip "Mythos NN:" prefix and trailing terminal punctuation — same
+ *  cleanup Fakten-Karten and Daten-Explorer apply to factsheet titles. */
+function cleanMythTitle(raw: string): string {
+  return raw
+    .replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "")
+    .replace(/[.!?]+$/u, "")
+    .trim();
+}
+
+let cachedPopupData: FaqMythPopupData | null = null;
+
+/**
+ * Build the data the FAQ popup host needs: an index of myth IDs → header
+ * metadata, a map of pre-rendered factsheet HTML, and a placeholder-resolver
+ * that swaps `__FAQ_MYTH_TITLE:mNN__` sentinels for actual statements.
+ *
+ * Cached for the build process — same approach Fakten-Karten + Daten-Explorer
+ * use. Group-metric data is intentionally NOT bundled here; callers that
+ * need the interactive group-bars chart inside the panel can pass it
+ * separately (we keep this helper small).
+ */
+export async function loadMythPopupData(): Promise<FaqMythPopupData> {
+  if (cachedPopupData && import.meta.env?.PROD) return cachedPopupData;
+
+  const Markdoc = (await import("@markdoc/markdoc")).default;
+  const slugs = await reader.collections.zahlenUndFakten.list();
+
+  const mythIndex: Record<string, FaqMythPopupIndexEntry> = {};
+  const mythContentMap: Record<number, FaqMythContentEntry> = {};
+  const titleById = new Map<string, string>();
+
+  for (const slug of slugs) {
+    const entry = await reader.collections.zahlenUndFakten.read(slug);
+    if (!entry || entry.status !== "published") continue;
+    const e = entry as {
+      mythId?: string | null;
+      mythNumber?: number | null;
+      title?: string | null;
+      classification?: string | null;
+      classificationLabel?: string | null;
+      content?: () => Promise<{ node: unknown }>;
+    };
+    const mythNumber =
+      typeof e.mythNumber === "number"
+        ? e.mythNumber
+        : (() => {
+            const m = slug.match(/^m(\d+)/);
+            return m ? parseInt(m[1], 10) : null;
+          })();
+    if (!mythNumber || !Number.isFinite(mythNumber)) continue;
+
+    const id = `m${mythNumber}`;
+    const cleanTitle = cleanMythTitle(e.title ?? id);
+
+    mythIndex[id] = {
+      mythNumber,
+      title: cleanTitle,
+      classification: e.classification ?? "",
+      classificationLabel: e.classificationLabel ?? "",
+      slug,
+    };
+    // Also index zero-padded form ("m01" alongside "m1") so editor entries
+    // with either convention resolve.
+    if (mythNumber < 10) {
+      mythIndex[`m0${mythNumber}`] = mythIndex[id];
+    }
+    titleById.set(id, cleanTitle);
+    if (mythNumber < 10) titleById.set(`m0${mythNumber}`, cleanTitle);
+
+    if (e.content) {
+      try {
+        const { node } = await e.content();
+        const html = Markdoc.renderers.html(
+          // The factsheet body uses default Markdoc nodes only; no custom
+          // tags here, so an empty config works.
+          Markdoc.transform(node as never),
+        );
+        const refMatch = html.match(/<li>/g);
+        mythContentMap[mythNumber] = {
+          html,
+          title: cleanTitle,
+          classification: e.classification ?? "",
+          classificationLabel: e.classificationLabel ?? "",
+          refCount: refMatch ? refMatch.length : 0,
+        };
+      } catch {
+        // If a factsheet fails to render, skip its popup body — the link
+        // still works, just without pre-rendered content.
+      }
+    }
+  }
+
+  function resolveTitlesInHtml(html: string): string {
+    return html.replace(/__FAQ_MYTH_TITLE:(m\d+)__/g, (_full, rawId: string) => {
+      const norm = normalizeMythId(rawId);
+      const title = titleById.get(norm) ?? titleById.get(rawId);
+      // Fallback: show the raw id if no title (e.g. m99 reference to a
+      // myth that doesn't exist) so an editor catches it during review.
+      return title ?? rawId;
+    });
+  }
+
+  cachedPopupData = { mythIndex, mythContentMap, resolveTitlesInHtml };
+  return cachedPopupData;
 }
 
 /**

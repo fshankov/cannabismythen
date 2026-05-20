@@ -1,7 +1,8 @@
 ---
 import {
-  resolveMythLinks,
   dashboardLinkLabel,
+  loadMythPopupData,
+  normalizeMythId,
   type FaqQuestion,
 } from "@lib/faq";
 
@@ -13,11 +14,26 @@ interface Props {
 
 const { question, quizTitles = {} } = Astro.props;
 
-// Resolve myth IDs to actual factsheet slugs. Skip unknowns (don't 404).
-const primary = question.primaryMyth
-  ? (await resolveMythLinks([question.primaryMyth]))[0] ?? null
+// Resolve myth IDs to popup-ready entries (id + full statement). The myth
+// IS the popup — the related rail no longer links to standalone factsheet
+// pages, it triggers the same slide-in panel MythPopupHost manages.
+const { mythIndex } = await loadMythPopupData();
+
+type RailMyth = { id: string; title: string };
+function lookupMyth(rawId: string): RailMyth | null {
+  const norm = normalizeMythId(rawId);
+  if (!norm) return null;
+  const meta = mythIndex[norm] ?? mythIndex[rawId];
+  if (!meta) return null;
+  return { id: norm, title: meta.title };
+}
+
+const primary: RailMyth | null = question.primaryMyth
+  ? lookupMyth(question.primaryMyth)
   : null;
-const related = await resolveMythLinks(question.relatedMyths);
+const related: RailMyth[] = question.relatedMyths
+  .map((m) => lookupMyth(m))
+  .filter((m): m is RailMyth => m !== null);
 
 const quiz = question.relatedQuiz
   .filter((slug) => Boolean(slug))
@@ -39,11 +55,16 @@ const hasRail = primary || related.length > 0 || quiz.length > 0 || dashboard.le
   <div class="faq-related-rail">
     {primary && (
       <div class="faq-related-rail__group faq-related-rail__group--primary">
-        <span class="faq-related-rail__heading">Mythen-Factsheet</span>
-        <a href={primary.url} class="faq-related-rail__link faq-related-rail__link--primary">
+        <span class="faq-related-rail__heading">Mythos</span>
+        <button
+          type="button"
+          class="faq-related-rail__link faq-related-rail__link--primary faq-myth-link"
+          data-faq-myth-id={primary.id}
+          aria-haspopup="dialog"
+        >
           <span class="faq-related-rail__icon" aria-hidden="true">▸</span>
-          {primary.id.toUpperCase()}
-        </a>
+          {primary.title}
+        </button>
       </div>
     )}
 
@@ -53,9 +74,14 @@ const hasRail = primary || related.length > 0 || quiz.length > 0 || dashboard.le
         <ul class="faq-related-rail__list">
           {related.map((m) => (
             <li>
-              <a href={m.url} class="faq-related-rail__link">
-                #{m.id.replace(/^m/, "")}
-              </a>
+              <button
+                type="button"
+                class="faq-related-rail__link faq-myth-link"
+                data-faq-myth-id={m.id}
+                aria-haspopup="dialog"
+              >
+                {m.title}
+              </button>
             </li>
           ))}
         </ul>

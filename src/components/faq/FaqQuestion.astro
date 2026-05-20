@@ -1,7 +1,7 @@
 ---
 import Markdoc, { type Node } from "@markdoc/markdoc";
 import { faqMarkdocConfig } from "@lib/markdoc/faq-nodes";
-import type { FaqQuestion } from "@lib/faq";
+import { loadMythPopupData, type FaqQuestion } from "@lib/faq";
 import FaqVerdictPill from "./FaqVerdictPill.astro";
 import FaqRelatedRail from "./FaqRelatedRail.astro";
 import HelplineBox from "./HelplineBox.astro";
@@ -19,9 +19,13 @@ interface Props {
 const { question, open = false, index, quizTitles = {} } = Astro.props;
 
 const { node } = await question.answer();
-const html = Markdoc.renderers.html(
+const rawHtml = Markdoc.renderers.html(
   Markdoc.transform(node as Node, faqMarkdocConfig as any),
 );
+// Resolve the {% factsheet-link %} placeholders into actual myth statements.
+// Cached per build, so cost is amortised across all questions on the page.
+const { resolveTitlesInHtml } = await loadMythPopupData();
+const html = resolveTitlesInHtml(rawHtml);
 
 const id = `faq-${question.slug}`;
 ---

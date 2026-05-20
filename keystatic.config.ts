@@ -98,9 +98,14 @@ const zahlenUndFakten = collection({
       description: 'Lesbare Kurzformel der Einordnung, z. B. "Das stimmt nicht." Wird auf der Fakten-Karte und im Daten-Explorer angezeigt.',
     }),
     cardSummary: fields.text({
-      label: "⭐ Karten-Zusammenfassung (Fakten-Karte Rückseite)",
+      label: "⭐ Karten-Zusammenfassung (Synthese im Factsheet-Popup)",
       multiline: true,
-      description: "2–3 prägnante Sätze für die Rückseite der Fakten-Karte. Faktenbasiert, allgemeinverständlich, zum Weiterlesen einladend. Maximal ~250 Zeichen. Wird ausschließlich auf den Fakten-Karten angezeigt.",
+      description: "2–3 prägnante Sätze. Wird im Popup-Factsheet als „Synthese\" angezeigt — eine kompakte Forschungs-Synthese. NICHT auf den Fakten-Karten-Vorderseiten (dort wird cardShortSummary verwendet, damit Karte und Popup sich unterscheiden).",
+    }),
+    cardShortSummary: fields.text({
+      label: "📇 Kurzzusammenfassung (Fakten-Karte / Quiz / Startseite)",
+      multiline: true,
+      description: "ISD-finalisierte Kurzfassung (Quelle: _local/research/team/FAQ final/Cannabismythen_Zusammenfassung_2026 05 20.docx, Stand 2026-05-20). Wird auf der Rückseite der Fakten-Karte, im Quiz-Reveal und im Karten-Preview auf der Startseite angezeigt. ~200–450 Zeichen. Bewusst LÄNGER und anders formuliert als cardSummary (Popup-Synthese), damit Nutzer:innen beim Klick eine andere Perspektive sehen.",
     }),
     trueStatement: fields.text({
       label: "✅ Wahre Aussage (reformuliert)",
@@ -151,15 +156,13 @@ const zahlenUndFaktenDashboard = collection({
   },
 });
 
-// ─── FAQ – audience-first restructure ───────────────────────────────────────
-// (The legacy `haeufigeFragen` theme-based collection has been removed; the
-// audience-first model below is the single source of truth. Source content
-// is `_local/team/FAQ/cannabismythen_FAQ_HL_2026 04 29.docx`, generated into
-// .mdoc files via `_local/team/FAQ/scripts/build_faq.py`.)
-// One question per file (faqQuestions). A question may belong to multiple
-// audiences (e.g. "Ist Cannabis eine Einstiegsdroge?" lives under both Eltern
-// and Jugendliche). Per-audience sort order lets the same question be 1.2
-// for one group and 2.11 for another.
+// ─── FAQ – audience-specific files ──────────────────────────────────────────
+// One file per audience × question. Source content is the final ISD-reviewed
+// FAQ doc at `_local/research/team/FAQ final/cannabismythen_FAQ_2026 05 20.docx`.
+// When the same scientific question appears for multiple Zielgruppen with a
+// different opening (e.g. "Die allermeisten Eltern…" vs "…Jugendlichen…") we
+// keep one .mdoc per audience so the text matches the doc verbatim — see the
+// audience-prefixed slug pattern `{audience}-{topic}` in src/content/faq/questions/.
 
 const FAQ_AUDIENCE_OPTIONS = [
   { label: "Eltern minderjähriger Kinder", value: "eltern" },
@@ -196,32 +199,19 @@ const faqQuestions = collection({
       label: "Vollständige Frage",
       description: "Wird als Überschrift auf der FAQ-Seite angezeigt.",
     }),
-    audiences: fields.multiselect({
-      label: "Zielgruppen",
+    audience: fields.select({
+      label: "Zielgruppe",
       options: FAQ_AUDIENCE_OPTIONS,
+      defaultValue: "eltern",
       description:
-        "Eine Frage kann mehreren Zielgruppen zugeordnet sein (z. B. erscheint 'Ist Cannabis eine Einstiegsdroge?' bei Eltern und Jugendlichen).",
+        "Genau eine Zielgruppe pro Datei. Wenn dieselbe Frage in mehreren Zielgruppen erscheint, gibt es pro Zielgruppe eine eigene Datei (z. B. eltern-strassenverkehr.mdoc, jugendliche-strassenverkehr.mdoc).",
     }),
-    sortByAudience: fields.array(
-      fields.object({
-        audience: fields.select({
-          label: "Zielgruppe",
-          options: FAQ_AUDIENCE_OPTIONS,
-          defaultValue: "eltern",
-        }),
-        order: fields.integer({
-          label: "Reihenfolge",
-          description: "Position auf der Audience-Seite (1, 2, 3, …).",
-        }),
-      }),
-      {
-        label: "Reihenfolge je Zielgruppe",
-        description:
-          "Pro Zielgruppe individuell sortierbar. Nicht angegebene Zielgruppen werden alphabetisch angehängt.",
-        itemLabel: (props) =>
-          `${props.fields.audience.value}: ${props.fields.order.value ?? "?"}`,
-      }
-    ),
+    sortOrder: fields.integer({
+      label: "Reihenfolge auf der Audience-Seite",
+      description:
+        "Position innerhalb der Zielgruppe (1, 2, 3, …). Entspricht der TOC-Nummer im Quelldokument (z. B. Eltern 1.5 → 5).",
+      defaultValue: 99,
+    }),
     classification: fields.select({
       label: "Wissenschaftliche Einordnung",
       options: [
@@ -286,6 +276,56 @@ const faqQuestions = collection({
       label: "Helpline – Link",
       description: "Vollständige URL inkl. https://",
     }),
+    vizSpec: fields.object(
+      {
+        vizType: fields.select({
+          label: "Visualisierungs-Typ",
+          options: [
+            { label: "Keine Visualisierung", value: "none" },
+            { label: "Top-Mythen (horizontale Balken)", value: "bars-top-myths" },
+            { label: "Richtigkeit (Balken)", value: "bars-correctness" },
+            { label: "Gruppenvergleich (gruppierte Balken)", value: "grouped-bars-groups" },
+            { label: "Donut – Richtigkeit", value: "donut-correctness" },
+            { label: "Kanal-Ranking", value: "ranking-channels" },
+            { label: "Streudiagramm: Vertrauen × Nutzung", value: "scatter-trust-usage" },
+            { label: "Vergleichstabelle", value: "table-comparison" },
+          ],
+          defaultValue: "none",
+        }),
+        vizSource: fields.text({
+          label: "Datenquelle (CaRM-Tabelle)",
+          description:
+            'z. B. "CaRM Tabelle ZG Eltern, Spalte Präventionsbedeutung". Hinweis für Editor und Render-Stage.',
+        }),
+        vizDescription: fields.text({
+          label: "Beschreibung der Visualisierung",
+          multiline: true,
+          description:
+            "Aus dem Quelldokument: was die Grafik zeigen soll. Wird in Stage 3 von den Render-Komponenten gelesen.",
+        }),
+        vizConfig: fields.text({
+          label: "Konfiguration (JSON, optional)",
+          multiline: true,
+          description:
+            'Optionaler JSON-Blob mit vizType-spezifischen Parametern (z. B. {"topN": 5, "groups": ["parents"]}). Bleibt in Stage 1 leer; wird in Stage 3 befüllt.',
+        }),
+        vizPlacement: fields.select({
+          label: "Platzierung im Antworttext",
+          options: [
+            { label: "Nach Kurzantwort", value: "after-lead" },
+            { label: "Vor CaRM-Datenblock", value: "before-data" },
+            { label: "Nach CaRM-Datenblock", value: "after-data" },
+            { label: "Am Ende", value: "end" },
+          ],
+          defaultValue: "after-data",
+        }),
+      },
+      {
+        label: "Visualisierung (optional)",
+        description:
+          "Pro Frage höchstens eine Visualisierung. In Stage 1 nur Spezifikation; in Stage 3 wird gerendert.",
+      }
+    ),
     ...metaFields,
     answer: fields.markdoc({
       label: "Ausführliche Antwort",
