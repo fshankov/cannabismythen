@@ -66,21 +66,15 @@
 
 .four-paths__grid {
   display: grid;
-  /* Desktop: 4 portrait tiles in a row — same aspect / max-width as a
-     Fakten-Karten card, so the row reads as 4 mini decks lined up. */
-  grid-template-columns: repeat(4, 1fr);
+  /* Always a 2×2 square matrix at 701 px+. The four tiles ARE the
+     matrix segments — bigger than the old 4-in-a-row layout, which
+     gives each inner preview (peek-stack, mini-card, bars chart,
+     audience deck) room to breathe and to scale with the tile via
+     container queries (see .path-tile__preview below). */
+  grid-template-columns: repeat(2, 1fr);
   gap: clamp(1rem, 2.4vw, 1.75rem);
-  /* Cap the grid width to 4 card-widths + 3 gaps so tiles don't stretch
-     beyond the canonical card width on very wide viewports. */
-  max-width: calc(4 * var(--card-width-max) + 3 * 1.75rem);
+  max-width: calc(2 * var(--card-width-max-square) + 1.75rem);
   margin-inline: auto;
-}
-
-@media (max-width: 1099px) {
-  .four-paths__grid {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: calc(2 * var(--card-width-max) + 1.75rem);
-  }
 }
 
 @media (max-width: 700px) {
@@ -104,6 +98,11 @@
      point on the actual <a> regardless of wrapper. */
   .four-paths__grid .path-tile {
     scroll-snap-align: start;
+    /* Carousel cards revert to the canonical portrait Fakten-Karten
+       footprint — square wouldn't work in a horizontal swipe row, the
+       card would be too narrow. */
+    aspect-ratio: var(--card-aspect-ratio);
+    max-width: var(--card-width-max);
   }
 }
 
@@ -119,11 +118,13 @@
   border: 1px solid var(--card-border-color);
   border-radius: var(--card-radius);
   overflow: hidden;
-  /* Portrait aspect — matches the canonical Fakten-Karten card. The
-     preview area on top + body underneath share this footprint. */
-  aspect-ratio: var(--card-aspect-ratio);
+  /* Square aspect — the four tiles ARE the 2×2 matrix segments.
+     Preview area on top, body (title + desc + cta) underneath. The
+     mobile carousel below overrides this to portrait so each swipe
+     card retains the canonical Fakten-Karten footprint. */
+  aspect-ratio: 1 / 1;
   width: 100%;
-  max-width: var(--card-width-max);
+  max-width: var(--card-width-max-square);
   box-shadow: var(--card-shadow);
   transition:
     transform var(--transition-fast),
@@ -149,6 +150,13 @@
   border-bottom: 1px solid var(--card-border-color);
   position: relative;
   overflow: hidden;
+  /* Container query root — inner peek-stack / mini-card / bars / audience
+     deck size off cqw so they scale with the tile (whose width varies
+     from ~340 px at 700 vw up to 460 px (--card-width-max-square) on
+     desktop). Without this, the inner content was sized off viewport
+     vw and looked lost inside the bigger 2×2 tiles. */
+  container-type: inline-size;
+  container-name: preview;
 }
 
 .path-tile__body {
@@ -555,4 +563,29 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ── 2×2 square mode: container-query inner scaling ──────────── */
+/* The tile is the matrix segment; its preview area is a container
+   query root (set above). Every inner preview surface sizes off the
+   preview's inline-size (cqw) so it scales with the tile across
+   viewports without per-breakpoint media queries.
+   Targets ≈ 50 % of preview width for the portrait peek-stack decks
+   (so their height = width × 1.4 fits inside the preview area, which
+   in a square tile is ≈ 70 % of tile-width tall), and ≈ 92 % for the
+   landscape dashboard bars (which adapt naturally). All capped so
+   the previews never balloon past their canonical max footprint on
+   ultra-wide tiles. */
+@container preview (min-width: 0) {
+  .quiz-preview-deck  { width: min(52cqw, 13rem); }
+  .meine-preview-deck { width: min(52cqw, 13rem); }
+  .karten-preview     { width: min(52cqw, 14rem); }
+  .daten-preview      { width: min(92cqw, 24rem); }
+}
+
+/* Above ~360 px preview width (≈ tablet 700 px viewport+), bump the
+   rotating myth statement a touch so it doesn't look anaemic inside
+   the bigger square card. */
+@container preview (min-width: 360px) {
+  .quiz-preview-deck__myth { font-size: 0.9rem; }
 }

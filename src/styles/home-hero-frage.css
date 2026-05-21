@@ -46,23 +46,96 @@
   overflow: hidden;
 }
 
-.hero-frage__question {
+/* Two scrolling columns of mythen-questions flanking the fan.
+   Each column is an absolutely-positioned tall flex stack whose
+   slice of questions is duplicated in the DOM so the CSS keyframe
+   (translateY 0 ↔ -50%) loops seamlessly: at -50% the second copy
+   sits where the first started, so the eye sees an endless ribbon.
+   Left column scrolls DOWN (content moves into view from above);
+   right column scrolls UP (content moves out of view upward).
+   Slow period (150 s) so the motion reads as ambient depth rather
+   than a ticker fighting the card fan for attention. Disabled
+   entirely for prefers-reduced-motion. */
+
+.hero-frage__column {
   position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.9rem, 1.4vw, 1.4rem);
+  /* Wider than the v1 22 ch so the longer questions ("Beeinträchtigt
+     Cannabis die kognitiven Fähigkeiten?", "Steigt der Konsum bei
+     Minderjährigen durch die Teillegalisierung?") fit on a single
+     line on desktop. Shorter ones leave a touch of trailing space. */
+  width: min(32ch, 30vw);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hero-frage__column--left {
+  left: clamp(0.5rem, 2.5vw, 2rem);
+  text-align: left;
+  animation: hero-scroll-down 150s linear infinite;
+}
+
+.hero-frage__column--right {
+  right: clamp(0.5rem, 2.5vw, 2rem);
+  text-align: right;
+  animation: hero-scroll-up 150s linear infinite;
+}
+
+@keyframes hero-scroll-down {
+  /* Column starts shifted up by half its own height — the second
+     copy of the question slice is visible inside the hero. As the
+     animation progresses the column slides DOWN to translateY(0),
+     by which point the first copy is back in view and the second
+     has slid out of frame below. Snap restart is invisible. */
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes hero-scroll-up {
+  /* Mirror of hero-scroll-down: starts at 0, ends at -50%. The
+     first copy of the slice scrolls UP and out of frame; by -50%
+     the second copy occupies the original visible window. */
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-frage__column {
+    animation: none;
+    /* With animation off the column sits at translateY(0). The
+       first half of the duplicated slice is in view; the second
+       extends below the hero crop, hidden by overflow: hidden
+       on .hero-frage. Reads as a static stacked list. */
+  }
+}
+
+.hero-frage__question {
   font-family: 'DM Serif Display', Georgia, serif;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(20px, 2.2vw, 30px);
-  line-height: 1.2;
+  /* Smaller than the v1 18–26 px range so each question reads as a
+     compact one-liner inside the wider column. */
+  font-size: clamp(14px, 1.5vw, 19px);
+  line-height: 1.25;
   letter-spacing: -0.3px;
-  color: rgba(255, 255, 255, 0.10);
-  max-width: 22ch;
+  /* Brightness preset B1 (Subtle lift): 0.18 opacity + 0.5 px blur.
+     Sharper and more visible than the v1 0.10 / blur(2 px) — readers
+     can scan the questions but they still sit behind the card fan
+     in the visual hierarchy. */
+  color: rgba(255, 255, 255, 0.18);
+  filter: blur(0.5px);
+  max-width: 32ch;
   user-select: none;
+  flex: 0 0 auto;
 }
 
-.hero-frage__question--p0 { top:  9%; left:  4%; }
-.hero-frage__question--p1 { bottom: 9%; right: 4%; text-align: right; }
-
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
+  /* On narrower viewports the card fan grows wider relative to the
+     hero, the side margins shrink, and the columns start crowding
+     the card edges. Hide them and let the fan breathe. */
   .hero-frage__bg { display: none; }
 }
 

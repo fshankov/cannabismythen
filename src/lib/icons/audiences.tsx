@@ -139,19 +139,20 @@ export const IconKonsumierende = forwardRef<SVGSVGElement, IconProps>(
 IconKonsumierende.displayName = 'IconKonsumierende';
 
 /* ------------------------------------------------------------------ */
-/* Eltern — adult base + filled (no-stroke) child silhouette (locked v5).
- * Child scaled up: head r=2.2, body bottom flush on y=21 (baseline).
- * Fill-only (no stroke) so the rounded-linejoin from baseProps doesn't
- * carve corners off the bottom edge — the child appears to stand on
- * the baseline without a floating gap.                                */
+/* Eltern — adult base + filled (no-stroke) child silhouette (locked v6).
+ * Child scaled up: head r=2.2 at cy=14.2. Child body fill extends to
+ * y=21.7 so it matches the parent baseline-stroke's visual bottom
+ * (baseline path stroke-width=1.75 → bottom edge at y≈21.875). The
+ * earlier v5 child ended at y=21 and appeared to float above the
+ * baseline.                                                            */
 /* ------------------------------------------------------------------ */
 export const IconEltern = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
       <BasePerson />
       <g fill="currentColor" stroke="none">
-        <circle cx="8" cy="14" r="2.2" />
-        <path d="M4.7 21v-3C4.7 16.2 6.1 15.2 8 15.2c1.9 0 3.3 1 3.3 2.8V21Z" />
+        <circle cx="8" cy="14.2" r="2.2" />
+        <path d="M4.7 21.7v-3.5C4.7 16.4 6.1 15.4 8 15.4c1.9 0 3.3 1 3.3 2.9V21.7Z" />
       </g>
     </svg>
   ),

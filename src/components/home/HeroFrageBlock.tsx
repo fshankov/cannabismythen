@@ -134,11 +134,43 @@ export default function HeroFrageBlock({
       <div className="hero-frage__fog" aria-hidden="true" />
 
       <div className="hero-frage__bg" aria-hidden="true">
-        {backgroundQuestions.slice(0, 2).map((q, i) => (
-          <span key={i} className={`hero-frage__question hero-frage__question--p${i}`}>
-            {q}
-          </span>
-        ))}
+        {/* Two scrolling columns of mythen-questions flanking the fan.
+            First half of the YAML array → left column (scrolls DOWN,
+            left-aligned). Second half → right column (scrolls UP,
+            right-aligned). Each column duplicates its slice in the
+            DOM so the CSS keyframe (translateY 0 ↔ -50%) loops
+            seamlessly — at -50% the second copy is exactly where the
+            first started. The animation pauses entirely under
+            prefers-reduced-motion (handled in CSS). */}
+        {(() => {
+          const half = Math.ceil(backgroundQuestions.length / 2);
+          const left = backgroundQuestions.slice(0, half);
+          const right = backgroundQuestions.slice(half);
+          // [...left, ...left] — render each slice twice for the
+          // seamless scroll. React keys stay unique by prefixing
+          // 'a' / 'b' so the duplication doesn't trip the reconciler.
+          const renderColumn = (
+            slice: ReadonlyArray<string>,
+            side: "left" | "right",
+          ) => (
+            <div className={`hero-frage__column hero-frage__column--${side}`}>
+              {[...slice, ...slice].map((q, i) => (
+                <span
+                  key={`${side}-${i < slice.length ? "a" : "b"}-${i % slice.length}`}
+                  className="hero-frage__question"
+                >
+                  {q}
+                </span>
+              ))}
+            </div>
+          );
+          return (
+            <>
+              {renderColumn(left, "left")}
+              {renderColumn(right, "right")}
+            </>
+          );
+        })()}
       </div>
 
       <div className="hero-frage__foreground">

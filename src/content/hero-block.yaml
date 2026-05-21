@@ -10,12 +10,69 @@ beliefLabel: 'Mythos'
 scienceLabel: 'Befund'
 
 backgroundQuestions:
-  - 'Macht Cannabis abhängig?'
-  - 'Macht Cannabis Psychosen?'
-  - 'Wirkt Cannabis entspannend?'
-  - 'Ist Cannabis eine Einstiegsdroge?'
-  - 'Hilft Cannabis beim Abnehmen?'
-  - 'Hemmt Cannabis Entzündungen?'
+  # 42 questions — one per myth (m01–m42), based on the FULL statement
+  # of each myth (not short labels). First 21 (m01–m21, body/medical
+  # topics) render in the left column (scrolls down, left-aligned).
+  # Last 21 (m22–m42, mental/social/legal topics) render in the right
+  # column (scrolls up, right-aligned).
+  #
+  # Special framings:
+  #  - m13 "löst Spasmen" → "Hilft Cannabis bei Spastiken?" because the
+  #    .mdoc title's wording is the known editorial inversion flagged
+  #    in CLAUDE.md (Excel master + scientific finding say "lindert
+  #    Spastiken"). The question maps to the scientifically correct frame.
+  #  - m23 myth is "Cannabis verursacht keine Abhängigkeit." (verdict
+  #    falsch) — natural reader question is "Macht Cannabis abhängig?".
+  #  - m32 myth is "Cannabis macht nicht aggressiv." (verdict eher_falsch)
+  #    — natural reader question is "Macht Cannabis aggressiv?".
+  #
+  # AI-drafted German awaiting ISD review.
+
+  # m01–m21 — medical / body / safety (left column, scrolls down)
+  - 'Ist Cannabis ein Allheilmittel?'                              # m01 falsch
+  - 'Ist Cannabis harmlos?'                                        # m02 falsch
+  - 'Schadet Cannabis Heranwachsenden mehr als Erwachsenen?'       # m03 eher_richtig
+  - 'Ist Cannabis weniger schädlich als Alkohol?'                  # m04 richtig
+  - 'Ist Cannabis schwer zu dosieren?'                             # m05 richtig
+  - 'Ist Mischkonsum mit Cannabis besonders riskant?'              # m06 richtig
+  - 'Erhöhen Zusätze im Cannabis das Gesundheitsrisiko?'           # m07 richtig
+  - 'Schadet Cannabis dem ungeborenen Kind?'                       # m08 richtig
+  - 'Kann eine Cannabis-Überdosis tödlich sein?'                   # m09 richtig (Mythos: tödlich nicht; Befund: stimmt nicht)
+  - 'Wirkt Cannabis gegen Schmerzen?'                              # m10 eher_falsch
+  - 'Verursacht Cannabis Übelkeit und Erbrechen?'                  # m11 richtig
+  - 'Hemmt Cannabis Entzündungen?'                                 # m12 keine_aussage
+  - 'Hilft Cannabis bei Spastiken?'                                # m13 (lindert Spastiken)
+  - 'Verursacht Cannabis Herz-Kreislauf-Erkrankungen?'             # m14 richtig
+  - 'Schadet das Rauchen von Cannabis den Atemwegen?'              # m15 richtig
+  - 'Verursacht Cannabis Krebs?'                                   # m16 richtig
+  - 'Hilft Cannabis beim Abnehmen?'                                # m17 keine_aussage
+  - 'Hilft Cannabis bei Schlafproblemen?'                          # m18 eher_falsch
+  - 'Verändert Cannabis die Wahrnehmung?'                          # m19 richtig
+  - 'Beeinträchtigt Cannabis die kognitiven Fähigkeiten?'          # m20 richtig
+  - 'Gefährdet Cannabis die Verkehrssicherheit?'                   # m21 richtig
+
+  # m22–m42 — mental / social / legal (right column, scrolls up)
+  - 'Ist Cannabis eine Einstiegsdroge?'                            # m22 eher_falsch
+  - 'Macht Cannabis abhängig?'                                     # m23 falsch (Mythos: nicht abhängig)
+  - 'Verursacht Cannabis Psychosen?'                               # m24 richtig
+  - 'Wirkt Cannabis gegen Angst?'                                  # m25 eher_falsch
+  - 'Wirkt Cannabis gegen Depressionen?'                           # m26 falsch
+  - 'Wirkt Cannabis gegen ADHS?'                                   # m27 eher_falsch
+  - 'Macht Cannabis antriebslos?'                                  # m28 falsch
+  - 'Verbessert Cannabis die Gemütslage?'                          # m29 eher_richtig
+  - 'Führt Cannabiskonsum zu Suizidgedanken?'                      # m30 eher_richtig
+  - 'Wirkt Cannabis entspannend?'                                  # m31 eher_richtig
+  - 'Macht Cannabis aggressiv?'                                    # m32 eher_falsch (Mythos: macht NICHT aggressiv)
+  - 'Macht Cannabis kreativ?'                                      # m33 eher_falsch
+  - 'Schadet Cannabis sozialen Beziehungen?'                       # m34 eher_falsch
+  - 'Halten Konsumierende sich weniger an soziale Regeln?'         # m35 eher_falsch
+  - 'Senkt Cannabiskonsum die Leistungsfähigkeit?'                 # m36 eher_falsch
+  - 'Geht Cannabiskonsum mit niedrigem sozialem Niveau einher?'    # m37 falsch
+  - 'Ist Cannabiskonsum cool?'                                     # m38 falsch
+  - 'Konsumiert ein großer Teil der Bevölkerung Cannabis?'         # m39 falsch
+  - 'Ist Cannabis nun überall erlaubt?'                            # m40 falsch
+  - 'Lässt die Teillegalisierung den Konsum steigen?'              # m41 richtig
+  - 'Steigt der Konsum bei Minderjährigen durch die Teillegalisierung?'  # m42 eher_falsch
 
 pairs:
   - belief: 'Cannabis verursacht Psychosen.'

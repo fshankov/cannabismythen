@@ -11,12 +11,11 @@ export interface Numeral {
 export interface Props {
   eyebrow: string;
   numerals: ReadonlyArray<Numeral>;
-  subline: string;
   linkLabel: string;
   linkUrl: string;
 }
 
-const { eyebrow, numerals, subline, linkLabel, linkUrl } = Astro.props;
+const { eyebrow, numerals, linkLabel, linkUrl } = Astro.props;
 
 const formatter = new Intl.NumberFormat("de-DE");
 
@@ -51,8 +50,6 @@ function suffixOf(n: { suffix?: string | null }) {
         </li>
       ))}
     </ol>
-
-    <p class="numbers-strip__subline">{subline}</p>
 
     <a class="numbers-strip__link" href={linkUrl}>
       {linkLabel}

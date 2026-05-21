@@ -117,6 +117,11 @@
      and inner-preview decks re-proportion together. */
   --card-aspect-ratio: 1 / 1.4;
   --card-width-max: 280px;
+  /* Square variant used by the four-paths 2×2 layout (always 2-col above the
+     mobile carousel breakpoint). Tile inner content (peek-stack, mini-card,
+     bars chart, audience deck) scales via container queries from
+     ~50–95 cqw, so this cap doubles as the upper bound for those decks too. */
+  --card-width-max-square: 460px;
   --card-padding: var(--space-lg);
   --card-radius: var(--radius-lg);
   --card-shadow: var(--shadow-md);

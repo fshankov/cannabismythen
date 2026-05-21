@@ -128,6 +128,7 @@ const audienceCards: AudienceCard[] = (audienceShortcutData?.cards ?? [])
         audienceId: card.audienceId,
         recommendation: card.recommendation,
         targetUrl: card.targetUrl,
+        additionalTargets: card.additionalTargets ?? [],
         cardLabel: meta.cardLabel,
         emoji: audienceEmoji(card.audienceId),
         accentColor: audienceAccentColor(card.audienceId),
@@ -172,7 +173,6 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
     <NumbersStripBlock
       eyebrow={numbersStripData.eyebrow}
       numerals={numbersStripData.numerals}
-      subline={numbersStripData.subline}
       linkLabel={numbersStripData.linkLabel}
       linkUrl={numbersStripData.linkUrl}
     />

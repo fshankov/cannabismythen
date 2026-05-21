@@ -835,7 +835,8 @@ const heroBlock = singleton({
       fields.text({ label: "Frage" }),
       {
         label: "Hintergrund-Fragen",
-        description: "Leichte Fragen, die dezent hinter dem Karten-Stack stehen. 4–8 empfohlen.",
+        description:
+          "Mythen-Fragen, die dezent hinter dem Karten-Stack scrollen. 42 empfohlen (21 pro Spalte) — eine Frage pro Mythos, auf Basis der vollständigen Mythos-Aussagen formuliert. Erste Hälfte = linke Spalte (scrollt nach unten); zweite Hälfte = rechte Spalte (scrollt nach oben, rechtsbündig). Gesamtzahl gerade halten für balancierte Spalten.",
         itemLabel: (p) => p.value || "Frage",
       },
     ),
@@ -1253,13 +1254,6 @@ const numbersStrip = singleton({
         itemLabel: (p) => `${p.fields.value.value} ${p.fields.label.value}`,
       },
     ),
-    subline: fields.text({
-      label: "Unterzeile",
-      multiline: true,
-      description: "Kontext zur quantitativen Validierungs-Befragung (2.795 Personen).",
-      defaultValue:
-        "Quantitative Validierungs-Befragung: 2.795 Personen — 2.097 Erwachsene (18–70), 555 Minderjährige (16–17), 143 Mitglieder einer Anbauvereinigung. Erhebung August 2025.",
-    }),
     linkLabel: fields.text({
       label: "Link-Text",
       defaultValue: "Mehr über das Projekt",
@@ -1305,6 +1299,24 @@ const audienceShortcut = singleton({
           label: "Ziel-URL",
           description: "Ziel des Klicks (intern oder extern).",
         }),
+        additionalTargets: fields.array(
+          fields.object({
+            label: fields.text({
+              label: "Beschriftung",
+              description: "Kurzer Pill-Text (1–3 Wörter ideal).",
+            }),
+            url: fields.text({
+              label: "Ziel-URL",
+              description: "Tieflink zur passenden Sektion (intern oder extern).",
+            }),
+          }),
+          {
+            label: "Weitere Ziele (Pill-Row)",
+            description:
+              "Optionale Liste tiefer Verweise pro Audience. Erscheinen als kleine Pill-Links unter der primären CTA. 0–3 Einträge empfohlen.",
+            itemLabel: (p) => p.fields.label.value || "Pill",
+          },
+        ),
       }),
       {
         label: "Audience-Karten",
