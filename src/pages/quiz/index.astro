@@ -77,52 +77,10 @@ const tiles = quizzes.map(([slug, entry]) => {
         </span>
         <h2 class="quiz-select-card__title">{tile.title}</h2>
         <span class="quiz-select-card__count">{tile.count} Fragen</span>
-        {/* Stage A (2026-05-16) — band-color completion dot. Hidden by
-            default; the inline script below reveals it once it finds a
-            matching cm-quiz-score-{slug} entry in localStorage and
-            derives the score band. */}
-        <span
-          class="quiz-select-card__band-dot"
-          data-quiz-slug={tile.slug}
-          aria-hidden="true"
-        ></span>
         {tile.featured && (
           <span class="quiz-select-card__chip">Mix</span>
         )}
       </a>
     ))}
   </section>
-
-  {/* Stage A — read each tile's last score from localStorage, derive the
-      band (≥80 profi · ≥60 guterweg · ≥40 gehtnoch · else erwischt) and
-      reveal a colored dot + tint the tile border. Per-browser only, no
-      cookies. */}
-  <script is:inline>
-    (function () {
-      if (typeof window === "undefined" || !window.localStorage) return;
-      function bandFor(score) {
-        if (score >= 80) return "profi";
-        if (score >= 60) return "guterweg";
-        if (score >= 40) return "gehtnoch";
-        return "erwischt";
-      }
-      var dots = document.querySelectorAll(".quiz-select-card__band-dot");
-      for (var i = 0; i < dots.length; i++) {
-        var dot = dots[i];
-        var slug = dot.getAttribute("data-quiz-slug");
-        if (!slug) continue;
-        try {
-          var raw = window.localStorage.getItem("cm-quiz-score-" + slug);
-          if (!raw) continue;
-          var data = JSON.parse(raw);
-          if (typeof data.moduleScore !== "number") continue;
-          var band = bandFor(data.moduleScore);
-          dot.setAttribute("data-band", band);
-          dot.parentNode.setAttribute("data-band", band);
-        } catch (e) {
-          // ignore parse errors / disabled storage
-        }
-      }
-    })();
-  </script>
 </BaseLayout>
