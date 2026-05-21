@@ -368,21 +368,24 @@ export default function QuizCard({
                   </div>
                 </div>
 
-                {/* 6 — Population stat (always shown). Wording:
-                    "Bevölkerungsbefragung in Deutschland" — same data
-                    (CaRM IS that sample), with "repräsentativ" dropped
-                    from user-visible copy per editorial ruling 2026-05-06. */}
+                {/* 5 — Population stat. Stage A (2026-05-16) wording —
+                    partial-credit-honest: populationCorrectPct is a CaRM
+                    Richtigkeit mean, not the "% of respondents who
+                    answered correctly". "Im Schnitt zu X % genau
+                    richtig" reads as "on average X % correctly" without
+                    implying the binary count. */}
                 {hasPopData && (
                   <div
                     className="quiz-card__pop-bar"
                     role="img"
-                    aria-label={`${popPct} Prozent der Erwachsenen 18 bis 70 in einer Bevölkerungsbefragung in Deutschland haben diesen Mythos genau richtig eingeschätzt`}
+                    aria-label={`${popPct} Prozent — durchschnittliche Trefferquote von Erwachsenen 18 bis 70 in einer Bevölkerungsbefragung in Deutschland für diese Aussage.`}
                   >
                     <p className="quiz-card__pop-bar-text">
-                      <strong>{popPct}&nbsp;%</strong> der Erwachsenen
-                      (18–70) in einer Bevölkerungsbefragung in
-                      Deutschland haben diesen Mythos genau richtig
-                      eingeschätzt.
+                      Erwachsene (18–70) in einer
+                      Bevölkerungsbefragung in Deutschland ordneten
+                      diese Aussage im Schnitt zu{" "}
+                      <strong>{popPct}&nbsp;%</strong> genau richtig
+                      ein.
                     </p>
                     <div className="quiz-card__pop-bar-track">
                       <div
@@ -394,11 +397,13 @@ export default function QuizCard({
                 )}
 
                 {/* 6 — Action row pinned to the bottom.
-                    BugHerd #34 (Session 3a, 2026-05-07): on the LAST
-                    question we hide the in-card "Ergebnis ansehen →" CTA
-                    so it doesn't duplicate the standalone finish-row
-                    rendered just below the card by QuizPlayer. On
-                    earlier cards the in-card "Nächste Frage →" stays. */}
+                    Stage C (2026-05-17): the in-card forward CTA now
+                    renders on every card. On the LAST card the label
+                    switches to "Ergebnis ansehen →"; the click handler
+                    is the same `onNext`, which `handleNext()` in
+                    QuizPlayer routes to `setFinished(true)` when at the
+                    last index. The standalone finish-row below the card
+                    is gone — single, consistent CTA path. */}
                 <div className="quiz-card__back-actions">
                   {onShowFactsheet && (
                     <button
@@ -409,16 +414,17 @@ export default function QuizCard({
                       {t("ui.openMythDetail")}
                     </button>
                   )}
-                  {!isLastQuestion && (
-                    <button
-                      type="button"
-                      className="quiz-card__next-btn"
-                      onClick={onNext}
-                      autoFocus
-                    >
-                      {t("ui.nextQuestion")} →
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className="quiz-card__next-btn"
+                    onClick={onNext}
+                    autoFocus
+                  >
+                    {isLastQuestion
+                      ? t("ui.finishQuiz")
+                      : t("ui.nextQuestion")}{" "}
+                    →
+                  </button>
                 </div>
 
                 <p className="quiz-card__swipe-hint" aria-hidden="true">

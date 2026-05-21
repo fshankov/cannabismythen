@@ -94,72 +94,9 @@
   flex-shrink: 0;
 }
 
-/* ── Score Pill ───────────────────────────────────────────────── */
-
-.quiz-score {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  border-radius: var(--radius-full);
-  padding: 2px 10px;
-  transition: transform 0.15s ease, background 0.3s ease;
-}
-
-.quiz-score__value {
-  font-size: 0.78rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-}
-
-.quiz-score__value--positive {
-  color: var(--classification-richtig);
-}
-
-.quiz-score__value--negative {
-  color: var(--classification-falsch);
-}
-
-.quiz-score__value--neutral {
-  color: var(--color-text-muted);
-}
-
-/* Flash animations on score change */
-.quiz-score--flash-great {
-  animation: scoreFlashGreat 0.6s ease;
-}
-
-.quiz-score--flash-good {
-  animation: scoreFlashGood 0.6s ease;
-}
-
-.quiz-score--flash-warn {
-  animation: scoreFlashWarn 0.6s ease;
-}
-
-.quiz-score--flash-bad {
-  animation: scoreFlashBad 0.6s ease;
-}
-
-@keyframes scoreFlashGreat {
-  0% { background: rgba(22, 163, 74, 0.25); transform: scale(1.18); }
-  100% { background: transparent; transform: scale(1); }
-}
-
-@keyframes scoreFlashGood {
-  0% { background: rgba(77, 124, 15, 0.2); transform: scale(1.1); }
-  100% { background: transparent; transform: scale(1); }
-}
-
-@keyframes scoreFlashWarn {
-  0% { background: rgba(180, 83, 9, 0.2); transform: scale(1.1); }
-  100% { background: transparent; transform: scale(1); }
-}
-
-@keyframes scoreFlashBad {
-  0% { background: rgba(220, 38, 38, 0.25); transform: scale(1.18); }
-  100% { background: transparent; transform: scale(1); }
-}
+/* Stage A (2026-05-16) — the live-score pill (.quiz-score and its
+   flash keyframes) was removed. The header bar now carries title +
+   progress fill + "Aussage X von Y" counter only (Pew minimalism). */
 
 
 /* ── Card Grid (legacy, used by fakten-karten) ─────────────────── */
@@ -276,13 +213,10 @@
   }
 }
 
-/* Stage 4 — "Ergebnis ansehen" finish-row, only shown after all
-   questions are answered (and the deck hasn't auto-flipped to results). */
-.quiz-player__finish-row {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-md);
-}
+/* Stage C (2026-05-17): the `.quiz-player__finish-row` selector is
+   retired. The "Ergebnis ansehen →" CTA now lives on the back face of
+   the last card (see `.quiz-card__back-actions .quiz-card__next-btn`).
+   No styles needed here. */
 
 /* Two pseudo-elements that look like the next cards in the deck.
    They fan VERTICALLY below the active card with a clear shadow stack
@@ -2259,6 +2193,297 @@
   gap: 4px;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Stage C (2026-05-17) — Polish pass.
+
+   1) Summary stats grid ("Du vs. Ø Bevölkerung"). Compact 3-column
+      table that sits between the ShareCard hero and the per-question
+      retrospective so the headline numbers read at a glance.
+   2) Top divider on the retrospective wrapper so the per-question
+      table separates visually from the ShareCard above.
+   3) Desktop max-width bump (760 → 880 px at ≥ 1024 px) so the wider
+      table doesn't feel cramped on big screens.
+   ══════════════════════════════════════════════════════════════════ */
+
+.quiz-result__summary {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.quiz-result__summary thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  text-align: right;
+  padding: 0 var(--space-md) var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.quiz-result__summary thead th:first-child {
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-text);
+}
+
+.quiz-result__summary tbody th {
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  padding: var(--space-md) var(--space-md) var(--space-md) 0;
+}
+
+.quiz-result__summary tbody td {
+  text-align: right;
+  padding: var(--space-md) var(--space-md);
+  vertical-align: baseline;
+}
+
+.quiz-result__summary tbody tr + tr th,
+.quiz-result__summary tbody tr + tr td {
+  border-top: 1px solid var(--color-border);
+}
+
+.quiz-result__summary-num {
+  font-family: var(--font-display, inherit);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.quiz-result__summary-num--muted {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.quiz-result__summary-denom {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-left: 2px;
+}
+
+/* Band-tinted user "Anteil insgesamt" cell — green/yellow/orange/red
+   per Schritte band. Uses the same classification tokens as the
+   verdict pills and retrospective row tints. */
+.quiz-result__summary-num--band {
+  color: var(--color-text);
+}
+.quiz-result__summary-num--band-profi {
+  color: var(--classification-richtig);
+}
+.quiz-result__summary-num--band-guterweg {
+  color: var(--classification-eher-richtig);
+}
+.quiz-result__summary-num--band-gehtnoch {
+  color: var(--classification-eher-falsch);
+}
+.quiz-result__summary-num--band-erwischt {
+  color: var(--classification-falsch);
+}
+
+@media (max-width: 640px) {
+  .quiz-result__summary thead th {
+    font-size: 0.68rem;
+    padding: 0 var(--space-sm) var(--space-xs);
+  }
+  .quiz-result__summary thead th:first-child {
+    font-size: 0.9rem;
+  }
+  .quiz-result__summary tbody th,
+  .quiz-result__summary tbody td {
+    padding: var(--space-sm) var(--space-sm);
+  }
+  .quiz-result__summary tbody th {
+    padding-left: 0;
+    font-size: 0.85rem;
+  }
+  .quiz-result__summary-num {
+    font-size: 1.2rem;
+  }
+  .quiz-result__summary-denom {
+    font-size: 0.85rem;
+  }
+}
+
+.quiz-result__retrospective {
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (min-width: 1024px) {
+  .quiz-result {
+    max-width: 880px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Stage B (2026-05-16) — 4-column comparison table.
+   Replaces the Stage A retrospective <ol> (.quiz-result__list /
+   .quiz-result__item*). Those legacy rules above remain inert; Stage 9
+   cleans them up alongside the other Stage 5 dead code.
+   ══════════════════════════════════════════════════════════════════ */
+
+.quiz-result__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+
+.quiz-result__table th,
+.quiz-result__table td {
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.quiz-result__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.quiz-result__table th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--color-surface-alt, #fafaf6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.quiz-result__table td:first-child {
+  width: 50%;
+}
+
+.quiz-result__table-cell--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.quiz-result__table-statement {
+  display: block;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+/* Band-tinted inset left edge per row — secondary cue to the verdict
+   pills in cols 2/3. box-shadow keeps border-collapse intact. */
+.quiz-result__row--exact {
+  box-shadow: inset 4px 0 0 0 var(--classification-richtig);
+}
+.quiz-result__row--near {
+  box-shadow: inset 4px 0 0 0 var(--classification-eher-richtig);
+}
+.quiz-result__row--off {
+  box-shadow: inset 4px 0 0 0 var(--classification-eher-falsch);
+}
+.quiz-result__row--far {
+  box-shadow: inset 4px 0 0 0 var(--classification-falsch);
+}
+
+.quiz-result__jump {
+  display: inline-block;
+  margin-top: var(--space-xs);
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.quiz-result__jump:hover {
+  text-decoration-thickness: 2px;
+}
+
+.quiz-result__table-caption {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin: var(--space-sm) 0 var(--space-xl);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Mobile (≤ 640 px): collapse to stacked cards. <table> stays in DOM
+   so screen-reader semantics still apply; visual <thead> is sr-only. */
+@media (max-width: 640px) {
+  .quiz-result__table,
+  .quiz-result__table tbody,
+  .quiz-result__table tr,
+  .quiz-result__table td {
+    display: block;
+    width: auto;
+  }
+  .quiz-result__table {
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+  .quiz-result__table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .quiz-result__table tr {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    background: var(--color-surface);
+  }
+  .quiz-result__table td {
+    padding: var(--space-xs) 0;
+    border-bottom: 0;
+  }
+  .quiz-result__table td::before {
+    content: attr(data-label) ":\00a0";
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-right: var(--space-xs);
+  }
+  .quiz-result__table td:first-child {
+    width: auto;
+  }
+  .quiz-result__table td:first-child::before {
+    /* Statement is the row anchor, not a labelled field. */
+    content: "";
+  }
+  .quiz-result__table-cell--num {
+    text-align: left;
+  }
+}
+
 /* 8 — CTAs */
 .quiz-result__cta {
   display: inline-block;
@@ -2299,36 +2524,9 @@
   margin-top: var(--space-sm);
 }
 
-/* Remediation 3 — unified ShareCard hero (verdict + percentage + share). */
-.share-card__score-unit {
-  font-size: 0.55em;
-  font-weight: 700;
-  vertical-align: 0.25em;
-  margin-left: 0.04em;
-  opacity: 0.9;
-}
-
-/* BugHerd #37 + #38: absolute "X,Y von Z möglichen Punkten" sits
-   between the % hero and the breakdown line. Smaller weight than the
-   percentage but heavier than the breakdown — it's a secondary anchor
-   that puts the raw score in concrete numbers for readers who don't
-   parse percentages well. */
-.share-card__absolute-score {
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0 0 4px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.share-card__breakdown {
-  font-size: 0.92rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 4px 0 var(--space-md);
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
+/* Stage A (2026-05-16) — the .share-card__score-unit / __absolute-score
+   / __breakdown rules were removed alongside the medal/% hero. The
+   result-screen ShareCard now leads with the Keystatic verdict block. */
 
 .share-card__verdict {
   margin: var(--space-md) auto 0;
@@ -2493,49 +2691,20 @@
   color: #fff;
 }
 
-/* CSS medal badge */
-.share-card__medal {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  border: 3px solid rgba(255, 255, 255, 0.35);
-  margin-bottom: var(--space-md);
-}
+/* Stage A (2026-05-16) — the medal/emoji circle, big-% hero
+   (.share-card__score / __pct / __percentile / __tier-title) were
+   removed. The result hero is now verdict-led: title + body + user
+   score sentence + population sentence. */
 
-.share-card__emoji {
-  font-size: 2rem;
-}
-
-.share-card__tier-title {
-  font-size: 1.15rem;
+.share-card__user-line {
+  margin: var(--space-md) auto 0;
+  max-width: 44ch;
+  text-align: center;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #fff;
-  margin-bottom: var(--space-sm);
-}
-
-.share-card__score {
-  font-size: 2.8rem;
-  font-weight: 800;
+  line-height: 1.45;
   color: #fff;
   font-variant-numeric: tabular-nums;
-  margin-bottom: var(--space-xs);
-  line-height: 1.1;
-}
-
-.share-card__pct {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: var(--space-xs);
-}
-
-.share-card__percentile {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: var(--space-lg);
 }
 
 .share-card__branding {
@@ -2886,7 +3055,6 @@
   .quiz-card__buttons,
   .quiz-card__pop-bar-fill,
   .quiz-progress__fill,
-  .quiz-score,
   .share-card__btn,
   .quiz-modal__backdrop,
   .quiz-modal__panel,
@@ -2936,14 +3104,6 @@
 
   .quiz-progress__label {
     font-size: 0.68rem;
-  }
-
-  .quiz-score__value {
-    font-size: 0.72rem;
-  }
-
-  .quiz-score {
-    padding: 1px 7px;
   }
 
   .quiz-player__grid {
@@ -3005,10 +3165,6 @@
 
   .quiz-modal__score-number {
     font-size: 2.2rem;
-  }
-
-  .share-card__score {
-    font-size: 2rem;
   }
 }
 
@@ -3199,23 +3355,41 @@
   letter-spacing: 0.02em;
 }
 
-/* BugHerd #37b (Session 3b, 2026-05-07): per-tile last-score chip. The
-   element is hidden by default so tiles look unchanged when localStorage
-   is empty; the inline script in /quiz/index.astro reveals it once a
-   matching cm-quiz-score-{slug} entry is found. Sits below the question-
-   count pill, smaller and quieter so it doesn't compete with the title. */
-.quiz-select-card__last-score {
-  display: none;
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  margin-top: 6px;
-  letter-spacing: 0.01em;
+/* Stage A (2026-05-16) — band-color completion dot. Hidden by default;
+   the inline script in /quiz/index.astro reads cm-quiz-score-{slug}
+   from localStorage, derives the band via scoreBand() thresholds, and
+   reveals the dot via the data-band attribute (which also tints the
+   tile's border). Single 10×10 dot in the top-right corner. */
+.quiz-select-card__band-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 2px var(--color-surface);
+  /* Invisible until [data-band] is set by the inline script. */
 }
 
-.quiz-select-card__last-score--has-data {
-  display: inline-block;
+.quiz-select-card__band-dot[data-band="profi"]    { background: var(--classification-richtig); }
+.quiz-select-card__band-dot[data-band="guterweg"] { background: var(--classification-eher-richtig); }
+.quiz-select-card__band-dot[data-band="gehtnoch"] { background: var(--classification-eher-falsch); }
+.quiz-select-card__band-dot[data-band="erwischt"] { background: var(--classification-falsch); }
+
+/* On the featured Schnellcheck tile the "Mix" chip already lives in
+   the top-right corner; shift the dot to the top-left so they don't
+   overlap. */
+.quiz-select-card--featured .quiz-select-card__band-dot {
+  right: auto;
+  left: 10px;
 }
+
+/* Subtle tile-border tint mirrors the dot — readable at a glance. */
+.quiz-select-card[data-band="profi"]    { border-color: var(--classification-richtig); }
+.quiz-select-card[data-band="guterweg"] { border-color: var(--classification-eher-richtig); }
+.quiz-select-card[data-band="gehtnoch"] { border-color: var(--classification-eher-falsch); }
+.quiz-select-card[data-band="erwischt"] { border-color: var(--classification-falsch); }
 
 /* Stage 6 — Featured Schnellcheck tile. Subtle dotted border + "Mix"
    chip in the top-right corner so it reads as the cross-thematic

@@ -1,9 +1,16 @@
-# BugHerd #29/#38/#39 — canonical population sentence (2026-05-07).
-# All four bands now use the same factual statement about the population's
-# score for the module. Banded differentiation moves to the verdict block
+# Quiz-overhaul Stage A (2026-05-16) — single canonical population
+# sentence for the per-band fallback. All four bands now use the same
+# wording; banded differentiation lives in the verdict block
 # (Keystatic verdicts.{band}.title/body).
 #
-# Placeholders interpolated by ResultScreen.tsx at render time:
+# Note: as of Stage A the result hero in ResultScreen.tsx composes the
+# population line directly from computePopulationStats(); this YAML is
+# kept in sync so Keystatic editors don't see drift between surfaces.
+# Future stages can re-introduce banded copy by switching ResultScreen
+# back to bandedPopulationLine().
+#
+# Placeholders (interpolated by ResultScreen.tsx if/when it falls back
+# to this template):
 #   {x}    → population's average absolute points for THIS module (int)
 #   {z}    → number of myths in THIS module (int)
 #   {pct}  → population's average percentage for THIS module (int, 0–100)
@@ -13,10 +20,10 @@
 #
 # AI draft, awaiting ISD review.
 profi: |
-  Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).
+  Erwachsene (18–70) in einer Bevölkerungsbefragung in Deutschland ordneten im Schnitt {x} von {z} Aussagen genau richtig ein ({pct} %).
 guterweg: |
-  Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).
+  Erwachsene (18–70) in einer Bevölkerungsbefragung in Deutschland ordneten im Schnitt {x} von {z} Aussagen genau richtig ein ({pct} %).
 gehtnoch: |
-  Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).
+  Erwachsene (18–70) in einer Bevölkerungsbefragung in Deutschland ordneten im Schnitt {x} von {z} Aussagen genau richtig ein ({pct} %).
 erwischt: |
-  Erwachsene haben in einer Studie durchschnittlich {x} von {z} möglichen Punkten erreicht ({pct} %).
+  Erwachsene (18–70) in einer Bevölkerungsbefragung in Deutschland ordneten im Schnitt {x} von {z} Aussagen genau richtig ein ({pct} %).
