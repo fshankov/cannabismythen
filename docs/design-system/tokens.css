@@ -1,0 +1,143 @@
+/* ═══════════════════════════════════════════════════════════════
+   Cannabis: Mythen & Evidenz — Design Tokens (extracted)
+
+   Last synced: 2026-05-21 against HEAD 5420b21
+   Source: src/styles/global.css :root block (lines 12–124)
+
+   This is a paste-ready extract of the live :root tokens.
+   Use for Claude design, third-party design tools (Tokens Studio,
+   Style Dictionary, Figma variables import), or anywhere you need
+   the tokens without the rest of global.css.
+
+   Round-trip rule: edits made here are NOT applied to the codebase
+   automatically. The source of truth is src/styles/global.css.
+   When you change a value here, paste the diff back to Claude Code
+   in this repo and it will update global.css at the cited line.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Page (global.css:14–19) */
+  --color-bg: #f4f4f0;                  /* warm ivory, NOT white */
+  --color-surface: #ffffff;
+  --color-text: #1a1a2e;
+  --color-text-secondary: #4a5568;
+  --color-text-muted: #718096;
+  --color-border: #e2e8f0;
+
+  /* Brand accent — forest green (global.css:22–24) */
+  --color-accent: #2d6a4f;
+  --color-accent-hover: #1f4f3a;
+  --color-accent-light: #e8f5ef;
+
+  /* Legacy aliases — prefer --color-accent* in new code (global.css:30–32) */
+  --color-primary: var(--color-accent);
+  --color-primary-hover: var(--color-accent-hover);
+  --color-primary-light: var(--color-accent-light);
+
+  /* Classification verdicts — load-bearing semantic palette
+     Deuteranopia-safe Emerald/Lime/Amber/Rose (global.css:40–49) */
+  --classification-richtig: #047857;             /* Emerald-700 */
+  --classification-eher-richtig: #4d7c0f;        /* Lime-700 */
+  --classification-eher-falsch: #b45309;         /* Amber-700 */
+  --classification-falsch: #be123c;              /* Rose-700 */
+  --classification-keine-aussage: #6b7280;       /* Gray-500 */
+  --classification-richtig-bg: #ecfdf5;          /* Emerald-50 */
+  --classification-eher-richtig-bg: #f7fee7;     /* Lime-50 */
+  --classification-eher-falsch-bg: #fffbeb;      /* Amber-50 */
+  --classification-falsch-bg: #fff1f2;           /* Rose-50 */
+  --classification-keine-aussage-bg: #f3f4f6;    /* Gray-100 */
+
+  /* Legacy --color-* aliases — prefer --classification-* in new code (global.css:53–62) */
+  --color-richtig: var(--classification-richtig);
+  --color-eher-richtig: var(--classification-eher-richtig);
+  --color-eher-falsch: var(--classification-eher-falsch);
+  --color-falsch: var(--classification-falsch);
+  --color-keine-aussage: var(--classification-keine-aussage);
+  --color-richtig-bg: var(--classification-richtig-bg);
+  --color-eher-richtig-bg: var(--classification-eher-richtig-bg);
+  --color-eher-falsch-bg: var(--classification-eher-falsch-bg);
+  --color-falsch-bg: var(--classification-falsch-bg);
+  --color-keine-aussage-bg: var(--classification-keine-aussage-bg);
+
+  /* Extended surfaces (global.css:65–69) */
+  --color-bg-subtle: #eeeee8;        /* Section dividers, alternate rows */
+  --color-surface-raised: #f8fafc;   /* Sidebar, toolbar backgrounds */
+  --color-border-strong: #cbd5e1;    /* Emphasized borders */
+  --color-text-inverse: #ffffff;     /* Text on dark backgrounds */
+  --color-accent-muted: #95c4ad;     /* Disabled accent / decorative */
+  --color-primary-muted: var(--color-accent-muted); /* legacy alias */
+
+  /* Spacing scale (global.css:73–79) — mobile override at ≤640px in global.css:1612–1615 */
+  --space-xs: 0.25rem;   /*  4px */
+  --space-sm: 0.5rem;    /*  8px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px  → mobile 1.25rem (20px) */
+  --space-xl: 2rem;      /* 32px  → mobile 1.5rem  (24px) */
+  --space-2xl: 3rem;     /* 48px  → mobile 2rem    (32px) */
+  --space-3xl: 4rem;     /* 64px  → mobile 2.5rem  (40px) */
+
+  /* Layout (global.css:82–84) */
+  --nav-height: 56px;
+  --max-width: 1100px;
+  --max-width-prose: 740px;
+
+  /* Radius (global.css:87–90) */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows (global.css:93–95) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+  /* Typography (global.css:98–102) — NOTE: body uses Segoe UI, NOT Inter */
+  --font-display: 'Inter Variable', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-body: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
+               'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, 'Cascadia Code',
+               'Fira Code', Menlo, Monaco, Consolas, monospace;
+
+  /* Transitions (global.css:105–106) */
+  --transition-fast: 0.15s ease;
+  --transition: 0.25s ease;
+
+  /* Motion — quiz card flip / slide / lift (global.css:109–112) */
+  --ease-card: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-flip: 600ms;
+  --dur-slide: 320ms;
+  --lift-md: 6px;
+
+  /* Canonical card surface (global.css:118–123)
+     The Fakten-Karten card is the source of truth — change one
+     value and the hero fan, four-paths tiles, audience shortcut
+     and inner-preview decks re-proportion together. */
+  --card-aspect-ratio: 1 / 1.4;
+  --card-width-max: 280px;
+  --card-padding: var(--space-lg);
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-md);
+  --card-border-color: var(--color-border);
+
+  /* Audience segments (global.css:1057–1061)
+     Five Zielgruppen — CaRM data slices, not reader-personas.
+     Source-of-truth for emoji + label: src/content/faq/audiences.yaml */
+  --audience-eltern:        #4f46e5;  /* Indigo-600 · 👨‍👩‍👧 · voice: Sie */
+  --audience-jugendliche:   #f97316;  /* Orange-500 · 🧑       · voice: Du */
+  --audience-konsumierende: #16a34a;  /* Green-600  · 🌿       · voice: Du */
+  --audience-lehrkraefte:   #0891b2;  /* Cyan-600   · 🧑‍🏫    · voice: Sie */
+  --audience-fachkraefte:   #7c3aed;  /* Violet-600 · 🔬       · voice: Sie */
+
+  /* ═══════════════════════════════════════════════════════════
+     PROPOSED — not yet in code.
+     Today there are ~71 ad-hoc media queries / ~30 distinct
+     breakpoint values across global.css + dashboard.css + quiz.css.
+     Tracked by the responsive-tokens-sweep skill and
+     docs/ai-pipeline/known-quirks.md finding #1.
+     ═══════════════════════════════════════════════════════════ */
+  /* --bp-sm: 480px;  */
+  /* --bp-md: 768px;  */
+  /* --bp-lg: 1024px; */
+  /* --bp-xl: 1440px; */
+}
