@@ -577,6 +577,7 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                         <div className="carm-spannweite__plot">
                           {value !== null ? (
                             <>
+                              {/* 2px stem — same as Spannweite. */}
                               <div
                                 className="carm-spannweite__bar"
                                 style={{
@@ -585,22 +586,23 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                                 }}
                                 aria-hidden="true"
                               />
-                              <span
-                                className="carm-sources-spannweite__circle"
+                              {/* 2026-05-22: unified dot idiom with the
+                                  value rendered INSIDE the dot. Source
+                                  category colors don't have a pre-baked
+                                  pastel token set, so the dot keeps a
+                                  solid category-color fill with white
+                                  text. */}
+                              <div
+                                className="carm-spannweite__dot carm-sources-spannweite__dot"
                                 aria-hidden="true"
                                 style={{
                                   left: `${Math.max(0, Math.min(100, value))}%`,
                                   background: categoryColor,
-                                }}
-                              />
-                              <span
-                                className="carm-spannweite__num"
-                                style={{
-                                  left: `calc(${Math.max(0, Math.min(100, value))}% + 12px)`,
+                                  color: '#ffffff',
                                 }}
                               >
                                 {Math.round(value)}
-                              </span>
+                              </div>
                             </>
                           ) : (
                             <span className="carm-spannweite__no-data" aria-hidden="true">
@@ -615,26 +617,8 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
               );
             })}
 
-            {/* Bottom axis row */}
-            <div
-              className="carm-spannweite__axis"
-              style={{ gridColumn: `1 / span ${columns.length + 1}`, gridTemplateColumns: gridTemplate }}
-              aria-hidden="true"
-            >
-              <div className="carm-spannweite__axis-corner" />
-              {columns.map((col) => {
-                if (isHidden(col.id)) {
-                  return <div key={`axis-${col.id}`} className="carm-spannweite__axis-hidden" />;
-                }
-                return (
-                  <div key={`axis-${col.id}`} className="carm-spannweite__axis-scale">
-                    <span>0</span>
-                    <span>50</span>
-                    <span>100</span>
-                  </div>
-                );
-              })}
-            </div>
+            {/* Bottom axis removed 2026-05-22 — Fedor: "self-evident
+                without it". */}
           </div>
         </div>
 

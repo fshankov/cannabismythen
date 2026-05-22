@@ -1,99 +1,218 @@
-import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import ReactECharts from 'echarts-for-react';
-import type { ECharts } from 'echarts';
-import type { Myth, Metric, AppState, BalkenSort } from '../../../lib/dashboard/types';
+/**
+ * BalkenView — 1-column Spannweite (Stage 2026-05-21 rebuild).
+ *
+ * The previous ECharts-based horizontal bar chart was replaced with a
+ * React + SVG grid that shares the Spannweite primitives 1:1. The view
+ * shows ONE data column (the active indicator × active group) for every
+ * filtered myth, using the same header chrome (icon + label +
+ * InfoTooltip + sort button), the same myth identity cell (verdict
+ * arrow + short text), and the same value cell (lollipop 2px stem +
+ * 18px solid white-on-verdict dot, or "k. A." for null).
+ *
+ * Sort state lives in `state.balkenSort` ('a-z' | 'value-asc' |
+ * 'value-desc' | 'verdict-asc' | 'verdict-desc'). Default 'a-z'. The
+ * shared toolbar's SortToggle has been retired for this view; sort
+ * now lives in the column headers (A-Z + verdict-rank on the MYTHEN
+ * column, value-asc/desc on the indicator column).
+ *
+ * Bev. Relevanz × invalid-group combos route through
+ * `getIndicatorValueChecked` so the cell renders "k. A." even when
+ * carm-data.json contains a stray non-null value.
+ */
 import {
-  buildTooltipHtml,
-  formatValue,
-  getIndicatorValue,
-  getMythMetric,
-  getMythShortText,
+  forwardRef, useCallback, useEffect, useImperativeHandle, useMemo,
+  useRef, useState,
+} from 'react';
+import type {
+  Myth, Metric, GroupId, AppState, Indicator, BalkenSort,
+  DashboardDefinitions, Group,
+} from '../../../lib/dashboard/types';
+import {
+  getIndicatorValueChecked, getMythMetric, getMythShortText,
 } from '../../../lib/dashboard/data';
-import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
-import { t } from '../../../lib/dashboard/translations';
+import { INDICATOR_ICONS } from '../../../lib/icons';
+import { t, type TranslationKey } from '../../../lib/dashboard/translations';
+import VerdictArrowSymbols from './verdictArrowSymbols';
+import {
+  GridDataHeader, GridLabelHeader, GridMythCell, GridValueCell, GridHoverTooltip,
+} from '../grid';
+import { renderSpannweiteSvg } from '../../../lib/dashboard/spannweite-svg';
 
 interface Props {
   myths: Myth[];
   metrics: Metric[];
+  groups: Group[];
   state: AppState;
+  update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
   onSelectMyth: (id: number) => void;
   /** Empty-state CTA resets categoryIds + mythIds + verdictFilter +
-   *  search + balkenSort so the user can recover from an
-   *  "over-filtered to nothing" state in one click. */
+   *  search so the user can recover from an "over-filtered to nothing"
+   *  state in one click. */
   onResetFilters?: () => void;
+  definitions?: DashboardDefinitions | null;
 }
 
 export interface BalkenViewHandle {
-  /** Returns the underlying ECharts instance for export. */
-  getEchartsInstance: () => ECharts | null;
-}
-
-interface Datum {
-  myth: Myth;
-  value: number;
-  category: string;
-}
-
-const GROUP_LABELS: Record<string, string> = {
-  adults: 'Volljährige (18–70)',
-  minors: 'Minderjährige (16–17)',
-  consumers: 'Konsumierende',
-  young_adults: 'Junge Erwachsene (18–26)',
-  parents: 'Eltern',
-};
-
-function sortData(data: Datum[], sort: BalkenSort): Datum[] {
-  const copy = data.slice();
-  if (sort === 'verdict-rank') {
-    // Session 4a (BugHerd #48): rank by scientific verdict band, then
-    // by descending value as a tie-break so the highest indicator
-    // value within a band sits at the top. Same rank as TableView.
-    const order: Record<string, number> = {
-      richtig: 1,
-      eher_richtig: 2,
-      eher_falsch: 3,
-      falsch: 4,
-      no_classification: 5,
-    };
-    return copy.sort((a, b) => {
-      const oa = order[a.myth.correctness_class] ?? 5;
-      const ob = order[b.myth.correctness_class] ?? 5;
-      if (oa !== ob) return oa - ob;
-      return b.value - a.value;
-    });
-  }
-  if (sort === 'value-asc') return copy.sort((a, b) => a.value - b.value);
-  return copy.sort((a, b) => b.value - a.value);
+  /** Returns the SVG element used for PNG/SVG export. Mirrors
+   *  SpannweiteViewHandle.getSvgElement. */
+  getSvgElement: () => SVGSVGElement | null;
 }
 
 const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
-  { myths, metrics, state, onSelectMyth, onResetFilters },
+  { myths, metrics, groups, state, update, onSelectMyth, onResetFilters, definitions },
   ref,
 ) {
-  const chartRef = useRef<ReactECharts>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
 
+  /** Cache of the latest render-relevant state — feeds renderSpannweiteSvg
+   *  for export, identical to SpannweiteView's renderDataRef pattern. */
+  const renderDataRef = useRef<{
+    myths: Myth[];
+    metrics: Metric[];
+    groups: Group[];
+    mode: 'indicator';
+    pickedGroup: GroupId;
+    pickedIndicator: Indicator;
+    visibleColumns: { id: string; label: string }[];
+    lang: AppState['lang'];
+  } | null>(null);
   useImperativeHandle(ref, () => ({
-    getEchartsInstance: () => chartRef.current?.getEchartsInstance() ?? null,
+    getSvgElement: () => {
+      if (renderDataRef.current) {
+        try {
+          return renderSpannweiteSvg(renderDataRef.current);
+        } catch {
+          return svgRef.current;
+        }
+      }
+      return svgRef.current;
+    },
   }));
 
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const lang = state.lang;
+  const groupId: GroupId = state.groupIds[0] ?? 'adults';
+  const indicator: Indicator = state.indicator;
+  const sort: BalkenSort = state.balkenSort ?? 'a-z';
 
-  /**
-   * Stage 4 — chart height adapts to the available viewport instead of
-   * the hard `data.length * 22 + 80` curve. We measure the chart
-   * wrapper's top offset on mount + resize, subtract a 80px footer
-   * margin, and clamp 420–1200. Falls back to the bar-driven curve
-   * when the wrapper hasn't measured yet (initial render before the
-   * effect runs).
-   */
+  // Indicator column metadata (icon + labels + definition for InfoTooltip).
+  const indicatorCol = useMemo(() => {
+    const Icon = INDICATOR_ICONS[indicator];
+    const rawLabel = t(`indicator.${indicator}.short` as TranslationKey, lang);
+    const label = rawLabel.replace(/\s*%\s*$/, '');
+    const def = definitions?.mythIndicators?.[indicator];
+    return {
+      id: indicator as string,
+      Icon,
+      label,
+      fullLabel: t(`indicator.${indicator}` as TranslationKey, lang),
+      defTitle: def?.label,
+      defText: def?.definition,
+      defScale: def?.scale,
+      defSampleSize: def?.sampleSize,
+    };
+  }, [indicator, lang, definitions]);
+
+  /** Single value lookup — routes through the Bev. Relevanz validity
+   *  guard so invalid combos render "k. A." regardless of JSON state. */
+  const cellValue = useCallback(
+    (mythId: number): number | null =>
+      getIndicatorValueChecked(
+        getMythMetric(metrics, mythId, groupId),
+        indicator,
+        groupId,
+      ),
+    [metrics, groupId, indicator],
+  );
+
+  /** Sort: 5-way (Spannweite parity). */
+  const sortedMyths = useMemo(() => {
+    const rows = [...myths];
+    const cmpAz = (a: Myth, b: Myth) =>
+      getMythShortText(a, lang).localeCompare(getMythShortText(b, lang), 'de');
+    if (sort === 'value-asc' || sort === 'value-desc') {
+      const dir = sort === 'value-asc' ? 1 : -1;
+      rows.sort((a, b) => {
+        const va = cellValue(a.id);
+        const vb = cellValue(b.id);
+        if (va === null && vb === null) return cmpAz(a, b);
+        if (va === null) return 1;
+        if (vb === null) return -1;
+        if (va !== vb) return dir * (va - vb);
+        return cmpAz(a, b);
+      });
+    } else if (sort === 'verdict-asc' || sort === 'verdict-desc') {
+      const dir = sort === 'verdict-asc' ? 1 : -1;
+      const order: Record<string, number> = {
+        richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, no_classification: 5,
+      };
+      rows.sort((a, b) => {
+        const oa = order[a.correctness_class] ?? 5;
+        const ob = order[b.correctness_class] ?? 5;
+        if (oa !== ob) return dir * (oa - ob);
+        return cmpAz(a, b);
+      });
+    } else {
+      rows.sort(cmpAz);
+    }
+    return rows;
+  }, [myths, sort, cellValue, lang]);
+
+  /** Sort cycle on the indicator column: inactive → asc → desc → asc. */
+  const handleColumnSortClick = useCallback(() => {
+    if (sort === 'value-asc') update('balkenSort', 'value-desc');
+    else if (sort === 'value-desc') update('balkenSort', 'value-asc');
+    else update('balkenSort', 'value-asc');
+  }, [sort, update]);
+
+  // ─── Hover tooltip state — mirrors Spannweite's pattern. ──────────
+  const [hoveredMythId, setHoveredMythId] = useState<number | null>(null);
+  const [hoveredOnCell, setHoveredOnCell] = useState<boolean>(false);
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+
+  const TOOLTIP_MAX_W = 420;
+  const VIEWPORT_MARGIN = 12;
+  const handleHover = useCallback(
+    (mythId: number, onCell: boolean, e: React.MouseEvent) => {
+      setHoveredMythId(mythId);
+      setHoveredOnCell(onCell);
+      const halfW = TOOLTIP_MAX_W / 2;
+      const minX = halfW + VIEWPORT_MARGIN;
+      const maxX = (typeof window !== 'undefined' ? window.innerWidth : 1280) - halfW - VIEWPORT_MARGIN;
+      const clampedX = Math.max(minX, Math.min(maxX, e.clientX));
+      setHoverPos({ x: clampedX, y: e.clientY });
+    },
+    [],
+  );
+  const handleLeave = useCallback(() => {
+    setHoveredMythId(null);
+    setHoveredOnCell(false);
+    setHoverPos(null);
+  }, []);
+
+  const hoveredMyth = hoveredMythId !== null
+    ? myths.find((m) => m.id === hoveredMythId) ?? null
+    : null;
+
+  // Keep export-data ref in sync with the live view.
+  useEffect(() => {
+    renderDataRef.current = {
+      myths: sortedMyths,
+      metrics,
+      groups,
+      mode: 'indicator',
+      pickedGroup: groupId,
+      pickedIndicator: indicator,
+      visibleColumns: [{ id: indicatorCol.id, label: indicatorCol.label }],
+      lang,
+    };
+  });
+
+  // ─── Viewport-fit height. ─────────────────────────────────────────
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [viewportH, setViewportH] = useState(
     typeof window !== 'undefined' ? window.innerHeight : 800,
   );
-  /** Measured top offset of the chart wrapper inside the viewport. Drives
-   *  the container's max-height so the chart fills the rest of the
-   *  visible area below the sticky toolbar. */
   const [measuredTop, setMeasuredTop] = useState(200);
-
   useEffect(() => {
     const onResize = () => {
       setViewportH(window.innerHeight);
@@ -106,220 +225,15 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Measure top after first paint so the initial render switches from the
-  // 200px fallback to the real offset (toolbar + tabs + nav header).
-  useLayoutEffect(() => {
-    if (wrapperRef.current) {
-      setMeasuredTop(wrapperRef.current.getBoundingClientRect().top);
-    }
-  }, []);
-
-  const groupId = state.groupIds[0] ?? 'adults';
-  const groupName = GROUP_LABELS[groupId] ?? groupId;
-
-  const data = useMemo<Datum[]>(() => {
-    const out: Datum[] = [];
-    for (const myth of myths) {
-      const metric = getMythMetric(metrics, myth.id, groupId);
-      const value = getIndicatorValue(metric, state.indicator);
-      if (value === null) continue;
-      out.push({ myth, value, category: myth.category_de });
-    }
-    return sortData(out, state.balkenSort);
-  }, [myths, metrics, groupId, state.indicator, state.balkenSort]);
-
-  const option = useMemo(() => {
-    // ECharts horizontal bars render bottom-up on the y-axis. Reverse so the
-    // highest-ranked myth appears at the TOP of the chart.
-    const ordered = [...data].reverse();
-
-    const max = state.indicator === 'awareness' ? 100 : 100;
-
-    // Verdict-coloured y-axis labels — replaces the separate
-    // VerdictLegend sidebar that used to live to the right of the chart.
-    // Each label is rendered with an ECharts `rich` style keyed by the
-    // myth's correctness_class, so the text picks up the verdict colour
-    // tint as a pill background. v3: no leading arrow glyph — just short
-    // statements. Truncation rule unchanged.
-    const yLabels = ordered.map((d) => {
-      const txt = getMythShortText(d.myth, 'de');
-      const trimmed = txt.length > 60 ? txt.slice(0, 58) + '…' : txt;
-      const cls = d.myth.correctness_class;
-      return `{${cls}|${trimmed}}`;
-    });
-
-    // Each y-axis label renders as a verdict-tinted pill: subtle bg
-    // (Emerald-50 / Lime-50 / Amber-50 / Rose-50), verdict-colored
-    // bold text, leading arrow glyph, and a small left padding so the
-    // text doesn't touch the pill edge. Matches the row treatment of
-    // Tabelle myth cells so a Balken row and a Tabelle row read as
-    // the same thing.
-    const pillPadding: [number, number, number, number] = [3, 8, 3, 8];
-    const richStyles = {
-      richtig: {
-        color: getCorrectnessColor('richtig'),
-        backgroundColor: getCorrectnessBgColor('richtig'),
-        padding: pillPadding,
-        borderRadius: 4,
-        fontWeight: 600,
-      },
-      eher_richtig: {
-        color: getCorrectnessColor('eher_richtig'),
-        backgroundColor: getCorrectnessBgColor('eher_richtig'),
-        padding: pillPadding,
-        borderRadius: 4,
-        fontWeight: 600,
-      },
-      eher_falsch: {
-        color: getCorrectnessColor('eher_falsch'),
-        backgroundColor: getCorrectnessBgColor('eher_falsch'),
-        padding: pillPadding,
-        borderRadius: 4,
-        fontWeight: 600,
-      },
-      falsch: {
-        color: getCorrectnessColor('falsch'),
-        backgroundColor: getCorrectnessBgColor('falsch'),
-        padding: pillPadding,
-        borderRadius: 4,
-        fontWeight: 600,
-      },
-      no_classification: {
-        color: '#1e293b',
-        backgroundColor: getCorrectnessBgColor('no_classification'),
-        padding: pillPadding,
-        borderRadius: 4,
-        fontWeight: 500,
-      },
-    };
-
-    return {
-      animation: false,
-      tooltip: {
-        trigger: 'axis' as const,
-        // Confine to the chart container so the card stays on-screen.
-        // Strip the ECharts default tooltip chrome (white bg + shadow
-        // + padding) — the verdict-tinted card built by
-        // `buildTooltipHtml()` carries its own background, border, and
-        // padding now. Without this override the ECharts wrapper sits
-        // around the card making it look double-bordered.
-        confine: true,
-        backgroundColor: 'transparent',
-        borderWidth: 0,
-        padding: 0,
-        extraCssText:
-          'box-shadow: 0 6px 18px rgba(15,23,42,0.22); background: transparent; border-radius: 8px; padding: 0;',
-        axisPointer: { type: 'shadow' as const },
-        formatter: (params: { dataIndex?: number }[] | { dataIndex?: number }) => {
-          const arr = Array.isArray(params) ? params : [params];
-          const idx = arr[0]?.dataIndex;
-          if (idx === undefined) return '';
-          const d = ordered[idx];
-          if (!d) return '';
-          return buildTooltipHtml({
-            myth: d.myth,
-            lang: 'de',
-            groupName,
-            indicator: state.indicator,
-            value: d.value,
-          });
-        },
-      },
-      grid: {
-        // 248 leaves an 8px gap between the verdict-tinted y-axis
-        // label pills (width 232 below) and the chart's left axis
-        // line so the pills don't visually butt against the bars.
-        // Stage 6: extra `right: 80` makes room for the value pill that
-        // sits just past the longest bar without clipping at the edge.
-        // Top is bumped to 40 to fit the relocated xAxis title.
-        left: 248,
-        right: 80,
-        top: 40,
-        bottom: 16,
-      },
-      xAxis: {
-        type: 'value' as const,
-        max,
-        // Stage 6: xAxis sits at the TOP so it stays visible at the
-        // start of the internal scroll (chart taller than container).
-        position: 'top' as const,
-        name: t(`indicator.${state.indicator}` as never, 'de'),
-        nameLocation: 'middle' as const,
-        nameGap: 28,
-        splitLine: {
-          show: true,
-          lineStyle: { type: 'dashed' as const, color: '#e5e7eb' },
-        },
-        z: 0,
-      },
-      yAxis: {
-        type: 'category' as const,
-        data: yLabels,
-        axisLabel: {
-          // 232 = grid.left (248) − 16 pill horizontal padding.
-          width: 232,
-          overflow: 'truncate' as const,
-          fontSize: 12,
-          color: '#1e293b',
-          // Widen the click target so tapping the y-axis myth label
-          // opens the factsheet, not just the bar itself.
-          triggerEvent: true,
-          rich: richStyles,
-        },
-        axisTick: { show: false },
-        axisLine: { lineStyle: { color: '#e2e8f0' } },
-      },
-      series: [
-        {
-          type: 'bar' as const,
-          barMaxWidth: 22,
-          itemStyle: {
-            borderRadius: [0, 3, 3, 0] as [number, number, number, number],
-          },
-          label: {
-            // Stage 6: always-outside white pill. No more contrast
-            // edge cases (lime, rose, etc.) — the label sits just past
-            // the bar end on plain white background with a 1px border.
-            show: true,
-            formatter: (p: { value: number; dataIndex: number }) => {
-              return formatValue(p.value, state.indicator);
-            },
-            position: 'right' as const,
-            distance: 4,
-            color: '#1a1a2e',
-            backgroundColor: '#ffffff',
-            borderColor: '#e2e8f0',
-            borderWidth: 1,
-            borderRadius: 4,
-            padding: [2, 6, 2, 6],
-            fontSize: 11,
-            fontWeight: 600,
-          },
-          data: ordered.map((d) => ({
-            value: d.value,
-            itemStyle: {
-              color: getCorrectnessColor(d.myth.correctness_class),
-              borderRadius: [0, 3, 3, 0] as [number, number, number, number],
-            },
-          })),
-        },
-      ],
-    };
-  }, [data, state.indicator, groupName]);
-
-  // Sort UI now lives in the shared dashboard toolbar (`<SortToggle>`);
-  // the inline chips that used to render here were removed when the
-  // toolbar consolidated.
-
-  if (data.length === 0) {
+  if (myths.length === 0) {
     return (
       <div className="carm-balken-view" ref={wrapperRef}>
         <div className="carm-balken-empty" role="status">
           <p className="carm-balken-empty__title">
-            {t('filter.empty.title', 'de')}
+            {t('filter.empty.title', lang)}
           </p>
           <p className="carm-balken-empty__body">
-            {t('filter.empty.body', 'de')}
+            {t('filter.empty.body', lang)}
           </p>
           {onResetFilters && (
             <button
@@ -327,7 +241,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
               className="carm-btn carm-btn--primary carm-balken-empty__cta"
               onClick={onResetFilters}
             >
-              {t('filter.empty.cta', 'de')}
+              {t('filter.empty.cta', lang)}
             </button>
           )}
         </div>
@@ -335,54 +249,170 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     );
   }
 
-  const handleClick = (params: { dataIndex?: number; componentType?: string; value?: string }) => {
-    // Click can come from the bar (`series`) OR — Stage 4 — from the
-    // y-axis label (`yAxis`). Both produce the same `dataIndex` when
-    // the y-axis triggers the event, so the lookup is identical.
-    if (params.dataIndex === undefined) return;
-    const ordered = [...data].reverse();
-    const datum = ordered[params.dataIndex];
-    if (datum) onSelectMyth(datum.myth.id);
-  };
+  const isAzActive = sort === 'a-z';
+  const azTooltip = t('spannweite.sort.alpha.tooltip', lang);
+  const isVerdictActive = sort === 'verdict-asc' || sort === 'verdict-desc';
+  const verdictDir: 'asc' | 'desc' = sort === 'verdict-desc' ? 'desc' : 'asc';
+  const verdictTooltipKey: TranslationKey = !isVerdictActive
+    ? 'spannweite.sort.verdict.activate.tooltip'
+    : sort === 'verdict-asc'
+    ? 'spannweite.sort.verdict.asc.tooltip'
+    : 'spannweite.sort.verdict.desc.tooltip';
+  const isSortCol = sort === 'value-asc' || sort === 'value-desc';
+  const isAsc = sort === 'value-asc';
+  const isDesc = sort === 'value-desc';
+  const colSortTooltipKey: TranslationKey = isAsc
+    ? 'spannweite.sort.col.asc.tooltip'
+    : isDesc
+    ? 'spannweite.sort.col.desc.tooltip'
+    : 'spannweite.sort.col.activate.tooltip';
+  const colSortTooltip = t(colSortTooltipKey, lang).replace('{col}', indicatorCol.fullLabel);
 
-  /**
-   * Height — Stage 6 follow-up (v2). Bars are a fixed 28px row each so
-   * they never compress on short viewports. Total chart SVG height =
-   * rows × rowHeight + axis chrome. The wrapper measures its own top
-   * offset and computes container height = viewportH − top − 24px
-   * bottom margin, so the chart fills the entire visible space below
-   * the toolbar (no big empty gap before the footer). Falls back to
-   * a 360px floor if the measurement is too small (e.g. very short
-   * window) and clamps at fullChartHeight so no empty bottom appears
-   * when the data fits comfortably.
-   */
-  const ROW_HEIGHT = 28;
-  // 40px top padding (xAxis title + line) + 16px bottom = 56px chrome.
-  const AXIS_CHROME = 56;
-  const fullChartHeight = data.length * ROW_HEIGHT + AXIS_CHROME;
-  // 24px breathing room before the global footer / page edge.
+  const gridTemplate = `var(--carm-spannweite-label-col) minmax(0, 1fr)`;
   const BOTTOM_MARGIN = 24;
   const availableH = Math.max(360, viewportH - measuredTop - BOTTOM_MARGIN);
-  // If the chart's own content is shorter than the available area, the
-  // container shrinks to fit (no empty bottom); otherwise it caps at
-  // availableH and scrolls.
-  const containerHeight = Math.min(fullChartHeight, availableH);
 
   return (
-    <div className="carm-balken-view" ref={wrapperRef}>
+    <div className="carm-spannweite carm-balken-view" ref={wrapperRef}>
       <div
-        className="carm-balken-view__scroll"
-        style={{ maxHeight: containerHeight, overflowY: 'auto' }}
+        className="carm-spannweite__scroller"
+        style={{ maxHeight: availableH, overflowY: 'auto' }}
       >
-        <ReactECharts
-          ref={chartRef}
-          option={option}
-          style={{ height: fullChartHeight, width: '100%' }}
-          onEvents={{ click: handleClick }}
-          opts={{ renderer: 'svg' }}
-          notMerge
-        />
+        <div
+          className="carm-spannweite__grid"
+          style={{ gridTemplateColumns: gridTemplate }}
+          role="grid"
+        >
+          {/* Header — MYTHEN column with A-Z (top-LEFT) + verdict-rank
+              (top-RIGHT) sort buttons. */}
+          <div
+            className="carm-spannweite__cell carm-spannweite__cell--header carm-spannweite__cell--label"
+            role="columnheader"
+          >
+            <GridLabelHeader
+              labelText={t('misc.myths', lang)}
+              isAzActive={isAzActive}
+              azTooltip={azTooltip}
+              onAzClick={() => update('balkenSort', 'a-z')}
+              verdictRank={{
+                isActive: isVerdictActive,
+                direction: verdictDir,
+                tooltip: t(verdictTooltipKey, lang),
+                onClick: () => {
+                  if (sort === 'verdict-asc') update('balkenSort', 'verdict-desc');
+                  else if (sort === 'verdict-desc') update('balkenSort', 'verdict-asc');
+                  else update('balkenSort', 'verdict-asc');
+                },
+              }}
+            />
+          </div>
+
+          {/* Header — indicator data column. */}
+          <div
+            className="carm-spannweite__cell carm-spannweite__cell--header"
+            role="columnheader"
+          >
+            <GridDataHeader
+              Icon={indicatorCol.Icon}
+              label={indicatorCol.label}
+              fullLabel={indicatorCol.fullLabel}
+              defTitle={indicatorCol.defTitle}
+              defText={indicatorCol.defText}
+              defScale={indicatorCol.defScale}
+              defSampleSize={indicatorCol.defSampleSize}
+              hideLabel={`${t('column.hide', lang)} — ${indicatorCol.fullLabel}`}
+              onHide={() => undefined}
+              isSortActive={isSortCol}
+              sortDir={isDesc ? 'desc' : 'asc'}
+              sortTooltip={colSortTooltip}
+              onSortClick={handleColumnSortClick}
+            />
+          </div>
+
+          {/* Body rows. */}
+          {sortedMyths.map((myth, rowIdx) => {
+            const verdict = myth.correctness_class;
+            const shortText = getMythShortText(myth, lang);
+            const isHover = hoveredMythId === myth.id;
+            const value = cellValue(myth.id);
+            return (
+              <div
+                key={`row-${myth.id}`}
+                className={`carm-spannweite__row${isHover ? ' is-hover' : ''}${rowIdx % 2 === 0 ? '' : ' is-alt'}`}
+                role="row"
+                style={{
+                  gridColumn: `1 / span 2`,
+                  gridTemplateColumns: gridTemplate,
+                }}
+                onClick={() => onSelectMyth(myth.id)}
+                onMouseLeave={handleLeave}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectMyth(myth.id);
+                  }
+                }}
+                tabIndex={0}
+              >
+                <div
+                  className="carm-spannweite__cell carm-spannweite__cell--label"
+                  role="rowheader"
+                  onMouseEnter={(e) => handleHover(myth.id, false, e)}
+                  onMouseMove={(e) => handleHover(myth.id, false, e)}
+                >
+                  <GridMythCell verdict={verdict} shortText={shortText} />
+                </div>
+                <div
+                  className="carm-spannweite__cell carm-spannweite__cell--plot"
+                  role="gridcell"
+                  aria-label={
+                    value !== null
+                      ? `${indicatorCol.fullLabel}: ${Math.round(value)} %`
+                      : `${indicatorCol.fullLabel}: keine Daten`
+                  }
+                  onMouseEnter={(e) => handleHover(myth.id, true, e)}
+                  onMouseMove={(e) => handleHover(myth.id, true, e)}
+                >
+                  <div className="carm-spannweite__plot">
+                    <GridValueCell verdict={verdict} value={value} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Shared verdict-arrow symbol library. */}
+        <svg
+          ref={svgRef}
+          className="carm-spannweite__symbols"
+          width={0}
+          height={0}
+          aria-hidden="true"
+          focusable="false"
+        >
+          <defs>
+            <VerdictArrowSymbols />
+          </defs>
+        </svg>
       </div>
+
+      {/* Hover tooltip — Spannweite-style verdict-tinted card. */}
+      {hoveredMyth && hoverPos && (() => {
+        let lesebeispielIndicator: Indicator | null = null;
+        if (hoveredOnCell) lesebeispielIndicator = indicator;
+        return (
+          <GridHoverTooltip
+            myth={hoveredMyth}
+            metrics={metrics}
+            lang={lang}
+            x={hoverPos.x}
+            y={hoverPos.y}
+            lesebeispielIndicator={lesebeispielIndicator}
+            lesebeispielGroup={groupId}
+          />
+        );
+      })()}
     </div>
   );
 });
