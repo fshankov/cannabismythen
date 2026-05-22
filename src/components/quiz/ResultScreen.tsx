@@ -17,7 +17,14 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import type { CardAnswer, QuizMyth, QuizResult, QuizTheme, ScoreBand } from "./types";
-import { QUIZ_THEMES, schritte, scoreBand } from "./quizData";
+import {
+  QUIZ_THEMES,
+  exactCountDelta,
+  populationExpectedExactCount,
+  schritte,
+  scoreBand,
+  userJoinedPercent,
+} from "./quizData";
 import { t } from "./i18n";
 import { trackResultCardViewed } from "./matomo";
 import ShareCard from "./ShareCard";
@@ -116,6 +123,24 @@ function realCopy(s: string | undefined): string {
   return trimmed;
 }
 
+/** Format a number the German way for body copy: integers stay bare
+ *  (no trailing ",0"), non-integers use a comma decimal separator and
+ *  exactly one fractional digit. Display-only — not for round-tripping. */
+function formatGermanDecimal(n: number): string {
+  const rounded = Math.round(n * 10) / 10;
+  if (rounded === Math.trunc(rounded)) {
+    return String(Math.trunc(rounded));
+  }
+  return rounded.toFixed(1).replace(".", ",");
+}
+
+/** German singular/plural for "Aussage". Singular only when the count is
+ *  exactly 1 (e.g. "1 Aussage über dem Schnitt"). All other values —
+ *  including 0 and decimals like 1,5 — take the plural "Aussagen". */
+function pluralizeAussage(n: number): string {
+  return n === 1 ? "Aussage" : "Aussagen";
+}
+
 export default function ResultScreen({
   result,
   theme,
@@ -200,6 +225,26 @@ export default function ResultScreen({
   // Computed from each myth's populationCorrectPct; rounded per #31.
   const populationStats = computePopulationStats(theme.myths);
 
+  // Stage D PR2 (2026-05-22) — Achievement card numbers. The card uses
+  // a single decimal of precision (Poisson-binomial expectation), unlike
+  // the rounded `populationStats.absolutePoints` the legacy ShareCard
+  // hero still consumes. ShareCard's hero is unbanded in PR3 and the
+  // duplication resolves there.
+  const populationExpectedCount = populationExpectedExactCount(theme.myths);
+  const delta = exactCountDelta(result.breakdown.exact, theme.myths);
+  const deltaSentence =
+    delta === 0
+      ? t("result.deltaLine.onPar")
+      : delta > 0
+        ? t("result.deltaLine.above", {
+            count: formatGermanDecimal(delta),
+            aussage: pluralizeAussage(delta),
+          })
+        : t("result.deltaLine.below", {
+            count: formatGermanDecimal(Math.abs(delta)),
+            aussage: pluralizeAussage(Math.abs(delta)),
+          });
+
   // Stage A (2026-05-16) — Pew minimalism hero. The two sentences are
   // composed inline because they're structural, not banded copy. The
   // share-copy.yaml singleton is kept in sync for future re-engagement
@@ -241,64 +286,38 @@ export default function ResultScreen({
         populationLine={populationLine}
       />
 
-      {/* Stage C (2026-05-17) — compact "Du vs. Ø Bevölkerung" stats
-          grid. Pulls the headline numbers up so they read at a glance
-          before the user scrolls into the per-question retrospective.
-          CaRM only exposes the population's "% genau richtig" per myth,
-          not a 4-Schritte breakdown, so the grid is intentionally two
-          rows (Genau-richtig count + overall share %). The full
-          Schritte band breakdown for the user lives inside the
-          retrospective table below. */}
-      <table
-        className="quiz-result__summary"
-        aria-label={t("ui.resultSummary.title")}
+      {/* Stage D PR2 (2026-05-22) — Achievement card. Replaces the
+          Stage C two-row summary grid. The grid mixed Schritte-coverage %
+          (partial credit, user side) with genau-richtig count % (binary,
+          population side) — not apples-to-apples. The new card uses one
+          honest metric (genau-richtig counts) for both sides, plus a
+          Pew-style band-tied headline and a sign-aware delta sentence.
+          The band feeling still comes through the headline; the
+          band-tinted backgrounds drop in PR3 along with the cream
+          paper background sweep.
+          AI-draft German strings — awaiting ISD review. See i18n.ts
+          (`result.*` keys) for the English glosses. */}
+      <section
+        className={`quiz-result__achievement quiz-result__achievement--${band}`}
+        aria-label={t(`result.achievementHeadline.${band}`)}
       >
-        <thead>
-          <tr>
-            <th scope="col" className="quiz-result__summary-rowlabel">
-              {t("ui.resultSummary.title")}
-            </th>
-            <th scope="col">{t("ui.resultSummary.colYou")}</th>
-            <th scope="col">{t("ui.resultSummary.colPopulation")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row" className="quiz-result__summary-rowlabel">
-              {t("ui.resultSummary.rowExact")}
-            </th>
-            <td className="quiz-result__summary-num">
-              {result.breakdown.exact}
-              <span className="quiz-result__summary-denom">
-                {" / "}
-                {result.totalQuestions}
-              </span>
-            </td>
-            <td className="quiz-result__summary-num quiz-result__summary-num--muted">
-              {populationStats.absolutePoints}
-              <span className="quiz-result__summary-denom">
-                {" / "}
-                {populationStats.questionCount}
-              </span>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row" className="quiz-result__summary-rowlabel">
-              {t("ui.resultSummary.rowShare")}
-            </th>
-            <td
-              className={`quiz-result__summary-num quiz-result__summary-num--band quiz-result__summary-num--band-${band}`}
-            >
-              {result.moduleScore}
-              <span className="quiz-result__summary-denom"> %</span>
-            </td>
-            <td className="quiz-result__summary-num quiz-result__summary-num--muted">
-              {populationStats.percent}
-              <span className="quiz-result__summary-denom"> %</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <h2 className="quiz-result__achievement-headline">
+          {t(`result.achievementHeadline.${band}`)}
+        </h2>
+        <p className="quiz-result__achievement-score">
+          {t("result.scoreLine.user", {
+            count: result.breakdown.exact,
+            total: result.totalQuestions,
+          })}
+        </p>
+        <p className="quiz-result__achievement-population">
+          {t("result.scoreLine.population", {
+            count: formatGermanDecimal(populationExpectedCount),
+            total: result.totalQuestions,
+          })}
+        </p>
+        <p className="quiz-result__achievement-delta">{deltaSentence}</p>
+      </section>
 
       {/* Module review, worst-first */}
       <div className="quiz-result__retrospective">
@@ -316,10 +335,22 @@ export default function ResultScreen({
             popup (replaces the broken "Zur Frage" jump-back). */}
         <ul className="quiz-result__list" aria-label={t("ui.retrospectiveTitle")}>
           {reviewRows.map((row) => {
-            const { myth, schritte: s } = row;
+            const { myth, answer, schritte: s } = row;
             const statement =
               quizTextMap[myth.id]?.statement || t(myth.statementKey);
             const bandModifier = ["exact", "near", "off", "far"][s];
+            // Stage D PR2 — Pew per-question reframe. The user joined
+            // either the {pct} % who placed this statement genau richtig
+            // (when s === 0) or the (100 − pct) % who didn't.
+            // `userJoinedPercent` does the branch; we pick the template.
+            const joinedPct = userJoinedPercent(
+              myth,
+              answer.chosenClassification,
+            );
+            const joinedSentence =
+              s === 0
+                ? t("result.row.joinedExact", { pct: joinedPct })
+                : t("result.row.joinedMissed", { pct: joinedPct });
             return (
               <li
                 key={myth.id}
@@ -330,7 +361,10 @@ export default function ResultScreen({
                   className={`quiz-result__list-dot quiz-result__list-dot--${bandModifier}`}
                   aria-hidden="true"
                 />
-                <span className="quiz-result__list-statement">{statement}</span>
+                <div className="quiz-result__list-body">
+                  <p className="quiz-result__list-statement">{statement}</p>
+                  <p className="quiz-result__list-joined">{joinedSentence}</p>
+                </div>
                 <button
                   type="button"
                   className="quiz-result__list-action"

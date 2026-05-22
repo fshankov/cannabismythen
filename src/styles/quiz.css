@@ -2504,7 +2504,7 @@
 
 .quiz-result__list-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-md);
   padding: var(--space-md);
   background: var(--color-surface);
@@ -2512,6 +2512,33 @@
   border-radius: var(--radius-md);
   font-size: 0.95rem;
   line-height: 1.45;
+}
+
+/* PR2: dot anchors visually to the first line of the statement.
+   Without this offset the dot would float to the cross-axis center,
+   which looks misaligned once the row has two paragraphs in it. */
+.quiz-result__list-dot {
+  margin-top: 0.45rem;
+}
+
+.quiz-result__list-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.quiz-result__list-statement {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.quiz-result__list-joined {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
 }
 
 /* Leading-edge tint per Schritte tier — secondary cue to the dot.
@@ -2552,12 +2579,6 @@
   background: var(--classification-falsch);
 }
 
-.quiz-result__list-statement {
-  flex: 1 1 auto;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
 .quiz-result__list-action {
   flex-shrink: 0;
   background: none;
@@ -2577,17 +2598,79 @@
   text-decoration-thickness: 2px;
 }
 
-/* Mobile: stack the action below the statement so neither truncates. */
+/* Mobile: stack the action below the body so neither truncates. The
+   body (statement + joined sentence) takes the full width minus the dot
+   gutter; the button wraps below, indented to line up with the body. */
 @media (max-width: 640px) {
   .quiz-result__list-item {
     flex-wrap: wrap;
   }
-  .quiz-result__list-statement {
-    flex-basis: calc(100% - 1.5rem);
+  .quiz-result__list-body {
+    flex-basis: calc(100% - 10px - var(--space-md));
   }
   .quiz-result__list-action {
     margin-left: calc(10px + var(--space-md));
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Stage D PR2 (2026-05-22) — Achievement card.
+   Compact hero that replaces the Stage C two-row summary grid. Lives
+   between the legacy Stage A ShareCard hero and the unified review
+   list. The band-tint subtlety here is a placeholder — PR3 swaps the
+   whole result page onto the cream paper background, at which point
+   the per-band accent stays in the headline (and possibly a small
+   left-border accent) but the broader background tint goes away.
+   ══════════════════════════════════════════════════════════════════ */
+
+.quiz-result__achievement {
+  margin: var(--space-lg) 0;
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.quiz-result__achievement--profi {
+  box-shadow: inset 4px 0 0 0 var(--classification-richtig);
+}
+.quiz-result__achievement--guterweg {
+  box-shadow: inset 4px 0 0 0 var(--classification-eher-richtig);
+}
+.quiz-result__achievement--gehtnoch {
+  box-shadow: inset 4px 0 0 0 var(--classification-eher-falsch);
+}
+.quiz-result__achievement--erwischt {
+  box-shadow: inset 4px 0 0 0 var(--classification-falsch);
+}
+
+.quiz-result__achievement-headline {
+  margin: 0 0 var(--space-md);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-text);
+}
+
+.quiz-result__achievement-score {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-result__achievement-population {
+  margin: var(--space-xs) 0 0;
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-result__achievement-delta {
+  margin: var(--space-md) 0 0;
+  font-size: 0.95rem;
+  color: var(--color-text);
 }
 
 /* 8 — CTAs */
