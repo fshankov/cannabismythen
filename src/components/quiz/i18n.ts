@@ -305,11 +305,46 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.resultTable.jump": "Zur Frage",
     // Stage C (2026-05-17) — compact "Du vs. Ø Bevölkerung" summary
     // grid above the per-question table. AI draft, awaiting ISD review.
+    // Removed from the result page in Stage D PR2 (replaced by the new
+    // achievement card); keys are retained as inert fallbacks until PR3
+    // sweeps unused i18n strings.
     "ui.resultSummary.title": "Auf einen Blick",
     "ui.resultSummary.colYou": "Du",
     "ui.resultSummary.colPopulation": "Ø Bevölkerung",
     "ui.resultSummary.rowExact": "Genau richtig",
     "ui.resultSummary.rowShare": "Anteil insgesamt",
+
+    // ── Stage D PR2 (2026-05-22) — Achievement card + per-row sentence.
+    //    AI draft — Du form — awaiting ISD review.
+    //    English glosses for ISD:
+    //      profi      → "You really know the cannabis myths."
+    //      guterweg   → "For most statements you're closer than most are."
+    //      gehtnoch   → "There's room to grow — that's what the Fakten-Karten are for."
+    //      erwischt   → "Cannabis is full of myths. The Fakten-Karten sort them out."
+    //      scoreLine.user        → "You: {count} of {total} exactly right"
+    //      scoreLine.population  → "Adults (18–70) avg: {count} of {total}"
+    //      deltaLine.above       → "You're {count} statement(s) above the average."
+    //      deltaLine.below       → "You're {count} statement(s) below the average."
+    //      deltaLine.onPar       → "You're right on the average."
+    //      row.joinedExact       → "You're among the {pct} % of adults (18–70) who placed this statement exactly right."
+    //      row.joinedMissed      → "You're among the {pct} % of adults (18–70) who did NOT place this statement exactly right."
+    "result.achievementHeadline.profi":
+      "Du kennst die Cannabis-Mythen wirklich.",
+    "result.achievementHeadline.guterweg":
+      "Bei den meisten Aussagen liegst du näher dran als die meisten.",
+    "result.achievementHeadline.gehtnoch":
+      "Da ist Luft nach oben — und genau dafür gibt's die Fakten-Karten.",
+    "result.achievementHeadline.erwischt":
+      "Cannabis ist voller Mythen. Die Fakten-Karten räumen damit auf.",
+    "result.scoreLine.user": "Du: {count} von {total} genau richtig",
+    "result.scoreLine.population": "Erwachsene (18–70) Ø: {count} von {total}",
+    "result.deltaLine.above": "Du liegst {count} {aussage} über dem Schnitt.",
+    "result.deltaLine.below": "Du liegst {count} {aussage} unter dem Schnitt.",
+    "result.deltaLine.onPar": "Du liegst genau auf dem Schnitt.",
+    "result.row.joinedExact":
+      "Du gehörst zu {pct} % der Erwachsenen (18–70), die diese Aussage genau richtig eingeordnet haben.",
+    "result.row.joinedMissed":
+      "Du gehörst zu {pct} % der Erwachsenen (18–70), die diese Aussage nicht genau richtig eingeordnet haben.",
   },
 
   // ── English (placeholder — to be filled) ──────────────────────────

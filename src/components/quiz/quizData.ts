@@ -112,6 +112,71 @@ export function scoreBand(pct: number): ScoreBand {
   return "erwischt";
 }
 
+// ─── Stage D (2026-05-22) — Pew-style per-question + aggregate framing ────
+//
+// Today's result page mixes Schritte-coverage % (partial credit) on the
+// user side with genau-richtig count % (binary) on the population side —
+// not apples-to-apples. The three helpers below replace that comparison
+// with an honest split:
+//
+//   1. `userJoinedPercent` — per question, "the user joined X % of the
+//      Erwachsene (18–70) who matched the science" (or the (100−X) % who
+//      didn't). That's the Pew per-question reframe.
+//
+//   2. `populationExpectedExactCount` — Σ p_i / 100 over a deck. The
+//      expected genau-richtig count a random Erwachsene gets, treated as
+//      a Poisson-binomial expectation. Single decimal precision; no
+//      assumption beyond the per-myth populationCorrectPct values.
+//
+//   3. `exactCountDelta` — signed delta of user.exactCount − populationExpected,
+//      single decimal. Drives the "über / unter / auf dem Schnitt" line on
+//      the achievement card.
+//
+// Schritte stays under the hood as today — per-question feedback
+// (Genau richtig / Nah dran / ...) and band-tier mapping (Mythen-Profi
+// → Erwischt). It does NOT appear in any user-vs-population sentence;
+// only genau-richtig counts do, since those are apples-to-apples.
+
+/** % of Erwachsene (18–70) the user joined for ONE question.
+ *  - If user.classification === myth.correctClassification → returns
+ *    `myth.populationCorrectPct` (the slice that matched the science).
+ *  - Else → returns `100 − myth.populationCorrectPct` (the slice that
+ *    did NOT match exactly).
+ *  Rounded to the nearest integer for display. */
+export function userJoinedPercent(
+  myth: QuizMyth,
+  userAnswer: Classification
+): number {
+  const exact = userAnswer === myth.correctClassification;
+  const raw = exact
+    ? myth.populationCorrectPct
+    : 100 - myth.populationCorrectPct;
+  return Math.round(raw);
+}
+
+/** Expected number of genau-richtig answers a random Erwachsene (18–70)
+ *  scores across a deck. Σ (myth.populationCorrectPct / 100). One decimal.
+ *  Poisson-binomial expectation — exact under the per-myth marginals,
+ *  agnostic to between-myth correlation. */
+export function populationExpectedExactCount(myths: QuizMyth[]): number {
+  if (myths.length === 0) return 0;
+  const sum = myths.reduce(
+    (acc, m) => acc + m.populationCorrectPct / 100,
+    0
+  );
+  return Math.round(sum * 10) / 10;
+}
+
+/** Signed delta `userExactCount − populationExpectedExactCount`, one
+ *  decimal. Positive → user above the population average. */
+export function exactCountDelta(
+  userExactCount: number,
+  myths: QuizMyth[]
+): number {
+  const expected = populationExpectedExactCount(myths);
+  return Math.round((userExactCount - expected) * 10) / 10;
+}
+
 /**
  * Score a single answer on the same 0–100 "Richtigkeit" scale used by CaRM.
  * 0 steps from correct → 100, 1 step → 66.67, 2 steps → 33.33, 3 steps → 0.
