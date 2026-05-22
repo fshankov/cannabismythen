@@ -188,22 +188,25 @@ confirmation.
 
 ## German text quality (HARD)
 
-Every line of user-visible German on this site is reviewed by ISD
-before it ships. AI-drafted German has shown two recurring failure
-modes flagged by the team: (1) it reads like a translation from
-English (English clause order, loaned constructions, calques like
-"macht Sinn"), and (2) it occasionally inverts technical claims (m13
-"löst Spasmen" vs. Excel "lindert Spastiken").
+ISD reads the live site post-deploy, so there is **no pre-ship
+gate** on AI-drafted German — but the bar for quality stays high and
+the rules below are non-negotiable. AI-drafted German has shown two
+recurring failure modes flagged by the team: (1) it reads like a
+translation from English (English clause order, loaned constructions,
+calques like "macht Sinn"), and (2) it occasionally inverts technical
+claims (m13 "löst Spasmen" vs. Excel "lindert Spastiken").
 
 Rules for any German text Claude proposes:
 
 1. Always include a brief English gloss in parentheses or as a
    follow-up line. Fedor doesn't speak German — he can't sanity-check
    tone without it.
-2. Never ship AI-drafted German into a .mdoc file's body without an
-   ISD-review checkpoint. Mark drafts clearly (e.g., `internalNotes:
-   "AI draft, awaiting ISD review"`). The Keystatic editor is the
-   review surface.
+2. AI-drafted German that touches editorial copy must be marked in
+   the source (e.g., `internalNotes: "AI draft, see ISD review"` for
+   `.mdoc` files; equivalent JSDoc note for component-rendered text)
+   so ISD can find and revise it after seeing it live. Whenever the
+   copy lives in a Keystatic-backed `.mdoc`, write through the
+   Keystatic schema and Markdoc, never bypass the schema.
 3. Avoid English-pattern phrasing. Common slips to self-check:
    English-style noun stacking, "es ist wichtig zu erwähnen, dass…",
    over-literal translations of "in terms of", "aus meiner Sicht"

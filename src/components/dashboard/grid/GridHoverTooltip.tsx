@@ -124,16 +124,12 @@ export default function GridHoverTooltip({
       </div>
       {lesebeispielMetric && lesebeispielIndicator && !lesebeispielHidden && (
         <div className="carm-spannweite__tooltip-lesebeispiel">
-          {/* Lesebeispiel only renders for `audience === 'adults'`
-              (other groups aren't ISD-approved yet). The signature
-              doesn't yet accept per-indicator / group / compactHeading
-              props on disk — these are part of the in-flight redesign
-              that was lost in the 2026-05-22 branch-switch incident.
-              The simpler call still produces the full paragraph for
-              adults, which is the team's primary use case. */}
           <Lesebeispiel
             metric={lesebeispielMetric}
             audience="adults"
+            group={lesebeispielGroup}
+            onlyIndicator={lesebeispielIndicator}
+            compactHeading
           />
         </div>
       )}

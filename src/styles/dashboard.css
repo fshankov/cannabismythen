@@ -6549,18 +6549,42 @@ body.carm-modal-open {
    the left/right edges. */
 .carm-spannweite__tooltip {
   /* position:fixed comes from inline style; transform centers
-     horizontally and lifts the card above the cursor. */
+     horizontally and lifts the card above the cursor. Widened from
+     280→320 / 320→420 px to fit the Lesebeispiel sentence; the
+     horizontal viewport clamp in handleHover was raised to match
+     (TOOLTIP_MAX_W = 420). */
   transform: translate(-50%, calc(-100% - 12px));
   color: var(--color-text, #0f172a);
   padding: 0.55rem 0.75rem 0.55rem 0.85rem;
   border-radius: 8px;
   font-size: 0.8rem;
   line-height: 1.4;
-  width: 280px;
-  max-width: 320px;
+  min-width: 280px;
+  max-width: 420px;
   pointer-events: none;
   z-index: 50;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.22);
+}
+
+/* Lesebeispiel sentence inside the hover tooltip card. Sits below
+   the verdict line with a thin divider; the inner `.lesebeispiel`
+   aside chrome is reset so it doesn't add a second box-in-box. */
+.carm-spannweite__tooltip-lesebeispiel {
+  margin-top: 0.55rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+}
+.carm-spannweite__tooltip-lesebeispiel .lesebeispiel {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border-left: 0;
+  border-radius: 0;
+}
+.carm-spannweite__tooltip-lesebeispiel .lesebeispiel__body {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--color-text, #0f172a);
 }
 
 /* Row 1: myth statement + verdict glyph (right). */
@@ -6735,4 +6759,16 @@ body.carm-modal-open {
    to default arrow. */
 .carm-sources-spannweite .carm-spannweite__row {
   cursor: default;
+}
+
+
+/* Static Lesebeispiel block inside the FactsheetPanel modal. The
+   `aside.lesebeispiel` default styling (global.css) is tuned for a
+   full-width slug page; inside the modal it sits directly under the
+   bars, so tighten its top margin to keep the panel compact. */
+.factsheet-group-bars__lesebeispiel {
+  margin-top: var(--space-md, 1rem);
+}
+.factsheet-group-bars__lesebeispiel .lesebeispiel {
+  margin-top: 0;
 }

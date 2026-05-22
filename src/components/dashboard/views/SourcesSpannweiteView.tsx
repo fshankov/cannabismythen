@@ -44,6 +44,7 @@ import { t, type TranslationKey } from '../../../lib/dashboard/translations';
 import InfoTooltip from '../InfoTooltip';
 import { useHiddenColumns } from '../hooks/useHiddenColumns';
 import { renderSourcesSpannweiteSvg } from '../../../lib/dashboard/sources-spannweite-svg';
+import LesebeispielSource from '../LesebeispielSource';
 
 /** Column order for the new sources2 view (Fedor 2026-05-15): Wahrnehmung
  *  moves to the last slot so the more "active" search/trust/prevention
@@ -622,23 +623,27 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
           </div>
         </div>
 
-        {/* Hover card — category-tinted, viewport-clamped. */}
+        {/* Hover card — category-tinted, viewport-clamped. v4: meta
+            line dropped; a per-metric Lesebeispiel sentence is shown
+            instead, adapted to the hovered cell's metric + group
+            (mode='metric' → group = selectedGroup; mode='group' →
+            metric = selectedMetric). Sentence templates are AI
+            drafts marked in LesebeispielSource.tsx for ISD review
+            on the live site. */}
         {hoveredSource && hoverPos && (() => {
-          const metaLine = (() => {
-            if (!hovered?.colId) return null;
-            const value = cellValue(hoveredSource.id, hovered.colId);
-            // Resolve column + locked-axis labels per pivot.
-            const colLabel = mode === 'metric'
-              ? METRIC_LABELS[hovered.colId as SourceMetricType]
-              : GROUP_LABELS[hovered.colId as SourceGroupId];
-            const otherLabel = mode === 'metric'
-              ? GROUP_LABELS[selectedGroup]
-              : METRIC_LABELS[selectedMetric];
-            const valLabel = value === null
-              ? (lang === 'de' ? 'keine Daten' : 'no data')
-              : `${Math.round(value)} %`;
-            return `${otherLabel} · ${colLabel} · ${valLabel}`;
-          })();
+          let lesebeispielMetric: SourceMetricType | null = null;
+          let lesebeispielGroup: SourceGroupId = selectedGroup;
+          let lesebeispielValue: number | null = null;
+          if (hovered?.colId) {
+            if (mode === 'metric') {
+              lesebeispielMetric = hovered.colId as SourceMetricType;
+              lesebeispielGroup = selectedGroup;
+            } else {
+              lesebeispielMetric = selectedMetric;
+              lesebeispielGroup = hovered.colId as SourceGroupId;
+            }
+            lesebeispielValue = cellValue(hoveredSource.id, hovered.colId);
+          }
           // Light category-tinted background via color-mix; fall back to white if unsupported.
           const bg = `color-mix(in srgb, ${hoveredCategoryColor} 14%, #ffffff)`;
           return (
@@ -669,8 +674,15 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
               >
                 {hoveredCategoryName}
               </div>
-              {metaLine && (
-                <div className="carm-spannweite__tooltip-meta">{metaLine}</div>
+              {lesebeispielMetric && lesebeispielValue !== null && (
+                <div className="carm-spannweite__tooltip-lesebeispiel">
+                  <LesebeispielSource
+                    metric={lesebeispielMetric}
+                    value={lesebeispielValue}
+                    group={lesebeispielGroup}
+                    compactHeading
+                  />
+                </div>
               )}
             </div>
           );

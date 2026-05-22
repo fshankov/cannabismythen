@@ -41,6 +41,7 @@ import type {
 } from '../../lib/dashboard/types';
 import { POP_REL_INVALID_GROUPS } from '../../lib/dashboard/data';
 import { t } from '../../lib/dashboard/translations';
+import Lesebeispiel from '../dashboard/Lesebeispiel';
 
 interface Props {
   /** Pre-computed metrics for the open myth — one entry per Zielgruppe.
@@ -150,6 +151,12 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
   const byGroup = new Map<GroupId, MythGroupMetrics[number]>();
   for (const m of metrics) byGroup.set(m.group_id, m);
 
+  // Erwachsene row drives the static Lesebeispiel block below the
+  // bars. Falls back to null when the row is missing or any of its
+  // five indicators is null — `<Lesebeispiel>` returns null in that
+  // case, so the section drops cleanly.
+  const adultsRow = byGroup.get('adults') ?? null;
+
   const fill = VERDICT_FILL_TOKEN[verdict];
   const track = VERDICT_TRACK_TOKEN[verdict];
 
@@ -194,6 +201,13 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
           );
         })}
       </div>
+
+      <p className="factsheet-group-bars__hint">
+        <strong className="factsheet-group-bars__hint-label">
+          {fullIndicatorLabel}:
+        </strong>{' '}
+        {hint}
+      </p>
 
       <ul className="factsheet-group-bars__list" role="presentation">
         {GROUP_ORDER.map((g) => {
@@ -248,12 +262,11 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
         })}
       </ul>
 
-      <p className="factsheet-group-bars__hint">
-        <strong className="factsheet-group-bars__hint-label">
-          {fullIndicatorLabel}:
-        </strong>{' '}
-        {hint}
-      </p>
+      {adultsRow && (
+        <div className="factsheet-group-bars__lesebeispiel">
+          <Lesebeispiel metric={adultsRow} audience="adults" />
+        </div>
+      )}
     </section>
   );
 }
