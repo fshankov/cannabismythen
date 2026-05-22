@@ -295,24 +295,13 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.exploreData": "Daten-Explorer \u00f6ffnen",
     "ui.shareResultHeading": "Ergebnis teilen",
     "ui.openMythDetail": "Mehr auf der Fakten-Karte \u2192",
-    // Stage B (2026-05-16) \u2014 4-column comparison table on the result screen.
-    "ui.resultTable.statement": "Aussage",
-    "ui.resultTable.yourAnswer": "Deine Antwort",
-    "ui.resultTable.scientific": "Wissenschaftlich",
-    "ui.resultTable.populationAvg": "Bev\u00f6lkerung \u00d8",
-    "ui.resultTable.populationAvgCaption":
-      "\u00d8 \u2014 Anteil der Erwachsenen (18\u201370), die diese Aussage in einer Bev\u00f6lkerungsbefragung in Deutschland im Schnitt genau richtig eingeordnet haben.",
-    "ui.resultTable.jump": "Zur Frage",
-    // Stage C (2026-05-17) — compact "Du vs. Ø Bevölkerung" summary
-    // grid above the per-question table. AI draft, awaiting ISD review.
-    // Removed from the result page in Stage D PR2 (replaced by the new
-    // achievement card); keys are retained as inert fallbacks until PR3
-    // sweeps unused i18n strings.
-    "ui.resultSummary.title": "Auf einen Blick",
-    "ui.resultSummary.colYou": "Du",
-    "ui.resultSummary.colPopulation": "Ø Bevölkerung",
-    "ui.resultSummary.rowExact": "Genau richtig",
-    "ui.resultSummary.rowShare": "Anteil insgesamt",
+    // Stage B (2026-05-16) 4-column comparison table keys removed in
+    // Stage D PR3 (2026-05-22). Replaced by the unified
+    // `quiz-result__list` pattern. Restore from git history if needed
+    // (commits bd728ed / 02520b9).
+    // Stage C (2026-05-17) "Auf einen Blick" summary-grid keys removed
+    // in Stage D PR3 (2026-05-22). Replaced by the achievement card's
+    // tonal headline + score lines.
 
     // ── Stage D PR2 (2026-05-22) — Achievement card + per-row sentence.
     //    AI draft — Du form — awaiting ISD review.
@@ -345,6 +334,11 @@ const translations: Record<Lang, Record<string, string>> = {
       "Du gehörst zu {pct} % der Erwachsenen (18–70), die diese Aussage genau richtig eingeordnet haben.",
     "result.row.joinedMissed":
       "Du gehörst zu {pct} % der Erwachsenen (18–70), die diese Aussage nicht genau richtig eingeordnet haben.",
+
+    // ── Stage D PR3 (2026-05-22) — "Lohnt sich besonders" flag chip on
+    //    the top weakest review rows. AI draft — awaiting ISD review.
+    //    English gloss: "Especially worth a closer look."
+    "result.row.especiallyWorth": "Lohnt sich besonders",
   },
 
   // ── English (placeholder — to be filled) ──────────────────────────

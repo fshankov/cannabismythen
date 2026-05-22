@@ -334,7 +334,7 @@ export default function ResultScreen({
             statement + "Mehr auf der Fakten-Karte →" CTA that opens the
             popup (replaces the broken "Zur Frage" jump-back). */}
         <ul className="quiz-result__list" aria-label={t("ui.retrospectiveTitle")}>
-          {reviewRows.map((row) => {
+          {reviewRows.map((row, idx) => {
             const { myth, answer, schritte: s } = row;
             const statement =
               quizTextMap[myth.id]?.statement || t(myth.statementKey);
@@ -351,10 +351,21 @@ export default function ResultScreen({
               s === 0
                 ? t("result.row.joinedExact", { pct: joinedPct })
                 : t("result.row.joinedMissed", { pct: joinedPct });
+            // Stage D PR3 — flag the top weakest rows so the user gets a
+            // gentle nudge toward the myths most worth a closer look.
+            // Highlight up to the first 3 rows that are NOT genau-richtig
+            // (s > 0). If the user nailed everything, no highlight shows.
+            const isHighlighted = idx < 3 && s > 0;
             return (
               <li
                 key={myth.id}
-                className={`quiz-result__list-item quiz-result__list-item--${bandModifier}`}
+                className={[
+                  "quiz-result__list-item",
+                  `quiz-result__list-item--${bandModifier}`,
+                  isHighlighted ? "quiz-result__list-item--highlighted" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
               >
                 <span className="sr-only">{schritteLabel(s)}</span>
                 <span
@@ -362,6 +373,11 @@ export default function ResultScreen({
                   aria-hidden="true"
                 />
                 <div className="quiz-result__list-body">
+                  {isHighlighted && (
+                    <span className="quiz-result__list-flag">
+                      {t("result.row.especiallyWorth")}
+                    </span>
+                  )}
                   <p className="quiz-result__list-statement">{statement}</p>
                   <p className="quiz-result__list-joined">{joinedSentence}</p>
                 </div>
@@ -378,15 +394,13 @@ export default function ResultScreen({
         </ul>
       </div>
 
-      {/* Action buttons — exactly two primary actions in matching size,
-          plus a "Weiter erkunden" invitation block + two same-sized text
-          links beneath. BugHerd #44 (Session 3b, 2026-05-07): the
-          invitation block adds explicit cross-section CTAs to
-          Daten-Explorer + Meine Interessen so the result screen reads
-          as a launchpad, not a dead end. The label "Meine Interessen"
-          preempts the Item 6 FAQ section rename (still upcoming);
-          /meine-interessen/ will 301 to /meine-interessen/ once Item 6
-          ships. */}
+      {/* Stage D PR3 (2026-05-22) — the BugHerd #44 "Weiter erkunden"
+          block (Daten-Explorer + Meine Interessen cross-links) was
+          removed. Per the Stage D design ruling, the result page now
+          points exclusively at Fakten-Karten + the next quiz module +
+          a retry option, since those are the surfaces that continue
+          the same learning track. Daten-Explorer / Meine-Interessen
+          remain reachable from the global header / mobile tab bar. */}
       <div className="quiz-result__actions">
         <div className="quiz-result__actions-primary">
           <a
@@ -403,21 +417,6 @@ export default function ResultScreen({
               {t("ui.nextModule.cta", { title: nextThemeTitle })}
             </a>
           )}
-        </div>
-        <div className="quiz-result__actions-explore">
-          <p className="quiz-result__explore-heading">Weiter erkunden</p>
-          <a
-            href="/daten-explorer/"
-            className="quiz-result__explore-link"
-          >
-            Daten-Explorer →
-          </a>
-          <a
-            href="/meine-interessen/"
-            className="quiz-result__explore-link"
-          >
-            Meine Interessen →
-          </a>
         </div>
         <div className="quiz-result__actions-tertiary">
           <button

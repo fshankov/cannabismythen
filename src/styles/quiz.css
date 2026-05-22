@@ -2193,127 +2193,10 @@
   gap: 4px;
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   Stage C (2026-05-17) — Polish pass.
-
-   1) Summary stats grid ("Du vs. Ø Bevölkerung"). Compact 3-column
-      table that sits between the ShareCard hero and the per-question
-      retrospective so the headline numbers read at a glance.
-   2) Top divider on the retrospective wrapper so the per-question
-      table separates visually from the ShareCard above.
-   3) Desktop max-width bump (760 → 880 px at ≥ 1024 px) so the wider
-      table doesn't feel cramped on big screens.
-   ══════════════════════════════════════════════════════════════════ */
-
-.quiz-result__summary {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.quiz-result__summary thead th {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-secondary);
-  text-align: right;
-  padding: 0 var(--space-md) var(--space-sm);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.quiz-result__summary thead th:first-child {
-  text-align: left;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--color-text);
-}
-
-.quiz-result__summary tbody th {
-  text-align: left;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-text);
-  padding: var(--space-md) var(--space-md) var(--space-md) 0;
-}
-
-.quiz-result__summary tbody td {
-  text-align: right;
-  padding: var(--space-md) var(--space-md);
-  vertical-align: baseline;
-}
-
-.quiz-result__summary tbody tr + tr th,
-.quiz-result__summary tbody tr + tr td {
-  border-top: 1px solid var(--color-border);
-}
-
-.quiz-result__summary-num {
-  font-family: var(--font-display, inherit);
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  color: var(--color-text);
-  white-space: nowrap;
-}
-
-.quiz-result__summary-num--muted {
-  color: var(--color-text-secondary);
-  font-weight: 600;
-}
-
-.quiz-result__summary-denom {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  margin-left: 2px;
-}
-
-/* Band-tinted user "Anteil insgesamt" cell — green/yellow/orange/red
-   per Schritte band. Uses the same classification tokens as the
-   verdict pills and retrospective row tints. */
-.quiz-result__summary-num--band {
-  color: var(--color-text);
-}
-.quiz-result__summary-num--band-profi {
-  color: var(--classification-richtig);
-}
-.quiz-result__summary-num--band-guterweg {
-  color: var(--classification-eher-richtig);
-}
-.quiz-result__summary-num--band-gehtnoch {
-  color: var(--classification-eher-falsch);
-}
-.quiz-result__summary-num--band-erwischt {
-  color: var(--classification-falsch);
-}
-
-@media (max-width: 640px) {
-  .quiz-result__summary thead th {
-    font-size: 0.68rem;
-    padding: 0 var(--space-sm) var(--space-xs);
-  }
-  .quiz-result__summary thead th:first-child {
-    font-size: 0.9rem;
-  }
-  .quiz-result__summary tbody th,
-  .quiz-result__summary tbody td {
-    padding: var(--space-sm) var(--space-sm);
-  }
-  .quiz-result__summary tbody th {
-    padding-left: 0;
-    font-size: 0.85rem;
-  }
-  .quiz-result__summary-num {
-    font-size: 1.2rem;
-  }
-  .quiz-result__summary-denom {
-    font-size: 0.85rem;
-  }
-}
+/* Stage C (2026-05-17) summary grid CSS removed in Stage D PR3
+   (2026-05-22) — the achievement card subsumed its role. The
+   desktop max-width bump at ≥ 1024 px lives further down in the
+   `.quiz-result` width rule and stays. */
 
 .quiz-result__retrospective {
   padding-top: var(--space-xl);
@@ -2326,163 +2209,11 @@
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   Stage B (2026-05-16) — 4-column comparison table.
-   Replaces the Stage A retrospective <ol> (.quiz-result__list /
-   .quiz-result__item*). Those legacy rules above remain inert; Stage 9
-   cleans them up alongside the other Stage 5 dead code.
-   ══════════════════════════════════════════════════════════════════ */
-
-.quiz-result__table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  font-size: 0.9rem;
-}
-
-.quiz-result__table th,
-.quiz-result__table td {
-  padding: var(--space-sm) var(--space-md);
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
-  vertical-align: top;
-}
-
-.quiz-result__table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.quiz-result__table th {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: var(--color-surface-alt, #fafaf6);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.quiz-result__table td:first-child {
-  width: 50%;
-}
-
-.quiz-result__table-cell--num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.quiz-result__table-statement {
-  display: block;
-  font-weight: 600;
-  line-height: 1.45;
-  color: var(--color-text);
-}
-
-/* Band-tinted inset left edge per row — secondary cue to the verdict
-   pills in cols 2/3. box-shadow keeps border-collapse intact. */
-.quiz-result__row--exact {
-  box-shadow: inset 4px 0 0 0 var(--classification-richtig);
-}
-.quiz-result__row--near {
-  box-shadow: inset 4px 0 0 0 var(--classification-eher-richtig);
-}
-.quiz-result__row--off {
-  box-shadow: inset 4px 0 0 0 var(--classification-eher-falsch);
-}
-.quiz-result__row--far {
-  box-shadow: inset 4px 0 0 0 var(--classification-falsch);
-}
-
-.quiz-result__jump {
-  display: inline-block;
-  margin-top: var(--space-xs);
-  background: none;
-  border: 0;
-  padding: 0;
-  color: var(--color-accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.quiz-result__jump:hover {
-  text-decoration-thickness: 2px;
-}
-
-.quiz-result__table-caption {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-  margin: var(--space-sm) 0 var(--space-xl);
-  line-height: 1.5;
-  font-style: italic;
-}
-
-/* Mobile (≤ 640 px): collapse to stacked cards. <table> stays in DOM
-   so screen-reader semantics still apply; visual <thead> is sr-only. */
-@media (max-width: 640px) {
-  .quiz-result__table,
-  .quiz-result__table tbody,
-  .quiz-result__table tr,
-  .quiz-result__table td {
-    display: block;
-    width: auto;
-  }
-  .quiz-result__table {
-    border: 0;
-    background: transparent;
-    overflow: visible;
-  }
-  .quiz-result__table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-  .quiz-result__table tr {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    margin-bottom: var(--space-sm);
-    background: var(--color-surface);
-  }
-  .quiz-result__table td {
-    padding: var(--space-xs) 0;
-    border-bottom: 0;
-  }
-  .quiz-result__table td::before {
-    content: attr(data-label) ":\00a0";
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--color-text-muted);
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    margin-right: var(--space-xs);
-  }
-  .quiz-result__table td:first-child {
-    width: auto;
-  }
-  .quiz-result__table td:first-child::before {
-    /* Statement is the row anchor, not a labelled field. */
-    content: "";
-  }
-  .quiz-result__table-cell--num {
-    text-align: left;
-  }
-}
+/* Stage B (2026-05-16) 4-column comparison table CSS removed in
+   Stage D PR3 (2026-05-22) — replaced by the unified `quiz-result__list`
+   pattern further down. The `.quiz-result__row--{band}` inset-shadow
+   rules and the mobile <table> collapse machinery are also gone; the
+   list rows carry their own accent in `.quiz-result__list-item--{band}`. */
 
 /* ══════════════════════════════════════════════════════════════════
    Stage D (2026-05-22) — single-row unified review list.
@@ -2539,6 +2270,27 @@
   font-size: 0.85rem;
   color: var(--color-text-muted);
   line-height: 1.5;
+}
+
+/* Stage D PR3 (2026-05-22) — "Lohnt sich besonders" flag chip on the
+   top weakest review rows. Subtle accent — not a "you failed" badge,
+   more "this one's worth your time." */
+.quiz-result__list-item--highlighted {
+  border-color: var(--color-accent);
+}
+
+.quiz-result__list-flag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  background: var(--color-accent-light, var(--color-bg-subtle));
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-bottom: var(--space-xs);
 }
 
 /* Leading-edge tint per Schritte tier — secondary cue to the dot.
@@ -2720,7 +2472,9 @@
 .share-card__verdict {
   margin: var(--space-md) auto 0;
   padding: var(--space-md) var(--space-lg);
-  background: rgba(255, 255, 255, 0.10);
+  /* Stage D PR3 — soft inset on a white card replaces the translucent
+     overlay used on the old green-gradient hero. */
+  background: var(--color-bg-subtle, #eeeee8);
   border-radius: var(--radius-md);
   max-width: 44ch;
   text-align: center;
@@ -2731,56 +2485,47 @@
   font-size: 1.15rem;
   font-weight: 700;
   margin: 0 0 6px;
-  color: var(--color-text-inverse);
+  color: var(--color-text);
 }
 
 .share-card__verdict-body {
   font-size: 0.95rem;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--color-text);
   margin: 0;
 }
 
-/* BugHerd #36: "Fakten-Karten" inline link in the verdict body. Inherits
-   color so the green-card aesthetic stays intact; subtle underline marks
-   it as interactive without screaming. */
+/* BugHerd #36: "Fakten-Karten" inline link in the verdict body. PR3
+   adjusts the link color to use the brand accent since the surrounding
+   text is now dark on a light card. */
 .share-card__verdict-link {
-  color: inherit;
+  color: var(--color-accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
-  text-decoration-color: rgba(255, 255, 255, 0.5);
   transition: text-decoration-color 0.15s ease;
 }
 
 .share-card__verdict-link:hover,
 .share-card__verdict-link:focus-visible {
-  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
 }
 
 .share-card__pop-line {
   font-size: 0.95rem;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-muted);
   margin: var(--space-md) auto 0;
   text-align: center;
   max-width: 44ch;
 }
 
-/* Per-band tint of the hero card so the colour matches the user's
-   actual result rather than always being green. */
-.share-card--profi .share-card__visual {
-  background: linear-gradient(145deg, var(--classification-richtig) 0%, #035c43 100%);
-}
-.share-card--guterweg .share-card__visual {
-  background: linear-gradient(145deg, var(--classification-eher-richtig) 0%, #3a5e0a 100%);
-}
-.share-card--gehtnoch .share-card__visual {
-  background: linear-gradient(145deg, var(--classification-eher-falsch) 0%, #8c4007 100%);
-}
-.share-card--erwischt .share-card__visual {
-  background: linear-gradient(145deg, var(--classification-falsch) 0%, #870d2c 100%);
-}
+/* Stage D PR3 (2026-05-22) — band-tinted gradients dropped. The result
+   page now uses a single calm background across all bands; band feeling
+   is carried by the achievement card's headline + the per-row leading
+   dots, not by full-block scare-color. The legacy `.share-card--{band}`
+   selectors are kept in JSX (ShareCard untouched per the Sie-pocket
+   constraint) but their per-band CSS overrides are gone. */
 
 /* Result-page action stack — two equally-sized primary buttons, two
    matching text links beneath, all centred. Replaces the previous
@@ -2800,40 +2545,10 @@
   text-align: center;
 }
 
-/* BugHerd #44 (Session 3b, 2026-05-07): "Weiter erkunden" invitation
-   block. Sits between the primary CTAs and the tertiary text-links.
-   Renders a small heading and two cross-section text links so the
-   result screen reads as a launchpad, not a dead end. */
-.quiz-result__actions-explore {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin: var(--space-md) 0;
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--color-line, #e7e7e2);
-}
-
-.quiz-result__explore-heading {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin: 0 0 4px;
-}
-
-.quiz-result__explore-link {
-  color: var(--color-accent);
-  font-size: 0.95rem;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  padding: 4px 8px;
-}
-
-.quiz-result__explore-link:hover {
-  text-decoration-thickness: 2px;
-}
+/* BugHerd #44 (Session 3b, 2026-05-07) "Weiter erkunden" CSS removed
+   in Stage D PR3 (2026-05-22) — the Daten-Explorer / Meine-Interessen
+   cross-links are gone from the result page per the new design;
+   those sections remain reachable via the global header/nav. */
 
 .quiz-result__actions-tertiary {
   display: flex;
@@ -2872,12 +2587,17 @@
 }
 
 .share-card__visual {
-  background: linear-gradient(145deg, #2d6a4f 0%, #1f4f3a 100%);
+  /* Stage D PR3 (2026-05-22) — calm white card on the page's cream
+     `--color-bg`. Replaces the Stage A green gradient hero. The
+     achievement card sits just below; both now share the visual
+     language of the rest of the site. */
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-xl) var(--space-lg);
   text-align: center;
   margin-bottom: var(--space-md);
-  color: #fff;
+  color: var(--color-text);
 }
 
 /* Stage A (2026-05-16) — the medal/emoji circle, big-% hero
@@ -2892,14 +2612,14 @@
   font-size: 1.05rem;
   font-weight: 700;
   line-height: 1.45;
-  color: #fff;
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
 .share-card__branding {
   font-size: 0.75rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-muted);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
