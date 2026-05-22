@@ -182,6 +182,7 @@ export function filterMyths(
   categoryIds: number[],
   verdictFilter: VerdictFilter,
   mythIds: number[] = [],
+  searchQuery: string = '',
 ): Myth[] {
   let filtered = myths;
 
@@ -200,12 +201,57 @@ export function filterMyths(
     filtered = filtered.filter((m) => m.correctness_class === verdictFilter);
   }
 
+  // 2026-05-22 universal myth-search: case-insensitive substring match
+  // against `text_de` AND `text_short_de` so a single query catches
+  // both the long statement and the short label. Empty query is no-op.
+  const q = searchQuery.trim().toLowerCase();
+  if (q.length > 0) {
+    filtered = filtered.filter((m) => {
+      const long = m.text_de.toLowerCase();
+      const short = m.text_short_de.toLowerCase();
+      return long.includes(q) || short.includes(q);
+    });
+  }
+
   return filtered;
 }
 
 /** Population_relevance was only collected for these two groups; values for
  *  the other three are null in carm-data.json. */
 const POP_REL_VALID_GROUPS: GroupId[] = ['adults', 'minors'];
+
+/** Groups for which `population_relevance` is methodologically invalid.
+ *  carm-data.json contains stray non-null values for these groups that
+ *  should be treated as missing data ("k. A.") across every surface that
+ *  renders an indicator value (Spannweite cells, Balken bars, Tabelle
+ *  cells, hover tooltips, CSV export, FactsheetGroupBars). */
+export const POP_REL_INVALID_GROUPS: ReadonlySet<GroupId> = new Set<GroupId>([
+  'consumers',
+  'young_adults',
+  'parents',
+]);
+
+/** Predicate — true when the (indicator, groupId) combo is methodologically
+ *  invalid. Currently only `population_relevance` has such combos. */
+export function isInvalidIndicatorGroupCombo(
+  indicator: Indicator,
+  groupId: GroupId,
+): boolean {
+  return indicator === 'population_relevance' && POP_REL_INVALID_GROUPS.has(groupId);
+}
+
+/** Like getIndicatorValue, but returns null for methodologically-invalid
+ *  combos regardless of what the JSON contains. Use this in every render
+ *  path so the dashboard never fabricates a Bev. Relevanz value for a
+ *  group where it was not collected. */
+export function getIndicatorValueChecked(
+  metric: Metric | undefined,
+  indicator: Indicator,
+  groupId: GroupId,
+): number | null {
+  if (isInvalidIndicatorGroupCombo(indicator, groupId)) return null;
+  return getIndicatorValue(metric, indicator);
+}
 
 /** Group ids that should be greyed-out in the IndicatorGroupSelector for the
  *  given indicator. Currently only `population_relevance` has a restriction. */
@@ -354,6 +400,9 @@ export function exportCSV(
 
   const rows = myths.map((m) => {
     const metric = getMythMetric(metrics, m.id, groupId);
+    const popRel = isInvalidIndicatorGroupCombo('population_relevance', groupId)
+      ? ''
+      : metric?.population_relevance ?? '';
     return [
       m.id,
       `"${getMythText(m, lang).replace(/"/g, '""')}"`,
@@ -363,7 +412,7 @@ export function exportCSV(
       metric?.significance ?? '',
       metric?.correctness ?? '',
       metric?.prevention_significance ?? '',
-      metric?.population_relevance ?? '',
+      popRel,
     ].join(',');
   });
 

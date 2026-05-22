@@ -44,6 +44,25 @@ export function getCorrectnessBgColor(cls: CorrectnessClass): string {
 }
 
 /**
+ * Mid-saturation verdict colors (Tailwind -600 family) — used as the
+ * dot fill in `GridValueCell`. The mid-saturation gives enough
+ * contrast that 11px white tabular-nums text inside the 18px dot
+ * passes WCAG-AA (~4.5–4.7:1 contrast ratio per verdict). Not exposed
+ * as CSS custom properties yet — the only consumer is the dot fill.
+ */
+export const CORRECTNESS_FILL_COLORS: Record<CorrectnessClass, string> = {
+  richtig: '#059669',           // Emerald-600
+  eher_richtig: '#65a30d',      // Lime-600
+  eher_falsch: '#d97706',       // Amber-600
+  falsch: '#e11d48',            // Rose-600
+  no_classification: '#6b7280', // Gray-500 (kept — no -600 for neutral)
+};
+
+export function getCorrectnessFillColor(cls: CorrectnessClass): string {
+  return CORRECTNESS_FILL_COLORS[cls] || '#6b7280';
+}
+
+/**
  * Lucide arrow component for each verdict — canonical iconography
  * across the site. UI consumers should prefer the
  * `<VerdictArrow verdict="…" />` wrapper in `src/components/shared/`

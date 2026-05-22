@@ -81,16 +81,24 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'balken' | 'balken2' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'spannweite' | 'sources' | 'sources2';
+export type ViewTab = 'balken' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'spannweite' | 'sources' | 'sources2';
 
-/** Spannweite view sort key (v4 — dropped verdict-rank toggles).
+/** Spannweite view sort key (post-2026-05-22 verdict-rank revival).
  *  - 'a-z' — alphabetical by short text. Lives in the MYTHEN column
- *    header (upper-right), styled identically to the per-column
- *    value-sort icons on the data columns.
+ *    header (upper-LEFT).
  *  - 'value-asc' / 'value-desc' — per-column numeric sort. The column
  *    whose values drive the sort is stored separately in
- *    `spannweiteSortColumn`. */
-export type SpannweiteSort = 'a-z' | 'value-asc' | 'value-desc';
+ *    `spannweiteSortColumn`.
+ *  - 'verdict-asc' / 'verdict-desc' — sort by the scientific verdict
+ *    band (richtig → falsch ascending; falsch → richtig descending),
+ *    with an A-Z tie-break. Triggered by the verdict-rank button in
+ *    the MYTHEN column header (top-RIGHT). */
+export type SpannweiteSort =
+  | 'a-z'
+  | 'value-asc'
+  | 'value-desc'
+  | 'verdict-asc'
+  | 'verdict-desc';
 
 /** Informationsquellen-Spannweite view sort key.
  *  No verdict-rank — sources aren't classified.
@@ -114,13 +122,17 @@ export type StripsMode = 'indicator' | 'group';
 export type StripsSortAxis = Indicator | GroupId;
 export type StripsSortDir = 'asc' | 'desc';
 
-/** Balken (ranking bar) view sort options.
- *  - 'value-desc' / 'value-asc' — sort by the active indicator's value.
- *  - 'verdict-rank' — sort by the scientific verdict band
- *    (richtig → eher_richtig → eher_falsch → falsch → keine Aussage),
- *    with descending value as the in-band tie-break. Added in
- *    Session 4a (BugHerd #48). */
-export type BalkenSort = 'value-desc' | 'value-asc' | 'verdict-rank';
+/** Balken view sort options (Spannweite parity, post-2026-05-22).
+ *  - 'a-z' — alphabetical by the myth's short text (default).
+ *  - 'value-asc' / 'value-desc' — by the active indicator's value.
+ *  - 'verdict-asc' / 'verdict-desc' — by scientific verdict band
+ *    (richtig → falsch / falsch → richtig). */
+export type BalkenSort =
+  | 'a-z'
+  | 'value-asc'
+  | 'value-desc'
+  | 'verdict-asc'
+  | 'verdict-desc';
 
 /** Quiz module slugs — the 5 Themen blocks shown in StripsView.
  *  Renamed in Session 1 of 2026-05 to match the docx 5-cat taxonomy. */
@@ -243,4 +255,9 @@ export interface AppState {
    *  shows only the union of "myths in selected categories" + "myths in
    *  this list". Empty array = no individual-myth restriction. */
   mythIds: number[];
+  /** Universal myth-search query (added 2026-05-22). When non-empty,
+   *  the dashboard hides any myth whose `text_de` AND `text_short_de`
+   *  don't include the query as a case-insensitive substring. Persists
+   *  in the URL via `?q=…` so deep-links re-apply the search. */
+  searchQuery: string;
 }

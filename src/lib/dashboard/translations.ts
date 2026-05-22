@@ -237,7 +237,6 @@ const translations = {
 
   // Balken view + new dashboard chrome (refactor)
   'view.balken': { de: 'Balken', en: 'Bars' },
-  'view.balken2': { de: 'Balken 2', en: 'Bars 2' },
   'view.streifen': { de: 'Punktwolke', en: 'Point Cloud' },
   'view.spannweite': { de: 'Spannweite', en: 'Range' },
   'view.tabelle': { de: 'Tabelle', en: 'Table' },
@@ -258,18 +257,35 @@ const translations = {
     de: 'Bevölkerungsrelevanz nur für Volljährige verfügbar — Gruppe wurde umgestellt.',
     en: 'Population Relevance only available for adults — group switched automatically.',
   },
+  // 2026-05-22 universal myth-search above the toolbars.
+  'search.myths.placeholder': { de: 'Mythen suchen…', en: 'Search myths…' },
+  'search.myths.aria': {
+    de: 'Mythen durchsuchen — tippen Sie ein Wort, um die Mythen einzugrenzen',
+    en: 'Search myths — type a word to narrow the list',
+  },
+  'search.myths.clear': { de: 'Suche löschen', en: 'Clear search' },
+
+  // 2026-05-22 verdict-rank sort revival — tooltip for the new
+  // stacked-circles button in the MYTHEN column header.
+  'spannweite.sort.verdict.activate.tooltip': {
+    de: 'Nach wissenschaftlicher Einordnung sortieren (richtig → falsch)',
+    en: 'Sort by scientific verdict (correct → incorrect)',
+  },
+  'spannweite.sort.verdict.asc.tooltip': {
+    de: 'Reihenfolge umkehren (falsch → richtig)',
+    en: 'Reverse order (incorrect → correct)',
+  },
+  'spannweite.sort.verdict.desc.tooltip': {
+    de: 'Reihenfolge umkehren (richtig → falsch)',
+    en: 'Reverse order (correct → incorrect)',
+  },
+
   'sort.label': { de: 'Sortierung', en: 'Sort' },
-  // Session 4a (BugHerd #48): switched from arrow glyphs ("Wert ↓")
-  // to text-based direction labels per Fedor's "Wert, not arrow,
-  // A–Z style" ruling. Two sort controls render side-by-side now —
-  // a Wert (value) toggle that flips direction on click, and a
-  // separate Urteil (verdict) button that activates verdict-rank.
+  // Balken sort labels — the shared toolbar's Wert/Urteil controls
+  // were retired 2026-05-21 in favour of in-header A-Z + value sort
+  // buttons. Labels kept in case any surface still references them.
   'sort.value-desc': { de: 'Wert: hoch → niedrig', en: 'Value: high → low' },
   'sort.value-asc': { de: 'Wert: niedrig → hoch', en: 'Value: low → high' },
-  'sort.verdict-rank': {
-    de: 'Urteil: richtig → falsch',
-    en: 'Verdict: correct → incorrect',
-  },
   'sort.value.short': { de: 'Wert', en: 'Value' },
   'sort.verdict.short': { de: 'Urteil', en: 'Verdict' },
   'filter.button': { de: 'Filter', en: 'Filter' },
@@ -363,10 +379,6 @@ const translations = {
     de: 'Mythen sortiert nach gewähltem Indikator. Farbe = wissenschaftliches Urteil. Klick öffnet das Factsheet.',
     en: 'Myths ranked by the selected indicator. Color = scientific verdict. Click for the factsheet.',
   },
-  'howto.balken2': {
-    de: 'Experimentelle Ansicht: Mythen-Statement liegt direkt auf dem Balken. Pfeil rechts = wissenschaftliches Urteil. Klick öffnet das Factsheet.',
-    en: 'Experimental view: myth statement sits directly on the bar. Arrow at right = scientific verdict. Click for the factsheet.',
-  },
   // Spannweite view. AI draft, awaiting ISD review per CLAUDE.md's
   // German-text-quality rule.
   'howto.spannweite': {
@@ -420,8 +432,8 @@ const translations = {
   'balken.subtitle': { de: '{indicator} · {group}', en: '{indicator} · {group}' },
 
   // Stage 6 follow-up — hide / show columns (Punktwolke + Quellen + Tabelle)
-  'column.hide': { de: 'Spalte ausblenden', en: 'Hide column' },
-  'column.show': { de: 'Spalte einblenden', en: 'Show column' },
+  'column.hide': { de: 'Diese Spalte ausblenden', en: 'Hide this column' },
+  'column.show': { de: 'Spalte wieder einblenden', en: 'Show this column again' },
   'column.hidden': { de: 'Ausgeblendet', en: 'Hidden' },
 } as const;
 

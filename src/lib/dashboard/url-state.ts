@@ -20,7 +20,7 @@ import type {
 
 const ALL_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 const ALL_INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
-const ALL_VIEWS: ViewTab[] = ['balken', 'balken2', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'spannweite', 'sources', 'sources2'];
+const ALL_VIEWS: ViewTab[] = ['balken', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'spannweite', 'sources', 'sources2'];
 const ALL_VERDICTS: CorrectnessClass[] = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
 const ALL_SOURCE_METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
 const ALL_SOURCE_GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
@@ -30,8 +30,12 @@ const ALL_STRIPS_MODES: StripsMode[] = ['indicator', 'group'];
 const ALL_QUIZ_THEME_SLUGS: QuizThemeSlug[] = ['quiz-gefaehrlichkeit', 'quiz-medizinischer-nutzen', 'quiz-risiken-koerper-psyche', 'quiz-soziales-bevoelkerung', 'quiz-stimmung-wahrnehmung'];
 const ALL_STRIPS_SORT_AXES: StripsSortAxis[] = [...ALL_INDICATORS, ...ALL_GROUP_IDS] as StripsSortAxis[];
 const ALL_STRIPS_DIRS: StripsSortDir[] = ['asc', 'desc'];
-const ALL_BALKEN_SORTS: BalkenSort[] = ['value-desc', 'value-asc', 'verdict-rank'];
-const ALL_SPANNWEITE_SORTS: SpannweiteSort[] = ['a-z', 'value-asc', 'value-desc'];
+const ALL_BALKEN_SORTS: BalkenSort[] = [
+  'a-z', 'value-asc', 'value-desc', 'verdict-asc', 'verdict-desc',
+];
+const ALL_SPANNWEITE_SORTS: SpannweiteSort[] = [
+  'a-z', 'value-asc', 'value-desc', 'verdict-asc', 'verdict-desc',
+];
 const ALL_SOURCES_SPANNWEITE_SORTS: SourcesSpannweiteSort[] = [
   'a-z', 'value-asc', 'value-desc',
 ];
@@ -92,13 +96,14 @@ const DEFAULTS: AppState = {
   stripsSortDir: 'desc',
   factsheetMythId: null,
   stripsThemeFilter: [],
-  balkenSort: 'value-desc',
+  balkenSort: 'a-z',
   spannweiteSort: 'a-z',
   spannweiteSortColumn: null,
   sourcesSpannweiteSort: 'a-z',
   sourcesSpannweiteSortColumn: null,
   sourcesSpannweiteExpanded: [],
   mythIds: [],
+  searchQuery: '',
 };
 
 export function stateToUrl(state: Partial<AppState>): string {
@@ -148,6 +153,12 @@ export function stateToUrl(state: Partial<AppState>): string {
   if (state.mythIds && state.mythIds.length > 0)
     params.set('myths', state.mythIds.join(','));
 
+  // 2026-05-22: universal myth-search query. Preserve case so the
+  // URL reads what the user typed; the filter logic itself is
+  // case-insensitive.
+  if (state.searchQuery && state.searchQuery.length > 0)
+    params.set('q', state.searchQuery);
+
   if (state.scatterX && state.scatterX !== DEFAULTS.scatterX) params.set('sx', state.scatterX);
   if (state.scatterY && state.scatterY !== DEFAULTS.scatterY) params.set('sy', state.scatterY);
   if (state.sourceMetric && state.sourceMetric !== DEFAULTS.sourceMetric)
@@ -190,8 +201,10 @@ export function urlToState(): Partial<AppState> {
   if (rawView) {
     if (rawView === 'sources_v2') {
       state.view = 'sources' as ViewTab;
-    } else if (rawView === 'lollipop' || rawView === 'bar') {
-      // Retired views — redirect to Balken.
+    } else if (rawView === 'lollipop' || rawView === 'bar' || rawView === 'balken2') {
+      // Retired views — redirect to Balken. (`balken2` was the
+      // experimental text-on-bar variant, dropped 2026-05-21 in
+      // favour of the Spannweite-parity Balken rebuild.)
       state.view = 'balken' as ViewTab;
     } else if (VIEW_FROM_DE[rawView]) {
       state.view = VIEW_FROM_DE[rawView];
@@ -239,9 +252,12 @@ export function urlToState(): Partial<AppState> {
   if (sort && ALL_BALKEN_SORTS.includes(sort as BalkenSort)) {
     state.balkenSort = sort as BalkenSort;
   } else if (sort === 'category') {
-    // Legacy URLs that still encode 'category' (retired sort option) snap
-    // to the default value-descending sort so existing share links resolve.
-    state.balkenSort = 'value-desc';
+    // Legacy URL — retired category-grouped sort. Snap to A-Z default.
+    state.balkenSort = 'a-z';
+  } else if (sort === 'verdict-rank') {
+    // Old single-direction `verdict-rank` value → new `verdict-asc`
+    // (richtig → falsch, matches the original behaviour).
+    state.balkenSort = 'verdict-asc';
   }
 
   const spsort = params.get('spsort');
@@ -288,6 +304,9 @@ export function urlToState(): Partial<AppState> {
       .map(Number)
       .filter((n) => !isNaN(n) && n > 0);
   }
+
+  const q = params.get('q');
+  if (q) state.searchQuery = q;
 
   const sx = params.get('sx');
   if (ALL_INDICATORS.includes(sx as Indicator)) state.scatterX = sx as Indicator;
