@@ -28,10 +28,6 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 import {
-  EyeOff,
-  ArrowDown01, ArrowDown10, ArrowDownAZ,
-} from 'lucide-react';
-import {
   INDICATOR_ICONS,
   AUDIENCE_ICONS_BY_GROUP,
   type IconComponent,
@@ -39,34 +35,18 @@ import {
 import type {
   Myth, Metric, Group, GroupId, AppState, Indicator,
   StripsMode, DashboardDefinitions, SpannweiteSort,
-  CorrectnessClass,
 } from '../../../lib/dashboard/types';
 import {
-  getMythMetric, getIndicatorValue, getMythShortText, getMythText,
-  getCategoryName,
+  getMythMetric, getIndicatorValueChecked, getMythShortText,
 } from '../../../lib/dashboard/data';
-import {
-  getCorrectnessColor, getCorrectnessBgColor,
-} from '../../../lib/dashboard/colors';
 import { t, type TranslationKey } from '../../../lib/dashboard/translations';
 import type { MythContentEntry } from '../FactsheetPanel';
 import VerdictArrowSymbols from './verdictArrowSymbols';
 import { useHiddenColumns } from '../hooks/useHiddenColumns';
-import InfoTooltip from '../InfoTooltip';
+import {
+  GridDataHeader, GridLabelHeader, GridMythCell, GridValueCell, GridHoverTooltip,
+} from '../grid';
 import { renderSpannweiteSvg } from '../../../lib/dashboard/spannweite-svg';
-
-/** Per-verdict vertical pixel shift applied to .carm-spannweite__pos
- *  so the verdict-arrow's CHEVRON TIP lands on the bar's vertical
- *  center (instead of the SVG viewBox center, which puts the tip a
- *  few px above or below the bar). Derived from the rotation each
- *  verdict applies inside verdictArrowSymbols.tsx around (12, 12). */
-const VERDICT_Y_SHIFT_PX: Record<CorrectnessClass, number> = {
-  richtig: 2.67,        // chevron at viewBox y=8 → shift glyph DOWN
-  eher_richtig: 1.89,
-  eher_falsch: -1.89,
-  falsch: -2.67,        // chevron at viewBox y=16 → shift glyph UP
-  no_classification: 0,
-};
 
 interface Props {
   myths: Myth[];
@@ -211,28 +191,34 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
     });
   }, [mode, groups, lang, definitions]);
 
-  /** Single value for (myth, column) using the picked off-axis dim. */
+  /** Single value for (myth, column) using the picked off-axis dim.
+   *  Routes through `getIndicatorValueChecked` so methodologically-
+   *  invalid combos (Bev. Relevanz × {consumers, young_adults, parents})
+   *  return null regardless of any stray non-null value in the JSON. */
   const cellValue = useCallback(
     (mythId: number, colId: string): number | null => {
       if (mode === 'indicator') {
-        return getIndicatorValue(
+        return getIndicatorValueChecked(
           getMythMetric(metrics, mythId, pickedGroup),
           colId as Indicator,
+          pickedGroup,
         );
       }
-      return getIndicatorValue(
+      return getIndicatorValueChecked(
         getMythMetric(metrics, mythId, colId as GroupId),
         pickedIndicator,
+        colId as GroupId,
       );
     },
     [mode, metrics, pickedGroup, pickedIndicator],
   );
 
-  /** Sort: 3-way (v4 — verdict-rank dropped).
-   *   - 'a-z'                   — alphabetical by short text (default)
-   *   - 'value-asc'/'value-desc' — by the value in `sortColumn` for
-   *     each row's picked off-axis dim. Nulls sort to the bottom in
-   *     both directions. A-Z tie-break. */
+  /** Sort: 5-way (post-2026-05-22 verdict-rank revival).
+   *   - 'a-z'                    — alphabetical by short text (default).
+   *   - 'value-asc'/'value-desc' — per-column numeric (sortColumn).
+   *     Nulls sort to the bottom in both directions. A-Z tie-break.
+   *   - 'verdict-asc'/'verdict-desc' — by scientific verdict band
+   *     (richtig=1 → falsch=4, no_classification=5). A-Z tie-break. */
   const sortedMyths = useMemo(() => {
     const rows = [...myths];
     const cmpAz = (a: Myth, b: Myth) =>
@@ -247,6 +233,17 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
         if (va === null) return 1;   // nulls last
         if (vb === null) return -1;
         if (va !== vb) return dir * (va - vb);
+        return cmpAz(a, b);
+      });
+    } else if (sort === 'verdict-asc' || sort === 'verdict-desc') {
+      const dir = sort === 'verdict-asc' ? 1 : -1;
+      const order: Record<string, number> = {
+        richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, no_classification: 5,
+      };
+      rows.sort((a, b) => {
+        const oa = order[a.correctness_class] ?? 5;
+        const ob = order[b.correctness_class] ?? 5;
+        if (oa !== ob) return dir * (oa - ob);
         return cmpAz(a, b);
       });
     } else {
@@ -338,34 +335,46 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
           style={{ gridTemplateColumns: gridTemplate }}
           role="grid"
         >
-          {/* Header row — MYTHEN column. Holds the A-Z sort affordance
-              (upper-right) so all sort controls live in column headers
-              now. Styled identically to the per-column value-sort
-              buttons via `.carm-spannweite__col-sort-btn`. */}
+          {/* Header row — MYTHEN column. A-Z sort top-LEFT;
+              verdict-rank sort top-RIGHT. Both buttons share the
+              `.carm-spannweite__col-sort-btn` styling. */}
           {(() => {
             const isAzActive = sort === 'a-z';
             const azTooltip = t('spannweite.sort.alpha.tooltip', lang);
+            const isVerdictActive = sort === 'verdict-asc' || sort === 'verdict-desc';
+            const verdictDir: 'asc' | 'desc' = sort === 'verdict-desc' ? 'desc' : 'asc';
+            const verdictTooltipKey: TranslationKey = !isVerdictActive
+              ? 'spannweite.sort.verdict.activate.tooltip'
+              : sort === 'verdict-asc'
+              ? 'spannweite.sort.verdict.asc.tooltip'
+              : 'spannweite.sort.verdict.desc.tooltip';
             return (
               <div
                 className="carm-spannweite__cell carm-spannweite__cell--header carm-spannweite__cell--label"
                 role="columnheader"
               >
-                <span className="carm-spannweite__header-text">
-                  {t('misc.myths', lang)}
-                </span>
-                <button
-                  type="button"
-                  className={`carm-spannweite__col-sort-btn${isAzActive ? ' is-active' : ''}`}
-                  onClick={() => {
+                <GridLabelHeader
+                  labelText={t('misc.myths', lang)}
+                  isAzActive={isAzActive}
+                  azTooltip={azTooltip}
+                  onAzClick={() => {
                     update('spannweiteSort', 'a-z');
                     update('spannweiteSortColumn', null);
                   }}
-                  aria-pressed={isAzActive}
-                  aria-label={azTooltip}
-                  title={azTooltip}
-                >
-                  <ArrowDownAZ size={14} strokeWidth={2} aria-hidden="true" />
-                </button>
+                  verdictRank={{
+                    isActive: isVerdictActive,
+                    direction: verdictDir,
+                    tooltip: t(verdictTooltipKey, lang),
+                    onClick: () => {
+                      if (sort === 'verdict-asc') update('spannweiteSort', 'verdict-desc');
+                      else if (sort === 'verdict-desc') update('spannweiteSort', 'verdict-asc');
+                      else {
+                        update('spannweiteSort', 'verdict-asc');
+                        update('spannweiteSortColumn', null);
+                      }
+                    },
+                  }}
+                />
               </div>
             );
           })()}
@@ -384,7 +393,6 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                 </button>
               );
             }
-            const Icon = col.Icon;
             const isSortCol =
               (sort === 'value-asc' || sort === 'value-desc') && sortColumn === col.id;
             const isAsc = isSortCol && sort === 'value-asc';
@@ -401,54 +409,21 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                 className="carm-spannweite__cell carm-spannweite__cell--header"
                 role="columnheader"
               >
-                {/* Upper-LEFT: EyeOff hide trigger (Punktwolke pattern). */}
-                <button
-                  type="button"
-                  className="carm-spannweite__hide-btn"
-                  onClick={() => hide(col.id)}
-                  aria-label={`${t('column.hide', lang)} — ${col.fullLabel}`}
-                  title={`${t('column.hide', lang)} — ${col.fullLabel}`}
-                >
-                  <EyeOff size={11} strokeWidth={2} aria-hidden="true" />
-                </button>
-                {/* Centered: indicator/group icon + label + inline "i"
-                    InfoTooltip. The whole cluster acts as one hover
-                    region for the basic browser tooltip (full label +
-                    definition); the "i" itself opens the rich
-                    InfoTooltip popover on hover or click. */}
-                <span
-                  className="carm-spannweite__header-inner"
-                  title={col.defText ? `${col.fullLabel} — ${col.defText}` : col.fullLabel}
-                >
-                  <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
-                  <span className="carm-spannweite__header-text">{col.label}</span>
-                  {col.defTitle && col.defText && (
-                    <span className="carm-spannweite__info-inline">
-                      <InfoTooltip
-                        title={col.defTitle}
-                        definition={col.defText}
-                        scale={col.defScale}
-                        sampleSize={col.defSampleSize}
-                      />
-                    </span>
-                  )}
-                </span>
-                {/* Upper-RIGHT: per-column value sort. Click cycles
-                    inactive → asc → desc → asc. Icons swap with state. */}
-                <button
-                  type="button"
-                  className={`carm-spannweite__col-sort-btn${isSortCol ? ' is-active' : ''}`}
-                  onClick={() => handleColumnSortClick(col.id)}
-                  aria-pressed={isSortCol}
-                  aria-label={colSortTooltip}
-                  title={colSortTooltip}
-                >
-                  {isDesc ? (
-                    <ArrowDown10 size={14} strokeWidth={2} aria-hidden="true" />
-                  ) : (
-                    <ArrowDown01 size={14} strokeWidth={2} aria-hidden="true" />
-                  )}
-                </button>
+                <GridDataHeader
+                  Icon={col.Icon}
+                  label={col.label}
+                  fullLabel={col.fullLabel}
+                  defTitle={col.defTitle}
+                  defText={col.defText}
+                  defScale={col.defScale}
+                  defSampleSize={col.defSampleSize}
+                  hideLabel={`${t('column.hide', lang)} — ${col.fullLabel}`}
+                  onHide={() => hide(col.id)}
+                  isSortActive={isSortCol}
+                  sortDir={isDesc ? 'desc' : 'asc'}
+                  sortTooltip={colSortTooltip}
+                  onSortClick={() => handleColumnSortClick(col.id)}
+                />
               </div>
             );
           })}
@@ -456,7 +431,6 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
           {/* Body rows */}
           {sortedMyths.map((myth, rowIdx) => {
             const verdict = myth.correctness_class;
-            const verdictColor = getCorrectnessColor(verdict);
             const shortText = getMythShortText(myth, lang);
             const isHover = hoveredMythId === myth.id;
             return (
@@ -484,20 +458,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                   onMouseEnter={(e) => handleHover(myth.id, null, e)}
                   onMouseMove={(e) => handleHover(myth.id, null, e)}
                 >
-                  <span
-                    className="carm-spannweite__row-glyph"
-                    style={{ color: verdictColor }}
-                    aria-hidden="true"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24">
-                      <use href={`#strips-arrow-${verdict}`} width="24" height="24" />
-                    </svg>
-                  </span>
-                  <span
-                    className="carm-spannweite__row-text"
-                  >
-                    {shortText}
-                  </span>
+                  <GridMythCell verdict={verdict} shortText={shortText} />
                 </div>
                 {columns.map((col) => {
                   if (isHidden(col.id)) {
@@ -525,53 +486,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                       onMouseMove={(e) => handleHover(myth.id, col.id, e)}
                     >
                       <div className="carm-spannweite__plot">
-                        {value !== null ? (
-                          <>
-                            {/* Bar's right edge = glyph's CENTER (which is
-                                where the chevron tip points). The right
-                                half of the glyph extends past the bar's
-                                end so the arrow visually "lands on" the
-                                bar's end. */}
-                            <div
-                              className="carm-spannweite__bar"
-                              style={{
-                                width: `${Math.max(0, Math.min(100, value))}%`,
-                                background: verdictColor,
-                              }}
-                              aria-hidden="true"
-                            />
-                            {/* Glyph centred at value% (its center is the
-                                anchor — chevron tip lands on bar midline via
-                                the per-verdict --y-shift). */}
-                            <span
-                              className="carm-spannweite__glyph"
-                              aria-hidden="true"
-                              style={{
-                                left: `${Math.max(0, Math.min(100, value))}%`,
-                                color: verdictColor,
-                                ['--y-shift' as string]: `${VERDICT_Y_SHIFT_PX[verdict]}px`,
-                              }}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24">
-                                <use href={`#strips-arrow-${verdict}`} width="24" height="24" />
-                              </svg>
-                            </span>
-                            {/* Numeric label sits IMMEDIATELY right of the
-                                glyph (value% + 10 px = half-glyph + 2 px). */}
-                            <span
-                              className="carm-spannweite__num"
-                              style={{
-                                left: `calc(${Math.max(0, Math.min(100, value))}% + 10px)`,
-                              }}
-                            >
-                              {Math.round(value)}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="carm-spannweite__no-data" aria-hidden="true">
-                            k. A.
-                          </span>
-                        )}
+                        <GridValueCell verdict={verdict} value={value} />
                       </div>
                     </div>
                   );
@@ -580,27 +495,8 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
             );
           })}
 
-          {/* Bottom axis row — 0 / 50 / 100 once, anchored to each
-              column's own boundaries so labels never collide. */}
-          <div
-            className="carm-spannweite__axis"
-            style={{ gridColumn: `1 / span ${columns.length + 1}`, gridTemplateColumns: gridTemplate }}
-            aria-hidden="true"
-          >
-            <div className="carm-spannweite__axis-corner" />
-            {columns.map((col) => {
-              if (isHidden(col.id)) {
-                return <div key={`axis-${col.id}`} className="carm-spannweite__axis-hidden" />;
-              }
-              return (
-                <div key={`axis-${col.id}`} className="carm-spannweite__axis-scale">
-                  <span>0</span>
-                  <span>50</span>
-                  <span>100</span>
-                </div>
-              );
-            })}
-          </div>
+          {/* Bottom axis (0/50/100) removed 2026-05-22 — Fedor:
+              "self-evident without it". */}
         </div>
 
         {/* Shared symbol library — used by row-label glyphs + per-cell
@@ -619,80 +515,29 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
         </svg>
       </div>
 
-      {/* Verdict-tinted hover card. position:fixed + viewport-clamped
-          x so the card never extends past the screen edges. Layout:
-            row 1: myth statement (left)  + verdict glyph (right)
-            row 2: "Wissenschaftlich [verdict]" (verdict-colored)
-            row 3: gruppe · indikator · value   (meta, smaller)
-          No verdict-definition explanation (per Fedor 2026-05-14). */}
+      {/* Verdict-tinted hover card delegated to GridHoverTooltip
+          primitive (shared with Balken). */}
       {hoveredMyth && hoverPos && (() => {
-        const verdict = hoveredMyth.correctness_class;
-        const verdictColor = getCorrectnessColor(verdict);
-        const verdictBg = getCorrectnessBgColor(verdict);
-        const wissenschaftlich = verdict === 'no_classification'
-          ? (lang === 'de'
-              ? 'Wissenschaftlich: keine Einordnung möglich'
-              : 'Scientific verdict: not classified')
-          : `${lang === 'de' ? 'Wissenschaftlich' : 'Scientifically'}: ${t(
-              `verdict.${verdict}` as TranslationKey,
-              lang,
-            ).toLowerCase()}`;
-        // Resolve the meta line (Gruppe · Indikator · Wert) based on
-        // which cell is hovered. When hoveredColId is null (row-label
-        // hover), we omit the per-cell meta line.
-        let metaLine: string | null = null;
+        let lesebeispielIndicator: Indicator | null = null;
+        let lesebeispielGroup: GroupId | undefined = pickedGroup;
         if (hoveredColId) {
-          const value = cellValue(hoveredMyth.id, hoveredColId);
-          const indicator: Indicator = mode === 'indicator'
+          lesebeispielIndicator = mode === 'indicator'
             ? (hoveredColId as Indicator)
             : pickedIndicator;
-          const groupId: GroupId = mode === 'indicator'
+          lesebeispielGroup = mode === 'indicator'
             ? pickedGroup
             : (hoveredColId as GroupId);
-          const groupLabel = t(`igs.group.${groupId}` as TranslationKey, lang);
-          const indLabel = t(`indicator.${indicator}.short` as TranslationKey, lang)
-            .replace(/\s*%\s*$/, '');
-          const valLabel = value === null
-            ? (lang === 'de' ? 'keine Daten' : 'no data')
-            : `${Math.round(value)} %`;
-          metaLine = `${groupLabel} · ${indLabel} · ${valLabel}`;
         }
         return (
-          <div
-            className="carm-spannweite__tooltip"
-            role="tooltip"
-            style={{
-              position: 'fixed',
-              left: hoverPos.x,
-              top: hoverPos.y,
-              background: verdictBg,
-              borderLeft: `3px solid ${verdictColor}`,
-            }}
-          >
-            <div className="carm-spannweite__tooltip-row">
-              <div className="carm-spannweite__tooltip-myth">
-                {getMythText(hoveredMyth, lang)}
-              </div>
-              <span
-                className="carm-spannweite__tooltip-glyph"
-                style={{ color: verdictColor }}
-                aria-hidden="true"
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24">
-                  <use href={`#strips-arrow-${verdict}`} width="24" height="24" />
-                </svg>
-              </span>
-            </div>
-            <div
-              className="carm-spannweite__tooltip-verdict"
-              style={{ color: verdictColor }}
-            >
-              {wissenschaftlich}
-            </div>
-            {metaLine && (
-              <div className="carm-spannweite__tooltip-meta">{metaLine}</div>
-            )}
-          </div>
+          <GridHoverTooltip
+            myth={hoveredMyth}
+            metrics={metrics}
+            lang={lang}
+            x={hoverPos.x}
+            y={hoverPos.y}
+            lesebeispielIndicator={lesebeispielIndicator}
+            lesebeispielGroup={lesebeispielGroup}
+          />
         );
       })()}
     </div>

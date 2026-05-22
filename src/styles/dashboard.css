@@ -624,7 +624,9 @@ main:has(.carm-explorer) {
 
 /* ==================== DATA TABLE ==================== */
 .carm-explorer .data-table-container {
-  overflow-x: auto;
+  /* 2026-05-21: Tabelle MUST fit the viewport — never overflow
+     horizontally. Container clips any sub-pixel rounding. */
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -632,19 +634,27 @@ main:has(.carm-explorer) {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.83rem;
+  /* Fixed layout — column widths come from <colgroup>'s <col>
+     elements set by TableView. Hidden columns get 28px; visible
+     columns share the remaining space proportionally. */
+  table-layout: fixed;
 }
 
 .carm-explorer .data-table th {
   text-align: left;
-  padding: 10px 12px;
+  /* 2026-05-21 v3: zero th padding so the inner Spannweite cell
+     div carries its own padding (matches Spannweite layout). */
+  padding: 0;
   background: var(--color-surface);
   border-bottom: 2px solid var(--color-border);
   font-weight: 600;
   font-size: 0.75rem;
-  text-transform: uppercase;
+  /* Indicator columns are mixed-case (matching Spannweite header
+     style); only the myth-column header stays uppercase via the
+     `.cell--header.cell--label` rule it inherits. */
   letter-spacing: 0.03em;
   color: var(--color-text-secondary);
-  white-space: nowrap;
+  white-space: normal;
   cursor: pointer;
   user-select: none;
   position: sticky;
@@ -687,9 +697,15 @@ main:has(.carm-explorer) {
 }
 
 .carm-explorer .data-table td {
-  padding: 9px 12px;
+  padding: 0;
   border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
+}
+
+/* Value cells are bare numeric text — restore the cell padding that
+   the inner Spannweite wrap divs would otherwise supply. */
+.carm-explorer .data-table td.value-cell {
+  padding: 9px 12px;
 }
 
 .carm-explorer .data-table tr {
@@ -706,16 +722,29 @@ main:has(.carm-explorer) {
   outline-offset: -2px;
 }
 
+/* 2026-05-22 v5 hover-row focus parity with grid views — when any
+   body row is hovered, sibling rows fade to 0.35. */
+.carm-explorer .data-table tbody:has(tr:hover) tr {
+  opacity: 0.35;
+  transition: opacity 120ms ease;
+}
+.carm-explorer .data-table tbody:has(tr:hover) tr:hover,
+.carm-explorer .data-table tbody:has(tr:hover) tr:focus-visible {
+  opacity: 1;
+}
+
 .carm-explorer .data-table .myth-cell {
-  max-width: 300px;
-  min-width: 160px;
   line-height: 1.4;
+  white-space: normal;
+  overflow: hidden;
 }
 
 .carm-explorer .data-table .value-cell {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-  text-align: right;
+  /* 2026-05-21: numbers centered (was right-aligned) for tighter
+     visual scan when columns share the same 0-100 numeric scale. */
+  text-align: center;
   white-space: nowrap;
   color: var(--color-text);
 }
@@ -744,6 +773,64 @@ main:has(.carm-explorer) {
   display: inline-flex;
   vertical-align: middle;
   color: var(--color-text-muted);
+}
+
+/* 2026-05-22 v5: universal myth-search input — inline in the toolbar's
+   actions slot alongside Filter / Exportieren. Wrapper holds the
+   input + clear button positioned relatively. */
+.carm-myth-search-row {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.carm-myth-search-input {
+  width: 220px;
+  height: 32px;
+  padding: 0 28px 0 12px;
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 18px;
+  background: var(--color-surface, #ffffff);
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--color-text, #0f172a);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.carm-myth-search-input::placeholder {
+  color: var(--color-text-muted, #94a3b8);
+}
+.carm-myth-search-input:focus-visible {
+  border-color: var(--color-accent, #2d6a4f);
+  box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.18);
+}
+.carm-myth-search-clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted, #64748b);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+.carm-myth-search-clear:hover,
+.carm-myth-search-clear:focus-visible {
+  color: var(--color-text, #0f172a);
+  background: var(--color-surface-alt, #f1f5f9);
+  outline: none;
+}
+@media (max-width: 480px) {
+  .carm-myth-search-input { width: 160px; }
 }
 
 /* ==================== CHIPS ==================== */
@@ -2492,92 +2579,55 @@ main:has(.carm-explorer) {
   margin-top: 24px;
 }
 
-/* Tabelle hide UX — header gets an EyeOff button absolutely positioned
-   in the upper-LEFT corner of the cell (matching the Punktwolke +
-   Informationsquellen pattern). Hidden columns collapse to a thin
-   (~28px) cell with a chevron + rotated label. */
+/* 2026-05-22 v3 Spannweite-parity Tabelle rebuild. <th> and <td>
+   carry zero padding (above); the inner div uses
+   `.carm-spannweite__cell--header` / `.carm-spannweite__cell--label`
+   styles so the header chrome (sort + icon + label + InfoTooltip +
+   EyeOff) AND the myth-row identity (verdict glyph + indented text)
+   are byte-for-byte identical to Spannweite. */
+.carm-explorer .data-table .data-table__na {
+  /* Inside a value-cell <td>, the .carm-spannweite__no-data class
+     uses absolute positioning that doesn't apply outside its grid
+     parent. Fall back to a normal inline italic span so the "k. A."
+     renders cleanly. */
+  position: static;
+  display: inline-block;
+  transform: none;
+  font-style: italic;
+  color: var(--color-text-secondary, #64748b);
+}
+
+/* Tabelle myth cell uses GridMythCell whose default row-text rule
+   sets `white-space: nowrap` + ellipsis. Override inside the table
+   so statements can wrap across two lines on narrow columns. */
+.carm-explorer .data-table .data-table__myth-wrap .carm-spannweite__row-text {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  flex: 1;
+}
+
+/* Hidden columns in Tabelle collapse to a thin 28px lane. Header
+   gets the chevron via the inner Spannweite hidden cell; body cells
+   paint the diagonal-stripe background directly on the <td>. */
 .data-table__th {
   position: relative;
 }
-
-.data-table__hide-btn {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--color-text-muted, #94a3b8);
+.carm-explorer .data-table th.data-table__hidden-th {
   cursor: pointer;
-  flex-shrink: 0;
-  line-height: 0;
-  transition: background 0.15s ease, color 0.15s ease;
 }
-
-.data-table__hide-btn:hover,
-.data-table__hide-btn:focus-visible {
-  background: var(--color-bg-subtle, #eeeee8);
-  color: var(--color-accent, #2d6a4f);
-  outline: none;
+.carm-explorer .data-table td.data-table__hidden-td {
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 4px,
+    rgba(148, 163, 184, 0.05) 4px 8px
+  );
+  border-right: 1px solid var(--color-border-soft, #f1f5f9);
+  border-left: 1px solid var(--color-border-soft, #f1f5f9);
 }
-
-.data-table__th-label {
-  cursor: pointer;
-  user-select: none;
-}
-
-.data-table__col--hidden {
-  width: 28px !important;
-  min-width: 28px !important;
-  max-width: 28px !important;
-  padding: 6px 4px !important;
-  cursor: pointer;
-  text-align: center;
-  border-left: 1px dashed var(--color-border, #cbd5e1);
-  border-right: 1px dashed var(--color-border, #cbd5e1);
-  background: var(--color-bg-subtle, #f8fafc);
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.data-table__col--hidden:hover {
-  background: var(--color-accent-light, #e8f5ef);
-  border-color: var(--color-accent, #2d6a4f);
-}
-
-.data-table__col--hidden__chevron {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-accent, #2d6a4f);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.data-table__col--hidden__label {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-secondary, #4a5568);
-  white-space: nowrap;
-  transform: rotate(-90deg);
-  transform-origin: center;
-  margin-top: 12px;
-}
-
-.data-table__col--hidden-cell {
-  width: 28px !important;
-  min-width: 28px !important;
-  max-width: 28px !important;
-  padding: 0 !important;
-  background: var(--color-bg-subtle, #f8fafc);
-  border-left: 1px dashed var(--color-border, #cbd5e1);
-  border-right: 1px dashed var(--color-border, #cbd5e1);
+.carm-explorer .data-table .data-table__hidden-wrap {
+  width: 100%;
+  min-width: 0;
 }
 
 @media (max-width: 640px) {
@@ -4889,176 +4939,8 @@ body.carm-modal-open {
 
 .carm-balken-view { width: 100%; }
 
-/* ===========================================================================
-   BalkenView2 — experimental "text on bar" layout (Stage 6 v3).
-   Each row stacks 3 layers absolutely:
-     1. dark text under the bar (visible past the bar end)
-     2. bar fill with white text inside (overflow:hidden clips the text
-        to the bar's width)
-     3. arrow + value pill positioned at the bar's right edge
-   The HTML+CSS approach gives full control over the dual-color text
-   handoff (white inside bar, dark outside) which ECharts can't do
-   cleanly. Used only for `state.view === 'balken2'`.
-   =========================================================================== */
-
-.carm-balken2 {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Top axis row — 0/20/40/60/80/100 reference. v2: ticks at the edges
-   (0 + 100) anchor flush-left / flush-right so they're never clipped
-   by the chart container's right edge. */
-.carm-balken2__axis {
-  position: relative;
-  height: 28px;
-  border-bottom: 1px solid var(--color-border, #e2e8f0);
-  margin-bottom: 4px;
-}
-
-.carm-balken2__axis-tick {
-  position: absolute;
-  top: 8px;
-  transform: translateX(-50%);
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--color-text-secondary, #4a5568);
-  font-variant-numeric: tabular-nums;
-}
-
-.carm-balken2__axis-tick.is-first {
-  /* Left edge — anchor at left:0 with no -50% transform so "0" sits
-     flush with the chart's left edge. */
-  transform: translateX(0);
-}
-
-.carm-balken2__axis-tick.is-last {
-  /* Right edge — anchor at left:100% with -100% transform so "100"
-     ends flush with the chart's right edge. */
-  transform: translateX(-100%);
-}
-
-.carm-balken2__axis-name {
-  position: absolute;
-  bottom: 4px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--color-text-muted, #718096);
-}
-
-.carm-balken2__scroll {
-  border-radius: 4px;
-  background:
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.03), transparent 8px) top / 100% 8px no-repeat,
-    linear-gradient(to top, rgba(0, 0, 0, 0.03), transparent 8px) bottom / 100% 8px no-repeat;
-}
-
-.carm-balken2__rows {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* v2 row: bar fill underneath, content (text + arrow) on top in
-   verdict color. No right-side pill anymore — bar fills the full
-   row width up to value%.
-   Session 4a (BugHerd #49): explicit `width: 100%` so the <li>
-   spans the full chart width regardless of UA defaults. The bar
-   and content are both `position: absolute` AND have
-   `pointer-events: none`, so the <li> is the sole hit target across
-   the entire row. Hover bg bumped from 0.025 → 0.05 so the hover
-   state reads clearly when the cursor sits past the bar end. */
-.carm-balken2__row {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 36px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.carm-balken2__row:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.carm-balken2__row:focus-visible {
-  outline: 2px solid var(--color-accent, #2d6a4f);
-  outline-offset: -2px;
-}
-
-/* Layer 1 (z=1): beige bar fill, width set inline as percentage. */
-.carm-balken2__bar {
-  position: absolute;
-  left: 0;
-  top: 4px;
-  bottom: 4px;
-  z-index: 1;
-  border-radius: 0 4px 4px 0;
-  pointer-events: none;
-}
-
-/* Layer 2: inline-flex container [text][arrow], anchored at the row's
-   left. Arrow follows the text naturally so it sits at the END OF TEXT,
-   never inside the statement on short bars. */
-.carm-balken2__content {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  pointer-events: none;
-}
-
-.carm-balken2__text {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--color-text, #1a1a2e);
-  white-space: nowrap;
-}
-
-.carm-balken2__arrow {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  /* Color set inline via style="color: …" — full-saturation verdict. */
-}
-
-/* Cursor-following tooltip — position: fixed with viewport coords set
-   inline (left, top). Mirrors Balken 1's ECharts tooltip placement so
-   the popup tracks the cursor instead of the row centre. */
-.carm-balken2__tooltip {
-  position: fixed;
-  z-index: 200;
-  width: 320px;
-  max-width: calc(100vw - 16px);
-  padding: 10px 12px;
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border, #cbd5e1);
-  border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
-  font-size: 0.82rem;
-  line-height: 1.45;
-  color: var(--color-text, #1a1a2e);
-  pointer-events: none;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-@media (max-width: 640px) {
-  .carm-balken2__text {
-    font-size: 0.85rem;
-  }
-  .carm-balken2__tooltip {
-    width: 280px;
-  }
-}
+/* (BalkenView2 CSS removed 2026-05-22 — view was retired in favour of
+   the Spannweite-parity Balken rebuild.) */
 
 /* Stage 6: scroll container — fixed bar height (28px each row) means
    the SVG can be taller than the viewport when 30+ myths are shown.
@@ -6275,6 +6157,22 @@ body.carm-modal-open {
   box-shadow: inset 0 0 0 2px var(--color-accent, #1d4ed8);
 }
 
+/* 2026-05-22 v5 hover-row focus: when any BODY ROW is hovered, dim
+   the other rows to 0.35. Uses `:has()` so the trigger is scoped to
+   actual row hover — column header / axis / hidden lane hovers don't
+   fire the dim. (Auto-falls-back to "no dim" on browsers without
+   :has() support, which now means almost none — Chrome 105+, Firefox
+   121+, Safari 15.4+.) */
+.carm-spannweite__grid:has(.carm-spannweite__row:hover) .carm-spannweite__row {
+  opacity: 0.35;
+  transition: opacity 120ms ease;
+}
+.carm-spannweite__grid:has(.carm-spannweite__row:hover) .carm-spannweite__row:hover,
+.carm-spannweite__grid:has(.carm-spannweite__row:hover) .carm-spannweite__row.is-hover,
+.carm-spannweite__grid:has(.carm-spannweite__row:hover) .carm-spannweite__row:focus-visible {
+  opacity: 1;
+}
+
 .carm-spannweite__cell {
   position: relative;
   display: flex;
@@ -6319,7 +6217,9 @@ body.carm-modal-open {
   font-weight: 500;
   color: var(--color-text, #0f172a);
   gap: 0.5rem;
-  padding: 0 0.75rem;
+  /* Indent the verdict-glyph + short-text cluster from the left edge
+     so the column has a comfortable margin (2026-05-21 feedback). */
+  padding: 0 0.75rem 0 1.25rem;
   background: inherit;
 }
 
@@ -6330,6 +6230,10 @@ body.carm-modal-open {
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  /* Leave 30px on each side for the corner sort buttons (A-Z top-
+     LEFT, verdict-rank top-RIGHT — added 2026-05-22). */
+  padding-left: 30px;
+  padding-right: 30px;
 }
 
 .carm-spannweite__row-glyph {
@@ -6387,12 +6291,12 @@ body.carm-modal-open {
   opacity: 1;
 }
 
-/* Upper-LEFT EyeOff hide button (Punktwolke pattern). Always visible
-   at 0.55 opacity, 1.0 on hover/focus. */
+/* Upper-RIGHT EyeOff hide button (2026-05-21 swap — was upper-left).
+   Always visible at 0.55 opacity, 1.0 on hover/focus. */
 .carm-spannweite__hide-btn {
   position: absolute;
   top: 4px;
-  left: 4px;
+  right: 4px;
   width: 18px;
   height: 18px;
   display: inline-flex;
@@ -6420,13 +6324,14 @@ body.carm-modal-open {
   color: var(--color-text, #0f172a);
 }
 
-/* Upper-RIGHT per-column value sort button. Lucide ArrowDown01
-   icon = ascending; ArrowDown10 = descending. Faded by default,
-   opaque + accent-colored when this column is the active sort. */
+/* Upper-LEFT per-column value sort button (2026-05-21 swap — was
+   upper-right). Lucide ArrowDown01 icon = ascending; ArrowDown10 =
+   descending. Faded by default, opaque + accent-colored when this
+   column is the active sort. */
 .carm-spannweite__col-sort-btn {
   position: absolute;
   top: 4px;
-  right: 4px;
+  left: 4px;
   width: 22px;
   height: 22px;
   display: inline-flex;
@@ -6460,6 +6365,41 @@ body.carm-modal-open {
   opacity: 1;
   outline: 2px solid var(--color-accent, #2d6a4f);
   outline-offset: 1px;
+}
+
+/* `--top-left` is a no-op alias after the 2026-05-21 swap (sort is at
+   top-LEFT by default). Kept so GridLabelHeader callers don't break. */
+.carm-spannweite__col-sort-btn--top-left { /* alias */ }
+
+/* 2026-05-22 v5: instant hover tooltip for sort + hide buttons.
+   Reads the existing `title=` attribute via `attr(title)` so no JSX
+   changes were needed. The browser's native `title` tooltip still
+   appears after ~1.5s — but ours is already visible by then. */
+.carm-spannweite__col-sort-btn[title],
+.carm-spannweite__hide-btn[title] {
+  position: absolute;  /* already set above, but explicit for tooltip anchor */
+}
+.carm-spannweite__col-sort-btn[title]:hover::after,
+.carm-spannweite__col-sort-btn[title]:focus-visible::after,
+.carm-spannweite__hide-btn[title]:hover::after,
+.carm-spannweite__hide-btn[title]:focus-visible::after {
+  content: attr(title);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-text, #0f172a);
+  color: #ffffff;
+  font: 500 11px/1.4 system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 5px 9px;
+  border-radius: 4px;
+  white-space: nowrap;
+  max-width: 280px;
+  pointer-events: none;
+  z-index: 30;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 /* Hidden column: collapsed 28-px placeholder. Chevron only — no
@@ -6514,60 +6454,46 @@ body.carm-modal-open {
   height: 100%;
 }
 
-/* Variant B: faint verdict-tinted bar from 0 → value, sitting behind
-   the glyph. Carries the "where is this on the 0–100 scale" signal. */
+/* Lollipop line (post-2026-05-21): hairline verdict-colored line
+   from 0 → value, terminating at the dot. Thickness matches the dot's
+   stroke for a classic lollipop look. */
 .carm-spannweite__bar {
   position: absolute;
   left: 0;
   top: 50%;
-  height: 8px;
+  height: 2px;
   transform: translateY(-50%);
-  border-radius: 4px;
-  opacity: 0.22;
+  border-radius: 1px;
+  opacity: 1;
   pointer-events: none;
 }
 
-/* v3.3 — glyph and numeric label are positioned INDEPENDENTLY so
-   the glyph's CENTER lands at value% (not the center of a wrapped
-   glyph+number cluster). This lets the bar terminate exactly at the
-   glyph's left edge via `calc(value% - 8px)` without overlap.
-
-   The verdict-arrow SVG isn't visually centred around its viewBox
-   centre — chevron tip sits a few px off depending on rotation
-   (richtig: tip 2.67 px above centre; falsch: 2.67 px below; eher_*:
-   ±1.89 px). React sets --y-shift inline so the CHEVRON TIP lands on
-   the bar's vertical midline. */
-.carm-spannweite__glyph {
+/* 2026-05-22 v5: solid 18px circle in the mid-saturation verdict
+   color (-600), with the value rendered inside in white 11px
+   tabular-nums monospace. NO border (user wanted "full circle"). */
+.carm-spannweite__dot {
   position: absolute;
   top: 50%;
-  transform: translate(-50%, calc(-50% + var(--y-shift, 0px)));
-  width: 16px;
-  height: 16px;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  line-height: 0;
-  color: inherit;
+  /* background + color set inline by GridValueCell from verdict-color
+     tokens (getCorrectnessFillColor for background, white for color). */
+  font: 600 11px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  font-variant-numeric: tabular-nums;
   pointer-events: none;
   transition: transform 160ms ease;
+  z-index: 1;
 }
 
-.carm-spannweite__row:hover .carm-spannweite__glyph,
-.carm-spannweite__row.is-hover .carm-spannweite__glyph,
-.carm-spannweite__row:focus-visible .carm-spannweite__glyph {
-  transform: translate(-50%, calc(-50% + var(--y-shift, 0px))) scale(1.12);
-}
-
-.carm-spannweite__num {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font:
-    11px/1 ui-monospace, 'SF Mono', Menlo, monospace;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-text, #0f172a);
-  pointer-events: none;
-  white-space: nowrap;
+.carm-spannweite__row:hover .carm-spannweite__dot,
+.carm-spannweite__row.is-hover .carm-spannweite__dot,
+.carm-spannweite__row:focus-visible .carm-spannweite__dot {
+  transform: translate(-50%, -50%) scale(1.12);
 }
 
 .carm-spannweite__no-data {

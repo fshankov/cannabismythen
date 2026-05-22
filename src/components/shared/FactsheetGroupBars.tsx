@@ -39,6 +39,7 @@ import type {
   Indicator,
   MythGroupMetrics,
 } from '../../lib/dashboard/types';
+import { POP_REL_INVALID_GROUPS } from '../../lib/dashboard/data';
 import { t } from '../../lib/dashboard/translations';
 
 interface Props {
@@ -70,19 +71,6 @@ const GROUP_ORDER: GroupId[] = [
   'young_adults',
   'parents',
 ];
-
-/** Groups for which `population_relevance` is methodologically undefined.
- *  CaRM only computed this metric on the population-level samples (Erwachsene
- *  18–70 and Minderjährige 16–17). The carm-data.json file contains stray
- *  non-null values for consumers / young_adults / parents that bypass the
- *  null check below; this set forces them back to null at render time so
- *  the cell renders as "k. A." (per stakeholder ruling 2026-05-06,
- *  BugHerd #33). */
-const POP_REL_INVALID_GROUPS = new Set<GroupId>([
-  'consumers',
-  'young_adults',
-  'parents',
-]);
 
 /** Full Zielgruppe labels — match the daten-explorer Balken view's
  *  GROUP_LABELS verbatim (single source of voice). */

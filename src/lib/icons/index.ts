@@ -77,6 +77,11 @@ export {
 } from './verdicts';
 export type { VerdictColorOverride } from './verdicts';
 
+export {
+  IconVerdictRankAsc,
+  IconVerdictRankDesc,
+} from './verdictRankSort';
+
 export type { IconComponent, FaqAudienceId, SourceCategoryId, SourceAxisMetricId } from './lookups';
 export {
   AUDIENCE_ICONS_BY_GROUP,

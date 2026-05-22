@@ -14,7 +14,6 @@ import type {
   VerdictFilter,
   GroupId,
   Indicator,
-  BalkenSort,
   DashboardDefinitions,
 } from '../../lib/dashboard/types';
 import {
@@ -39,7 +38,6 @@ import SpannweiteView, { type SpannweiteViewHandle } from './views/SpannweiteVie
 import SourcesStripsView, { type SourcesStripsViewHandle } from './views/SourcesStripsView';
 import SourcesSpannweiteView, { type SourcesSpannweiteViewHandle } from './views/SourcesSpannweiteView';
 import BalkenView, { type BalkenViewHandle } from './views/BalkenView';
-import BalkenView2 from './views/BalkenView2';
 import type { ChartHandle } from '../../lib/dashboard/export';
 import FilterDrawer from './controls/FilterDrawer';
 import ExportDrawer from './controls/ExportDrawer';
@@ -138,7 +136,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   const getActiveChart = useCallback((): ChartHandle | null => {
     switch (state.view) {
       case 'balken':
-        return balkenRef.current?.getEchartsInstance() ?? null;
+        return balkenRef.current?.getSvgElement() ?? null;
       case 'strips':
         return stripsRef.current?.getSvgElement() ?? null;
       case 'spannweite':
@@ -183,7 +181,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    *  drawer (search-at-top + category + individual-myth checkboxes). */
   const isModernView =
     state.view === 'balken' ||
-    state.view === 'balken2' ||
     state.view === 'table';
 
   /** Counter that, when bumped, opens the DashboardOnboarding modal. */
@@ -283,8 +280,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       state.categoryIds,
       state.verdictFilter,
       state.mythIds,
+      state.searchQuery,
     );
-  }, [data, state.categoryIds, state.mythIds, state.verdictFilter]);
+  }, [data, state.categoryIds, state.mythIds, state.verdictFilter, state.searchQuery]);
 
   // (`handleShareLink` was inlined into `ExportDrawer`'s
   // `handleCopyLink` — the dialog manages its own "Kopiert!" feedback
@@ -355,8 +353,34 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     </button>
   );
 
+  /** 2026-05-22 v5: search input is inline with Filter / Export
+   *  inside the toolbar. Threaded as the FIRST element so every view
+   *  that consumes this slot picks it up automatically. */
   const sharedActions: ReactNode = (
     <>
+      <div className="carm-myth-search-row" role="search">
+        <input
+          type="search"
+          className="carm-myth-search-input"
+          value={state.searchQuery}
+          onChange={(e) => update('searchQuery', e.target.value)}
+          placeholder={t('search.myths.placeholder', 'de')}
+          aria-label={t('search.myths.aria', 'de')}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        {state.searchQuery && (
+          <button
+            type="button"
+            className="carm-myth-search-clear"
+            onClick={() => update('searchQuery', '')}
+            aria-label={t('search.myths.clear', 'de')}
+            title={t('search.myths.clear', 'de')}
+          >
+            ✕
+          </button>
+        )}
+      </div>
       <button
         type="button"
         className="carm-btn"
@@ -467,93 +491,13 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
 
           const groupValue: GroupId = state.groupIds[0] ?? 'adults';
 
-          // Session 4a (BugHerd #48): two side-by-side sort controls.
-          //   - Wert (Value) toggle: when active, click flips direction
-          //     between value-asc / value-desc. When inactive (Urteil
-          //     mode is active), one click switches back to the most
-          //     recent value direction (defaults to value-desc).
-          //   - Urteil (Verdict) button: activates verdict-rank sort
-          //     (richtig → falsch) on click. When already active, it
-          //     stays put (next click on Wert flips out of it).
-          //
-          // The two controls are mutually exclusive — only one sort
-          // mode applies at a time. Visual treatment: active control
-          // is the primary (filled) button; inactive is the secondary
-          // (outlined) button. Both stay clickable.
-          //
-          // Per Fedor's 2026-05-08 ruling, labels use text-based
-          // direction ("hoch → niedrig", "richtig → falsch") rather
-          // than arrow glyphs (↑↓), so the direction reads at a glance
-          // for users who don't parse arrow direction quickly.
-          const isVerdictMode = state.balkenSort === 'verdict-rank';
-          const isValueDesc = state.balkenSort === 'value-desc';
-          const isValueAsc = state.balkenSort === 'value-asc';
-          const isValueMode = isValueDesc || isValueAsc;
-          /** Label for the Wert toggle. When Wert is active, shows the
-           *  current direction. When Urteil is active, shows the
-           *  direction we'd switch back to (defaults to desc). */
-          const wertLabel = isValueAsc
-            ? t('sort.value-asc', 'de')
-            : t('sort.value-desc', 'de');
-          const verdictLabel = t('sort.verdict-rank', 'de');
-          const onClickWert = () => {
-            if (isVerdictMode) {
-              // Coming from verdict mode → switch to default value-desc.
-              update('balkenSort', 'value-desc');
-              return;
-            }
-            // Already in value mode → flip direction.
-            update('balkenSort', isValueDesc ? 'value-asc' : 'value-desc');
-          };
-          const onClickVerdict = () => {
-            if (!isVerdictMode) update('balkenSort', 'verdict-rank');
-          };
+          // 2026-05-21: sort toolbar retired — sort lives in column
+          // headers now (A-Z + verdict-rank in MYTHEN cell, value-asc/
+          // desc in indicator cell). No pivot slot needed for Balken.
 
           return (
             <ToolbarRow
               aria-label={t('filter.title', 'de')}
-              pivot={
-                // Session 4a (BugHerd #48): two side-by-side sort
-                // controls — Wert direction toggle + Urteil activator.
-                // Sits leftmost on Balken (pivot slot) so it stays
-                // visually distinct from the Indikator/Bevölkerungsgruppe
-                // dropdowns to its right. The active mode renders as
-                // the primary (filled) button; the inactive renders as
-                // the standard outlined button. Both are clickable to
-                // switch modes.
-                state.view === 'balken' || state.view === 'balken2' ? (
-                  <div
-                    className="carm-sort-group"
-                    role="group"
-                    aria-label={t('sort.label', 'de')}
-                  >
-                    <button
-                      type="button"
-                      className={`carm-btn carm-sort-btn${
-                        isValueMode ? ' carm-sort-btn--active' : ''
-                      }`}
-                      onClick={onClickWert}
-                      aria-pressed={isValueMode}
-                      aria-label={`${t('sort.label', 'de')} — ${wertLabel}`}
-                      title={wertLabel}
-                    >
-                      {wertLabel}
-                    </button>
-                    <button
-                      type="button"
-                      className={`carm-btn carm-sort-btn${
-                        isVerdictMode ? ' carm-sort-btn--active' : ''
-                      }`}
-                      onClick={onClickVerdict}
-                      aria-pressed={isVerdictMode}
-                      aria-label={`${t('sort.label', 'de')} — ${verdictLabel}`}
-                      title={verdictLabel}
-                    >
-                      {verdictLabel}
-                    </button>
-                  </div>
-                ) : undefined
-              }
               pickers={[
                 // Tabelle renders ALL indicator columns side-by-side, so
                 // the Indikator picker (which scopes the chart to one
@@ -691,8 +635,11 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                     ref={balkenRef}
                     myths={filteredMyths}
                     metrics={data.metrics}
+                    groups={data.groups}
                     state={state}
+                    update={update}
                     onSelectMyth={selectMyth}
+                    definitions={defs}
                     onResetFilters={() => {
                       // Single-shot recovery: clear every filter slot
                       // the active filter count tracks so the empty
@@ -703,30 +650,20 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                         categoryIds: [],
                         mythIds: [],
                         verdictFilter: 'all',
-                        balkenSort: 'value-desc',
-                      }));
-                    }}
-                  />
-                )}
-                {state.view === 'balken2' && (
-                  <BalkenView2
-                    myths={filteredMyths}
-                    metrics={data.metrics}
-                    state={state}
-                    onSelectMyth={selectMyth}
-                    onResetFilters={() => {
-                      setState((prev) => ({
-                        ...prev,
-                        categoryIds: [],
-                        mythIds: [],
-                        verdictFilter: 'all',
-                        balkenSort: 'value-desc',
+                        balkenSort: 'a-z',
                       }));
                     }}
                   />
                 )}
                 {state.view === 'table' && (
-                  <TableView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
+                  <TableView
+                    myths={filteredMyths}
+                    metrics={data.metrics}
+                    state={state}
+                    update={update}
+                    onSelectMyth={selectMyth}
+                    definitions={defs}
+                  />
                 )}
                 {state.view === 'scatter' && (
                   <ScatterView myths={filteredMyths} metrics={data.metrics} state={state} update={update} onSelectMyth={selectMyth} />
