@@ -21,7 +21,6 @@ import { QUIZ_THEMES, schritte, scoreBand } from "./quizData";
 import { t } from "./i18n";
 import { trackResultCardViewed } from "./matomo";
 import ShareCard from "./ShareCard";
-import VerdictPill from "../shared/VerdictPill";
 import type {
   QuizTextEntry,
   QuizVerdictsEntry,
@@ -43,7 +42,11 @@ interface ResultScreenProps {
    *  with the global `share-copy.yaml` singleton on the Astro page. */
   shareCopy: QuizShareCopyEntry;
   onRestart: () => void;
-  onJumpToQuestion: (idx: number) => void;
+  /** Stage D (2026-05-22): the per-row CTA now opens the FactsheetPanel
+   *  popup instead of jumping back to the question card. Same handler
+   *  used by QuizCard's "Mehr auf der Fakten-Karte" button, threaded
+   *  from QuizPlayer's `handleShowFactsheet`. */
+  onShowFactsheet: (myth: QuizMyth) => void;
 }
 
 /** Stage 5 — fallback verdict copy used when a Keystatic cell is empty.
@@ -122,7 +125,7 @@ export default function ResultScreen({
   intros,
   shareCopy,
   onRestart,
-  onJumpToQuestion,
+  onShowFactsheet,
 }: ResultScreenProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
@@ -303,75 +306,42 @@ export default function ResultScreen({
           {t("ui.retrospectiveTitle")}
         </h2>
         <p className="quiz-result__retrospective-intro">{reviewIntro}</p>
-        {/* Stage B (2026-05-16) — 4-column comparison table replaces the
-            Stage A retrospective <ol>. The new column 4 (Bevölkerung Ø)
-            shows each myth's populationCorrectPct so the user can see how
-            their answers stack up against the public average. Mobile
-            collapse is via display:block + data-label::before — the
-            <table> stays semantic for screen readers. */}
-        <table className="quiz-result__table">
-          <thead>
-            <tr>
-              <th scope="col">{t("ui.resultTable.statement")}</th>
-              <th scope="col">{t("ui.resultTable.yourAnswer")}</th>
-              <th scope="col">{t("ui.resultTable.scientific")}</th>
-              <th scope="col" className="quiz-result__table-cell--num">
-                {t("ui.resultTable.populationAvg")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {reviewRows.map((row) => {
-              const { myth, answer, schritte: s, visibleIdx } = row;
-              const statement =
-                quizTextMap[myth.id]?.statement || t(myth.statementKey);
-              const bandModifier = ["exact", "near", "off", "far"][s];
-              return (
-                <tr
-                  key={myth.id}
-                  className={`quiz-result__row quiz-result__row--${bandModifier}`}
+        {/* Stage D (2026-05-22) — the four-column Stage B comparison
+            table is gone. Per-row "Deine Antwort" and "Wissenschaftlich"
+            chips now live inside the FactsheetPanel popup (popup-first
+            pattern), and the per-row "Du gehörst zu X %" sentence lands
+            in PR2 of the Stage-D overhaul. PR1 ships the scaffold: a
+            single-row <ul> with a Schritte-tinted leading dot + the
+            statement + "Mehr auf der Fakten-Karte →" CTA that opens the
+            popup (replaces the broken "Zur Frage" jump-back). */}
+        <ul className="quiz-result__list" aria-label={t("ui.retrospectiveTitle")}>
+          {reviewRows.map((row) => {
+            const { myth, schritte: s } = row;
+            const statement =
+              quizTextMap[myth.id]?.statement || t(myth.statementKey);
+            const bandModifier = ["exact", "near", "off", "far"][s];
+            return (
+              <li
+                key={myth.id}
+                className={`quiz-result__list-item quiz-result__list-item--${bandModifier}`}
+              >
+                <span className="sr-only">{schritteLabel(s)}</span>
+                <span
+                  className={`quiz-result__list-dot quiz-result__list-dot--${bandModifier}`}
+                  aria-hidden="true"
+                />
+                <span className="quiz-result__list-statement">{statement}</span>
+                <button
+                  type="button"
+                  className="quiz-result__list-action"
+                  onClick={() => onShowFactsheet(myth)}
                 >
-                  <td>
-                    <span className="sr-only">{schritteLabel(s)}</span>
-                    <span className="quiz-result__table-statement">
-                      {statement}
-                    </span>
-                    <button
-                      type="button"
-                      className="quiz-result__jump"
-                      onClick={() => onJumpToQuestion(visibleIdx)}
-                    >
-                      {t("ui.resultTable.jump")}
-                    </button>
-                  </td>
-                  <td data-label={t("ui.resultTable.yourAnswer")}>
-                    <VerdictPill
-                      verdict={answer.chosenClassification}
-                      label={t(`classification.${answer.chosenClassification}`)}
-                      size="sm"
-                    />
-                  </td>
-                  <td data-label={t("ui.resultTable.scientific")}>
-                    <VerdictPill
-                      verdict={myth.correctClassification}
-                      label={t(`classification.${myth.correctClassification}`)}
-                      size="sm"
-                    />
-                  </td>
-                  <td
-                    data-label={t("ui.resultTable.populationAvg")}
-                    className="quiz-result__table-cell--num"
-                  >
-                    {myth.populationCorrectPct} %
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        <p className="quiz-result__table-caption">
-          {t("ui.resultTable.populationAvgCaption")}
-        </p>
+                  {t("ui.openMythDetail")}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
       {/* Action buttons — exactly two primary actions in matching size,
