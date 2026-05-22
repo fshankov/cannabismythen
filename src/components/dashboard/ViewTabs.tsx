@@ -2,16 +2,13 @@ import { MapPin } from 'lucide-react';
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 
-// Public tab order — Balken / Streifen / Tabelle ╎ Informationsquellen.
-// The visual divider before `sources` signals the IA shift from
-// "visualisation type" to "content type". Old views (bar/scatter/lollipop/
-// overview/circular/ladder) stay registered in MythenExplorer so legacy
-// share-links keep resolving; url-state.ts redirects retired ones to balken.
-const TABS: ViewTab[] = ['balken', 'balken2', 'strips', 'spannweite', 'table', 'sources', 'sources2'];
+// Public tab order — Balken / Streifen / Spannweite / Tabelle ╎ Informationsquellen.
+// (`balken2` was retired 2026-05-21 — url-state.ts redirects legacy
+// `?view=balken2` URLs to balken.)
+const TABS: ViewTab[] = ['balken', 'strips', 'spannweite', 'table', 'sources', 'sources2'];
 
 const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
   balken: 'view.balken',
-  balken2: 'view.balken2',
   strips: 'view.streifen',
   spannweite: 'view.spannweite',
   table: 'view.tabelle',
