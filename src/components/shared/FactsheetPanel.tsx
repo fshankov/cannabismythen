@@ -93,6 +93,14 @@ interface FactsheetPanelProps {
    *  falls back to whatever "Daten nach Zielgruppen" markdown is present
    *  in `mythContentEntry.html` so legacy content keeps rendering. */
   groupMetrics?: MythGroupMetrics;
+
+  /** Stage D (2026-05-22): quiz-only — the user's chosen classification
+   *  for this myth. When provided, the panel renders a "Deine Antwort:
+   *  <pill>" line directly above the "Wissenschaftlich:" line so the
+   *  comparison is visible inside the popup (the back-of-card chip pair
+   *  is being replaced by a popup-first pattern). Dashboard +
+   *  fakten-karten callsites leave this undefined; nothing renders. */
+  userAnswer?: CorrectnessClass | null;
 }
 
 /**
@@ -150,6 +158,7 @@ export default function FactsheetPanel({
   onClose,
   fallbackExplanation,
   groupMetrics,
+  userAnswer,
   // v3 (2026-05-13): verdict is now carried by the colored statement +
   // trailing arrow inside <VerdictStatement>. These three props from the
   // legacy "separate verdict block" pattern are kept in the type so the
@@ -305,6 +314,21 @@ export default function FactsheetPanel({
                 arrowSize={18}
               />
 
+              {/* Stage D (2026-05-22): quiz popup-first pattern — when the
+                  user opened the panel after answering, surface their
+                  pick directly above the scientific verdict so the
+                  comparison is visible without scrolling back to a card.
+                  Dashboard + fakten-karten leave userAnswer undefined →
+                  this block doesn't render. */}
+              {userAnswer && (
+                <p className="factsheet-panel__verdict-line">
+                  <span className="factsheet-panel__verdict-label">
+                    Deine Antwort:
+                  </span>{' '}
+                  <VerdictPill verdict={userAnswer} size="md" />
+                </p>
+              )}
+
               {/* 2. "Wissenschaftlich: <pill>" line (Fedor 2026-05-14).
                   Sits directly under the statement and names the
                   scientific verdict explicitly — the colored statement
@@ -355,6 +379,17 @@ export default function FactsheetPanel({
                 className="factsheet-panel__statement"
                 arrowSize={18}
               />
+
+              {/* Mirror of the primary branch's Stage-D "Deine Antwort:"
+                  row — only renders when the quiz callsite passed it. */}
+              {userAnswer && (
+                <p className="factsheet-panel__verdict-line">
+                  <span className="factsheet-panel__verdict-label">
+                    Deine Antwort:
+                  </span>{' '}
+                  <VerdictPill verdict={userAnswer} size="md" />
+                </p>
+              )}
 
               {/* Mirror of the primary branch's "Wissenschaftlich:" row. */}
               <p className="factsheet-panel__verdict-line">

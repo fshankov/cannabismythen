@@ -916,10 +916,7 @@ function QuizPlayerInner({
           intros={introsMap}
           shareCopy={shareCopyMap}
           onRestart={handleRestart}
-          onJumpToQuestion={(idx) => {
-            setFinished(false);
-            setCurrentIndex(idx);
-          }}
+          onShowFactsheet={handleShowFactsheet}
         />
       )}
 
@@ -931,6 +928,7 @@ function QuizPlayerInner({
           onClose={handleCloseFactsheet}
           statementText={quizTextMap[factsheetMyth.id]?.statement}
           explanationText={quizTextMap[factsheetMyth.id]?.explanation}
+          userAnswer={answers[factsheetMyth.id]?.chosenClassification ?? null}
         />
       )}
 

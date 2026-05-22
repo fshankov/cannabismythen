@@ -6,7 +6,7 @@
 import SharedFactsheetPanel from '../shared/FactsheetPanel';
 import type { MythContentEntry } from '../shared/FactsheetPanel';
 import VerdictArrowWithInfo from '../shared/VerdictArrowWithInfo';
-import type { MythGroupMetrics } from '../../lib/dashboard/types';
+import type { MythGroupMetrics, CorrectnessClass } from '../../lib/dashboard/types';
 import type { QuizMyth } from './types';
 import { t } from './i18n';
 
@@ -24,6 +24,13 @@ interface FactsheetPanelProps {
   statementText?: string;
   /** Explanation text from Keystatic content (overrides i18n key) */
   explanationText?: string;
+  /** Stage D (2026-05-22): the user's classification for this myth.
+   *  When provided, the shared panel renders a "Deine Antwort: <pill>"
+   *  line above "Wissenschaftlich:" so the comparison is visible inside
+   *  the popup. Read by QuizPlayer from `answers[mythId]` and threaded
+   *  to every opener (back-of-card detail button, keyboard `D`, and
+   *  the new result-page row click). */
+  userAnswer?: CorrectnessClass | null;
 }
 
 export default function FactsheetPanel({
@@ -33,6 +40,7 @@ export default function FactsheetPanel({
   onClose,
   statementText,
   explanationText,
+  userAnswer,
 }: FactsheetPanelProps) {
   return (
     <SharedFactsheetPanel
@@ -56,6 +64,7 @@ export default function FactsheetPanel({
       groupMetrics={groupMetrics}
       onClose={onClose}
       fallbackExplanation={explanationText || t(myth.explanationKey)}
+      userAnswer={userAnswer}
     />
   );
 }

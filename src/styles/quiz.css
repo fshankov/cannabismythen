@@ -2484,6 +2484,112 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Stage D (2026-05-22) — single-row unified review list.
+   Replaces the Stage B 4-column comparison table. Per-question
+   "Deine Antwort" and "Wissenschaftlich" chips now live inside the
+   FactsheetPanel popup (popup-first pattern). The "you joined X %"
+   sentence ships in PR2 of the Stage-D overhaul; PR1 keeps the
+   scaffold minimal — dot + statement + factsheet CTA.
+   ══════════════════════════════════════════════════════════════════ */
+
+.quiz-result__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.quiz-result__list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+/* Leading-edge tint per Schritte tier — secondary cue to the dot.
+   Matches the Stage B row inset shadow so the result page reads as
+   a refined continuation, not a regression. */
+.quiz-result__list-item--exact {
+  box-shadow: inset 4px 0 0 0 var(--classification-richtig);
+}
+.quiz-result__list-item--near {
+  box-shadow: inset 4px 0 0 0 var(--classification-eher-richtig);
+}
+.quiz-result__list-item--off {
+  box-shadow: inset 4px 0 0 0 var(--classification-eher-falsch);
+}
+.quiz-result__list-item--far {
+  box-shadow: inset 4px 0 0 0 var(--classification-falsch);
+}
+
+.quiz-result__list-dot {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+}
+
+.quiz-result__list-dot--exact {
+  background: var(--classification-richtig);
+}
+.quiz-result__list-dot--near {
+  background: var(--classification-eher-richtig);
+}
+.quiz-result__list-dot--off {
+  background: var(--classification-eher-falsch);
+}
+.quiz-result__list-dot--far {
+  background: var(--classification-falsch);
+}
+
+.quiz-result__list-statement {
+  flex: 1 1 auto;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.quiz-result__list-action {
+  flex-shrink: 0;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.quiz-result__list-action:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Mobile: stack the action below the statement so neither truncates. */
+@media (max-width: 640px) {
+  .quiz-result__list-item {
+    flex-wrap: wrap;
+  }
+  .quiz-result__list-statement {
+    flex-basis: calc(100% - 1.5rem);
+  }
+  .quiz-result__list-action {
+    margin-left: calc(10px + var(--space-md));
+  }
+}
+
 /* 8 — CTAs */
 .quiz-result__cta {
   display: inline-block;
