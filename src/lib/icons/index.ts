@@ -80,6 +80,8 @@ export type { VerdictColorOverride } from './verdicts';
 export {
   IconVerdictRankAsc,
   IconVerdictRankDesc,
+  IconCategoryRankAsc,
+  IconCategoryRankDesc,
 } from './verdictRankSort';
 
 export type { IconComponent, FaqAudienceId, SourceCategoryId, SourceAxisMetricId } from './lookups';
