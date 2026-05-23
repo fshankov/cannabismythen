@@ -1,15 +1,27 @@
 /**
  * GridValueCell — shared data-cell visual for the lollipop idiom used
- * by Spannweite, Balken, and Informationsquellen 2.
+ * by Spannweite + Balken. (Informationsquellen 2 uses the same CSS
+ * primitives but renders them inline because its cell needs extra
+ * chevron / child-row affordances; the visual contract is mirrored
+ * there manually.)
  *
- * Renders (2026-05-22 v5 solid-dot redesign):
- *   - a 2px verdict-colored stem from 0 → value%
- *   - an 18px filled circle at value% in the mid-saturation verdict
- *     color (-600 family), with the rounded value rendered in white
- *     11px tabular-nums monospace inside the circle — no border.
+ * Renders three pieces (2026-05-23 Polish v7 "V3a-dot + V3b-num" hybrid):
+ *   - a 2 px verdict-colored stem from 0 → value %
+ *   - a plain solid filled circle at value % (size from the
+ *     `--carm-spannweite-dot-size` token, mid-saturation verdict
+ *     color via `getCorrectnessFillColor`)
+ *   - a small monospace number floating ABOVE the dot at the same
+ *     horizontal anchor, sized from `--carm-spannweite-num-size`,
+ *     colored verdict-700 via `getCorrectnessColor`, with a white
+ *     halo background so the digits stay legible over the stem
  *
- * When `value === null`, renders the italic "k. A." span centered in
- * the cell — same styling Spannweite has used for missing data.
+ * The dot no longer hosts text inside — the floating number does.
+ * This separation lets the dot stay prominent without growing huge
+ * enough to fit a 2-digit number, and lets the number scale and
+ * reposition independently of the dot via CSS custom properties.
+ *
+ * `value === null` renders the italic "k. A." span centered in the
+ * cell — same styling Spannweite has used for missing data.
  *
  * Headless: returns a fragment for the cell's INNER (`.plot`) wrapper.
  * Consumer provides the outer `<div class="carm-spannweite__cell
@@ -36,9 +48,11 @@ export default function GridValueCell({ verdict, value }: Props) {
       </span>
     );
   }
-  // 2px stem keeps the saturated -700 verdict color so the line
-  // still reads at a glance; the dot uses the slightly lighter -600
-  // so white 11px text inside passes WCAG-AA contrast.
+  // 2 px stem keeps the saturated -700 verdict color so the line
+  // still reads at a glance. The dot uses the slightly lighter -600
+  // (so a future revival of in-dot text would still hit WCAG-AA);
+  // today the dot is empty and the number floats above in -700 so
+  // the dot+number cluster reads as one verdict-themed mark.
   const stemColor = getCorrectnessColor(verdict);
   const dotColor = getCorrectnessFillColor(verdict);
   const clamped = Math.max(0, Math.min(100, value));
@@ -57,7 +71,14 @@ export default function GridValueCell({ verdict, value }: Props) {
         style={{
           left: `${clamped}%`,
           background: dotColor,
-          color: '#ffffff',
+        }}
+        aria-hidden="true"
+      />
+      <div
+        className="carm-spannweite__num"
+        style={{
+          left: `${clamped}%`,
+          color: stemColor,
         }}
         aria-hidden="true"
       >

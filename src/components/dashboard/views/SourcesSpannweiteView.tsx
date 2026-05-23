@@ -650,19 +650,31 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                                 }}
                                 aria-hidden="true"
                               />
-                              {/* 2026-05-22: unified dot idiom with the
-                                  value rendered INSIDE the dot. Source
-                                  category colors don't have a pre-baked
-                                  pastel token set, so the dot keeps a
-                                  solid category-color fill with white
-                                  text. */}
+                              {/* 2026-05-23 Polish v7: dot is a plain
+                                  filled circle (no text inside) — the
+                                  value floats above as a sibling
+                                  `.carm-spannweite__num` so the dot+
+                                  number cluster mirrors the V3a-dot +
+                                  V3b-num hybrid used by Spannweite/
+                                  Balken via GridValueCell. Source
+                                  category color drives both the dot
+                                  fill and the number's text color so
+                                  the cluster reads as one
+                                  category-themed mark. */}
                               <div
                                 className="carm-spannweite__dot carm-sources-spannweite__dot"
                                 aria-hidden="true"
                                 style={{
                                   left: `${Math.max(0, Math.min(100, value))}%`,
                                   background: categoryColor,
-                                  color: '#ffffff',
+                                }}
+                              />
+                              <div
+                                className="carm-spannweite__num"
+                                aria-hidden="true"
+                                style={{
+                                  left: `${Math.max(0, Math.min(100, value))}%`,
+                                  color: categoryColor,
                                 }}
                               >
                                 {Math.round(value)}
