@@ -41,6 +41,8 @@ import type {
 } from '../../lib/dashboard/types';
 import { POP_REL_INVALID_GROUPS } from '../../lib/dashboard/data';
 import { t } from '../../lib/dashboard/translations';
+import DataPicker, { type DataPickerOption } from '../dashboard/controls/DataPicker';
+import { INDICATOR_ICONS } from '../../lib/icons/lookups';
 
 interface Props {
   /** Pre-computed metrics for the open myth — one entry per Zielgruppe.
@@ -82,7 +84,7 @@ const GROUP_LABELS: Record<GroupId, string> = {
   parents: 'Eltern',
 };
 
-/** Compact pill labels for the indicator picker — match the on-card
+/** Compact labels for the indicator picker — match the on-card
  *  language of the daten-explorer. The full names live in the hint
  *  line below the bars. */
 const INDICATOR_PILL_LABELS: Record<Indicator, string> = {
@@ -92,6 +94,17 @@ const INDICATOR_PILL_LABELS: Record<Indicator, string> = {
   prevention_significance: 'Prävention',
   population_relevance: 'Bev. Relevanz',
 };
+
+/** DataPicker options for the indicator dropdown — same dropdown
+ *  primitive the Daten-Explorer's FilterBar uses, so the popup picker
+ *  reads as part of the same product. */
+const INDICATOR_OPTIONS: DataPickerOption<Indicator>[] = [
+  { value: 'awareness', label: INDICATOR_PILL_LABELS.awareness, Icon: INDICATOR_ICONS.awareness },
+  { value: 'significance', label: INDICATOR_PILL_LABELS.significance, Icon: INDICATOR_ICONS.significance },
+  { value: 'correctness', label: INDICATOR_PILL_LABELS.correctness, Icon: INDICATOR_ICONS.correctness },
+  { value: 'prevention_significance', label: INDICATOR_PILL_LABELS.prevention_significance, Icon: INDICATOR_ICONS.prevention_significance },
+  { value: 'population_relevance', label: INDICATOR_PILL_LABELS.population_relevance, Icon: INDICATOR_ICONS.population_relevance },
+];
 
 /** Verdict → CSS-token map, kept inline so the component is
  *  self-contained. Mirrors --classification-* / --classification-*-bg
@@ -177,28 +190,18 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
         Daten nach Zielgruppen
       </h3>
 
-      <div
-        className="factsheet-group-bars__pills"
-        role="tablist"
-        aria-label="Indikator wählen"
-      >
-        {INDICATORS.map((i) => {
-          const isActive = i === indicator;
-          return (
-            <button
-              key={i}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              className={`factsheet-group-bars__pill${
-                isActive ? ' factsheet-group-bars__pill--active' : ''
-              }`}
-              onClick={() => setIndicator(i)}
-            >
-              {INDICATOR_PILL_LABELS[i]}
-            </button>
-          );
-        })}
+      {/* Indicator dropdown — replaces the 5-pill row (travel pipeline
+          Stage 4A, 2026-05-23). Reads as part of the Daten-Explorer
+          product because it shares the DataPicker primitive used by the
+          dashboard FilterBar. */}
+      <div className="factsheet-group-bars__picker">
+        <DataPicker
+          caption="Indikator"
+          value={indicator}
+          options={INDICATOR_OPTIONS}
+          onChange={(v) => setIndicator(v)}
+          aria-label="Indikator auswählen"
+        />
       </div>
 
       <p className="factsheet-group-bars__hint">
