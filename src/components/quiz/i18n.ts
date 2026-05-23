@@ -347,9 +347,17 @@ const translations: Record<Lang, Record<string, string>> = {
       "Du gehörst zu {pct} % der Erwachsenen (18–70), die diese Aussage nicht genau richtig eingeordnet haben.",
 
     // ── Stage D PR3 (2026-05-22) — "Lohnt sich besonders" flag chip on
-    //    the top weakest review rows. AI draft — awaiting ISD review.
-    //    English gloss: "Especially worth a closer look."
+    //    the top weakest review rows. Removed from rendering in Stage E
+    //    commit 4 (replaced by the wrong-myths fakten-karten grid);
+    //    key kept inert in case a future surface needs it.
     "result.row.especiallyWorth": "Lohnt sich besonders",
+
+    // ── Stage E commit 4 (2026-05-23) — wrong-myths fakten-karten grid
+    //    heading. Shown below the consolidated ShareCard when the
+    //    user did NOT place every myth genau richtig. AI draft —
+    //    awaiting ISD review.
+    //    English gloss: "These myths are worth a second look."
+    "result.wrongMyths.heading": "Diese Mythen lohnen einen zweiten Blick.",
   },
 
   // ── English (placeholder — to be filled) ──────────────────────────

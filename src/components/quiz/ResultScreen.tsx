@@ -22,16 +22,17 @@ import {
   QUIZ_THEMES,
   schritte,
   scoreBand,
-  userJoinedPercent,
 } from "./quizData";
 import { t } from "./i18n";
 import { trackResultCardViewed } from "./matomo";
 import ShareCard from "./ShareCard";
+import FaktenCard from "../fakten-karten/FaktenCard";
 import type {
   QuizTextEntry,
   QuizVerdictsEntry,
   QuizIntrosEntry,
   QuizShareCopyEntry,
+  QuizFaktenContentEntry,
 } from "./QuizPlayer";
 
 interface ResultScreenProps {
@@ -47,30 +48,20 @@ interface ResultScreenProps {
   /** Stage 7: per-band share/comparison copy. Per-module override merged
    *  with the global `share-copy.yaml` singleton on the Astro page. */
   shareCopy: QuizShareCopyEntry;
+  /** Stage E commit 4 (2026-05-23): per-myth fakten-karten payload for
+   *  the wrong-myths grid. Built in `src/pages/quiz/[slug].astro`. */
+  faktenContentMap: Record<string, QuizFaktenContentEntry>;
   onRestart: () => void;
   /** Stage D (2026-05-22): the per-row CTA now opens the FactsheetPanel
    *  popup instead of jumping back to the question card. Same handler
    *  used by QuizCard's "Mehr auf der Fakten-Karte" button, threaded
    *  from QuizPlayer's `handleShowFactsheet`. */
   onShowFactsheet: (myth: QuizMyth) => void;
-}
-
-/** Schritte → German label, no period (matches the back-of-card verdict). */
-function schritteLabel(s: 0 | 1 | 2 | 3): string {
-  if (s === 0) return t("schritte.exact");
-  if (s === 1) return t("schritte.near");
-  if (s === 2) return t("schritte.off");
-  return t("schritte.far");
-}
-
-/** Treat copy that begins with "PLACEHOLDER" (or is empty) as missing,
- *  so it falls back to the hardcoded sentence rather than rendering the
- *  editorial marker on the public page. */
-function realCopy(s: string | undefined): string {
-  const trimmed = (s ?? "").trim();
-  if (!trimmed) return "";
-  if (/^PLACEHOLDER\b/i.test(trimmed)) return "";
-  return trimmed;
+  /** Stage E commit 4: slug-based opener for the wrong-myths
+   *  `FaktenCard` grid. FaktenCard hands back a kebab slug; the
+   *  parent resolves to a QuizMyth so the popup still gets the user's
+   *  answer wired through (Stage D PR1). */
+  onShowFactsheetBySlug: (slug: string) => void;
 }
 
 export default function ResultScreen({
@@ -81,8 +72,10 @@ export default function ResultScreen({
   verdicts,
   intros,
   shareCopy,
+  faktenContentMap,
   onRestart,
   onShowFactsheet,
+  onShowFactsheetBySlug,
 }: ResultScreenProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
@@ -146,14 +139,12 @@ export default function ResultScreen({
     return rows;
   }, [orderedMyths, result.answers]);
 
-  // ── Intros (weakSpotIntro / strongPerformanceIntro) — pick by whether
-  //    any answer is 2+ Schritte off. Falls back to a quiet generic line.
-  const hasWeakSpot = reviewRows.some((r) => r.schritte >= 2);
-  const reviewIntro = hasWeakSpot
-    ? realCopy(intros.weakSpotIntro) ||
-      "Hier sind deine Antworten — sortiert nach Abstand zur Wissenschaft."
-    : realCopy(intros.strongPerformanceIntro) ||
-      "Du lagst bei jeder Aussage nah dran. Hier zur Erinnerung der Stand der Forschung.";
+  // Stage E commit 4 (2026-05-23): Keystatic `weakSpotIntro` /
+  // `strongPerformanceIntro` are no longer rendered on the result
+  // page — the wrong-myths section below has its own heading. The
+  // Keystatic fields remain populated as editorial-suggestion surface
+  // alongside the verdict block; see the `internalNotes` marker on
+  // each module .mdoc.
 
   return (
     <section
@@ -182,80 +173,39 @@ export default function ResultScreen({
         deckMyths={theme.myths}
       />
 
-      {/* Module review, worst-first */}
-      <div className="quiz-result__retrospective">
-        <h2 className="quiz-result__retrospective-title">
-          {t("ui.retrospectiveTitle")}
-        </h2>
-        <p className="quiz-result__retrospective-intro">{reviewIntro}</p>
-        {/* Stage D (2026-05-22) — the four-column Stage B comparison
-            table is gone. Per-row "Deine Antwort" and "Wissenschaftlich"
-            chips now live inside the FactsheetPanel popup (popup-first
-            pattern), and the per-row "Du gehörst zu X %" sentence lands
-            in PR2 of the Stage-D overhaul. PR1 ships the scaffold: a
-            single-row <ul> with a Schritte-tinted leading dot + the
-            statement + "Mehr auf der Fakten-Karte →" CTA that opens the
-            popup (replaces the broken "Zur Frage" jump-back). */}
-        <ul className="quiz-result__list" aria-label={t("ui.retrospectiveTitle")}>
-          {reviewRows.map((row, idx) => {
-            const { myth, answer, schritte: s } = row;
-            const statement =
-              quizTextMap[myth.id]?.statement || t(myth.statementKey);
-            const bandModifier = ["exact", "near", "off", "far"][s];
-            // Stage D PR2 — Pew per-question reframe. The user joined
-            // either the {pct} % who placed this statement genau richtig
-            // (when s === 0) or the (100 − pct) % who didn't.
-            // `userJoinedPercent` does the branch; we pick the template.
-            const joinedPct = userJoinedPercent(
-              myth,
-              answer.chosenClassification,
-            );
-            const joinedSentence =
-              s === 0
-                ? t("result.row.joinedExact", { pct: joinedPct })
-                : t("result.row.joinedMissed", { pct: joinedPct });
-            // Stage D PR3 — flag the top weakest rows so the user gets a
-            // gentle nudge toward the myths most worth a closer look.
-            // Highlight up to the first 3 rows that are NOT genau-richtig
-            // (s > 0). If the user nailed everything, no highlight shows.
-            const isHighlighted = idx < 3 && s > 0;
-            return (
-              <li
-                key={myth.id}
-                className={[
-                  "quiz-result__list-item",
-                  `quiz-result__list-item--${bandModifier}`,
-                  isHighlighted ? "quiz-result__list-item--highlighted" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                <span className="sr-only">{schritteLabel(s)}</span>
-                <span
-                  className={`quiz-result__list-dot quiz-result__list-dot--${bandModifier}`}
-                  aria-hidden="true"
-                />
-                <div className="quiz-result__list-body">
-                  {isHighlighted && (
-                    <span className="quiz-result__list-flag">
-                      {t("result.row.especiallyWorth")}
-                    </span>
-                  )}
-                  <p className="quiz-result__list-statement">{statement}</p>
-                  <p className="quiz-result__list-joined">{joinedSentence}</p>
-                </div>
-                <button
-                  type="button"
-                  className="quiz-result__list-action"
-                  onClick={() => onShowFactsheet(myth)}
-                >
-                  {t("ui.openMythDetail")}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      {/* Stage E commit 4 (2026-05-23) — wrong-myths grid. Replaces
+          the Stage D unified `quiz-result__list` of all 7 myths with
+          `Lohnt sich besonders` flag on the top 3. Now: only the
+          myths the user did NOT place genau richtig (Schritte > 0)
+          show up, rendered as fakten-karten flip cards. Click opens
+          the FactsheetPanel popup with the Stage D PR1 `Deine Antwort`
+          strip so the comparison stays contextualised. Section is
+          hidden entirely if the user got everything right — no
+          "Glückwunsch, alles richtig" line; the consolidated block
+          above already carries that energy. */}
+      {reviewRows.some((r) => r.schritte > 0) && (
+        <div className="quiz-result__wrong-myths">
+          <h2 className="quiz-result__wrong-myths-title">
+            {t("result.wrongMyths.heading")}
+          </h2>
+          <div className="fakten-grid quiz-result__wrong-grid">
+            {reviewRows
+              .filter((r) => r.schritte > 0)
+              .map((row) => {
+                const fakten = faktenContentMap[row.myth.id];
+                if (!fakten) return null;
+                return (
+                  <FaktenCard
+                    key={row.myth.id}
+                    myth={fakten}
+                    categoryGroup={fakten.categoryGroup}
+                    onShowFactsheet={onShowFactsheetBySlug}
+                  />
+                );
+              })}
+          </div>
+        </div>
+      )}
 
       {/* Stage D PR3 (2026-05-22) — the BugHerd #44 "Weiter erkunden"
           block (Daten-Explorer + Meine Interessen cross-links) was

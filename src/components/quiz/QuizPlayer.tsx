@@ -95,6 +95,21 @@ export interface QuizShareCopyEntry {
   erwischt?: string;
 }
 
+/** Stage E commit 4 (2026-05-23) — per-myth fakten-karten payload,
+ *  consumed by ResultScreen to render the wrong-myths `FaktenCard`
+ *  grid. Built in `src/pages/quiz/[slug].astro` from the same
+ *  `zahlenUndFakten` entries the FactsheetPanel popup reads. */
+export interface QuizFaktenContentEntry {
+  mythNumber: number;
+  title: string;
+  classification: string;
+  classificationLabel: string;
+  cardSummary: string;
+  cardShortSummary: string;
+  slug: string;
+  categoryGroup: string;
+}
+
 interface QuizPlayerProps {
   /** Quiz slug, e.g. "quiz-risiken-koerper-psyche" */
   quizSlug: string;
@@ -116,6 +131,10 @@ interface QuizPlayerProps {
   /** JSON-serialized QuizShareCopyEntry. Per-module override merged with
    *  global `share-copy.yaml` singleton on the Astro page (Stage 7). */
   shareCopy?: string;
+  /** JSON-serialized Record<mythId, QuizFaktenContentEntry> from Astro build.
+   *  Powers the wrong-myths `FaktenCard` grid on the result page
+   *  (Stage E commit 4). */
+  faktenContent?: string;
   /** Optional Keystatic summary used in the intro card */
   quizSummary?: string;
 }
@@ -354,6 +373,7 @@ function QuizPlayerInner({
   verdicts,
   intros,
   shareCopy,
+  faktenContent,
 }: QuizPlayerInnerProps) {
   const totalQuestions = theme.myths.length;
   const accent = QUIZ_ACCENT[quizSlug] ?? "var(--color-accent)";
@@ -517,6 +537,17 @@ function QuizPlayerInner({
     }
   }, [shareCopy]);
 
+  // Stage E commit 4 (2026-05-23) — fakten-karten data for the
+  // wrong-myths grid on the result page.
+  const faktenContentMap: Record<string, QuizFaktenContentEntry> = useMemo(() => {
+    if (!faktenContent) return {};
+    try {
+      return JSON.parse(faktenContent) as Record<string, QuizFaktenContentEntry>;
+    } catch {
+      return {};
+    }
+  }, [faktenContent]);
+
   // ── Track quiz start once per mount.
   useEffect(() => {
     if (!hasTrackedStart.current) {
@@ -630,6 +661,19 @@ function QuizPlayerInner({
   const handleShowFactsheet = useCallback((myth: QuizMyth) => {
     setFactsheetMyth(myth);
   }, []);
+
+  // Stage E commit 4 (2026-05-23) — slug-based opener for the result-page
+  // wrong-myths `FaktenCard` grid. FaktenCard's click handler hands back
+  // the kebab `mythPageSlug` (e.g. "m01-allheilmittel"); we resolve to
+  // the runtime QuizMyth via theme.myths so the popup still gets the
+  // user's answer wired through (Stage D PR1).
+  const handleShowFactsheetBySlug = useCallback(
+    (slug: string) => {
+      const match = theme.myths.find((m) => m.mythPageSlug === slug);
+      if (match) setFactsheetMyth(match);
+    },
+    [theme.myths],
+  );
 
   const handleCloseFactsheet = useCallback(() => {
     setFactsheetMyth(null);
@@ -898,8 +942,10 @@ function QuizPlayerInner({
           verdicts={verdictsMap}
           intros={introsMap}
           shareCopy={shareCopyMap}
+          faktenContentMap={faktenContentMap}
           onRestart={handleRestart}
           onShowFactsheet={handleShowFactsheet}
+          onShowFactsheetBySlug={handleShowFactsheetBySlug}
         />
       )}
 

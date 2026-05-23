@@ -99,6 +99,26 @@ const mythContentMap: Record<string, { html: string; title: string; classificati
 // re-key the numeric carm-data map into the same shape QuizPlayer's
 // content map already uses.
 const quizGroupMetricsMap: Record<string, MythGroupMetrics> = {};
+// Stage E commit 4 (2026-05-23): per-quiz-myth-id fakten-karten data
+// for the wrong-myths grid on the result page. Mirrors the
+// FaktenCardMyth shape consumed by `src/components/fakten-karten/
+// FaktenCard.tsx`, plus the `categoryGroup` field needed for the
+// card's category footer + stripe color. Built from the same
+// `reader.collections.zahlenUndFakten.read()` call below; no extra
+// I/O per myth.
+const quizFaktenContentMap: Record<
+  string,
+  {
+    mythNumber: number;
+    title: string;
+    classification: string;
+    classificationLabel: string;
+    cardSummary: string;
+    cardShortSummary: string;
+    slug: string;
+    categoryGroup: string;
+  }
+> = {};
 
 if (theme) {
   for (const myth of theme.myths) {
@@ -151,6 +171,26 @@ if (theme) {
         if (Number.isFinite(mythNumber) && groupMetricsByMythId[mythNumber]) {
           quizGroupMetricsMap[myth.id] = groupMetricsByMythId[mythNumber];
         }
+
+        // Stage E commit 4 — assemble FaktenCard payload for the
+        // wrong-myths grid on the quiz result page. Pulls all fields
+        // from the same `mythEntry` already loaded above so this adds
+        // no extra Keystatic round-trips.
+        const mythEntryAny = mythEntry as {
+          cardSummary?: string;
+          cardShortSummary?: string;
+          categoryGroup?: string;
+        };
+        quizFaktenContentMap[myth.id] = {
+          mythNumber: Number.isFinite(mythNumber) ? mythNumber : 0,
+          title: cleanMythTitle,
+          classification: mythEntry.classification as string,
+          classificationLabel: mythEntry.classificationLabel as string,
+          cardSummary: mythEntryAny.cardSummary ?? "",
+          cardShortSummary: mythEntryAny.cardShortSummary ?? "",
+          slug: myth.mythPageSlug,
+          categoryGroup: mythEntryAny.categoryGroup ?? "",
+        };
       }
     } catch {
       // If a myth page doesn't exist or fails to render, skip it
@@ -174,6 +214,7 @@ if (theme) {
       verdicts={JSON.stringify(verdictsPayload)}
       intros={JSON.stringify(introsPayload)}
       shareCopy={JSON.stringify(sharePayload)}
+      faktenContent={JSON.stringify(quizFaktenContentMap)}
       quizSummary={(entry as any).summary || undefined}
     />
 
