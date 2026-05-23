@@ -36,6 +36,7 @@ import LadderView from './views/LadderView';
 import StripsView, { type StripsViewHandle } from './views/StripsView';
 import SpannweiteView, { type SpannweiteViewHandle } from './views/SpannweiteView';
 import SourcesStripsView, { type SourcesStripsViewHandle } from './views/SourcesStripsView';
+import SourcesBalkenView, { type SourcesBalkenViewHandle } from './views/SourcesBalkenView';
 import SourcesSpannweiteView, { type SourcesSpannweiteViewHandle } from './views/SourcesSpannweiteView';
 import BalkenView, { type BalkenViewHandle } from './views/BalkenView';
 import type { ChartHandle } from '../../lib/dashboard/export';
@@ -123,6 +124,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   const stripsRef = useRef<StripsViewHandle>(null);
   const spannweiteRef = useRef<SpannweiteViewHandle>(null);
   const sourcesRef = useRef<SourcesStripsViewHandle>(null);
+  const sourcesBalkenRef = useRef<SourcesBalkenViewHandle>(null);
   const sources2Ref = useRef<SourcesSpannweiteViewHandle>(null);
 
   /**
@@ -611,8 +613,8 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         >
           <div className="chart-area__chart">
             {state.view === 'sources' ? (
-              <SourcesStripsView
-                ref={sourcesRef}
+              <SourcesBalkenView
+                ref={sourcesBalkenRef}
                 state={state}
                 update={update}
                 definitions={defs}
