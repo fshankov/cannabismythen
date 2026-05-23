@@ -314,8 +314,15 @@ header nav a.active {
 main {
   max-width: var(--max-width);
   margin: 0 auto;
-  /* Top padding compensates for the fixed nav */
-  padding: calc(var(--nav-height) + var(--space-xl)) var(--space-lg) var(--space-3xl);
+  /* Top padding compensates for the fixed `body > header`. Stage F
+     commit 1 (2026-05-23): use the live `--header-height` published by
+     the inline script in BaseLayout.astro so the page content sits
+     below the actual header height (which expands when the quiz
+     portals its feedback strip into the header). Falls back to the
+     static `--nav-height` token so non-quiz pages stay unaffected. */
+  padding: calc(var(--header-height, var(--nav-height)) + var(--space-md))
+           var(--space-lg)
+           var(--space-3xl);
   min-height: 60vh;
 }
 

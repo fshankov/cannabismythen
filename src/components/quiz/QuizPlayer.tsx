@@ -842,11 +842,13 @@ function QuizPlayerInner({
   // Quiet single-line header bar — module title + thin progress fill +
   // "Aussage X von Y" counter. Stage A (2026-05-16) dropped the
   // live-score pill (Pew minimalism). Stage E commit 5 (2026-05-23):
-  // adds a feedback strip immediately below the progress bar, shown
-  // only after the user has answered the current myth. The strip
-  // carries the verdict + statement + scientific pill + population
-  // sentence that used to live on the QuizCard back face.
-  const showFeedbackStrip =
+  // added a feedback strip immediately below the progress bar, shown
+  // only after the user has answered the current myth. Stage F commit
+  // 1 (2026-05-23): the same strip slot carries a `result` variant
+  // when the quiz is finished — replaces per-question feedback with
+  // a single `Dein Ergebnis — {module}` row, keeping the sticky-header
+  // rhythm consistent between quiz mode and result mode.
+  const showAnswerStrip =
     !showTitleCard && !showResults && currentMyth !== undefined && currentAnswer !== null;
   const headerContent = (
     <>
@@ -855,11 +857,18 @@ function QuizPlayerInner({
         answered={answeredCount}
         total={totalQuestions}
       />
-      {showFeedbackStrip && currentMyth && currentAnswer && (
+      {showAnswerStrip && currentMyth && currentAnswer && (
         <FeedbackStrip
+          variant="answer"
           myth={currentMyth}
           answer={currentAnswer}
           statementText={quizTextMap[currentMyth.id]?.statement}
+        />
+      )}
+      {showResults && (
+        <FeedbackStrip
+          variant="result"
+          moduleTitle={t(theme.titleKey)}
         />
       )}
     </>

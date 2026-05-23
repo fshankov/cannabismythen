@@ -30,12 +30,26 @@ import { schritte, userJoinedPercent } from "./quizData";
 import { t } from "./i18n";
 import VerdictPill from "../shared/VerdictPill";
 
+type FeedbackStripVariant = "answer" | "result";
+
 interface FeedbackStripProps {
-  myth: QuizMyth;
-  answer: CardAnswer;
-  /** Keystatic-editorial myth statement; falls back to the i18n key
-   *  if undefined. Mirrors the same lookup QuizCard does. */
+  /** Stage F commit 1 (2026-05-23): "answer" renders the per-question
+   *  verdict + statement + scientific pill + population sentence
+   *  (default). "result" replaces that whole block with a single
+   *  `Dein Ergebnis — {moduleTitle}` row so the sticky strip slot
+   *  keeps a consistent visual rhythm between quiz mode and result
+   *  mode. */
+  variant?: FeedbackStripVariant;
+  /** Required in "answer" mode. */
+  myth?: QuizMyth;
+  /** Required in "answer" mode. */
+  answer?: CardAnswer;
+  /** Required in "answer" mode. Keystatic-editorial myth statement;
+   *  falls back to the i18n key if undefined. */
   statementText?: string;
+  /** Required in "result" mode. Module title (e.g. "Medizinischer und
+   *  therapeutischer Nutzen") rendered in the result strip. */
+  moduleTitle?: string;
 }
 
 /** Schritte → i18n key (improved wording in Stage E commit 5). */
@@ -56,10 +70,33 @@ const SCHRITTE_MODIFIER: Record<Schritte, string> = {
 };
 
 export default function FeedbackStrip({
+  variant = "answer",
   myth,
   answer,
   statementText,
+  moduleTitle,
 }: FeedbackStripProps) {
+  // ── Result-mode strip ───────────────────────────────────────────────
+  // Replaces the per-question feedback content with a single title row
+  // when the user lands on the result page. Same DOM slot, same visual
+  // rhythm — the only thing that changes is the inner block.
+  if (variant === "result") {
+    return (
+      <div className="quiz-feedback-strip quiz-feedback-strip--result">
+        <h1 className="quiz-feedback-strip__result-title">
+          {t("ui.resultTitle")}
+          {moduleTitle ? <> — <span className="quiz-feedback-strip__result-module">{moduleTitle}</span></> : null}
+        </h1>
+      </div>
+    );
+  }
+
+  // ── Answer-mode strip ───────────────────────────────────────────────
+  // Guard: in TypeScript the optional props mean callers can omit them,
+  // but in practice the answer-mode call sites always pass both. Render
+  // nothing if the caller passed the wrong combination.
+  if (!myth || !answer) return null;
+
   const s: Schritte = schritte(answer.chosenClassification, myth.correctClassification);
   const verdictText = t(SCHRITTE_LABEL_KEY[s]);
   const verdictModifier = SCHRITTE_MODIFIER[s];

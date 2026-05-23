@@ -179,6 +179,30 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       })();
     </script>
 
+    {/* Stage F commit 1 (2026-05-23) — publish the live header height as a
+        CSS variable so `main { padding-top }` can compensate for the
+        feedback strip the quiz portals into the fixed `body > header`.
+        Without this, the strip overflows into the page content area
+        (the QuizCard statement ends up hidden behind the strip on first
+        paint). The ResizeObserver catches the height change every time
+        the strip mounts / changes size; the fallback `--nav-height`
+        keeps non-quiz pages unaffected. */}
+    <script is:inline>
+      (function () {
+        var header = document.querySelector('body > header');
+        if (!header) return;
+        function publishHeight() {
+          var h = header.getBoundingClientRect().height;
+          document.documentElement.style.setProperty('--header-height', h + 'px');
+        }
+        publishHeight();
+        window.addEventListener('resize', publishHeight, { passive: true });
+        if (typeof ResizeObserver === 'function') {
+          new ResizeObserver(publishHeight).observe(header);
+        }
+      })();
+    </script>
+
     {/* Decision D: Mobile bottom tab bar — visible < 1024px, hidden on desktop */}
     <nav class="mobile-tab-bar" aria-label="Mobile-Navigation">
       <a href="/fakten-karten/" class="mobile-tab-bar__item">

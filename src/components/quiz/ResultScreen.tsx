@@ -153,12 +153,11 @@ export default function ResultScreen({
       tabIndex={-1}
       aria-label={t("ui.resultTitle")}
     >
-      {/* Header */}
-      <header className="quiz-result__header">
-        <h1 className="quiz-result__title">
-          {t("ui.resultTitle")} — {t(theme.titleKey)}
-        </h1>
-      </header>
+      {/* Stage F commit 1 (2026-05-23) — the in-page `Dein Ergebnis —
+          {module}` h1 moved up into the sticky `#quiz-progress-slot`
+          via FeedbackStrip's `variant="result"` mode. Same DOM slot
+          as the per-question feedback strip; consistent sticky header
+          rhythm between quiz mode and result mode. */}
 
       {/* Stage E commit 3 (2026-05-23) — Consolidated ShareCard hero.
           The Stage A Keystatic verdict + Stage D standalone achievement
