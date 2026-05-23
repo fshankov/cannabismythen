@@ -30,7 +30,6 @@
 import { useCallback, useState } from "react";
 import type { QuizResult, ScoreBand } from "./types";
 import {
-  exactCountDelta,
   populationExpectedExactCount,
   scoreBand,
 } from "./quizData";
@@ -49,20 +48,13 @@ interface ShareCardProps {
 
 /** Format a number the German way for body copy: integers stay bare
  *  (no trailing ",0"), non-integers use a comma decimal separator and
- *  one fractional digit. Mirrors the helper that lived in
- *  ResultScreen.tsx through Stage D. */
+ *  one fractional digit. */
 function formatGermanDecimal(n: number): string {
   const rounded = Math.round(n * 10) / 10;
   if (rounded === Math.trunc(rounded)) {
     return String(Math.trunc(rounded));
   }
   return rounded.toFixed(1).replace(".", ",");
-}
-
-/** Singular only when count === 1 (e.g. "1 Aussage über dem Schnitt").
- *  All other values — including 0 and decimals like 1,5 — take the plural. */
-function pluralizeAussage(n: number): string {
-  return n === 1 ? "Aussage" : "Aussagen";
 }
 
 export default function ShareCard({
@@ -74,21 +66,12 @@ export default function ShareCard({
   const [copied, setCopied] = useState(false);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
 
-  // Population reference + delta — single decimal, Poisson-binomial mean.
+  // Population reference — single decimal, Poisson-binomial mean.
+  // Stage F commit 3 (2026-05-23) dropped the sign-aware delta sentence
+  // ("Du liegst {Δ} Aussagen über/unter dem Schnitt") per Fedor's call
+  // that the comparison framing read as a judgement. Score line +
+  // population line carry the comparison on their own.
   const populationExpectedCount = populationExpectedExactCount(deckMyths);
-  const delta = exactCountDelta(result.breakdown.exact, deckMyths);
-  const deltaSentence =
-    delta === 0
-      ? t("result.deltaLine.onPar")
-      : delta > 0
-        ? t("result.deltaLine.above", {
-            count: formatGermanDecimal(delta),
-            aussage: pluralizeAussage(delta),
-          })
-        : t("result.deltaLine.below", {
-            count: formatGermanDecimal(Math.abs(delta)),
-            aussage: pluralizeAussage(Math.abs(delta)),
-          });
 
   // Share text composition — code-side (Keystatic shareCopy.{band} is
   // a per-module editorial surface but no consumer reads it yet).
@@ -184,8 +167,6 @@ export default function ShareCard({
             total: result.totalQuestions,
           })}
         </p>
-
-        <p className="share-card__delta">{deltaSentence}</p>
 
         <div className="share-card__branding">{t("ui.siteUrl")}</div>
       </div>

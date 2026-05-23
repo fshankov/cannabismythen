@@ -108,15 +108,27 @@
    ══════════════════════════════════════════════════════════════════ */
 
 .quiz-feedback-strip {
+  /* Stage F commit 3 (2026-05-23) — align horizontally with the
+     `.quiz-header-bar` above it (same max-width container + same
+     `--space-lg` horizontal padding) so brand row + nav + progress
+     bar + feedback strip share one cohesive baseline. */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-bg-subtle, #eeeee8);
-  border-bottom: 1px solid var(--color-border);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-sm) var(--space-lg);
   font-size: 0.9rem;
   line-height: 1.45;
+  color: var(--color-text);
+}
+
+/* Subtle divider between the progress bar above and the strip below.
+   Reading the strip's visual treatment as a continuation of the
+   sticky header rhythm, not a separate floating element. */
+#quiz-progress-slot .quiz-feedback-strip {
+  border-top: 1px solid rgba(226, 232, 240, 0.40);
 }
 
 /* Stage F commit 2 (2026-05-23) — the tinted pill background was too
@@ -200,10 +212,10 @@
 
 /* Stage F commit 1 (2026-05-23) — result-mode strip. Replaces the
    per-question feedback content with a single title row when the
-   quiz is finished. Same DOM slot as the answer-mode strip; tight
-   padding, single line. */
+   quiz is finished. Same DOM slot, same max-width container, same
+   horizontal padding rhythm as the answer-mode strip. */
 .quiz-feedback-strip--result {
-  padding: var(--space-sm) var(--space-md);
+  /* (padding inherits from .quiz-feedback-strip above) */
 }
 
 .quiz-feedback-strip__result-title {
@@ -2484,19 +2496,34 @@
   color: var(--color-text-muted);
 }
 
+/* Stage F commit 3 (2026-05-23) — unify the tertiary action styling so
+   `<button class="quiz-result__textlink">Quiz wiederholen</button>` and
+   `<a class="quiz-result__textlink">← Alle Quiz-Module</a>` render
+   identically (the browser-default button styling was leaking through
+   on some engines, making the two read as different button vs. link
+   shapes). `all: unset` clears the user-agent styles; the explicit
+   declarations below rebuild the link-style treatment for both. */
 .quiz-result__textlink {
-  background: none;
-  border: 0;
+  all: unset;
+  display: inline-block;
   padding: 4px 8px;
   font: inherit;
   color: var(--color-accent);
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
+  border-radius: var(--radius-sm, 4px);
 }
 
-.quiz-result__textlink:hover {
+.quiz-result__textlink:hover,
+.quiz-result__textlink:focus-visible {
   color: var(--color-accent-hover);
+  text-decoration-thickness: 2px;
+}
+
+.quiz-result__textlink:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .quiz-result__textlink-sep {

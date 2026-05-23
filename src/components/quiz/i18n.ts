@@ -345,10 +345,18 @@ const translations: Record<Lang, Record<string, string>> = {
     "result.achievementHeadline.erwischt":
       "Cannabis steckt voller Mythen. Zeit für einen Blick in die Fakten-Karten.",
     "result.scoreLine.user": "Du: {count} von {total} genau richtig",
-    "result.scoreLine.population": "Erwachsene (18–70) Ø: {count} von {total}",
-    "result.deltaLine.above": "Du liegst {count} {aussage} über dem Schnitt.",
-    "result.deltaLine.below": "Du liegst {count} {aussage} unter dem Schnitt.",
-    "result.deltaLine.onPar": "Du liegst genau auf dem Schnitt.",
+    // Stage F commit 3 (2026-05-23) — revised population line.
+    // Was: "Erwachsene (18–70) Ø: {count} von {total}" (mathematical).
+    // Now: references the CaRM project name explicitly so the source
+    // is visible to anyone reading the result. AI draft — Du form
+    // applies vacuously (no second-person pronoun). ISD review pending.
+    // English gloss: "Adults (18–70) in Germany — per the CaRM study:
+    // {count} out of {total} placed exactly right."
+    "result.scoreLine.population":
+      "Erwachsene (18–70) in Deutschland — laut der CaRM-Studie: {count} von {total} genau richtig",
+    // Stage F commit 3 (2026-05-23) — deltaLine keys removed alongside
+    // the delta-sentence render. Score line + population line now
+    // carry the comparison without an explicit "X above/below" line.
     "result.row.joinedExact":
       "Du gehörst zu {pct} % der Erwachsenen (18–70), die diese Aussage genau richtig eingeordnet haben.",
     "result.row.joinedMissed":
