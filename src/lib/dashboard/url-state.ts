@@ -201,10 +201,17 @@ export function urlToState(): Partial<AppState> {
   if (rawView) {
     if (rawView === 'sources_v2') {
       state.view = 'sources' as ViewTab;
-    } else if (rawView === 'lollipop' || rawView === 'bar' || rawView === 'balken2') {
-      // Retired views — redirect to Balken. (`balken2` was the
-      // experimental text-on-bar variant, dropped 2026-05-21 in
-      // favour of the Spannweite-parity Balken rebuild.)
+    } else if (
+      rawView === 'lollipop' ||
+      rawView === 'bar' ||
+      rawView === 'balken2' ||
+      rawView === 'strips'
+    ) {
+      // Retired views — redirect to Balken. (`balken2` was the experimental
+      // text-on-bar variant, dropped 2026-05-21; `strips`/Punktwolke was
+      // pulled from public tabs 2026-05-23 as part of the travel-pipeline
+      // dashboard reorg, but the underlying StripsView component stays so
+      // we don't lose tests or the export pipeline.)
       state.view = 'balken' as ViewTab;
     } else if (VIEW_FROM_DE[rawView]) {
       state.view = VIEW_FROM_DE[rawView];
