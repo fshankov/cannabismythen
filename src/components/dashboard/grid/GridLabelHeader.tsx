@@ -68,7 +68,7 @@ export default function GridLabelHeader({
       {verdictRank && (
         <button
           type="button"
-          className={`carm-spannweite__col-sort-btn${verdictRank.isActive ? ' is-active' : ''}`}
+          className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-right${verdictRank.isActive ? ' is-active' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             verdictRank.onClick();

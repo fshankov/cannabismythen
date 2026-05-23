@@ -6371,6 +6371,18 @@ body.carm-modal-open {
    top-LEFT by default). Kept so GridLabelHeader callers don't break. */
 .carm-spannweite__col-sort-btn--top-left { /* alias */ }
 
+/* `--top-right` anchors the button to the upper-RIGHT corner of the
+   cell (2026-05-23). Used by the optional verdict-rank button in
+   GridLabelHeader so it sits beside the A-Z button on the opposite
+   side of the MYTHEN-column header label. Also used by the new
+   category-rank button in SourcesSpannweiteView's QUELLEN header.
+   Mirrors the data-column header layout (sort top-left, EyeOff hide
+   top-right) so the visual rhythm matches across all four views. */
+.carm-spannweite__col-sort-btn--top-right {
+  left: auto;
+  right: 4px;
+}
+
 /* 2026-05-22 v5: instant hover tooltip for sort + hide buttons.
    Reads the existing `title=` attribute via `attr(title)` so no JSX
    changes were needed. The browser's native `title` tooltip still

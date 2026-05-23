@@ -28,6 +28,8 @@ import {
 import {
   SOURCE_METRIC_ICONS,
   AUDIENCE_ICONS_BY_GROUP,
+  IconCategoryRankAsc,
+  IconCategoryRankDesc,
   type IconComponent,
 } from '../../../lib/icons';
 import type {
@@ -215,8 +217,32 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     );
 
     // ── Sort ───────────────────────────────────────────────────────
+    // Canonical order for the new `category-asc` / `category-desc`
+    // axes (2026-05-23). Mirrors the JSON taxonomy order in
+    // `public/data/information-sources.json` so users see the source
+    // categories in the same sequence ISD ranked them. Unknown
+    // categories fall to the end (99) so a future taxonomy extension
+    // doesn't crash the sort. Within a category, parents stay in
+    // alphabetical order so the grouping is readable.
+    const CATEGORY_ORDER: Record<string, number> = {
+      institutional: 1,
+      internet: 2,
+      social_media: 3,
+      traditional_media: 4,
+      print_physical: 5,
+      personal: 6,
+    };
     const sortedParents = useMemo(() => {
       const arr = [...filteredParents];
+      if (sort === 'category-asc' || sort === 'category-desc') {
+        const dir = sort === 'category-asc' ? 1 : -1;
+        return arr.sort((a, b) => {
+          const oa = CATEGORY_ORDER[a.category] ?? 99;
+          const ob = CATEGORY_ORDER[b.category] ?? 99;
+          if (oa !== ob) return dir * (oa - ob);
+          return a.name.localeCompare(b.name, 'de');
+        });
+      }
       if (sort === 'a-z' || !sortColumn || (sort !== 'value-asc' && sort !== 'value-desc')) {
         return arr.sort((a, b) => a.name.localeCompare(b.name, 'de'));
       }
@@ -391,20 +417,19 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
             style={{ gridTemplateColumns: gridTemplate }}
             role="grid"
           >
-            {/* Header row — QUELLEN column carries the A–Z sort button
-                in its upper-right corner (Fedor 2026-05-15), mirroring
-                the per-column value-sort placement on metric/group
-                columns. */}
+            {/* Header row — QUELLEN column carries two sort buttons:
+                A-Z at upper-LEFT (existing) and category-rank at
+                upper-RIGHT (added 2026-05-23 — mirrors the
+                verdict-rank affordance on the myth views, but groups
+                sources by their information-source category instead
+                of by scientific verdict). */}
             <div
               className="carm-spannweite__cell carm-spannweite__cell--header carm-spannweite__cell--label"
               role="columnheader"
             >
-              <span className="carm-spannweite__header-text">
-                {lang === 'de' ? 'QUELLEN' : 'SOURCES'}
-              </span>
               <button
                 type="button"
-                className={`carm-spannweite__col-sort-btn${sort === 'a-z' ? ' is-active' : ''}`}
+                className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-left${sort === 'a-z' ? ' is-active' : ''}`}
                 onClick={() => {
                   update('sourcesSpannweiteSort', 'a-z');
                   update('sourcesSpannweiteSortColumn', null);
@@ -415,6 +440,44 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
               >
                 <ArrowDownAZ size={14} strokeWidth={2} aria-hidden="true" />
               </button>
+              <span className="carm-spannweite__header-text">
+                {lang === 'de' ? 'QUELLEN' : 'SOURCES'}
+              </span>
+              {(() => {
+                const isCatActive = sort === 'category-asc' || sort === 'category-desc';
+                const catTooltipKey: TranslationKey =
+                  sort === 'category-asc'
+                    ? 'sources.sort.category.asc.tooltip'
+                    : sort === 'category-desc'
+                      ? 'sources.sort.category.desc.tooltip'
+                      : 'sources.sort.category.activate.tooltip';
+                const catTooltip = t(catTooltipKey, lang);
+                return (
+                  <button
+                    type="button"
+                    className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-right${isCatActive ? ' is-active' : ''}`}
+                    onClick={() => {
+                      if (sort === 'category-asc') {
+                        update('sourcesSpannweiteSort', 'category-desc');
+                      } else if (sort === 'category-desc') {
+                        update('sourcesSpannweiteSort', 'category-asc');
+                      } else {
+                        update('sourcesSpannweiteSort', 'category-asc');
+                        update('sourcesSpannweiteSortColumn', null);
+                      }
+                    }}
+                    aria-pressed={isCatActive}
+                    aria-label={catTooltip}
+                    title={catTooltip}
+                  >
+                    {sort === 'category-desc' ? (
+                      <IconCategoryRankDesc size={14} aria-hidden="true" />
+                    ) : (
+                      <IconCategoryRankAsc size={14} aria-hidden="true" />
+                    )}
+                  </button>
+                );
+              })()}
             </div>
             {columns.map((col) => {
               if (isHidden(col.id)) {
