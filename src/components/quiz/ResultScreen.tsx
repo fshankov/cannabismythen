@@ -1,26 +1,25 @@
 /**
- * ResultScreen — Per-module result page (Stage A rebuild).
+ * ResultScreen — Per-module result page.
  *
- * Top-to-bottom order:
+ * Top-to-bottom order (Stage E commit 3, 2026-05-23):
  *   1) Header: "Dein Ergebnis — {module title}"
- *   2) Hero card (ShareCard): Keystatic verdict title + body + user score
- *      sentence + population reference sentence + share button.
- *      Band-tinted background.
- *   3) Module review (worst-first): per-myth answer/science pills +
- *      "Zur Frage" link. weakSpotIntro / strongPerformanceIntro intro.
- *   4) Action stack: Fakten-Karten · Nächstes Modul · Daten-Explorer ·
- *      Meine Interessen · Quiz zurücksetzen · Alle Module.
+ *   2) Consolidated ShareCard hero: tonal headline (code-side
+ *      `result.achievementHeadline.*`), user score, Erwachsene Ø,
+ *      delta sentence, small share icon top-right.
+ *   3) Module review (worst-first): unified list — replaced by the
+ *      wrong-myths Fakten-Karten grid in Stage E commit 4.
+ *   4) Action stack: Fakten-Karten · Nächstes Modul · Erneut versuchen.
  *
- * Dropped in Stage A: medal/emoji + big-% hero, breakdown line, per-myth
- * "Zur Karte →" link. Sie → Du sweep on touched strings.
+ * Keystatic verdict.title / verdict.body are no longer rendered on
+ * this page — they remain as an editorial-suggestion surface in
+ * `src/content/quiz/*.mdoc` with the `internalNotes` marker added in
+ * Stage E commit 2 explaining the split.
  */
 
 import { useEffect, useMemo, useRef } from "react";
 import type { CardAnswer, QuizMyth, QuizResult, QuizTheme, ScoreBand } from "./types";
 import {
   QUIZ_THEMES,
-  exactCountDelta,
-  populationExpectedExactCount,
   schritte,
   scoreBand,
   userJoinedPercent,
@@ -56,55 +55,6 @@ interface ResultScreenProps {
   onShowFactsheet: (myth: QuizMyth) => void;
 }
 
-/** Stage 5 — fallback verdict copy used when a Keystatic cell is empty.
- *  These are intentionally generic; Keystatic copy should always win.
- *  Stage A (2026-05-16) — Sie → Du flip on touched fallbacks. */
-const VERDICT_FALLBACK: Record<ScoreBand, { title: string; body: string }> = {
-  profi: {
-    title: "Mythen-Profi",
-    body: "Du erkennst die Cannabis-Mythen klar als das, was sie sind — Halbwahrheiten oder Mythen.",
-  },
-  guterweg: {
-    title: "Auf dem richtigen Weg",
-    body: "Bei den meisten Aussagen liegst du richtig. Ein paar Details lohnen einen zweiten Blick.",
-  },
-  gehtnoch: {
-    title: "Da geht noch was",
-    body: "Manche Mythen sind hartnäckig. In den Fakten-Karten findest du die Forschung dahinter.",
-  },
-  erwischt: {
-    title: "Mythen haben dich erwischt",
-    body: "Die Forschung sagt häufig etwas anderes als die Alltagserzählung. Zeit für eine Tour durch die Fakten-Karten.",
-  },
-};
-
-interface PopulationStats {
-  /** Population's average absolute points for the module, rounded
-   *  (BugHerd #31). E.g. 4 if 4.27 of 7 questions on average. */
-  absolutePoints: number;
-  /** Number of myths/questions in the module. */
-  questionCount: number;
-  /** Population's average percentage score for the module, rounded. */
-  percent: number;
-}
-
-/** Compute the population's reference score for the module from each
- *  myth's `populationCorrectPct` (CaRM mean distanceScore 0–100).
- *  Average pct = mean of populationCorrectPct.
- *  Average absolute = sum(populationCorrectPct) / 100, since each myth's
- *  max points = 1 and pct/100 = expected points-per-question. */
-function computePopulationStats(myths: QuizMyth[]): PopulationStats {
-  if (myths.length === 0) {
-    return { absolutePoints: 0, questionCount: 0, percent: 0 };
-  }
-  const sumPct = myths.reduce((acc, m) => acc + m.populationCorrectPct, 0);
-  return {
-    absolutePoints: Math.round(sumPct / 100),
-    questionCount: myths.length,
-    percent: Math.round(sumPct / myths.length),
-  };
-}
-
 /** Schritte → German label, no period (matches the back-of-card verdict). */
 function schritteLabel(s: 0 | 1 | 2 | 3): string {
   if (s === 0) return t("schritte.exact");
@@ -123,24 +73,6 @@ function realCopy(s: string | undefined): string {
   return trimmed;
 }
 
-/** Format a number the German way for body copy: integers stay bare
- *  (no trailing ",0"), non-integers use a comma decimal separator and
- *  exactly one fractional digit. Display-only — not for round-tripping. */
-function formatGermanDecimal(n: number): string {
-  const rounded = Math.round(n * 10) / 10;
-  if (rounded === Math.trunc(rounded)) {
-    return String(Math.trunc(rounded));
-  }
-  return rounded.toFixed(1).replace(".", ",");
-}
-
-/** German singular/plural for "Aussage". Singular only when the count is
- *  exactly 1 (e.g. "1 Aussage über dem Schnitt"). All other values —
- *  including 0 and decimals like 1,5 — take the plural "Aussagen". */
-function pluralizeAussage(n: number): string {
-  return n === 1 ? "Aussage" : "Aussagen";
-}
-
 export default function ResultScreen({
   result,
   theme,
@@ -154,13 +86,15 @@ export default function ResultScreen({
 }: ResultScreenProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
-  const verdict = verdicts[band] ?? {};
-  const verdictTitle = realCopy(verdict.title) || VERDICT_FALLBACK[band].title;
-  const verdictBody = realCopy(verdict.body) || VERDICT_FALLBACK[band].body;
 
+  // Stage E commit 3 (2026-05-23): Matomo tracking name now uses the
+  // code-side achievement headline (the string the user actually sees
+  // at the top of the result page). Keystatic verdict.title is no
+  // longer rendered (see `internalNotes` markers in src/content/quiz/*.mdoc).
+  const achievementHeadline = t(`result.achievementHeadline.${band}`);
   useEffect(() => {
-    trackResultCardViewed(verdictTitle);
-  }, [verdictTitle]);
+    trackResultCardViewed(achievementHeadline);
+  }, [achievementHeadline]);
 
   useEffect(() => {
     if (panelRef.current) {
@@ -221,43 +155,6 @@ export default function ResultScreen({
     : realCopy(intros.strongPerformanceIntro) ||
       "Du lagst bei jeder Aussage nah dran. Hier zur Erinnerung der Stand der Forschung.";
 
-  // Population reference for the canonical sentence (BugHerd #29/#38/#39).
-  // Computed from each myth's populationCorrectPct; rounded per #31.
-  const populationStats = computePopulationStats(theme.myths);
-
-  // Stage D PR2 (2026-05-22) — Achievement card numbers. The card uses
-  // a single decimal of precision (Poisson-binomial expectation), unlike
-  // the rounded `populationStats.absolutePoints` the legacy ShareCard
-  // hero still consumes. ShareCard's hero is unbanded in PR3 and the
-  // duplication resolves there.
-  const populationExpectedCount = populationExpectedExactCount(theme.myths);
-  const delta = exactCountDelta(result.breakdown.exact, theme.myths);
-  const deltaSentence =
-    delta === 0
-      ? t("result.deltaLine.onPar")
-      : delta > 0
-        ? t("result.deltaLine.above", {
-            count: formatGermanDecimal(delta),
-            aussage: pluralizeAussage(delta),
-          })
-        : t("result.deltaLine.below", {
-            count: formatGermanDecimal(Math.abs(delta)),
-            aussage: pluralizeAussage(Math.abs(delta)),
-          });
-
-  // Stage A (2026-05-16) — Pew minimalism hero. The two sentences are
-  // composed inline because they're structural, not banded copy. The
-  // share-copy.yaml singleton is kept in sync for future re-engagement
-  // (see editorial/quiz-overhaul/stage-a/spec.md §4).
-  const userScoreLine =
-    `Du hast ${result.breakdown.exact} von ${result.totalQuestions} ` +
-    `Aussagen genau richtig eingeordnet (${result.moduleScore} %).`;
-  const populationLine =
-    `Erwachsene (18–70) in einer Bevölkerungsbefragung in Deutschland ` +
-    `ordneten im Schnitt ${populationStats.absolutePoints} von ` +
-    `${populationStats.questionCount} Aussagen genau richtig ein ` +
-    `(${populationStats.percent} %).`;
-
   return (
     <section
       ref={panelRef}
@@ -272,52 +169,18 @@ export default function ResultScreen({
         </h1>
       </header>
 
-      {/* Stage A (2026-05-16) — Pew minimalism hero. Verdict title +
-          body (Keystatic) carry the warmth; the two new lines below
-          carry the numbers. The medal/big-% pair was dropped. The
-          card is still tinted by band so the result reads at a glance. */}
+      {/* Stage E commit 3 (2026-05-23) — Consolidated ShareCard hero.
+          The Stage A Keystatic verdict + Stage D standalone achievement
+          card are now folded into one block. ShareCard reads the
+          tonal headline from code (`result.achievementHeadline.*`),
+          computes the score / population / delta inside, and renders
+          a small share icon top-right (replaces the big button below). */}
       <ShareCard
         result={result}
         quizUrl={quizUrl}
         moduleTitle={t(theme.titleKey)}
-        verdictTitle={verdictTitle}
-        verdictBody={verdictBody}
-        userScoreLine={userScoreLine}
-        populationLine={populationLine}
+        deckMyths={theme.myths}
       />
-
-      {/* Stage D PR2 (2026-05-22) — Achievement card. Replaces the
-          Stage C two-row summary grid. The grid mixed Schritte-coverage %
-          (partial credit, user side) with genau-richtig count % (binary,
-          population side) — not apples-to-apples. The new card uses one
-          honest metric (genau-richtig counts) for both sides, plus a
-          Pew-style band-tied headline and a sign-aware delta sentence.
-          The band feeling still comes through the headline; the
-          band-tinted backgrounds drop in PR3 along with the cream
-          paper background sweep.
-          AI-draft German strings — awaiting ISD review. See i18n.ts
-          (`result.*` keys) for the English glosses. */}
-      <section
-        className={`quiz-result__achievement quiz-result__achievement--${band}`}
-        aria-label={t(`result.achievementHeadline.${band}`)}
-      >
-        <h2 className="quiz-result__achievement-headline">
-          {t(`result.achievementHeadline.${band}`)}
-        </h2>
-        <p className="quiz-result__achievement-score">
-          {t("result.scoreLine.user", {
-            count: result.breakdown.exact,
-            total: result.totalQuestions,
-          })}
-        </p>
-        <p className="quiz-result__achievement-population">
-          {t("result.scoreLine.population", {
-            count: formatGermanDecimal(populationExpectedCount),
-            total: result.totalQuestions,
-          })}
-        </p>
-        <p className="quiz-result__achievement-delta">{deltaSentence}</p>
-      </section>
 
       {/* Module review, worst-first */}
       <div className="quiz-result__retrospective">

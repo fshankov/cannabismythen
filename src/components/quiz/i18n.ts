@@ -317,14 +317,25 @@ const translations: Record<Lang, Record<string, string>> = {
     //      deltaLine.onPar       → "You're right on the average."
     //      row.joinedExact       → "You're among the {pct} % of adults (18–70) who placed this statement exactly right."
     //      row.joinedMissed      → "You're among the {pct} % of adults (18–70) who did NOT place this statement exactly right."
+    // Stage E commit 3 (2026-05-23) — revised tonal headlines.
+    // Du-form, AI draft, awaiting ISD review. The Keystatic
+    // verdict.title in each module .mdoc is an editorial-suggestion
+    // surface (see the `internalNotes` marker on each module);
+    // ISD proposes there, Fedor promotes here.
+    //
+    // English glosses for ISD:
+    //   profi      → "You recognise the myths clearly — scientifically solid."
+    //   guterweg   → "You usually sit closer to the research than the average."
+    //   gehtnoch   → "A few myths are stubborn. The Fakten-Karten help."
+    //   erwischt   → "Cannabis is full of myths. Time for a look in the Fakten-Karten."
     "result.achievementHeadline.profi":
-      "Du kennst die Cannabis-Mythen wirklich.",
+      "Du erkennst die Mythen klar — wissenschaftlich solide.",
     "result.achievementHeadline.guterweg":
-      "Bei den meisten Aussagen liegst du näher dran als die meisten.",
+      "Du liegst meist näher an der Forschung als der Schnitt.",
     "result.achievementHeadline.gehtnoch":
-      "Da ist Luft nach oben — und genau dafür gibt's die Fakten-Karten.",
+      "Ein paar Mythen halten sich hartnäckig. Die Fakten-Karten helfen.",
     "result.achievementHeadline.erwischt":
-      "Cannabis ist voller Mythen. Die Fakten-Karten räumen damit auf.",
+      "Cannabis steckt voller Mythen. Zeit für einen Blick in die Fakten-Karten.",
     "result.scoreLine.user": "Du: {count} von {total} genau richtig",
     "result.scoreLine.population": "Erwachsene (18–70) Ø: {count} von {total}",
     "result.deltaLine.above": "Du liegst {count} {aussage} über dem Schnitt.",

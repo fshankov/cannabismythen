@@ -278,7 +278,8 @@ const mythsMedizin: QuizMyth[] = [
     statementKey: "myth.m13.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m13.explanation",
-    populationCorrectPct: 78.06,
+    // Stage E commit 3 (2026-05-23): 78.06 → 78.32 (carm-data.json alignment).
+    populationCorrectPct: 78.32,
     mythPageSlug: "m13-spastiken",
   },
   {
@@ -302,7 +303,8 @@ const mythsMedizin: QuizMyth[] = [
     statementKey: "myth.m26.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m26.explanation",
-    populationCorrectPct: 30.39,
+    // Stage E commit 3 (2026-05-23): 30.39 → 30.18 (carm-data.json alignment).
+    populationCorrectPct: 30.18,
     mythPageSlug: "m26-depressionen",
   },
   {
@@ -545,7 +547,8 @@ const mythsGesellschaft: QuizMyth[] = [
     statementKey: "myth.m40.statement",
     correctClassification: "falsch",
     explanationKey: "myth.m40.explanation",
-    populationCorrectPct: 36.09,
+    // Stage E commit 3 (2026-05-23): 36.09 → 35.76 (carm-data.json alignment).
+    populationCorrectPct: 35.76,
     mythPageSlug: "m40-ueberall-erlaubt",
   },
 ];
@@ -562,7 +565,9 @@ const mythsGefaehrlichkeit: QuizMyth[] = [
     statementKey: "myth.m04.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m04.explanation",
-    populationCorrectPct: 69.42,
+    // Stage E commit 3 (2026-05-23): 69.42 → 69.66 to match carm-data.json
+    // `metrics[group_id="adults"].correctness`. Validation script PR4 flagged.
+    populationCorrectPct: 69.66,
     mythPageSlug: "m04-weniger-schaedlich-alkohol",
   },
   {
@@ -586,7 +591,8 @@ const mythsGefaehrlichkeit: QuizMyth[] = [
     statementKey: "myth.m09.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m09.explanation",
-    populationCorrectPct: 74.08,
+    // Stage E commit 3 (2026-05-23): 74.08 → 74.30 (carm-data.json alignment).
+    populationCorrectPct: 74.30,
     mythPageSlug: "m09-ueberdosierung",
   },
   {
@@ -594,7 +600,8 @@ const mythsGefaehrlichkeit: QuizMyth[] = [
     statementKey: "myth.m05.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m05.explanation",
-    populationCorrectPct: 76.17,
+    // Stage E commit 3 (2026-05-23): 76.17 → 76.43 (carm-data.json alignment).
+    populationCorrectPct: 76.43,
     mythPageSlug: "m05-schwierig-dosieren",
   },
   {

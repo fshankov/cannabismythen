@@ -2375,55 +2375,9 @@
    left-border accent) but the broader background tint goes away.
    ══════════════════════════════════════════════════════════════════ */
 
-.quiz-result__achievement {
-  margin: var(--space-lg) 0;
-  padding: var(--space-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-
-.quiz-result__achievement--profi {
-  box-shadow: inset 4px 0 0 0 var(--classification-richtig);
-}
-.quiz-result__achievement--guterweg {
-  box-shadow: inset 4px 0 0 0 var(--classification-eher-richtig);
-}
-.quiz-result__achievement--gehtnoch {
-  box-shadow: inset 4px 0 0 0 var(--classification-eher-falsch);
-}
-.quiz-result__achievement--erwischt {
-  box-shadow: inset 4px 0 0 0 var(--classification-falsch);
-}
-
-.quiz-result__achievement-headline {
-  margin: 0 0 var(--space-md);
-  font-size: 1.35rem;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--color-text);
-}
-
-.quiz-result__achievement-score {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--color-text);
-  font-variant-numeric: tabular-nums;
-}
-
-.quiz-result__achievement-population {
-  margin: var(--space-xs) 0 0;
-  font-size: 1.05rem;
-  color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.quiz-result__achievement-delta {
-  margin: var(--space-md) 0 0;
-  font-size: 0.95rem;
-  color: var(--color-text);
-}
+/* Stage E commit 3 (2026-05-23) — the standalone `.quiz-result__achievement*`
+   block was folded into the ShareCard hero. All those rules removed;
+   styling now lives under `.share-card__*` below. */
 
 /* 8 — CTAs */
 .quiz-result__cta {
@@ -2469,56 +2423,11 @@
    / __breakdown rules were removed alongside the medal/% hero. The
    result-screen ShareCard now leads with the Keystatic verdict block. */
 
-.share-card__verdict {
-  margin: var(--space-md) auto 0;
-  padding: var(--space-md) var(--space-lg);
-  /* Stage D PR3 — soft inset on a white card replaces the translucent
-     overlay used on the old green-gradient hero. */
-  background: var(--color-bg-subtle, #eeeee8);
-  border-radius: var(--radius-md);
-  max-width: 44ch;
-  text-align: center;
-}
-
-.share-card__verdict-title {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 700;
-  margin: 0 0 6px;
-  color: var(--color-text);
-}
-
-.share-card__verdict-body {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: var(--color-text);
-  margin: 0;
-}
-
-/* BugHerd #36: "Fakten-Karten" inline link in the verdict body. PR3
-   adjusts the link color to use the brand accent since the surrounding
-   text is now dark on a light card. */
-.share-card__verdict-link {
-  color: var(--color-accent);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-  transition: text-decoration-color 0.15s ease;
-}
-
-.share-card__verdict-link:hover,
-.share-card__verdict-link:focus-visible {
-  text-decoration-thickness: 2px;
-}
-
-.share-card__pop-line {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: var(--color-text-muted);
-  margin: var(--space-md) auto 0;
-  text-align: center;
-  max-width: 44ch;
-}
+/* Stage E commit 3 (2026-05-23) — the legacy `.share-card__verdict*`
+   and `.share-card__pop-line` rules were removed. The consolidated
+   ShareCard hero no longer renders a Keystatic verdict block; it
+   reads the headline from code. New styles are below in the main
+   share-card section. */
 
 /* Stage D PR3 (2026-05-22) — band-tinted gradients dropped. The result
    page now uses a single calm background across all bands; band feeling
@@ -2586,37 +2495,59 @@
   margin-bottom: var(--space-xl);
 }
 
+/* Stage E commit 3 (2026-05-23) — consolidated ShareCard hero. Folds
+   what used to be the Keystatic verdict block + the Stage D
+   achievement card into one block: tonal headline (code-side) → score
+   line → population reference → delta sentence → branding. A small
+   share icon sits absolute-positioned top-right (replaces the
+   previous big "Ergebnis teilen" button below the card). */
 .share-card__visual {
-  /* Stage D PR3 (2026-05-22) — calm white card on the page's cream
-     `--color-bg`. Replaces the Stage A green gradient hero. The
-     achievement card sits just below; both now share the visual
-     language of the rest of the site. */
+  position: relative;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--space-xl) var(--space-lg) var(--space-lg);
   text-align: center;
   margin-bottom: var(--space-md);
   color: var(--color-text);
 }
 
-/* Stage A (2026-05-16) — the medal/emoji circle, big-% hero
-   (.share-card__score / __pct / __percentile / __tier-title) were
-   removed. The result hero is now verdict-led: title + body + user
-   score sentence + population sentence. */
-
-.share-card__user-line {
-  margin: var(--space-md) auto 0;
+.share-card__headline {
+  margin: 0 auto var(--space-md);
   max-width: 44ch;
-  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-text);
+}
+
+.share-card__score {
+  margin: 0 auto;
+  max-width: 44ch;
   font-size: 1.05rem;
   font-weight: 700;
-  line-height: 1.45;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
+.share-card__population {
+  margin: var(--space-xs) auto 0;
+  max-width: 44ch;
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.share-card__delta {
+  margin: var(--space-md) auto 0;
+  max-width: 44ch;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
 .share-card__branding {
+  margin-top: var(--space-lg);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-text-muted);
@@ -2624,31 +2555,54 @@
   text-transform: uppercase;
 }
 
-.share-card__btn {
+/* Small share icon, top-right. Padded so the 18 × 18 SVG sits inside
+   a comfortable touch target. */
+.share-card__share-icon {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
   display: inline-flex;
   align-items: center;
-  gap: var(--space-sm);
-  background: var(--color-text);
-  color: var(--color-surface);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 12px 24px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--color-text-muted);
   cursor: pointer;
   transition:
     background var(--transition-fast),
-    transform var(--transition-fast);
+    color var(--transition-fast);
 }
 
-.share-card__btn:hover {
-  background: #1e293b;
-  transform: translateY(-1px);
+.share-card__share-icon:hover,
+.share-card__share-icon:focus-visible {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-text);
 }
 
-.share-card__btn:focus-visible {
+.share-card__share-icon:focus-visible {
   outline: 3px solid var(--color-accent);
-  outline-offset: 3px;
+  outline-offset: 2px;
+}
+
+/* "Link kopiert" toast — appears briefly after clipboard fallback. */
+.share-card__share-toast {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--space-xs);
+  white-space: nowrap;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 4px 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 
@@ -2964,7 +2918,7 @@
   .quiz-card__buttons,
   .quiz-card__pop-bar-fill,
   .quiz-progress__fill,
-  .share-card__btn,
+  .share-card__share-icon,
   .quiz-modal__backdrop,
   .quiz-modal__panel,
   .quiz-modal__restart-btn,
