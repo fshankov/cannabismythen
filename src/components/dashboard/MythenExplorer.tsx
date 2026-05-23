@@ -751,6 +751,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           factsheetSlug={mythSlugMap?.get(factsheetMyth.id)}
           groupMetrics={factsheetGroupMetrics}
           onClose={closeFactsheet}
+          onSelectRelatedMyth={selectMyth}
         />
       )}
 

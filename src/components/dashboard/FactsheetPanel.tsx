@@ -20,6 +20,11 @@ interface FactsheetPanelProps {
    *  the legacy "Daten nach Zielgruppen" markdown table. */
   groupMetrics?: MythGroupMetrics;
   onClose: () => void;
+  /** Travel pipeline 4B (2026-05-23) — click a related-myth row inside
+   *  the popup's "Verwandte Mythen" section to swap the panel to that
+   *  myth without closing first. Parent's `selectMyth` dispatch does the
+   *  state update. */
+  onSelectRelatedMyth?: (mythNumber: number) => void;
 }
 
 export default function FactsheetPanel({
@@ -28,6 +33,7 @@ export default function FactsheetPanel({
   factsheetSlug,
   groupMetrics,
   onClose,
+  onSelectRelatedMyth,
 }: FactsheetPanelProps) {
   // Canonical verdict label — the conversational `classificationLabel`
   // on the .mdoc is intentionally bypassed (Stage 1 of the
@@ -55,6 +61,7 @@ export default function FactsheetPanel({
       }
       groupMetrics={groupMetrics}
       onClose={onClose}
+      onSelectRelatedMyth={onSelectRelatedMyth}
     />
   );
 }

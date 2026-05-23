@@ -389,6 +389,15 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                   aria-label={`${t('column.show', lang)} — ${col.fullLabel}`}
                   title={`${t('column.show', lang)} — ${col.fullLabel}`}
                 >
+                  {/* Travel pipeline 3D (2026-05-23) — surface the
+                      column name vertically inside the collapsed lane
+                      so users see WHAT is hidden, not just THAT
+                      something is hidden. Uses the short label (no unit
+                      suffix) so "Kenntnis" fits the 28px lane height;
+                      `title` still carries the full label for hover. */}
+                  <span className="carm-spannweite__hidden-label" aria-hidden="true">
+                    {col.label}
+                  </span>
                   <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
                 </button>
               );

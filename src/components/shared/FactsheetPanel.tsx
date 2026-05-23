@@ -22,11 +22,53 @@
 import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
 import FactsheetGroupBars from './FactsheetGroupBars';
 import VerdictStatement from './VerdictStatement';
+import VerdictArrow from './VerdictArrow';
 import VerdictPill from './VerdictPill';
 import type {
   CorrectnessClass,
   MythGroupMetrics,
 } from '../../lib/dashboard/types';
+
+/** Travel pipeline 4C (2026-05-23) — full audience label, used as the
+ *  tooltip on the short-code chip beside each FAQ-backlink row. */
+const FAQ_AUDIENCE_LABEL: Record<string, string> = {
+  eltern: 'Eltern',
+  jugendliche: 'Jugendliche',
+  konsumierende: 'Konsumierende',
+  lehrkraefte: 'Lehrkräfte',
+  fachkraefte: 'Fachkräfte',
+};
+
+/** Short chip label (2 chars) so backlink rows stay compact even on
+ *  narrow mobile popups. Falls back to the audience id on lookup miss. */
+const FAQ_AUDIENCE_LABEL_SHORT: Record<string, string> = {
+  eltern: 'El',
+  jugendliche: 'Ju',
+  konsumierende: 'Ko',
+  lehrkraefte: 'Le',
+  fachkraefte: 'Fa',
+};
+
+/** Reference to a related myth — surfaced inside the popup as a click
+ *  target that swaps the panel to the related myth. Pre-resolved at
+ *  build-time so the popup never round-trips for title/verdict lookups.
+ *  Travel pipeline 4B (2026-05-23). */
+export interface RelatedMythRef {
+  mythId: string;          // e.g. "m04"
+  mythNumber: number;      // e.g. 4
+  title: string;           // canonical short title, "Mythos N:" prefix stripped
+  classification: string;  // "richtig" | "eher_richtig" | …
+}
+
+/** Backlink from a FAQ question inside Meine Interessen → this myth.
+ *  Pre-resolved at build-time via `getQuestionsForMyth` in `src/lib/faq.ts`.
+ *  Travel pipeline 4C (2026-05-23). */
+export interface FaqBacklink {
+  slug: string;
+  title: string;     // questionLong (or title fallback)
+  audience: string;  // 'eltern' | 'jugendliche' | 'konsumierende' | …
+  href: string;      // /meine-interessen/{audience}/#frage-{slug}
+}
 
 /** Pre-rendered factsheet content from Keystatic (passed from Astro at build time). */
 export interface MythContentEntry {
@@ -35,6 +77,13 @@ export interface MythContentEntry {
   classification: string;
   classificationLabel: string;
   refCount: number;
+  /** Resolved references to related myths declared via `relatedMyths` on
+   *  the .mdoc. Travel pipeline 4B. Optional so legacy build outputs
+   *  without the field still render. */
+  relatedMyths?: RelatedMythRef[];
+  /** FAQ questions that cite this myth via `primaryMyth` or
+   *  `relatedMyths`. Travel pipeline 4C. Optional for same reason. */
+  faqBacklinks?: FaqBacklink[];
 }
 
 interface Section {
@@ -101,6 +150,13 @@ interface FactsheetPanelProps {
    *  is being replaced by a popup-first pattern). Dashboard +
    *  fakten-karten callsites leave this undefined; nothing renders. */
   userAnswer?: CorrectnessClass | null;
+
+  /** Travel pipeline 4B (2026-05-23): clicking a related myth inside
+   *  the "Verwandte Mythen" collapsed section calls this callback so the
+   *  parent surface (dashboard / fakten-karten / quiz) can swap the
+   *  panel to the new myth. When undefined, related-myth chips render
+   *  as plain text (no click affordance). */
+  onSelectRelatedMyth?: (mythNumber: number) => void;
 }
 
 /**
@@ -164,6 +220,7 @@ export default function FactsheetPanel({
   fallbackExplanation,
   groupMetrics,
   userAnswer,
+  onSelectRelatedMyth,
   // v3 (2026-05-13): verdict is now carried by the colored statement +
   // trailing arrow inside <VerdictStatement>. These three props from the
   // legacy "separate verdict block" pattern are kept in the type so the
@@ -361,6 +418,90 @@ export default function FactsheetPanel({
                   metrics={groupMetrics!}
                   verdict={classificationKey as CorrectnessClass}
                 />
+              )}
+
+              {/* Travel pipeline 4B + 4C (2026-05-23): collapsed
+                  Related Myths + FAQ-backlinks blocks at popup bottom.
+                  Both <details> closed by default — match the existing
+                  Zentrale Erkenntnisse / Referenzen collapsed pattern.
+                  Data pre-resolved at build-time via buildMythContentMap
+                  in src/lib/myth-content.ts. Sections only render when
+                  the entry has non-empty arrays. */}
+              {mythContentEntry.relatedMyths && mythContentEntry.relatedMyths.length > 0 && (
+                <details className="factsheet-panel__section factsheet-panel__section--collapsible factsheet-panel__extras factsheet-panel__related">
+                  <summary className="factsheet-panel__section-toggle">
+                    <span className="factsheet-panel__section-title">
+                      Verwandte Mythen
+                    </span>
+                    <span className="factsheet-panel__chevron" aria-hidden="true">
+                      &#9662;
+                    </span>
+                  </summary>
+                  <ul className="factsheet-panel__extras-list">
+                    {mythContentEntry.relatedMyths.map((r) => {
+                      const inner = (
+                        <>
+                          <VerdictArrow
+                            verdict={r.classification as CorrectnessClass}
+                            size={14}
+                            strokeWidth={2}
+                          />
+                          <span className="factsheet-panel__extras-label">
+                            {r.title}
+                          </span>
+                        </>
+                      );
+                      return (
+                        <li key={r.mythId} className="factsheet-panel__extras-item">
+                          {onSelectRelatedMyth ? (
+                            <button
+                              type="button"
+                              className="factsheet-panel__extras-link"
+                              onClick={() => onSelectRelatedMyth(r.mythNumber)}
+                            >
+                              {inner}
+                            </button>
+                          ) : (
+                            <span className="factsheet-panel__extras-link factsheet-panel__extras-link--static">
+                              {inner}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </details>
+              )}
+
+              {mythContentEntry.faqBacklinks && mythContentEntry.faqBacklinks.length > 0 && (
+                <details className="factsheet-panel__section factsheet-panel__section--collapsible factsheet-panel__extras factsheet-panel__backlinks">
+                  <summary className="factsheet-panel__section-toggle">
+                    <span className="factsheet-panel__section-title">
+                      In Meine Interessen referenziert
+                    </span>
+                    <span className="factsheet-panel__chevron" aria-hidden="true">
+                      &#9662;
+                    </span>
+                  </summary>
+                  <ul className="factsheet-panel__extras-list">
+                    {mythContentEntry.faqBacklinks.map((b) => (
+                      <li key={`${b.audience}-${b.slug}`} className="factsheet-panel__extras-item">
+                        <a href={b.href} className="factsheet-panel__extras-link">
+                          <span
+                            className={`factsheet-panel__extras-audience factsheet-panel__extras-audience--${b.audience}`}
+                            aria-hidden="true"
+                            title={FAQ_AUDIENCE_LABEL[b.audience] ?? b.audience}
+                          >
+                            {FAQ_AUDIENCE_LABEL_SHORT[b.audience] ?? b.audience}
+                          </span>
+                          <span className="factsheet-panel__extras-label">
+                            {b.title}
+                          </span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               )}
 
             </>

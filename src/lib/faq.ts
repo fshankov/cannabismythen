@@ -302,6 +302,26 @@ export interface FaqMythContentEntry {
   classification: string;
   classificationLabel: string;
   refCount: number;
+  /** Resolved related-myth refs (travel pipeline 4B, 2026-05-23). Mirrors
+   *  the same field on `MythContentEntry` in FactsheetPanel.tsx so a single
+   *  popup component handles both popup contexts. */
+  relatedMyths?: RelatedMythRef[];
+  /** FAQ-backlink refs (travel pipeline 4C, 2026-05-23). Same mirror. */
+  faqBacklinks?: FaqBacklink[];
+}
+
+export interface RelatedMythRef {
+  mythId: string;
+  mythNumber: number;
+  title: string;
+  classification: string;
+}
+
+export interface FaqBacklink {
+  slug: string;
+  title: string;
+  audience: string;
+  href: string;
 }
 
 /** Compact metadata for one myth, populates the popup header. */
@@ -356,17 +376,27 @@ export async function loadMythPopupData(): Promise<FaqMythPopupData> {
   const mythContentMap: Record<number, FaqMythContentEntry> = {};
   const titleById = new Map<string, string>();
 
+  type EntryShape = {
+    mythId?: string | null;
+    mythNumber?: number | null;
+    title?: string | null;
+    classification?: string | null;
+    classificationLabel?: string | null;
+    relatedMyths?: readonly string[] | null;
+    content?: () => Promise<{ node: unknown }>;
+  };
+
+  // Two-pass build (travel pipeline 4B/4C, 2026-05-23). Pass 1 reads every
+  // entry into a cached list and populates the mythIndex / titleById
+  // lookup; pass 2 renders content and resolves relatedMyths against the
+  // now-complete mythIndex. A single-pass version would silently drop a
+  // related-myth ref whenever the iteration order put the related myth
+  // after its referencer (filesystem order is not guaranteed).
+  const cached: { slug: string; e: EntryShape; mythNumber: number; cleanTitle: string }[] = [];
   for (const slug of slugs) {
     const entry = await reader.collections.zahlenUndFakten.read(slug);
     if (!entry || entry.status !== "published") continue;
-    const e = entry as {
-      mythId?: string | null;
-      mythNumber?: number | null;
-      title?: string | null;
-      classification?: string | null;
-      classificationLabel?: string | null;
-      content?: () => Promise<{ node: unknown }>;
-    };
+    const e = entry as EntryShape;
     const mythNumber =
       typeof e.mythNumber === "number"
         ? e.mythNumber
@@ -394,26 +424,53 @@ export async function loadMythPopupData(): Promise<FaqMythPopupData> {
     titleById.set(id, cleanTitle);
     if (mythNumber < 10) titleById.set(`m0${mythNumber}`, cleanTitle);
 
-    if (e.content) {
-      try {
-        const { node } = await e.content();
-        const html = Markdoc.renderers.html(
-          // The factsheet body uses default Markdoc nodes only; no custom
-          // tags here, so an empty config works.
-          Markdoc.transform(node as never),
-        );
-        const refMatch = html.match(/<li>/g);
-        mythContentMap[mythNumber] = {
-          html,
-          title: cleanTitle,
-          classification: e.classification ?? "",
-          classificationLabel: e.classificationLabel ?? "",
-          refCount: refMatch ? refMatch.length : 0,
-        };
-      } catch {
-        // If a factsheet fails to render, skip its popup body — the link
-        // still works, just without pre-rendered content.
+    cached.push({ slug, e, mythNumber, cleanTitle });
+  }
+
+  for (const { e, mythNumber, cleanTitle } of cached) {
+    if (!e.content) continue;
+    try {
+      const { node } = await e.content();
+      const html = Markdoc.renderers.html(
+        // The factsheet body uses default Markdoc nodes only; no custom
+        // tags here, so an empty config works.
+        Markdoc.transform(node as never),
+      );
+      const refMatch = html.match(/<li>/g);
+
+      const rawRelated = (e.relatedMyths ?? []) as readonly string[];
+      const relatedMyths: RelatedMythRef[] = [];
+      for (const rid of rawRelated) {
+        const indexEntry = mythIndex[rid] ?? mythIndex[normalizeMythId(rid)];
+        if (!indexEntry) continue;
+        relatedMyths.push({
+          mythId: rid,
+          mythNumber: indexEntry.mythNumber,
+          title: indexEntry.title,
+          classification: indexEntry.classification,
+        });
       }
+
+      const backlinkQs = e.mythId ? await getQuestionsForMyth(e.mythId) : [];
+      const faqBacklinks: FaqBacklink[] = backlinkQs.map((q) => ({
+        slug: q.slug,
+        title: q.questionLong || q.title,
+        audience: q.audience,
+        href: `/meine-interessen/${q.audience}/#frage-${q.slug}`,
+      }));
+
+      mythContentMap[mythNumber] = {
+        html,
+        title: cleanTitle,
+        classification: e.classification ?? "",
+        classificationLabel: e.classificationLabel ?? "",
+        refCount: refMatch ? refMatch.length : 0,
+        relatedMyths,
+        faqBacklinks,
+      };
+    } catch {
+      // If a factsheet fails to render, skip its popup body — the link
+      // still works, just without pre-rendered content.
     }
   }
 

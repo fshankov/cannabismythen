@@ -1,13 +1,14 @@
 ---
 export const prerender = true;
 
-import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 import QuizPlayer from "@components/quiz/QuizPlayer";
 import { QUIZ_THEMES } from "@components/quiz/quizData";
 import type { MythGroupMetrics } from "@lib/dashboard/types";
+import type { MythContentEntry } from "@components/shared/FactsheetPanel";
 import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
+import { buildMythContentMapByMythId } from "@lib/myth-content";
 // Direct JSON import — see fakten-karten/index.astro for the rationale.
 // `readFile(new URL(..., import.meta.url))` resolves wrong after Vite
 // bundles this page into Netlify's prerender chunk.
@@ -92,9 +93,15 @@ const sharePayload = {
     (moduleOverrides.erwischt || defaultShareCopy?.erwischt || "").trim(),
 };
 
-// Pre-render myth page content for the factsheet panel
+// Pre-render myth page content for the factsheet panel. Travel pipeline
+// 4B/4C (2026-05-23) — the popup data shape is now built once in
+// `buildMythContentMapByMythId` (includes relatedMyths + faqBacklinks),
+// then this loop just narrows to the theme's myths and stays in charge
+// of the quiz-only sibling maps (quizGroupMetricsMap, quizTextMap
+// overlay, quizFaktenContentMap).
 const theme = QUIZ_THEMES[slug!];
-const mythContentMap: Record<string, { html: string; title: string; classification: string; classificationLabel: string; refCount: number }> = {};
+const allMythContent = await buildMythContentMapByMythId();
+const mythContentMap: Record<string, MythContentEntry> = {};
 // Per-quiz-myth-id metrics map. The quiz uses string IDs ("m01"), so we
 // re-key the numeric carm-data map into the same shape QuizPlayer's
 // content map already uses.
@@ -124,31 +131,24 @@ if (theme) {
   for (const myth of theme.myths) {
     try {
       const mythEntry = await reader.collections.zahlenUndFakten.read(myth.mythPageSlug);
-      if (mythEntry && mythEntry.content) {
-        const { node } = await mythEntry.content();
-        const fullHtml = Markdoc.renderers.html(Markdoc.transform(node));
-
-        // Count references (lines starting with a number followed by a period in the Referenzen section)
-        const refMatch = fullHtml.match(/<li>/g);
-        const refCount = refMatch ? refMatch.length : 0;
-
+      if (mythEntry) {
         // Strip "Mythos N:" / "Mythos N/M:" prefix AND trailing terminal
         // punctuation (.!?) so the popup heading reads as a clean
-        // statement. Mirrors the Fakten-Karten + Daten-Explorer fix —
-        // the myth-number is editorial metadata, not part of the
-        // user-facing statement.
+        // statement. Kept inline for the quiz-only `quizFaktenContentMap`
+        // below that needs the cleaned title alongside other myth fields.
         const rawMythTitle = mythEntry.title as string;
         const cleanMythTitle = rawMythTitle
           .replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "")
           .replace(/[.!?]+$/u, "");
 
-        mythContentMap[myth.id] = {
-          html: fullHtml,
-          title: cleanMythTitle,
-          classification: mythEntry.classification as string,
-          classificationLabel: mythEntry.classificationLabel as string,
-          refCount,
-        };
+        // Popup content (html + title + classification + related/backlinks)
+        // comes from the pre-built map. Falling back to a minimal inline
+        // entry is unnecessary — buildMythContentMapByMythId covers every
+        // published myth, so a miss means the .mdoc is unpublished or
+        // mythId is missing, in which case the popup couldn't open anyway.
+        if (allMythContent[myth.id]) {
+          mythContentMap[myth.id] = allMythContent[myth.id];
+        }
 
         // Overlay the ISD-finalised cardShortSummary onto the reveal
         // card's explanation. Quiz mdoc's `explanation` stays as the

@@ -490,6 +490,15 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                     aria-label={`${t('column.show', lang)} — ${col.fullLabel}`}
                     title={`${t('column.show', lang)} — ${col.fullLabel}`}
                   >
+                    {/* Travel pipeline 3D (2026-05-23) — same vertical
+                        column-name affordance as SpannweiteView so the
+                        collapsed lane reads as "X is hidden, click to
+                        show" rather than just a mystery arrow. Short
+                        label (no unit) fits the 28px lane; `title`
+                        carries the full label. */}
+                    <span className="carm-spannweite__hidden-label" aria-hidden="true">
+                      {col.label}
+                    </span>
                     <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
                   </button>
                 );

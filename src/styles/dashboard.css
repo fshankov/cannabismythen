@@ -6099,6 +6099,247 @@ body.carm-modal-open {
   }
 }
 
+/* ─── FactsheetGroupBars matrix (travel pipeline 4D, 2026-05-23) ──────
+   The 5 × 5 indicator × population matrix that replaced the single-
+   indicator 5-bar stack. Each cell shows a rounded integer plus a thin
+   verdict-tinted mini-bar so the eye scans both magnitude and relative
+   comparisons across rows AND columns at once. */
+
+.factsheet-group-bars__matrix-wrap {
+  margin-top: 8px;
+  /* Horizontal overflow guard for the narrowest mobile widths. The
+     matrix shrinks before scrolling, but anything below ~320 px will
+     scroll horizontally rather than break the layout. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.factsheet-group-bars__matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  font-size: 0.78rem;
+  color: var(--color-text, #0f172a);
+}
+
+.factsheet-group-bars__matrix th,
+.factsheet-group-bars__matrix td {
+  padding: 6px 4px;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.factsheet-group-bars__matrix tbody tr:last-child th,
+.factsheet-group-bars__matrix tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.factsheet-group-bars__corner {
+  width: 32%;
+  background: transparent;
+}
+
+.factsheet-group-bars__col-header {
+  font-weight: 600;
+  color: var(--color-text-secondary, #475569);
+  line-height: 1.1;
+}
+
+.factsheet-group-bars__col-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+  color: var(--color-text, #0f172a);
+}
+
+.factsheet-group-bars__col-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.factsheet-group-bars__row-header {
+  font-weight: 600;
+  font-size: 0.74rem;
+  text-align: left;
+  padding-left: 2px;
+  padding-right: 8px;
+  color: var(--color-text, #0f172a);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* Cells render via grid-on-row; align icon + label as inline flex. */
+}
+
+.factsheet-group-bars__row-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary, #475569);
+  flex-shrink: 0;
+}
+
+.factsheet-group-bars__row-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.factsheet-group-bars__cell {
+  font-variant-numeric: tabular-nums;
+  position: relative;
+}
+
+.factsheet-group-bars__cell-value {
+  display: block;
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.1;
+}
+
+.factsheet-group-bars__cell-bar {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 4px;
+  margin-top: 3px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.factsheet-group-bars__cell-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.factsheet-group-bars__cell--na .factsheet-group-bars__cell-na {
+  color: var(--color-text-muted, #64748b);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 0.74rem;
+  cursor: help;
+}
+
+@media (max-width: 480px) {
+  .factsheet-group-bars__matrix {
+    font-size: 0.74rem;
+  }
+  .factsheet-group-bars__matrix th,
+  .factsheet-group-bars__matrix td {
+    padding: 5px 2px;
+  }
+  .factsheet-group-bars__col-label {
+    font-size: 0.62rem;
+  }
+  .factsheet-group-bars__row-header {
+    font-size: 0.68rem;
+    gap: 4px;
+  }
+  .factsheet-group-bars__cell-value {
+    font-size: 0.78rem;
+  }
+  .factsheet-group-bars__corner {
+    width: 28%;
+  }
+}
+
+/* ─── Popup extras: Related Myths + FAQ backlinks (travel pipeline 4B/4C, 2026-05-23) ──────
+   Two collapsed <details> blocks rendered at the bottom of the popup.
+   Both closed by default; clicking the summary expands. List rows reuse
+   the verdict-arrow glyph (Related Myths) or a small audience-code chip
+   (FAQ backlinks) so the eye can scan the section without reading each
+   row. */
+
+.factsheet-panel__extras {
+  margin-top: 10px;
+}
+
+.factsheet-panel__extras-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.factsheet-panel__extras-item {
+  margin: 0;
+}
+
+.factsheet-panel__extras-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  text-align: left;
+  color: var(--color-text, #0f172a);
+  text-decoration: none;
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.factsheet-panel__extras-link:hover,
+.factsheet-panel__extras-link:focus-visible {
+  background: var(--color-surface-soft, rgba(15, 23, 42, 0.04));
+  border-color: var(--color-border, #e2e8f0);
+  outline: none;
+}
+
+.factsheet-panel__extras-link--static {
+  cursor: default;
+}
+
+.factsheet-panel__extras-link--static:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+.factsheet-panel__extras-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.factsheet-panel__extras-audience {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary, #475569);
+  background: var(--color-surface-soft, rgba(15, 23, 42, 0.06));
+  cursor: help;
+}
+
+.factsheet-panel__extras-audience--eltern { color: var(--audience-eltern, #b91c1c); }
+.factsheet-panel__extras-audience--jugendliche { color: var(--audience-jugendliche, #1d4ed8); }
+.factsheet-panel__extras-audience--konsumierende { color: var(--audience-konsumierende, #047857); }
+.factsheet-panel__extras-audience--lehrkraefte { color: var(--audience-lehrkraefte, #b45309); }
+.factsheet-panel__extras-audience--fachkraefte { color: var(--audience-fachkraefte, #6d28d9); }
+
 /* ─── Spannweite v3 — single-picked-value grid with bar accent ──────
    Rows = myths, columns = 5 Indikatoren or 5 Bevölkerungsgruppen.
    Each cell renders a faint verdict-tinted bar from 0 → value,
@@ -6440,29 +6681,70 @@ body.carm-modal-open {
    out of the narrow 28-px lane. Title attribute carries the full
    column name for hover discovery. */
 .carm-spannweite__cell--hidden {
-  padding: 0;
+  padding: 4px 0;
   border: 1px solid var(--color-border, #cbd5e1);
   background: #f8fafc;
   color: var(--color-text-muted, #64748b);
   cursor: pointer;
+  /* The vertical label fills the whole header lane — the chevron
+     affordance is supplied by the cursor + hover-tint + title tooltip,
+     not a separate glyph, so every pixel of vertical space goes to
+     the column name. */
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   overflow: hidden;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
-.carm-spannweite__cell--hidden:hover {
+.carm-spannweite__cell--hidden:hover,
+.carm-spannweite__cell--hidden:focus-visible {
   background: var(--color-surface, #ffffff);
+  color: var(--color-text, #0f172a);
+  border-color: var(--color-text-secondary, #64748b);
+  outline: none;
+}
+
+/* Travel pipeline 3D (2026-05-23) — vertical column-name label inside
+   the collapsed lane. `writing-mode: vertical-rl` + 180deg rotation
+   yields a label readable bottom-to-top (the canonical print convention
+   for vertical text). Truncated with ellipsis if the column header
+   row is too short for the full name; `title` on the parent button
+   surfaces the full label on hover. */
+.carm-spannweite__hidden-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: var(--color-text-secondary, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-block-size: 100%;
+  transition: color 160ms ease;
+}
+
+.carm-spannweite__cell--hidden:hover .carm-spannweite__hidden-label,
+.carm-spannweite__cell--hidden:focus-visible .carm-spannweite__hidden-label {
   color: var(--color-text, #0f172a);
 }
 
+/* Chevron retained as a fallback affordance for screen readers / users
+   who hide CSS — the label is the canonical click-target now. Visually
+   hidden so the vertical name owns the full lane height. */
 .carm-spannweite__hidden-chev {
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-  color: inherit;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Hidden body cell: subtle striped column behind the body rows. */
