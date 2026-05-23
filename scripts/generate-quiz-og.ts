@@ -41,15 +41,21 @@ const COLORS = {
 const WIDTH = 1200;
 const HEIGHT = 630;
 
-// ── Module emoji + title fallback (matches index.astro) ────────────
-const MODULE_EMOJI: Record<string, string> = {
-  "quiz-medizinischer-nutzen": "💊",
-  "quiz-risiken-koerper-psyche": "⚠️",
-  "quiz-stimmung-wahrnehmung": "🧠",
-  "quiz-soziales-bevoelkerung": "🏛️",
-  "quiz-gefaehrlichkeit": "⚖️",
-  "quiz-schnellcheck": "🎲",
-};
+// ── Module emoji (parked) ───────────────────────────────────────────
+// Original design placed a module emoji in the OG card's top-right.
+// Inter has no emoji glyphs, so Satori renders "NO GLYPH" tofu unless
+// a colour-emoji font (e.g. Noto Color Emoji ~3 MB) is loaded
+// alongside Inter. Parked until someone wires that up; restore the
+// emoji <div> in the JSX above and re-enable this map at the same time.
+//
+// const MODULE_EMOJI: Record<string, string> = {
+//   "quiz-medizinischer-nutzen": "💊",
+//   "quiz-risiken-koerper-psyche": "⚠️",
+//   "quiz-stimmung-wahrnehmung": "🧠",
+//   "quiz-soziales-bevoelkerung": "🏛️",
+//   "quiz-gefaehrlichkeit": "⚖️",
+//   "quiz-schnellcheck": "🎲",
+// };
 
 interface ModuleEntry {
   slug: string;
@@ -59,19 +65,20 @@ interface ModuleEntry {
 }
 
 async function loadInterFont(): Promise<ArrayBuffer | null> {
-  // @fontsource-variable/inter ships .woff2 + a copy of the variable
-  // font in subset folders. We need a static .ttf or .woff for Satori
-  // to embed; fall back to a CDN-fetched .ttf if the package's woff2
-  // doesn't load. Wrap in try/catch so a missing font doesn't kill
-  // the whole build — see FALLBACK note at top of file.
+  // Satori only parses .ttf / .otf / .woff — never .woff2. We load Inter
+  // from @fontsource/inter which ships static .woff at each weight. The
+  // CDN fallback fetches the same .woff from rsms.me when the local
+  // package is missing. Both paths are .woff (NOT .woff2) — past
+  // breakage came from feeding the variable-font .woff2 to Satori,
+  // which fails with "Unsupported OpenType signature wOF2".
   try {
     const fontPath = path.join(
       REPO_ROOT,
       "node_modules",
-      "@fontsource-variable",
+      "@fontsource",
       "inter",
       "files",
-      "inter-latin-wght-normal.woff2"
+      "inter-latin-700-normal.woff"
     );
     const data = await fs.readFile(fontPath);
     return data.buffer.slice(
@@ -80,12 +87,12 @@ async function loadInterFont(): Promise<ArrayBuffer | null> {
     );
   } catch (err) {
     console.warn(
-      "[generate-quiz-og] Could not load @fontsource-variable/inter; fetching from rsms.me as fallback.",
+      "[generate-quiz-og] Could not load @fontsource/inter; fetching from rsms.me as fallback.",
       err
     );
     try {
       const res = await fetch(
-        "https://rsms.me/inter/font-files/Inter-Bold.woff2"
+        "https://rsms.me/inter/font-files/Inter-Bold.woff"
       );
       if (!res.ok) throw new Error(`Inter CDN ${res.status}`);
       return await res.arrayBuffer();
@@ -115,30 +122,24 @@ function moduleSvgTree(entry: ModuleEntry, fontFamily: string) {
         fontFamily,
       },
       children: [
-        // Top row: emoji + brand
+        // Top row: brand label. The original design included a module
+        // emoji on the right (see MODULE_EMOJI below). Satori needs a
+        // colour-emoji font to render those glyphs and Inter alone
+        // produces a "NO GLYPH" tofu, so the emoji is dropped for now.
+        // Re-enable by loading e.g. Noto Color Emoji alongside Inter.
         {
           type: "div",
           props: {
             style: {
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
               fontSize: "28px",
               color: COLORS.textMuted,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               fontWeight: 700,
             },
-            children: [
-              { type: "div", props: { children: "Quiz" } },
-              {
-                type: "div",
-                props: {
-                  style: { fontSize: "80px" },
-                  children: MODULE_EMOJI[entry.slug] ?? "📋",
-                },
-              },
-            ],
+            children: "Quiz",
           },
         },
         // Center: title + subtitle

@@ -5,6 +5,11 @@ node_modules/
 dist/
 .netlify/
 
+# Generated OG share cards. `npm run og:generate` (also runs as prebuild)
+# writes these on every build/deploy; Netlify regenerates them server-side
+# so they should never be committed.
+public/og/
+
 # Astro
 .astro/
 
