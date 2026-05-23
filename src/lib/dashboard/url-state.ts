@@ -20,7 +20,7 @@ import type {
 
 const ALL_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 const ALL_INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
-const ALL_VIEWS: ViewTab[] = ['balken', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'spannweite', 'sources', 'sources2'];
+const ALL_VIEWS: ViewTab[] = ['balken', 'table', 'bar', 'scatter', 'lollipop', 'overview', 'circular', 'ladder', 'strips', 'spannweite', 'sources', 'sources2', 'sources_table'];
 const ALL_VERDICTS: CorrectnessClass[] = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
 const ALL_SOURCE_METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
 const ALL_SOURCE_GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
@@ -49,6 +49,7 @@ const VIEW_DE: Partial<Record<ViewTab, string>> = {
   table: 'tabelle',
   sources: 'quellen',
   sources2: 'quellen2',
+  sources_table: 'quellen-tabelle',
 };
 const VIEW_FROM_DE: Record<string, ViewTab> = Object.fromEntries(
   Object.entries(VIEW_DE).map(([k, v]) => [v as string, k as ViewTab]),

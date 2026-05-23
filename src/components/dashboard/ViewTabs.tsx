@@ -2,11 +2,13 @@ import { MapPin } from 'lucide-react';
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 
-// Public tab order — Balken / Spannweite / Tabelle ╎ Informationsquellen.
+// Public tab order — Balken / Spannweite / Tabelle ╎ Informationsquellen /
+// Informationsquellen 2 / Quellen-Tabelle.
 // (`balken2` was retired 2026-05-21; `strips`/Punktwolke retired 2026-05-23
-// as part of the travel-pipeline dashboard reorg — url-state.ts redirects
-// legacy `?view=strips` and `?view=balken2` URLs to balken.)
-const TABS: ViewTab[] = ['balken', 'spannweite', 'table', 'sources', 'sources2'];
+// in travel-pipeline Stage 3A — url-state.ts redirects legacy `?view=strips`
+// and `?view=balken2` URLs to balken. `sources_table` added 2026-05-23 in
+// Stage 3C — a Tabelle for source data mirroring the LEFT myth Tabelle.)
+const TABS: ViewTab[] = ['balken', 'spannweite', 'table', 'sources', 'sources2', 'sources_table'];
 
 const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
   balken: 'view.balken',
@@ -14,6 +16,7 @@ const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
   table: 'view.tabelle',
   sources: 'view.quellen',
   sources2: 'view.quellen2',
+  sources_table: 'view.quellen-tabelle',
   // Retired views — never shown in the tab bar; keys present so the type
   // remains exhaustive and url-state redirects don't crash on lookup.
   strips: null,

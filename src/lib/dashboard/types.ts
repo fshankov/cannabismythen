@@ -81,7 +81,7 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'balken' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'spannweite' | 'sources' | 'sources2';
+export type ViewTab = 'balken' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'spannweite' | 'sources' | 'sources2' | 'sources_table';
 
 /** Spannweite view sort key (post-2026-05-22 verdict-rank revival).
  *  - 'a-z' — alphabetical by short text. Lives in the MYTHEN column

@@ -242,6 +242,7 @@ const translations = {
   'view.tabelle': { de: 'Tabelle', en: 'Table' },
   'view.quellen': { de: 'Informationsquellen', en: 'Information Sources' },
   'view.quellen2': { de: 'Informationsquellen 2', en: 'Information Sources 2' },
+  'view.quellen-tabelle': { de: 'Quellen-Tabelle', en: 'Sources Table' },
   'igs.indicator.legend': { de: 'Indikator', en: 'Indicator' },
   'igs.group.legend': { de: 'Bevölkerungsgruppe', en: 'Population group' },
   'igs.group.adults': { de: 'Volljährige (18–70)', en: 'Adults (18–70)' },

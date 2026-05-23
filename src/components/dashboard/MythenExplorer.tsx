@@ -39,6 +39,7 @@ import SpannweiteView, { type SpannweiteViewHandle } from './views/SpannweiteVie
 import SourcesStripsView, { type SourcesStripsViewHandle } from './views/SourcesStripsView';
 import SourcesBalkenView, { type SourcesBalkenViewHandle } from './views/SourcesBalkenView';
 import SourcesSpannweiteView, { type SourcesSpannweiteViewHandle } from './views/SourcesSpannweiteView';
+import SourcesTableView, { type SourcesTableViewHandle } from './views/SourcesTableView';
 import BalkenView, { type BalkenViewHandle } from './views/BalkenView';
 import type { ChartHandle } from '../../lib/dashboard/export';
 import FilterDrawer from './controls/FilterDrawer';
@@ -130,6 +131,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   const sourcesRef = useRef<SourcesStripsViewHandle>(null);
   const sourcesBalkenRef = useRef<SourcesBalkenViewHandle>(null);
   const sources2Ref = useRef<SourcesSpannweiteViewHandle>(null);
+  const sourcesTableRef = useRef<SourcesTableViewHandle>(null);
 
   /**
    * `getActiveChart()` — the canonical lookup the ExportDrawer uses to
@@ -589,6 +591,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
          *  use it — they pick up the unified Filter drawer instead. */}
         {state.view !== 'sources' &&
           state.view !== 'sources2' &&
+          state.view !== 'sources_table' &&
           state.view !== 'strips' &&
           state.view !== 'spannweite' &&
           !isModernView && (
@@ -605,7 +608,10 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             there too. Vollbild was dropped (browser-native F11 covers
             the same use case for the rare power user). */}
 
-        {state.view !== 'strips' && state.view !== 'sources' && state.view !== 'sources2' && (
+        {state.view !== 'strips' &&
+          state.view !== 'sources' &&
+          state.view !== 'sources2' &&
+          state.view !== 'sources_table' && (
           <p className="howto-microcopy">{t(`howto.${state.view}` as never, 'de')}</p>
         )}
         {state.view === 'sources2' && (
@@ -627,6 +633,14 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             ) : state.view === 'sources2' ? (
               <SourcesSpannweiteView
                 ref={sources2Ref}
+                state={state}
+                update={update}
+                definitions={defs}
+                sharedActions={exportOnlyAction}
+              />
+            ) : state.view === 'sources_table' ? (
+              <SourcesTableView
+                ref={sourcesTableRef}
                 state={state}
                 update={update}
                 definitions={defs}
