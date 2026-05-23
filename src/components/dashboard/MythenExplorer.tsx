@@ -3,9 +3,10 @@ import type { ReactNode } from 'react';
 import {
   Download, Filter,
   Eye, TrendingUp, Target, Shield, Globe,
-  Users, Baby, Cannabis, GraduationCap, UsersRound,
+  Baby, Cannabis, GraduationCap, UsersRound,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { IconVolljaehrige } from '../../lib/icons/audiences';
 import type {
   CarmData,
   AppState,
@@ -78,7 +79,10 @@ const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
 };
 
 const GROUP_ICONS: Record<GroupId, LucideIcon> = {
-  adults: Users,
+  // Custom 3-figure icon (one front + two lowered back figures) replaces
+  // the single Lucide Users glyph — Erwachsene/Volljährige reads as a
+  // population group, not a lone person. SVG source in audiences.tsx.
+  adults: IconVolljaehrige as unknown as LucideIcon,
   minors: Baby,
   consumers: Cannabis,
   young_adults: GraduationCap,

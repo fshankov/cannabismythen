@@ -44,11 +44,13 @@ const BasePerson = () => (
 );
 
 /* ------------------------------------------------------------------ */
-/* Volljährige — custom group of 3 (locked v5).
+/* Volljährige — custom group of 3 (v6, 2026-05-23).
  * Main figure (base proportions) + back-left and back-right figures
- * with smaller heads at cy=9.2 r=2.2 and diagonal shoulder strokes
- * ending at each back head's bottom. Back partial bodies sit outside
- * the main body U so there's no stroke conflict.
+ * lowered ~2 units vs v5 so the main figure reads as more dominant
+ * and the back pair feels visually receded. Heads now at cy=11.2 r=2.2
+ * (was cy=9.2), shoulder anchor at y=22 (was y=20). Bottom of back
+ * figures aligns with the main body baseline so the group sits on
+ * a single visual ground.
  */
 /* ------------------------------------------------------------------ */
 export const IconVolljaehrige = forwardRef<SVGSVGElement, IconProps>(
@@ -57,10 +59,10 @@ export const IconVolljaehrige = forwardRef<SVGSVGElement, IconProps>(
       <circle cx="12" cy="7" r="3" />
       <path d="M7 21v-4.3c0-2.8 2-4.7 5-4.7s5 1.9 5 4.7V21" />
       <path d="M7.7 21h8.6" />
-      <circle cx="5.8" cy="9.2" r="2.2" />
-      <path d="M2.4 20v-2.4c0-2 1.3-3.4 3.4-3.4" />
-      <circle cx="18.2" cy="9.2" r="2.2" />
-      <path d="M21.6 20v-2.4c0-2-1.3-3.4-3.4-3.4" />
+      <circle cx="5.8" cy="11.2" r="2.2" />
+      <path d="M2.4 22v-2.4c0-2 1.3-3.4 3.4-3.4" />
+      <circle cx="18.2" cy="11.2" r="2.2" />
+      <path d="M21.6 22v-2.4c0-2-1.3-3.4-3.4-3.4" />
     </svg>
   ),
 );
