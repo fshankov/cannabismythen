@@ -98,6 +98,117 @@
    flash keyframes) was removed. The header bar now carries title +
    progress fill + "Aussage X von Y" counter only (Pew minimalism). */
 
+/* ══════════════════════════════════════════════════════════════════
+   Stage E commit 5 (2026-05-23) — FeedbackStrip.
+   Portaled below the ProgressBar inside `#quiz-progress-slot`. Shown
+   only after the user answered the current myth — clears when they
+   advance to the next (unanswered) question. Carries the verdict +
+   statement + scientific pill + population sentence that used to
+   live on the QuizCard back face.
+   ══════════════════════════════════════════════════════════════════ */
+
+.quiz-feedback-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-subtle, #eeeee8);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+/* The verdict pill — Schritte tier in a coloured chip. Calm tints,
+   classification-token-based so it matches the per-row dots on the
+   wrong-myths grid (commit 4). */
+.quiz-feedback-strip__verdict {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+.quiz-feedback-strip__verdict--exact {
+  background: color-mix(in srgb, var(--classification-richtig) 14%, var(--color-surface));
+  border-color: var(--classification-richtig);
+  color: var(--classification-richtig);
+}
+.quiz-feedback-strip__verdict--near {
+  background: color-mix(in srgb, var(--classification-eher-richtig) 14%, var(--color-surface));
+  border-color: var(--classification-eher-richtig);
+  color: var(--classification-eher-richtig);
+}
+.quiz-feedback-strip__verdict--off {
+  background: color-mix(in srgb, var(--classification-eher-falsch) 14%, var(--color-surface));
+  border-color: var(--classification-eher-falsch);
+  color: var(--classification-eher-falsch);
+}
+.quiz-feedback-strip__verdict--far {
+  background: color-mix(in srgb, var(--classification-falsch) 14%, var(--color-surface));
+  border-color: var(--classification-falsch);
+  color: var(--classification-falsch);
+}
+
+.quiz-feedback-strip__statement {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-text);
+}
+
+.quiz-feedback-strip__statement-text {
+  font-weight: 600;
+}
+
+.quiz-feedback-strip__statement-sep {
+  color: var(--color-text-muted);
+}
+
+.quiz-feedback-strip__scientific {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.quiz-feedback-strip__scientific-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.quiz-feedback-strip__joined {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* Mobile: progress bar + strip share the same portal target; keep
+   the strip's content readable by allowing the body lines to wrap
+   without crowding. */
+@media (max-width: 640px) {
+  .quiz-feedback-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+  }
+  .quiz-feedback-strip__statement {
+    flex-basis: 100%;
+    font-size: 0.85rem;
+  }
+}
+
 
 /* ── Card Grid (legacy, used by fakten-karten) ─────────────────── */
 

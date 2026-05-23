@@ -55,6 +55,7 @@ import {
 import QuizCard from "./QuizCard";
 import TitleCard from "./TitleCard";
 import ProgressBar from "./ProgressBar";
+import FeedbackStrip from "./FeedbackStrip";
 import ResultScreen from "./ResultScreen";
 import FactsheetPanel from "./FactsheetPanel";
 import ShortcutHelp from "./ShortcutHelp";
@@ -840,13 +841,28 @@ function QuizPlayerInner({
 
   // Quiet single-line header bar — module title + thin progress fill +
   // "Aussage X von Y" counter. Stage A (2026-05-16) dropped the
-  // live-score pill (Pew minimalism).
-  const progressBarContent = (
-    <ProgressBar
-      quizTitle={t(theme.titleKey)}
-      answered={answeredCount}
-      total={totalQuestions}
-    />
+  // live-score pill (Pew minimalism). Stage E commit 5 (2026-05-23):
+  // adds a feedback strip immediately below the progress bar, shown
+  // only after the user has answered the current myth. The strip
+  // carries the verdict + statement + scientific pill + population
+  // sentence that used to live on the QuizCard back face.
+  const showFeedbackStrip =
+    !showTitleCard && !showResults && currentMyth !== undefined && currentAnswer !== null;
+  const headerContent = (
+    <>
+      <ProgressBar
+        quizTitle={t(theme.titleKey)}
+        answered={answeredCount}
+        total={totalQuestions}
+      />
+      {showFeedbackStrip && currentMyth && currentAnswer && (
+        <FeedbackStrip
+          myth={currentMyth}
+          answer={currentAnswer}
+          statementText={quizTextMap[currentMyth.id]?.statement}
+        />
+      )}
+    </>
   );
 
   return (
@@ -855,10 +871,10 @@ function QuizPlayerInner({
       style={{ ["--quiz-accent" as string]: accent }}
     >
       {portalTarget
-        ? createPortal(progressBarContent, portalTarget)
+        ? createPortal(headerContent, portalTarget)
         : (
           <header className="quiz-player__header">
-            {progressBarContent}
+            {headerContent}
           </header>
         )}
 

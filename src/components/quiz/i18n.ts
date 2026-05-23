@@ -256,10 +256,18 @@ const translations: Record<Lang, Record<string, string>> = {
     // labels updated per ISD ruling — reviewer's set + 'Völlig daneben'
     // for the 3-Schritte case (English glosses: completely correct /
     // close to it / unfortunately incorrect / completely off).
-    "schritte.exact": "Völlig korrekt",
-    "schritte.near": "Nah dran",
-    "schritte.off": "Leider fehlerhaft",
-    "schritte.far": "Völlig daneben",
+    // Stage E commit 5 (2026-05-23) — revised Schritte verdict wording.
+    // Renders in the per-question FeedbackStrip portaled below the
+    // progress bar. AI draft — Du form — awaiting ISD review.
+    // English glosses:
+    //   exact → "Right!"
+    //   near  → "Almost right."
+    //   off   → "Close, but off."
+    //   far   → "You're off the mark there."
+    "schritte.exact": "Richtig!",
+    "schritte.near": "Fast richtig.",
+    "schritte.off": "Knapp daneben.",
+    "schritte.far": "Da liegst du daneben.",
     //\u2500\u2500 Micro-copy table (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     // \u2500\u2500 Result screen \u2014 N\u00e4chstes Modul (Phase C \u00a73.14) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     "ui.nextModule.cta": "N\u00e4chstes Modul: {title} \u2192",

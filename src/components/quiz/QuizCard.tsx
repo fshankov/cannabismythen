@@ -36,7 +36,6 @@ import {
 } from "./usePointerSwipe";
 import VerdictScale from "./VerdictScale";
 import StreakChip from "./StreakChip";
-import VerdictPill from "../shared/VerdictPill";
 import { trackCardSwiped } from "./matomo";
 
 /** Stable hash for deterministic randomization. */
@@ -128,7 +127,11 @@ export default function QuizCard({
   const liveRef = useRef<HTMLDivElement>(null);
 
   const statement = statementText || t(myth.statementKey);
-  const explanation = explanationText || t(myth.explanationKey);
+  // explanationText / `t(myth.explanationKey)` no longer rendered on
+  // the card back (Stage E commit 5); the popup shows full content
+  // when the user clicks "Mehr auf der Fakten-Karte". Prop kept for
+  // back-compat with the Astro page; intentionally unread here.
+  void explanationText;
 
   const isCoarsePointer = useIsCoarsePointer();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -196,8 +199,10 @@ export default function QuizCard({
     verdict: verdictPhrase,
   }).replace(/\.\s*$/, "");
 
-  const hasPopData = typeof myth.populationCorrectPct === "number";
-  const popPct = hasPopData ? Math.round(myth.populationCorrectPct) : 0;
+  // Stage E commit 5 (2026-05-23): hasPopData / popPct removed — the
+  // population bar moved into the FeedbackStrip portal in the page
+  // header. The strip computes its own `Du gehörst zu N %` sentence
+  // via `userJoinedPercent` (Stage D PR2 helper).
 
   const cellStyle: CSSProperties = {
     ["--card-tilt" as string]: `${tilt.toFixed(2)}deg`,
@@ -300,8 +305,15 @@ export default function QuizCard({
           >
             {isAnswered && answer && (
               <>
-                {/* Topbar — same shape as the front so the card feels stable
-                    front-to-back. */}
+                {/* Stage E commit 5 (2026-05-23) — minimal back face.
+                    The chip pair, big Schritte verdict line, explanation
+                    paragraph, and population bar all moved UP into the
+                    `FeedbackStrip` portaled into the page header (see
+                    `src/components/quiz/FeedbackStrip.tsx`). What stays
+                    here: statement summary (tinted by scientific verdict)
+                    + Mehr-auf-Fakten-Karte + Nächste-Frage. Detail still
+                    one click away via the popup. */}
+
                 <div className="quiz-card__topbar">
                   <span className="quiz-card__counter">
                     {String(index + 1).padStart(2, "0")} /{" "}
@@ -309,101 +321,12 @@ export default function QuizCard({
                   </span>
                 </div>
 
-                {/* Remediation 5 — back-face copy stack, top to bottom,
-                    all left-aligned:
-                    1) Myth statement (left, tinted by scientific verdict).
-                    2) Chip pair: Ihre Antwort + Wissenschaftlich.
-                    3) Schritte verdict line (large, colored by Schritte).
-                    4) Explanation paragraph.
-                    5) Population stat (always shown, new wording).
-                    6) Action buttons.
-                    Note: the "n Schritt(e) daneben → x,xx Punkte" sub-line
-                    was removed per BugHerd #27 (Session 2). i18n key
-                    `schritte.points` was deleted in Session 3a as dead
-                    code. Raw Punkte numbers stay only on ShareCard hero. */}
-
-                {/* 1 — Statement, left-aligned, tinted by scientific verdict. */}
                 <p
                   className={`quiz-card__statement quiz-card__statement--back statement--${myth.correctClassification}`}
                 >
                   {displayStatement(statement)}
                 </p>
 
-                {/* 2 — Chip pair: user's answer + scientific verdict on
-                    one line. Wraps on narrow screens. */}
-                <p className="quiz-card__answer-note">
-                  <span className="quiz-card__answer-label">
-                    {t("ui.yourAnswerLabel")}:
-                  </span>{" "}
-                  <VerdictPill
-                    verdict={answer.chosenClassification}
-                    label={t(`classification.${answer.chosenClassification}`)}
-                    size="sm"
-                    className="quiz-card__answer-chip"
-                  />
-                  <span className="quiz-card__answer-vs"> · </span>
-                  <span className="quiz-card__answer-label">
-                    {t("classification.scientific")}:
-                  </span>{" "}
-                  <VerdictPill
-                    verdict={myth.correctClassification}
-                    label={t(`classification.${myth.correctClassification}`)}
-                    size="sm"
-                    className="quiz-card__answer-chip"
-                  />
-                </p>
-
-                {/* 3 — Schritte verdict — large, colored by Schritte band. */}
-                <p
-                  className="quiz-card__verdict-line"
-                >
-                  {schritteVerdictText}
-                </p>
-
-                {/* 4 — Explanation. Scrollable inside its own region only when
-                    it overflows the available card height. */}
-                <div className="quiz-card__explanation-wrap">
-                  <div className="quiz-card__explanation">
-                    <p>{explanation}</p>
-                  </div>
-                </div>
-
-                {/* 5 — Population stat. Stage A (2026-05-16) wording —
-                    partial-credit-honest: populationCorrectPct is a CaRM
-                    Richtigkeit mean, not the "% of respondents who
-                    answered correctly". "Im Schnitt zu X % genau
-                    richtig" reads as "on average X % correctly" without
-                    implying the binary count. */}
-                {hasPopData && (
-                  <div
-                    className="quiz-card__pop-bar"
-                    role="img"
-                    aria-label={`${popPct} Prozent — durchschnittliche Trefferquote von Erwachsenen 18 bis 70 in einer Bevölkerungsbefragung in Deutschland für diese Aussage.`}
-                  >
-                    <p className="quiz-card__pop-bar-text">
-                      Erwachsene (18–70) in einer
-                      Bevölkerungsbefragung in Deutschland ordneten
-                      diese Aussage im Schnitt zu{" "}
-                      <strong>{popPct}&nbsp;%</strong> genau richtig
-                      ein.
-                    </p>
-                    <div className="quiz-card__pop-bar-track">
-                      <div
-                        className="quiz-card__pop-bar-fill"
-                        style={{ width: `${popPct}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* 6 — Action row pinned to the bottom.
-                    Stage C (2026-05-17): the in-card forward CTA now
-                    renders on every card. On the LAST card the label
-                    switches to "Ergebnis ansehen →"; the click handler
-                    is the same `onNext`, which `handleNext()` in
-                    QuizPlayer routes to `setFinished(true)` when at the
-                    last index. The standalone finish-row below the card
-                    is gone — single, consistent CTA path. */}
                 <div className="quiz-card__back-actions">
                   {onShowFactsheet && (
                     <button
@@ -431,8 +354,9 @@ export default function QuizCard({
                   {t("ui.swipeHint")}
                 </p>
 
-                {/* SR-only live region announcing the feedback (Schritte
-                    label + scientific verdict). */}
+                {/* SR-only live region — announces the verdict for
+                    screen-reader users when the FeedbackStrip is rendered
+                    elsewhere in the DOM. */}
                 <div
                   ref={liveRef}
                   className="sr-only"
