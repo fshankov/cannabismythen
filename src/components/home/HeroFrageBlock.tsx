@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { CSSProperties, KeyboardEvent } from "react";
+import { ChevronDown } from "lucide-react";
 import VerdictArrow from "../shared/VerdictArrow";
 import VerdictPill from "../shared/VerdictPill";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
@@ -19,10 +20,6 @@ export interface Props {
   backgroundQuestions: ReadonlyArray<string>;
   pairs: ReadonlyArray<HeroPair>;
   rotationSeconds: number;
-  primaryCtaLabel: string;
-  primaryCtaUrl: string;
-  secondaryCtaLabel: string;
-  secondaryCtaUrl: string;
 }
 
 /** Time the auto-rotate pauses after a manual click before resuming. */
@@ -53,10 +50,6 @@ export default function HeroFrageBlock({
   backgroundQuestions,
   pairs,
   rotationSeconds,
-  primaryCtaLabel,
-  primaryCtaUrl,
-  secondaryCtaLabel,
-  secondaryCtaUrl,
 }: Props) {
   const [activeIdx, setActiveIdx] = useState(0);
   const lastInteractionRef = useRef<number>(0);
@@ -87,6 +80,16 @@ export default function HeroFrageBlock({
     lastInteractionRef.current = performance.now();
     setActiveIdx(((next % pairs.length) + pairs.length) % pairs.length);
   }, [pairs.length]);
+
+  // Scroll the next section into view when the user taps the down-chevron
+  // that replaces the old "Quiz starten" / "Alle 42 Mythen" CTA pair.
+  // The hero's next sibling is the NumbersStripBlock on the home page;
+  // using nextElementSibling keeps this independent of section IDs.
+  const handleScrollCue = useCallback(() => {
+    const hero = document.querySelector('.hero-frage');
+    const next = hero?.nextElementSibling as HTMLElement | null;
+    next?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   const handleCardKey = (e: KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
@@ -250,14 +253,15 @@ export default function HeroFrageBlock({
           })}
         </div>
 
-        <div className="hero-frage__ctas">
-          <a className="hero-frage__cta-primary" href={primaryCtaUrl}>
-            {primaryCtaLabel}
-            <span aria-hidden="true">→</span>
-          </a>
-          <a className="hero-frage__cta-secondary" href={secondaryCtaUrl}>
-            {secondaryCtaLabel}
-          </a>
+        <div className="hero-frage__scroll-cue-wrap">
+          <button
+            type="button"
+            className="hero-frage__scroll-cue"
+            onClick={handleScrollCue}
+            aria-label="Weiter zur Übersicht"
+          >
+            <ChevronDown size={32} strokeWidth={2.25} aria-hidden="true" />
+          </button>
         </div>
       </div>
     </section>

@@ -433,55 +433,42 @@
   }
 }
 
-/* ── CTAs ───────────────────────────────────────────────────── */
+/* ── Scroll cue (replaces the old CTA pair) ─────────────────── */
 
-.hero-frage__ctas {
+.hero-frage__scroll-cue-wrap {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: clamp(0.75rem, 2vw, 1.75rem);
-  flex-wrap: wrap;
+  margin-top: clamp(1rem, 3vw, 2rem);
 }
 
-.hero-frage__cta-primary {
+.hero-frage__scroll-cue {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1.65rem;
-  border-radius: var(--radius-full);
-  background: #f4f4f0;
-  color: var(--color-accent-hover);
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--classification-richtig, #047857);
+  cursor: pointer;
+  border-radius: 999px;
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+  animation: hero-frage__scroll-cue-pulse 2.5s ease-in-out infinite;
 }
 
-.hero-frage__cta-primary:hover,
-.hero-frage__cta-primary:focus-visible {
-  background: #ffffff;
-  transform: translateY(-1px);
+.hero-frage__scroll-cue:hover,
+.hero-frage__scroll-cue:focus-visible {
+  background: rgba(4, 120, 87, 0.12);
   outline: none;
+  animation: none;
 }
 
-.hero-frage__cta-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
-  padding-bottom: 1px;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+@keyframes hero-frage__scroll-cue-pulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
 }
 
-.hero-frage__cta-secondary:hover,
-.hero-frage__cta-secondary:focus-visible {
-  color: #ffffff;
-  border-color: #ffffff;
-  outline: none;
+@media (prefers-reduced-motion: reduce) {
+  .hero-frage__scroll-cue { animation: none; }
 }

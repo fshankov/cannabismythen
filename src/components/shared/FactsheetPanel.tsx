@@ -154,7 +154,12 @@ export default function FactsheetPanel({
   mythText,
   classificationKey,
   mythContentEntry,
-  factsheetSlug,
+  // factsheetSlug intentionally not destructured — the "Zur vollständigen
+  // Seite" link was removed (travel pipeline Stage 1, 2026-05-23) since
+  // the popup is now the source of truth for myth content. Stage 5 plans
+  // to repurpose this slug as a ?myth=<id> URL param; the prop stays on
+  // the interface so callers don't need to change.
+  factsheetSlug: _factsheetSlug,
   onClose,
   fallbackExplanation,
   groupMetrics,
@@ -172,6 +177,7 @@ export default function FactsheetPanel({
   void _classificationLabel;
   void _verdictLabel;
   void _verdictAccessory;
+  void _factsheetSlug;
   const panelRef = useRef<HTMLDivElement>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
@@ -277,10 +283,6 @@ export default function FactsheetPanel({
     );
   };
 
-  const pageSlug = factsheetSlug
-    ? `/daten-explorer/${factsheetSlug}/`
-    : undefined;
-
   return (
     <div
       className={`factsheet-panel__backdrop factsheet-panel__backdrop--${context}`}
@@ -361,12 +363,6 @@ export default function FactsheetPanel({
                 />
               )}
 
-              {/* Link to full page */}
-              {pageSlug && (
-                <a href={pageSlug} className="factsheet-panel__link">
-                  Zur vollständigen Seite &rarr;
-                </a>
-              )}
             </>
           ) : (
             <>
@@ -419,11 +415,6 @@ export default function FactsheetPanel({
                 />
               )}
 
-              {pageSlug && (
-                <a href={pageSlug} className="factsheet-panel__link">
-                  Zur vollständigen Seite &rarr;
-                </a>
-              )}
             </>
           )}
         </div>
