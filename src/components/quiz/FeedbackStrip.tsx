@@ -44,8 +44,10 @@ interface FeedbackStripProps {
   variant?: FeedbackStripVariant;
   /** Required in "answer" mode. */
   myth?: QuizMyth;
-  /** Required in "answer" mode. */
-  answer?: CardAnswer;
+  /** Required in "answer" mode. May be null when the current myth
+   *  hasn't been answered yet — Stage G renders an empty placeholder
+   *  in that case to keep the strip slot's height stable. */
+  answer?: CardAnswer | null;
   /** Required in "answer" mode. Keystatic-editorial myth statement;
    *  falls back to the i18n key if undefined. */
   statementText?: string;
@@ -105,10 +107,23 @@ export default function FeedbackStrip({
   }
 
   // ── Answer-mode strip ───────────────────────────────────────────────
-  // Guard: in TypeScript the optional props mean callers can omit them,
-  // but in practice the answer-mode call sites always pass both. Render
-  // nothing if the caller passed the wrong combination.
-  if (!myth || !answer) return null;
+  // Guard: render nothing when the parent didn't pass a myth.
+  if (!myth) return null;
+
+  // Stage G (2026-05-23): when the current myth hasn't been answered
+  // yet, render an empty strip that reserves the same slot height. The
+  // `--empty` modifier + CSS `min-height` keep the QuizCard below
+  // anchored at the same y-position whether or not the user has
+  // answered. aria-hidden so screen readers don't announce a blank
+  // region.
+  if (!answer) {
+    return (
+      <div
+        className="quiz-feedback-strip quiz-feedback-strip--empty"
+        aria-hidden="true"
+      />
+    );
+  }
 
   const s: Schritte = schritte(answer.chosenClassification, myth.correctClassification);
   const verdictText = t(SCHRITTE_LABEL_KEY[s]);

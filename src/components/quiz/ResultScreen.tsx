@@ -206,45 +206,40 @@ export default function ResultScreen({
         </div>
       )}
 
-      {/* Stage D PR3 (2026-05-22) — the BugHerd #44 "Weiter erkunden"
-          block (Daten-Explorer + Meine Interessen cross-links) was
-          removed. Per the Stage D design ruling, the result page now
-          points exclusively at Fakten-Karten + the next quiz module +
-          a retry option, since those are the surfaces that continue
-          the same learning track. Daten-Explorer / Meine-Interessen
-          remain reachable from the global header / mobile tab bar. */}
+      {/* Stage G (2026-05-23) — all four CTAs render as filled primary
+          buttons. The Stage D primary/secondary/tertiary distinction is
+          gone; one flat `.quiz-result__actions` row that wraps to a
+          column on mobile. Fakten-Karten + Nächstes Modul + Quiz
+          wiederholen + Alle Quiz-Module read as equal-weight next
+          steps. */}
       <div className="quiz-result__actions">
-        <div className="quiz-result__actions-primary">
+        <a
+          href="/fakten-karten/"
+          className="quiz-result__cta quiz-result__cta--primary"
+        >
+          Lies mehr in den Fakten-Karten →
+        </a>
+        {nextSlug && nextThemeTitle && nextSlug !== result.themeSlug && (
           <a
-            href="/fakten-karten/"
+            href={`/quiz/${nextSlug}/`}
             className="quiz-result__cta quiz-result__cta--primary"
           >
-            Lies mehr in den Fakten-Karten →
+            {t("ui.nextModule.cta", { title: nextThemeTitle })}
           </a>
-          {nextSlug && nextThemeTitle && nextSlug !== result.themeSlug && (
-            <a
-              href={`/quiz/${nextSlug}/`}
-              className="quiz-result__cta quiz-result__cta--secondary"
-            >
-              {t("ui.nextModule.cta", { title: nextThemeTitle })}
-            </a>
-          )}
-        </div>
-        <div className="quiz-result__actions-tertiary">
-          <button
-            type="button"
-            className="quiz-result__textlink"
-            onClick={onRestart}
-          >
-            {t("ui.restartQuiz")}
-          </button>
-          <span className="quiz-result__textlink-sep" aria-hidden="true">
-            ·
-          </span>
-          <a href="/quiz/" className="quiz-result__textlink">
-            ← {t("ui.backToQuizzes")}
-          </a>
-        </div>
+        )}
+        <button
+          type="button"
+          className="quiz-result__cta quiz-result__cta--primary"
+          onClick={onRestart}
+        >
+          {t("ui.restartQuiz")}
+        </button>
+        <a
+          href="/quiz/"
+          className="quiz-result__cta quiz-result__cta--primary"
+        >
+          ← {t("ui.backToQuizzes")}
+        </a>
       </div>
     </section>
   );

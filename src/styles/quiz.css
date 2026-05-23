@@ -111,7 +111,11 @@
   /* Stage F commit 3 (2026-05-23) — align horizontally with the
      `.quiz-header-bar` above it (same max-width container + same
      `--space-lg` horizontal padding) so brand row + nav + progress
-     bar + feedback strip share one cohesive baseline. */
+     bar + feedback strip share one cohesive baseline.
+     Stage G (2026-05-23) — stable min-height reserves the slot
+     even when the strip has no inner content yet (unanswered card).
+     Prevents the QuizCard below from jumping between unanswered
+     and answered states. */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -119,9 +123,16 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: var(--space-sm) var(--space-lg);
+  min-height: 4.25rem;
   font-size: 0.9rem;
   line-height: 1.45;
   color: var(--color-text);
+}
+
+/* Stage G — empty variant. Same DOM container, same min-height; just
+   no inner content while the user is reading the unanswered card. */
+.quiz-feedback-strip--empty {
+  /* (inherits everything from `.quiz-feedback-strip` above) */
 }
 
 /* Subtle divider between the progress bar above and the strip below.
@@ -1955,6 +1966,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
+  /* Stage G (2026-05-23) — when ResultScreen's mount-effect calls
+     `panelRef.current.scrollIntoView({block: "start"})`, the browser
+     respects `scroll-margin-top`. Without this, the section's top
+     scrolls to viewport y=0 — behind the fixed sticky header — and
+     the user lands inside the wrong-myths grid instead of seeing
+     the consolidated ShareCard hero. */
+  scroll-margin-top: calc(var(--header-height, var(--nav-height)) + var(--space-md));
 }
 
 .quiz-result__header {
@@ -2430,22 +2448,10 @@
   transform: translateY(-1px);
 }
 
-.quiz-result__cta--secondary {
-  background: var(--color-surface);
-  color: var(--color-accent);
-  border: 1px solid var(--color-accent);
-}
-.quiz-result__cta--secondary:hover {
-  background: var(--color-accent-light);
-}
-
-.quiz-result__actions-secondary {
-  display: flex;
-  gap: var(--space-md);
-  align-items: center;
-  justify-content: center;
-  margin-top: var(--space-sm);
-}
+/* Stage G (2026-05-23) — `.quiz-result__cta--secondary` removed;
+   all four CTAs now use `--primary`. `.quiz-result__actions-secondary`
+   container also gone (single `.quiz-result__actions` row carries
+   all four buttons). */
 
 /* Stage A (2026-05-16) — the .share-card__score-unit / __absolute-score
    / __breakdown rules were removed alongside the medal/% hero. The
@@ -2464,15 +2470,16 @@
    selectors are kept in JSX (ShareCard untouched per the Sie-pocket
    constraint) but their per-band CSS overrides are gone. */
 
-/* Result-page action stack — two equally-sized primary buttons, two
-   matching text links beneath, all centred. Replaces the previous
-   four-different-sizes mess. */
-.quiz-result__actions-primary {
+/* Stage G (2026-05-23) — flat 4-button action row. Replaces the
+   Stage D primary/secondary/tertiary split. All four CTAs render as
+   filled primary buttons of equal weight. Wraps to a column on
+   mobile via flex-wrap + flex-basis. */
+.quiz-result__actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-md);
-  margin-bottom: var(--space-md);
+  margin-top: var(--space-xl);
 }
 
 .quiz-result__cta {
@@ -2482,53 +2489,25 @@
   text-align: center;
 }
 
-/* BugHerd #44 (Session 3b, 2026-05-07) "Weiter erkunden" CSS removed
-   in Stage D PR3 (2026-05-22) — the Daten-Explorer / Meine-Interessen
-   cross-links are gone from the result page per the new design;
-   those sections remain reachable via the global header/nav. */
-
-.quiz-result__actions-tertiary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-size: 0.88rem;
-  color: var(--color-text-muted);
-}
-
-/* Stage F commit 3 (2026-05-23) — unify the tertiary action styling so
-   `<button class="quiz-result__textlink">Quiz wiederholen</button>` and
-   `<a class="quiz-result__textlink">← Alle Quiz-Module</a>` render
-   identically (the browser-default button styling was leaking through
-   on some engines, making the two read as different button vs. link
-   shapes). `all: unset` clears the user-agent styles; the explicit
-   declarations below rebuild the link-style treatment for both. */
-.quiz-result__textlink {
-  all: unset;
-  display: inline-block;
-  padding: 4px 8px;
-  font: inherit;
-  color: var(--color-accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+/* Reset user-agent <button> styling so the JS-driven Quiz-wiederholen
+   CTA reads identically to the three <a>-element CTAs around it. */
+button.quiz-result__cta {
+  font-family: inherit;
   cursor: pointer;
-  border-radius: var(--radius-sm, 4px);
 }
 
-.quiz-result__textlink:hover,
-.quiz-result__textlink:focus-visible {
-  color: var(--color-accent-hover);
-  text-decoration-thickness: 2px;
+@media (max-width: 640px) {
+  /* Stage G mobile: each CTA takes the full row width so the four
+     buttons stack vertically and stay readable. */
+  .quiz-result__cta {
+    flex-basis: 100%;
+    min-width: 0;
+  }
 }
 
-.quiz-result__textlink:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.quiz-result__textlink-sep {
-  color: var(--color-text-muted);
-}
+/* Stage G (2026-05-23) — `.quiz-result__textlink` + `__textlink-sep`
+   rules removed; the Quiz-wiederholen and Alle-Quiz-Module CTAs now
+   use `.quiz-result__cta .quiz-result__cta--primary` like the rest. */
 
 /* ═══════════════════════════════════════════════════════════════
    Share Card — Dark forest green (#2d6a4f) background

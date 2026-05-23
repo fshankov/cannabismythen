@@ -248,6 +248,23 @@ function clearProgress(slug: string): void {
   }
 }
 
+/** Stage G (2026-05-23): wrapper around `loadProgress` that returns
+ *  null (and clears the entry) if the persisted state reflects a
+ *  previously-finished run. Fedor's call: on revisit to a finished
+ *  quiz, the user should start from question 1 instead of seeing
+ *  their old result page. Partial progress (`finished: false`) still
+ *  restores normally. `clearProgress` is idempotent so calling this
+ *  helper from each lazy initializer is safe — the first call clears,
+ *  subsequent calls see empty localStorage and return null. */
+function loadProgressUnlessFinished(slug: string): PersistedState | null {
+  const saved = loadProgress(slug);
+  if (saved?.finished) {
+    clearProgress(slug);
+    return null;
+  }
+  return saved;
+}
+
 /** Per-quiz accent token (one of the four classification colours) used to
  *  tint the progress bar fill, the dot ring, and the next-question CTA. */
 const QUIZ_ACCENT: Record<string, string> = {
@@ -320,7 +337,10 @@ function resolveDynamicTheme(
     // SSR: render an empty deck. The actual myths land at hydration.
     return template;
   }
-  const saved = loadProgress(quizSlug);
+  // Stage G — also use the wrapper here so a previously-finished
+  // Schnellcheck starts fresh on revisit (same behaviour as the
+  // five thematic modules).
+  const saved = loadProgressUnlessFinished(quizSlug);
   let mythIds = saved?.order ?? [];
   // Resolve persisted IDs against the global lookup; drop any unknowns.
   let myths = mythIds
@@ -382,7 +402,7 @@ function QuizPlayerInner({
   // ── Lazy state initialisers: read localStorage SYNCHRONOUSLY before first
   //    render. No useEffect race, no flash of empty state on reload.
   const [answers, setAnswers] = useState<Record<string, CardAnswer>>(() => {
-    const saved = loadProgress(quizSlug);
+    const saved = loadProgressUnlessFinished(quizSlug);
     if (!saved) return {};
     const valid: Record<string, CardAnswer> = {};
     for (const m of theme.myths) {
@@ -399,24 +419,24 @@ function QuizPlayerInner({
   // the SSR HTML deterministic. Hydration mismatch on the deck is avoided
   // by gating the shuffle behind `mounted`.
   const [order, setOrder] = useState<string[]>(() => {
-    const saved = loadProgress(quizSlug);
+    const saved = loadProgressUnlessFinished(quizSlug);
     return resolveDeckOrder(theme.myths, saved?.order);
   });
 
   const [currentIndex, setCurrentIndex] = useState<number>(() => {
-    const saved = loadProgress(quizSlug);
+    const saved = loadProgressUnlessFinished(quizSlug);
     const raw = saved?.currentIndex ?? 0;
     return Math.min(Math.max(0, raw), Math.max(0, totalQuestions - 1));
   });
 
   const [finished, setFinished] = useState<boolean>(() => {
-    const saved = loadProgress(quizSlug);
+    const saved = loadProgressUnlessFinished(quizSlug);
     return Boolean(saved?.finished);
   });
 
   // Title card is dismissed once the user starts (or has any saved answers).
   const [introDismissed, setIntroDismissed] = useState<boolean>(() => {
-    const saved = loadProgress(quizSlug);
+    const saved = loadProgressUnlessFinished(quizSlug);
     if (!saved) return false;
     if (saved.introDismissed) return true;
     return Object.keys(saved.answers ?? {}).length > 0;
@@ -425,7 +445,7 @@ function QuizPlayerInner({
   const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [restoredNotice, setRestoredNotice] = useState<boolean>(() => {
-    const saved = loadProgress(quizSlug);
+    const saved = loadProgressUnlessFinished(quizSlug);
     return Boolean(saved && Object.keys(saved.answers).length > 0);
   });
 
@@ -445,7 +465,7 @@ function QuizPlayerInner({
   //    on the rendered question), and the user only sees the natural
   //    order for a single render before the shuffled order takes over.
   useEffect(() => {
-    const saved = loadProgress(quizSlug);
+    const saved = loadProgressUnlessFinished(quizSlug);
     if (saved?.order && saved.order.length === theme.myths.length) return;
     const shuffled = shuffleMythIds(theme.myths.map((m) => m.id));
     setOrder(shuffled);
@@ -842,14 +862,14 @@ function QuizPlayerInner({
   // Quiet single-line header bar — module title + thin progress fill +
   // "Aussage X von Y" counter. Stage A (2026-05-16) dropped the
   // live-score pill (Pew minimalism). Stage E commit 5 (2026-05-23):
-  // added a feedback strip immediately below the progress bar, shown
-  // only after the user has answered the current myth. Stage F commit
-  // 1 (2026-05-23): the same strip slot carries a `result` variant
-  // when the quiz is finished — replaces per-question feedback with
-  // a single `Dein Ergebnis — {module}` row, keeping the sticky-header
-  // rhythm consistent between quiz mode and result mode.
+  // added a feedback strip immediately below the progress bar. Stage
+  // F commit 1: same strip slot carries `variant="result"` on the
+  // finished page. Stage G (2026-05-23): strip ALWAYS renders in
+  // quiz mode (even when the current myth hasn't been answered yet)
+  // — the slot reserves a stable min-height so the QuizCard below
+  // doesn't jump up/down between unanswered and answered states.
   const showAnswerStrip =
-    !showTitleCard && !showResults && currentMyth !== undefined && currentAnswer !== null;
+    !showTitleCard && !showResults && currentMyth !== undefined;
   const headerContent = (
     <>
       <ProgressBar
@@ -857,7 +877,7 @@ function QuizPlayerInner({
         answered={answeredCount}
         total={totalQuestions}
       />
-      {showAnswerStrip && currentMyth && currentAnswer && (
+      {showAnswerStrip && currentMyth && (
         <FeedbackStrip
           variant="answer"
           myth={currentMyth}
