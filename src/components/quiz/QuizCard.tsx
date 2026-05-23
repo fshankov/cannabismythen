@@ -127,11 +127,12 @@ export default function QuizCard({
   const liveRef = useRef<HTMLDivElement>(null);
 
   const statement = statementText || t(myth.statementKey);
-  // explanationText / `t(myth.explanationKey)` no longer rendered on
-  // the card back (Stage E commit 5); the popup shows full content
-  // when the user clicks "Mehr auf der Fakten-Karte". Prop kept for
-  // back-compat with the Astro page; intentionally unread here.
-  void explanationText;
+  // Stage F commit 2 (2026-05-23): explanation restored on the card
+  // back. Stage E commit 5 had stripped this — a mistake; ISD's
+  // cardShortSummary (overlaid onto myth.explanationKey by
+  // `src/pages/quiz/[slug].astro`) is a key learning element and
+  // belongs on the visible back face, not behind a popup click.
+  const explanation = explanationText || t(myth.explanationKey);
 
   const isCoarsePointer = useIsCoarsePointer();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -326,6 +327,18 @@ export default function QuizCard({
                 >
                   {displayStatement(statement)}
                 </p>
+
+                {/* Stage F commit 2 (2026-05-23) — explanation restored
+                    on the card back. ISD's cardShortSummary (overlaid
+                    onto the quiz mdoc's explanation field by the Astro
+                    page) renders here between the statement and the
+                    action buttons. The chip pair, big Schritte verdict
+                    line, and population bar STAY removed (those moved
+                    up into the FeedbackStrip in Stage E commit 5) —
+                    only the explanation comes back. */}
+                <div className="quiz-card__explanation-wrap">
+                  <p className="quiz-card__explanation">{explanation}</p>
+                </div>
 
                 <div className="quiz-card__back-actions">
                   {onShowFactsheet && (

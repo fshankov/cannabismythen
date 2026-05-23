@@ -29,6 +29,8 @@ import type { CardAnswer, QuizMyth, Schritte } from "./types";
 import { schritte, userJoinedPercent } from "./quizData";
 import { t } from "./i18n";
 import VerdictPill from "../shared/VerdictPill";
+import { CheckCircle, CircleDashed, AlertCircle, XCircle } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 type FeedbackStripVariant = "answer" | "result";
 
@@ -60,13 +62,24 @@ const SCHRITTE_LABEL_KEY: Record<Schritte, string> = {
   3: "schritte.far",
 };
 
-/** Modifier class for the verdict pill background tone. Matches the
- *  classification token convention used on the result-page row dots. */
+/** Modifier class for the verdict icon stroke color. Maps to the
+ *  classification token convention used elsewhere on the site. */
 const SCHRITTE_MODIFIER: Record<Schritte, string> = {
   0: "exact",
   1: "near",
   2: "off",
   3: "far",
+};
+
+/** Stage F commit 2 (2026-05-23) — Lucide icon per Schritte tier.
+ *  Replaces the tinted pill background with a single 18 × 18 icon
+ *  next to plain text. Calm read; "feedback" iconography from the
+ *  same library QuizPlayer's VerdictScale already uses. */
+const SCHRITTE_ICON: Record<Schritte, LucideIcon> = {
+  0: CheckCircle,
+  1: CircleDashed,
+  2: AlertCircle,
+  3: XCircle,
 };
 
 export default function FeedbackStrip({
@@ -100,6 +113,7 @@ export default function FeedbackStrip({
   const s: Schritte = schritte(answer.chosenClassification, myth.correctClassification);
   const verdictText = t(SCHRITTE_LABEL_KEY[s]);
   const verdictModifier = SCHRITTE_MODIFIER[s];
+  const VerdictIcon = SCHRITTE_ICON[s];
 
   const statement = statementText || t(myth.statementKey);
 
@@ -118,7 +132,13 @@ export default function FeedbackStrip({
       <div
         className={`quiz-feedback-strip__verdict quiz-feedback-strip__verdict--${verdictModifier}`}
       >
-        {verdictText}
+        <VerdictIcon
+          size={18}
+          strokeWidth={2}
+          aria-hidden="true"
+          className="quiz-feedback-strip__verdict-icon"
+        />
+        <span className="quiz-feedback-strip__verdict-text">{verdictText}</span>
       </div>
       <div className="quiz-feedback-strip__statement">
         <span className="quiz-feedback-strip__statement-text">{statement}</span>
