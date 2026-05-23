@@ -6107,7 +6107,28 @@ body.carm-modal-open {
    collide between adjacent columns. */
 .carm-spannweite {
   --carm-spannweite-label-col: clamp(180px, 24%, 260px);
-  --carm-spannweite-row-h: 32px;
+
+  /* ─── Lollipop sizing tokens (2026-05-23, "V3a-dot + V3b-num" hybrid) ───
+     Four tokens drive the dot/number/row geometry. All in rem so the
+     hybrid scales with the user's browser font-size, and so each
+     breakpoint just retunes the token quartet instead of duplicating
+     selectors. Default values below are the "desktop ≥1025 px" stop
+     per Polish v7 Option B; smaller breakpoints retune them in the
+     `@media` blocks at the bottom of this file.
+
+     dot-size   = solid filled circle diameter (V3a-leaning, prominent)
+     num-size   = monospace number font-size (V3b-leaning, compact)
+     num-offset = vertical distance from row center to NUMBER center
+                  (negative → number sits ABOVE the dot)
+     row-h      = total row height — chosen so the floating number's
+                  top edge stays inside the cell, with `overflow:hidden`
+                  on `.carm-spannweite__cell--plot` as the hard
+                  guardrail. */
+  --carm-spannweite-dot-size: 0.75rem;       /* 12 px */
+  --carm-spannweite-num-size: 0.625rem;      /* 10 px */
+  --carm-spannweite-num-offset: -0.6875rem;  /* -11 px */
+  --carm-spannweite-row-h: 2.375rem;         /* 38 px */
+
   position: relative;
   padding: 0.25rem 0 1.25rem;
 }
@@ -6446,6 +6467,12 @@ body.carm-modal-open {
 .carm-spannweite__cell--plot {
   padding: 0;
   align-items: stretch;
+  /* HARD GUARDRAIL (Polish v7) — the floating number sits ABOVE the dot
+     at a negative offset from row center. Without `overflow:hidden`
+     here, a row with low row-h or a number rendered with a too-large
+     font could leak above the cell into the row line. Clip at the cell
+     boundary so the lollipop primitives can never visually escape. */
+  overflow: hidden;
 }
 
 .carm-spannweite__plot {
@@ -6468,23 +6495,22 @@ body.carm-modal-open {
   pointer-events: none;
 }
 
-/* 2026-05-22 v5: solid 18px circle in the mid-saturation verdict
-   color (-600), with the value rendered inside in white 11px
-   tabular-nums monospace. NO border (user wanted "full circle"). */
+/* 2026-05-23 Polish v7 ("V3a-dot + V3b-num" hybrid): the dot is now a
+   PLAIN solid filled circle anchoring the value position — the number
+   no longer renders inside it. Number lives in its own
+   `.carm-spannweite__num` sibling that floats above, freeing the dot
+   from having to be large enough to host text. Diameter comes from the
+   `--carm-spannweite-dot-size` token so the four breakpoints can
+   retune size independently of color/position rules. Background color
+   set inline by the consumer (verdict -600 for myths, source category
+   color for sources). */
 .carm-spannweite__dot {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 18px;
-  height: 18px;
+  width: var(--carm-spannweite-dot-size);
+  height: var(--carm-spannweite-dot-size);
   border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  /* background + color set inline by GridValueCell from verdict-color
-     tokens (getCorrectnessFillColor for background, white for color). */
-  font: 600 11px/1 ui-monospace, 'SF Mono', Menlo, monospace;
-  font-variant-numeric: tabular-nums;
   pointer-events: none;
   transition: transform 160ms ease;
   z-index: 1;
@@ -6494,6 +6520,30 @@ body.carm-modal-open {
 .carm-spannweite__row.is-hover .carm-spannweite__dot,
 .carm-spannweite__row:focus-visible .carm-spannweite__dot {
   transform: translate(-50%, -50%) scale(1.12);
+}
+
+/* Floating number above the dot (Polish v7). Sits at the same `left`
+   anchor as the dot, vertically offset upward by `--num-offset`.
+   White halo background keeps the small monospace digits legible when
+   they overlap the stem or zebra row background. Color set inline by
+   the consumer (verdict-700 for myths, source category color for
+   sources) so it visually couples with the dot below. The cell's
+   `overflow:hidden` is the hard guardrail against row-line crossing. */
+.carm-spannweite__num {
+  position: absolute;
+  top: 50%;
+  /* Center the number horizontally on the value anchor, then push it
+     above the row center by the configured offset (negative value). */
+  transform: translate(-50%, calc(-50% + var(--carm-spannweite-num-offset)));
+  font: 700 var(--carm-spannweite-num-size) / 1
+        ui-monospace, 'SF Mono', Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0 0.125rem;   /* 2 px */
+  border-radius: 0.125rem;
+  pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
 }
 
 .carm-spannweite__no-data {
@@ -6642,10 +6692,34 @@ body.carm-modal-open {
   .carm-spannweite__header-inner { gap: 0.25rem; padding: 0 18px; }
 }
 
+/* ─── Polish v7 lollipop breakpoints ──────────────────────────────────
+   Four stops, four token retuning blocks. Default (desktop ≥1025 px)
+   is declared on `.carm-spannweite` itself near the top of this file.
+   Each smaller-screen stop adjusts only the lollipop quartet — other
+   tokens (`--label-col`) stay at their existing scale.
+
+   Math constraint per stop: the floating number's top edge must stay
+   inside the cell. With `line-height: 1` and the transform expression
+   `translate(-50%, calc(-50% + offset))`, that constant is
+       num-top = (row-h / 2) + offset - (num-size / 2)
+   and must be ≥ 0. The number bottom edge must also clear the dot
+   top:  |offset| ≥ (num-size + dot-size) / 2. */
+
+/* Laptop (721–1024 px): same dot/num as desktop, slightly tighter row. */
+@media (max-width: 1024px) {
+  .carm-spannweite {
+    --carm-spannweite-row-h: 2.25rem;    /* 36 px */
+  }
+}
+
+/* Tablet (481–720 px): shrink dot 12→11, num 10→9, retune offset/row. */
 @media (max-width: 720px) {
   .carm-spannweite {
     --carm-spannweite-label-col: 150px;
-    --carm-spannweite-row-h: 30px;
+    --carm-spannweite-dot-size: 0.6875rem;   /* 11 px */
+    --carm-spannweite-num-size: 0.5625rem;   /* 9 px */
+    --carm-spannweite-num-offset: -0.625rem; /* -10 px */
+    --carm-spannweite-row-h: 2.125rem;       /* 34 px */
   }
 
   .carm-spannweite__grid {
@@ -6659,9 +6733,17 @@ body.carm-modal-open {
   .carm-spannweite__row-text {
     font-size: 0.72rem;
   }
+}
 
-  .carm-spannweite__num {
-    font-size: 10px;
+/* Mobile (≤480 px): smallest comfortable lollipop. Row at 32 px keeps
+   the same density as the pre-v7 default; the dot + number shrink so
+   nothing overlaps even on a 320-px Safari-mobile window. */
+@media (max-width: 480px) {
+  .carm-spannweite {
+    --carm-spannweite-dot-size: 0.625rem;     /* 10 px */
+    --carm-spannweite-num-size: 0.5625rem;    /* 9 px */
+    --carm-spannweite-num-offset: -0.5625rem; /* -9 px */
+    --carm-spannweite-row-h: 2rem;            /* 32 px */
   }
 }
 
