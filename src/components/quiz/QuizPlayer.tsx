@@ -550,29 +550,12 @@ function QuizPlayerInner({
     };
   }, [allAnswered, answers, theme.myths, quizSlug, totalQuestions]);
 
-  // BugHerd #37b (Session 3b, 2026-05-07): persist the latest module
-  // score to localStorage so the /quiz/ index can render a small
-  // "Zuletzt: 5/6 · 83 %" chip on each tile. No cookies, no server,
-  // no PII — purely a per-browser convenience. Key uses the canonical
-  // (post-Session-1) slug so renames don't bleed scores between modules.
-  useEffect(() => {
-    if (!result || typeof window === "undefined") return;
-    try {
-      const payload = {
-        slug: result.themeSlug,
-        moduleScore: result.moduleScore,
-        correctCount: result.correctCount,
-        totalQuestions: result.totalQuestions,
-        savedAt: Date.now(),
-      };
-      window.localStorage.setItem(
-        `cm-quiz-score-${result.themeSlug}`,
-        JSON.stringify(payload),
-      );
-    } catch {
-      // localStorage may be disabled (private mode, quota) — silently skip.
-    }
-  }, [result]);
+  // Stage E commit 1 (2026-05-23): BugHerd #37b score writer removed.
+  // The /quiz/ index read-side ("Zuletzt: X/Y · Z %" chip on each tile)
+  // was already removed in commit 83af975 so users could retake a
+  // module without seeing their previous score. The writer above was
+  // now writing data nothing consumed; dropped so each visit starts
+  // fully fresh and we don't accumulate dead localStorage entries.
 
   const handleAnswer = useCallback(
     (mythId: string, chosen: Classification) => {
