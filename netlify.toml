@@ -63,6 +63,19 @@
   force = true
 
 # ---------------------------------------------------------------------------
+# Travel pipeline Stage 5 (2026-05-23) — individual myth pages retired;
+# popup inside /daten-explorer/ is the canonical surface for myth content.
+# Edge middleware (src/middleware.ts) handles the redirect at the edge,
+# extracting the numeric mythId from the slug so /daten-explorer/?mythos={N}
+# opens the popup directly. We intentionally do NOT add a netlify.toml
+# splat rule here — Netlify path-pattern redirects can't extract the
+# numeric prefix from a slug like "m01-allheilmittel", and a non-splat
+# fallback would beat the more useful middleware redirect in dev mode.
+# In production the edge function always wins (it runs before redirect
+# rules), so this is safe.
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
 # Session 3a of 2026-05 — `/haeufige-fragen/*` renamed to
 # `/meine-interessen/*` per BugHerd #6 (Fedor 2026-05-07). Mirror rules
 # also live in `src/middleware.ts`.

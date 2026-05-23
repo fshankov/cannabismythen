@@ -43,6 +43,24 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   /**
+   * Travel pipeline Stage 5 (2026-05-23) — individual myth pages at
+   * `/daten-explorer/m{NN}-{slug}/` are retired. The popup inside the
+   * dashboard is now the source of truth for myth content. Redirect old
+   * external links to the explorer with a `?mythos={N}` param that
+   * opens the popup automatically (see url-state.ts).
+   * Slug pattern: `m\d+` optionally followed by a `-…` kebab tail.
+   * Mirror rule also lives in netlify.toml.
+   */
+  const mythPageMatch = pathname.match(/^\/daten-explorer\/m(\d+)(?:-[a-z0-9-]+)?\/?$/i);
+  if (mythPageMatch) {
+    const id = String(parseInt(mythPageMatch[1], 10));
+    return Response.redirect(
+      new URL(`/daten-explorer/?mythos=${id}`, context.url),
+      301,
+    );
+  }
+
+  /**
    * Session 3a of 2026-05 — `/haeufige-fragen/*` renamed to
    * `/meine-interessen/*` per BugHerd #6 (Fedor 2026-05-07). Mirror
    * rules also live in `netlify.toml` for paths that bypass the edge
