@@ -416,6 +416,23 @@ const translations = {
     de: 'Quellen alphabetisch sortieren (A → Z)',
     en: 'Sort sources alphabetically (A → Z)',
   },
+  // Category-rank sort affordance (added 2026-05-23) — second sort
+  // button in the QUELLEN header. Mirrors the verdict-rank affordance
+  // on the myth views: first click groups sources by their canonical
+  // source-category order (Institutionell → Persönlich); second click
+  // reverses (Persönlich → Institutionell).
+  'sources.sort.category.activate.tooltip': {
+    de: 'Nach Quellen-Kategorie sortieren (Institutionell → Persönlich)',
+    en: 'Sort by source category (Institutional → Personal)',
+  },
+  'sources.sort.category.asc.tooltip': {
+    de: 'Reihenfolge umkehren (Persönlich → Institutionell)',
+    en: 'Reverse order (Personal → Institutional)',
+  },
+  'sources.sort.category.desc.tooltip': {
+    de: 'Reihenfolge umkehren (Institutionell → Persönlich)',
+    en: 'Reverse order (Institutional → Personal)',
+  },
   'sources.sort.col.activate.tooltip': {
     de: 'Nach {col} sortieren (niedrige Werte oben). Erneut klicken: hohe Werte oben.',
     en: 'Sort by {col} (low values first). Click again: high values first.',

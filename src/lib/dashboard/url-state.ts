@@ -37,7 +37,7 @@ const ALL_SPANNWEITE_SORTS: SpannweiteSort[] = [
   'a-z', 'value-asc', 'value-desc', 'verdict-asc', 'verdict-desc',
 ];
 const ALL_SOURCES_SPANNWEITE_SORTS: SourcesSpannweiteSort[] = [
-  'a-z', 'value-asc', 'value-desc',
+  'a-z', 'value-asc', 'value-desc', 'category-asc', 'category-desc',
 ];
 
 /** Public view aliases. The four published tabs use German URL keys; legacy/internal

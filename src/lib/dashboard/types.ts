@@ -101,12 +101,21 @@ export type SpannweiteSort =
   | 'verdict-desc';
 
 /** Informationsquellen-Spannweite view sort key.
- *  No verdict-rank — sources aren't classified.
  *  - 'a-z' — alphabetical by source name.
  *  - 'value-asc' / 'value-desc' — per-column numeric sort. The column
  *    whose values drive the sort is stored separately in
- *    `sourcesSpannweiteSortColumn`. Nulls always sort last. */
-export type SourcesSpannweiteSort = 'a-z' | 'value-asc' | 'value-desc';
+ *    `sourcesSpannweiteSortColumn`. Nulls always sort last.
+ *  - 'category-asc' / 'category-desc' (2026-05-23) — group sources by
+ *    their information-source category in the canonical taxonomy order
+ *    (institutional → internet → social_media → traditional_media →
+ *    print_physical → personal), with alphabetical within-category
+ *    tie-break. Mirrors the verdict-rank affordance on the myth views. */
+export type SourcesSpannweiteSort =
+  | 'a-z'
+  | 'value-asc'
+  | 'value-desc'
+  | 'category-asc'
+  | 'category-desc';
 
 /** Information-sources Streifen view — pivot mirrors the Mythen-Streifen idiom.
  *  - 'metric' → 4 strips (Suche / Wahrnehmung / Vertrauen / Prävention),
