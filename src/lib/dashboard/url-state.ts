@@ -252,8 +252,19 @@ export function urlToState(): Partial<AppState> {
   if (vf === 'all' || ALL_VERDICTS.includes(vf as CorrectnessClass))
     state.verdictFilter = vf as VerdictFilter;
 
+  // Travel pipeline Stage 5 (2026-05-23): `?mythos={N}` now opens the
+  // myth popup as well as highlighting the row. Previously the param
+  // only set selectedMythId (highlight). External links from the retired
+  // /daten-explorer/m{NN}-{slug}/ pages route through this so the popup
+  // greets the visitor automatically.
   const myth = params.get('mythos') ?? params.get('myth');
-  if (myth) state.selectedMythId = Number(myth) || null;
+  if (myth) {
+    const id = Number(myth) || null;
+    if (id !== null) {
+      state.selectedMythId = id;
+      state.factsheetMythId = id;
+    }
+  }
 
   const sort = params.get('sort');
   if (sort && ALL_BALKEN_SORTS.includes(sort as BalkenSort)) {
