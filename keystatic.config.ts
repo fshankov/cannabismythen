@@ -878,22 +878,6 @@ const heroBlock = singleton({
       description: "Wie oft das Paar wechselt.",
       defaultValue: 6,
     }),
-    primaryCtaLabel: fields.text({
-      label: "Primärer CTA – Text",
-      defaultValue: "Quiz starten — 3 Min",
-    }),
-    primaryCtaUrl: fields.text({
-      label: "Primärer CTA – Ziel",
-      defaultValue: "/quiz/",
-    }),
-    secondaryCtaLabel: fields.text({
-      label: "Sekundärer CTA – Text",
-      defaultValue: "Alle 42 Mythen",
-    }),
-    secondaryCtaUrl: fields.text({
-      label: "Sekundärer CTA – Ziel",
-      defaultValue: "/fakten-karten/",
-    }),
   },
 });
 

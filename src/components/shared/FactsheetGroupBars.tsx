@@ -41,7 +41,6 @@ import type {
 } from '../../lib/dashboard/types';
 import { POP_REL_INVALID_GROUPS } from '../../lib/dashboard/data';
 import { t } from '../../lib/dashboard/translations';
-import Lesebeispiel from '../dashboard/Lesebeispiel';
 
 interface Props {
   /** Pre-computed metrics for the open myth — one entry per Zielgruppe.
@@ -262,11 +261,6 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
         })}
       </ul>
 
-      {adultsRow && (
-        <div className="factsheet-group-bars__lesebeispiel">
-          <Lesebeispiel metric={adultsRow} audience="adults" />
-        </div>
-      )}
     </section>
   );
 }

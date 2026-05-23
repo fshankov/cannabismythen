@@ -101,7 +101,3 @@ pairs:
     verdict: 'keine_aussage'
 
 rotationSeconds: 5
-primaryCtaLabel: 'Quiz starten — 3 Min'
-primaryCtaUrl: '/quiz/'
-secondaryCtaLabel: 'Alle 42 Mythen'
-secondaryCtaUrl: '/fakten-karten/'
