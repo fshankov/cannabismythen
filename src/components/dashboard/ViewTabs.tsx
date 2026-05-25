@@ -1,6 +1,7 @@
 import { MapPin } from 'lucide-react';
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
+import TabsBar, { type TabDef } from '../shared/TabsBar';
 
 // Public tab order — Balken / Spannweite / Tabelle ╎ Informationsquellen /
 // Informationsquellen 2 / Quellen-Tabelle.
@@ -40,37 +41,40 @@ interface Props {
 }
 
 export default function ViewTabs({ view, lang, onChange, onRundgang }: Props) {
+  // Build the localised tab list once per render. The underlying chrome
+  // (`<TabsBar>` from `src/components/shared/TabsBar.tsx`) is shared with
+  // the popup viz tabs so any future styling tweak to `.tabs-bar` /
+  // `.tab-btn` propagates automatically across both surfaces.
+  const tabDefs: TabDef<ViewTab>[] = TABS.map((tab) => {
+    const key = TAB_LABEL_KEY[tab];
+    return { key: tab, label: key ? t(key, lang) : tab };
+  });
+
   return (
-    <nav className="tabs-bar" role="tablist" aria-label="Visualization type">
-      {TABS.map((tab) => {
-        const key = TAB_LABEL_KEY[tab];
-        const label = key ? t(key, lang) : tab;
-        const isLast = tab === 'sources';
-        return (
+    <TabsBar<ViewTab>
+      tabs={tabDefs}
+      activeKey={view}
+      onChange={onChange}
+      ariaLabel="Visualization type"
+      // Insert the 24 px gap before the first source-side tab so the
+      // myth / source grouping stays visually distinct (matches the
+      // pre-extraction `tab-btn--after-divider` behaviour).
+      dividerBeforeKey="sources"
+      endSlot={
+        onRundgang ? (
           <button
-            key={tab}
-            className={`tab-btn ${view === tab ? 'active' : ''}${isLast ? ' tab-btn--after-divider' : ''}`}
-            role="tab"
-            aria-selected={view === tab}
-            onClick={() => onChange(tab)}
+            type="button"
+            className="carm-btn tabs-bar__rundgang"
+            onClick={onRundgang}
+            aria-label={t('rundgang.label', lang)}
           >
-            {label}
+            <MapPin size={14} strokeWidth={2} aria-hidden="true" />
+            <span className="tabs-bar__rundgang-label">
+              {t('rundgang.label', lang)}
+            </span>
           </button>
-        );
-      })}
-      {onRundgang && (
-        <button
-          type="button"
-          className="carm-btn tabs-bar__rundgang"
-          onClick={onRundgang}
-          aria-label={t('rundgang.label', lang)}
-        >
-          <MapPin size={14} strokeWidth={2} aria-hidden="true" />
-          <span className="tabs-bar__rundgang-label">
-            {t('rundgang.label', lang)}
-          </span>
-        </button>
-      )}
-    </nav>
+        ) : null
+      }
+    />
   );
 }
