@@ -1,10 +1,10 @@
 ---
 export const prerender = true;
 
-import Markdoc from "@markdoc/markdoc";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import MythenExplorer from "@components/dashboard/MythenExplorer";
-import { reader, getPublishedEntries } from "@lib/content";
+import { getPublishedEntries } from "@lib/content";
+import { buildMythContentMap } from "@lib/myth-content";
 // Dashboard definitions — loaded at build time from Keystatic singleton.
 // Edit via /keystatic (Dashboard – Definitionen & Glossar) → commit to
 // content/ branch → Netlify rebuilds → tooltips show updated text.
@@ -39,52 +39,12 @@ for (const [slug, entry] of factsheetEntries) {
   }
 }
 
-// Pre-render factsheet HTML for the detail panel (same approach as Quiz pages)
-const mythContentMap: Record<
-  number,
-  {
-    html: string;
-    title: string;
-    classification: string;
-    classificationLabel: string;
-    refCount: number;
-  }
-> = {};
-
-for (const [slug, entry] of factsheetEntries) {
-  const e = entry as any;
-  if (!e.mythNumber) continue;
-
-  try {
-    const fullEntry = await reader.collections.zahlenUndFakten.read(slug);
-    if (fullEntry && fullEntry.content) {
-      const { node } = await fullEntry.content();
-      const fullHtml = Markdoc.renderers.html(Markdoc.transform(node));
-
-      const refMatch = fullHtml.match(/<li>/g);
-      const refCount = refMatch ? refMatch.length : 0;
-
-      // Strip "Mythos XX:" prefix AND trailing terminal punctuation (.!?)
-      // from the display title — same canonical form used by Fakten-Karten
-      // and the quiz popup. Future surfaces that render mythContent.title
-      // get a clean statement either way.
-      const rawTitle = fullEntry.title as string;
-      const cleanTitle = rawTitle
-        .replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "")
-        .replace(/[.!?]+$/u, "");
-
-      mythContentMap[e.mythNumber] = {
-        html: fullHtml,
-        title: cleanTitle,
-        classification: (fullEntry as any).classification || "",
-        classificationLabel: (fullEntry as any).classificationLabel || "",
-        refCount,
-      };
-    }
-  } catch {
-    // If a factsheet fails to render, skip it
-  }
-}
+// Pre-render factsheet HTML for the detail panel. Travel pipeline 4B/4C
+// (2026-05-23) consolidated the per-callsite render-loop into
+// `buildMythContentMap` so the new `relatedMyths` + `faqBacklinks`
+// fields stay populated identically across Daten-Explorer, Fakten-Karten,
+// Quiz, and Meine Interessen.
+const mythContentMap = await buildMythContentMap();
 ---
 
 <BaseLayout title="Daten-Explorer" description="Interaktive Datenvisualisierung zu 42 Cannabis-Mythen — Erkunden Sie wissenschaftliche Einordnungen, Bevölkerungsdaten und Indikatoren.">

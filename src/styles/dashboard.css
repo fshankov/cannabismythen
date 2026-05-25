@@ -159,13 +159,21 @@ main:has(.carm-explorer) {
   }
 }
 
-/* ==================== TABS ====================
+/* ==================== TABS (shared primitive) ====================
    Chrome-browser style: connected rounded-top tabs that visually merge
    into the chart container below. The tab-bar's bottom border doubles
    as the chart container's top border, so the active tab "lifts" by 1px
    to break that line on its own segment.
-   --------------------------------------------- */
-.carm-explorer .tabs-bar {
+
+   These rules are intentionally UNSCOPED so the same chrome powers both
+   the Daten-Explorer's `<ViewTabs>` and the popup viz tabs (radar /
+   table) inside `<FactsheetPanel>`. Any change here propagates to both
+   surfaces — that is the design contract of `<TabsBar>` in
+   `src/components/shared/TabsBar.tsx`. Dashboard-only behaviour
+   (sticky-on-mobile, the Rundgang chip alignment, the 1024px size-down)
+   stays scoped under `.carm-explorer` below.
+   ----------------------------------------------------------------- */
+.tabs-bar {
   display: flex;
   align-items: flex-end;
   gap: 2px;
@@ -179,11 +187,11 @@ main:has(.carm-explorer) {
   z-index: 1;
 }
 
-.carm-explorer .tabs-bar::-webkit-scrollbar {
+.tabs-bar::-webkit-scrollbar {
   display: none;
 }
 
-.carm-explorer .tab-btn {
+.tab-btn {
   padding: 10px 18px;
   border: 1px solid transparent;
   border-radius: 10px 10px 0 0;
@@ -200,12 +208,12 @@ main:has(.carm-explorer) {
   font-family: var(--font-sans);
 }
 
-.carm-explorer .tab-btn:hover {
+.tab-btn:hover {
   background: var(--color-surface-raised, #f8fafc);
   color: var(--color-text);
 }
 
-.carm-explorer .tab-btn.active {
+.tab-btn.active {
   background: white;
   color: var(--color-text);
   border-color: var(--color-border);
@@ -214,15 +222,17 @@ main:has(.carm-explorer) {
   z-index: 2;
 }
 
-.carm-explorer .tab-btn:focus-visible {
+.tab-btn:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
 }
 
 /* Divider before the Informationsquellen tab — replaces the previous
    left-border+padding combo with a flat 24px gap so the new tab shape
-   reads cleanly. */
-.carm-explorer .tab-btn--after-divider {
+   reads cleanly. Stays in the shared primitive: the popup just doesn't
+   set `dividerBeforeKey`, so the modifier class is never applied
+   there. */
+.tab-btn--after-divider {
   margin-left: 24px;
 }
 
@@ -5974,10 +5984,12 @@ body.carm-modal-open {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   FactsheetGroupBars — interactive replacement for the static
-   "Daten nach Zielgruppen" markdown table inside the popup.
-   Same rules as in quiz.css — duplicated here because dashboard pages
-   don't load quiz.css and vice-versa.
+   FactsheetGroupBars — interactive 2-tab strip (radar + table) that
+   replaces the static "Daten nach Zielgruppen" markdown table inside
+   the popup. The tab chrome reuses the shared `<TabsBar>` primitive
+   (same `.tabs-bar` / `.tab-btn` rules the Daten-Explorer uses); the
+   per-popup overrides below shrink the buttons for the narrow popup
+   width and remove the dashboard-only sticky / Rundgang behaviour.
    ═══════════════════════════════════════════════════════════════ */
 
 .factsheet-group-bars {
@@ -5985,119 +5997,316 @@ body.carm-modal-open {
   margin-bottom: 12px;
 }
 
-.factsheet-group-bars__pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 8px 0 14px;
+/* Tab strip wrapper — the only popup-specific tweak is shrinking the
+   button padding/font so 2 tabs sit comfortably inside the 480 px
+   panel. All other tab visuals (rounded tops, active-lift, hover) come
+   from the unscoped `.tab-btn` rules near the top of this file. */
+.factsheet-group-bars__tabs {
+  margin-top: 8px;
 }
 
-.factsheet-group-bars__pill {
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border, #e2e8f0);
-  background: var(--color-surface, #fff);
-  color: var(--color-text-secondary, #475569);
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+.factsheet-group-bars__tabs .tab-btn {
+  padding: 8px 14px;
+  font-size: 0.78rem;
 }
 
-.factsheet-group-bars__pill:hover {
-  border-color: var(--color-text-secondary, #475569);
-  color: var(--color-text, #0f172a);
+.factsheet-group-bars__viz {
+  padding-top: 12px;
 }
 
-.factsheet-group-bars__pill:focus-visible {
-  outline: 2px solid var(--color-accent, #2d6a4f);
-  outline-offset: 2px;
-}
+/* ─── Radar tab — FactsheetGroupRadar (2026-05-25) ──────────────────
+   5-edge polygon (one edge per indicator), 5 group lines overlaid in
+   the per-group colours from --audience-* in global.css. Legend above
+   the chart uses the audience icon coloured to match the line. */
 
-.factsheet-group-bars__pill--active,
-.factsheet-group-bars__pill--active:hover {
-  background: var(--color-text, #0f172a);
-  border-color: var(--color-text, #0f172a);
-  color: var(--color-surface, #fff);
-}
-
-.factsheet-group-bars__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.factsheet-group-radar {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.factsheet-group-bars__row {
-  display: grid;
-  grid-template-columns: minmax(110px, 38%) 1fr 44px;
+.factsheet-group-radar__legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 10px;
+}
+
+.factsheet-group-radar__legend-chip {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  /* color comes from inline style (per-group). */
 }
 
-.factsheet-group-bars__group-label {
-  font-size: 0.78rem;
-  color: var(--color-text, #0f172a);
-  line-height: 1.25;
-  overflow-wrap: anywhere;
-}
-
-.factsheet-group-bars__track {
-  position: relative;
-  width: 100%;
-  height: 14px;
+.factsheet-group-radar__legend-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
   border-radius: 999px;
-  overflow: hidden;
-}
-
-.factsheet-group-bars__fill {
-  height: 100%;
-  border-radius: 999px;
-  transition: width 0.25s ease;
-}
-
-.factsheet-group-bars__value {
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.factsheet-group-bars__value--na {
-  color: var(--color-text-muted, #64748b);
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font-size: 0.72rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+
+.factsheet-group-radar__legend-button:hover,
+.factsheet-group-radar__legend-button:focus-visible {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+  outline: none;
+}
+
+.factsheet-group-radar__legend-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.factsheet-group-radar__legend-label {
+  letter-spacing: 0.01em;
+}
+
+/* The chart container is a near-square: ECharts auto-sizes to fill
+   100% × 100%, so we lock an aspect ratio + a max height to keep the
+   polygon regular across desktop popup (480 px) and mobile sheet
+   (375 px). */
+.factsheet-group-radar__chart {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 320px;
+  margin: 0 auto;
+}
+
+/* ─── Table tab — FactsheetGroupTable (2026-05-25) ──────────────────
+   Clean 6×6 number table. No verdict-tinted mini-bars per cell (the
+   radar tab carries the "shape" reading) — this tab is the scannable
+   lookup. Audience icons in column headers, indicator icons in row
+   headers, integer values in cells ("k. A." italic for invalid combos). */
+
+.factsheet-group-table-wrap {
+  margin-top: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.factsheet-group-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  font-size: 0.8rem;
+  color: var(--color-text, #0f172a);
+}
+
+.factsheet-group-table th,
+.factsheet-group-table td {
+  padding: 8px 4px;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.factsheet-group-table tbody tr:last-child th,
+.factsheet-group-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.factsheet-group-table__corner {
+  width: 32%;
+  background: transparent;
+}
+
+.factsheet-group-table__col-header {
+  font-weight: 600;
+  color: var(--color-text-secondary, #475569);
+  line-height: 1.1;
+}
+
+.factsheet-group-table__col-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+  color: var(--color-text, #0f172a);
+}
+
+.factsheet-group-table__col-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.factsheet-group-table__row-header {
+  font-weight: 600;
+  font-size: 0.74rem;
+  text-align: left;
+  padding-left: 2px;
+  padding-right: 8px;
+  color: var(--color-text, #0f172a);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.factsheet-group-table__row-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary, #475569);
+  flex-shrink: 0;
+}
+
+.factsheet-group-table__row-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.factsheet-group-table__cell {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.factsheet-group-table__na {
+  color: var(--color-text-muted, #64748b);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 0.74rem;
   cursor: help;
 }
 
-.factsheet-group-bars__hint {
-  margin: 12px 0 0;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--color-text-secondary, #475569);
-}
-
-.factsheet-group-bars__hint-label {
-  font-weight: 700;
-  color: var(--color-text, #0f172a);
-}
-
 @media (max-width: 480px) {
-  .factsheet-group-bars__row {
-    grid-template-columns: minmax(90px, 42%) 1fr 40px;
-    gap: 8px;
+  .factsheet-group-radar__chart {
+    max-height: 260px;
+  }
+  .factsheet-group-radar__legend-button {
+    padding: 3px 6px;
+    font-size: 0.68rem;
   }
 
-  .factsheet-group-bars__group-label {
-    font-size: 0.72rem;
+  .factsheet-group-table {
+    font-size: 0.74rem;
+  }
+  .factsheet-group-table th,
+  .factsheet-group-table td {
+    padding: 6px 2px;
+  }
+  .factsheet-group-table__col-label {
+    font-size: 0.62rem;
+  }
+  .factsheet-group-table__row-header {
+    font-size: 0.68rem;
+    gap: 4px;
+  }
+  .factsheet-group-table__corner {
+    width: 28%;
   }
 
-  .factsheet-group-bars__track {
-    height: 12px;
+  .factsheet-group-bars__tabs .tab-btn {
+    padding: 7px 12px;
+    font-size: 0.74rem;
   }
 }
+
+/* ─── Popup extras: Related Myths + FAQ backlinks (travel pipeline 4B/4C, 2026-05-23) ──────
+   Two collapsed <details> blocks rendered at the bottom of the popup.
+   Both closed by default; clicking the summary expands. List rows reuse
+   the verdict-arrow glyph (Related Myths) or a small audience-code chip
+   (FAQ backlinks) so the eye can scan the section without reading each
+   row. */
+
+.factsheet-panel__extras {
+  margin-top: 10px;
+}
+
+.factsheet-panel__extras-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.factsheet-panel__extras-item {
+  margin: 0;
+}
+
+.factsheet-panel__extras-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  text-align: left;
+  color: var(--color-text, #0f172a);
+  text-decoration: none;
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.factsheet-panel__extras-link:hover,
+.factsheet-panel__extras-link:focus-visible {
+  background: var(--color-surface-soft, rgba(15, 23, 42, 0.04));
+  border-color: var(--color-border, #e2e8f0);
+  outline: none;
+}
+
+.factsheet-panel__extras-link--static {
+  cursor: default;
+}
+
+.factsheet-panel__extras-link--static:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+.factsheet-panel__extras-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.factsheet-panel__extras-audience {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary, #475569);
+  background: var(--color-surface-soft, rgba(15, 23, 42, 0.06));
+  cursor: help;
+}
+
+.factsheet-panel__extras-audience--eltern { color: var(--audience-eltern, #b91c1c); }
+.factsheet-panel__extras-audience--jugendliche { color: var(--audience-jugendliche, #1d4ed8); }
+.factsheet-panel__extras-audience--konsumierende { color: var(--audience-konsumierende, #047857); }
+.factsheet-panel__extras-audience--lehrkraefte { color: var(--audience-lehrkraefte, #b45309); }
+.factsheet-panel__extras-audience--fachkraefte { color: var(--audience-fachkraefte, #6d28d9); }
 
 /* ─── Spannweite v3 — single-picked-value grid with bar accent ──────
    Rows = myths, columns = 5 Indikatoren or 5 Bevölkerungsgruppen.
@@ -6440,29 +6649,70 @@ body.carm-modal-open {
    out of the narrow 28-px lane. Title attribute carries the full
    column name for hover discovery. */
 .carm-spannweite__cell--hidden {
-  padding: 0;
+  padding: 4px 0;
   border: 1px solid var(--color-border, #cbd5e1);
   background: #f8fafc;
   color: var(--color-text-muted, #64748b);
   cursor: pointer;
+  /* The vertical label fills the whole header lane — the chevron
+     affordance is supplied by the cursor + hover-tint + title tooltip,
+     not a separate glyph, so every pixel of vertical space goes to
+     the column name. */
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   overflow: hidden;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
-.carm-spannweite__cell--hidden:hover {
+.carm-spannweite__cell--hidden:hover,
+.carm-spannweite__cell--hidden:focus-visible {
   background: var(--color-surface, #ffffff);
+  color: var(--color-text, #0f172a);
+  border-color: var(--color-text-secondary, #64748b);
+  outline: none;
+}
+
+/* Travel pipeline 3D (2026-05-23) — vertical column-name label inside
+   the collapsed lane. `writing-mode: vertical-rl` + 180deg rotation
+   yields a label readable bottom-to-top (the canonical print convention
+   for vertical text). Truncated with ellipsis if the column header
+   row is too short for the full name; `title` on the parent button
+   surfaces the full label on hover. */
+.carm-spannweite__hidden-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: var(--color-text-secondary, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-block-size: 100%;
+  transition: color 160ms ease;
+}
+
+.carm-spannweite__cell--hidden:hover .carm-spannweite__hidden-label,
+.carm-spannweite__cell--hidden:focus-visible .carm-spannweite__hidden-label {
   color: var(--color-text, #0f172a);
 }
 
+/* Chevron retained as a fallback affordance for screen readers / users
+   who hide CSS — the label is the canonical click-target now. Visually
+   hidden so the vertical name owns the full lane height. */
 .carm-spannweite__hidden-chev {
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-  color: inherit;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Hidden body cell: subtle striped column behind the body rows. */
