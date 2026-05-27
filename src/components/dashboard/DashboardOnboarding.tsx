@@ -27,6 +27,7 @@ import { createPortal } from 'react-dom';
 import { MapPin, PlayCircle, X } from 'lucide-react';
 import { driver, type Driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
+import type { RundgangScript } from '../../lib/dashboard/rundgang-scripts';
 
 const STORAGE_KEY = 'carm-onboarding-strips-v1';
 
@@ -45,6 +46,10 @@ interface Props {
    *  trigger (so the Rundgang button in the tabs row can live on every
    *  tab) and just needs to increment to invoke us. */
   openTrigger?: number;
+  /** Optional per-tab tour. When provided with non-empty `steps`, Driver.js
+   *  drives those steps instead of the hardcoded Streifen tour. `null` (or
+   *  empty steps) falls back to the legacy behaviour. */
+  script?: RundgangScript | null;
 }
 
 /**
@@ -71,7 +76,7 @@ function safeQuery(selector: string): Element | null {
   }
 }
 
-export default function DashboardOnboarding({ active, openTrigger }: Props) {
+export default function DashboardOnboarding({ active, openTrigger, script }: Props) {
   const [mode, setMode] = useState<Mode>('closed');
   const [hasSeen, setHasSeen] = useState<boolean>(true); // start true to avoid SSR flash
   /** Modal a11y refs — restore focus to the trigger on close, and focus
@@ -169,6 +174,9 @@ export default function DashboardOnboarding({ active, openTrigger }: Props) {
 
   /** Built lazily so we don't pay the Driver.js init cost unless the tour runs. */
   const buildTour = useCallback((): Driver => {
+    // Per-tab script wins when present; otherwise fall back to the legacy
+    // Streifen-anchored steps below.
+    const perTabSteps = script && script.steps.length > 0 ? script.steps : null;
     const tour = driver({
       showProgress: true,
       allowClose: true,
@@ -189,7 +197,7 @@ export default function DashboardOnboarding({ active, openTrigger }: Props) {
         persistDismiss();
         tour.destroy();
       },
-      steps: [
+      steps: perTabSteps ?? [
         {
           element: TOUR_SELECTORS.tabs,
           popover: {
@@ -225,7 +233,7 @@ export default function DashboardOnboarding({ active, openTrigger }: Props) {
       ],
     });
     return tour;
-  }, [persistDismiss]);
+  }, [persistDismiss, script]);
 
   const startTour = useCallback(() => {
     // Defer to next tick so the welcome card can unmount cleanly first.

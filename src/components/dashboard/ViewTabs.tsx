@@ -1,4 +1,3 @@
-import { MapPin } from 'lucide-react';
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import TabsBar, { type TabDef } from '../shared/TabsBar';
@@ -33,14 +32,15 @@ interface Props {
   view: ViewTab;
   lang: Lang;
   onChange: (v: ViewTab) => void;
-  /** Click handler for the Rundgang chip on the right of the tabs row.
-   *  Stage 1 of the Daten-Explorer refactor moved the Rundgang trigger
-   *  out of the floating <Fab> and the StickyToolbar's end slot into
-   *  here so all tab-level affordances live in one row. */
+  /** Kept for back-compat with any caller still passing the prop. The
+   *  Rundgang trigger now lives inside `<ToolbarRow>`'s actions slot as
+   *  a green circular badge (see `.carm-rundgang-badge` in
+   *  `MythenExplorer.tsx`'s `sharedActions`), so this prop is intentionally
+   *  unused. Safe to remove from callers once they've been updated. */
   onRundgang?: () => void;
 }
 
-export default function ViewTabs({ view, lang, onChange, onRundgang }: Props) {
+export default function ViewTabs({ view, lang, onChange }: Props) {
   // Build the localised tab list once per render. The underlying chrome
   // (`<TabsBar>` from `src/components/shared/TabsBar.tsx`) is shared with
   // the popup viz tabs so any future styling tweak to `.tabs-bar` /
@@ -60,21 +60,6 @@ export default function ViewTabs({ view, lang, onChange, onRundgang }: Props) {
       // myth / source grouping stays visually distinct (matches the
       // pre-extraction `tab-btn--after-divider` behaviour).
       dividerBeforeKey="sources"
-      endSlot={
-        onRundgang ? (
-          <button
-            type="button"
-            className="carm-btn tabs-bar__rundgang"
-            onClick={onRundgang}
-            aria-label={t('rundgang.label', lang)}
-          >
-            <MapPin size={14} strokeWidth={2} aria-hidden="true" />
-            <span className="tabs-bar__rundgang-label">
-              {t('rundgang.label', lang)}
-            </span>
-          </button>
-        ) : null
-      }
     />
   );
 }

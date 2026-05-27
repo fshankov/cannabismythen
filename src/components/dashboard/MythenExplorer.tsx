@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Download, Filter,
+  Download, Filter, HelpCircle,
   Eye, TrendingUp, Target, Shield, Globe,
   Baby, Cannabis, GraduationCap, UsersRound,
 } from 'lucide-react';
@@ -25,6 +25,7 @@ import {
 } from '../../lib/dashboard/data';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import { urlToState, getDefaultState, pushState } from '../../lib/dashboard/url-state';
+import { RUNDGANG_SCRIPTS } from '../../lib/dashboard/rundgang-scripts';
 import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
 import VerdictTags from './VerdictTags';
@@ -194,12 +195,14 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   /** Counter that, when bumped, opens the DashboardOnboarding modal. */
   const [rundgangSignal, setRundgangSignal] = useState(0);
   const handleRundgang = useCallback(() => {
-    // The Driver.js tour anchors to Streifen DOM; switch to that tab
-    // first so the modal's tour option lands on a working layout when
-    // the user starts it.
-    setState((prev) =>
-      prev.view === 'strips' ? prev : { ...prev, view: 'strips' as const },
-    );
+    // If the active tab has its own Rundgang script in the registry, the
+    // tour anchors to that tab's DOM — no view switch needed. Otherwise
+    // fall back to the legacy Streifen-anchored tour (current behaviour).
+    setState((prev) => {
+      const script = RUNDGANG_SCRIPTS[prev.view];
+      if (script && script.steps.length > 0) return prev;
+      return prev.view === 'strips' ? prev : { ...prev, view: 'strips' as const };
+    });
     setRundgangSignal((n) => n + 1);
   }, []);
 
@@ -429,6 +432,15 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         )}
       </button>
       {exportOnlyAction}
+      <button
+        type="button"
+        className="carm-rundgang-badge"
+        onClick={handleRundgang}
+        aria-label={t('rundgang.label', 'de')}
+        title={t('rundgang.label', 'de')}
+      >
+        <HelpCircle size={20} strokeWidth={2} aria-hidden="true" />
+      </button>
     </>
   );
 
@@ -440,19 +452,37 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       <div className="app-layout">
         {/* First-visit guidance for the Streifen view: welcome card +
             opt-in 4-step Driver.js tour. The persistent Rundgang
-            button moved to the ViewTabs bar so it's visible on every
-            tab — `rundgangSignal` opens the modal regardless of the
-            active view. */}
+            button now lives inside the ToolbarRow's `actions` slot as
+            the green circular badge — `rundgangSignal` opens the modal
+            regardless of the active view. The optional `script` prop
+            picks up a per-tab tour from RUNDGANG_SCRIPTS when one is
+            registered; null falls back to the legacy Streifen tour. */}
         <DashboardOnboarding
           active={state.view === 'strips'}
           openTrigger={rundgangSignal}
+          script={RUNDGANG_SCRIPTS[state.view]}
         />
+
+        {/* Newton Variante A intro paragraph (AI draft, see ISD review).
+            Honest population framing per CLAUDE.md; cross-references the
+            project background + Fakten-Karten; nudges visitors toward
+            the green Rundgang badge in the toolbar. */}
+        <section className="carm-explorer__intro" aria-label="Daten-Explorer — Einleitung">
+          <p>
+            <strong>Daten-Explorer.</strong> Hier kannst du die Forschungsdaten erkunden,
+            die im CaRM-Projekt 2024 mit rund 2.097 Erwachsenen (18–70) in Deutschland
+            erhoben wurden. Wie die Daten zustande kamen, steht im{' '}
+            <a href="/projekt/">Projekt-Hintergrund</a>; ausführliche Erklärungen zu
+            einzelnen Mythen findest du in den{' '}
+            <a href="/fakten-karten/">Fakten-Karten</a>. Für jeden Tab gibt es einen
+            vierstufigen Rundgang — tippe auf den grünen Kreis, wenn du Hilfe brauchst.
+          </p>
+        </section>
 
         <ViewTabs
           view={state.view}
           lang={'de'}
           onChange={(v: ViewTab) => update('view', v)}
-          onRundgang={handleRundgang}
         />
 
         {isModernView && (() => {

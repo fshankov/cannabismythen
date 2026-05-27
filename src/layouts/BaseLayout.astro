@@ -81,13 +81,21 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         site create Asana tasks (project CannabisMythen, gid 1214704634010891);
         replies in Asana prefixed with @feedbucket post back to the widget.
         Replaces the previous BugHerd Phase 1 install (Studierendentest, Mai
-        2026) — historical pins are triaged in _local/BugHerd/triage.md.
+        2026) — historical pins are triaged in _local/archive/bugherd/triage.md.
 
         The install IIFE is wrapped in a path check so reviewers can't pin on
         the login gate, API routes, or the Keystatic CMS. Feedbucket's
         documented init doesn't expose a runtime hide/show hook, so
         conditional injection is the equivalent of the previous BugHerd
-        post-load hide pattern. */}
+        post-load hide pattern.
+
+        ⚠ DISABLED 2026-05-27 — Feedbucket trial ended. To re-enable: remove
+        the JSX-comment wrapper (the FEEDBUCKET-DISABLED-START / -END marker
+        lines) around the script block below. The vendor key
+        (lpuJyzKJ9oT0o2uKlRSk) and Query Trigger secret (cm-feedback-2026 in
+        the footer block further down) stay valid as long as Fedor's
+        Feedbucket project isn't deleted. */}
+    {/* FEEDBUCKET-DISABLED-START
     <script is:inline>
       (function (k) {
         var path = window.location.pathname;
@@ -104,6 +112,32 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         s.dataset.feedbucket = k;
         document.head.appendChild(s);
       })("lpuJyzKJ9oT0o2uKlRSk");
+    </script>
+    FEEDBUCKET-DISABLED-END */}
+
+    {/* Marker.io feedback widget — installed 2026-05-27 for trial evaluation.
+        Vendor snippet from edge.marker.io with the project key Fedor provided.
+        The vendor IIFE is wrapped in the same /login + /api/* + /keystatic/*
+        path check we used for BugHerd and Feedbucket, so reviewers can't pin
+        on the login gate, API routes, or the Keystatic CMS. Marker.io exposes
+        a Marker.hide()/Marker.show() JS API natively, but conditional script
+        injection is cleaner and matches the existing pattern. */}
+    <script is:inline>
+      (function () {
+        var path = window.location.pathname;
+        if (
+          path === "/login" ||
+          path.startsWith("/api/") ||
+          path.startsWith("/keystatic/")
+        ) {
+          return;
+        }
+        window.markerConfig = {
+          project: '6a17077eb556eed3d7a4403d',
+          source: 'snippet'
+        };
+        !function(e,r,a){if(!e.__Marker){e.__Marker={};var t=[],n={__cs:t};["show","hide","isVisible","capture","cancelCapture","unload","reload","isExtensionInstalled","setReporter","clearReporter","setCustomData","on","off"].forEach(function(e){n[e]=function(){var r=Array.prototype.slice.call(arguments);r.unshift(e),t.push(r)}}),e.Marker=n;var s=r.createElement("script");s.async=1,s.src="https://edge.marker.io/latest/shim.js";var i=r.getElementsByTagName("script")[0];i.parentNode.insertBefore(s,i)}}(window,document);
+      })();
     </script>
   </head>
   <body class={heroMode ? "has-hero" : ""}>
@@ -122,6 +156,13 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       <slot />
     </main>
     <footer id="main-content">
+      <p>&copy; {new Date().getFullYear()} CaRM-Projekt</p>
+      {/* ⚠ FEEDBUCKET DISABLED 2026-05-27 — trial ended. To re-enable:
+          replace the simple <p> above with the commented <p> below AND
+          uncomment the trigger <script> further down (search for
+          FEEDBUCKET-DISABLED-START in this file). All three pieces (head
+          script, footer pill, trigger script) need to flip back together. */}
+      {/* FEEDBUCKET-DISABLED-START
       <p>
         &copy; {new Date().getFullYear()} CaRM-Projekt
         <span class="footer-sep" aria-hidden="true">·</span>
@@ -132,9 +173,10 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
           rel="nofollow"
         >Feedback geben</a>
       </p>
+      FEEDBUCKET-DISABLED-END */}
     </footer>
 
-    {/* Reviewer-only feedback trigger.
+    {/* Reviewer-only feedback trigger — DISABLED 2026-05-27 (trial ended).
         Clicking the footer link reloads the current page with
         ?feedbucketKey=<secret> appended; Feedbucket's Query Trigger
         (configured in the project's Widget settings) then activates the
@@ -145,6 +187,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         (e.g. /quiz/?theme=… stays intact, just gains feedbucketKey). The
         secret value here MUST match what's configured in the Feedbucket
         project dashboard. If you rotate the secret, update both places. */}
+    {/* FEEDBUCKET-DISABLED-START
     <script is:inline>
       (function () {
         var a = document.getElementById('footer-feedback-trigger');
@@ -159,6 +202,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         }
       })();
     </script>
+    FEEDBUCKET-DISABLED-END */}
 
     {/* Scroll-aware nav: adds .is-scrolled once user leaves the hero zone */}
     <script is:inline>

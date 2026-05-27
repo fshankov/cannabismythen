@@ -30,7 +30,11 @@ main:has(.carm-explorer) {
   /* Layout */
   --radius: 8px;
   --radius-sm: 4px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
+  /* Soft elevation used on toolbar chips, search input, and the Rundgang
+     badge. Matches the Figma frame (2026-05-27 refresh). */
+  --shadow-chip: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -192,11 +196,15 @@ main:has(.carm-explorer) {
 }
 
 .tab-btn {
-  padding: 10px 18px;
+  /* 2026-05-27 refresh: bumped to 44px touch target with 14px label so
+     the tabs match the Figma frame's bigger rhythm. Mobile override
+     below 1024px drops back to a compact 36/40px scale. */
+  min-height: 44px;
+  padding: 12px 24px;
   border: 1px solid transparent;
   border-radius: 10px 10px 0 0;
   background: var(--color-bg-subtle, #eeeee8);
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -236,27 +244,10 @@ main:has(.carm-explorer) {
   margin-left: 24px;
 }
 
-/* Rundgang chip on the right of the tabs row (Stage 1 of the
-   Daten-Explorer refactor — the floating <Fab> was deleted and the
-   StickyToolbar Rundgang button was relocated here). Stage 6: visual
-   properties come from the unified .carm-btn rule; this block only
-   handles right-alignment + the mobile icon-only collapse. */
-.carm-explorer .tabs-bar__rundgang {
-  margin-left: auto;
-  align-self: center;
-  flex: 0 0 auto;
-}
-
-/* Mobile: keep the chip square (icon-only) so the tab row can still
-   scroll horizontally without the chip eating tab width. */
-@media (max-width: 639px) {
-  .carm-explorer .tabs-bar__rundgang {
-    padding: 0 10px;
-  }
-  .carm-explorer .tabs-bar__rundgang-label {
-    display: none;
-  }
-}
+/* (Removed 2026-05-27) — the Rundgang chip moved out of the tabs row
+   into the ToolbarRow's actions slot as the green circular badge
+   `.carm-rundgang-badge` below. The right-alignment and mobile collapse
+   rules that previously lived here are obsolete. */
 
 /* ==================== UTILITY BAR ==================== */
 .carm-explorer .utility-bar {
@@ -334,7 +325,10 @@ main:has(.carm-explorer) {
   min-height: 400px;
   border: 1px solid var(--color-border);
   border-top: none;
-  border-radius: 0 0 var(--radius) var(--radius);
+  /* Top-left stays flat so the active Chrome-style tab visually merges
+     with the card; the other three corners pick up the larger 16px
+     radius from the 2026-05-27 Figma refresh. */
+  border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg);
   background: white;
   overflow: hidden;
 }
@@ -810,15 +804,19 @@ main:has(.carm-explorer) {
 }
 .carm-myth-search-input {
   width: 220px;
-  height: 32px;
-  padding: 0 28px 0 12px;
+  /* 2026-05-27 refresh: aligned to the unified 44px chip baseline so the
+     toolbar reads on a single horizontal rhythm. 8px radius + soft chip
+     shadow match `.carm-btn` below. */
+  height: 44px;
+  padding: 0 36px 0 14px;
   border: 1px solid var(--color-border, #cbd5e1);
-  border-radius: 18px;
+  border-radius: 8px;
   background: var(--color-surface, #ffffff);
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--color-text, #0f172a);
   outline: none;
+  box-shadow: var(--shadow-chip);
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 .carm-myth-search-input::placeholder {
@@ -830,11 +828,11 @@ main:has(.carm-explorer) {
 }
 .carm-myth-search-clear {
   position: absolute;
-  right: 4px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1646,8 +1644,12 @@ main:has(.carm-explorer) {
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
   .carm-explorer .tab-btn {
-    padding: 10px 12px;
-    font-size: 0.78rem;
+    /* 2026-05-27 refresh — keeps the desktop chip 44px feel but drops the
+       tab back to a compact 38/40px on tablet so the tab row doesn't
+       crowd the toolbar below. */
+    min-height: 40px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
   }
 
   .carm-explorer .data-table .myth-cell {
@@ -4825,10 +4827,12 @@ body.carm-modal-open {
   color: var(--color-text-muted, #718096);
 }
 
-/* Stage 6 — single unified chip for every non-tab toolbar control.
-   `.carm-btn`, `.carm-picker__trigger`, and `.carm-pivot-toggle__btn`
-   all share this visual contract (36px height, 8px radius, 1px border,
-   white bg, accent on active). Tabs stay Chrome-style elsewhere. */
+/* 2026-05-27 refresh — single unified chip for every non-tab toolbar
+   control. `.carm-btn`, `.carm-picker__trigger`, and `.carm-pivot-toggle__btn`
+   all share this visual contract (44px height, 8px radius, 1px border,
+   white bg, soft chip shadow, accent on active). Tabs stay Chrome-style
+   elsewhere. Below 1024px the override later in this file drops to a
+   compact 36px / 14px so tablets and phones don't lose horizontal room. */
 .carm-btn,
 .carm-picker__trigger,
 .carm-pivot-toggle__btn {
@@ -4837,18 +4841,19 @@ body.carm-modal-open {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 12px;
+  height: 44px;
+  padding: 0 16px;
   border-radius: 8px;
   border: 1px solid var(--color-border, #e2e8f0);
   background: var(--color-surface, #ffffff);
   color: var(--color-text, #1a1a2e);
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  box-shadow: var(--shadow-chip);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .carm-btn:hover,
@@ -4881,6 +4886,106 @@ body.carm-modal-open {
    stragglers that still pass it. The base `.carm-btn` IS the ghost
    appearance. Safe to drop the modifier in JSX. */
 .carm-btn--ghost { /* alias of .carm-btn — Stage 6 unified chip */ }
+
+/* Green circular Rundgang badge (2026-05-27 refresh) — replaces the
+   pill-shaped "Rundgang" chip that used to sit at the right end of the
+   tabs row. Now lives in the ToolbarRow's actions slot alongside
+   Filter / Exportieren. Per-tab tutorial picker; click hands off to
+   `handleRundgang` in MythenExplorer, which consults RUNDGANG_SCRIPTS
+   and either fires the tab-specific tour or falls back to the legacy
+   Streifen tour. */
+.carm-rundgang-badge {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-accent, #2d6a4f);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25);
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.carm-rundgang-badge:hover {
+  background: var(--color-accent-hover, #1f4f3a);
+  transform: scale(1.04);
+}
+.carm-rundgang-badge:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .carm-rundgang-badge { transition: background 0.15s ease, box-shadow 0.15s ease; }
+  .carm-rundgang-badge:hover { transform: none; }
+}
+
+/* Daten-Explorer intro paragraph (2026-05-27 refresh) — sits between
+   `<DashboardOnboarding>` and `<ViewTabs>`, invites the visitor to
+   explore the data and links across to the project background +
+   Fakten-Karten. AI-drafted Newton-Variante-A German; flagged for ISD
+   review post-deploy (see MythenExplorer.tsx). */
+.carm-explorer__intro {
+  margin: 8px 4px 16px;
+  padding: 0;
+  max-width: 72ch;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+.carm-explorer__intro p { margin: 0; }
+.carm-explorer__intro strong {
+  color: var(--color-text);
+  font-weight: 700;
+}
+.carm-explorer__intro a {
+  color: var(--color-accent, #2d6a4f);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+.carm-explorer__intro a:hover {
+  color: var(--color-accent-hover, #1f4f3a);
+}
+
+/* 2026-05-27 refresh — drop the chip + tab scale on tablet/phone so the
+   toolbar still fits one row above 640px and the badge stays a
+   touch-friendly size. The toolbar-row layout already has its own
+   1024px breakpoint elsewhere (sticky positioning, 2-row stacking);
+   this block only adjusts the unified chip dimensions. */
+@media (max-width: 1024px) {
+  .carm-btn,
+  .carm-picker__trigger,
+  .carm-pivot-toggle__btn {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 0.875rem;
+  }
+  .carm-myth-search-input {
+    height: 36px;
+    font-size: 0.875rem;
+    padding: 0 32px 0 12px;
+  }
+  .carm-myth-search-clear {
+    width: 22px;
+    height: 22px;
+    right: 6px;
+  }
+  .carm-rundgang-badge {
+    width: 40px;
+    height: 40px;
+  }
+}
+@media (max-width: 640px) {
+  .carm-explorer__intro {
+    margin: 4px 0 12px;
+    font-size: 0.9rem;
+  }
+}
 
 /* Session 4a (BugHerd #48) — Sort control group on Balken / Balken 2.
    Two side-by-side buttons (Wert direction toggle + Urteil activator)
