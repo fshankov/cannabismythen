@@ -29,28 +29,33 @@ const translations: Record<Lang, Record<string, string>> = {
 
     // ── Quiz theme titles ─────────────────────────────────────────────
     "quiz.medizin.title": "Medizinischer und therapeutischer Nutzen",
+    // EN: "How well do you know the research findings on the medical use of cannabis?"
     "quiz.medizin.subtitle":
-      "Was wissen Sie über den therapeutischen Nutzen von Cannabis?",
+      "Wie gut kennst du die Forschungsbefunde zum medizinischen Einsatz von Cannabis?",
     "quiz.medizin.description":
       "Schmerzlinderung, Spastiken, Schlaf, Angst, Depressionen und ADHS.",
     "quiz.risiken.title": "Risiken für Entwicklung, Körper und Psyche",
+    // EN: "How well do you know the scientific findings on physical and mental health risks?"
     "quiz.risiken.subtitle":
-      "Was wissen Sie über die gesundheitlichen Risiken von Cannabis?",
+      "Wie gut kennst du die wissenschaftlichen Erkenntnisse zu körperlichen und psychischen Risiken?",
     "quiz.risiken.description":
       "Entwicklung, Körper, Psyche — von Fötus bis Sucht und Suizidgedanken.",
     "quiz.stimmung.title": "Wirkung auf Stimmung und Wahrnehmung",
+    // EN: "What do you know about how cannabis affects mood and perception?"
     "quiz.stimmung.subtitle":
-      "Was wissen Sie über die Wirkungen von Cannabis auf Stimmung und Sinne?",
+      "Was weißt du darüber, wie Cannabis Stimmung und Wahrnehmung beeinflusst?",
     "quiz.stimmung.description":
       "Entspannung, Kreativität, Motivation, Aggression und Wahrnehmung.",
     "quiz.gesellschaft.title": "Soziales, Bevölkerung und Gesetzgebung",
+    // EN: "What do you know about cannabis, society and the new legal situation?"
     "quiz.gesellschaft.subtitle":
-      "Was wissen Sie über Cannabis in der Gesellschaft?",
+      "Was weißt du über Cannabis, Gesellschaft und die neue Gesetzeslage?",
     "quiz.gesellschaft.description":
       "Verbreitung, Verkehr, soziale Folgen, Legalisierung und Vorurteile.",
     "quiz.gefaehrlichkeit.title": "Allgemeine Einschätzung der Gefährlichkeit",
+    // EN: "How do you assess the general risks of cannabis — and where does research stand?"
     "quiz.gefaehrlichkeit.subtitle":
-      "Was wissen Sie über die allgemeine Gefährlichkeit von Cannabis?",
+      "Wie schätzt du die Gefährlichkeit von Cannabis ein — und was zeigt die Forschung?",
     "quiz.gefaehrlichkeit.description":
       "Alkohol-Vergleich, Harmlosigkeit, Heranwachsende, Dosierung und Mischkonsum.",
     // Stage 6 — Schnellcheck (dynamic 7-myth deck across all themes)
@@ -342,8 +347,9 @@ const translations: Record<Lang, Record<string, string>> = {
       "Du liegst meist näher an der Forschung als der Schnitt.",
     "result.achievementHeadline.gehtnoch":
       "Ein paar Mythen halten sich hartnäckig. Die Fakten-Karten helfen.",
+    // EN: "Cannabis is more complex than it sounds. The Fakten-Karten show what research says."
     "result.achievementHeadline.erwischt":
-      "Cannabis steckt voller Mythen. Zeit für einen Blick in die Fakten-Karten.",
+      "Cannabis ist komplizierter, als es klingt. Die Fakten-Karten zeigen, was die Forschung dazu sagt.",
     "result.scoreLine.user": "Du: {count} von {total} genau richtig",
     // Stage F commit 3 (2026-05-23) — revised population line.
     // Was: "Erwachsene (18–70) Ø: {count} von {total}" (mathematical).

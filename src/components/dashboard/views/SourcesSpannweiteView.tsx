@@ -47,6 +47,9 @@ import InfoTooltip from '../InfoTooltip';
 import { useHiddenColumns } from '../hooks/useHiddenColumns';
 import { renderSourcesSpannweiteSvg } from '../../../lib/dashboard/sources-spannweite-svg';
 import LesebeispielSource from '../LesebeispielSource';
+import { ValueCircle } from '../grid';
+import { getCategoryDescription } from '../../../lib/dashboard/source-descriptions';
+import type { SourceCategoryId } from '../../../lib/icons/lookups';
 
 /** Column order for the new sources2 view (Fedor 2026-05-15): Wahrnehmung
  *  moves to the last slot so the more "active" search/trust/prevention
@@ -180,8 +183,15 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
       const subSet = subFilter.length > 0 ? new Set(subFilter) : null;
       const filterBySub = (s: InformationSource) =>
         subSet === null || subSet.has(s.id);
+      // Universal source search (Fedor 2026-05-25 PM, item F):
+      // case-insensitive substring on source.name. Applied to parents
+      // only — children visible inside an expanded parent are not
+      // independently filtered (they appear when their parent matches).
+      const q = state.sourcesSearchQuery.trim().toLowerCase();
+      const filterByName = (s: InformationSource) =>
+        q.length === 0 || s.name.toLowerCase().includes(q);
       const parents = sourceData.sources.filter(
-        (s) => s.parentId === null && filterByCat(s) && filterBySub(s),
+        (s) => s.parentId === null && filterByCat(s) && filterBySub(s) && filterByName(s),
       );
       const byParent = new Map<number, InformationSource[]>();
       for (const s of sourceData.sources) {
@@ -196,7 +206,7 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
         }
       }
       return { filteredParents: parents, childrenByParent: byParent };
-    }, [sourceData, categoryFilter, subFilter]);
+    }, [sourceData, categoryFilter, subFilter, state.sourcesSearchQuery]);
 
     // ── Cell value lookup ──────────────────────────────────────────
     const cellValue = useCallback(
@@ -329,8 +339,13 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     } | null>(null);
     const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
 
-    const TOOLTIP_MAX_W = 320;
-    const VIEWPORT_MARGIN = 12;
+    // v3 (2026-05-26): width bumped from 320 → 420 to match the
+    // `.carm-spannweite__tooltip { max-width: 420px }` CSS rule.
+    // The 320 underestimate let the left half of the card spill past
+    // the viewport on long source names. Margin 12 → 24 matches
+    // BalkenView's breathing room.
+    const TOOLTIP_MAX_W = 420;
+    const VIEWPORT_MARGIN = 24;
 
     const handleHover = useCallback(
       (sourceId: number, colId: string | null, e: React.MouseEvent) => {
@@ -481,6 +496,7 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
             </div>
             {columns.map((col) => {
               if (isHidden(col.id)) {
+                const ColIcon = col.Icon;
                 return (
                   <button
                     key={`th-${col.id}`}
@@ -490,16 +506,16 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                     aria-label={`${t('column.show', lang)} — ${col.fullLabel}`}
                     title={`${t('column.show', lang)} — ${col.fullLabel}`}
                   >
-                    {/* Travel pipeline 3D (2026-05-23) — same vertical
-                        column-name affordance as SpannweiteView so the
-                        collapsed lane reads as "X is hidden, click to
-                        show" rather than just a mystery arrow. Short
-                        label (no unit) fits the 28px lane; `title`
-                        carries the full label. */}
+                    {/* Closed-column layout (Fedor 2026-05-25 PM) —
+                        expand chev on top + the column's metric / group
+                        icon below; vertical text label dropped. */}
+                    <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
+                    <span className="carm-spannweite__hidden-icon" aria-hidden="true">
+                      <ColIcon size={16} strokeWidth={1.75} />
+                    </span>
                     <span className="carm-spannweite__hidden-label" aria-hidden="true">
                       {col.label}
                     </span>
-                    <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
                   </button>
                 );
               }
@@ -650,7 +666,7 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                         <div className="carm-spannweite__plot">
                           {value !== null ? (
                             <>
-                              {/* 2px stem — same as Spannweite. */}
+                              {/* 2 px stem — Spannweite parity. */}
                               <div
                                 className="carm-spannweite__bar"
                                 style={{
@@ -659,35 +675,13 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                                 }}
                                 aria-hidden="true"
                               />
-                              {/* 2026-05-23 Polish v7: dot is a plain
-                                  filled circle (no text inside) — the
-                                  value floats above as a sibling
-                                  `.carm-spannweite__num` so the dot+
-                                  number cluster mirrors the V3a-dot +
-                                  V3b-num hybrid used by Spannweite/
-                                  Balken via GridValueCell. Source
-                                  category color drives both the dot
-                                  fill and the number's text color so
-                                  the cluster reads as one
-                                  category-themed mark. */}
-                              <div
-                                className="carm-spannweite__dot carm-sources-spannweite__dot"
-                                aria-hidden="true"
-                                style={{
-                                  left: `${Math.max(0, Math.min(100, value))}%`,
-                                  background: categoryColor,
-                                }}
-                              />
-                              <div
-                                className="carm-spannweite__num"
-                                aria-hidden="true"
-                                style={{
-                                  left: `${Math.max(0, Math.min(100, value))}%`,
-                                  color: categoryColor,
-                                }}
-                              >
-                                {Math.round(value)}
-                              </div>
+                              {/* v2 (2026-05-26): shared ValueCircle marker —
+                                  22 px solid circle centered at value % with
+                                  the rounded number inside in white. Single
+                                  source-category color drives the fill;
+                                  matches the marker used by GridValueCell
+                                  (Mythen Spannweite) and BalkenBar. */}
+                              <ValueCircle value={value} accent={categoryColor} />
                             </>
                           ) : (
                             <span className="carm-spannweite__no-data" aria-hidden="true">
@@ -758,6 +752,16 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
               >
                 {hoveredCategoryName}
               </div>
+              {/* v3 (2026-05-26): per-category description above the
+                  Lesebeispiel, mirroring the new Quellen Balken hover. */}
+              {(() => {
+                const desc = getCategoryDescription(
+                  hoveredSource.category as SourceCategoryId,
+                );
+                return desc ? (
+                  <div className="carm-sources-tooltip__desc">{desc}</div>
+                ) : null;
+              })()}
               {lesebeispielMetric && lesebeispielValue !== null && (
                 <div className="carm-spannweite__tooltip-lesebeispiel">
                   <LesebeispielSource

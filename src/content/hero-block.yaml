@@ -86,7 +86,7 @@ pairs:
     verdict: 'eher_richtig'
 
   - belief: 'Cannabis ist eine Einstiegsdroge.'
-    science: 'Eher nein. Wenn überhaupt, sind Nikotin und Alkohol die ersten Substanzen — die Gateway-These hält der Forschung nicht stand.'
+    science: 'Eher nein. Nikotin und Alkohol kommen als erste Substanzen häufiger vor — der Zusammenhang erklärt sich eher durch gemeinsame Risikofaktoren als durch die Substanz selbst.'
     mythSlug: 'm22'
     verdict: 'eher_falsch'
 

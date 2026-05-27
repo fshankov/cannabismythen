@@ -185,51 +185,104 @@ export function lesebeispielHtml(
  *    - the indicator's value is null
  *    - (for `significance`) the awareness value is null, since that
  *      sentence references the kenntnis % count.
+ *
+ *  Hardcoded to the Erwachsene wording — kept for backwards
+ *  compatibility with BalkenView and SpannweiteView. New callers
+ *  (e.g. the popup table) should use
+ *  `lesebeispielIndicatorHtmlForGroup` below, which switches the
+ *  audience phrasing per group.
  */
 export function lesebeispielIndicatorHtml(
   metric: LesebeispielMetric | null | undefined,
   indicator: Indicator,
 ): string | null {
+  return lesebeispielIndicatorHtmlForGroup(metric, indicator, "adults");
+}
+
+/** Per-group variant of `lesebeispielIndicatorHtml`. Picks the audience
+ *  phrasing from `GROUP_INTRO_GENITIVE` + `GROUP_DEMONSTRATIVE` +
+ *  `GROUP_POPULATION_NOUN` so the same indicator sentence reads
+ *  naturally for any of the 5 Zielgruppen.
+ *
+ *  Returns null when:
+ *    - the metric is missing
+ *    - the indicator's value is null
+ *    - the (indicator × group) combo is invalid (today only
+ *      population_relevance × {consumers, young_adults, parents} —
+ *      these groups have no approved "volljährige Bevölkerung"
+ *      counterpart, so the sentence is suppressed)
+ *    - (for `significance`) the awareness value is null
+ *
+ *  Used by the popup's `<FactsheetGroupBars>` table on the cell hover.
+ */
+export function lesebeispielIndicatorHtmlForGroup(
+  metric: LesebeispielMetric | null | undefined,
+  indicator: Indicator,
+  group: GroupId,
+): string | null {
   if (!metric) return null;
   const v = metric[indicator];
   if (v === null) return null;
+
+  // Skip pop_relevance for groups without an approved population noun
+  // (consumers, young_adults, parents). The caller will already be
+  // rendering "k. A." in those cells.
+  if (indicator === "population_relevance" && !GROUP_POPULATION_NOUN[group]) {
+    return null;
+  }
+
   const rounded = Math.round(v as number);
+  const intro = GROUP_INTRO_GENITIVE[group];
+  const demonstrative = GROUP_DEMONSTRATIVE[group];
+  const populationNoun = GROUP_POPULATION_NOUN[group];
 
   let sentence = "";
   if (indicator === "awareness") {
     sentence =
-      `In der Zielgruppe der Erwachsenen kennen <strong>${rounded}&nbsp;%</strong> diesen Mythos. ` +
+      `In der Zielgruppe der ${intro} kennen <strong>${rounded}&nbsp;%</strong> diesen Mythos. ` +
       `Das ist ein <strong>${anteilLabel(rounded)}</strong>.`;
   } else if (indicator === "significance") {
     if (metric.awareness === null) return null;
     const kenntnis = Math.round(metric.awareness as number);
     sentence =
-      `Die Bedeutung dieses Mythos für die Erwachsenen, die diesen Mythos kennen ` +
+      `Die Bedeutung dieses Mythos für die ${intro}, die diesen Mythos kennen ` +
       `<strong>${kenntnis}&nbsp;%</strong>, für ihren Umgang mit Cannabis hat ein ` +
       `<strong>${niveauLabel(rounded)}</strong> von <strong>${rounded}&nbsp;Punkten</strong>.`;
   } else if (indicator === "correctness") {
     sentence =
       `Die Beurteilung des Mythos in Übereinstimmung mit der wissenschaftlichen Klassifizierung ` +
-      `erreicht bei diesen Erwachsenen ein <strong>${niveauLabel(rounded)}</strong> ` +
+      `erreicht bei ${demonstrative} <strong>${niveauLabel(rounded)}</strong> ` +
       `von <strong>${rounded}&nbsp;Punkten</strong>.`;
   } else if (indicator === "prevention_significance") {
     sentence =
       `Aus der individuellen Bedeutung und der Beurteilung der Richtigkeit resultiert ein ` +
       `<strong>${niveauLabel(rounded)}</strong> für die Präventionsbedeutung ` +
-      `(<strong>${rounded}&nbsp;Punkte</strong>) für die Zielgruppe der Erwachsenen, ` +
+      `(<strong>${rounded}&nbsp;Punkte</strong>) für die Zielgruppe der ${intro}, ` +
       `die diesen Mythos kennen.`;
   } else {
-    // population_relevance
+    // population_relevance — populationNoun is guaranteed non-null
+    // by the early-return above.
     sentence =
-      `Mit Blick auf die gesamte volljährige Bevölkerung (nicht nur diejenigen, die den ` +
+      `Mit Blick auf die gesamte ${populationNoun} (nicht nur diejenigen, die den ` +
       `Mythos schon kennen) ergibt sich ein <strong>${niveauLabel(rounded)}</strong> für ` +
       `die Präventionsbedeutung (Bevölkerungsrelevanz: <strong>${rounded}&nbsp;Punkte</strong>) ` +
       `für diesen Mythos.`;
   }
 
+  // The heading uses nominative ("Erwachsene", "Minderjährige", ...)
+  // not genitive — derive from the existing genitive form by chopping
+  // the trailing "n" where applicable.
+  const groupNominative: Record<GroupId, string> = {
+    adults: "Erwachsenen",
+    minors: "Minderjährigen",
+    consumers: "Konsumierenden",
+    young_adults: "jungen Erwachsenen",
+    parents: "Eltern",
+  };
+
   return (
     `<div class="lesebeispiel-tooltip">` +
-    `<div class="lesebeispiel-tooltip__heading">Lesebeispiel für die Gruppe der Erwachsenen</div>` +
+    `<div class="lesebeispiel-tooltip__heading">Lesebeispiel für die Gruppe der ${groupNominative[group]}</div>` +
     `<p class="lesebeispiel-tooltip__body">${sentence}</p>` +
     `</div>`
   );

@@ -48,6 +48,25 @@
   --classification-falsch-bg: #fff1f2;        /* Rose-50 */
   --classification-keine-aussage-bg: #f3f4f6; /* Gray-100 */
 
+  /* Source-category colors — used by the Quellen views (Balken,
+     Spannweite, Strips). Token names match `SOURCE_CATEGORY_COLOR_VAR`
+     in `src/lib/icons/lookups.ts`. Six categories from CaRM's source
+     classification: institutional / internet / soziale Medien /
+     traditionelle Medien / print / persönlich. The `-bg` variants are
+     light tints used as the verdict-style tooltip card background. */
+  --source-institutionell: #4b6cb7;
+  --source-internet: #2d8da4;
+  --source-soziale-medien: #b15edb;
+  --source-traditionelle: #c97a3d;
+  --source-print: #8b7355;
+  --source-persoenlich: #d04a4a;
+  --source-institutionell-bg: #eef2fb;
+  --source-internet-bg: #e7f3f5;
+  --source-soziale-medien-bg: #f6ebfb;
+  --source-traditionelle-bg: #fbf2e7;
+  --source-print-bg: #f3eee8;
+  --source-persoenlich-bg: #fbeaea;
+
   /* Legacy aliases — kept so existing `var(--color-richtig)` references
      keep working. Prefer the `--classification-…` tokens in new code. */
   --color-richtig: var(--classification-richtig);
@@ -1073,21 +1092,41 @@ button.pill[aria-pressed="true"] {
   --audience-fachkraefte:   #7c3aed;
 
   /* Dashboard-side audience accents (CaRM GroupId).
-     Referenced by AUDIENCE_COLOR_VAR_BY_GROUP in src/lib/icons/lookups.ts
-     and used by the popup radar chart (FactsheetGroupRadar.tsx) to give
-     each of the 5 population-group lines a stable, high-contrast hue.
+     Referenced by AUDIENCE_COLOR_VAR_BY_GROUP in src/lib/icons/lookups.ts.
      Distinct from the FAQ audience palette above: dashboard groups are a
      superset (adults, minors, consumers, young_adults, parents) and the
      overlap (parents↔eltern, consumers↔konsumierende) is intentional so
      the same audience reads the same colour across FAQ + dashboard
      surfaces. The two new dashboard-only hues (adults = slate, minors =
-     amber, young_adults = teal) were picked for radar readability when
-     all five lines overlap. */
+     amber, young_adults = teal) were picked for readability when
+     audience-coded glyphs appear next to each other. */
   --audience-volljaehrige:    #0f172a; /* slate-900 — high-contrast anchor */
   --audience-minderjaehrige:  #d97706; /* amber-600 — warm distinct accent */
   --audience-konsumierende-dashboard: #16a34a; /* shares FAQ konsumierende */
   --audience-junge-erwachsene: #0d9488; /* teal-600 */
   --audience-eltern-dashboard: #4f46e5; /* shares FAQ eltern */
+
+  /* Sequential value heatmap (7 bands). Used by the popup
+     `<FactsheetGroupBars>` table to tint cell backgrounds by the
+     band classification from src/lib/dashboard/lesebeispiel-bands.ts:
+       band 0 → 0–10   "sehr niedrig"
+       band 1 → 11–25  "niedrig"
+       band 2 → 26–37  "niedrig mittel"
+       band 3 → 38–62  "mittel"
+       band 4 → 63–74  "hoch mittel"
+       band 5 → 75–89  "hoch"
+       band 6 → 90–100 "sehr hoch"
+     Blue → red sequential ramp at high lightness so the cell wash
+     leaves the cell number legible in --color-text. Sequential (not
+     diverging) because raw percentage / point values have no
+     meaningful "neutral midpoint". */
+  --band-0: #cfe5ff; /* very light blue */
+  --band-1: #b6d4ff;
+  --band-2: #d2dfff; /* tilts toward neutral-cool */
+  --band-3: #ecdcd2; /* pivot through warm-neutral */
+  --band-4: #ffcfb8;
+  --band-5: #ffb19a;
+  --band-6: #ff8a7e; /* warm coral red */
 }
 
 /* Hub */
@@ -2400,5 +2439,151 @@ button.pill[aria-pressed="true"] {
   .scrollytelling__viz-mobile {
     height: 38vh;
     min-height: 240px;
+  }
+}
+
+/* ── HoverTooltip primitive ─────────────────────────────────────
+   Portal-rendered hover card. Lives at the top of global.css's tail
+   so the rules apply wherever the React component renders
+   `<HoverTooltip>` (popup tables, dashboard tables — portals into
+   document.body, so the styles must NOT be scoped under any page
+   wrapper). See src/components/shared/HoverTooltip.tsx.
+
+   Visual chrome mirrors `.carm-spannweite__tooltip` (the Spannweite
+   GridHoverTooltip) — light card with dark text, soft shadow,
+   asymmetric padding (more left padding for the verdict-color
+   border accent). When the consumer passes a `verdict` prop, the
+   background + left border come from inline styles (verdict-tinted
+   bg + verdict-color left border, same getCorrectnessColor /
+   getCorrectnessBgColor pair Spannweite uses). When no verdict is
+   passed, this neutral white-card default applies.
+   ──────────────────────────────────────────────────────────────── */
+.hover-tooltip {
+  min-width: 280px;
+  /* Cap at 420 px on roomy viewports; shrink to fit on narrower ones
+     so the tooltip can never extend past the viewport edge even if
+     the JS-side half-width clamp in HoverTooltip.tsx misfires. Pairs
+     with the `min(...)` clamp math there for defense-in-depth.
+     v3 (2026-05-26): bumped the inset from 24 → 48 px so the card has
+     visible breathing room on right-column hovers, matching the
+     bumped `VIEWPORT_MARGIN` in HoverTooltip.tsx (12 → 24 each side). */
+  max-width: min(420px, calc(100vw - 48px));
+  padding: 0.55rem 0.75rem 0.55rem 0.85rem;
+  background: #ffffff;
+  color: var(--color-text, #0f172a);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-border, #cbd5e1);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.22);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  /* `pointer-events: none` is set inline on the wrapper so the
+     tooltip never interrupts the user's mouse path away from the
+     trigger. */
+}
+
+/* When the consumer passes `verdict=`, the inline-style background +
+   borderLeft override these defaults. The `.hover-tooltip--verdict`
+   class is added purely as a hook for any optional verdict-only
+   tweaks; the colours themselves are inline. */
+
+.hover-tooltip__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hover-tooltip__title {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--color-text, #0f172a);
+  letter-spacing: 0.005em;
+}
+
+.hover-tooltip__body {
+  margin: 0;
+  color: var(--color-text, #0f172a);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.hover-tooltip__hint {
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--color-text-muted, #475569);
+}
+
+/* Band chip inside the cell tooltip — the tinted pill next to the
+   band label tells the reader which heatmap colour band this cell
+   belongs to. */
+.hover-tooltip__band {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text, #0f172a);
+  align-self: flex-start;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.hover-tooltip__band--band-0 { background: var(--band-0); }
+.hover-tooltip__band--band-1 { background: var(--band-1); }
+.hover-tooltip__band--band-2 { background: var(--band-2); }
+.hover-tooltip__band--band-3 { background: var(--band-3); }
+.hover-tooltip__band--band-4 { background: var(--band-4); }
+.hover-tooltip__band--band-5 { background: var(--band-5); }
+.hover-tooltip__band--band-6 { background: var(--band-6); }
+
+/* When the tooltip wraps a Lesebeispiel React component, reset the
+   <aside class="lesebeispiel"> chrome so it doesn't add a second
+   box-in-box. Same pattern Spannweite uses for its tooltip
+   lesebeispiel (see .carm-spannweite__tooltip-lesebeispiel
+   .lesebeispiel in dashboard.css). */
+.hover-tooltip .lesebeispiel {
+  background: transparent;
+  border: none;
+  border-left: 0;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  border-radius: 0;
+}
+
+.hover-tooltip .lesebeispiel__body {
+  margin: 0;
+  color: var(--color-text, #0f172a);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.hover-tooltip .lesebeispiel__body strong {
+  color: var(--color-text, #0f172a);
+  font-weight: 700;
+}
+
+/* Optional divider above the Lesebeispiel sentence when it sits
+   below a title (matches Spannweite's __tooltip-lesebeispiel
+   border-top). */
+.hover-tooltip__inner > .lesebeispiel {
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+@media (max-width: 480px) {
+  .hover-tooltip {
+    max-width: calc(100vw - 16px);
+    min-width: 220px;
+    padding: 0.5rem 0.65rem 0.5rem 0.75rem;
+    font-size: 0.76rem;
+  }
+  .hover-tooltip__title {
+    font-size: 0.78rem;
+  }
+  .hover-tooltip__band {
+    font-size: 0.68rem;
   }
 }

@@ -269,4 +269,11 @@ export interface AppState {
    *  don't include the query as a case-insensitive substring. Persists
    *  in the URL via `?q=…` so deep-links re-apply the search. */
   searchQuery: string;
+  /** Source-side search query (Fedor 2026-05-25 PM). Separate field
+   *  from `searchQuery` so the user's myth-search query is preserved
+   *  when switching to a source view and back. The toolbar input
+   *  auto-scopes by the active view — myth views write to
+   *  `searchQuery`, source views write to `sourcesSearchQuery`.
+   *  Persists in the URL via `?qs=…`. */
+  sourcesSearchQuery: string;
 }

@@ -764,6 +764,21 @@ main:has(.carm-explorer) {
   font-style: italic;
 }
 
+/* Heatmap band backgrounds (Fedor 2026-05-25 PM) — same 7-band
+   blue→red ramp the popup table uses, applied to the Mythen-Tabelle
+   AND Quellen-Tabelle so the value-magnitude reads consistently
+   across the popup and the dashboard. Bands computed by
+   bandIndex() from src/lib/dashboard/lesebeispiel-bands.ts; tokens
+   defined in src/styles/global.css. NA cells skip the modifier so
+   they stay transparent. */
+.carm-explorer .data-table .value-cell--band-0 { background: var(--band-0); }
+.carm-explorer .data-table .value-cell--band-1 { background: var(--band-1); }
+.carm-explorer .data-table .value-cell--band-2 { background: var(--band-2); }
+.carm-explorer .data-table .value-cell--band-3 { background: var(--band-3); }
+.carm-explorer .data-table .value-cell--band-4 { background: var(--band-4); }
+.carm-explorer .data-table .value-cell--band-5 { background: var(--band-5); }
+.carm-explorer .data-table .value-cell--band-6 { background: var(--band-6); }
+
 .carm-explorer .myth-header-row {
   display: flex;
   align-items: center;
@@ -1195,7 +1210,9 @@ main:has(.carm-explorer) {
   position: fixed;
   top: 0;
   right: 0;
-  width: 480px;
+  width: 540px; /* Fedor 2026-05-25 — modest widen (was 480) so the popup
+                   table fits without horizontal scroll. Mobile rule below
+                   still collapses to 100 %. */
   max-width: 100%;
   height: 100%;
   background: white;
@@ -1207,15 +1224,31 @@ main:has(.carm-explorer) {
   flex-direction: column;
 }
 
+/* Header carries the statement + scientific verdict (Fedor 2026-05-25).
+   Sticky on scroll (Fedor 2026-05-25 PM) so the myth statement +
+   verdict + close X stay pinned when the body scrolls. The
+   `.factsheet-panel` parent has overflow-y: auto, so sticky on the
+   header freezes against the panel's top edge. */
 .factsheet-panel__header {
-  display: flex;
-  justify-content: flex-end;
-  padding: 12px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: white;
+  padding: 14px 52px 12px 20px; /* right-pad reserves space for the X */
   border-bottom: 1px solid var(--color-border, #e2e8f0);
   flex-shrink: 0;
 }
 
+.factsheet-panel__header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .factsheet-panel__close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
   background: none;
   border: none;
   font-size: 1.6rem;
@@ -1225,6 +1258,7 @@ main:has(.carm-explorer) {
   padding: 4px 8px;
   border-radius: 4px;
   transition: background 0.15s ease, color 0.15s ease;
+  z-index: 1;
 }
 
 .factsheet-panel__close:hover {
@@ -1238,11 +1272,29 @@ main:has(.carm-explorer) {
 }
 
 .factsheet-panel__statement {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  line-height: 1.45;
+  line-height: 1.4;
   color: #1e293b;
-  margin-bottom: 16px;
+  margin: 0; /* gap on __header-content handles vertical spacing */
+}
+
+/* "Wissenschaftlich: <pill>" line + "Deine Antwort: <pill>" — same
+   styling rules mirrored from quiz.css so the dashboard popup
+   (which doesn't load quiz.css) gets identical layout. */
+.factsheet-panel__verdict-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.factsheet-panel__verdict-label {
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
 }
 
 .factsheet-panel__classification {
@@ -5984,238 +6036,237 @@ body.carm-modal-open {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   FactsheetGroupBars — interactive 2-tab strip (radar + table) that
-   replaces the static "Daten nach Zielgruppen" markdown table inside
-   the popup. The tab chrome reuses the shared `<TabsBar>` primitive
-   (same `.tabs-bar` / `.tab-btn` rules the Daten-Explorer uses); the
-   per-popup overrides below shrink the buttons for the narrow popup
-   width and remove the dashboard-only sticky / Rundgang behaviour.
+   FactsheetGroupBars (v5, 2026-05-25) — transposed sortable
+   heatmap table. Rows are population groups, columns are indicators.
+   Cells carry a rounded integer (mono-numerals) on top of a 7-band
+   blue→red background drawn from `--band-0` … `--band-6` in
+   global.css. The same band classification powers the cell hover
+   tooltip's "niedrig / mittel / hoch" copy.
+
+   No section heading inside the component — the table IS the
+   "Daten nach Zielgruppen" section (Fedor 2026-05-25: drop the
+   heading). No tabs (radar + sibling table removed).
    ═══════════════════════════════════════════════════════════════ */
 
 .factsheet-group-bars {
-  margin-top: 16px;
+  margin-top: 12px;
   margin-bottom: 12px;
 }
 
-/* Tab strip wrapper — the only popup-specific tweak is shrinking the
-   button padding/font so 2 tabs sit comfortably inside the 480 px
-   panel. All other tab visuals (rounded tops, active-lift, hover) come
-   from the unscoped `.tab-btn` rules near the top of this file. */
-.factsheet-group-bars__tabs {
-  margin-top: 8px;
-}
-
-.factsheet-group-bars__tabs .tab-btn {
-  padding: 8px 14px;
-  font-size: 0.78rem;
-}
-
-.factsheet-group-bars__viz {
-  padding-top: 12px;
-}
-
-/* ─── Radar tab — FactsheetGroupRadar (2026-05-25) ──────────────────
-   5-edge polygon (one edge per indicator), 5 group lines overlaid in
-   the per-group colours from --audience-* in global.css. Legend above
-   the chart uses the audience icon coloured to match the line. */
-
-.factsheet-group-radar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.factsheet-group-radar__legend {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 10px;
-}
-
-.factsheet-group-radar__legend-chip {
-  display: inline-flex;
-  align-items: center;
-  /* color comes from inline style (per-group). */
-}
-
-.factsheet-group-radar__legend-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--duration-fast, 150ms) var(--ease-out, ease-out),
-              border-color var(--duration-fast, 150ms) var(--ease-out, ease-out);
-}
-
-.factsheet-group-radar__legend-button:hover,
-.factsheet-group-radar__legend-button:focus-visible {
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  border-color: color-mix(in srgb, currentColor 30%, transparent);
-  outline: none;
-}
-
-.factsheet-group-radar__legend-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.factsheet-group-radar__legend-label {
-  letter-spacing: 0.01em;
-}
-
-/* The chart container is a near-square: ECharts auto-sizes to fill
-   100% × 100%, so we lock an aspect ratio + a max height to keep the
-   polygon regular across desktop popup (480 px) and mobile sheet
-   (375 px). */
-.factsheet-group-radar__chart {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  max-height: 320px;
-  margin: 0 auto;
-}
-
-/* ─── Table tab — FactsheetGroupTable (2026-05-25) ──────────────────
-   Clean 6×6 number table. No verdict-tinted mini-bars per cell (the
-   radar tab carries the "shape" reading) — this tab is the scannable
-   lookup. Audience icons in column headers, indicator icons in row
-   headers, integer values in cells ("k. A." italic for invalid combos). */
-
-.factsheet-group-table-wrap {
-  margin-top: 4px;
+.factsheet-group-bars__wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.factsheet-group-table {
+.factsheet-group-bars__table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  table-layout: fixed;
+  /* `table-layout: auto` so the left header column shrinks to the
+     longest group label ("Junge E.") while data columns expand to the
+     longest indicator label ("Bev. Relevanz"). */
+  table-layout: auto;
   font-size: 0.8rem;
   color: var(--color-text, #0f172a);
 }
 
-.factsheet-group-table th,
-.factsheet-group-table td {
-  padding: 8px 4px;
+.factsheet-group-bars__table th,
+.factsheet-group-bars__table td {
+  padding: 4px 4px;
   text-align: center;
   vertical-align: middle;
   border-bottom: 1px solid var(--color-border, #e2e8f0);
 }
 
-.factsheet-group-table tbody tr:last-child th,
-.factsheet-group-table tbody tr:last-child td {
+.factsheet-group-bars__table tbody tr:last-child th,
+.factsheet-group-bars__table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.factsheet-group-table__corner {
-  width: 32%;
+/* Top-left corner — clickable to reset sort. Bears a small ↺ glyph
+   when the canonical order is active (subtle) or an active-state
+   ring when the user has sorted away from it. */
+.factsheet-group-bars__corner {
+  width: 1%; /* auto-shrink to fit the longest group name in column 1 */
+  padding: 4px 6px;
   background: transparent;
 }
 
-.factsheet-group-table__col-header {
-  font-weight: 600;
-  color: var(--color-text-secondary, #475569);
-  line-height: 1.1;
+.factsheet-group-bars__corner-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted, #64748b);
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.factsheet-group-table__col-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2px;
+.factsheet-group-bars__corner-btn:hover {
+  background: var(--color-surface-soft, rgba(15, 23, 42, 0.05));
   color: var(--color-text, #0f172a);
 }
 
-.factsheet-group-table__col-label {
-  display: block;
-  font-size: 0.68rem;
+.factsheet-group-bars__corner--active .factsheet-group-bars__corner-btn {
+  color: var(--color-text, #0f172a);
+}
+
+/* Indicator column header — vertical stack: icon on top, abbreviated
+   label below. The whole header (the entire <th>) is the sort
+   affordance via the inner button; the parent <th> is the
+   HoverTooltip trigger via the shared `<HoverTooltip>` primitive.
+   Header text color matches the row headers (both use --color-text)
+   so the table's four header edges read as one frame. */
+.factsheet-group-bars__col-header {
   font-weight: 600;
+  color: var(--color-text, #0f172a);
+  line-height: 1.1;
+  vertical-align: middle;
+  padding: 4px 2px;
+}
+
+.factsheet-group-bars__col-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 4px 2px;
+  border-radius: 4px;
+  transition: background 0.15s ease, color 0.15s ease;
+  width: 100%;
+}
+
+.factsheet-group-bars__col-btn:hover {
+  background: var(--color-surface-soft, rgba(15, 23, 42, 0.04));
+  color: var(--color-text, #0f172a);
+}
+
+.factsheet-group-bars__col-header--active .factsheet-group-bars__col-btn {
+  color: var(--color-text, #0f172a);
+}
+
+.factsheet-group-bars__col-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text, #0f172a);
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.factsheet-group-bars__col-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
-.factsheet-group-table__row-header {
-  font-weight: 600;
-  font-size: 0.74rem;
-  text-align: left;
-  padding-left: 2px;
-  padding-right: 8px;
-  color: var(--color-text, #0f172a);
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.factsheet-group-table__row-icon {
+.factsheet-group-bars__col-sort {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary, #475569);
+  width: 11px;
+  height: 11px;
+  color: var(--color-text, #0f172a);
   flex-shrink: 0;
 }
 
-.factsheet-group-table__row-label {
+/* Row header — population label with icon. Left-aligned so the table
+   reads as "Group: numbers across". */
+.factsheet-group-bars__row-header {
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-align: left;
+  padding-left: 6px;
+  padding-right: 8px;
+  color: var(--color-text, #0f172a);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  cursor: help; /* tooltip hint */
 }
 
-.factsheet-group-table__cell {
+.factsheet-group-bars__row-header > * {
+  /* nested span layout — icon + label side by side via inline-flex on
+     each child, avoiding `display: flex` on the <th> which fights with
+     `vertical-align: middle` set by the table-cell rule above. */
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.factsheet-group-bars__row-icon {
+  color: var(--color-text-secondary, #475569);
+  margin-right: 6px;
+  line-height: 0;
+}
+
+.factsheet-group-bars__row-label {
+  font-weight: 600;
+}
+
+/* Data cell — mono-numerals over a band-tinted background. The
+   background colour comes from an inline style (`var(--band-{N})`)
+   set by FactsheetGroupBars.tsx; we just hold the layout. */
+.factsheet-group-bars__cell {
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  cursor: help; /* tooltip hint via title= */
+  /* Smooth band transitions when sorting reshuffles the table. */
+  transition: background 0.2s ease;
 }
 
-.factsheet-group-table__na {
+.factsheet-group-bars__value {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.88rem;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace);
+  letter-spacing: 0;
+  color: var(--color-text, #0f172a);
+}
+
+.factsheet-group-bars__cell--na {
+  background: transparent !important;
+}
+
+.factsheet-group-bars__na {
   color: var(--color-text-muted, #64748b);
   font-style: italic;
   font-weight: 500;
   font-size: 0.74rem;
-  cursor: help;
 }
 
 @media (max-width: 480px) {
-  .factsheet-group-radar__chart {
-    max-height: 260px;
-  }
-  .factsheet-group-radar__legend-button {
-    padding: 3px 6px;
-    font-size: 0.68rem;
-  }
-
-  .factsheet-group-table {
+  .factsheet-group-bars__table {
     font-size: 0.74rem;
   }
-  .factsheet-group-table th,
-  .factsheet-group-table td {
-    padding: 6px 2px;
+  .factsheet-group-bars__table th,
+  .factsheet-group-bars__table td {
+    padding: 5px 3px;
   }
-  .factsheet-group-table__col-label {
+  .factsheet-group-bars__col-btn {
     font-size: 0.62rem;
+    gap: 2px;
   }
-  .factsheet-group-table__row-header {
-    font-size: 0.68rem;
-    gap: 4px;
+  .factsheet-group-bars__row-header {
+    font-size: 0.7rem;
+    padding-left: 4px;
+    padding-right: 4px;
   }
-  .factsheet-group-table__corner {
-    width: 28%;
+  .factsheet-group-bars__row-icon {
+    margin-right: 4px;
   }
-
-  .factsheet-group-bars__tabs .tab-btn {
-    padding: 7px 12px;
-    font-size: 0.74rem;
+  .factsheet-group-bars__value {
+    font-size: 0.78rem;
   }
 }
 
@@ -6284,29 +6335,34 @@ body.carm-modal-open {
   overflow-wrap: anywhere;
 }
 
-.factsheet-panel__extras-audience {
+/* FAQ-backlinks audience glyph (Fedor 2026-05-25 — replaced the 2-char
+   El/Ju/Ko/Le/Fa text chips with the real audience icon components
+   from src/lib/icons/audiences.ts so the row reads at a glance and
+   matches the icon vocabulary used everywhere else on the site).
+   Color comes from the audience CSS token; no chip background. */
+.factsheet-panel__extras-audience-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  min-width: 28px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-secondary, #475569);
+  cursor: help;
+}
+
+.factsheet-panel__extras-audience-icon--eltern        { color: var(--audience-eltern, #4f46e5); }
+.factsheet-panel__extras-audience-icon--jugendliche   { color: var(--audience-jugendliche, #f97316); }
+.factsheet-panel__extras-audience-icon--konsumierende { color: var(--audience-konsumierende, #16a34a); }
+.factsheet-panel__extras-audience-icon--lehrkraefte   { color: var(--audience-lehrkraefte, #0891b2); }
+.factsheet-panel__extras-audience-icon--fachkraefte   { color: var(--audience-fachkraefte, #7c3aed); }
+
+.factsheet-panel__extras-audience-fallback {
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-text-secondary, #475569);
-  background: var(--color-surface-soft, rgba(15, 23, 42, 0.06));
-  cursor: help;
 }
-
-.factsheet-panel__extras-audience--eltern { color: var(--audience-eltern, #b91c1c); }
-.factsheet-panel__extras-audience--jugendliche { color: var(--audience-jugendliche, #1d4ed8); }
-.factsheet-panel__extras-audience--konsumierende { color: var(--audience-konsumierende, #047857); }
-.factsheet-panel__extras-audience--lehrkraefte { color: var(--audience-lehrkraefte, #b45309); }
-.factsheet-panel__extras-audience--fachkraefte { color: var(--audience-fachkraefte, #6d28d9); }
 
 /* ─── Spannweite v3 — single-picked-value grid with bar accent ──────
    Rows = myths, columns = 5 Indikatoren or 5 Bevölkerungsgruppen.
@@ -6336,6 +6392,19 @@ body.carm-modal-open {
   --carm-spannweite-dot-size: 0.75rem;       /* 12 px */
   --carm-spannweite-num-size: 0.625rem;      /* 10 px */
   --carm-spannweite-num-offset: -0.6875rem;  /* -11 px */
+
+  /* ─── Balken bar + circle sizing (2026-05-26 v2) ───
+     The Mythen Balken + Quellen Balken views render a translucent
+     wash, capped by a circular value-marker whose center sits on the
+     value position. Spannweite (Mythen + Quellen) uses the SAME
+     circle, just paired with the existing 2 px stem instead of a
+     wash. Tokens are scoped to `.carm-spannweite` because all four
+     views compose the same grid primitives. */
+  --carm-balken-bar-height: 22px;        /* wash height on Balken */
+  --carm-balken-wash-opacity: 0.32;      /* translucent fill */
+  --carm-balken-wash-opacity-hover: 0.46;
+  --carm-circle-size: 22px;              /* unified value-marker diameter */
+  --carm-circle-num-size: 0.6875rem;     /* 11 px inside the circle */
   --carm-spannweite-row-h: 2.375rem;         /* 38 px */
 
   position: relative;
@@ -6644,23 +6713,23 @@ body.carm-modal-open {
   overflow: hidden;
 }
 
-/* Hidden column: collapsed 28-px placeholder. Chevron only — no
-   rotated label, so the column closes cleanly with nothing bleeding
-   out of the narrow 28-px lane. Title attribute carries the full
-   column name for hover discovery. */
+/* Hidden column: collapsed 28-px placeholder. Layout updated
+   (Fedor 2026-05-25 PM): vertical stack with an expand chevron on
+   top + the column's indicator icon below. Drops the
+   writing-mode: vertical-rl text label that 3D had — too noisy at
+   28 px, and the icon now tells the same story at a glance.
+   Title attribute carries the full column name for hover discovery. */
 .carm-spannweite__cell--hidden {
   padding: 4px 0;
   border: 1px solid var(--color-border, #cbd5e1);
   background: #f8fafc;
   color: var(--color-text-muted, #64748b);
   cursor: pointer;
-  /* The vertical label fills the whole header lane — the chevron
-     affordance is supplied by the cursor + hover-tint + title tooltip,
-     not a separate glyph, so every pixel of vertical space goes to
-     the column name. */
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 4px;
   border-radius: 4px;
   overflow: hidden;
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
@@ -6674,36 +6743,44 @@ body.carm-modal-open {
   outline: none;
 }
 
-/* Travel pipeline 3D (2026-05-23) — vertical column-name label inside
-   the collapsed lane. `writing-mode: vertical-rl` + 180deg rotation
-   yields a label readable bottom-to-top (the canonical print convention
-   for vertical text). Truncated with ellipsis if the column header
-   row is too short for the full name; `title` on the parent button
-   surfaces the full label on hover. */
-.carm-spannweite__hidden-label {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
+/* Expand affordance — small ▸ glyph at the top of the collapsed lane.
+   Visible (no longer sr-only); pairs with the icon below to signal
+   both "click to expand" and "this is column X". */
+.carm-spannweite__hidden-chev {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
-  color: var(--color-text-secondary, #64748b);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-block-size: 100%;
+  line-height: 1;
+  color: var(--color-text-muted, #64748b);
   transition: color 160ms ease;
 }
 
-.carm-spannweite__cell--hidden:hover .carm-spannweite__hidden-label,
-.carm-spannweite__cell--hidden:focus-visible .carm-spannweite__hidden-label {
+.carm-spannweite__cell--hidden:hover .carm-spannweite__hidden-chev,
+.carm-spannweite__cell--hidden:focus-visible .carm-spannweite__hidden-chev {
   color: var(--color-text, #0f172a);
 }
 
-/* Chevron retained as a fallback affordance for screen readers / users
-   who hide CSS — the label is the canonical click-target now. Visually
-   hidden so the vertical name owns the full lane height. */
-.carm-spannweite__hidden-chev {
+/* Indicator / source-metric icon under the chev — sized to fit the
+   28 px lane comfortably. */
+.carm-spannweite__hidden-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary, #64748b);
+  line-height: 0;
+  transition: color 160ms ease;
+}
+
+.carm-spannweite__cell--hidden:hover .carm-spannweite__hidden-icon,
+.carm-spannweite__cell--hidden:focus-visible .carm-spannweite__hidden-icon {
+  color: var(--color-text, #0f172a);
+}
+
+/* Legacy class kept so any unupdated callsite renders harmlessly as
+   visually-hidden text (sr-only). Active call sites should use
+   `__hidden-icon` now. */
+.carm-spannweite__hidden-label {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -6729,12 +6806,28 @@ body.carm-modal-open {
 .carm-spannweite__cell--plot {
   padding: 0;
   align-items: stretch;
-  /* HARD GUARDRAIL (Polish v7) — the floating number sits ABOVE the dot
-     at a negative offset from row center. Without `overflow:hidden`
-     here, a row with low row-h or a number rendered with a too-large
-     font could leak above the cell into the row line. Clip at the cell
-     boundary so the lollipop primitives can never visually escape. */
-  overflow: hidden;
+  /* v3 (2026-05-26): replace hard `overflow: hidden` with a soft mask
+     gradient so value-circles whose center sits near a column edge
+     keep their full circle shape — the portion crossing the boundary
+     fades to transparent over an 8 px feather rather than getting cut
+     in half. Side effect: 2 px Spannweite stems + Balken washes also
+     pick up the 8 px fade at their column tips — reads more refined,
+     reduces hard-edge visual noise. Modern browsers GPU-accelerate
+     masks; negligible perf cost at our row counts. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black 8px,
+    black calc(100% - 8px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black 8px,
+    black calc(100% - 8px),
+    transparent 100%
+  );
 }
 
 .carm-spannweite__plot {
@@ -6757,56 +6850,14 @@ body.carm-modal-open {
   pointer-events: none;
 }
 
-/* 2026-05-23 Polish v7 ("V3a-dot + V3b-num" hybrid): the dot is now a
-   PLAIN solid filled circle anchoring the value position — the number
-   no longer renders inside it. Number lives in its own
-   `.carm-spannweite__num` sibling that floats above, freeing the dot
-   from having to be large enough to host text. Diameter comes from the
-   `--carm-spannweite-dot-size` token so the four breakpoints can
-   retune size independently of color/position rules. Background color
-   set inline by the consumer (verdict -600 for myths, source category
-   color for sources). */
-.carm-spannweite__dot {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: var(--carm-spannweite-dot-size);
-  height: var(--carm-spannweite-dot-size);
-  border-radius: 50%;
-  pointer-events: none;
-  transition: transform 160ms ease;
-  z-index: 1;
-}
-
-.carm-spannweite__row:hover .carm-spannweite__dot,
-.carm-spannweite__row.is-hover .carm-spannweite__dot,
-.carm-spannweite__row:focus-visible .carm-spannweite__dot {
-  transform: translate(-50%, -50%) scale(1.12);
-}
-
-/* Floating number above the dot (Polish v7). Sits at the same `left`
-   anchor as the dot, vertically offset upward by `--num-offset`.
-   White halo background keeps the small monospace digits legible when
-   they overlap the stem or zebra row background. Color set inline by
-   the consumer (verdict-700 for myths, source category color for
-   sources) so it visually couples with the dot below. The cell's
-   `overflow:hidden` is the hard guardrail against row-line crossing. */
-.carm-spannweite__num {
-  position: absolute;
-  top: 50%;
-  /* Center the number horizontally on the value anchor, then push it
-     above the row center by the configured offset (negative value). */
-  transform: translate(-50%, calc(-50% + var(--carm-spannweite-num-offset)));
-  font: 700 var(--carm-spannweite-num-size) / 1
-        ui-monospace, 'SF Mono', Menlo, monospace;
-  font-variant-numeric: tabular-nums;
-  background: rgba(255, 255, 255, 0.92);
-  padding: 0 0.125rem;   /* 2 px */
-  border-radius: 0.125rem;
-  pointer-events: none;
-  z-index: 2;
-  white-space: nowrap;
-}
+/* The v0 lollipop `.carm-spannweite__dot` + `.carm-spannweite__num`
+   rules were retired in v2 (2026-05-26). The value marker is now the
+   shared `.carm-value-circle` (see above), used by both Balken (with
+   wash) and Spannweite (with 2 px stem). The bottom-axis tokens
+   `--carm-spannweite-dot-size` / `--carm-spannweite-num-size` /
+   `--carm-spannweite-num-offset` remain defined on `.carm-spannweite`
+   in case any legacy export-pipeline code reads them, but no live UI
+   element consumes them after v2. */
 
 .carm-spannweite__no-data {
   position: absolute;
@@ -6935,6 +6986,19 @@ body.carm-modal-open {
   margin-top: 0.2rem;
   font-size: 0.7rem;
   color: var(--color-text-muted, #475569);
+}
+
+/* ─── Sources hover tooltip (Quellen Balken/Spannweite/Tabelle, v3
+   2026-05-26) — single category-description line stacked between the
+   source-name title and the Lesebeispiel sentence. Reuses the
+   `.carm-spannweite__tooltip` outer chrome + the existing
+   `.carm-spannweite__tooltip-lesebeispiel` divider for the
+   Lesebeispiel block. */
+.carm-sources-tooltip__desc {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #475569);
+  line-height: 1.45;
 }
 
 /* Progressive header collapse for narrow viewports — step the label
@@ -7115,4 +7179,115 @@ body.carm-modal-open {
 }
 .factsheet-group-bars__lesebeispiel .lesebeispiel {
   margin-top: 0;
+}
+
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  BalkenBar (2026-05-26)                                          ║
+   ║  Shared bar primitive used by Mythen Balken + Quellen Balken.    ║
+   ║  Translucent wash from 0 → value, opaque accent-tip pill         ║
+   ║  containing the white number when wide enough, collapsing to a   ║
+   ║  3 px tip-line + outside-right number when too small.            ║
+   ║  Backed by `src/components/dashboard/grid/BalkenBar.tsx`.        ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+
+.carm-balken__plot {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: var(--carm-balken-bar-height, 22px);
+  display: block;
+}
+
+/* Dotted vertical guides at 0/25/50/75/100 % — sit behind the wash so
+   the bar fill visually crosses them. Subtle by design; the 50 %
+   midline gets a slightly darker tick to anchor "above/below half"
+   comparisons. */
+.carm-balken__axis {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.carm-balken__axis-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dotted rgba(0, 0, 0, 0.08);
+}
+
+.carm-balken__axis-tick[data-pos="0"]   { left: 0; }
+.carm-balken__axis-tick[data-pos="25"]  { left: 25%; }
+.carm-balken__axis-tick[data-pos="50"]  { left: 50%; border-left-color: rgba(0, 0, 0, 0.13); }
+.carm-balken__axis-tick[data-pos="75"]  { left: 75%; }
+.carm-balken__axis-tick[data-pos="100"] { left: 100%; }
+
+/* Translucent fill 0 → value %. The bar's visual mass. Color set
+   inline by the consumer (verdict color or source-category color).
+   Opacity is the bridge between "tinted background" and "solid bar". */
+.carm-balken__wash {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: var(--carm-balken-bar-height, 22px);
+  transform: translateY(-50%);
+  border-radius: 3px;
+  opacity: var(--carm-balken-wash-opacity, 0.32);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 160ms ease;
+}
+
+.carm-spannweite__row:hover .carm-balken__wash,
+.carm-spannweite__row.is-hover .carm-balken__wash,
+.carm-spannweite__row:focus-visible .carm-balken__wash {
+  opacity: var(--carm-balken-wash-opacity-hover, 0.46);
+}
+
+/* Shared value-marker (2026-05-26 v2). A solid circle whose CENTER
+   sits at `left: <value>%`, so the left half overlaps the end of the
+   wash/stem and the right half extends past — soft cap. Hosts the
+   white rounded number in 11 px monospace, centered via flex.
+   Used by BalkenBar (with wash) and by GridValueCell /
+   SourcesSpannweiteView (with 2 px stem). White text always passes
+   contrast against the verdict + source-category palette at full
+   opacity, so no per-color flip needed. */
+.carm-value-circle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--carm-circle-size, 22px);
+  height: var(--carm-circle-size, 22px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font: 600 var(--carm-circle-num-size, 0.6875rem) / 1
+        ui-monospace, 'SF Mono', Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  z-index: 2;
+  transition: transform 160ms ease;
+}
+
+/* Slight scale-up on row hover/focus to mirror the existing lollipop
+   dot affordance. Keeps the center anchored at value % during the
+   transform (translate stays, scale composites). */
+.carm-spannweite__row:hover .carm-value-circle,
+.carm-spannweite__row.is-hover .carm-value-circle,
+.carm-spannweite__row:focus-visible .carm-value-circle {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+/* Mobile — shrink the label column so the bar column has room. The
+   circle works at any cell width (no measurement / outside-label
+   gymnastics needed in v2), so no other mobile tweaks required. */
+@media (max-width: 640px) {
+  .carm-balken-view.carm-spannweite,
+  .carm-sources-balken.carm-spannweite {
+    --carm-spannweite-label-col: minmax(120px, 35vw);
+  }
 }

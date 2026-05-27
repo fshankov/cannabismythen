@@ -26,8 +26,10 @@ import {
   getMythMetric,
   getIndicatorValueChecked,
   getMythShortText,
+  getMythText,
   formatValue,
 } from '../../../lib/dashboard/data';
+import { getCorrectnessColor } from '../../../lib/dashboard/colors';
 import {
   INDICATOR_ICONS,
   type IconComponent,
@@ -40,6 +42,33 @@ import {
   GridLabelHeader,
   GridMythCell,
 } from '../grid';
+import {
+  bandIndex,
+  anteilLabel,
+  niveauLabel,
+} from '../../../lib/dashboard/lesebeispiel-bands';
+import Lesebeispiel from '../Lesebeispiel';
+import HoverTooltip from '../../shared/HoverTooltip';
+
+/** Compact label set used by the cell-hover tooltip title bar. The
+ *  in-table column header already has its own label via GridDataHeader;
+ *  this set is just for "indicator · group" composition in the
+ *  tooltip. */
+const INDICATOR_LABELS_FULL: Record<Indicator, string> = {
+  awareness: 'Kenntnis',
+  significance: 'Bedeutung',
+  correctness: 'Richtigkeit',
+  prevention_significance: 'Prävention',
+  population_relevance: 'Bevölkerungsrelevanz',
+};
+
+const GROUP_FULL_LABELS: Record<string, string> = {
+  adults: 'Erwachsene (18–70)',
+  minors: 'Minderjährige (16–17)',
+  consumers: 'Konsumierende',
+  young_adults: 'Junge Erwachsene (18–26)',
+  parents: 'Eltern',
+};
 
 interface Props {
   myths: Myth[];
@@ -222,6 +251,7 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
             {columnMeta.map((col) => {
               const colHidden = isHidden(col.key);
               if (colHidden) {
+                const ColIcon = col.Icon;
                 return (
                   <th
                     key={col.key}
@@ -234,7 +264,13 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
                       className="carm-spannweite__cell carm-spannweite__cell--header carm-spannweite__cell--hidden data-table__hidden-wrap"
                       role="columnheader"
                     >
+                      {/* Closed-column layout (Fedor 2026-05-25 PM):
+                          chev on top + indicator icon below. Matches
+                          Spannweite's redesign. */}
                       <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
+                      <span className="carm-spannweite__hidden-icon" aria-hidden="true">
+                        <ColIcon size={16} strokeWidth={1.75} />
+                      </span>
                     </div>
                   </th>
                 );
@@ -278,6 +314,31 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
         <tbody>
           {sortedMyths.map((myth) => {
             const metric = getMythMetric(metrics, myth.id, groupId);
+            // Myth-cell (first-column row label) hover. v3 (2026-05-26):
+            // drop the Lesebeispiel — the label-hover should match
+            // Spannweite's pattern (statement + "Wissenschaftlich:…"
+            // verdict line only). Data cells in this row keep their
+            // own Lesebeispiel via their own HoverTooltip below.
+            const verdictKey = myth.correctness_class;
+            const verdictLabelDe = t(
+              `verdict.${verdictKey}` as TranslationKey,
+              lang,
+            ).toLowerCase();
+            const verdictColor = getCorrectnessColor(verdictKey);
+            const mythTooltipContent = (
+              <div className="hover-tooltip__inner">
+                <div className="hover-tooltip__title">
+                  {getMythText(myth, lang)}
+                </div>
+                <div
+                  className="hover-tooltip__body"
+                  style={{ color: verdictColor, fontWeight: 600 }}
+                >
+                  {lang === 'de' ? 'Wissenschaftlich' : 'Scientifically'}:{' '}
+                  {verdictLabelDe}
+                </div>
+              </div>
+            );
             return (
               <tr
                 key={myth.id}
@@ -286,14 +347,16 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
                 onKeyDown={(e) => { if (e.key === 'Enter') onSelectMyth(myth.id); }}
                 role="row"
               >
-                <td className="myth-cell">
-                  <div className="carm-spannweite__cell carm-spannweite__cell--label data-table__myth-wrap">
-                    <GridMythCell
-                      verdict={myth.correctness_class}
-                      shortText={getMythShortText(myth, lang)}
-                    />
-                  </div>
-                </td>
+                <HoverTooltip content={mythTooltipContent} verdict={verdictKey}>
+                  <td className="myth-cell">
+                    <div className="carm-spannweite__cell carm-spannweite__cell--label data-table__myth-wrap">
+                      <GridMythCell
+                        verdict={myth.correctness_class}
+                        shortText={getMythShortText(myth, lang)}
+                      />
+                    </div>
+                  </td>
+                </HoverTooltip>
                 {columnMeta.map((col) => {
                   if (isHidden(col.key)) {
                     return (
@@ -314,10 +377,54 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
                       </td>
                     );
                   }
+                  // Heatmap band + Lesebeispiel hover (Fedor 2026-05-25
+                  // PM): map the rounded value to a 7-band tint matching
+                  // the popup table; hover shows the same Lesebeispiel
+                  // sentence the popup uses, so the read is consistent
+                  // across surfaces.
+                  const rounded = Math.round(val);
+                  const band = bandIndex(rounded);
+                  const usesAnteil = col.key === 'awareness';
+                  const bandLabel = usesAnteil
+                    ? anteilLabel(rounded)
+                    : niveauLabel(rounded);
+                  const tooltipContent = (
+                    <div className="hover-tooltip__inner">
+                      <div className="hover-tooltip__title">
+                        {INDICATOR_LABELS_FULL[col.key]} ·{' '}
+                        {GROUP_FULL_LABELS[groupId] ?? groupId}
+                      </div>
+                      {metric ? (
+                        <Lesebeispiel
+                          metric={metric}
+                          audience="adults"
+                          group={groupId}
+                          onlyIndicator={col.key}
+                          compactHeading
+                        />
+                      ) : null}
+                      <div
+                        className={
+                          'hover-tooltip__band ' +
+                          `hover-tooltip__band--band-${band}`
+                        }
+                      >
+                        {bandLabel}
+                      </div>
+                    </div>
+                  );
                   return (
-                    <td key={col.key} className="value-cell">
-                      {formatValue(val, col.key)}
-                    </td>
+                    <HoverTooltip
+                      key={col.key}
+                      content={tooltipContent}
+                      verdict={verdictKey}
+                    >
+                      <td
+                        className={`value-cell value-cell--band-${band}`}
+                      >
+                        {formatValue(val, col.key)}
+                      </td>
+                    </HoverTooltip>
                   );
                 })}
               </tr>

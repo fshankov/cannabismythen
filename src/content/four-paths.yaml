@@ -22,6 +22,6 @@ datenExplorerTile:
   targetUrl: '/daten-explorer/'
 meineInteressenTile:
   title: 'Meine Interessen'
-  description: 'Antworten, passend zu deiner Rolle — von Eltern bis Fachkräften.'
+  description: 'Fragen und Fakten, sortiert nach Thema und Zielgruppe — von Eltern bis Fachkräften.'
   ctaLabel: 'Themen auswählen'
   targetUrl: '/meine-interessen/'

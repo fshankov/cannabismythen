@@ -380,6 +380,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
           })()}
           {columns.map((col) => {
             if (isHidden(col.id)) {
+              const ColIcon = col.Icon;
               return (
                 <button
                   key={`th-${col.id}`}
@@ -389,16 +390,17 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
                   aria-label={`${t('column.show', lang)} — ${col.fullLabel}`}
                   title={`${t('column.show', lang)} — ${col.fullLabel}`}
                 >
-                  {/* Travel pipeline 3D (2026-05-23) — surface the
-                      column name vertically inside the collapsed lane
-                      so users see WHAT is hidden, not just THAT
-                      something is hidden. Uses the short label (no unit
-                      suffix) so "Kenntnis" fits the 28px lane height;
+                  {/* Closed-column layout (Fedor 2026-05-25 PM) —
+                      expand chevron on top + the column's indicator
+                      icon below; vertical text label dropped.
                       `title` still carries the full label for hover. */}
+                  <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
+                  <span className="carm-spannweite__hidden-icon" aria-hidden="true">
+                    <ColIcon size={16} strokeWidth={1.75} />
+                  </span>
                   <span className="carm-spannweite__hidden-label" aria-hidden="true">
                     {col.label}
                   </span>
-                  <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
                 </button>
               );
             }

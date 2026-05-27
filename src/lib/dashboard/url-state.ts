@@ -105,6 +105,7 @@ const DEFAULTS: AppState = {
   sourcesSpannweiteExpanded: [],
   mythIds: [],
   searchQuery: '',
+  sourcesSearchQuery: '',
 };
 
 export function stateToUrl(state: Partial<AppState>): string {
@@ -159,6 +160,11 @@ export function stateToUrl(state: Partial<AppState>): string {
   // case-insensitive.
   if (state.searchQuery && state.searchQuery.length > 0)
     params.set('q', state.searchQuery);
+
+  // 2026-05-25 PM: source-side search query (paired with `q` for
+  // myths). Same case-preservation rule.
+  if (state.sourcesSearchQuery && state.sourcesSearchQuery.length > 0)
+    params.set('qs', state.sourcesSearchQuery);
 
   if (state.scatterX && state.scatterX !== DEFAULTS.scatterX) params.set('sx', state.scatterX);
   if (state.scatterY && state.scatterY !== DEFAULTS.scatterY) params.set('sy', state.scatterY);
@@ -326,6 +332,9 @@ export function urlToState(): Partial<AppState> {
 
   const q = params.get('q');
   if (q) state.searchQuery = q;
+
+  const qs = params.get('qs');
+  if (qs) state.sourcesSearchQuery = qs;
 
   const sx = params.get('sx');
   if (ALL_INDICATORS.includes(sx as Indicator)) state.scatterX = sx as Indicator;

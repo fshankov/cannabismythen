@@ -363,27 +363,49 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
 
   /** 2026-05-22 v5: search input is inline with Filter / Export
    *  inside the toolbar. Threaded as the FIRST element so every view
-   *  that consumes this slot picks it up automatically. */
+   *  that consumes this slot picks it up automatically.
+   *
+   *  Auto-scoped by active view (Fedor 2026-05-25 PM, item F): on
+   *  myth views the input filters myths via `searchQuery`; on source
+   *  views (sources / sources2 / sources_table) the same input
+   *  filters sources via `sourcesSearchQuery`. Both fields persist
+   *  separately so switching back restores the user's prior myth
+   *  query. */
+  const isSourceView =
+    state.view === 'sources' ||
+    state.view === 'sources2' ||
+    state.view === 'sources_table';
+  const searchValue = isSourceView ? state.sourcesSearchQuery : state.searchQuery;
+  const searchKey: keyof AppState = isSourceView ? 'sourcesSearchQuery' : 'searchQuery';
+  const searchPlaceholder = isSourceView
+    ? 'Quellen suchen…'
+    : t('search.myths.placeholder', 'de');
+  const searchAria = isSourceView
+    ? 'Quellen-Suche'
+    : t('search.myths.aria', 'de');
+  const searchClearAria = isSourceView
+    ? 'Quellen-Suche löschen'
+    : t('search.myths.clear', 'de');
   const sharedActions: ReactNode = (
     <>
       <div className="carm-myth-search-row" role="search">
         <input
           type="search"
           className="carm-myth-search-input"
-          value={state.searchQuery}
-          onChange={(e) => update('searchQuery', e.target.value)}
-          placeholder={t('search.myths.placeholder', 'de')}
-          aria-label={t('search.myths.aria', 'de')}
+          value={searchValue}
+          onChange={(e) => update(searchKey, e.target.value)}
+          placeholder={searchPlaceholder}
+          aria-label={searchAria}
           autoComplete="off"
           spellCheck={false}
         />
-        {state.searchQuery && (
+        {searchValue && (
           <button
             type="button"
             className="carm-myth-search-clear"
-            onClick={() => update('searchQuery', '')}
-            aria-label={t('search.myths.clear', 'de')}
-            title={t('search.myths.clear', 'de')}
+            onClick={() => update(searchKey, '')}
+            aria-label={searchClearAria}
+            title={searchClearAria}
           >
             ✕
           </button>
@@ -475,29 +497,20 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             };
           });
 
-          // Tabelle gets a 3rd picker for the science-verdict filter —
-          // the inline `<select className="verdict-header-select">`
-          // inside the table header is replaced by this so the column
-          // header stays clean (Stage 2, issue #13 in the plan).
-          const VERDICTS: VerdictFilter[] = [
-            'all',
-            'richtig',
-            'eher_richtig',
-            'eher_falsch',
-            'falsch',
-            'no_classification',
-          ];
-          const verdictOptions: DataPickerOption<VerdictFilter>[] = VERDICTS.map(
-            (v) => ({
-              value: v,
-              label:
-                v === 'all'
-                  ? t('verdict.all', 'de')
-                  : t(`verdict.${v}` as TranslationKey, 'de'),
-            }),
-          );
-
+          // v3 (2026-05-26): retired the Tabelle-only verdict picker.
+          // Verdict filtering still works via the existing
+          // `<VerdictTags>` row below the toolbar. Keeps Tabelle's
+          // top row visually parallel with Spannweite (which also
+          // shows only a group picker + search).
           const groupValue: GroupId = state.groupIds[0] ?? 'adults';
+          // Match Spannweite's "Wert für" caption on Tabelle so the
+          // two views read consistently. Balken keeps the default
+          // group-legend caption since it pairs with the indicator
+          // picker.
+          const groupCaption =
+            state.view === 'table'
+              ? 'Wert für'
+              : t('igs.group.legend', 'de');
 
           // 2026-05-21: sort toolbar retired — sort lives in column
           // headers now (A-Z + verdict-rank in MYTHEN cell, value-asc/
@@ -526,26 +539,13 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                     ]),
                 <DataPicker<GroupId>
                   key="group"
-                  caption={t('igs.group.legend', 'de')}
+                  caption={groupCaption}
                   value={groupValue}
                   options={groupOptions}
                   onChange={(v) => update('groupIds', [v])}
                   aria-label={t('igs.group.legend', 'de')}
                   lang="de"
                 />,
-                ...(state.view === 'table'
-                  ? [
-                      <DataPicker<VerdictFilter>
-                        key="verdict"
-                        caption={t('detail.verdict', 'de')}
-                        value={state.verdictFilter}
-                        options={verdictOptions}
-                        onChange={(v) => update('verdictFilter', v)}
-                        aria-label={t('detail.verdict', 'de')}
-                        lang="de"
-                      />,
-                    ]
-                  : []),
               ]}
               actions={sharedActions}
             />
@@ -628,7 +628,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 state={state}
                 update={update}
                 definitions={defs}
-                sharedActions={exportOnlyAction}
+                sharedActions={sharedActions}
               />
             ) : state.view === 'sources2' ? (
               <SourcesSpannweiteView
@@ -636,7 +636,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 state={state}
                 update={update}
                 definitions={defs}
-                sharedActions={exportOnlyAction}
+                sharedActions={sharedActions}
               />
             ) : state.view === 'sources_table' ? (
               <SourcesTableView
@@ -644,7 +644,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 state={state}
                 update={update}
                 definitions={defs}
-                sharedActions={exportOnlyAction}
+                sharedActions={sharedActions}
               />
             ) : filteredMyths.length === 0 ? (
               <div className="no-results">{t('misc.noResults', 'de')}</div>

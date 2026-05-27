@@ -20,7 +20,7 @@ cards:
       - label: 'Daten zu Minderjährigen'
         url: '/daten-explorer/indikatoren-minderjaehrige/'
   - audienceId: 'eltern'
-    recommendation: 'Antworten für den Familienalltag'
+    recommendation: 'Fakten für den Familienalltag'
     targetUrl: '/meine-interessen/eltern/'
     additionalTargets:
       - label: 'Daten zur eigenen Zielgruppe'

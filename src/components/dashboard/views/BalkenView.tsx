@@ -34,9 +34,11 @@ import { INDICATOR_ICONS } from '../../../lib/icons';
 import { t, type TranslationKey } from '../../../lib/dashboard/translations';
 import VerdictArrowSymbols from './verdictArrowSymbols';
 import {
-  GridDataHeader, GridLabelHeader, GridMythCell, GridValueCell, GridHoverTooltip,
+  GridDataHeader, GridLabelHeader, GridMythCell, GridHoverTooltip,
+  BalkenBar,
 } from '../grid';
 import { renderSpannweiteSvg } from '../../../lib/dashboard/spannweite-svg';
+import { getCorrectnessColor } from '../../../lib/dashboard/colors';
 
 interface Props {
   myths: Myth[];
@@ -164,17 +166,20 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     else update('balkenSort', 'value-asc');
   }, [sort, update]);
 
-  // ─── Hover tooltip state — mirrors Spannweite's pattern. ──────────
+  // ─── Hover tooltip state. v3 (2026-05-26): unified label-and-cell
+  //     hover. Balken shows ONE indicator per row, so the Lesebeispiel
+  //     content is identical wherever you hover within the row — no
+  //     need for the Spannweite-style `hoveredOnCell` gate. The
+  //     row-label hover gets the same tooltip + Lesebeispiel as the
+  //     value cell.
   const [hoveredMythId, setHoveredMythId] = useState<number | null>(null);
-  const [hoveredOnCell, setHoveredOnCell] = useState<boolean>(false);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
 
   const TOOLTIP_MAX_W = 420;
-  const VIEWPORT_MARGIN = 12;
+  const VIEWPORT_MARGIN = 24;
   const handleHover = useCallback(
-    (mythId: number, onCell: boolean, e: React.MouseEvent) => {
+    (mythId: number, e: React.MouseEvent) => {
       setHoveredMythId(mythId);
-      setHoveredOnCell(onCell);
       const halfW = TOOLTIP_MAX_W / 2;
       const minX = halfW + VIEWPORT_MARGIN;
       const maxX = (typeof window !== 'undefined' ? window.innerWidth : 1280) - halfW - VIEWPORT_MARGIN;
@@ -185,7 +190,6 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
   );
   const handleLeave = useCallback(() => {
     setHoveredMythId(null);
-    setHoveredOnCell(false);
     setHoverPos(null);
   }, []);
 
@@ -357,8 +361,8 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
                 <div
                   className="carm-spannweite__cell carm-spannweite__cell--label"
                   role="rowheader"
-                  onMouseEnter={(e) => handleHover(myth.id, false, e)}
-                  onMouseMove={(e) => handleHover(myth.id, false, e)}
+                  onMouseEnter={(e) => handleHover(myth.id, e)}
+                  onMouseMove={(e) => handleHover(myth.id, e)}
                 >
                   <GridMythCell verdict={verdict} shortText={shortText} />
                 </div>
@@ -370,12 +374,10 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
                       ? `${indicatorCol.fullLabel}: ${Math.round(value)} %`
                       : `${indicatorCol.fullLabel}: keine Daten`
                   }
-                  onMouseEnter={(e) => handleHover(myth.id, true, e)}
-                  onMouseMove={(e) => handleHover(myth.id, true, e)}
+                  onMouseEnter={(e) => handleHover(myth.id, e)}
+                  onMouseMove={(e) => handleHover(myth.id, e)}
                 >
-                  <div className="carm-spannweite__plot">
-                    <GridValueCell verdict={verdict} value={value} />
-                  </div>
+                  <BalkenBar value={value} accent={getCorrectnessColor(verdict)} />
                 </div>
               </div>
             );
@@ -397,10 +399,11 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
         </svg>
       </div>
 
-      {/* Hover tooltip — Spannweite-style verdict-tinted card. */}
+      {/* Hover tooltip — Spannweite-style verdict-tinted card.
+          v3: always pin Lesebeispiel to the active indicator, since
+          Balken's single column means label-hover and cell-hover
+          should produce identical context. */}
       {hoveredMyth && hoverPos && (() => {
-        let lesebeispielIndicator: Indicator | null = null;
-        if (hoveredOnCell) lesebeispielIndicator = indicator;
         return (
           <GridHoverTooltip
             myth={hoveredMyth}
@@ -408,7 +411,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
             lang={lang}
             x={hoverPos.x}
             y={hoverPos.y}
-            lesebeispielIndicator={lesebeispielIndicator}
+            lesebeispielIndicator={indicator}
             lesebeispielGroup={groupId}
           />
         );

@@ -216,6 +216,19 @@ export function filterMyths(
   return filtered;
 }
 
+/** Source-side equivalent of `filterMyths` (Fedor 2026-05-25 PM):
+ *  case-insensitive substring match against `source.name`. Sources
+ *  only have one searchable text field (no shortText), so the match
+ *  surface is narrower than for myths. Empty query is a no-op. */
+export function filterSourcesBySearch<T extends { name: string }>(
+  sources: T[],
+  searchQuery: string,
+): T[] {
+  const q = searchQuery.trim().toLowerCase();
+  if (q.length === 0) return sources;
+  return sources.filter((s) => s.name.toLowerCase().includes(q));
+}
+
 /** Population_relevance was only collected for these two groups; values for
  *  the other three are null in carm-data.json. */
 const POP_REL_VALID_GROUPS: GroupId[] = ['adults', 'minors'];

@@ -2644,7 +2644,9 @@ button.quiz-result__cta {
   position: fixed;
   top: 0;
   right: 0;
-  width: 480px;
+  width: 540px; /* Fedor 2026-05-25 — modest widen (was 480) so the popup
+                   table fits without horizontal scroll. Mobile rule below
+                   still collapses to 100 %. */
   max-width: 100%;
   height: 100%;
   background: var(--color-surface);
@@ -2656,15 +2658,32 @@ button.quiz-result__cta {
   flex-direction: column;
 }
 
+/* Header carries the statement + scientific verdict (Fedor 2026-05-25).
+   Statement on top, "Deine Antwort:" + "Wissenschaftlich:" lines
+   stacked beneath. Close X is absolutely positioned top-right so the
+   header content can wrap freely. */
+/* Sticky on scroll (Fedor 2026-05-25 PM) — see dashboard.css mirror.
+   The `.factsheet-panel` parent is the scrolling container. */
 .factsheet-panel__header {
-  display: flex;
-  justify-content: flex-end;
-  padding: var(--space-md) var(--space-lg);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-surface);
+  padding: 14px 52px 12px var(--space-lg);
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 
+.factsheet-panel__header-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
 .factsheet-panel__close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
   background: none;
   border: none;
   font-size: 1.6rem;
@@ -2674,6 +2693,7 @@ button.quiz-result__cta {
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   transition: background var(--transition-fast), color var(--transition-fast);
+  z-index: 1;
 }
 
 .factsheet-panel__close:hover {
@@ -2687,13 +2707,11 @@ button.quiz-result__cta {
 }
 
 .factsheet-panel__statement {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  line-height: 1.45;
+  line-height: 1.4;
   color: var(--color-text);
-  /* Reduced from --space-lg so the "Wissenschaftlich:" line below
-     sits close enough to read as a continuation of the statement. */
-  margin-bottom: var(--space-xs);
+  margin: 0; /* gap on __header-content handles vertical spacing */
 }
 
 /* "Wissenschaftlich: <VerdictPill>" row, added 2026-05-14 per Fedor's
@@ -2708,6 +2726,13 @@ button.quiz-result__cta {
   margin: 0 0 var(--space-lg);
   font-size: 0.95rem;
   line-height: 1.45;
+}
+
+/* When the verdict-line lives inside the header (Fedor 2026-05-25
+   header relocation), drop the bottom margin — the parent's flex gap
+   handles vertical spacing. */
+.factsheet-panel__header .factsheet-panel__verdict-line {
+  margin: 0;
 }
 
 .factsheet-panel__verdict-label {
@@ -4701,209 +4726,297 @@ button.quiz-result__cta {
   margin-left: 24px;
 }
 
-/* ── Tab host wrapper inside the popup ────────────────────────── */
+/* ── FactsheetGroupBars v5 (2026-05-25) — transposed sortable heatmap
+       table. Mirror of dashboard.css; keep both in sync. ─────────── */
 .factsheet-group-bars {
-  margin-top: var(--space-lg);
+  margin-top: var(--space-md);
   margin-bottom: var(--space-md);
 }
 
-.factsheet-group-bars__tabs {
-  margin-top: 8px;
-}
-
-.factsheet-group-bars__tabs .tab-btn {
-  padding: 8px 14px;
-  font-size: 0.78rem;
-}
-
-.factsheet-group-bars__viz {
-  padding-top: 12px;
-}
-
-/* ── Radar tab — FactsheetGroupRadar ──────────────────────────── */
-.factsheet-group-radar {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.factsheet-group-radar__legend {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 10px;
-}
-
-.factsheet-group-radar__legend-chip {
-  display: inline-flex;
-  align-items: center;
-}
-
-.factsheet-group-radar__legend-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: var(--radius-full, 999px);
-  border: 1px solid transparent;
-  background: transparent;
-  color: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background var(--transition-fast, 150ms ease),
-    border-color var(--transition-fast, 150ms ease);
-}
-
-.factsheet-group-radar__legend-button:hover,
-.factsheet-group-radar__legend-button:focus-visible {
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  border-color: color-mix(in srgb, currentColor 30%, transparent);
-  outline: none;
-}
-
-.factsheet-group-radar__legend-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.factsheet-group-radar__chart {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  max-height: 320px;
-  margin: 0 auto;
-}
-
-/* ── Table tab — FactsheetGroupTable ──────────────────────────── */
-.factsheet-group-table-wrap {
-  margin-top: 4px;
+.factsheet-group-bars__wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.factsheet-group-table {
+.factsheet-group-bars__table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  table-layout: fixed;
+  table-layout: auto;
   font-size: 0.8rem;
   color: var(--color-text);
 }
 
-.factsheet-group-table th,
-.factsheet-group-table td {
-  padding: 8px 4px;
+.factsheet-group-bars__table th,
+.factsheet-group-bars__table td {
+  padding: 4px 4px;
   text-align: center;
   vertical-align: middle;
   border-bottom: 1px solid var(--color-border);
 }
 
-.factsheet-group-table tbody tr:last-child th,
-.factsheet-group-table tbody tr:last-child td {
+.factsheet-group-bars__table tbody tr:last-child th,
+.factsheet-group-bars__table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.factsheet-group-table__corner {
-  width: 32%;
+.factsheet-group-bars__corner {
+  width: 1%;
+  padding: 4px 6px;
   background: transparent;
 }
 
-.factsheet-group-table__col-header {
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  line-height: 1.1;
+.factsheet-group-bars__corner-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 4px);
+  transition: background var(--transition-fast, 150ms ease),
+              color var(--transition-fast, 150ms ease);
 }
 
-.factsheet-group-table__col-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2px;
+.factsheet-group-bars__corner-btn:hover {
+  background: var(--color-surface-soft, rgba(15, 23, 42, 0.05));
   color: var(--color-text);
 }
 
-.factsheet-group-table__col-label {
-  display: block;
-  font-size: 0.68rem;
+.factsheet-group-bars__corner--active .factsheet-group-bars__corner-btn {
+  color: var(--color-text);
+}
+
+.factsheet-group-bars__col-header {
   font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.1;
+  vertical-align: middle;
+  padding: 4px 2px;
+}
+
+.factsheet-group-bars__col-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 4px 2px;
+  border-radius: var(--radius-sm, 4px);
+  transition: background var(--transition-fast, 150ms ease),
+              color var(--transition-fast, 150ms ease);
+  width: 100%;
+}
+
+.factsheet-group-bars__col-btn:hover {
+  background: var(--color-surface-soft, rgba(15, 23, 42, 0.04));
+  color: var(--color-text);
+}
+
+.factsheet-group-bars__col-header--active .factsheet-group-bars__col-btn {
+  color: var(--color-text);
+}
+
+.factsheet-group-bars__col-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.factsheet-group-bars__col-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
-.factsheet-group-table__row-header {
-  font-weight: 600;
-  font-size: 0.74rem;
-  text-align: left;
-  padding-left: 2px;
-  padding-right: 8px;
-  color: var(--color-text);
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.factsheet-group-table__row-icon {
+.factsheet-group-bars__col-sort {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  width: 11px;
+  height: 11px;
+  color: var(--color-text);
   flex-shrink: 0;
 }
 
-.factsheet-group-table__row-label {
+.factsheet-group-bars__row-header {
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-align: left;
+  padding-left: 6px;
+  padding-right: 8px;
+  color: var(--color-text);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  cursor: help;
 }
 
-.factsheet-group-table__cell {
+.factsheet-group-bars__row-header > * {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.factsheet-group-bars__row-icon {
+  color: var(--color-text-secondary);
+  margin-right: 6px;
+  line-height: 0;
+}
+
+.factsheet-group-bars__row-label {
+  font-weight: 600;
+}
+
+.factsheet-group-bars__cell {
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  cursor: help;
+  transition: background 0.2s ease;
 }
 
-.factsheet-group-table__na {
+.factsheet-group-bars__value {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.88rem;
+  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace);
+  letter-spacing: 0;
+  color: var(--color-text);
+}
+
+.factsheet-group-bars__cell--na {
+  background: transparent !important;
+}
+
+.factsheet-group-bars__na {
   color: var(--color-text-muted);
   font-style: italic;
   font-weight: 500;
   font-size: 0.74rem;
-  cursor: help;
 }
 
 @media (max-width: 480px) {
-  .factsheet-group-radar__chart {
-    max-height: 260px;
-  }
-  .factsheet-group-radar__legend-button {
-    padding: 3px 6px;
-    font-size: 0.68rem;
-  }
-
-  .factsheet-group-table {
+  .factsheet-group-bars__table {
     font-size: 0.74rem;
   }
-  .factsheet-group-table th,
-  .factsheet-group-table td {
-    padding: 6px 2px;
+  .factsheet-group-bars__table th,
+  .factsheet-group-bars__table td {
+    padding: 5px 3px;
   }
-  .factsheet-group-table__col-label {
+  .factsheet-group-bars__col-btn {
     font-size: 0.62rem;
+    gap: 2px;
   }
-  .factsheet-group-table__row-header {
-    font-size: 0.68rem;
-    gap: 4px;
+  .factsheet-group-bars__row-header {
+    font-size: 0.7rem;
+    padding-left: 4px;
+    padding-right: 4px;
   }
-  .factsheet-group-table__corner {
-    width: 28%;
+  .factsheet-group-bars__row-icon {
+    margin-right: 4px;
   }
+  .factsheet-group-bars__value {
+    font-size: 0.78rem;
+  }
+}
 
-  .factsheet-group-bars__tabs .tab-btn {
-    padding: 7px 12px;
-    font-size: 0.74rem;
-  }
+/* ─── Popup extras: Related Myths + FAQ backlinks (mirror of
+       dashboard.css; quiz / meine-interessen / fakten-karten popups
+       load this file). ───────────────────────────────────────────── */
+
+.factsheet-panel__extras {
+  margin-top: 10px;
+}
+
+.factsheet-panel__extras-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.factsheet-panel__extras-item {
+  margin: 0;
+}
+
+.factsheet-panel__extras-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  text-align: left;
+  color: var(--color-text);
+  text-decoration: none;
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: background var(--transition-fast, 150ms ease),
+              border-color var(--transition-fast, 150ms ease);
+}
+
+.factsheet-panel__extras-link:hover,
+.factsheet-panel__extras-link:focus-visible {
+  background: var(--color-surface-soft, rgba(15, 23, 42, 0.04));
+  border-color: var(--color-border);
+  outline: none;
+}
+
+.factsheet-panel__extras-link--static {
+  cursor: default;
+}
+
+.factsheet-panel__extras-link--static:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+.factsheet-panel__extras-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* FAQ-backlinks audience glyph (Fedor 2026-05-25 — real audience icons
+   from src/lib/icons/audiences.ts instead of the 2-char text chips).
+   Color comes from the audience CSS token; no chip background. */
+.factsheet-panel__extras-audience-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-secondary);
+  cursor: help;
+}
+
+.factsheet-panel__extras-audience-icon--eltern        { color: var(--audience-eltern, #4f46e5); }
+.factsheet-panel__extras-audience-icon--jugendliche   { color: var(--audience-jugendliche, #f97316); }
+.factsheet-panel__extras-audience-icon--konsumierende { color: var(--audience-konsumierende, #16a34a); }
+.factsheet-panel__extras-audience-icon--lehrkraefte   { color: var(--audience-lehrkraefte, #0891b2); }
+.factsheet-panel__extras-audience-icon--fachkraefte   { color: var(--audience-fachkraefte, #7c3aed); }
+
+.factsheet-panel__extras-audience-fallback {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }

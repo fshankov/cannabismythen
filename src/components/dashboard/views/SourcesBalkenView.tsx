@@ -29,6 +29,7 @@ import type {
 } from '../../../lib/dashboard/types';
 import {
   GridDataHeader, GridLabelHeader,
+  BalkenBar, SourcesHoverTooltip,
 } from '../grid';
 import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
 import {
@@ -36,6 +37,8 @@ import {
   SOURCE_CATEGORY_ICONS, SOURCE_METRIC_ICONS,
   type SourceCategoryId,
 } from '../../../lib/icons/lookups';
+import { filterSourcesBySearch } from '../../../lib/dashboard/data';
+import { getCategoryColor } from '../../../lib/dashboard/colors';
 
 interface Props {
   state: AppState;
@@ -75,16 +78,10 @@ const GROUP_LABELS: Record<SourceGroupId, string> = {
   parents: 'Eltern',
 };
 
-/** Source-category CSS color tokens (defined in dashboard.css). Fallback
- *  is the neutral keine-aussage grey so a missing category still renders. */
-const CATEGORY_COLORS: Record<SourceCategoryId, string> = {
-  institutional: 'var(--source-institutionell, #4b6cb7)',
-  internet: 'var(--source-internet, #2d8da4)',
-  social_media: 'var(--source-soziale-medien, #b15edb)',
-  traditional_media: 'var(--source-traditionelle, #c97a3d)',
-  print_physical: 'var(--source-print, #8b7355)',
-  personal: 'var(--source-persoenlich, #d04a4a)',
-};
+/** Category color now lives in `src/lib/dashboard/colors.ts`
+ *  (`SOURCE_CATEGORY_COLORS` + `getCategoryColor`) so the BalkenBar
+ *  primitive and the SourcesHoverTooltip share a single source of
+ *  truth with the CSS-side `--source-*` tokens in global.css. */
 
 const METRIC_OPTIONS: DataPickerOption<SourceMetricType>[] = [
   { value: 'search', label: 'Suche', Icon: SOURCE_METRIC_ICONS.search },
@@ -127,23 +124,24 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
 
     /** Top-level sources only (children render inside SourcesSpannweiteView
      *  and the matrix tab; this Balken overview keeps the row count
-     *  scannable). */
+     *  scannable). Universal source search (Fedor 2026-05-25 PM,
+     *  item F) filters by source.name before mapping. */
     const rows = useMemo(() => {
       if (!sourceData) return [];
       const metricDef = sourceData.metrics[selectedMetric];
       if (!metricDef) return [];
       const valueMap = metricDef.data[selectedGroup] ?? {};
-      return sourceData.sources
-        .filter((s) => s.parentId === null)
-        .map((src) => {
-          const raw = valueMap[String(src.id)];
-          return {
-            source: src,
-            value: typeof raw === 'number' ? raw : null,
-            categoryId: src.category as SourceCategoryId,
-          };
-        });
-    }, [sourceData, selectedMetric, selectedGroup]);
+      const topLevel = sourceData.sources.filter((s) => s.parentId === null);
+      const searched = filterSourcesBySearch(topLevel, state.sourcesSearchQuery);
+      return searched.map((src) => {
+        const raw = valueMap[String(src.id)];
+        return {
+          source: src,
+          value: typeof raw === 'number' ? raw : null,
+          categoryId: src.category as SourceCategoryId,
+        };
+      });
+    }, [sourceData, selectedMetric, selectedGroup, state.sourcesSearchQuery]);
 
     const sortedRows = useMemo(() => {
       const arr = [...rows];
@@ -170,9 +168,40 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
       else setSort('value-asc');
     }, [sort]);
 
-    // ── Hover state for a lightweight tooltip line. ───────────────────
-    const [hoveredId, setHoveredId] = useState<number | null>(null);
+    // ── Hover state (Spannweite-style rich card via SourcesHoverTooltip,
+    //    2026-05-26). Mirrors BalkenView's handleHover pattern: clamp
+    //    the X position so the 360 px-wide card never extends past the
+    //    viewport edge near the left/right gutter. ─────────────────────
+    const [hoveredSourceId, setHoveredSourceId] = useState<number | null>(null);
+    const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
+
+    // v3 (2026-05-26): width bumped from 360 → 420 to match the
+    // actual `.carm-spannweite__tooltip { max-width: 420px }` CSS rule.
+    // The old 360 underestimate caused the left half of the tooltip
+    // to spill past the viewport on long source names ("Fernsehen
+    // (Info- / Diskussionssendungen)") when hovering near the left
+    // edge. Margin 12 → 24 matches BalkenView's breathing room.
+    const TOOLTIP_MAX_W = 420;
+    const VIEWPORT_MARGIN = 24;
+    const handleHover = useCallback(
+      (sourceId: number, e: React.MouseEvent) => {
+        setHoveredSourceId(sourceId);
+        const halfW = TOOLTIP_MAX_W / 2;
+        const minX = halfW + VIEWPORT_MARGIN;
+        const maxX =
+          (typeof window !== 'undefined' ? window.innerWidth : 1280) -
+          halfW -
+          VIEWPORT_MARGIN;
+        const clampedX = Math.max(minX, Math.min(maxX, e.clientX));
+        setHoverPos({ x: clampedX, y: e.clientY });
+      },
+      [],
+    );
+    const handleLeave = useCallback(() => {
+      setHoveredSourceId(null);
+      setHoverPos(null);
+    }, []);
 
     if (!sourceData) {
       return (
@@ -281,23 +310,23 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
             {/* Body rows. */}
             {sortedRows.map((row, rowIdx) => {
               const { source, value, categoryId } = row;
-              const isHover = hoveredId === source.id;
-              const accent = CATEGORY_COLORS[categoryId] ?? 'var(--color-text-muted, #6b7280)';
+              const isHover = hoveredSourceId === source.id;
+              const accent = getCategoryColor(categoryId);
               const CategoryIcon = SOURCE_CATEGORY_ICONS[categoryId];
-              const clamped = value === null ? 0 : Math.max(0, Math.min(100, value));
               return (
                 <div
                   key={`row-${source.id}`}
                   className={`carm-spannweite__row${isHover ? ' is-hover' : ''}${rowIdx % 2 === 0 ? '' : ' is-alt'}`}
                   role="row"
                   style={{ gridColumn: `1 / span 2`, gridTemplateColumns: gridTemplate }}
-                  onMouseEnter={() => setHoveredId(source.id)}
-                  onMouseLeave={() => setHoveredId(null)}
+                  onMouseLeave={handleLeave}
                   tabIndex={0}
                 >
                   <div
                     className="carm-spannweite__cell carm-spannweite__cell--label carm-sources-balken__label"
                     role="rowheader"
+                    onMouseEnter={(e) => handleHover(source.id, e)}
+                    onMouseMove={(e) => handleHover(source.id, e)}
                   >
                     {CategoryIcon && (
                       <span
@@ -318,40 +347,34 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
                         ? `${metricLabel} — ${source.name}: ${Math.round(value)} %`
                         : `${metricLabel} — ${source.name}: keine Daten`
                     }
-                    title={
-                      value !== null
-                        ? `${source.name}\n${fullLabel}: ${Math.round(value)} %`
-                        : `${source.name}\n${fullLabel}: keine Daten`
-                    }
+                    onMouseEnter={(e) => handleHover(source.id, e)}
+                    onMouseMove={(e) => handleHover(source.id, e)}
                   >
-                    <div className="carm-spannweite__plot">
-                      {value === null ? (
-                        <span className="carm-spannweite__no-data" aria-hidden="true">
-                          k. A.
-                        </span>
-                      ) : (
-                        <>
-                          <div
-                            className="carm-spannweite__bar"
-                            style={{ width: `${clamped}%`, background: accent }}
-                            aria-hidden="true"
-                          />
-                          <div
-                            className="carm-spannweite__dot"
-                            style={{ left: `${clamped}%`, background: accent, color: '#ffffff' }}
-                            aria-hidden="true"
-                          >
-                            {Math.round(value)}
-                          </div>
-                        </>
-                      )}
-                    </div>
+                    <BalkenBar value={value} accent={accent} />
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
+
+        {/* Spannweite-style rich hover card. Replaces the previous
+            native title= attribute so Quellen Balken now matches the
+            hover quality of Mythen Balken / Spannweite. */}
+        {hoveredSourceId !== null && hoverPos && (() => {
+          const hovered = sortedRows.find((r) => r.source.id === hoveredSourceId);
+          if (!hovered) return null;
+          return (
+            <SourcesHoverTooltip
+              source={hovered.source}
+              sourceData={sourceData}
+              metric={selectedMetric}
+              group={selectedGroup}
+              x={hoverPos.x}
+              y={hoverPos.y}
+            />
+          );
+        })()}
       </div>
     );
   },

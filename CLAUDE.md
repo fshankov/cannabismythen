@@ -39,6 +39,33 @@ clipboard helpers (`pbcopy` / `pbpaste`), and "open in editor" commands (`open .
 opens the current dir in Finder; VS Code path is the macOS .app bundle). Don't
 propose Ctrl-key shortcuts or Windows path conventions.
 
+## Local-only workflow (HARD — 2026-05-25 onward)
+
+**Default mode for this codebase:** Claude makes **uncommitted edits in
+the local working tree on `main`**. No new branches, no commits, no
+pushes, no PRs unless Fedor explicitly asks ("commit", "push", "open a
+PR", "merge"). Fedor iterates via `./_local/render.sh` and reviews
+changes by visual inspection in the browser, not by reading PR diffs.
+
+Concretely:
+
+- Stay on `main`. Edit files in place. Do not run `git checkout -b`,
+  `git commit`, `git push`, or `gh pr create` unless Fedor explicitly
+  asks for one of those actions in the current turn.
+- Past sessions ran a "travel pipeline" with many feature branches +
+  PRs. That mode is OVER. Don't replicate that workflow without an
+  explicit request.
+- If a change accidentally lands on a branch other than `main`,
+  switch back to `main` and re-apply locally.
+- Stale open PRs from prior sessions are Fedor's to manage; don't
+  close, merge, or rebase them unsolicited.
+- The exception: `astro check` and other read-only verification
+  commands are always fine to run.
+
+The reason: Fedor wants tight visual iteration without the PR-review
+overhead. Branches + PRs slow down "see the change → tweak → see
+again" cycles when he's at his desk with the dev server running.
+
 ## Tracker workflow (Asana + Feedbucket)
 
 **Use the Asana CannabisMythen project for every task related to

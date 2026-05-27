@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { CorrectnessClass } from './types';
+import type { SourceCategoryId } from '../icons/lookups';
 
 /**
  * Unified classification colors — Emerald / Lime / Amber / Rose palette.
@@ -108,4 +109,39 @@ export const CORRECTNESS_ICONS: Record<CorrectnessClass, string> = {
  */
 export function getCorrectnessIcon(cls: CorrectnessClass): string {
   return CORRECTNESS_ICONS[cls] || '—';
+}
+
+/**
+ * Source-category accent colors — used by Quellen views as the bar
+ * fill / pill color. Mirrors the `--source-…` CSS custom properties in
+ * `src/styles/global.css`; both must stay in sync. JS-side consumers
+ * (BalkenBar, SourcesHoverTooltip) read from this map; CSS-side
+ * consumers read the var().
+ */
+export const SOURCE_CATEGORY_COLORS: Record<SourceCategoryId, string> = {
+  institutional: '#4b6cb7',
+  internet: '#2d8da4',
+  social_media: '#b15edb',
+  traditional_media: '#c97a3d',
+  print_physical: '#8b7355',
+  personal: '#d04a4a',
+};
+
+export function getCategoryColor(cat: SourceCategoryId): string {
+  return SOURCE_CATEGORY_COLORS[cat] || '#6b7280';
+}
+
+/** Light tints for tooltip card backgrounds — mirrors the
+ *  `--source-…-bg` tokens in global.css. */
+export const SOURCE_CATEGORY_BG_COLORS: Record<SourceCategoryId, string> = {
+  institutional: '#eef2fb',
+  internet: '#e7f3f5',
+  social_media: '#f6ebfb',
+  traditional_media: '#fbf2e7',
+  print_physical: '#f3eee8',
+  personal: '#fbeaea',
+};
+
+export function getCategoryBgColor(cat: SourceCategoryId): string {
+  return SOURCE_CATEGORY_BG_COLORS[cat] || '#f3f4f6';
 }

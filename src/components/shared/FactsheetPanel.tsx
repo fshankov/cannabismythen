@@ -28,25 +28,21 @@ import type {
   CorrectnessClass,
   MythGroupMetrics,
 } from '../../lib/dashboard/types';
+import {
+  AUDIENCE_ICONS_BY_FAQ_ID,
+  type FaqAudienceId,
+} from '../../lib/icons/lookups';
 
 /** Travel pipeline 4C (2026-05-23) — full audience label, used as the
- *  tooltip on the short-code chip beside each FAQ-backlink row. */
+ *  tooltip on the audience icon beside each FAQ-backlink row.
+ *  (The 2-char "El/Ju/Ko/Le/Fa" chips were replaced by the audience
+ *   icons themselves on 2026-05-25 — see FAQ backlinks block below.) */
 const FAQ_AUDIENCE_LABEL: Record<string, string> = {
   eltern: 'Eltern',
   jugendliche: 'Jugendliche',
   konsumierende: 'Konsumierende',
   lehrkraefte: 'Lehrkräfte',
   fachkraefte: 'Fachkräfte',
-};
-
-/** Short chip label (2 chars) so backlink rows stay compact even on
- *  narrow mobile popups. Falls back to the audience id on lookup miss. */
-const FAQ_AUDIENCE_LABEL_SHORT: Record<string, string> = {
-  eltern: 'El',
-  jugendliche: 'Ju',
-  konsumierende: 'Ko',
-  lehrkraefte: 'Le',
-  fachkraefte: 'Fa',
 };
 
 /** Reference to a related myth — surfaced inside the popup as a click
@@ -349,7 +345,52 @@ export default function FactsheetPanel({
       aria-label={mythText}
     >
       <div ref={panelRef} className="factsheet-panel" tabIndex={-1}>
+        {/* Header carries the statement + scientific verdict (Fedor
+            2026-05-25). Previously the statement + "Wissenschaftlich:"
+            line sat at the top of the body; moving them into the
+            header places the verdict above the fold and frees the body
+            to start directly with Einordnung. The close X is
+            absolutely positioned top-right of the header so the
+            statement + verdict can wrap freely without colliding. */}
         <div className="factsheet-panel__header">
+          <div className="factsheet-panel__header-content">
+            <VerdictStatement
+              statement={mythContentEntry?.title ?? mythText}
+              verdict={classificationKey as CorrectnessClass}
+              as="p"
+              className="factsheet-panel__statement"
+              arrowSize={18}
+            />
+
+            {/* Stage D (2026-05-22): quiz popup-first pattern — when the
+                user opened the panel after answering, surface their
+                pick directly next to the scientific verdict so the
+                comparison is visible without scrolling. Dashboard +
+                fakten-karten leave userAnswer undefined → this block
+                doesn't render. */}
+            {userAnswer && (
+              <p className="factsheet-panel__verdict-line">
+                <span className="factsheet-panel__verdict-label">
+                  Deine Antwort:
+                </span>{' '}
+                <VerdictPill verdict={userAnswer} size="md" />
+              </p>
+            )}
+
+            {/* "Wissenschaftlich: <pill>" line. "Wissenschaftlich" (not
+                "Wissenschaftliches Urteil") follows the BugHerd #30
+                UI-label rule. */}
+            <p className="factsheet-panel__verdict-line">
+              <span className="factsheet-panel__verdict-label">
+                Wissenschaftlich:
+              </span>{' '}
+              <VerdictPill
+                verdict={classificationKey as CorrectnessClass}
+                size="md"
+              />
+            </p>
+          </div>
+
           <button
             type="button"
             className="factsheet-panel__close"
@@ -363,49 +404,6 @@ export default function FactsheetPanel({
         <div className="factsheet-panel__body">
           {mythContentEntry ? (
             <>
-              {/* 1. Myth statement carries the verdict (v3, 2026-05-13).
-                  Bold + verdict color + trailing arrow. */}
-              <VerdictStatement
-                statement={mythContentEntry.title}
-                verdict={classificationKey as CorrectnessClass}
-                as="p"
-                className="factsheet-panel__statement"
-                arrowSize={18}
-              />
-
-              {/* Stage D (2026-05-22): quiz popup-first pattern — when the
-                  user opened the panel after answering, surface their
-                  pick directly above the scientific verdict so the
-                  comparison is visible without scrolling back to a card.
-                  Dashboard + fakten-karten leave userAnswer undefined →
-                  this block doesn't render. */}
-              {userAnswer && (
-                <p className="factsheet-panel__verdict-line">
-                  <span className="factsheet-panel__verdict-label">
-                    Deine Antwort:
-                  </span>{' '}
-                  <VerdictPill verdict={userAnswer} size="md" />
-                </p>
-              )}
-
-              {/* 2. "Wissenschaftlich: <pill>" line (Fedor 2026-05-14).
-                  Sits directly under the statement and names the
-                  scientific verdict explicitly — the colored statement
-                  alone left some users unsure whether the verdict was
-                  Richtig or Falsch. Uses the canonical VerdictPill so
-                  the label tracks across surfaces (Quiz, Daten-Explorer,
-                  Fakten-Karten). "Wissenschaftlich" (not "Wissenschaftliches
-                  Urteil") follows the BugHerd #30 UI-label rule. */}
-              <p className="factsheet-panel__verdict-line">
-                <span className="factsheet-panel__verdict-label">
-                  Wissenschaftlich:
-                </span>{' '}
-                <VerdictPill
-                  verdict={classificationKey as CorrectnessClass}
-                  size="md"
-                />
-              </p>
-
               {/* 3-7. Ordered sections (markdown table hidden when bars wired) */}
               {orderedSections.map((section, i) => renderSection(section, i))}
 
@@ -484,22 +482,37 @@ export default function FactsheetPanel({
                     </span>
                   </summary>
                   <ul className="factsheet-panel__extras-list">
-                    {mythContentEntry.faqBacklinks.map((b) => (
-                      <li key={`${b.audience}-${b.slug}`} className="factsheet-panel__extras-item">
-                        <a href={b.href} className="factsheet-panel__extras-link">
-                          <span
-                            className={`factsheet-panel__extras-audience factsheet-panel__extras-audience--${b.audience}`}
-                            aria-hidden="true"
-                            title={FAQ_AUDIENCE_LABEL[b.audience] ?? b.audience}
-                          >
-                            {FAQ_AUDIENCE_LABEL_SHORT[b.audience] ?? b.audience}
-                          </span>
-                          <span className="factsheet-panel__extras-label">
-                            {b.title}
-                          </span>
-                        </a>
-                      </li>
-                    ))}
+                    {mythContentEntry.faqBacklinks.map((b) => {
+                      // Look up the audience icon component (Fedor 2026-05-25:
+                      // the 2-char EL/JU/KO/LE/FA chips were replaced by the
+                      // real audience icons from src/lib/icons/audiences.ts).
+                      // Fallback to a neutral chip if the audience id isn't
+                      // in the known set — shouldn't happen but defensive.
+                      const AudienceIcon =
+                        AUDIENCE_ICONS_BY_FAQ_ID[b.audience as FaqAudienceId];
+                      return (
+                        <li key={`${b.audience}-${b.slug}`} className="factsheet-panel__extras-item">
+                          <a href={b.href} className="factsheet-panel__extras-link">
+                            <span
+                              className={`factsheet-panel__extras-audience-icon factsheet-panel__extras-audience-icon--${b.audience}`}
+                              aria-hidden="true"
+                              title={FAQ_AUDIENCE_LABEL[b.audience] ?? b.audience}
+                            >
+                              {AudienceIcon ? (
+                                <AudienceIcon size={16} strokeWidth={1.75} />
+                              ) : (
+                                <span className="factsheet-panel__extras-audience-fallback">
+                                  {b.audience.slice(0, 2).toUpperCase()}
+                                </span>
+                              )}
+                            </span>
+                            <span className="factsheet-panel__extras-label">
+                              {b.title}
+                            </span>
+                          </a>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </details>
               )}
@@ -507,37 +520,10 @@ export default function FactsheetPanel({
             </>
           ) : (
             <>
-              {/* Fallback if no pre-rendered content. Same v3 pattern as
-                  the primary branch above — statement carries the verdict. */}
-              <VerdictStatement
-                statement={mythText}
-                verdict={classificationKey as CorrectnessClass}
-                as="p"
-                className="factsheet-panel__statement"
-                arrowSize={18}
-              />
-
-              {/* Mirror of the primary branch's Stage-D "Deine Antwort:"
-                  row — only renders when the quiz callsite passed it. */}
-              {userAnswer && (
-                <p className="factsheet-panel__verdict-line">
-                  <span className="factsheet-panel__verdict-label">
-                    Deine Antwort:
-                  </span>{' '}
-                  <VerdictPill verdict={userAnswer} size="md" />
-                </p>
-              )}
-
-              {/* Mirror of the primary branch's "Wissenschaftlich:" row. */}
-              <p className="factsheet-panel__verdict-line">
-                <span className="factsheet-panel__verdict-label">
-                  Wissenschaftlich:
-                </span>{' '}
-                <VerdictPill
-                  verdict={classificationKey as CorrectnessClass}
-                  size="md"
-                />
-              </p>
+              {/* Fallback when the .mdoc didn't load. The statement +
+                  verdict already live in the header above, so the body
+                  starts directly with the fallback explanation (if any)
+                  and the interactive bars. */}
 
               {fallbackExplanation && (
                 <div className="factsheet-panel__section">
