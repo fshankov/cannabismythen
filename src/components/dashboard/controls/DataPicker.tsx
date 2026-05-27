@@ -168,30 +168,31 @@ export default function DataPicker<T extends string>({
       className={`carm-picker${dropup ? ' carm-picker--dropup' : ''}`}
     >
       <span className="carm-picker__caption">{caption}:</span>
-      <button
-        type="button"
-        className="carm-picker__trigger"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={listboxId}
-        aria-label={ariaLabel}
-        onClick={() => {
-          setOpen((v) => !v);
-        }}
-      >
-        {renderLeading(active)}
-        <span className="carm-picker__current">{active?.label ?? ''}</span>
-        <span className="carm-picker__chevron" aria-hidden="true">
-          ▾
-        </span>
-      </button>
-      {open && (
-        <div
-          id={listboxId}
-          className="carm-picker__menu"
-          role="listbox"
+      <span className="carm-picker__anchor">
+        <button
+          type="button"
+          className="carm-picker__trigger"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={listboxId}
           aria-label={ariaLabel}
+          onClick={() => {
+            setOpen((v) => !v);
+          }}
         >
+          {renderLeading(active)}
+          <span className="carm-picker__current">{active?.label ?? ''}</span>
+          <span className="carm-picker__chevron" aria-hidden="true">
+            ▾
+          </span>
+        </button>
+        {open && (
+          <div
+            id={listboxId}
+            className="carm-picker__menu"
+            role="listbox"
+            aria-label={ariaLabel}
+          >
           {searchable && (
             <div className="carm-picker__search">
               <Search
@@ -297,8 +298,9 @@ export default function DataPicker<T extends string>({
               </div>
             );
           })}
-        </div>
-      )}
+          </div>
+        )}
+      </span>
     </div>
   );
 }

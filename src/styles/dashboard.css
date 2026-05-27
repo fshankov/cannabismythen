@@ -18,6 +18,12 @@ main:has(.carm-explorer) {
   --color-surface-raised: #f1f5f9;
   --color-border: #e2e8f0;
   --color-border-strong: #cbd5e1;
+  /* 2026-05-27 PM refresh — lighter inactive tab background. Original
+     site-wide `--color-bg-subtle` is #eeeee8 (milky beige) which read
+     as a separate tan strip behind the tabs. Drop it just inside the
+     dashboard scope to a near-white tone so the inactive tabs blend
+     with the dashboard surface; the active white tab still pops. */
+  --color-bg-subtle: #f5f5f2;
   /* Text — slightly warmer near-black + better secondary contrast (WCAG AA).
      These values match global.css :root but are re-declared so the .carm-explorer
      subtree resolves them consistently when used in portalled overlays. */
@@ -132,9 +138,8 @@ main:has(.carm-explorer) {
 /* Stage 6 — sticky tabs + toolbar on mobile (≤768px) so the user can
    change indicator / group / sort while the chart scrolls below. The
    tabs row sticks to the very top of the viewport; the toolbar row
-   stacks just under it. The howto-microcopy line below the toolbar is
-   NOT sticky (it's documentation, not control). Background is the
-   page color so content scrolls under cleanly. */
+   stacks just under it. Background is the page color so content
+   scrolls under cleanly. */
 @media (max-width: 768px) {
   .carm-explorer .tabs-bar {
     position: sticky;
@@ -306,14 +311,11 @@ main:has(.carm-explorer) {
   height: 13px;
 }
 
-/* ==================== HOW-TO MICROCOPY ==================== */
-.carm-explorer .howto-microcopy {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 6px;
-  line-height: 1.4;
-  padding: 0 2px;
-}
+/* (Removed 2026-05-27 PM) — `.howto-microcopy` was the one-line explainer
+   that sat between the toolbar and the chart on each view. Stripped
+   per Fedor's request; intro paragraph above the tabs now carries the
+   page-level orientation, and per-tab Rundgang tours handle the
+   detailed walk-through. */
 
 /* ==================== CHART AREA ====================
    Top edge intentionally has 0 radius so the active Chrome-style tab
@@ -330,6 +332,11 @@ main:has(.carm-explorer) {
      radius from the 2026-05-27 Figma refresh. */
   border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg);
   background: white;
+  /* Soft elevation (2026-05-27 PM) — lifts the chart card off the
+     dashboard surface so the chrome reads as a Figma-style card.
+     Top edge intentionally excluded from the shadow so the active
+     tab's merge with the card stays clean. */
+  box-shadow: 0 6px 24px -8px rgba(15, 23, 42, 0.1);
   overflow: hidden;
 }
 
@@ -4887,13 +4894,14 @@ body.carm-modal-open {
    appearance. Safe to drop the modifier in JSX. */
 .carm-btn--ghost { /* alias of .carm-btn — Stage 6 unified chip */ }
 
-/* Green circular Rundgang badge (2026-05-27 refresh) — replaces the
-   pill-shaped "Rundgang" chip that used to sit at the right end of the
-   tabs row. Now lives in the ToolbarRow's actions slot alongside
-   Filter / Exportieren. Per-tab tutorial picker; click hands off to
-   `handleRundgang` in MythenExplorer, which consults RUNDGANG_SCRIPTS
-   and either fires the tab-specific tour or falls back to the legacy
-   Streifen tour. */
+/* Green map-pin / teardrop Rundgang badge (2026-05-27 PM refresh) —
+   silhouette is a navigation pin (rounded top, pointed bottom-left
+   corner via the `border-radius: 50% 50% 50% 0` trick + a -45° rotate).
+   Sits in the ToolbarRow's actions slot alongside Filter / Exportieren;
+   click hands off to `handleRundgang` in MythenExplorer, which consults
+   RUNDGANG_SCRIPTS and either fires the tab-specific tour or falls back
+   to the legacy Streifen tour. The `<HelpCircle>` icon inside is
+   counter-rotated so the question mark stays upright. */
 .carm-rundgang-badge {
   appearance: none;
   display: inline-flex;
@@ -4903,36 +4911,43 @@ body.carm-modal-open {
   height: 44px;
   padding: 0;
   border: none;
-  border-radius: 50%;
+  /* Teardrop: three rounded corners + one pointed (bottom-left). */
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
   background: var(--color-accent, #2d6a4f);
   color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25);
+  box-shadow: 0 6px 14px rgba(45, 106, 79, 0.28);
   flex-shrink: 0;
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
+.carm-rundgang-badge > svg {
+  /* Counter-rotate so the question-mark icon reads upright inside the
+     -45°-rotated pin shape. */
+  transform: rotate(45deg);
+}
 .carm-rundgang-badge:hover {
   background: var(--color-accent-hover, #1f4f3a);
-  transform: scale(1.04);
+  transform: rotate(-45deg) scale(1.06);
 }
 .carm-rundgang-badge:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 @media (prefers-reduced-motion: reduce) {
   .carm-rundgang-badge { transition: background 0.15s ease, box-shadow 0.15s ease; }
-  .carm-rundgang-badge:hover { transform: none; }
+  .carm-rundgang-badge:hover { transform: rotate(-45deg); }
 }
 
-/* Daten-Explorer intro paragraph (2026-05-27 refresh) — sits between
-   `<DashboardOnboarding>` and `<ViewTabs>`, invites the visitor to
-   explore the data and links across to the project background +
-   Fakten-Karten. AI-drafted Newton-Variante-A German; flagged for ISD
-   review post-deploy (see MythenExplorer.tsx). */
+/* Daten-Explorer intro paragraph (2026-05-27 PM refresh) — sits between
+   `<DashboardOnboarding>` and `<ViewTabs>`, spans the full dashboard
+   width so the paragraph reads as part of the dashboard chrome (not a
+   constrained editorial block). AI-drafted Newton-Variante-A German;
+   flagged for ISD review post-deploy (see MythenExplorer.tsx). */
 .carm-explorer__intro {
-  margin: 8px 4px 16px;
+  margin: 12px 0 18px;
   padding: 0;
-  max-width: 72ch;
+  max-width: none;
   font-size: 0.95rem;
   line-height: 1.55;
   color: var(--color-text-secondary);
@@ -5348,51 +5363,41 @@ body.carm-modal-open {
    in this file can be deleted (Stage 2 cleanup task).
    =========================================================================== */
 
-/* PivotToggle — Indikatoren | Gruppen segmented chip group.
-   Stage 6: outer container is now a 36px unified "wrapper chip" with
-   thin internal divider; inner buttons override the unified chip's
-   height/border to slot inside without doubling the borders. */
+/* PivotToggle — Indikatoren / Gruppen switch.
+   2026-05-27 PM refresh: dropped the segmented "wrapper chip" treatment
+   so the toggle reads as two unified chips side-by-side instead of a
+   separate UI primitive. Outer container is now just a flex row with a
+   small gap; each inner button inherits the unified `.carm-btn`-style
+   chip (height/border/radius/font from the unified rule at the top of
+   this block), and the active one swaps to the accent fill like
+   `.carm-btn--primary`. */
 .carm-pivot-toggle {
   display: inline-flex;
-  align-items: stretch;
-  gap: 2px;
-  padding: 3px;
-  height: 36px;
-  border: 1px solid var(--color-border, #e2e8f0);
-  background: var(--color-bg-subtle, #eeeee8);
-  border-radius: 8px;
+  align-items: center;
+  gap: 6px;
   flex-shrink: 0;
 }
 
-/* Override the unified chip rule for the inner segments — they sit
-   INSIDE the wrapper chip so they need no border + a smaller radius. */
-.carm-pivot-toggle__btn {
-  height: auto;
-  min-height: 28px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--color-text-secondary, #4a5568);
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.carm-pivot-toggle__btn:hover {
-  background: transparent;
-  border: 0;
-  color: var(--color-accent, #2d6a4f);
-}
+/* Inner segments fall through to the unified .carm-btn,
+   .carm-picker__trigger, .carm-pivot-toggle__btn rule at the top of the
+   chip block — same 44px height, 8px radius, white bg, soft chip shadow.
+   No overrides needed here. */
 
 .carm-pivot-toggle__btn.active {
-  background: var(--color-surface, #ffffff);
-  color: var(--color-text, #1a1a2e);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+  background: var(--color-accent, #2d6a4f);
+  color: var(--color-text-inverse, #ffffff);
+  border-color: var(--color-accent, #2d6a4f);
+}
+
+.carm-pivot-toggle__btn.active:hover {
+  background: var(--color-accent-hover, #1f4f3a);
+  border-color: var(--color-accent-hover, #1f4f3a);
+  color: var(--color-text-inverse, #ffffff);
 }
 
 .carm-pivot-toggle__btn:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
-  outline-offset: -1px;
+  outline-offset: 2px;
 }
 
 /* DataPicker — caption + dropdown trigger + menu (with inline definitions). */
@@ -5435,12 +5440,28 @@ body.carm-modal-open {
   margin-left: 2px;
 }
 
+/* Anchor span wrapping the trigger + menu (DataPicker.tsx). Lets the
+   menu's `min-width: 100%` resolve to the trigger's width instead of
+   the caption + trigger width — so the dropdown aligns flush with the
+   trigger button on every tab. */
+.carm-picker__anchor {
+  position: relative;
+  display: inline-flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .carm-picker__menu {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  min-width: 220px;
-  max-width: 320px;
+  /* 2026-05-27 PM refresh — width tracks the trigger's measured rect
+     (via the anchor span). `max-content` lets long option labels still
+     expand the menu when the trigger is short; clamp to viewport so it
+     never overflows on phone. */
+  min-width: 100%;
+  width: max-content;
+  max-width: min(420px, calc(100vw - 32px));
   z-index: 60;
   background: white;
   border: 1px solid var(--color-border, #cbd5e1);
@@ -5532,14 +5553,16 @@ body.carm-modal-open {
   align-items: center;
   gap: 8px;
   width: 100%;
-  min-height: 36px;
-  padding: 6px 8px 6px 10px;
+  /* 2026-05-27 PM refresh — match the trigger's 44px height so the
+     dropdown reads as a continuation of the toolbar rhythm. */
+  min-height: 44px;
+  padding: 8px 10px 8px 12px;
   border: 0;
   background: transparent;
   color: var(--color-text, #1e293b);
   border-radius: 6px;
   font-family: inherit;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -5694,10 +5717,23 @@ body.carm-modal-open {
 
 /* Phone-narrow (≤640px) — make every picker chip take its own row so
    the 3 dropdowns stack vertically when the device is too narrow for
-   them to fit inline. Above 640 (tablet/laptop), they share a row. */
+   them to fit inline. Above 640 (tablet/laptop), they share a row.
+   Also lets the actions row wrap: search input claims its own line,
+   then Filter + Exportieren + the Rundgang badge share the row
+   below. Prevents the badge / Exportieren label from clipping at the
+   right edge on iPhone-narrow viewports. */
 @media (max-width: 640px) {
   .carm-toolbar-row__picker {
     flex: 1 1 100%;
+  }
+  .carm-toolbar-row__actions {
+    flex-wrap: wrap;
+  }
+  .carm-toolbar-row__actions > .carm-myth-search-row {
+    flex: 1 1 100%;
+  }
+  .carm-toolbar-row__actions > .carm-myth-search-row .carm-myth-search-input {
+    width: 100%;
   }
 }
 

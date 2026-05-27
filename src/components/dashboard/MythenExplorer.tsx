@@ -349,19 +349,39 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    *  Modern views (Balken, Tabelle) embed it directly in the ToolbarRow
    *  below; Streifen + Sources accept it as a prop and slot it next to
    *  their own pivot toggle so the bar stays in lockstep across tabs. */
-  /** Just the Exportieren chip — used on Informationsquellen, where
-   *  the Filter drawer targets Mythen state and doesn't apply to
-   *  source/channel data. */
-  const exportOnlyAction: ReactNode = (
+  /** Green map-pin Rundgang launcher (2026-05-27 PM). Same instance is
+   *  rendered on every toolbar — bundled with exportOnlyAction so views
+   *  that opt out of search/Filter (Streifen + Sources family) still
+   *  surface the per-tab tour affordance. */
+  const rundgangBadge: ReactNode = (
     <button
       type="button"
-      className="carm-btn"
-      onClick={() => setExportDrawerOpen(true)}
-      aria-label={t('export.button', 'de')}
+      className="carm-rundgang-badge"
+      onClick={handleRundgang}
+      aria-label={t('rundgang.label', 'de')}
+      title={t('rundgang.label', 'de')}
     >
-      <Download size={14} strokeWidth={2} aria-hidden="true" />
-      {t('export.button', 'de')}
+      <HelpCircle size={20} strokeWidth={2} aria-hidden="true" />
     </button>
+  );
+
+  /** Exportieren chip + the Rundgang badge — used on Streifen /
+   *  Informationsquellen / Sources2 / Quellen-Tabelle, where the Filter
+   *  drawer targets Mythen state and doesn't apply to source/channel
+   *  data, but the per-tab tour still belongs in the toolbar. */
+  const exportOnlyAction: ReactNode = (
+    <>
+      <button
+        type="button"
+        className="carm-btn"
+        onClick={() => setExportDrawerOpen(true)}
+        aria-label={t('export.button', 'de')}
+      >
+        <Download size={14} strokeWidth={2} aria-hidden="true" />
+        {t('export.button', 'de')}
+      </button>
+      {rundgangBadge}
+    </>
   );
 
   /** 2026-05-22 v5: search input is inline with Filter / Export
@@ -432,15 +452,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         )}
       </button>
       {exportOnlyAction}
-      <button
-        type="button"
-        className="carm-rundgang-badge"
-        onClick={handleRundgang}
-        aria-label={t('rundgang.label', 'de')}
-        title={t('rundgang.label', 'de')}
-      >
-        <HelpCircle size={20} strokeWidth={2} aria-hidden="true" />
-      </button>
     </>
   );
 
@@ -464,18 +475,17 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         />
 
         {/* Newton Variante A intro paragraph (AI draft, see ISD review).
-            Honest population framing per CLAUDE.md; cross-references the
-            project background + Fakten-Karten; nudges visitors toward
-            the green Rundgang badge in the toolbar. */}
+            Full-width within the dashboard. Cross-references the project
+            background and nudges visitors toward the green Rundgang
+            badge in the toolbar. */}
         <section className="carm-explorer__intro" aria-label="Daten-Explorer — Einleitung">
           <p>
-            <strong>Daten-Explorer.</strong> Hier kannst du die Forschungsdaten erkunden,
-            die im CaRM-Projekt 2024 mit rund 2.097 Erwachsenen (18–70) in Deutschland
-            erhoben wurden. Wie die Daten zustande kamen, steht im{' '}
-            <a href="/projekt/">Projekt-Hintergrund</a>; ausführliche Erklärungen zu
-            einzelnen Mythen findest du in den{' '}
-            <a href="/fakten-karten/">Fakten-Karten</a>. Für jeden Tab gibt es einen
-            vierstufigen Rundgang — tippe auf den grünen Kreis, wenn du Hilfe brauchst.
+            Hier kannst du die Forschungsdaten erkunden, die im CaRM-Projekt 2024
+            in Deutschland erhoben wurden. Die Sektion{' '}
+            <a href="/projekt/">„Über das Projekt"</a> erklärt ausführlich, wie
+            die Daten zustande kamen. Jeder Tab im Dashboard enthält einen
+            vierstufigen Rundgang — tippe auf den grünen Button mit Fragezeichen,
+            wenn du beim Navigieren Hilfe brauchst.
           </p>
         </section>
 
@@ -637,16 +647,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             Exportieren dialog (Daten tab); CSV / JSON / PNG / SVG live
             there too. Vollbild was dropped (browser-native F11 covers
             the same use case for the rare power user). */}
-
-        {state.view !== 'strips' &&
-          state.view !== 'sources' &&
-          state.view !== 'sources2' &&
-          state.view !== 'sources_table' && (
-          <p className="howto-microcopy">{t(`howto.${state.view}` as never, 'de')}</p>
-        )}
-        {state.view === 'sources2' && (
-          <p className="howto-microcopy">{t('howto.sources2', 'de')}</p>
-        )}
 
         <div
           className={`chart-area${state.view === 'strips' ? ' chart-area--strips' : ''}`}
