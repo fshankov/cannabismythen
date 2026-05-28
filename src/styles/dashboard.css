@@ -7,23 +7,36 @@
  */
 main:has(.carm-explorer) {
   max-width: 1440px;
+  /* 2026-05-28 designer brief — paint the warm cream as the outer
+     dashboard page tone so the white chart panel reads as elevated
+     through contrast. Literal hex (not `var(--color-bg)`) because the
+     dashboard's local override of `--color-bg` lives on `.carm-explorer`
+     and the `main` ancestor sees only the site-wide value. */
+  background: #faf9f5;
 }
 
 .carm-explorer {
-  /* Page surfaces — the dashboard area uses a white backdrop instead of
-     the site's warm beige (--color-bg in global.css is #f4f4f0). These
-     four overrides are intentional, not duplicates. */
-  --color-bg: #ffffff;
-  --color-surface: #f8fafc;
+  /* 2026-05-28 designer-brief refresh (Figma node 403:1976):
+     Dashboard area flips to a warm cream so the white chart panel
+     reads as elevated through contrast, not through heavy shadow.
+     The brief restores the LEFT/RIGHT inactive-tab tint difference
+     (#eeeee9 vs #f2f2f2) — applied via the .carm-explorer__tabs--*
+     scoped rules below, not this token. */
+  --color-bg: #faf9f5;                /* page surface around the panel — warm cream */
+  --color-surface: #ffffff;           /* chart panel — explicitly white */
+  --color-surface-alt: #f8fafc;       /* canvas inner — cool-tint card inside the white panel */
   --color-surface-raised: #f1f5f9;
-  --color-border: #e2e8f0;
-  --color-border-strong: #cbd5e1;
-  /* 2026-05-27 PM refresh — lighter inactive tab background. Original
-     site-wide `--color-bg-subtle` is #eeeee8 (milky beige) which read
-     as a separate tan strip behind the tabs. Drop it just inside the
-     dashboard scope to a near-white tone so the inactive tabs blend
-     with the dashboard surface; the active white tab still pops. */
-  --color-bg-subtle: #f5f5f2;
+  --color-border: #dddddd;            /* warmer border for chips + panel */
+  --color-border-soft: #f2f2f2;       /* hairline border for the canvas inner card */
+  --color-border-strong: #c6c5be;
+  /* Inactive-tab fallback bg (used by .tab-btn base rule). Real values
+     come from .carm-explorer__tabs--left / --right which override per
+     group per the brief. */
+  --color-bg-subtle: #eeeee9;
+  /* State-layer token (designer brief) — applied as a transparent
+     `::after` overlay on every interactive surface so hover and
+     active read as material-style darkening, not ad-hoc bg swaps. */
+  --color-on-surface: #1a1a2e;
   /* Text — slightly warmer near-black + better secondary contrast (WCAG AA).
      These values match global.css :root but are re-declared so the .carm-explorer
      subtree resolves them consistently when used in portalled overlays. */
@@ -185,10 +198,11 @@ main:has(.carm-explorer) {
 .tabs-bar {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
+  gap: 0;
   margin-bottom: 0;
   padding-right: 4px;
-  border-bottom: 1px solid var(--color-border);
+  /* Bottom border removed — the designer-brief tab bar uses a hairline
+     1 px line drawn by the outer panel's top border instead. */
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -201,19 +215,23 @@ main:has(.carm-explorer) {
 }
 
 .tab-btn {
-  /* 2026-05-27 refresh: bumped to 44px touch target with 14px label so
-     the tabs match the Figma frame's bigger rhythm. Mobile override
-     below 1024px drops back to a compact 36/40px scale. */
+  /* 2026-05-28 designer-brief refresh (Figma node 403:1976): 44 px
+     touch target with 14 px Inter Medium label, sits items-end inside
+     a 63 px tab-bar row. The active tab keeps the Chrome-lift merge
+     with the white panel below; LEFT group bg #EEEEE9, RIGHT group
+     bg #F2F2F2 (applied via .carm-explorer__tabs--left/--right
+     scope below). */
   min-height: 44px;
-  padding: 12px 24px;
-  border: 1px solid transparent;
-  border-radius: 10px 10px 0 0;
-  background: var(--color-bg-subtle, #eeeee8);
+  padding: 10px 24px;
+  border: 1px solid var(--color-border-soft, #e5e7eb);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: var(--color-bg-subtle, #eeeee9);
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
+  font-weight: 500;
+  color: #6b7280;
   cursor: pointer;
-  margin-bottom: -1px; /* sits flush on the chart-area top border */
+  margin-bottom: 0;
   transition: background var(--duration-fast) var(--ease-out),
               color var(--duration-fast) var(--ease-out),
               border-color var(--duration-fast) var(--ease-out);
@@ -222,18 +240,25 @@ main:has(.carm-explorer) {
 }
 
 .tab-btn:hover {
-  background: var(--color-surface-raised, #f8fafc);
-  color: var(--color-text);
+  color: #1f2937;
 }
 
 .tab-btn.active {
-  background: white;
-  color: var(--color-text);
-  border-color: var(--color-border);
-  border-bottom-color: white; /* break the bottom strip on the active tab */
+  background: var(--color-surface, #ffffff);
+  /* 2026-05-28 PM: dropped the green underline. The white-on-white
+     panel merge + the slightly darker text + bold weight carry the
+     active signal on their own. */
+  color: #1f2937;
+  font-weight: 700;
   position: relative;
   z-index: 2;
 }
+
+/* 2026-05-28 PM: active tab is the resting state — don't darken on
+   hover. The state-layer `::after` overlay applies to interactive
+   surfaces that are still "targets"; the active tab is not. */
+.tab-btn.active::after { display: none; }
+.tab-btn.active:hover { background: var(--color-surface, #ffffff); }
 
 .tab-btn:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -322,21 +347,18 @@ main:has(.carm-explorer) {
    visually merges with the chart container (the active tab's white
    background continues as the chart-area's white background).
    ----------------------------------------------------- */
+/* 2026-05-28 designer-brief refresh (Figma node 403:1976) — the chart
+   area is now the INNER "canvas" card (cool-tint #f8fafc with a
+   hairline #f2f2f2 border) nested inside the white outer panel.
+   The outer panel itself is rendered via `.carm-explorer__panel` (rule
+   added below the chip-system block) and carries the 16px radius +
+   soft shadow that used to live here. */
 .carm-explorer .chart-area {
   position: relative;
   min-height: 400px;
-  border: 1px solid var(--color-border);
-  border-top: none;
-  /* Top-left stays flat so the active Chrome-style tab visually merges
-     with the card; the other three corners pick up the larger 16px
-     radius from the 2026-05-27 Figma refresh. */
-  border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg);
-  background: white;
-  /* Soft elevation (2026-05-27 PM) — lifts the chart card off the
-     dashboard surface so the chrome reads as a Figma-style card.
-     Top edge intentionally excluded from the shadow so the active
-     tab's merge with the card stays clean. */
-  box-shadow: 0 6px 24px -8px rgba(15, 23, 42, 0.1);
+  border: 1px solid var(--color-border-soft, #f2f2f2);
+  border-radius: var(--radius, 8px);
+  background: var(--color-surface-alt, #f8fafc);
   overflow: hidden;
 }
 
@@ -1715,10 +1737,11 @@ main:has(.carm-explorer) {
   flex-direction: column;
   gap: 12px;
   margin-bottom: 14px;
-  padding: 12px 14px;
-  background: #f8fafc;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  /* 2026-05-28 PM: dropped the explicit `background`, `border`, and
+     `border-radius` so this inner toolbar sits flat on the chart-area
+     canvas — visually consistent with the Balken/Tabelle toolbar
+     treatment instead of reading as a "card inside a card". */
+  padding: 4px 0;
 }
 
 .sources-v2-control-group {
@@ -4907,8 +4930,11 @@ body.carm-modal-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  /* 2026-05-28 PM: shrunk from 44 → 36 px so the rotated teardrop's
+     visual bounding sits inside the chip-row band instead of
+     protruding above it. */
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: none;
   /* Teardrop: three rounded corners + one pointed (bottom-left). */
@@ -4917,7 +4943,7 @@ body.carm-modal-open {
   background: var(--color-accent, #2d6a4f);
   color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 6px 14px rgba(45, 106, 79, 0.28);
+  box-shadow: 0 4px 10px rgba(45, 106, 79, 0.25);
   flex-shrink: 0;
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -4937,6 +4963,228 @@ body.carm-modal-open {
 @media (prefers-reduced-motion: reduce) {
   .carm-rundgang-badge { transition: background 0.15s ease, box-shadow 0.15s ease; }
   .carm-rundgang-badge:hover { transform: rotate(-45deg); }
+}
+
+/* ===========================================================================
+   Designer brief structural primitives (2026-05-28, Figma node 403:1976)
+   — eyebrow, two-group tab bar, outer white panel, fixed-width action
+   buttons, state-layer overlays. Tokens come from the .carm-explorer
+   block at the top of this file.
+   =========================================================================== */
+
+/* (Removed 2026-05-28 PM) — the "EXPLORE" eyebrow was dropped per
+   Fedor; the global nav already labels the page. */
+
+/* Tab-bar row: 63 px tall, items-end, LEFT and RIGHT tab groups
+   separated by two flex-1 spacers (brief 403:1981). Mobile collapses
+   the spacers and lets the tabs scroll horizontally. */
+.carm-explorer__tab-bar {
+  display: flex;
+  align-items: flex-end;
+  min-height: 63px;
+  gap: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.carm-explorer__tabs--left,
+.carm-explorer__tabs--right {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.carm-explorer__tab-bar > .carm-explorer__tab-spacer {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Per-group inactive tab bg — brief restores the LEFT/RIGHT tint
+   difference. The active tab in both groups still overrides to white
+   via the .tab-btn.active rule above. */
+.carm-explorer__tabs--left .tab-btn:not(.active) {
+  background: #eeeee9;
+}
+.carm-explorer__tabs--right .tab-btn:not(.active) {
+  background: #f2f2f2;
+}
+
+/* "Tabelle" and "Quellen-Tabelle" tabs carry a fixed 163 px width per
+   the brief (the other tabs size to content). */
+.carm-explorer__tab-btn--fixed {
+  width: 163px;
+  justify-content: center;
+}
+
+/* Outer white panel — holds the toolbar + chart canvas. The top-left
+   stays flat so the active tab merges into it; the other three
+   corners pick up the 16 px radius. The 1 px top border is OMITTED
+   so the active tab's bottom edge can sit flush. */
+.carm-explorer__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border-soft, #e5e7eb);
+  border-top: none;
+  border-radius: 0 var(--radius-lg, 16px) var(--radius-lg, 16px) var(--radius-lg, 16px);
+  box-shadow: var(--shadow-chip, 0 4px 20px -2px rgba(0, 0, 0, 0.05));
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
+}
+
+/* Toolbar inside the panel — flex-wrap, justify-between, gap-y 16 px.
+   Brief layer 403:2003. */
+.carm-explorer__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.carm-explorer__toolbar-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.carm-explorer__toolbar-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.carm-explorer__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Fixed-width modifiers on Filter (102 px) and Exportieren (148 px)
+   per the brief, with the action-button 12 px radius (vs. the chip
+   default 8 px). The chips remain interactive; the modifier only
+   overrides width + radius. */
+.carm-explorer__filter {
+  width: 102px;
+  border-radius: 12px;
+  justify-content: center;
+}
+.carm-explorer__export {
+  width: 148px;
+  border-radius: 12px;
+  justify-content: center;
+}
+
+/* Empty state inside the canvas — shown when `!data` or when the
+   active view has nothing to render. Brief layer 403:2026. */
+.carm-canvas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px;
+  min-height: 400px;
+}
+.carm-canvas-empty__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: #bfc7d1;
+}
+.carm-canvas-empty__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #94a1b0;
+}
+.carm-canvas-empty__subtitle {
+  margin: 0;
+  max-width: 400px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-align: center;
+  color: rgba(148, 161, 176, 0.7);
+}
+
+/* Mobile (≤768 px): collapse the tab-bar spacers + drop fixed widths
+   on the two long tabs so the row can scroll horizontally without
+   gaps. */
+@media (max-width: 768px) {
+  .carm-explorer__tab-bar > .carm-explorer__tab-spacer {
+    display: none;
+  }
+  .carm-explorer__tab-btn--fixed {
+    width: auto;
+  }
+  .carm-explorer__tab-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .carm-explorer__tab-bar::-webkit-scrollbar { display: none; }
+  .carm-explorer__panel {
+    padding: 16px;
+    gap: 16px;
+  }
+}
+
+/* State-layer ::after overlay (designer brief) — every interactive
+   surface that opts in (.tab-btn, .carm-btn, .carm-picker__trigger,
+   .carm-explorer__filter, .carm-explorer__export, the Rundgang badge)
+   gets a transparent darkening overlay on hover / active. Smooth,
+   token-driven, consistent everywhere. The opt-in is `position:
+   relative` + `isolation: isolate` on the host element. */
+.tab-btn,
+.carm-btn,
+.carm-picker__trigger,
+.carm-myth-search-row,
+.carm-rundgang-badge {
+  position: relative;
+  isolation: isolate;
+}
+.tab-btn::after,
+.carm-btn::after,
+.carm-picker__trigger::after,
+.carm-myth-search-row::after,
+.carm-rundgang-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-on-surface, #1a1a2e);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+  z-index: 0;
+}
+.tab-btn:hover::after,
+.carm-btn:hover::after,
+.carm-picker__trigger:hover::after,
+.carm-myth-search-row:focus-within::after,
+.carm-rundgang-badge:hover::after { opacity: 0.06; }
+.tab-btn:active::after,
+.carm-btn:active::after,
+.carm-picker__trigger:active::after,
+.carm-rundgang-badge:active::after { opacity: 0.10; }
+
+/* Make sure the host element's actual content sits above the
+   ::after overlay (z-index 0 means the overlay sits at the same
+   stacking level — child content needs a positive z-index OR the
+   overlay needs negative). Cleanest: bump children. */
+.tab-btn > *,
+.carm-btn > *,
+.carm-picker__trigger > *,
+.carm-myth-search-row > *,
+.carm-rundgang-badge > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Daten-Explorer intro paragraph (2026-05-27 PM refresh) — sits between
@@ -4991,8 +5239,8 @@ body.carm-modal-open {
     right: 6px;
   }
   .carm-rundgang-badge {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
   }
 }
 @media (max-width: 640px) {
@@ -5363,41 +5611,82 @@ body.carm-modal-open {
    in this file can be deleted (Stage 2 cleanup task).
    =========================================================================== */
 
-/* PivotToggle — Indikatoren / Gruppen switch.
-   2026-05-27 PM refresh: dropped the segmented "wrapper chip" treatment
-   so the toggle reads as two unified chips side-by-side instead of a
-   separate UI primitive. Outer container is now just a flex row with a
-   small gap; each inner button inherits the unified `.carm-btn`-style
-   chip (height/border/radius/font from the unified rule at the top of
-   this block), and the active one swaps to the accent fill like
-   `.carm-btn--primary`. */
-.carm-pivot-toggle {
+/* 2026-05-28 PM (v2) — PivotToggle as iOS-style switch with a solid
+   green knob inside a soft track. Labels sit at the same 1 rem /
+   weight-500 size as the picker caption ("Wert für:") so the whole
+   toolbar reads on a single typographic baseline. Single unified
+   control: `Indikatoren  [⬤ slides]  Gruppen`. */
+.carm-pivot-switch {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   flex-shrink: 0;
+  font-family: var(--font-sans);
 }
-
-/* Inner segments fall through to the unified .carm-btn,
-   .carm-picker__trigger, .carm-pivot-toggle__btn rule at the top of the
-   chip block — same 44px height, 8px radius, white bg, soft chip shadow.
-   No overrides needed here. */
-
-.carm-pivot-toggle__btn.active {
-  background: var(--color-accent, #2d6a4f);
-  color: var(--color-text-inverse, #ffffff);
-  border-color: var(--color-accent, #2d6a4f);
+.carm-pivot-switch__label {
+  /* Match `.carm-picker__caption` exactly so the toggle labels and
+     the next picker's caption ("Wert für:") read identical. */
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #94a3b8;
+  cursor: pointer;
+  user-select: none;
+  transition: color 150ms ease;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-family: inherit;
 }
-
-.carm-pivot-toggle__btn.active:hover {
-  background: var(--color-accent-hover, #1f4f3a);
-  border-color: var(--color-accent-hover, #1f4f3a);
-  color: var(--color-text-inverse, #ffffff);
+.carm-pivot-switch__label:hover {
+  color: var(--color-text-secondary, #4a5568);
 }
-
-.carm-pivot-toggle__btn:focus-visible {
+.carm-pivot-switch__label--active {
+  color: #334155;
+  font-weight: 600;
+}
+.carm-pivot-switch__track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 56px;
+  height: 28px;
+  padding: 0;
+  background: var(--color-bg-subtle, #eeeee9);
+  border: 1px solid var(--color-border, #dddddd);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.carm-pivot-switch__track:hover {
+  background: var(--color-surface-alt, #f8fafc);
+}
+.carm-pivot-switch__track:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
   outline-offset: 2px;
+}
+/* The knob is the brand-green circle — strong visual signal that
+   THIS is the active mode marker. Track stays neutral so the green
+   dot reads as the focal element. */
+.carm-pivot-switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-accent, #2d6a4f);
+  box-shadow: 0 1px 3px rgba(45, 106, 79, 0.35);
+  transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+.carm-pivot-switch__track[data-active="right"] .carm-pivot-switch__knob {
+  transform: translateX(28px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .carm-pivot-switch__knob { transition: none; }
 }
 
 /* DataPicker — caption + dropdown trigger + menu (with inline definitions). */
@@ -5411,9 +5700,13 @@ body.carm-modal-open {
 }
 
 .carm-picker__caption {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-text-secondary, #4a5568);
+  /* 2026-05-28 brief: 16 px / weight 500 — same size as the toggle
+     labels (.carm-pivot-switch__label) so "Wert für:" and the
+     "Indikatoren / Gruppen" labels share one typographic baseline. */
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #334155;
   flex-shrink: 0;
 }
 

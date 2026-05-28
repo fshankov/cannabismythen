@@ -68,24 +68,14 @@ export default function SourcesSpannweiteToolbar({
   // The toolbar's pivot slot is left empty intentionally; the
   // PivotToggle moves down into the pickers row.
 
-  // "Wert für" picker — when columns = metrics, picker selects a group;
-  // when columns = groups, picker selects a metric. Same shape as
-  // SpannweiteToolbar.
+  // v5 (2026-05-26) — same swap as SpannweiteToolbar: the toggle name
+  // names the picker dimension. "Indikatoren" pivot → picker = metric,
+  // columns = 5 groups. "Gruppen" pivot → picker = group (population
+  // selector — Fedor's term), columns = 4 metrics. The picker and the
+  // columns are always different dimensions; the toggle dictates which.
   const valueOptions: DataPickerOption<string>[] =
     mode === 'metric'
-      ? GROUPS.map((gid) => {
-          const def = definitions?.groups?.[gid];
-          return {
-            value: gid as string,
-            label: GROUP_LABELS[gid],
-            Icon: GROUP_ICONS[gid],
-            definition:
-              def?.label && def?.definition
-                ? { title: def.label, text: def.definition, sampleSize: def.sampleSize }
-                : undefined,
-          };
-        })
-      : METRICS.map((m) => {
+      ? METRICS.map((m) => {
           const def = definitions?.sourcesIndicators?.[m];
           return {
             value: m as string,
@@ -96,15 +86,27 @@ export default function SourcesSpannweiteToolbar({
                 ? { title: def.label, text: def.definition, scale: def.scale }
                 : undefined,
           };
+        })
+      : GROUPS.map((gid) => {
+          const def = definitions?.groups?.[gid];
+          return {
+            value: gid as string,
+            label: GROUP_LABELS[gid],
+            Icon: GROUP_ICONS[gid],
+            definition:
+              def?.label && def?.definition
+                ? { title: def.label, text: def.definition, sampleSize: def.sampleSize }
+                : undefined,
+          };
         });
 
-  const activeId = mode === 'metric' ? state.sourceGroup : state.sourceMetric;
+  const activeId = mode === 'metric' ? state.sourceMetric : state.sourceGroup;
 
   const onPickerChange = (next: string) => {
     if (mode === 'metric') {
-      update('sourceGroup', next as SourceGroupId);
-    } else {
       update('sourceMetric', next as SourceMetricType);
+    } else {
+      update('sourceGroup', next as SourceGroupId);
     }
   };
 
@@ -124,11 +126,16 @@ export default function SourcesSpannweiteToolbar({
         />,
         <DataPicker<string>
           key="value"
-          caption={mode === 'metric' ? 'Bevölkerungsgruppe' : 'Indikator'}
+          // v4 (2026-05-26): unify with SpannweiteToolbar's "Wert für"
+          // caption so Quellen-Spannweite + Quellen-Tabelle read the
+          // same as Mythen-Spannweite + Mythen-Tabelle. The picker's
+          // options swap by pivot (groups vs metrics) but the caption
+          // stays put — it's always "the off-axis dimension".
+          caption={t('strips.value.label', state.lang)}
           value={activeId}
           options={valueOptions}
           onChange={onPickerChange}
-          aria-label={mode === 'metric' ? 'Bevölkerungsgruppe' : 'Indikator'}
+          aria-label={t('strips.value.label', state.lang)}
           lang={state.lang}
         />,
       ]}

@@ -426,46 +426,59 @@
   height: 100%;
 }
 
+/* 2026-05-28 — Quiz card front face, Figma "Design-Preferences" refresh.
+   Light blue-white surface (#f5faff), big drop shadow, deep-rounded
+   corners. The back face keeps the prior background since this scope
+   covers the front only. */
 .quiz-card--flow .quiz-card__face {
   position: absolute;
   inset: 0;
-  padding: 18px 18px 16px;
+  padding: 22px 22px 20px;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
+  border: 1px solid transparent;
+  border-radius: 30px;
+  background: #f5faff;
+  box-shadow: 0 20px 28px -8px rgba(0, 0, 0, 0.22);
   /* Card never extends; long explanations scroll inside the back face. */
   overflow: hidden;
   box-sizing: border-box;
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast);
 }
 
+/* Back face keeps the original surface vocabulary — out of this scope. */
 .quiz-card--flow .quiz-card__back {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 18px 18px 16px;
   /* Stay rotated so it's hidden until the inner flips. */
   transform: rotateY(180deg);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .quiz-card--flow:not(.quiz-card--answered):not(.quiz-card--title):hover .quiz-card__face {
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 24px 36px -10px rgba(0, 0, 0, 0.28);
   }
 }
 
 .quiz-card--flow .quiz-card__statement {
   font-family: var(--font-display);
-  font-weight: 600;
-  /* Stage 2 size ramp per DESIGN.md §3.2: 24 / 28 / 32 / 36 px across
-     480 / 768 / 1024 breakpoints. Statement is the dominant element on
-     the card; the verdict-scale anchors to the bottom. */
-  font-size: clamp(1.5rem, 4.5vw, 2.25rem);
-  line-height: 1.3;
+  font-weight: 900;
+  font-style: italic;
+  /* Figma title: 31 px at 312.5 px-wide card. Scale to current 380 px
+     max-width card with a clamp() so it still reads at narrow viewports. */
+  font-size: clamp(1.55rem, 5vw, 2.1rem);
+  line-height: 1.15;
   letter-spacing: -0.01em;
+  color: #2d6a4f;
   /* Top-aligned with generous breathing room — DESIGN.md asks the
      statement to read like a slogan, not a centred caption. Padding-top
-     scales: 32 px mobile, 48 px tablet+. */
+     scales: 32 px mobile, 56 px tablet+. */
   margin: var(--space-md) 0 0;
-  padding-top: clamp(16px, 4vw, 32px);
+  padding-top: clamp(28px, 6vw, 56px);
   flex: 0 0 auto;
   text-align: center;
   hyphens: auto;
@@ -516,61 +529,64 @@
   /* margin-top: auto pins the scale to the bottom of the front face's
      flex column, leaving the statement to absorb vertical slack. */
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.verdict-scale__spectrum {
-  height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--classification-falsch) 0%,
-    var(--classification-eher-falsch) 33%,
-    var(--classification-eher-richtig) 66%,
-    var(--classification-richtig) 100%
-  );
-  opacity: 0.85;
-  margin-bottom: 6px;
+/* 2026-05-28 — Figma-styled heading sitting above the answer row.
+   Replaces the gradient spectrum hairline. Letter-spaced uppercase
+   green to match the in-tile CTA colour vocabulary. */
+.verdict-scale__heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #116c4a;
+  text-align: left;
 }
 
 .verdict-scale__row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
+/* Each segment is a self-contained pastel pill with an arrow icon and a
+   small text label below. Background colours come from the Figma
+   `quiz-card/answer-{red|yellow|salat|green}-bg` variables. */
 .verdict-scale__seg {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  /* Stage 2: bigger touch targets per DESIGN.md mobile spec (≥48 px). */
-  padding: 12px 4px 10px;
-  min-height: 64px;
+  justify-content: flex-start;
+  padding: 10px 4px 8px;
+  min-height: 78px;
   font: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  background: transparent;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #4b5563;
+  background: var(--seg-bg, #f3f4f6);
   border: 0;
-  border-right: 1px solid var(--color-border);
+  border-radius: 12px;
   cursor: pointer;
   transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
     background var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.verdict-scale__seg:last-child {
-  border-right: 0;
+    filter var(--transition-fast);
 }
 
 .verdict-scale__seg:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
+  outline: 2px solid #116c4a;
+  outline-offset: 2px;
   z-index: 1;
 }
 
@@ -579,14 +595,25 @@
 }
 
 .verdict-scale__glyph {
-  font-size: 1rem;
-  line-height: 1;
-  margin-bottom: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 6px;
+  color: var(--seg-fg, #4b5563);
+}
+
+.verdict-scale__glyph svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.5;
 }
 
 .verdict-scale__label {
   text-align: center;
   line-height: 1.15;
+  color: #6b7280;
 }
 
 /* Stage 2: kbd hint moves UNDER the label as a small "Taste N" line.
@@ -596,11 +623,11 @@
 .verdict-scale__kbd {
   display: block;
   margin-top: 2px;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-family: var(--font-mono, monospace);
   font-weight: 500;
   letter-spacing: 0.04em;
-  color: var(--color-text-muted);
+  color: #9ca3af;
   background: transparent;
   padding: 0;
   border-radius: 0;
@@ -612,45 +639,42 @@
   }
 }
 
-/* Per-segment hover tints — matches the back-face tier palette. */
-.verdict-scale__seg--falsch:hover:not(:disabled) {
-  background: var(--classification-falsch-bg);
-  color: var(--classification-falsch);
+/* Per-segment background + arrow tint — Figma variable values. The
+   --seg-bg / --seg-fg locals propagate to .glyph for icon colour. */
+.verdict-scale__seg--falsch {
+  --seg-bg: #ffe9ed;
+  --seg-fg: #c0392b;
+}
+.verdict-scale__seg--eher_falsch {
+  --seg-bg: #ffefbc;
+  --seg-fg: #b07a17;
+}
+.verdict-scale__seg--eher_richtig {
+  --seg-bg: #e1ebe2;
+  --seg-fg: #4a7c5b;
+}
+.verdict-scale__seg--richtig {
+  --seg-bg: #d1e8d1;
+  --seg-fg: #2d6a4f;
 }
 
-.verdict-scale__seg--eher_falsch:hover:not(:disabled) {
-  background: var(--classification-eher-falsch-bg);
-  color: var(--classification-eher-falsch);
+/* Hover — subtle deepen + lift. Mirrors Figma's pre-feedback hint
+   without changing the click-commits-answer flow. */
+.verdict-scale__seg:hover:not(:disabled) {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px -6px rgba(0, 0, 0, 0.18);
 }
 
-.verdict-scale__seg--eher_richtig:hover:not(:disabled) {
-  background: var(--classification-eher-richtig-bg);
-  color: var(--classification-eher-richtig);
-}
-
-.verdict-scale__seg--richtig:hover:not(:disabled) {
-  background: var(--classification-richtig-bg);
-  color: var(--classification-richtig);
-}
-
-/* Selected (committed answer) — solid fill in the verdict colour. */
-.verdict-scale__seg.is-selected.verdict-scale__seg--falsch {
-  background: var(--classification-falsch);
+/* Selected (committed answer) — saturated fill in the verdict colour. */
+.verdict-scale__seg.is-selected {
+  background: var(--seg-fg, #2d6a4f);
   color: #fff;
 }
 
-.verdict-scale__seg.is-selected.verdict-scale__seg--eher_falsch {
-  background: var(--classification-eher-falsch);
-  color: #fff;
-}
-
-.verdict-scale__seg.is-selected.verdict-scale__seg--eher_richtig {
-  background: var(--classification-eher-richtig);
-  color: #fff;
-}
-
-.verdict-scale__seg.is-selected.verdict-scale__seg--richtig {
-  background: var(--classification-richtig);
+.verdict-scale__seg.is-selected .verdict-scale__glyph,
+.verdict-scale__seg.is-selected .verdict-scale__label,
+.verdict-scale__seg.is-selected .verdict-scale__kbd {
   color: #fff;
 }
 
@@ -674,25 +698,12 @@
   display: none;
 }
 
-/* Sub-380 px viewports (iPhone SE-class): drop to 2×2 so each segment has
-   room for its glyph + label without truncation. */
+/* Sub-380 px viewports (iPhone SE-class): drop to 2×2 so each segment
+   still has room for its glyph + label. The new pastel-square design
+   has no inter-segment borders, just the same 10 px gap. */
 @media (max-width: 380px) {
   .verdict-scale__row {
     grid-template-columns: 1fr 1fr;
-  }
-  .verdict-scale__seg {
-    border-right: 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-  .verdict-scale__seg:nth-child(2n) {
-    border-right: 0;
-  }
-  .verdict-scale__seg:nth-last-child(-n+2) {
-    border-bottom: 0;
-  }
-  /* Re-divide odd children with a right border so the 2×2 grid has lines. */
-  .verdict-scale__seg:nth-child(2n+1) {
-    border-right: 1px solid var(--color-border);
   }
 }
 
@@ -3103,143 +3114,107 @@ button.quiz-result__cta {
   color: var(--color-text-secondary);
 }
 
-/* Remediation 6 — Topic tiles share the in-quiz card's poker-card
-   aspect (1 : 1.4) and idle tilt + hover lift. Each tile shows a
-   "deck" behind it whose thickness reflects the question count
-   (data-deck attribute set by the index page: 0–3, where higher =
-   more cards fanned out behind the front tile). */
+/* 2026-05-28 — Quiz category tiles, Figma "Design-Preferences" refresh
+   (file 9Ix8F9bkjVbvU41QsxnxYX, node 427:2548). Each tile is a fixed
+   346.675 × 500 px card with a saturated solid or gradient fill, a
+   blurred white orb decoration top-right, an icon top-left, a bold
+   italic title + light subline, and a white "QUIZ STARTEN" CTA at the
+   bottom. Schnellcheck (gradient theme) carries a floating "MIX" pill
+   that overhangs the top edge. Mobile keeps the snap-carousel layout
+   from the prior design; only the card visuals are new. */
 .quiz-selection {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(346.675px, max-content));
+  justify-content: center;
   gap: var(--space-2xl) var(--space-lg);
   padding-top: var(--space-md);
   padding-bottom: var(--space-2xl);
-  /* Extra row gap so the fanned cards behind don't visually touch
-     the next row of tiles. */
 }
 
 .quiz-select-card {
   position: relative;
   isolation: isolate;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  display: block;
+  width: 346.675px;
+  height: 500px;
+  border-radius: 24px;
+  overflow: hidden;
+  color: #fff;
   text-decoration: none;
-  color: inherit;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  /* Extra top padding leaves room for the 7-px colored band so the
-     icon doesn't sit right against it. The band has matching
-     top-corner radii — no overflow:hidden, because the deck
-     pseudo-elements need to render outside the front tile. */
-  padding: calc(var(--space-lg) + 4px) var(--space-md) var(--space-lg);
-  /* Same poker-card proportions as the in-quiz card; capped width
-     keeps the deck silhouette intact even at full-width breakpoints. */
-  width: 100%;
-  max-width: 280px;
-  margin: 0 auto;
-  aspect-ratio: 1 / 1.4;
-  box-sizing: border-box;
-  box-shadow: var(--shadow-sm);
-  /* Reuse the in-quiz card's idle-tilt token. The index page generates
-     a per-tile deterministic tilt via inline style. */
-  transform: rotate(var(--card-tilt, 0deg));
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast),
-    transform var(--transition-fast);
+  background: var(--card-bg, #047857);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
   cursor: pointer;
 }
 
 .quiz-select-card:hover {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-lg);
-  /* Lift + un-tilt on hover so it feels like picking the card up. */
-  transform: rotate(0deg) translateY(-3px);
+  transform: translateY(-3px);
+  box-shadow: 0 30px 60px -14px rgba(0, 0, 0, 0.3);
 }
 
-.quiz-select-card:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 4px;
-}
-
-/* Deck-behind pseudo-elements — up to 3 cards fanned behind the
-   front tile. Visibility is gated by the `data-deck` attribute (0..3)
-   set on the link in index.astro. */
-.quiz-select-card::before,
-.quiz-select-card::after {
+.quiz-select-card:hover::after {
+  /* state-overlay/hover from Figma — 8 % white wash on top of the fill. */
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-lg);
-  /* Layout D — every card in the deck carries the same 7-px colored
-     top band so the colored "edge of the deck" cascades as the cards
-     fan out. The background is layered: a 7-px gradient strip at the
-     top using the theme's --tile-strip, plus the surface color below. */
-  background:
-    linear-gradient(var(--tile-strip, transparent), var(--tile-strip, transparent))
-      top / 100% 7px no-repeat,
-    var(--color-surface);
-  border: 1px solid var(--color-border);
-  z-index: -1;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: inherit;
   pointer-events: none;
-  opacity: 0;
-  transition:
-    transform var(--transition-fast),
-    opacity var(--transition-fast);
+  z-index: 1;
 }
 
-.quiz-select-card[data-deck="1"]::before,
-.quiz-select-card[data-deck="2"]::before,
-.quiz-select-card[data-deck="3"]::before {
-  opacity: 1;
-  transform: translate(6px, 8px) rotate(2deg);
-  box-shadow: 0 2px 8px rgba(26, 26, 46, 0.06);
+.quiz-select-card:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -3px;
 }
 
-.quiz-select-card[data-deck="2"]::after,
-.quiz-select-card[data-deck="3"]::after {
-  opacity: 0.85;
-  transform: translate(-6px, 12px) rotate(-2.5deg);
-  box-shadow: 0 4px 14px rgba(26, 26, 46, 0.05);
-}
-
-/* The "3" depth nudges the second card further out so the deck reads
-   as deeper without adding a third pseudo (which CSS doesn't allow). */
-.quiz-select-card[data-deck="3"]::after {
-  transform: translate(-9px, 16px) rotate(-3.5deg);
-  opacity: 0.7;
-}
-
-/* Colored top band — 6-px stripe in the theme's xxx-500 (or a
-   5-stop gradient for Schnellcheck). Translates Fakten-Karten's
-   vertical left stripe onto the poker-card-proportioned quiz tile.
-   The band's top corners match the card's border-radius so the
-   stripe sits flush with the rounded corner. */
-.quiz-select-card__band {
+/* Decorative blurred orb in the top-right corner. */
+.quiz-select-card__orb {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 7px;
-  background: var(--tile-strip, var(--color-border));
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
+  top: -48px;
+  right: -48px;
+  width: 192px;
+  height: 192px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  filter: blur(20px);
   pointer-events: none;
-  /* Above the deck pseudos (z-index: -1) but below the card content. */
-  z-index: 0;
+}
+
+/* "MIX" pill on the Schnellcheck tile — floats over the top-right
+   edge so it visually breaks the card silhouette. */
+.quiz-select-card__mix {
+  position: absolute;
+  top: -16px;
+  right: 16px;
+  padding: 8px 16px;
+  background: #eeeee8;
+  color: #404943;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 30px;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.quiz-select-card__content {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  right: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .quiz-select-card__icon {
-  margin-bottom: var(--space-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
-  color: var(--tile-label, var(--color-text-secondary));
+  color: #fff;
 }
 
 .quiz-select-card__icon svg {
@@ -3247,152 +3222,133 @@ button.quiz-result__cta {
 }
 
 .quiz-select-card__title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0 0 var(--space-md) 0;
-  line-height: 1.3;
+  margin: 0;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 28px;
+  line-height: 1.2;
+  color: #fff;
+  word-break: break-word;
   hyphens: auto;
 }
 
-.quiz-select-card__count {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-  padding: 0.25em 0.8em;
-  border-radius: var(--radius-full);
-  letter-spacing: 0.02em;
+.quiz-select-card__subline {
+  margin: 0;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
 }
 
-/* Stage A (2026-05-16) — band-color completion dot. Hidden by default;
-   the inline script in /quiz/index.astro reads cm-quiz-score-{slug}
-   from localStorage, derives the band via scoreBand() thresholds, and
-   reveals the dot via the data-band attribute (which also tints the
-   tile's border). Single 10×10 dot in the top-right corner. */
-.quiz-select-card__band-dot {
+/* White CTA pill at the bottom — Figma calls it "Card / CTA-Button".
+   The text + icon color comes from the per-theme --cta-text variable. */
+.quiz-select-card__cta {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: transparent;
-  box-shadow: 0 0 0 2px var(--color-surface);
-  /* Invisible until [data-band] is set by the inline script. */
+  left: 40px;
+  right: 40px;
+  bottom: 40px;
+  height: 47px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  color: var(--cta-text, #116c4a);
 }
 
-.quiz-select-card__band-dot[data-band="profi"]    { background: var(--classification-richtig); }
-.quiz-select-card__band-dot[data-band="guterweg"] { background: var(--classification-eher-richtig); }
-.quiz-select-card__band-dot[data-band="gehtnoch"] { background: var(--classification-eher-falsch); }
-.quiz-select-card__band-dot[data-band="erwischt"] { background: var(--classification-falsch); }
-
-/* On the featured Schnellcheck tile the "Mix" chip already lives in
-   the top-right corner; shift the dot to the top-left so they don't
-   overlap. */
-.quiz-select-card--featured .quiz-select-card__band-dot {
-  right: auto;
-  left: 10px;
-}
-
-/* Subtle tile-border tint mirrors the dot — readable at a glance. */
-.quiz-select-card[data-band="profi"]    { border-color: var(--classification-richtig); }
-.quiz-select-card[data-band="guterweg"] { border-color: var(--classification-eher-richtig); }
-.quiz-select-card[data-band="gehtnoch"] { border-color: var(--classification-eher-falsch); }
-.quiz-select-card[data-band="erwischt"] { border-color: var(--classification-falsch); }
-
-/* Stage 6 — Featured Schnellcheck tile. Subtle dotted border + "Mix"
-   chip in the top-right corner so it reads as the cross-thematic
-   wildcard without out-shouting the editorial modules. */
-.quiz-select-card--featured {
-  position: relative;
-  border-style: dashed;
-  border-color: var(--color-accent-muted);
-}
-
-/* Schnellcheck-only: paint the band as a 5-stop linear gradient
-   through the module hues so it reads as "all themes shuffled".
-   Icon is tinted slate-700 so it doesn't fight the gradient. */
-.quiz-select-card--featured .quiz-select-card__band {
-  background: linear-gradient(
-    90deg,
-    #3b82f6 0%,
-    #8b5cf6 25%,
-    #eab308 50%,
-    #6366f1 75%,
-    #f97316 100%
-  );
-}
-
-/* Layout D for Schnellcheck — the deck cards behind share the same
-   gradient top band, painted via the pseudo-element background layer. */
-.quiz-select-card--featured::before,
-.quiz-select-card--featured::after {
-  background:
-    linear-gradient(
-      90deg,
-      #3b82f6 0%,
-      #8b5cf6 25%,
-      #eab308 50%,
-      #6366f1 75%,
-      #f97316 100%
-    ) top / 100% 7px no-repeat,
-    var(--color-surface);
-}
-
-.quiz-select-card--featured .quiz-select-card__icon {
-  color: #334155; /* Slate-700 */
-}
-
-.quiz-select-card__chip {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  /* Mix chip size L — visible, declarative, on par with the title. */
-  font-size: 0.92rem;
-  font-weight: 700;
+.quiz-select-card__cta-text {
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 1.4px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
+  line-height: 1;
 }
 
-/* Mobile: snap-carousel instead of a vertical wall of tall tiles. */
+.quiz-select-card__cta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.quiz-select-card__cta-icon svg {
+  display: block;
+}
+
+/* Per-theme fill + CTA text color. The fill is set via --card-bg so
+   one rule covers both the solid themes and the gradient. */
+.quiz-select-card--green {
+  --card-bg: #047857;
+  --cta-text: #116c4a;
+}
+.quiz-select-card--blue {
+  --card-bg: #0f78d5;
+  --cta-text: #0f78d5;
+}
+.quiz-select-card--purple {
+  --card-bg: #bc5ed3;
+  --cta-text: #bc5ed3;
+}
+.quiz-select-card--indigo {
+  --card-bg: #508ad7;
+  --cta-text: #508ad7;
+}
+.quiz-select-card--yellow {
+  --card-bg: #f5b02f;
+  --cta-text: #fac800;
+}
+.quiz-select-card--gradient {
+  --card-bg: linear-gradient(
+    146.93deg,
+    rgb(39, 165, 248) 4.07%,
+    rgba(154, 203, 185, 0.97) 49.06%,
+    rgb(255, 192, 75) 94.05%
+  );
+  --cta-text: #2da6f4;
+}
+
+/* Desktop: lock the grid to exactly 3 columns so the 6 quiz modules
+   read as a clean 3 × 2 matrix. Cards flex slightly narrower than
+   346.675 px if the container can't fit three full-width cards. */
+@media (min-width: 1024px) {
+  .quiz-selection {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .quiz-select-card {
+    width: 100%;
+    max-width: 346.675px;
+    justify-self: center;
+  }
+}
+
+/* Mobile: snap-carousel — unchanged mechanic; cards shrink to ~78 %
+   of the viewport while preserving the 346.675:500 aspect. */
 @media (max-width: 640px) {
   .quiz-selection {
     grid-auto-flow: column;
     grid-auto-columns: 78%;
     grid-template-columns: none;
+    justify-content: start;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     /* Bleed the row to the page edges so the snap targets feel native. */
     margin-left: calc(-1 * var(--space-lg));
     margin-right: calc(-1 * var(--space-lg));
-    padding: 4px var(--space-lg);
-    /* Allow the focus ring on the first tile to render outside the row. */
+    padding: 24px var(--space-lg);
     overflow-y: visible;
   }
 
   .quiz-select-card {
     scroll-snap-align: start;
-    min-height: 140px;
-    padding: var(--space-md);
-  }
-
-  .quiz-select-card__icon {
-    margin-bottom: 4px;
-  }
-
-  .quiz-select-card__icon svg {
-    width: 28px;
-    height: 28px;
-  }
-
-  .quiz-select-card__title {
-    font-size: 0.95rem;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 346.675 / 500;
   }
 }
 
@@ -3411,6 +3367,66 @@ button.quiz-result__cta {
 
 .fakten-explorer {
   width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Page header (Figma 427-2113, 2026-05-28).
+   Replaces the prior generic <h1>+<p> chrome with an eyebrow line
+   ("42 Mythen" small caps with a short tint divider), an oversized
+   bold H1, and a wider subhead paragraph. Sizing uses clamp() with
+   vw so the 72-px Figma desktop H1 collapses cleanly to ~40 px on
+   narrow viewports.
+   ═══════════════════════════════════════════════════════════════ */
+
+.fakten-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 0 0 var(--space-2xl);
+  /* The page already gives container side-padding through BaseLayout;
+     this header only adds the vertical rhythm. */
+}
+
+.fakten-page-header__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.fakten-page-header__eyebrow-divider {
+  display: inline-block;
+  width: 48px;
+  height: 2px;
+  background: rgba(17, 108, 74, 0.2);
+}
+
+.fakten-page-header__eyebrow-text {
+  font-size: 12px;
+  font-weight: 900;
+  color: #116c4a;
+  letter-spacing: 3.6px;
+  line-height: 18px;
+  text-transform: uppercase;
+}
+
+.fakten-page-header__h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  color: #1a1c1a;
+  letter-spacing: -0.025em;
+  line-height: 0.95;
+}
+
+.fakten-page-header__sub {
+  margin: 0;
+  max-width: 672px;
+  padding-top: 9px;
+  font-size: clamp(1rem, 1.8vw, 1.5rem);
+  font-weight: 400;
+  color: #404943;
+  line-height: 1.33;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -3440,6 +3456,10 @@ button.quiz-result__cta {
   font: inherit;
   color: inherit;
   text-align: left;
+  /* Lets percentage padding/sizes on the faces and `cqi` units on
+     children resolve against the card's inline width — keeps the
+     Figma 360×500 proportions stable across the responsive grid. */
+  container-type: inline-size;
 }
 
 .fakten-card:focus-visible {
@@ -3479,25 +3499,53 @@ button.quiz-result__cta {
   overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  /* Right-pad the body to match the left padding offset, so the
-     content area is symmetric across the 6-px stripe. */
-  padding: var(--space-lg) var(--space-lg) var(--space-lg)
-    calc(var(--space-lg) + 6px);
+  padding: var(--space-lg);
 }
 
 .fakten-card__face--back {
   transform: rotateY(180deg);
+  /* Figma 427-3835: card back keeps a white surface but drops the
+     border for a cleaner edge — only the shadow communicates lift. */
+  border: none;
+  border-radius: 10.4%;
+  box-shadow: 0 19.5px 39px -9.4px rgba(0, 0, 0, 0.25);
+  padding: 8.9%;
 }
 
-/* Each face renders its own left-edge stripe so the category color
-   stays continuous through the flip. */
-.fakten-card__stripe {
+/* ── Verdict-coloured front face (Figma 427-2043, 2026-05-28) ──────
+   Drops the white card chrome entirely: full gradient background per
+   verdict (set inline from getVerdictVisual().gradient), a large faint
+   background arrow indicating direction (positioned absolutely), and
+   white italic title with a white CategoryFooter pinned at the bottom.
+   Padding values are percentages so the layout stays proportional to
+   the Figma 360×500 mobile frame regardless of card width. */
+.fakten-card__face--front {
+  background: none;
+  border: none;
+  /* Figma rounded-[37.5px] on a 360-wide card = 10.4% → use percentage so
+     the radius scales with card size. */
+  border-radius: 10.4%;
+  box-shadow: 0 19.5px 39px -9.4px rgba(0, 0, 0, 0.25);
+  /* 88/360 top, 32/360 sides, 32/360 bottom from Figma. */
+  padding: 24.4% 8.9% 8.9%;
+  color: #ffffff;
+}
+
+.fakten-card__bg-arrow {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 6px;
-  /* color set inline from CATEGORY_META.strip */
+  display: block;
+  pointer-events: none;
+  /* SVG strokes use `currentColor` so we tint via this `color`. The
+     0.14 opacity matches Figma's vector-group opacity. */
+  color: #ffffff;
+  opacity: 0.14;
+  /* top/left/width/height/transform set inline per-verdict. */
+}
+
+.fakten-card__bg-arrow img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* Face body — flex column. Statement / Summary anchor to the top;
@@ -3507,6 +3555,14 @@ button.quiz-result__cta {
   flex-direction: column;
   gap: var(--space-md);
   height: 100%;
+  /* Lift above the absolutely-positioned bg arrow. */
+  position: relative;
+  z-index: 1;
+}
+
+.fakten-card__face--front .fakten-card__face-body {
+  align-items: center;
+  text-align: center;
 }
 
 .fakten-card__statement {
@@ -3517,20 +3573,70 @@ button.quiz-result__cta {
   letter-spacing: -0.005em;
 }
 
-/* Back face content */
-.fakten-card__summary {
-  margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.55;
-  color: var(--color-text-secondary);
+/* Front-face title: Inter Black Italic, white, large. cqi tracks the
+   card's own inline size (container-type on .fakten-card), so the
+   title stays at ~7% of card width like Figma's 25/360. */
+.fakten-card__face--front .fakten-card__statement {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(1.05rem, 7cqi, 1.6rem);
+  line-height: 1.47;
+  letter-spacing: 0;
+  word-break: break-word;
 }
 
+/* ── Back face content (Figma 427-3835, 2026-05-28) ────────────────
+   Stack order: verdict-tinted title → VerdictPill badge → summary →
+   full-width green CTA pushed to the bottom. */
+.fakten-card__back-title {
+  margin: 0;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(1.1rem, 6cqi, 1.4rem);
+  line-height: 1.25;
+  word-break: break-word;
+  color: var(--verdict-heading-color, var(--color-text));
+}
+
+.fakten-card__back-badge {
+  display: inline-flex;
+  align-self: flex-start;
+}
+
+.fakten-card__summary {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  /* Card height is fixed by aspect-ratio; clamp to 6 lines so the
+     green CTA below never gets pushed off the card. Full summary is
+     still available in the popup when the user taps in. */
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* Soft fade at the cut so the truncation reads as intentional. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent);
+          mask-image: linear-gradient(to bottom, #000 78%, transparent);
+}
+
+/* The outer card is itself a <button>; this span just carries the
+   pill-button styling and is pushed to the bottom of the back stack. */
 .fakten-card__cta {
   margin-top: auto;
-  align-self: flex-end;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-accent);
+  align-self: stretch;
+  padding: 12px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  color: #ffffff;
+  background: var(--color-accent);
+  border-radius: 8px;
   white-space: nowrap;
 }
 
@@ -3549,10 +3655,10 @@ button.quiz-result__cta {
   }
 }
 
-/* Category footer — small Lucide icon + category name at the bottom
-   of the front face. Owns the whole bottom row (the back face's CTA
-   doesn't share the row), so the name renders in full with no
-   ellipsis. Color (xxx-700) set inline from CATEGORY_META.label. */
+/* Category footer — Lucide icon + category name at the bottom of the
+   card front (white tone, via the --on-color modifier) and inside the
+   Kategorien filter dropdown rows (default tone, category color set
+   inline from CATEGORY_META.label). */
 .fakten-card-cat {
   display: inline-flex;
   align-items: center;
@@ -3562,7 +3668,7 @@ button.quiz-result__cta {
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1.25;
-  /* color set inline from CATEGORY_META.label */
+  /* color set inline from CATEGORY_META.label (default tone) */
 }
 
 .fakten-card-cat svg {
@@ -3574,6 +3680,22 @@ button.quiz-result__cta {
      the name to wrap onto a second line if the card is narrow. */
   white-space: normal;
   word-break: break-word;
+}
+
+/* On-color variant: white icon + text stacked vertically (icon above
+   the name), centred. Matches the Figma card-front footer where the
+   24-px icon sits directly above the 11-px name line. */
+.fakten-card-cat--on-color {
+  flex-direction: column;
+  gap: var(--space-sm);
+  color: #ffffff;
+  font-size: 0.7rem;
+  text-align: center;
+  width: 100%;
+}
+
+.fakten-card-cat--on-color .fakten-card-cat__name {
+  text-align: center;
 }
 
 /* Empty state when filter + search resolve to zero myths. */
@@ -3601,80 +3723,64 @@ button.quiz-result__cta {
   outline: none;
 }
 
-/* ── Fakten-Karten inline filter bar (3-slot, 2026-05-14) ───────
-   Three deliberate slots on one row:
-     [ X Mythen  ]      [ 🔍 Mythen suchen … ]      [ Kategorien ▾ ]
-        flush-left           centered                  flush-right
-   Card grid below aligns to the same left + right rails.
-   Independent of the Daten-Explorer's .carm-filter-* family. */
+/* ── Fakten-Karten filter section (Figma 427-2113, 2026-05-28) ───
+   New chrome for the filter row above the grid:
+     KATEGORIEN & SUCHE label
+     [ ▾ Alle Kategorien ]    [ 🔍 Mythos suchen … ]
+   Both controls use glassmorphism (semi-transparent white, soft
+   border, subtle shadow). The count chip from the prior 3-slot
+   design is retired — match counts surface inside the search panel
+   hint instead. */
+.fakten-filter-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-xl);
+}
 
-/* When the Daten-Explorer's `.carm-filter-search-row` element is
-   lifted into the inline Fakten-Karten filter bar, its drawer-specific
-   sticky-header chrome (padding, sticky position, divider, beige
-   background, 12-px bottom margin) misaligns the search input and adds
-   visual noise. Reset those properties here so the row reads as a
-   clean inline pill matching the count chip + Kategorien trigger. */
+.fakten-filter-section__label {
+  margin: 0 0 16px;
+  font-size: 10px;
+  font-weight: 900;
+  color: rgba(64, 73, 67, 0.6);
+  letter-spacing: 4px;
+  line-height: 15px;
+  text-transform: uppercase;
+}
+
+/* Reset the lifted-in `.carm-filter-search-row` chrome (from
+   dashboard.css) and reapply the glassmorphism look for the inline
+   Fakten-Karten use. */
 .fakten-filter-bar .carm-filter-search-row {
   position: static;
   display: flex;
   align-items: center;
-  gap: 0;
-  padding: 0;
+  gap: var(--space-sm);
   margin: 0;
-  background: transparent;
   border-bottom: none;
+  /* Glass chrome */
+  padding: 17px 25px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
 }
 
-/* Layout: count flush-left, search expands to fill the middle,
-   dropdown flush-right. Every slot is a 40-px-tall flex centre so
-   the count chip, search input, and Kategorien trigger share the
-   same vertical baseline — they all sit on the same imaginary
-   horizontal line through the row. */
+/* Two equal columns, each capped so the chrome stays readable on
+   wide viewports. Mobile collapses to a stack below. */
 .fakten-filter-bar {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-xl);
-  min-height: 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  max-width: 912px;
 }
 
-.fakten-filter-bar__left,
-.fakten-filter-bar__center,
-.fakten-filter-bar__right {
+.fakten-filter-bar__category,
+.fakten-filter-bar__search {
   display: flex;
-  align-items: center;
-  min-height: 40px;
-}
-
-.fakten-filter-bar__left {
-  justify-self: start;
-}
-
-.fakten-filter-bar__center {
-  justify-self: stretch;
-  width: 100%;
-}
-
-.fakten-filter-bar__right {
-  justify-self: end;
-}
-
-/* Count chip — compact, secondary. `align-items: center` makes the
-   chip text sit on the same horizontal line as the 40-px search input
-   and Kategorien trigger; baseline alignment previously made it float. */
-.fakten-filter-count {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.85rem;
-  letter-spacing: 0.01em;
-  color: var(--color-text-muted);
-}
-
-.fakten-filter-count--filtered {
-  color: var(--color-text);
-  font-weight: 600;
+  align-items: stretch;
+  min-width: 0;
 }
 
 /* ── Search autocomplete (2026-05-15 redesign) ──────────────────
@@ -3814,18 +3920,26 @@ button.quiz-result__cta {
   position: relative;
 }
 
+.fakten-filter-dropdown {
+  width: 100%;
+}
+
 .fakten-filter-dropdown__trigger {
+  /* Glassmorphism chrome matching the search row beside it. */
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
-  height: 40px;
-  padding: 0 14px;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 17px 25px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   font-family: inherit;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--color-text);
   cursor: pointer;
   transition:
@@ -3836,16 +3950,19 @@ button.quiz-result__cta {
 
 .fakten-filter-dropdown__trigger:hover,
 .fakten-filter-dropdown__trigger:focus-visible {
-  border-color: var(--color-accent);
-  background: var(--color-accent-light);
-  color: var(--color-accent);
+  border-color: rgba(17, 108, 74, 0.4);
+  background: rgba(255, 255, 255, 0.85);
   outline: none;
 }
 
 .fakten-filter-dropdown__trigger.is-open {
-  border-color: var(--color-accent);
-  background: var(--color-accent-light);
-  color: var(--color-accent);
+  border-color: rgba(17, 108, 74, 0.5);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.fakten-filter-dropdown__label {
+  flex: 1 1 auto;
+  text-align: left;
 }
 
 .fakten-filter-dropdown__count {

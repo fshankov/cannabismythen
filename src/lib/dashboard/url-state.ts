@@ -89,10 +89,15 @@ const DEFAULTS: AppState = {
   scatterY: 'prevention_significance',
   sourceMetric: 'prevention',
   sourceGroup: 'adults',
-  sourcesStripsMode: 'metric',
+  // v5 (2026-05-26) — pivot semantics swapped: the toggle label now
+  // names the PICKER dimension, columns are the OTHER dimension.
+  // Defaults set to 'group' so first-load preserves the historical
+  // visual (5 indicator columns on Mythen, 4 metric columns on
+  // Quellen). The "Gruppen" toggle is active by default, picker = group.
+  sourcesStripsMode: 'group',
   sourceCategoryFilter: [],
   sourceSubFilter: [],
-  stripsMode: 'indicator',
+  stripsMode: 'group',
   stripsSortAxis: 'awareness',
   stripsSortDir: 'desc',
   factsheetMythId: null,

@@ -23,6 +23,10 @@ export interface TabDef<K extends string> {
   key: K;
   /** Already-localised text shown inside the tab button. */
   label: string;
+  /** Optional extra className(s) appended to the `<button>` (e.g. the
+   *  Daten-Explorer's `.carm-explorer__tab-btn--fixed` modifier for the
+   *  163 px-wide "Tabelle" / "Quellen-Tabelle" tabs). */
+  className?: string;
 }
 
 interface Props<K extends string> {
@@ -68,6 +72,7 @@ export default function TabsBar<K extends string>({
           'tab-btn',
           isActive ? 'active' : '',
           hasDivider ? 'tab-btn--after-divider' : '',
+          tab.className ?? '',
         ]
           .filter(Boolean)
           .join(' ');

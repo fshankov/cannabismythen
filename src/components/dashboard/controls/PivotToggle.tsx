@@ -1,19 +1,18 @@
 /**
- * PivotToggle — a 2-3 option pill segmented control.
+ * PivotToggle — iOS-style switch with a text label on each side.
  *
- * Lifted from the Streifen view's `.strips-pivot-toggle` (the
- * Indikatoren | Gruppen switch). Now the canonical primitive that the
- * Streifen, Sources, and Tabelle / Balken toolbars all share so every
- * dashboard tab renders identical chrome above the chart.
+ * 2026-05-28 PM redesign: replaced the segmented two-chip pair with a
+ * single switch (`Indikatoren  [knob slides]  Gruppen`). One track,
+ * one knob, two labels — reads obviously as a binary toggle. Click
+ * anywhere on the track OR on either label flips state.
  *
- * Keyboard:
- *   - ArrowLeft / ArrowRight move focus between segments.
- *   - Enter or Space activates the focused segment.
+ * Keyboard: ArrowLeft → options[0], ArrowRight → options[1],
+ * Space / Enter toggles. Focus lands on the track <button>.
  *
- * Visuals:
- *   - `.carm-pivot-toggle` matches the geometry of the original
- *     `.strips-pivot-toggle` exactly so Streifen stays pixel-identical
- *     after migration.
+ * API is unchanged from the old segmented component — every caller
+ * (StripsToolbar, SpannweiteToolbar, SourcesSpannweiteToolbar) keeps
+ * passing the same `options: [{value, label}, {value, label}]` shape
+ * and the same `onChange(value)` signature. No consumer-side edits.
  */
 
 import { useRef, type KeyboardEvent } from 'react';
@@ -27,7 +26,7 @@ interface PivotToggleProps<T extends string> {
   options: PivotOption<T>[];
   value: T;
   onChange: (next: T) => void;
-  /** Required for the underlying tablist — German label is fine. */
+  /** Required for the underlying track button — German label is fine. */
   'aria-label': string;
 }
 
@@ -37,55 +36,74 @@ export default function PivotToggle<T extends string>({
   onChange,
   'aria-label': ariaLabel,
 }: PivotToggleProps<T>) {
-  const buttonsRef = useRef<Array<HTMLButtonElement | null>>([]);
+  const trackRef = useRef<HTMLButtonElement | null>(null);
 
-  const focusIndex = (i: number) => {
-    const next = (i + options.length) % options.length;
-    buttonsRef.current[next]?.focus();
+  // The component is contract-locked to exactly two options; defensively
+  // fall back to a stable order if a caller passes more / fewer.
+  const left = options[0];
+  const right = options[1] ?? options[0];
+  const activeSide: 'left' | 'right' = value === right.value ? 'right' : 'left';
+
+  const toggle = () => {
+    onChange(activeSide === 'left' ? right.value : left.value);
   };
 
-  const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+  const select = (side: 'left' | 'right') => {
+    onChange(side === 'left' ? left.value : right.value);
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === 'ArrowLeft' || e.key === 'Home') {
       e.preventDefault();
-      focusIndex(index + 1);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      select('left');
+    } else if (e.key === 'ArrowRight' || e.key === 'End') {
       e.preventDefault();
-      focusIndex(index - 1);
-    } else if (e.key === 'Home') {
+      select('right');
+    } else if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
-      focusIndex(0);
-    } else if (e.key === 'End') {
-      e.preventDefault();
-      focusIndex(options.length - 1);
+      toggle();
     }
   };
 
   return (
-    <div
-      className="carm-pivot-toggle"
-      role="tablist"
-      aria-label={ariaLabel}
-    >
-      {options.map((opt, i) => {
-        const active = opt.value === value;
-        return (
-          <button
-            key={opt.value}
-            ref={(el) => {
-              buttonsRef.current[i] = el;
-            }}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            tabIndex={active ? 0 : -1}
-            className={`carm-pivot-toggle__btn ${active ? 'active' : ''}`}
-            onClick={() => onChange(opt.value)}
-            onKeyDown={(e) => onKeyDown(e, i)}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
+    <div className="carm-pivot-switch" role="group" aria-label={ariaLabel}>
+      <button
+        type="button"
+        className={
+          'carm-pivot-switch__label' +
+          (activeSide === 'left' ? ' carm-pivot-switch__label--active' : '')
+        }
+        onClick={() => select('left')}
+        aria-pressed={activeSide === 'left'}
+        tabIndex={-1}
+      >
+        {left.label}
+      </button>
+      <button
+        ref={trackRef}
+        type="button"
+        role="switch"
+        aria-checked={activeSide === 'right'}
+        aria-label={ariaLabel}
+        className="carm-pivot-switch__track"
+        data-active={activeSide}
+        onClick={toggle}
+        onKeyDown={onKeyDown}
+      >
+        <span className="carm-pivot-switch__knob" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        className={
+          'carm-pivot-switch__label' +
+          (activeSide === 'right' ? ' carm-pivot-switch__label--active' : '')
+        }
+        onClick={() => select('right')}
+        aria-pressed={activeSide === 'right'}
+        tabIndex={-1}
+      >
+        {right.label}
+      </button>
     </div>
   );
 }

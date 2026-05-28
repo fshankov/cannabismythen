@@ -146,11 +146,6 @@ export default function FaktenFilterBar({
     };
   }, [searchOpen, catDropdownOpen]);
 
-  const isFiltered = filteredCount !== totalCount;
-  const countLabel = isFiltered
-    ? `${filteredCount} von ${totalCount} Mythen`
-    : `${totalCount} Mythen`;
-
   const selectedGroupCount = selectedGroups.size;
   const hasActiveFilter =
     selectedGroupCount > 0 ||
@@ -163,20 +158,97 @@ export default function FaktenFilterBar({
       : `${totalCount} Mythen · zum Filtern anklicken`;
 
   return (
-    <div className="fakten-filter-bar" role="search">
-      <div className="fakten-filter-bar__left">
-        <span
-          className={`fakten-filter-count${
-            isFiltered ? " fakten-filter-count--filtered" : ""
+    <div className="fakten-filter-section">
+      <p className="fakten-filter-section__label" aria-hidden="true">
+        Kategorien &amp; Suche
+      </p>
+      <div className="fakten-filter-bar" role="search">
+      <div
+        className="fakten-filter-bar__category fakten-filter-dropdown"
+        ref={catContainerRef}
+      >
+        <button
+          ref={catTriggerRef}
+          type="button"
+          className={`fakten-filter-dropdown__trigger${
+            catDropdownOpen ? " is-open" : ""
           }`}
-          role="status"
-          aria-live="polite"
+          aria-haspopup="true"
+          aria-expanded={catDropdownOpen}
+          onClick={() => setCatDropdownOpen((v) => !v)}
         >
-          {countLabel}
-        </span>
+          <ChevronDown
+            size={14}
+            strokeWidth={2}
+            aria-hidden="true"
+            className="fakten-filter-dropdown__chevron"
+          />
+          <span className="fakten-filter-dropdown__label">
+            Alle Kategorien
+            {selectedGroupCount > 0 && (
+              <span
+                className="fakten-filter-dropdown__count"
+                aria-label={`${selectedGroupCount} ausgewählt`}
+              >
+                ({selectedGroupCount})
+              </span>
+            )}
+          </span>
+        </button>
+
+        {catDropdownOpen && (
+          <div
+            className="fakten-filter-dropdown__panel"
+            role="menu"
+            aria-label="Kategorien filtern"
+          >
+            <ul className="fakten-filter-dropdown__list" role="none">
+              {categoryGroups.map((group) => {
+                const checked = selectedGroups.has(group);
+                const count = groupCounts.get(group) ?? 0;
+                return (
+                  <li
+                    key={group}
+                    className="fakten-filter-dropdown__item"
+                    role="none"
+                  >
+                    <label className="fakten-filter-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => onToggleGroup(group)}
+                      />
+                      <CategoryFooter
+                        categoryGroup={group}
+                        className="fakten-filter-checkbox__cat"
+                      />
+                      <span className="fakten-filter-checkbox__count">
+                        ({count})
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+            {hasActiveFilter && (
+              <div className="fakten-filter-dropdown__footer">
+                <button
+                  type="button"
+                  className="fakten-filter-dropdown__reset"
+                  onClick={() => {
+                    onReset();
+                    setCatDropdownOpen(false);
+                  }}
+                >
+                  Filter zurücksetzen
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="fakten-filter-bar__center" ref={searchContainerRef}>
+      <div className="fakten-filter-bar__search" ref={searchContainerRef}>
         <div className="carm-filter-search-row fakten-search">
           <span
             className="carm-filter-search-row__icon"
@@ -310,89 +382,6 @@ export default function FaktenFilterBar({
         )}
       </div>
 
-      <div
-        className="fakten-filter-bar__right fakten-filter-dropdown"
-        ref={catContainerRef}
-      >
-        <button
-          ref={catTriggerRef}
-          type="button"
-          className={`fakten-filter-dropdown__trigger${
-            catDropdownOpen ? " is-open" : ""
-          }`}
-          aria-haspopup="true"
-          aria-expanded={catDropdownOpen}
-          onClick={() => setCatDropdownOpen((v) => !v)}
-        >
-          <span className="fakten-filter-dropdown__label">
-            Kategorien
-            {selectedGroupCount > 0 && (
-              <span
-                className="fakten-filter-dropdown__count"
-                aria-label={`${selectedGroupCount} ausgewählt`}
-              >
-                ({selectedGroupCount})
-              </span>
-            )}
-          </span>
-          <ChevronDown
-            size={14}
-            strokeWidth={2}
-            aria-hidden="true"
-            className="fakten-filter-dropdown__chevron"
-          />
-        </button>
-
-        {catDropdownOpen && (
-          <div
-            className="fakten-filter-dropdown__panel"
-            role="menu"
-            aria-label="Kategorien filtern"
-          >
-            <ul className="fakten-filter-dropdown__list" role="none">
-              {categoryGroups.map((group) => {
-                const checked = selectedGroups.has(group);
-                const count = groupCounts.get(group) ?? 0;
-                return (
-                  <li
-                    key={group}
-                    className="fakten-filter-dropdown__item"
-                    role="none"
-                  >
-                    <label className="fakten-filter-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => onToggleGroup(group)}
-                      />
-                      <CategoryFooter
-                        categoryGroup={group}
-                        className="fakten-filter-checkbox__cat"
-                      />
-                      <span className="fakten-filter-checkbox__count">
-                        ({count})
-                      </span>
-                    </label>
-                  </li>
-                );
-              })}
-            </ul>
-            {hasActiveFilter && (
-              <div className="fakten-filter-dropdown__footer">
-                <button
-                  type="button"
-                  className="fakten-filter-dropdown__reset"
-                  onClick={() => {
-                    onReset();
-                    setCatDropdownOpen(false);
-                  }}
-                >
-                  Filter zurücksetzen
-                </button>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

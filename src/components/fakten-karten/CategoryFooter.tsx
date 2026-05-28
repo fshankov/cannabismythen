@@ -1,38 +1,47 @@
 /**
- * CategoryFooter — small "icon + category name" label rendered at the
- * bottom of each FaktenCard and inside each Kategorien-dropdown row.
+ * CategoryFooter — "icon + category name" label.
  *
- * Reads from the single CATEGORY_META map so the visual language on the
- * card and in the filter dropdown stays in lockstep. Color (xxx-700)
- * matches the same hue family as the card's left-edge stripe (xxx-500)
- * so the two signals feel like one design.
+ * Two tones:
+ *   - "default": category-colored icon + text (CATEGORY_META.label).
+ *     Used inside the Kategorien filter dropdown.
+ *   - "on-color": white icon + text. Used at the bottom of the
+ *     verdict-colored card front, where category color would clash
+ *     with the gradient background.
  */
 
 import { getCategoryMeta } from "../../lib/fakten-karten/categories";
 
 interface Props {
   categoryGroup: string;
-  /** Optional override for the size of the Lucide icon (px). */
+  /** Lucide icon pixel size. Defaults: 13 for "default", 24 for "on-color". */
   iconSize?: number;
-  /** Optional extra className appended to the wrapper. */
   className?: string;
+  tone?: "default" | "on-color";
 }
 
 export default function CategoryFooter({
   categoryGroup,
-  iconSize = 13,
+  iconSize,
   className,
+  tone = "default",
 }: Props) {
   const meta = getCategoryMeta(categoryGroup);
   const Icon = meta.icon;
-  const classes = ["fakten-card-cat", className].filter(Boolean).join(" ");
+  const effectiveIconSize = iconSize ?? (tone === "on-color" ? 24 : 13);
+  const classes = [
+    "fakten-card-cat",
+    tone === "on-color" ? "fakten-card-cat--on-color" : null,
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
     <span
       className={classes}
-      style={{ color: meta.label }}
+      style={tone === "on-color" ? undefined : { color: meta.label }}
       aria-label={`Kategorie: ${categoryGroup}`}
     >
-      <Icon size={iconSize} strokeWidth={2} aria-hidden="true" />
+      <Icon size={effectiveIconSize} strokeWidth={2} aria-hidden="true" />
       <span className="fakten-card-cat__name">{categoryGroup}</span>
     </span>
   );

@@ -17,9 +17,9 @@
  *   - Sort state extended to support verdict-rank (asc/desc) via the
  *     stacked-circles button in the MYTHEN column header.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type {
-  Myth, Metric, AppState, Indicator,
+  Myth, Metric, AppState, Indicator, GroupId, StripsMode,
   DashboardDefinitions,
 } from '../../../lib/dashboard/types';
 import {
@@ -32,6 +32,7 @@ import {
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
 import {
   INDICATOR_ICONS,
+  AUDIENCE_ICONS_BY_GROUP,
   type IconComponent,
 } from '../../../lib/icons';
 import VerdictArrowSymbols from './verdictArrowSymbols';
@@ -85,19 +86,17 @@ interface Props {
   definitions?: DashboardDefinitions | null;
 }
 
-type SortKey =
-  | 'myth'
-  | 'verdict'
-  | 'awareness'
-  | 'significance'
-  | 'correctness'
-  | 'prevention_significance'
-  | 'population_relevance';
+/** Sort target: the two label-column sorts ('myth' alpha, 'verdict' rank)
+ *  stay constant across the pivot; the data-column sort key is just the
+ *  active column ID (an Indicator in 'indicator' mode, a GroupId in
+ *  'group' mode). Stored as a string so both flavors fit. */
+type SortKey = 'myth' | 'verdict' | string;
 
 type SortDir = 'asc' | 'desc';
 
 interface ColSpec {
-  key: Indicator;
+  /** Indicator key (in 'indicator' mode) or GroupId (in 'group' mode). */
+  key: string;
   Icon: IconComponent;
 }
 
@@ -109,18 +108,54 @@ const INDICATOR_COLS: ColSpec[] = [
   { key: 'population_relevance', Icon: INDICATOR_ICONS.population_relevance },
 ];
 
+/** v4 (2026-05-26): when `state.stripsMode === 'group'`, columns become
+ *  the 5 Zielgruppen and each cell shows `state.indicator`'s value for
+ *  that column's group. */
+const GROUP_COLS: ColSpec[] = [
+  { key: 'adults', Icon: AUDIENCE_ICONS_BY_GROUP.adults },
+  { key: 'minors', Icon: AUDIENCE_ICONS_BY_GROUP.minors },
+  { key: 'consumers', Icon: AUDIENCE_ICONS_BY_GROUP.consumers },
+  { key: 'young_adults', Icon: AUDIENCE_ICONS_BY_GROUP.young_adults },
+  { key: 'parents', Icon: AUDIENCE_ICONS_BY_GROUP.parents },
+];
+
 export default function TableView({ myths, metrics, state, update, onSelectMyth, definitions }: Props) {
   void update;
   const [sortKey, setSortKey] = useState<SortKey>('myth');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const lang = state.lang;
-  const groupId = state.groupIds[0] || 'adults';
+  // v4: state from the SpannweiteToolbar's PivotToggle + "Wert für"
+  // picker. The "off-axis" dimension comes from state.groupIds[0]
+  // (when columns = indicators) or state.indicator (when columns =
+  // groups), matching SpannweiteToolbar's onPickerChange wiring.
+  const mode: StripsMode = state.stripsMode ?? 'indicator';
+  const groupId: GroupId = (state.groupIds[0] as GroupId) || 'adults';
+  const pickedIndicator: Indicator = state.indicator;
 
-  const allIndicatorIds = INDICATOR_COLS.map((c) => c.key as string);
+  // v5 (2026-05-26) — swap so the toggle label names the PICKER
+  // dimension and the columns become the OTHER dimension. "Indikatoren"
+  // mode → picker = indicator, columns = 5 groups. "Gruppen" mode →
+  // picker = group, columns = 5 indicators.
+  const cols: ColSpec[] = mode === 'indicator' ? GROUP_COLS : INDICATOR_COLS;
+  const allColIds = cols.map((c) => c.key);
+
+  // Hidden-column state is scoped per-mode so the user's hidden
+  // selections survive flipping back and forth (mirrors SpannweiteView).
   const { hide, show, isHidden } = useHiddenColumns(
-    'carm.table.hidden',
-    allIndicatorIds,
+    `carm.table.hidden.${mode}`,
+    allColIds,
   );
+
+  // When the pivot changes the column schema changes too — any
+  // data-column sort instantly becomes meaningless. Reset to the alpha
+  // sort on the myth-label column so the table stays coherent.
+  useEffect(() => {
+    if (sortKey !== 'myth' && sortKey !== 'verdict') {
+      setSortKey('myth');
+      setSortDir('asc');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   /** Click cycle: same column → flip direction; new column → asc. */
   const cycleColumnSort = (key: SortKey) => {
@@ -130,6 +165,26 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
       setSortKey(key);
       setSortDir('asc');
     }
+  };
+
+  /** v5 pivot-aware cell value. The toggle name = picker dimension.
+   *  'indicator' mode: picker = indicator, columns = groups → cell uses
+   *  pickedIndicator and colKey-as-GroupId. 'group' mode: picker =
+   *  group, columns = indicators → cell uses pickedGroup and
+   *  colKey-as-Indicator. */
+  const cellValueFor = (mythId: number, colKey: string): number | null => {
+    if (mode === 'indicator') {
+      return getIndicatorValueChecked(
+        getMythMetric(metrics, mythId, colKey as GroupId),
+        pickedIndicator,
+        colKey as GroupId,
+      );
+    }
+    return getIndicatorValueChecked(
+      getMythMetric(metrics, mythId, groupId),
+      colKey as Indicator,
+      groupId,
+    );
   };
 
   const sortedMyths = useMemo(() => {
@@ -149,11 +204,10 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
         cmp = oa - ob;
         if (cmp === 0) cmp = cmpAz(a, b);
       } else {
-        const ind = sortKey as Indicator;
-        const ma = getMythMetric(metrics, a.id, groupId);
-        const mb = getMythMetric(metrics, b.id, groupId);
-        const va = getIndicatorValueChecked(ma, ind, groupId);
-        const vb = getIndicatorValueChecked(mb, ind, groupId);
+        // Data-column sort — colKey is whichever dimension is on the
+        // columns in the active pivot.
+        const va = cellValueFor(a.id, sortKey);
+        const vb = cellValueFor(b.id, sortKey);
         if (va === null && vb === null) cmp = 0;
         else if (va === null) cmp = 1;
         else if (vb === null) cmp = -1;
@@ -162,25 +216,45 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
       return sortDir === 'asc' ? cmp : -cmp;
     });
     return arr;
-  }, [myths, sortKey, sortDir, lang, groupId, metrics]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myths, sortKey, sortDir, lang, groupId, pickedIndicator, mode, metrics]);
 
   const columnMeta = useMemo(() => {
-    return INDICATOR_COLS.map((col) => {
-      const rawLabel = t(`indicator.${col.key}.short` as TranslationKey, lang);
-      const label = rawLabel.replace(/\s*%\s*$/, '');
-      const def = definitions?.mythIndicators?.[col.key];
+    return cols.map((col) => {
+      // v5: 'indicator' pivot mode → cols are groups; 'group' pivot
+      // mode → cols are indicators. Pick the metadata accordingly.
+      if (mode === 'group') {
+        const ind = col.key as Indicator;
+        const rawLabel = t(`indicator.${ind}.short` as TranslationKey, lang);
+        const label = rawLabel.replace(/\s*%\s*$/, '');
+        const def = definitions?.mythIndicators?.[ind];
+        return {
+          key: col.key,
+          Icon: col.Icon,
+          label,
+          fullLabel: t(`indicator.${ind}` as TranslationKey, lang),
+          defTitle: def?.label,
+          defText: def?.definition,
+          defScale: def?.scale,
+          defSampleSize: def?.sampleSize,
+        };
+      }
+      // 'indicator' mode — column is a Zielgruppe.
+      const gid = col.key as GroupId;
+      const label = t(`igs.group.${gid}` as TranslationKey, lang);
+      const def = definitions?.groups?.[gid];
       return {
         key: col.key,
         Icon: col.Icon,
         label,
-        fullLabel: t(`indicator.${col.key}` as TranslationKey, lang),
+        fullLabel: GROUP_FULL_LABELS[gid] ?? label,
         defTitle: def?.label,
         defText: def?.definition,
-        defScale: def?.scale,
+        defScale: undefined as string | undefined,
         defSampleSize: def?.sampleSize,
       };
     });
-  }, [definitions, lang]);
+  }, [cols, mode, definitions, lang]);
 
   const isAzActive = sortKey === 'myth';
   const azTooltip = t('spannweite.sort.alpha.tooltip', lang);
@@ -313,12 +387,9 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
         </thead>
         <tbody>
           {sortedMyths.map((myth) => {
-            const metric = getMythMetric(metrics, myth.id, groupId);
-            // Myth-cell (first-column row label) hover. v3 (2026-05-26):
-            // drop the Lesebeispiel — the label-hover should match
-            // Spannweite's pattern (statement + "Wissenschaftlich:…"
-            // verdict line only). Data cells in this row keep their
-            // own Lesebeispiel via their own HoverTooltip below.
+            // Myth-cell (first-column row label) hover. Statement +
+            // "Wissenschaftlich:…" verdict line only — no Lesebeispiel
+            // (pinned to data cells, which know their own metric × group).
             const verdictKey = myth.correctness_class;
             const verdictLabelDe = t(
               `verdict.${verdictKey}` as TranslationKey,
@@ -367,7 +438,22 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
                       />
                     );
                   }
-                  const val = getIndicatorValueChecked(metric, col.key, groupId);
+                  // v5: pivot-aware (cell-row) values + Lesebeispiel
+                  // context. Toggle label names the picker dimension;
+                  // columns are the OTHER dimension. So in 'indicator'
+                  // mode the column IS the group (off-axis) and the
+                  // indicator is fixed = pickedIndicator. In 'group'
+                  // mode it's the other way around.
+                  const cellIndicator: Indicator =
+                    mode === 'indicator'
+                      ? pickedIndicator
+                      : (col.key as Indicator);
+                  const cellGroupId: GroupId =
+                    mode === 'indicator'
+                      ? (col.key as GroupId)
+                      : groupId;
+                  const cellMetric = getMythMetric(metrics, myth.id, cellGroupId);
+                  const val = cellValueFor(myth.id, col.key);
                   if (val === null) {
                     return (
                       <td key={col.key} className="value-cell na-value">
@@ -377,29 +463,26 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
                       </td>
                     );
                   }
-                  // Heatmap band + Lesebeispiel hover (Fedor 2026-05-25
-                  // PM): map the rounded value to a 7-band tint matching
-                  // the popup table; hover shows the same Lesebeispiel
-                  // sentence the popup uses, so the read is consistent
-                  // across surfaces.
+                  // Heatmap band + Lesebeispiel hover. The band is
+                  // computed on the rounded value regardless of pivot.
                   const rounded = Math.round(val);
                   const band = bandIndex(rounded);
-                  const usesAnteil = col.key === 'awareness';
+                  const usesAnteil = cellIndicator === 'awareness';
                   const bandLabel = usesAnteil
                     ? anteilLabel(rounded)
                     : niveauLabel(rounded);
                   const tooltipContent = (
                     <div className="hover-tooltip__inner">
                       <div className="hover-tooltip__title">
-                        {INDICATOR_LABELS_FULL[col.key]} ·{' '}
-                        {GROUP_FULL_LABELS[groupId] ?? groupId}
+                        {INDICATOR_LABELS_FULL[cellIndicator]} ·{' '}
+                        {GROUP_FULL_LABELS[cellGroupId] ?? cellGroupId}
                       </div>
-                      {metric ? (
+                      {cellMetric ? (
                         <Lesebeispiel
-                          metric={metric}
+                          metric={cellMetric}
                           audience="adults"
-                          group={groupId}
-                          onlyIndicator={col.key}
+                          group={cellGroupId}
+                          onlyIndicator={cellIndicator}
                           compactHeading
                         />
                       ) : null}
@@ -422,7 +505,7 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
                       <td
                         className={`value-cell value-cell--band-${band}`}
                       >
-                        {formatValue(val, col.key)}
+                        {formatValue(val, cellIndicator)}
                       </td>
                     </HoverTooltip>
                   );

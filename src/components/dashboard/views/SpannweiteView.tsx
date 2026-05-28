@@ -139,10 +139,13 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
   const pickedGroup: GroupId = state.groupIds[0] ?? 'adults';
   const pickedIndicator: Indicator = state.indicator;
 
-  // ── Column list (visible + hidden, in original order) ──────────────
+  // v5 (2026-05-26) — toggle label names the PICKER dimension; the
+  // OTHER dimension goes on the columns. 'indicator' mode → picker =
+  // indicator, columns = 5 Zielgruppen. 'group' mode → picker = group,
+  // columns = 5 indicators.
   const allColumnIds: string[] = mode === 'indicator'
-    ? (INDICATORS as string[])
-    : (GROUP_IDS as string[]);
+    ? (GROUP_IDS as string[])
+    : (INDICATORS as string[]);
 
   const { hide, show, isHidden } = useHiddenColumns(
     `carm.spannweite.hidden.${mode}`,
@@ -153,7 +156,9 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
   // slot in the layout — matches Punktwolke's "collapsed strip"
   // behavior where placeholders sit between visible columns.
   const columns = useMemo(() => {
-    if (mode === 'indicator') {
+    // v5: 'indicator' mode → cols = groups; 'group' mode → cols =
+    // indicators (the picker holds the OTHER dimension).
+    if (mode === 'group') {
       return INDICATORS.map((ind) => {
         const def = definitions?.mythIndicators?.[ind];
         // Strip trailing "%" suffix (e.g. "Kenntnis %") — the unit
@@ -532,12 +537,14 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
         let lesebeispielIndicator: Indicator | null = null;
         let lesebeispielGroup: GroupId | undefined = pickedGroup;
         if (hoveredColId) {
+          // v5: 'indicator' pivot → cols = groups, picker = indicator;
+          // 'group' pivot → cols = indicators, picker = group.
           lesebeispielIndicator = mode === 'indicator'
-            ? (hoveredColId as Indicator)
-            : pickedIndicator;
+            ? pickedIndicator
+            : (hoveredColId as Indicator);
           lesebeispielGroup = mode === 'indicator'
-            ? pickedGroup
-            : (hoveredColId as GroupId);
+            ? (hoveredColId as GroupId)
+            : pickedGroup;
         }
         return (
           <GridHoverTooltip

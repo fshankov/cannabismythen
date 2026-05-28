@@ -8,14 +8,19 @@
  * devices skip the flip entirely (handled in CSS) and tap goes
  * straight to the popup.
  *
+ * Front-face chrome is verdict-coloured (gradient background + faint
+ * background arrow indicating direction), per Figma 427-2043
+ * (Design-Preferences, 2026-05-28). Category color stays alive only in
+ * the filter UI; on the card itself, only the verdict matters.
+ *
  * Statistics live ONLY inside the FactsheetPanel popup — cards never
  * show data viz.
  */
 
-import { useCallback } from "react";
-import VerdictStatement from "../shared/VerdictStatement";
+import { useCallback, type CSSProperties } from "react";
 import CategoryFooter from "./CategoryFooter";
-import { getCategoryMeta } from "../../lib/fakten-karten/categories";
+import VerdictPill from "../shared/VerdictPill";
+import { getVerdictVisual } from "../../lib/fakten-karten/verdict-colors";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
 
 export interface FaktenCardMyth {
@@ -38,7 +43,7 @@ export interface FaktenCardMyth {
 
 interface FaktenCardProps {
   myth: FaktenCardMyth;
-  /** Required for category coloring + footer rendering. */
+  /** Drives the CategoryFooter rendered at the bottom of each face. */
   categoryGroup: string;
   onShowFactsheet?: (slug: string) => void;
 }
@@ -63,22 +68,27 @@ export default function FaktenCard({
   onShowFactsheet,
 }: FaktenCardProps) {
   const verdict = toVerdict(myth.classification);
-  const meta = getCategoryMeta(categoryGroup);
+  const visual = getVerdictVisual(verdict);
 
   const handleClick = useCallback(() => {
     if (onShowFactsheet) onShowFactsheet(myth.slug);
   }, [onShowFactsheet, myth.slug]);
 
-  // Both faces render their own left-edge stripe so the category color
-  // signal stays continuous across the flip — without it, the back of
-  // the card would lose its category identity mid-rotation.
-  const stripe = (
-    <span
-      className="fakten-card__stripe"
-      style={{ background: meta.strip }}
-      aria-hidden="true"
-    />
-  );
+  const frontFaceStyle: CSSProperties = {
+    backgroundImage: visual.gradient,
+  };
+  const arrowStyle: CSSProperties = {
+    top: visual.arrowFrame.top,
+    left: visual.arrowFrame.left,
+    width: visual.arrowFrame.width,
+    height: visual.arrowFrame.height,
+    transform: visual.arrowTransform,
+  };
+  // Phase-3-ready: back face consumes this var for its verdict-tinted
+  // title. Set now so Phase 3 only adds CSS rules.
+  const backFaceStyle = {
+    "--verdict-heading-color": visual.headingColor,
+  } as CSSProperties;
 
   return (
     <div className="quiz-card__cell">
@@ -89,21 +99,31 @@ export default function FaktenCard({
         aria-label={`${myth.title} — Factsheet öffnen`}
       >
         <div className="fakten-card__inner">
-          <div className="fakten-card__face fakten-card__face--front">
-            {stripe}
+          <div
+            className="fakten-card__face fakten-card__face--front"
+            style={frontFaceStyle}
+          >
+            <span
+              className="fakten-card__bg-arrow"
+              style={arrowStyle}
+              aria-hidden="true"
+            >
+              <img src={visual.arrowSrc} alt="" />
+            </span>
             <div className="fakten-card__face-body">
-              <VerdictStatement
-                statement={myth.title}
-                verdict={verdict}
-                as="p"
-                className="fakten-card__statement"
-              />
-              <CategoryFooter categoryGroup={categoryGroup} />
+              <p className="fakten-card__statement">{myth.title}</p>
+              <CategoryFooter categoryGroup={categoryGroup} tone="on-color" />
             </div>
           </div>
-          <div className="fakten-card__face fakten-card__face--back">
-            {stripe}
+          <div
+            className="fakten-card__face fakten-card__face--back"
+            style={backFaceStyle}
+          >
             <div className="fakten-card__face-body">
+              <p className="fakten-card__back-title">{myth.title}</p>
+              <span className="fakten-card__back-badge">
+                <VerdictPill verdict={verdict} size="sm" />
+              </span>
               <p className="fakten-card__summary">
                 {myth.cardShortSummary || myth.cardSummary}
               </p>

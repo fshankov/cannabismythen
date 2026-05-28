@@ -49,12 +49,28 @@ export default function SpannweiteToolbar({
 }: Props) {
   const mode: StripsMode = state.stripsMode;
 
-  // "Wert für" picker options swap with the pivot — same pattern as
-  // StripsToolbar. When columns are indicators, the picker selects the
-  // GROUP each cell reads from (and vice versa).
+  // v5 (2026-05-26) — swap the picker semantics so the toggle name
+  // matches the picker dimension: "Indikatoren" pivot = "I'm picking
+  // one indicator", "Gruppen" pivot = "I'm picking one group". The
+  // OTHER dimension becomes the comparison axis (columns). Resolves
+  // Fedor's confusion that "Wert für: Prävention" appeared in Gruppen
+  // mode when groups should be the picker, not metrics.
   const valueOptions: DataPickerOption<string>[] =
     mode === 'indicator'
-      ? STRIP_GROUP_IDS.map((gid) => {
+      ? INDICATORS.map((ind) => {
+          const def = definitions?.mythIndicators?.[ind];
+          const label = t(`indicator.${ind}.short` as TranslationKey, state.lang);
+          return {
+            value: ind as string,
+            label,
+            Icon: INDICATOR_ICONS[ind],
+            definition:
+              def?.label && def?.definition
+                ? { title: def.label, text: def.definition, scale: def.scale }
+                : undefined,
+          };
+        })
+      : STRIP_GROUP_IDS.map((gid) => {
           const g = groups.find((x) => x.id === gid);
           const def = definitions?.groups?.[gid];
           const fullLabel = g ? (state.lang === 'de' ? g.name_de : g.name_en) : gid;
@@ -67,31 +83,18 @@ export default function SpannweiteToolbar({
                 ? { title: def.label, text: def.definition, sampleSize: def.sampleSize }
                 : undefined,
           };
-        })
-      : INDICATORS.map((ind) => {
-          const def = definitions?.mythIndicators?.[ind];
-          const label = t(`indicator.${ind}.short` as TranslationKey, state.lang);
-          return {
-            value: ind as string,
-            label,
-            Icon: INDICATOR_ICONS[ind],
-            definition:
-              def?.label && def?.definition
-                ? { title: def.label, text: def.definition, scale: def.scale }
-                : undefined,
-          };
         });
 
   const activeId =
     mode === 'indicator'
-      ? state.groupIds[0] ?? STRIP_GROUP_IDS[0]
-      : state.indicator;
+      ? state.indicator
+      : state.groupIds[0] ?? STRIP_GROUP_IDS[0];
 
   const onPickerChange = (next: string) => {
     if (mode === 'indicator') {
-      update('groupIds', [next as GroupId]);
-    } else {
       update('indicator', next as Indicator);
+    } else {
+      update('groupIds', [next as GroupId]);
     }
   };
 

@@ -2,13 +2,22 @@ import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import TabsBar, { type TabDef } from '../shared/TabsBar';
 
-// Public tab order — Balken / Spannweite / Tabelle ╎ Informationsquellen /
-// Informationsquellen 2 / Quellen-Tabelle.
-// (`balken2` was retired 2026-05-21; `strips`/Punktwolke retired 2026-05-23
-// in travel-pipeline Stage 3A — url-state.ts redirects legacy `?view=strips`
-// and `?view=balken2` URLs to balken. `sources_table` added 2026-05-23 in
-// Stage 3C — a Tabelle for source data mirroring the LEFT myth Tabelle.)
-const TABS: ViewTab[] = ['balken', 'spannweite', 'table', 'sources', 'sources2', 'sources_table'];
+// Public tab order — split into LEFT (myth views) and RIGHT (source
+// views) groups per the 2026-05-28 designer brief (Figma node 403:1976).
+// The two groups carry different inactive backgrounds (#eeeee9 vs.
+// #f2f2f2) and are separated visually by flex-1 spacers in
+// MythenExplorer's `.carm-explorer__tab-bar` row.
+const TABS_LEFT: ViewTab[] = ['balken', 'spannweite', 'table'];
+const TABS_RIGHT: ViewTab[] = ['sources', 'sources2', 'sources_table'];
+const TABS: ViewTab[] = [...TABS_LEFT, ...TABS_RIGHT];
+
+/** "Tabelle" and "Quellen-Tabelle" carry a fixed 163 px width per the
+ *  brief — the other tabs size to content. The modifier is applied
+ *  through the TabsBar primitive's per-tab `className` slot. */
+const TAB_FIXED_WIDTH: Partial<Record<ViewTab, true>> = {
+  table: true,
+  sources_table: true,
+};
 
 const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
   balken: 'view.balken',
@@ -32,22 +41,33 @@ interface Props {
   view: ViewTab;
   lang: Lang;
   onChange: (v: ViewTab) => void;
+  /** Which slice to render. Defaults to all tabs (back-compat). The
+   *  designer brief (2026-05-28, Figma node 403:1976) splits the tab
+   *  bar into LEFT myth views + RIGHT source views with flex-1
+   *  spacers between them; pass `group="left"` / `group="right"`
+   *  twice from `MythenExplorer` to get the split. */
+  group?: 'left' | 'right' | 'all';
   /** Kept for back-compat with any caller still passing the prop. The
-   *  Rundgang trigger now lives inside `<ToolbarRow>`'s actions slot as
-   *  a green circular badge (see `.carm-rundgang-badge` in
-   *  `MythenExplorer.tsx`'s `sharedActions`), so this prop is intentionally
-   *  unused. Safe to remove from callers once they've been updated. */
+   *  Rundgang trigger now lives inside the toolbar as the green
+   *  teardrop badge — see `.carm-rundgang-badge` in MythenExplorer.tsx. */
   onRundgang?: () => void;
 }
 
-export default function ViewTabs({ view, lang, onChange }: Props) {
-  // Build the localised tab list once per render. The underlying chrome
-  // (`<TabsBar>` from `src/components/shared/TabsBar.tsx`) is shared with
-  // the popup viz tabs so any future styling tweak to `.tabs-bar` /
-  // `.tab-btn` propagates automatically across both surfaces.
-  const tabDefs: TabDef<ViewTab>[] = TABS.map((tab) => {
+export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props) {
+  // Pick the slice for this render: LEFT (myth views), RIGHT (source
+  // views), or both (back-compat).
+  const slice =
+    group === 'left' ? TABS_LEFT :
+    group === 'right' ? TABS_RIGHT :
+    TABS;
+
+  const tabDefs: TabDef<ViewTab>[] = slice.map((tab) => {
     const key = TAB_LABEL_KEY[tab];
-    return { key: tab, label: key ? t(key, lang) : tab };
+    return {
+      key: tab,
+      label: key ? t(key, lang) : tab,
+      className: TAB_FIXED_WIDTH[tab] ? 'carm-explorer__tab-btn--fixed' : undefined,
+    };
   });
 
   return (
@@ -55,11 +75,7 @@ export default function ViewTabs({ view, lang, onChange }: Props) {
       tabs={tabDefs}
       activeKey={view}
       onChange={onChange}
-      ariaLabel="Visualization type"
-      // Insert the 24 px gap before the first source-side tab so the
-      // myth / source grouping stays visually distinct (matches the
-      // pre-extraction `tab-btn--after-divider` behaviour).
-      dividerBeforeKey="sources"
+      ariaLabel={group === 'right' ? 'Quellen-Ansicht wählen' : 'Mythos-Ansicht wählen'}
     />
   );
 }

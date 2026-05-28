@@ -4,6 +4,7 @@ export const prerender = true;
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getPublishedEntries } from "@lib/content";
 import { getQuizThemeMeta } from "@lib/quiz/categories";
+import { Send } from "lucide-react";
 import "../../styles/quiz.css";
 
 const entries = await getPublishedEntries("quiz");
@@ -11,37 +12,19 @@ const entries = await getPublishedEntries("quiz");
 // Filter out feedback-texte for the quiz index (it's not a playable quiz)
 const quizzes = entries.filter(([slug]) => slug !== "feedback-texte");
 
-// Remediation 6 — precompute per-tile values in the frontmatter (pure TS).
-// Doing this inline inside the JSX expression confused Astro's template
-// parser, which mis-read `i << s.length` and `(h << 5)` as JSX tags.
-//
-// Deck thickness ladder: ≤6 questions → 1 card behind, 7–9 → 2, ≥10 → 3.
-// Idle tilt is a deterministic −1.6° to +1.6° per slug so the index reads
-// as a hand-laid spread of cards, mirroring the in-quiz card's idle tilt.
-function hashCode(input: string): number {
-  let h = 0;
-  for (let i = 0; i < input.length; i++) {
-    h = (((h << 5) - h) + input.charCodeAt(i)) | 0;
-  }
-  return Math.abs(h);
-}
-
 const tiles = quizzes.map(([slug, entry]) => {
   const e = entry as { title: string; questionCount?: number };
   const meta = getQuizThemeMeta(slug as string);
   const count = (meta.count || e.questionCount || 7) as number;
-  const deckDepth = count >= 10 ? 3 : count >= 7 ? 2 : 1;
-  const tilt = ((hashCode(slug as string) % 1000) / 1000) * 3.2 - 1.6;
+  // Tile uses the short title from QUIZ_THEME_META; entry.title is the
+  // long descriptive form used on the quiz play screen and OG images.
+  const title = meta.shortTitle || e.title;
   return {
     slug: slug as string,
-    title: e.title,
+    title,
     Icon: meta.icon,
-    strip: meta.strip,
-    label: meta.label,
+    theme: meta.theme,
     count,
-    deckDepth,
-    tilt: tilt.toFixed(2),
-    featured: Boolean(meta.featured),
   };
 });
 ---
@@ -67,19 +50,32 @@ const tiles = quizzes.map(([slug, entry]) => {
     {tiles.map((tile) => (
       <a
         href={`/quiz/${tile.slug}/`}
-        class={`quiz-select-card ${tile.featured ? "quiz-select-card--featured" : ""}`}
-        data-deck={tile.deckDepth}
-        style={`--card-tilt: ${tile.tilt}deg; --tile-strip: ${tile.strip}; --tile-label: ${tile.label};`}
+        class={`quiz-select-card quiz-select-card--${tile.theme}`}
+        aria-label={`Quiz starten: ${tile.title}`}
       >
-        <span class="quiz-select-card__band" aria-hidden="true"></span>
-        <span class="quiz-select-card__icon" aria-hidden="true">
-          <tile.Icon size={44} strokeWidth={1.75} />
-        </span>
-        <h2 class="quiz-select-card__title">{tile.title}</h2>
-        <span class="quiz-select-card__count">{tile.count} Fragen</span>
-        {tile.featured && (
-          <span class="quiz-select-card__chip">Mix</span>
+        <span class="quiz-select-card__orb" aria-hidden="true"></span>
+
+        {tile.theme === "gradient" && (
+          <span class="quiz-select-card__mix" aria-hidden="true">MIX</span>
         )}
+
+        <div class="quiz-select-card__content">
+          <span class="quiz-select-card__icon" aria-hidden="true">
+            <tile.Icon size={56} strokeWidth={1.75} />
+          </span>
+          <h2 class="quiz-select-card__title">{tile.title}</h2>
+          {/* AI-drafted German copy (Du baseline). ISD review pending. */}
+          <p class="quiz-select-card__subline">
+            {tile.count} Fragen, die deine Perspektive auf Cannabis verändern könnten.
+          </p>
+        </div>
+
+        <span class="quiz-select-card__cta" aria-hidden="true">
+          <span class="quiz-select-card__cta-text">QUIZ STARTEN</span>
+          <span class="quiz-select-card__cta-icon">
+            <Send size={20} strokeWidth={1.75} />
+          </span>
+        </span>
       </a>
     ))}
   </section>

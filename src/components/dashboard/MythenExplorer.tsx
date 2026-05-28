@@ -361,7 +361,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       aria-label={t('rundgang.label', 'de')}
       title={t('rundgang.label', 'de')}
     >
-      <HelpCircle size={20} strokeWidth={2} aria-hidden="true" />
+      <HelpCircle size={16} strokeWidth={2} aria-hidden="true" />
     </button>
   );
 
@@ -373,7 +373,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     <>
       <button
         type="button"
-        className="carm-btn"
+        className="carm-btn carm-explorer__export"
         onClick={() => setExportDrawerOpen(true)}
         aria-label={t('export.button', 'de')}
       >
@@ -436,7 +436,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       </div>
       <button
         type="button"
-        className="carm-btn"
+        className="carm-btn carm-explorer__filter"
         onClick={() => setFilterDrawerOpen(true)}
         aria-label={t('filter.button', 'de')}
       >
@@ -489,17 +489,45 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           </p>
         </section>
 
-        <ViewTabs
-          view={state.view}
-          lang={'de'}
-          onChange={(v: ViewTab) => update('view', v)}
-        />
+        {/* Two-group tab bar with flex spacers (2026-05-28 designer
+            brief). ViewTabs renders twice — once for LEFT myth views,
+            once for RIGHT source views. The flex spacers keep the
+            groups visually distinct on desktop and collapse on mobile
+            via the @media (max-width: 768px) rule in dashboard.css.
+            The "EXPLORE" eyebrow that the brief originally placed
+            above the bar was removed 2026-05-28 PM per Fedor. */}
+        <div className="carm-explorer__tab-bar">
+          <div className="carm-explorer__tabs--left">
+            <ViewTabs
+              view={state.view}
+              lang={'de'}
+              group="left"
+              onChange={(v: ViewTab) => update('view', v)}
+            />
+          </div>
+          <div className="carm-explorer__tab-spacer" aria-hidden="true" />
+          <div className="carm-explorer__tabs--right">
+            <ViewTabs
+              view={state.view}
+              lang={'de'}
+              group="right"
+              onChange={(v: ViewTab) => update('view', v)}
+            />
+          </div>
+          <div className="carm-explorer__tab-spacer" aria-hidden="true" />
+        </div>
 
-        {isModernView && (() => {
-          // Stage 2 — every modern tab (Balken, Tabelle) renders the
-          // shared `<ToolbarRow>` chrome built from `<DataPicker>` and
-          // `<PivotToggle>`. Streifen and Sources own their own
-          // toolbars and render them inside the chart-area.
+        {/* Outer white panel — wraps the toolbar + chart canvas per
+            the designer brief. The top-left corner stays flat so the
+            active tab merges into the panel; the other three corners
+            pick up the 16 px radius. */}
+        <div className="carm-explorer__panel">
+
+        {state.view === 'balken' && (() => {
+          // Balken renders the indicator + group pickers. Tabelle and
+          // Spannweite share the SpannweiteToolbar (with PivotToggle)
+          // farther down; Tabelle no longer goes through this block
+          // (v4, 2026-05-26).
           const indicatorOptions: DataPickerOption<Indicator>[] = INDICATORS.map(
             (ind) => {
               const def = defs?.mythIndicators?.[ind];
@@ -537,49 +565,24 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             };
           });
 
-          // v3 (2026-05-26): retired the Tabelle-only verdict picker.
-          // Verdict filtering still works via the existing
-          // `<VerdictTags>` row below the toolbar. Keeps Tabelle's
-          // top row visually parallel with Spannweite (which also
-          // shows only a group picker + search).
           const groupValue: GroupId = state.groupIds[0] ?? 'adults';
-          // Match Spannweite's "Wert für" caption on Tabelle so the
-          // two views read consistently. Balken keeps the default
-          // group-legend caption since it pairs with the indicator
-          // picker.
-          const groupCaption =
-            state.view === 'table'
-              ? 'Wert für'
-              : t('igs.group.legend', 'de');
-
-          // 2026-05-21: sort toolbar retired — sort lives in column
-          // headers now (A-Z + verdict-rank in MYTHEN cell, value-asc/
-          // desc in indicator cell). No pivot slot needed for Balken.
 
           return (
             <ToolbarRow
               aria-label={t('filter.title', 'de')}
               pickers={[
-                // Tabelle renders ALL indicator columns side-by-side, so
-                // the Indikator picker (which scopes the chart to one
-                // indicator at a time) is redundant there. Hide it on
-                // table view; Balken keeps it.
-                ...(state.view === 'table'
-                  ? []
-                  : [
-                      <DataPicker<Indicator>
-                        key="indicator"
-                        caption={t('igs.indicator.legend', 'de')}
-                        value={state.indicator}
-                        options={indicatorOptions}
-                        onChange={(v) => update('indicator', v)}
-                        aria-label={t('igs.indicator.legend', 'de')}
-                        lang="de"
-                      />,
-                    ]),
+                <DataPicker<Indicator>
+                  key="indicator"
+                  caption={t('igs.indicator.legend', 'de')}
+                  value={state.indicator}
+                  options={indicatorOptions}
+                  onChange={(v) => update('indicator', v)}
+                  aria-label={t('igs.indicator.legend', 'de')}
+                  lang="de"
+                />,
                 <DataPicker<GroupId>
                   key="group"
-                  caption={groupCaption}
+                  caption={t('igs.group.legend', 'de')}
                   value={groupValue}
                   options={groupOptions}
                   onChange={(v) => update('groupIds', [v])}
@@ -606,7 +609,12 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           />
         )}
 
-        {state.view === 'spannweite' && (
+        {(state.view === 'spannweite' || state.view === 'table') && (
+          // v4 (2026-05-26): Tabelle shares the Spannweite toolbar so
+          // it gets the Indikatoren ↔ Gruppen PivotToggle + "Wert für"
+          // picker. State (stripsMode, indicator, groupIds[0]) is
+          // shared with Spannweite — flipping the pivot on one view
+          // carries over to the other.
           <SpannweiteToolbar
             state={state}
             update={update}
@@ -616,12 +624,15 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           />
         )}
 
-        {state.view === 'sources2' && (
+        {(state.view === 'sources2' || state.view === 'sources_table') && (
+          // v4: Quellen-Tabelle shares the Quellen-Spannweite toolbar
+          // (PivotToggle: Indikatoren ↔ Gruppen, with
+          // `sourcesStripsMode` state shared across both views).
           <SourcesSpannweiteToolbar
             state={state}
             update={update}
             definitions={defs}
-            sharedActions={exportOnlyAction}
+            sharedActions={state.view === 'sources_table' ? sharedActions : exportOnlyAction}
           />
         )}
 
@@ -772,6 +783,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         {/* Bottom utility bar (Link kopieren / CSV / Vollbild) was
             removed — Exportieren dialog covers Link kopieren + CSV +
             JSON + PNG + SVG; Vollbild dropped. */}
+        </div>{/* /.carm-explorer__panel */}
       </div>
 
       {factsheetMyth && (

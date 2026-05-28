@@ -15,6 +15,7 @@
  * - Compact mode hides the labels for use inside narrow review rows.
  */
 
+import { useId } from "react";
 import {
   ArrowUp,
   ArrowUpRight,
@@ -68,17 +69,22 @@ export default function VerdictScale({
   compact = false,
   autoFocus = false,
 }: VerdictScaleProps) {
+  const headingId = useId();
   return (
     <div
       className={`verdict-scale ${compact ? "verdict-scale--compact" : ""}`}
     >
       {!compact && (
-        <div className="verdict-scale__spectrum" aria-hidden="true" />
+        <p id={headingId} className="verdict-scale__heading">
+          {t("ui.verdictScale.label")}
+        </p>
       )}
       <div
         className="verdict-scale__row"
         role="radiogroup"
-        aria-label={t("ui.verdictScale.label")}
+        {...(compact
+          ? { "aria-label": t("ui.verdictScale.label") }
+          : { "aria-labelledby": headingId })}
       >
         {ORDER.map((c, i) => {
           const isSelected = selected === c;

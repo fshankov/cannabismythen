@@ -118,10 +118,12 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     const selectedMetric: SourceMetricType = state.sourceMetric;
     const lang = state.lang;
 
-    // ── Column definitions ────────────────────────────────────────
+    // v5 (2026-05-26) — toggle label = picker dimension; columns are
+    // the OTHER dimension. 'metric' mode → picker = metric, cols =
+    // groups. 'group' mode → picker = group, cols = metrics.
     const allColumnIds: string[] = mode === 'metric'
-      ? (METRICS as string[])
-      : (GROUPS as string[]);
+      ? (GROUPS as string[])
+      : (METRICS as string[]);
 
     const { hide, show, isHidden } = useHiddenColumns(
       `carm.sources2.hidden.${mode}`,
@@ -129,7 +131,7 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     );
 
     const columns = useMemo(() => {
-      if (mode === 'metric') {
+      if (mode === 'group') {
         return METRICS.map((m) => {
           const def = definitions?.sourcesIndicators?.[m];
           return {
@@ -208,18 +210,22 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
       return { filteredParents: parents, childrenByParent: byParent };
     }, [sourceData, categoryFilter, subFilter, state.sourcesSearchQuery]);
 
-    // ── Cell value lookup ──────────────────────────────────────────
+    // v5: cell-value lookup mirrors the swapped pivot semantics.
+    // 'metric' mode → picker = metric, cols = groups → cell uses
+    // selectedMetric and colId-as-GroupId. 'group' mode → picker =
+    // group, cols = metrics → cell uses colId-as-MetricType and
+    // selectedGroup.
     const cellValue = useCallback(
       (sourceId: number, colId: string): number | null => {
         if (!sourceData) return null;
         if (mode === 'metric') {
-          const m = colId as SourceMetricType;
-          const data = sourceData.metrics[m]?.data[selectedGroup] || {};
+          const g = colId as SourceGroupId;
+          const data = sourceData.metrics[selectedMetric]?.data[g] || {};
           const v = data[String(sourceId)];
           return typeof v === 'number' ? v : null;
         }
-        const g = colId as SourceGroupId;
-        const data = sourceData.metrics[selectedMetric]?.data[g] || {};
+        const m = colId as SourceMetricType;
+        const data = sourceData.metrics[m]?.data[selectedGroup] || {};
         const v = data[String(sourceId)];
         return typeof v === 'number' ? v : null;
       },
@@ -713,12 +719,15 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
           let lesebeispielGroup: SourceGroupId = selectedGroup;
           let lesebeispielValue: number | null = null;
           if (hovered?.colId) {
+            // v5: in 'metric' mode the cols are groups (selectedMetric
+            // is the fixed picker dim); in 'group' mode the cols are
+            // metrics (selectedGroup is fixed).
             if (mode === 'metric') {
-              lesebeispielMetric = hovered.colId as SourceMetricType;
-              lesebeispielGroup = selectedGroup;
-            } else {
               lesebeispielMetric = selectedMetric;
               lesebeispielGroup = hovered.colId as SourceGroupId;
+            } else {
+              lesebeispielMetric = hovered.colId as SourceMetricType;
+              lesebeispielGroup = selectedGroup;
             }
             lesebeispielValue = cellValue(hoveredSource.id, hovered.colId);
           }
