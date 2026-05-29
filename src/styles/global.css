@@ -179,8 +179,8 @@
 
   /* Feedback overlay + points badge — per Schritte tier */
   --quiz-fb-exact: #09ae64;
-  --quiz-fb-near: #2d6a4f;
-  --quiz-fb-off: #d97706;
+  --quiz-fb-near: #09ae64;
+  --quiz-fb-off: #fbaf35;
   --quiz-fb-far: #c86a7c;
 
   /* Shared CTA fill (matches Figma #2D6A4F — reuse the accent token) */
