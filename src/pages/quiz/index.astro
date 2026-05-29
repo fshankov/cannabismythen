@@ -48,7 +48,7 @@ const tiles = quizzes.map(([slug, entry]) => {
   description="Teste dein Wissen über Cannabis-Mythen"
   ogImage="/og/quiz/index.png"
 >
-  <h1>Quiz: Was weißt du über Cannabis?</h1>
+  <h1 class="quiz-index__title">Quiz: Was weißt du über Cannabis?</h1>
 
   <div class="quiz-index__intro">
     <p>
@@ -59,6 +59,8 @@ const tiles = quizzes.map(([slug, entry]) => {
       Bevölkerungsbefragung in Deutschland.
     </p>
   </div>
+
+  <p class="quiz-index__category-label">Wählen Sie eine Kategorie aus</p>
 
   <section class="quiz-selection">
     {tiles.map((tile) => (

@@ -297,16 +297,10 @@
   position: relative;
   isolation: isolate;
   perspective: 1600px;
-  width: 100%;
-  /* Remediation 6 — board-game / poker card aspect (≈ 1 : 1.4). Width
-     capped at 380 px so the card reads as a single playing card on
-     wide screens; height locked to that ratio with a clamp() so it
-     stays usable at small viewports. Grid 1fr propagates a definite
-     height into the inner .quiz-card chain. */
-  max-width: min(380px, calc(100vw - 32px));
+  width: min(312.5px, calc(100vw - 32px));
+  max-width: 312.5px;
+  height: 500px;
   margin: 0 auto;
-  aspect-ratio: 1 / 1.4;
-  min-height: clamp(440px, 64vh, 540px);
   display: grid;
   grid-template-rows: 1fr;
 }
@@ -352,10 +346,10 @@
 }
 
 .quiz-card__edge-arrow--prev {
-  left: -22px;
+  left: -60px;
 }
 .quiz-card__edge-arrow--next {
-  right: -22px;
+  right: -60px;
 }
 
 @media (max-width: 640px) {
@@ -367,10 +361,10 @@
     font-size: 1rem;
   }
   .quiz-card__edge-arrow--prev {
-    left: 4px;
+    left: -52px;
   }
   .quiz-card__edge-arrow--next {
-    right: 4px;
+    right: -52px;
   }
 }
 
@@ -469,11 +463,9 @@
   font-family: var(--font-display);
   font-weight: 900;
   font-style: italic;
-  /* Figma title: 31 px at 312.5 px-wide card. Scale to current 380 px
-     max-width card with a clamp() so it still reads at narrow viewports. */
-  font-size: clamp(1.55rem, 5vw, 2.1rem);
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  font-size: 31px;
+  line-height: 30px;
+  letter-spacing: 0;
   color: #2d6a4f;
   /* Top-aligned with generous breathing room — DESIGN.md asks the
      statement to read like a slogan, not a centred caption. Padding-top
@@ -490,9 +482,10 @@
    pop stat all fit. Tinted by the scientific verdict via the site-wide
    `statement--{verdict}` class. */
 .quiz-card--flow .quiz-card__statement--back {
-  font-size: clamp(1.15rem, 3.2vw, 1.55rem);
-  line-height: 1.25;
-  font-weight: 700;
+  font-size: 24px;
+  line-height: 26px;
+  font-weight: 900;
+  font-style: italic;
   text-align: left;
   padding-top: 4px;
   margin: 0 0 var(--space-sm);
@@ -528,10 +521,16 @@
 
 /* Feedback cluster — icon stacked over a phrase + points row, centered. */
 .quiz-card__feedback {
+  position: absolute;
+  left: 50%;
+  bottom: 109.844px;
+  z-index: 30;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 23px;
+  pointer-events: none;
 }
 
 /* ── Answer area: eyebrow label + 4-button grid ── */
@@ -541,18 +540,19 @@
   gap: 12px;
 }
 
-.quiz-answer-area__label {
+.quiz-card .quiz-answer-area__label {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 0.7rem;
-  letter-spacing: 0.28em;
+  font-size: 7.813px;
+  line-height: 11.719px;
+  letter-spacing: 3.125px;
   text-transform: uppercase;
   color: #116c4a;
-  text-align: left;
+  text-align: center;
   transition: opacity 0.25s ease;
 }
-.quiz-answer-area__label.is-hidden { opacity: 0; }
+.quiz-card .quiz-answer-area__label.is-hidden { opacity: 0; }
 
 .quiz-answer-grid {
   display: grid;
@@ -602,11 +602,21 @@
 /* Answer labels (grid row 2). */
 .quiz-answer-grid__label {
   font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-size: 6.378px;
   font-weight: 700;
   color: #6b7280;
   text-align: center;
-  line-height: 1.2;
+  line-height: 10.438px;
+}
+
+.quiz-answer-grid > .quiz-answer-grid__label:nth-of-type(2),
+.quiz-answer-grid > .quiz-answer-grid__label:nth-of-type(3) {
+  font-size: 5.872px;
+  line-height: 9.609px;
+}
+
+.quiz-answer-grid > .quiz-answer-grid__label:nth-of-type(4) {
+  line-height: 9.609px;
 }
 
 /* ── Post-answer feedback cluster — the card's emotional peak ─────────
@@ -623,13 +633,16 @@
   align-items: center;
   gap: 10px;
   white-space: nowrap;
+  text-align: center;
   animation: quiz-fb-rise 0.35s var(--ease-card) 0.05s both;
 }
 .quiz-card__feedback-phrase {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.5rem;
-  line-height: 1.2;
+  font-size: 24px;
+  font-style: normal;
+  line-height: 30px;
+  text-align: center;
 }
 .quiz-card__feedback-points {
   font-family: var(--font-display);
@@ -703,9 +716,9 @@
   .quiz-card__feedback-line { animation: none; }
 }
 
-/* Mobile: slightly smaller feedback phrase. */
+/* Fixed-size card: keep the verified feedback typography on mobile too. */
 @media (max-width: 640px) {
-  .quiz-card__feedback-phrase { font-size: 1.3rem; }
+  .quiz-card__feedback-phrase { font-size: 24px; }
 }
 
 /* Chip pair: "Deine Antwort: [chip] · Wissenschaftlich: [chip]" on one
@@ -1070,8 +1083,9 @@
   overscroll-behavior: contain;
   padding-right: 6px;
   font-family: var(--font-display);
-  font-size: 0.875rem;
-  line-height: 1.55;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18.25px;
   color: var(--color-text-secondary);
   /* Override the line-clamp from the legacy .quiz-card__explanation block. */
   display: block;
@@ -1264,7 +1278,7 @@
   height: 55px;
   padding: 0 14px;
   gap: 12px;
-  font-size: 0.78rem;
+  font-size: 12.544px;
   font-weight: 900;
   border-radius: 12.5px;
   margin-top: 0;
@@ -1276,7 +1290,7 @@
   padding: 0 16px;
   gap: 12px;
   justify-content: center;
-  font-size: 0.78rem;
+  font-size: 12.544px;
   font-weight: 900;
   border-radius: 12.5px;
   /* Figma/HTML: the Nächste button is ALWAYS the brand green #2d6a4f
@@ -1568,9 +1582,7 @@
    min-height to a clamp via this dual-class override so the bigger
    responsive minimum wins. */
 .quiz-card__cell.quiz-card__cell--flow {
-  /* Promoted to dual-class specificity so the bigger min-height wins
-     over the generic `.quiz-card__cell { min-height: 340px }` rule. */
-  min-height: clamp(440px, 64vh, 540px);
+  min-height: 500px;
 }
 
 /* ── Card (outer clickable wrapper) ───────────────────────────── */
@@ -3281,9 +3293,7 @@ button.quiz-result__cta {
   }
 
   .quiz-card--flow .quiz-card__statement {
-    /* Stage 2: keep the dominant-statement size ramp on mobile too.
-       Caps at 28 px on phones; desktop ramp lifts up to 36 px. */
-    font-size: clamp(1.25rem, 5.5vw, 1.75rem);
+    font-size: 31px;
     padding-top: clamp(12px, 3vw, 24px);
   }
 
@@ -3329,15 +3339,40 @@ button.quiz-result__cta {
 
 /* ── Quiz Index Page ──────────────────────────────────────────── */
 
+.quiz-index__title {
+  max-width: 746px;
+  margin: 32px 0 24px;
+  color: #1A1C1A;
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 52px;
+  letter-spacing: -1.8px;
+}
+
 .quiz-index__intro {
-  max-width: var(--max-width-prose);
-  margin-bottom: var(--space-xl);
+  max-width: 680px;
+  margin: 0 0 64px;
 }
 
 .quiz-index__intro p {
+  margin: 0;
   font-size: 1.05rem;
   line-height: 1.65;
   color: var(--color-text-secondary);
+}
+
+.quiz-index__category-label {
+  margin: 0 0 32px;
+  color: rgba(64, 73, 67, 0.60);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 15px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
 }
 
 /* 2026-05-28 — Quiz category tiles, Figma "Design-Preferences" refresh
@@ -3353,7 +3388,8 @@ button.quiz-result__cta {
   grid-template-columns: repeat(auto-fill, minmax(346.675px, max-content));
   justify-content: center;
   gap: var(--space-2xl) var(--space-lg);
-  padding-top: var(--space-md);
+  margin-top: 0;
+  padding-top: 0;
   padding-bottom: var(--space-2xl);
 }
 
@@ -3411,8 +3447,8 @@ button.quiz-result__cta {
    edge so it visually breaks the card silhouette. */
 .quiz-select-card__mix {
   position: absolute;
-  top: -16px;
-  right: 16px;
+  top: 24px;
+  right: 24px;
   padding: 8px 16px;
   background: #eeeee8;
   color: #404943;
@@ -3437,6 +3473,7 @@ button.quiz-result__cta {
 
 .quiz-select-card__icon {
   display: inline-flex;
+  align-self: flex-start;
   align-items: center;
   justify-content: center;
   line-height: 1;
