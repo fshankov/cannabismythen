@@ -361,6 +361,14 @@ const translations: Record<Lang, Record<string, string>> = {
     //   guterweg   → "You usually sit closer to the research than the average."
     //   gehtnoch   → "A few myths are stubborn. The Fakten-Karten help."
     //   erwischt   → "Cannabis is full of myths. Time for a look in the Fakten-Karten."
+    // 2026-05-29 (Stage 3) — big Inter band TITLE above the headline on the
+    // result card. German, punchy + appreciative (Newton-Youth voice; no
+    // finger-wag even in the lowest band). AI draft — ISD review pending.
+    // EN glosses: Myth pro / Well-informed / Room to grow / Lots to discover.
+    "result.bandTitle.profi": "Mythen-Profi",
+    "result.bandTitle.guterweg": "Gut im Bilde",
+    "result.bandTitle.gehtnoch": "Da geht noch was",
+    "result.bandTitle.erwischt": "Viel zu entdecken",
     "result.achievementHeadline.profi":
       "Du erkennst die Mythen klar — wissenschaftlich solide.",
     "result.achievementHeadline.guterweg":

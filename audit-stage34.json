@@ -1,0 +1,9 @@
+{
+  "reachedResult": true,
+  "bandTitle": "Gut im Bilde",
+  "bandTitleColor": "rgb(255, 255, 255)",
+  "visualHasGradient": true,
+  "headlineColor": "rgba(255, 255, 255, 0.92)",
+  "shareCardClass": "share-card share-card--guterweg",
+  "exportErr": "TypeError: Failed to resolve module specifier 'html-to-image'"
+}

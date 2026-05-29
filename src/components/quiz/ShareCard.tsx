@@ -27,7 +27,7 @@
  * dots (Stage E commit 4).
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { QuizResult, ScoreBand } from "./types";
 import {
   populationModuleScore,
@@ -65,6 +65,7 @@ export default function ShareCard({
   deckMyths,
 }: ShareCardProps) {
   const [copied, setCopied] = useState(false);
+  const visualRef = useRef<HTMLDivElement>(null);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
 
   // 2026-05-29 (QuizCard redesign) — result page shows the user's points
@@ -78,48 +79,110 @@ export default function ShareCard({
   const deltaKey =
     ppDelta > 0 ? "above" : ppDelta < 0 ? "below" : "onpar";
 
-  // Share text composition — code-side (Keystatic shareCopy.{band} is
-  // a per-module editorial surface but no consumer reads it yet).
-  const shareText = `Ich habe ${result.moduleScore} % beim Quiz „${moduleTitle}" auf cannabismythen.de erreicht.`;
+  // Share text — band title + points (Newton-Youth voice). The shared URL is
+  // the quiz module page, which unfurls to that module's OG preview image.
+  const shareTitle = `Mein Ergebnis: ${moduleTitle}`;
+  const shareText = `Ich bin „${t(`result.bandTitle.${band}`)}" im Quiz „${moduleTitle}" auf cannabismythen.de — ${formatGermanDecimal(userPunkte)} von ${result.totalQuestions} Punkten.`;
   const fullShareText = `${shareText} ${quizUrl}`;
 
+  const copyToClipboard = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(fullShareText);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = fullShareText;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  }, [fullShareText]);
+
+  // 2026-05-29 (Stage 4) — export the result card as a PNG (html-to-image),
+  // then: mobile → native share sheet WITH the image file + text + the quiz
+  // link; desktop → download the PNG and copy text+link. The shared link is
+  // the quiz module page (unfurls to its OG preview). The share icon itself
+  // is excluded from the captured image.
   const handleShare = useCallback(async () => {
-    if (navigator.share) {
+    let file: File | null = null;
+    try {
+      const node = visualRef.current;
+      if (node) {
+        const { toPng } = await import("html-to-image");
+        const dataUrl = await toPng(node, {
+          pixelRatio: 2,
+          cacheBust: true,
+          filter: (el) =>
+            !(
+              el instanceof HTMLElement &&
+              el.classList?.contains("share-card__share-icon")
+            ),
+        });
+        const blob = await (await fetch(dataUrl)).blob();
+        file = new File([blob], "cannabismythen-quiz.png", {
+          type: "image/png",
+        });
+      }
+    } catch {
+      // image export unavailable — fall through to text/link share
+    }
+
+    // Mobile: native share sheet with the image file + text + link.
+    if (
+      file &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({ files: [file] })
+    ) {
       try {
         await navigator.share({
-          title: `Mein Ergebnis: ${moduleTitle}`,
+          files: [file],
           text: shareText,
           url: quizUrl,
+          title: shareTitle,
         });
-        trackResultCardShared("native");
+        trackResultCardShared("native-image");
       } catch {
-        // user cancelled — not an error
+        // cancelled — not an error
       }
-    } else {
+      return;
+    }
+
+    // Desktop with an image: download the PNG + copy the text + link.
+    if (file) {
+      const objUrl = URL.createObjectURL(file);
+      const a = document.createElement("a");
+      a.href = objUrl;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objUrl);
+      await copyToClipboard();
+      trackResultCardShared("download");
+      return;
+    }
+
+    // No image: native text share (mobile) or clipboard (desktop).
+    if (navigator.share) {
       try {
-        await navigator.clipboard.writeText(fullShareText);
-        setCopied(true);
-        trackResultCardShared("clipboard");
-        setTimeout(() => setCopied(false), 2500);
+        await navigator.share({ title: shareTitle, text: shareText, url: quizUrl });
+        trackResultCardShared("native");
+        return;
       } catch {
-        const textArea = document.createElement("textarea");
-        textArea.value = fullShareText;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        setCopied(true);
-        trackResultCardShared("clipboard");
-        setTimeout(() => setCopied(false), 2500);
+        // cancelled — fall through to clipboard
       }
     }
-  }, [shareText, fullShareText, quizUrl, moduleTitle]);
+    await copyToClipboard();
+    trackResultCardShared("clipboard");
+  }, [shareText, shareTitle, quizUrl, copyToClipboard]);
 
   return (
     <div className={`share-card share-card--${band}`}>
-      <div className="share-card__visual">
+      <div className="share-card__visual" ref={visualRef}>
         {/* Stage E commit 3 (2026-05-23) — small share icon top-right
             replaces the previous big "Ergebnis teilen" button under
             the card. Touch hit area expanded via padding so the
@@ -154,6 +217,10 @@ export default function ShareCard({
             </span>
           )}
         </button>
+
+        <p className="share-card__band-title">
+          {t(`result.bandTitle.${band}`)}
+        </p>
 
         <h2 className="share-card__headline">
           {t(`result.achievementHeadline.${band}`)}

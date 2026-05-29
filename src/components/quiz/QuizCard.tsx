@@ -41,6 +41,7 @@ import type {
 } from "./types";
 import { t } from "./i18n";
 import { schritte } from "./quizData";
+import { fireConfetti, fireFloatingEmoji } from "./celebrate";
 import {
   usePointerSwipe,
   useIsCoarsePointer,
@@ -231,7 +232,17 @@ export default function QuizCard({
       setShowBack(true);
       return;
     }
-    // Fresh answer (null → set): hold the feedback state, then flip.
+    // Fresh answer (null → set), motion allowed → celebrate by tier, then
+    // hold the feedback state and flip to the back. Stage 5 (2026-05-29):
+    // 🎉 confetti on an exact hit, a floating 👍 when one step off; nothing
+    // for the two lower tiers (calm, no punishment).
+    const freshSchritte = schritte(
+      answer.chosenClassification,
+      myth.correctClassification,
+    );
+    if (freshSchritte === 0) void fireConfetti(cardRef.current);
+    else if (freshSchritte === 1) fireFloatingEmoji(cardRef.current, "👍");
+
     const tid = window.setTimeout(() => setShowBack(true), FLIP_DELAY_MS);
     return () => window.clearTimeout(tid);
   }, [answer, prefersReducedMotion]);
