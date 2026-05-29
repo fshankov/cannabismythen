@@ -234,6 +234,22 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Dotted page texture (opt-in) ───────────────────────────────
+   The subtle dot grid first introduced on /fakten-karten/ (Figma
+   203-153), lifted here as a single source of truth and toggled per
+   page via BaseLayout's `bgTexture` prop (adds `.dot-texture` to
+   <body>). Used on Fakten-Karten, Quiz, Daten-Explorer and Meine
+   Interessen. The `background` shorthand above only sets the color,
+   so layering `background-image` here keeps the warm off-white base.
+   The dashboard's opaque cream <main> repeats the same texture in
+   dashboard.css so the dots stay visible behind the chart panel. */
+body.dot-texture {
+  background-image:
+    radial-gradient(circle, rgba(17, 28, 26, 0.06) 1px, transparent 1.4px);
+  background-size: 14px 14px;
+  background-position: 0 0;
+}
+
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   line-height: 1.25;

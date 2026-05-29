@@ -50,6 +50,7 @@ import ToolbarRow from './controls/ToolbarRow';
 import StripsToolbar from './controls/StripsToolbar';
 import SpannweiteToolbar from './controls/SpannweiteToolbar';
 import SourcesSpannweiteToolbar from './controls/SourcesSpannweiteToolbar';
+import SourcesBalkenToolbar from './controls/SourcesBalkenToolbar';
 import FactsheetPanel from './FactsheetPanel';
 import DashboardOnboarding from './DashboardOnboarding';
 import type { MythContentEntry } from './FactsheetPanel';
@@ -493,8 +494,11 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             in Deutschland erhoben wurden. Die Sektion{' '}
             <a href="/projekt/">„Über das Projekt"</a> erklärt ausführlich, wie
             die Daten zustande kamen. Jeder Tab im Dashboard enthält einen
-            vierstufigen Rundgang — tippe auf den grünen Button mit Fragezeichen,
-            wenn du beim Navigieren Hilfe brauchst.
+            vierstufigen Rundgang{' '}
+            <span className="carm-explorer__rundgang-hint" aria-hidden="true">
+              <HelpCircle size={16} strokeWidth={2} />
+            </span>{' '}
+            — tippe darauf, wenn du beim Navigieren Hilfe brauchst.
           </p>
         </header>
 
@@ -618,6 +622,18 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           />
         )}
 
+        {/* 2026-05-29: Quellen-Balken toolbar lifted to the panel level
+            (was nested inside SourcesBalkenView/chart-area, which left a
+            stray border line above the filter menu). Now structurally
+            identical to every other tab's toolbar. */}
+        {state.view === 'sources' && (
+          <SourcesBalkenToolbar
+            state={state}
+            update={update}
+            sharedActions={sharedActions}
+          />
+        )}
+
         {(state.view === 'spannweite' || state.view === 'table') && (
           // v4 (2026-05-26): Tabelle shares the Spannweite toolbar so
           // it gets the Indikatoren ↔ Gruppen PivotToggle + "Wert für"
@@ -678,7 +694,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 state={state}
                 update={update}
                 definitions={defs}
-                sharedActions={sharedActions}
               />
             ) : state.view === 'sources2' ? (
               <SourcesSpannweiteView
@@ -785,7 +800,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           </div>
         </div>
 
-        {!isModernView && state.view !== 'sources' && state.view !== 'sources2' && state.view !== 'strips' && state.view !== 'spannweite' && (
+        {!isModernView && state.view !== 'sources' && state.view !== 'sources2' && state.view !== 'sources_table' && state.view !== 'strips' && state.view !== 'spannweite' && (
           <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
         )}
 

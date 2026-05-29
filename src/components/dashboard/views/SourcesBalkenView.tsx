@@ -23,7 +23,6 @@ import {
   forwardRef, useCallback, useEffect, useImperativeHandle, useMemo,
   useRef, useState,
 } from 'react';
-import type { ReactNode } from 'react';
 import type {
   AppState, InformationSourcesData,
   SourceGroupId, SourceMetricType,
@@ -32,10 +31,7 @@ import {
   GridDataHeader, GridLabelHeader,
   BalkenBar, SourcesHoverTooltip,
 } from '../grid';
-import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
-import { t } from '../../../lib/dashboard/translations';
 import {
-  AUDIENCE_ICONS_BY_GROUP,
   SOURCE_CATEGORY_ICONS, SOURCE_METRIC_ICONS,
   type SourceCategoryId,
 } from '../../../lib/icons/lookups';
@@ -45,10 +41,6 @@ import { getCategoryColor } from '../../../lib/dashboard/colors';
 interface Props {
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
-  /** Right-aligned toolbar actions (search input, Exportieren, Rundgang
-   *  badge). Threaded from MythenExplorer's `sharedActions`; on source
-   *  views the Filter button is omitted (myth filter doesn't apply). */
-  sharedActions?: ReactNode;
   /** Definitions singleton — kept for prop-shape parity with the other
    *  source views even though we don't read it here yet (metric labels
    *  come from translations). */
@@ -86,23 +78,11 @@ const GROUP_LABELS: Record<SourceGroupId, string> = {
  *  primitive and the SourcesHoverTooltip share a single source of
  *  truth with the CSS-side `--source-*` tokens in global.css. */
 
-const METRIC_OPTIONS: DataPickerOption<SourceMetricType>[] = [
-  { value: 'search', label: 'Suche', Icon: SOURCE_METRIC_ICONS.search },
-  { value: 'perception', label: 'Wahrnehmung', Icon: SOURCE_METRIC_ICONS.perception },
-  { value: 'trust', label: 'Vertrauen', Icon: SOURCE_METRIC_ICONS.trust },
-  { value: 'prevention', label: 'Prävention', Icon: SOURCE_METRIC_ICONS.prevention },
-];
-
-const GROUP_OPTIONS: DataPickerOption<SourceGroupId>[] = [
-  { value: 'adults', label: 'Erwachsene (18–70)', Icon: AUDIENCE_ICONS_BY_GROUP.adults },
-  { value: 'minors', label: 'Minderjährige (16–17)', Icon: AUDIENCE_ICONS_BY_GROUP.minors },
-  { value: 'consumers', label: 'Konsumierende', Icon: AUDIENCE_ICONS_BY_GROUP.consumers },
-  { value: 'young_adults', label: 'Junge Erwachsene (18–26)', Icon: AUDIENCE_ICONS_BY_GROUP.young_adults },
-  { value: 'parents', label: 'Eltern', Icon: AUDIENCE_ICONS_BY_GROUP.parents },
-];
+// (METRIC_OPTIONS / GROUP_OPTIONS moved to SourcesBalkenToolbar.tsx on
+//  2026-05-29 — the picker UI now lives in the panel-level toolbar.)
 
 const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
-  function SourcesBalkenView({ state, update, sharedActions }, ref) {
+  function SourcesBalkenView({ state, update }, ref) {
     const selectedMetric: SourceMetricType = state.sourceMetric;
     const selectedGroup: SourceGroupId = state.sourceGroup;
 
@@ -238,42 +218,13 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
 
     return (
       <div className="carm-spannweite carm-balken-view carm-sources-balken" ref={wrapperRef}>
-        {/* Top picker row — uses the same translation keys + captions as
-            the LEFT Balken toolbar (Indikatoren / Gruppe per 2026-05-28
-            rename) so the sources tab feels like the same tool, just
-            pivoted to source rows. The right-side actions slot
-            (search + Exportieren + Rundgang badge) comes from the parent
-            via `sharedActions`. */}
-        <div className="carm-toolbar-row carm-sources-balken__toolbar">
-          <div className="carm-toolbar-row__pickers">
-            <div className="carm-toolbar-row__picker">
-              <DataPicker
-                caption={t('igs.indicator.legend', state.lang)}
-                value={selectedMetric}
-                options={METRIC_OPTIONS}
-                onChange={(v) => update('sourceMetric', v)}
-                aria-label={t('igs.indicator.legend', state.lang)}
-              />
-            </div>
-            <div className="carm-toolbar-row__picker">
-              <DataPicker
-                caption={t('igs.group.legend', state.lang)}
-                value={selectedGroup}
-                options={GROUP_OPTIONS}
-                onChange={(v) => update('sourceGroup', v)}
-                aria-label={t('igs.group.legend', state.lang)}
-              />
-            </div>
-          </div>
-          {sharedActions && (
-            <div className="carm-toolbar-row__actions">{sharedActions}</div>
-          )}
-        </div>
-
-        <div
-          className="carm-spannweite__scroller"
-          style={{ maxHeight: '70vh', overflowY: 'auto' }}
-        >
+        {/* 2026-05-29: the metric + group pickers (+ search / Exportieren /
+            Rundgang) now render at the panel level via
+            <SourcesBalkenToolbar> in MythenExplorer — same structure as
+            every other tab. This view renders only the grid. No inner-
+            scroll cap — the page scrolls (overflow-x stays via the
+            scroller CSS rule). */}
+        <div className="carm-spannweite__scroller">
           <div
             className="carm-spannweite__grid"
             style={{ gridTemplateColumns: gridTemplate }}
@@ -285,7 +236,7 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
               role="columnheader"
             >
               <GridLabelHeader
-                labelText="Informationsquellen"
+                labelText="Quellen"
                 isAzActive={isAzActive}
                 azTooltip="Alphabetisch sortieren"
                 onAzClick={() => setSort('a-z')}

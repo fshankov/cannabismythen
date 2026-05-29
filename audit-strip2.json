@@ -1,0 +1,14 @@
+{
+  "filledStripHeight": 72,
+  "stripFlexDir": "column",
+  "stripAlign": "center",
+  "stripTextAlign": "center",
+  "lineJustify": "center",
+  "pointsText": "0",
+  "pointsColor": "rgb(200, 106, 124)",
+  "populationText": "Erwachsene (18–70) erreichen hier im Durchschnitt 0,8 von 1 Punkt.",
+  "hasStatement": false,
+  "answerLabel": "Deine Antwort:",
+  "scientificLabel": "Wissenschaftlich:",
+  "pillCount": 6
+}

@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import {
   SOURCE_METRIC_ICONS,
+  SOURCE_CATEGORY_ICONS,
   AUDIENCE_ICONS_BY_GROUP,
   IconCategoryRankAsc,
   IconCategoryRankDesc,
@@ -652,11 +653,28 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                     ) : (
                       <span className="carm-sources-spannweite__chev-spacer" aria-hidden="true" />
                     )}
-                    <span
-                      className="carm-sources-spannweite__row-swatch"
-                      style={{ background: categoryColor }}
-                      aria-hidden="true"
-                    />
+                    {(() => {
+                      // 2026-05-29: render the source-category icon (tinted
+                      // with the category colour) instead of a plain
+                      // swatch square, so the first column matches
+                      // Quellen-Balken across all three Quellen tabs.
+                      const CategoryIcon = SOURCE_CATEGORY_ICONS[source.category as SourceCategoryId];
+                      return CategoryIcon ? (
+                        <span
+                          className="carm-sources-spannweite__row-icon"
+                          style={{ color: categoryColor }}
+                          aria-hidden="true"
+                        >
+                          <CategoryIcon size={16} strokeWidth={1.75} />
+                        </span>
+                      ) : (
+                        <span
+                          className="carm-sources-spannweite__row-swatch"
+                          style={{ background: categoryColor }}
+                          aria-hidden="true"
+                        />
+                      );
+                    })()}
                     <span className="carm-spannweite__row-text">{source.name}</span>
                   </div>
                   {columns.map((col) => {

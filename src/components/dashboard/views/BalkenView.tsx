@@ -211,23 +211,11 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     };
   });
 
-  // ─── Viewport-fit height. ─────────────────────────────────────────
+  // 2026-05-29: the viewport-fit height measuring (viewportH / measuredTop
+  // + resize listener) was removed — Balken now renders full-height and
+  // the page scrolls, so there's no inner-scroll cap to compute. wrapperRef
+  // stays for the empty-state + main wrapper.
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const [viewportH, setViewportH] = useState(
-    typeof window !== 'undefined' ? window.innerHeight : 800,
-  );
-  const [measuredTop, setMeasuredTop] = useState(200);
-  useEffect(() => {
-    const onResize = () => {
-      setViewportH(window.innerHeight);
-      if (wrapperRef.current) {
-        setMeasuredTop(wrapperRef.current.getBoundingClientRect().top);
-      }
-    };
-    window.addEventListener('resize', onResize);
-    onResize();
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   if (myths.length === 0) {
     return (
@@ -273,15 +261,13 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
   const colSortTooltip = t(colSortTooltipKey, lang).replace('{col}', indicatorCol.fullLabel);
 
   const gridTemplate = `var(--carm-spannweite-label-col) minmax(0, 1fr)`;
-  const BOTTOM_MARGIN = 24;
-  const availableH = Math.max(360, viewportH - measuredTop - BOTTOM_MARGIN);
 
   return (
     <div className="carm-spannweite carm-balken-view" ref={wrapperRef}>
-      <div
-        className="carm-spannweite__scroller"
-        style={{ maxHeight: availableH, overflowY: 'auto' }}
-      >
+      {/* 2026-05-29: no inner-scroll cap — the whole page scrolls (matches
+          SpannweiteView). `.carm-spannweite__scroller` keeps overflow-x
+          auto for narrow-screen horizontal scroll via its CSS rule. */}
+      <div className="carm-spannweite__scroller">
         <div
           className="carm-spannweite__grid"
           style={{ gridTemplateColumns: gridTemplate }}

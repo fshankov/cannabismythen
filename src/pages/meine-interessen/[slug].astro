@@ -57,7 +57,7 @@ const pageTitle = audience.title;
 const pageDescription = audience.description;
 ---
 
-<BaseLayout title={pageTitle} description={pageDescription || undefined}>
+<BaseLayout title={pageTitle} description={pageDescription || undefined} bgTexture>
   <article class="faq-audience-page" data-audience={audience.id}>
     <AudienceHeader audience={audience} questionCount={questions.length} />
 

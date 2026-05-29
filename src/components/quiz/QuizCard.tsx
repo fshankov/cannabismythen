@@ -178,8 +178,6 @@ interface QuizCardProps {
   explanationText?: string;
   /** How many phantom cards are stacked behind this one (0–2). */
   deckBehind?: number;
-  /** Quiz theme label shown in the front-face topbar. */
-  categoryLabel?: string;
   /** When ≥ 2, render a 🔥 streak chip pinned to the front face top-right. */
   streakCount?: number;
 }
@@ -200,7 +198,6 @@ export default function QuizCard({
   statementText,
   explanationText,
   deckBehind = 0,
-  categoryLabel,
   streakCount = 0,
 }: QuizCardProps) {
   const isAnswered = answer !== null;
@@ -359,9 +356,9 @@ export default function QuizCard({
                 {String(index + 1).padStart(2, "0")} /{" "}
                 {String(total).padStart(2, "0")}
               </span>
-              {categoryLabel && (
-                <span className="quiz-card__category">{categoryLabel}</span>
-              )}
+              {/* 2026-05-29 — the module title is already in the progress
+                  bar above; showing it here truncated ("MEDIZINISCHER UND
+                  T…") read as broken, so the category label was removed. */}
             </div>
 
             <p

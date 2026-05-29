@@ -79,8 +79,8 @@ export interface SourcesTableViewHandle {
 type SortKey = 'source' | string;
 type SortDir = 'asc' | 'desc';
 
-interface MetricCol { key: SourceMetricType; label: string; flavor: 'metric'; }
-interface GroupCol { key: SourceGroupId; label: string; flavor: 'group'; }
+interface MetricCol { key: SourceMetricType; label: string; short?: string; flavor: 'metric'; }
+interface GroupCol { key: SourceGroupId; label: string; short?: string; flavor: 'group'; }
 type ColSpec = MetricCol | GroupCol;
 
 /** v3 (2026-05-26): Wahrnehmung moves to the trailing slot so the
@@ -95,12 +95,15 @@ const METRIC_COLS: MetricCol[] = [
 
 /** v4 (2026-05-26): pivot to group columns. Same 5 Zielgruppen as
  *  Informationsquellen 2 (SourcesSpannweiteView). */
+// `short` = column-header label (Erw./Minderj./…, matching
+// Mythen-Übersicht); `label` stays the full form for tooltips + aria
+// (Fedor 2026-05-29).
 const GROUP_COLS: GroupCol[] = [
-  { key: 'adults', label: 'Erwachsene (18–70)', flavor: 'group' },
-  { key: 'minors', label: 'Minderjährige (16–17)', flavor: 'group' },
-  { key: 'consumers', label: 'Konsumierende', flavor: 'group' },
-  { key: 'young_adults', label: 'Junge Erwachsene (18–26)', flavor: 'group' },
-  { key: 'parents', label: 'Eltern', flavor: 'group' },
+  { key: 'adults', label: 'Erwachsene (18–70)', short: 'Erw.', flavor: 'group' },
+  { key: 'minors', label: 'Minderjährige (16–17)', short: 'Minderj.', flavor: 'group' },
+  { key: 'consumers', label: 'Konsumierende', short: 'Konsum.', flavor: 'group' },
+  { key: 'young_adults', label: 'Junge Erwachsene (18–26)', short: 'Junge Erw.', flavor: 'group' },
+  { key: 'parents', label: 'Eltern', short: 'Eltern', flavor: 'group' },
 ];
 
 const GROUP_FULL_LABELS_DE: Record<SourceGroupId, string> = {
@@ -289,7 +292,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                   role="columnheader"
                 >
                   <GridLabelHeader
-                    labelText="Informationsquellen"
+                    labelText="Quellen"
                     isAzActive={isAzActive}
                     azTooltip="Alphabetisch sortieren"
                     onAzClick={() => { setSortKey('source'); setSortDir('asc'); }}
@@ -337,7 +340,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                     >
                       <GridDataHeader
                         Icon={Icon}
-                        label={col.label}
+                        label={col.short ?? col.label}
                         fullLabel={fullLabel}
                         hideLabel={`${t('column.hide', lang)} — ${col.label}`}
                         onHide={() => hide(colKey)}
