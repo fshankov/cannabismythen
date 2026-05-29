@@ -859,18 +859,22 @@ function QuizPlayerInner({
     handlePrev,
   ]);
 
-  // Quiet single-line header bar — module title + thin progress fill +
-  // "Mythos N von Y" counter (CAR-6 2026-05-28). Stage A (2026-05-16)
-  // dropped the live-score pill (Pew minimalism). Stage E commit 5
-  // (2026-05-23): added a feedback strip immediately below the progress
-  // bar. Stage F commit 1: same strip slot carries `variant="result"`
-  // on the finished page. Stage G: strip ALWAYS renders in quiz mode
-  // (even when the current myth hasn't been answered yet) — the slot
-  // reserves a stable min-height so the QuizCard below doesn't jump
-  // up/down between unanswered and answered states. CAR-5 (2026-05-28)
-  // removed the intro TitleCard guard.
+  // Stage 2 (2026-05-29): during the quiz the bar (progress + per-question
+  // feedback) is PINNED via the header portal. On the RESULT page it is
+  // rendered INLINE instead, so it scrolls away with the page while the
+  // site menu stays pinned (Fedor's call). The slot is marked active only
+  // while the quiz is in progress, so the fixed header reserves the bar's
+  // height only then (on results it collapses to just the menu).
+  useEffect(() => {
+    if (!portalTarget) return;
+    portalTarget.classList.toggle("quiz-progress-slot--active", !showResults);
+  }, [portalTarget, showResults]);
+
   const showAnswerStrip = !showResults && currentMyth !== undefined;
-  const headerContent = (
+
+  // Pinned header (during the quiz): module title + thin progress fill +
+  // "Mythos N von Y" counter, plus the per-question feedback strip.
+  const pinnedHeader = (
     <>
       <ProgressBar
         quizTitle={t(theme.titleKey)}
@@ -886,12 +890,19 @@ function QuizPlayerInner({
           statementText={quizTextMap[currentMyth.id]?.statement}
         />
       )}
-      {showResults && (
-        <FeedbackStrip
-          variant="result"
-          moduleTitle={t(theme.titleKey)}
-        />
-      )}
+    </>
+  );
+
+  // Result header (rendered INLINE on the result page so it scrolls away).
+  const resultHeader = (
+    <>
+      <ProgressBar
+        quizTitle={t(theme.titleKey)}
+        current={totalQuestions}
+        answered={answeredCount}
+        total={totalQuestions}
+      />
+      <FeedbackStrip variant="result" moduleTitle={t(theme.titleKey)} />
     </>
   );
 
@@ -900,13 +911,14 @@ function QuizPlayerInner({
       className="quiz-player quiz-player--active"
       style={{ ["--quiz-accent" as string]: accent }}
     >
-      {portalTarget
-        ? createPortal(headerContent, portalTarget)
-        : (
-          <header className="quiz-player__header">
-            {headerContent}
-          </header>
-        )}
+      {!showResults &&
+        (portalTarget
+          ? createPortal(pinnedHeader, portalTarget)
+          : (
+            <header className="quiz-player__header">
+              {pinnedHeader}
+            </header>
+          ))}
 
       {!showResults && currentMyth && (
         <div className="quiz-player__flow">
@@ -969,19 +981,25 @@ function QuizPlayerInner({
       )}
 
       {showResults && result && (
-        <ResultScreen
-          result={result}
-          theme={theme}
-          orderedMyths={orderedMyths}
-          quizTextMap={quizTextMap}
-          verdicts={verdictsMap}
-          intros={introsMap}
-          shareCopy={shareCopyMap}
-          faktenContentMap={faktenContentMap}
-          onRestart={handleRestart}
-          onShowFactsheet={handleShowFactsheet}
-          onShowFactsheetBySlug={handleShowFactsheetBySlug}
-        />
+        <>
+          {/* Stage 2: the quiz bar renders inline here (not in the fixed
+              header portal) so it scrolls away with the result page while
+              the site menu stays pinned. */}
+          <div className="quiz-player__result-bar">{resultHeader}</div>
+          <ResultScreen
+            result={result}
+            theme={theme}
+            orderedMyths={orderedMyths}
+            quizTextMap={quizTextMap}
+            verdicts={verdictsMap}
+            intros={introsMap}
+            shareCopy={shareCopyMap}
+            faktenContentMap={faktenContentMap}
+            onRestart={handleRestart}
+            onShowFactsheet={handleShowFactsheet}
+            onShowFactsheetBySlug={handleShowFactsheetBySlug}
+          />
+        </>
       )}
 
       {factsheetMyth && (

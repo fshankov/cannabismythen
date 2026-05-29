@@ -782,11 +782,21 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                 <div className="carm-spannweite__tooltip-myth">
                   {hoveredSource.name}
                 </div>
-                <span
-                  className="carm-sources-spannweite__tooltip-swatch"
-                  style={{ background: hoveredCategoryColor }}
-                  aria-hidden="true"
-                />
+                {(() => {
+                  // 2026-05-29: show the source-category SVG icon (tinted),
+                  // matching Quellen-Balken's hover tooltip — was a plain
+                  // colour circle before.
+                  const TipIcon = SOURCE_CATEGORY_ICONS[hoveredSource.category as SourceCategoryId];
+                  return TipIcon ? (
+                    <span
+                      className="carm-spannweite__tooltip-glyph"
+                      style={{ color: hoveredCategoryColor }}
+                      aria-hidden="true"
+                    >
+                      <TipIcon size={20} strokeWidth={1.75} />
+                    </span>
+                  ) : null;
+                })()}
               </div>
               <div
                 className="carm-spannweite__tooltip-verdict"

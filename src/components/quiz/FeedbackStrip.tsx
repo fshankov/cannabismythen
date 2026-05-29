@@ -143,7 +143,8 @@ export default function FeedbackStrip({
   const verdictText = t(SCHRITTE_LABEL_KEY[s]);
   const verdictModifier = SCHRITTE_MODIFIER[s];
   const VerdictIcon = SCHRITTE_ICON[s];
-  const pointsText = pointsDisplay(s);
+  // 2026-05-29 — "+1 aus 1" form (points earned out of 1 possible per card).
+  const pointsText = `${pointsDisplay(s)} aus 1`;
 
   // 2026-05-29 (QuizCard redesign) — per-question population reveal on the
   // 0–1 per-card points scale (no percentages on cards). populationCorrectPct
@@ -157,9 +158,27 @@ export default function FeedbackStrip({
   // Row 1: verdict + points + Deine Antwort + Wissenschaftlich. Row 2: the
   // Erwachsene population line. The myth statement (shown on the card) is no
   // longer repeated here.
+  // 2026-05-29 (Stage 1) — logical order: answers first (your pick vs the
+  // science), then the verdict + points, then the population line. Three
+  // centered rows; the strip's fixed height keeps empty == filled (no jump).
   return (
     <div className="quiz-feedback-strip" role="status" aria-live="polite">
-      <div className="quiz-feedback-strip__line">
+      <div className="quiz-feedback-strip__row quiz-feedback-strip__row--answers">
+        <span className="quiz-feedback-strip__answer">
+          <span className="quiz-feedback-strip__answer-label">
+            {t("ui.yourAnswerLabel")}:
+          </span>{" "}
+          <VerdictPill verdict={answer.chosenClassification} size="sm" />
+        </span>
+        <span className="quiz-feedback-strip__sep" aria-hidden="true">·</span>
+        <span className="quiz-feedback-strip__scientific">
+          <span className="quiz-feedback-strip__scientific-label">
+            {t("classification.scientific")}:
+          </span>{" "}
+          <VerdictPill verdict={myth.correctClassification} size="sm" />
+        </span>
+      </div>
+      <div className="quiz-feedback-strip__row quiz-feedback-strip__row--verdict">
         <span
           className={`quiz-feedback-strip__verdict quiz-feedback-strip__verdict--${verdictModifier}`}
         >
@@ -175,20 +194,6 @@ export default function FeedbackStrip({
           className={`quiz-feedback-strip__points quiz-feedback-strip__points--${verdictModifier}`}
         >
           {pointsText}
-        </span>
-        <span className="quiz-feedback-strip__sep" aria-hidden="true">·</span>
-        <span className="quiz-feedback-strip__answer">
-          <span className="quiz-feedback-strip__answer-label">
-            {t("ui.yourAnswerLabel")}:
-          </span>{" "}
-          <VerdictPill verdict={answer.chosenClassification} size="sm" />
-        </span>
-        <span className="quiz-feedback-strip__sep" aria-hidden="true">·</span>
-        <span className="quiz-feedback-strip__scientific">
-          <span className="quiz-feedback-strip__scientific-label">
-            {t("classification.scientific")}:
-          </span>{" "}
-          <VerdictPill verdict={myth.correctClassification} size="sm" />
         </span>
       </div>
       <p className="quiz-feedback-strip__population">{populationSentence}</p>

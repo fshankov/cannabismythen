@@ -400,7 +400,7 @@ const translations: Record<Lang, Record<string, string>> = {
     // user's on-card points badge (+1 / +0,66 / +0,33 / 0).
     // EN gloss: "Adults (18–70) score on average {0,8} out of 1 point here."
     "result.row.populationMean":
-      "Erwachsene (18–70) erreichen hier im Durchschnitt {points} von 1 Punkt.",
+      "Erwachsene (18–70) in der CaRM-Studie erreichen hier im Durchschnitt {points} von 1 Punkt.",
 
     // ── Stage D PR3 (2026-05-22) — "Lohnt sich besonders" flag chip on
     //    the top weakest review rows. Removed from rendering in Stage E

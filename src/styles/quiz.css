@@ -121,7 +121,7 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: var(--space-sm) var(--space-lg);
-  height: 4.5rem;
+  height: 5.5rem; /* 2026-05-29 — 3 rows (answers · verdict+points · population) */
   font-size: 0.9rem;
   line-height: 1.4;
   text-align: center;
@@ -180,9 +180,9 @@
   color: var(--classification-falsch);
 }
 
-/* Row 1: verdict + points chip + Deine Antwort + Wissenschaftlich,
-   centered and wrapping as one group. */
-.quiz-feedback-strip__line {
+/* Each strip row (row 1: answers · row 2: verdict + points), centered and
+   wrapping as one group. */
+.quiz-feedback-strip__row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -248,14 +248,27 @@
   font-weight: 700;
 }
 
+/* Stage 2 (2026-05-29) — the quiz bar rendered INLINE on the result page
+   (scrolls away with the page; the site menu stays pinned). Drop the fixed
+   slot height + the slot divider since it's now a single line in normal
+   flow, and give it a little breathing room above the result hero. */
+.quiz-player__result-bar {
+  width: 100%;
+  margin-bottom: var(--space-md);
+}
+.quiz-player__result-bar .quiz-feedback-strip {
+  height: auto;
+  border-top: none;
+}
+
 /* Mobile: progress bar + strip share the same portal target; keep
    the strip's content readable by allowing the body lines to wrap
    without crowding. */
 @media (max-width: 640px) {
   .quiz-feedback-strip {
-    /* Taller fixed height so the wrapped row 1 + population line still fit
-       identically whether answered or not (no jump on mobile either). */
-    height: 6rem;
+    /* Taller fixed height so the (possibly wrapped) 3 rows fit identically
+       whether answered or not (no jump on mobile either). */
+    height: 7.5rem;
     gap: 0.25rem;
     padding: var(--space-sm) var(--space-md);
   }
@@ -511,32 +524,26 @@
   transition: opacity 0.25s ease;
 }
 
-/* ── Bottom block: pins feedback + answer area to the card bottom. The
-   feedback cluster flows ABOVE the grid (in the empty gap) so it never
-   overlaps the buttons, at any card height. ─────────────────────────── */
-.quiz-card__bottom {
+/* 2026-05-29 (Stage 1) — feedback + answer-area are siblings of the front
+   face; BOTH use margin-top:auto so the free space splits evenly: the
+   feedback lands vertically centred (a bit above the buttons) while the
+   buttons stay pinned at the bottom and don't move when feedback appears. */
+
+/* Feedback cluster — tier icon over the verdict phrase. Points removed
+   (they now live in the strip). Centred; pointer-events:none so it never
+   blocks the buttons. */
+.quiz-card__feedback {
   margin-top: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-/* Feedback cluster — icon stacked over a phrase + points row, centered. */
-.quiz-card__feedback {
-  position: absolute;
-  left: 50%;
-  bottom: 109.844px;
-  z-index: 30;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 23px;
+  gap: 10px;
   pointer-events: none;
 }
 
-/* ── Answer area: eyebrow label + 4-button grid ── */
+/* ── Answer area: eyebrow label + 4-button grid (pinned to card bottom) ── */
 .quiz-answer-area {
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -656,19 +663,10 @@
   line-height: 30px;
   text-align: center;
 }
-.quiz-card__feedback-points {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 1.05rem;
-  line-height: 1;
-  padding: 3px 11px;
-  border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
-  font-variant-numeric: tabular-nums;
-}
+/* (Points badge removed from the card 2026-05-29 — points now show in the
+   strip under the progress bar.) */
 
-/* Tier colours (icon + phrase + points share the tier colour). */
+/* Tier colours (icon + phrase share the tier colour). */
 .quiz-card__feedback-icon--exact { color: var(--quiz-fb-exact); }
 .quiz-card__feedback-icon--near  { color: var(--quiz-fb-near); }
 .quiz-card__feedback-icon--off   { color: var(--quiz-fb-off); }

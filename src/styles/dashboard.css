@@ -757,20 +757,16 @@ main:has(.carm-explorer) {
   background: var(--color-primary-light);
 }
 
+/* 2026-05-29: highlight the hovered row with a left accent bar (on the
+   first cell — box-shadow on <tr> is unreliable). Replaces the old
+   "dim every other row to 0.35" spotlight, so all rows stay readable. */
+.carm-explorer .data-table tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-accent, #2d6a4f);
+}
+
 .carm-explorer .data-table tbody tr:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
-}
-
-/* 2026-05-22 v5 hover-row focus parity with grid views — when any
-   body row is hovered, sibling rows fade to 0.35. */
-.carm-explorer .data-table tbody:has(tr:hover) tr {
-  opacity: 0.35;
-  transition: opacity 120ms ease;
-}
-.carm-explorer .data-table tbody:has(tr:hover) tr:hover,
-.carm-explorer .data-table tbody:has(tr:hover) tr:focus-visible {
-  opacity: 1;
 }
 
 .carm-explorer .data-table .myth-cell {
@@ -6939,30 +6935,20 @@ body.carm-modal-open {
   background: var(--color-surface-alt, #fafbfc);
 }
 
-.carm-spannweite__row:hover,
-.carm-spannweite__row.is-hover,
 .carm-spannweite__row:focus-visible {
   background: var(--color-surface-hover, #f1f5f9);
-}
-
-.carm-spannweite__row:focus-visible {
   box-shadow: inset 0 0 0 2px var(--color-accent, #1d4ed8);
 }
 
-/* 2026-05-22 v5 hover-row focus: when any BODY ROW is hovered, dim
-   the other rows to 0.35. Uses `:has()` so the trigger is scoped to
-   actual row hover — column header / axis / hidden lane hovers don't
-   fire the dim. (Auto-falls-back to "no dim" on browsers without
-   :has() support, which now means almost none — Chrome 105+, Firefox
-   121+, Safari 15.4+.) */
-.carm-spannweite__grid:has(.carm-spannweite__row:hover) .carm-spannweite__row {
-  opacity: 0.35;
-  transition: opacity 120ms ease;
-}
-.carm-spannweite__grid:has(.carm-spannweite__row:hover) .carm-spannweite__row:hover,
-.carm-spannweite__grid:has(.carm-spannweite__row:hover) .carm-spannweite__row.is-hover,
-.carm-spannweite__grid:has(.carm-spannweite__row:hover) .carm-spannweite__row:focus-visible {
-  opacity: 1;
+/* 2026-05-29: highlight the hovered row instead of dimming every other
+   one. The old "dim siblings to 0.35" spotlight made dense grids
+   unreadable while hovering (Fedor: had to move the cursor off the
+   dashboard to read other rows). Now all rows stay at full opacity and
+   the hovered one gets a soft green tint + a left accent bar. */
+.carm-spannweite__row:hover,
+.carm-spannweite__row.is-hover {
+  background: var(--color-primary-light);
+  box-shadow: inset 3px 0 0 var(--color-accent, #2d6a4f);
 }
 
 .carm-spannweite__cell {
@@ -7633,6 +7619,20 @@ body.carm-modal-open {
 }
 
 .carm-sources-spannweite .carm-spannweite__row--child .carm-spannweite__row-text {
+  font-size: 0.74rem;
+}
+
+/* 2026-05-29: same child-row treatment for Quellen-Balken (sub-sources
+   under an expanded parent) — indent + dim, mirroring Quellen-Übersicht.
+   Balken uses `.carm-sources-balken__name` for the source label. */
+.carm-sources-balken .carm-spannweite__row--child {
+  opacity: 0.62;
+  cursor: default;
+}
+.carm-sources-balken .carm-spannweite__row--child .carm-spannweite__cell--label {
+  padding-left: 1.75rem;
+}
+.carm-sources-balken .carm-spannweite__row--child .carm-sources-balken__name {
   font-size: 0.74rem;
 }
 

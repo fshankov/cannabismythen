@@ -40,7 +40,7 @@ import type {
   Schritte,
 } from "./types";
 import { t } from "./i18n";
-import { schritte, pointsDisplay } from "./quizData";
+import { schritte } from "./quizData";
 import {
   usePointerSwipe,
   useIsCoarsePointer,
@@ -269,8 +269,6 @@ export default function QuizCard({
   const FeedbackIcon = userSchritte !== null ? SCHRITTE_ICON[userSchritte] : null;
   const feedbackPhrase =
     userSchritte !== null ? t(SCHRITTE_LABEL_KEY[userSchritte]) : "";
-  const feedbackPoints =
-    userSchritte !== null ? pointsDisplay(userSchritte) : "";
 
   const schritteVerdictText = feedbackPhrase;
   const verdictPhrase = t(`ui.classificationPhrase.${myth.correctClassification}`);
@@ -372,30 +370,29 @@ export default function QuizCard({
               {displayStatement(statement)}
             </p>
 
-            {/* ── Bottom block: feedback cluster (flow, in the gap above
-                 the grid so it reliably clears the grid at any card
-                 height — no fragile absolute overlap) + the 4-button
-                 answer area. ─────────────────────────────────────── */}
-            <div className="quiz-card__bottom">
-              {showFeedback && FeedbackIcon && (
-                <div className="quiz-card__feedback" aria-hidden="true">
-                  <div
-                    className={`quiz-card__feedback-icon quiz-card__feedback-icon--${feedbackTier}`}
-                  >
-                    <FeedbackIcon size={44} strokeWidth={2} />
-                  </div>
-                  <div
-                    className={`quiz-card__feedback-line quiz-card__feedback-line--${feedbackTier}`}
-                  >
-                    <span className="quiz-card__feedback-phrase">
-                      {feedbackPhrase}
-                    </span>
-                    <span className="quiz-card__feedback-points">
-                      {feedbackPoints}
-                    </span>
-                  </div>
+            {/* ── On-card feedback: tier icon + phrase, vertically centred
+                 between the statement and the buttons (2026-05-29 — points
+                 moved to the strip). Feedback + answer-area are siblings;
+                 both use margin-top:auto so the free space splits and the
+                 feedback lands in the middle while the buttons stay at the
+                 bottom. ─────────────────────────────────────────────── */}
+            {showFeedback && FeedbackIcon && (
+              <div className="quiz-card__feedback" aria-hidden="true">
+                <div
+                  className={`quiz-card__feedback-icon quiz-card__feedback-icon--${feedbackTier}`}
+                >
+                  <FeedbackIcon size={44} strokeWidth={2} />
                 </div>
-              )}
+                <div
+                  className={`quiz-card__feedback-line quiz-card__feedback-line--${feedbackTier}`}
+                >
+                  <span className="quiz-card__feedback-phrase">
+                    {feedbackPhrase}
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="quiz-answer-area">
               <p
                 className={[
@@ -462,7 +459,6 @@ export default function QuizCard({
                   </span>
                 ))}
               </div>
-            </div>
             </div>
           </div>
 

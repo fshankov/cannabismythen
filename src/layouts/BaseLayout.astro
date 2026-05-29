@@ -25,6 +25,9 @@ const {
   ogImage,
 } = Astro.props;
 
+// PREVIEW BANNER — flip to false before public launch
+const SHOW_PREVIEW_BANNER = true;
+
 const bodyClass = [heroMode ? "has-hero" : "", bgTexture ? "dot-texture" : ""]
   .filter(Boolean)
   .join(" ");
@@ -128,6 +131,54 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
     FEEDBUCKET-DISABLED-END */}
   </head>
   <body class={heroMode ? "has-hero" : ""}>
+
+    {/* PREVIEW BANNER — remove Fragment + dialog before public launch */}
+    {SHOW_PREVIEW_BANNER && (
+      <Fragment>
+        <div id="preview-banner" class="preview-banner" role="note" aria-label="Vorabversion-Hinweis">
+          <div class="preview-banner__inner">
+            <svg class="preview-banner__icon" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span class="preview-banner__text">
+              Vorschauversion: Diese Website befindet sich noch in der Entwicklung und wurde nicht abschließend freigegeben.
+            </span>
+            <button class="preview-banner__details-btn" type="button" id="previewBannerDetails" aria-haspopup="dialog">
+              Details
+            </button>
+            <button class="preview-banner__close-btn" type="button" id="previewBannerClose" aria-label="Hinweis schließen">
+              &times;
+            </button>
+          </div>
+          <button class="preview-banner__tab" type="button" id="previewBannerExpand" aria-label="Vorabversion-Hinweis einblenden">
+            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Vorschau
+          </button>
+        </div>
+
+        <dialog id="preview-modal" class="preview-modal" aria-labelledby="preview-modal-title">
+          <div class="preview-modal__content">
+            <button class="preview-modal__close" type="button" id="previewModalClose" aria-label="Schließen">&times;</button>
+            <h2 id="preview-modal-title" class="preview-modal__title">Vorabversion &ndash; Hinweis</h2>
+            <p>
+              <strong>Diese Website befindet sich noch in der Entwicklung</strong> und wurde noch nicht offiziell durch das ISD Hamburg abschließend freigegeben. Inhalte können sich bis zum offiziellen Start noch ändern.
+            </p>
+            <p>
+              Alle Inhalte dienen ausschließlich <strong>Informations- und Forschungszwecken</strong> und ersetzen keine persönliche ärztliche Beratung. Bei gesundheitlichen Fragen wenden Sie sich bitte an eine qualifizierte Fachkraft.
+            </p>
+            <p>
+              Für die Vollständigkeit und Richtigkeit der bereitgestellten Informationen wird <strong>keine Gewähr übernommen</strong>. Die Inhalte basieren auf der CaRM-Studie (n&#8201;=&#8201;2.097), einer Bevölkerungsbefragung in Deutschland (Erwachsene&#160;18–70).
+            </p>
+          </div>
+        </dialog>
+      </Fragment>
+    )}
 
     <!-- Feathered blur strip behind the floating pill -->
     <div class="nav-blur-shield" aria-hidden="true"></div>
@@ -296,6 +347,65 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         });
       })();
     </script>
+
+    {/* Preview banner: collapse/expand + modal + --preview-banner-h CSS var */}
+    {SHOW_PREVIEW_BANNER && (
+      <script is:inline>
+        (function () {
+          var banner = document.getElementById('preview-banner');
+          if (!banner) return;
+
+          function setBannerH(h) {
+            document.documentElement.style.setProperty('--preview-banner-h', h + 'px');
+          }
+
+          function collapse() {
+            banner.classList.add('preview-banner--collapsed');
+            setBannerH(4); /* 4px strip remains */
+            sessionStorage.setItem('cm-preview-state', 'collapsed');
+          }
+
+          function expand() {
+            banner.classList.remove('preview-banner--collapsed');
+            /* measure after removing class so we get the expanded height */
+            var h = banner.getBoundingClientRect().height;
+            setBannerH(h || 44);
+            sessionStorage.removeItem('cm-preview-state');
+          }
+
+          /* Restore collapsed state from prior page/navigation */
+          if (sessionStorage.getItem('cm-preview-state') === 'collapsed') {
+            banner.classList.add('preview-banner--collapsed');
+            setBannerH(4);
+          } else {
+            setBannerH(banner.getBoundingClientRect().height);
+            window.addEventListener('resize', function () {
+              if (!banner.classList.contains('preview-banner--collapsed')) {
+                setBannerH(banner.getBoundingClientRect().height);
+              }
+            }, { passive: true });
+          }
+
+          /* × collapses (not hides) */
+          var closeBtn = document.getElementById('previewBannerClose');
+          if (closeBtn) closeBtn.addEventListener('click', collapse);
+
+          /* Peek tab re-expands */
+          var expandBtn = document.getElementById('previewBannerExpand');
+          if (expandBtn) expandBtn.addEventListener('click', expand);
+
+          /* Details → modal */
+          var detailsBtn = document.getElementById('previewBannerDetails');
+          var modal = document.getElementById('preview-modal');
+          if (detailsBtn && modal) {
+            detailsBtn.addEventListener('click', function () { modal.showModal(); });
+            var modalClose = document.getElementById('previewModalClose');
+            if (modalClose) modalClose.addEventListener('click', function () { modal.close(); });
+            modal.addEventListener('click', function (e) { if (e.target === modal) modal.close(); });
+          }
+        })();
+      </script>
+    )}
 
     {/* Stage F commit 1 (2026-05-23) — publish the live header height as a
         CSS variable so `main { padding-top }` can compensate for the
