@@ -107,17 +107,53 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
     </script>
   </head>
   <body class={heroMode ? "has-hero" : ""}>
-    <header>
-      <nav>
-        <a href="/">cannabismythen</a>
-        <a href="/fakten-karten/">Fakten-Karten</a>
-        <a href="/daten-explorer/">Daten-Explorer</a>
-        <a href="/meine-interessen/">Meine Interessen</a>
-        <a href="/quiz/">Quiz</a>
-        <a href="/projekt/">Über das Projekt</a>
+
+    <!-- Feathered blur strip behind the floating pill -->
+    <div class="nav-blur-shield" aria-hidden="true"></div>
+
+    <!-- Floating pill nav -->
+    <div class="nav-wrapper">
+      <nav class="nav" id="mainNav" aria-label="Hauptnavigation">
+
+        <a href="/" class="nav__brand" aria-label="cannabismythen – Startseite">
+          cannabismythen
+        </a>
+
+        <ul class="nav__links" role="list">
+          <li><a href="/fakten-karten/"    class="nav__link">Fakten-Karten</a></li>
+          <li><a href="/daten-explorer/"   class="nav__link">Daten-Explorer</a></li>
+          <li><a href="/meine-interessen/" class="nav__link">Meine Interessen</a></li>
+          <li><a href="/quiz/"             class="nav__link">Quiz</a></li>
+          <li><a href="/projekt/"          class="nav__link">Über das Projekt</a></li>
+        </ul>
+
+        <button class="nav__hamburger" id="hamburgerBtn"
+          aria-label="Menü öffnen"
+          aria-expanded="false"
+          aria-controls="navDrawer">
+          <span class="nav__hamburger-line"></span>
+          <span class="nav__hamburger-line"></span>
+          <span class="nav__hamburger-line"></span>
+        </button>
+
       </nav>
+      <!-- Quiz progress portal — QuizPlayer portals its strip here -->
       <div id="quiz-progress-slot"></div>
-    </header>
+    </div>
+
+    <!-- Mobile/tablet drawer (full-viewport, outside the pill wrapper) -->
+    <div class="nav__drawer-overlay" id="navDrawer"
+         role="dialog" aria-modal="true" aria-label="Navigationsmenü">
+      <div class="nav__drawer">
+        <ul class="nav__drawer-list" role="list">
+          <li class="nav__drawer-item"><a href="/fakten-karten/"    class="nav__drawer-link">Fakten-Karten</a></li>
+          <li class="nav__drawer-item"><a href="/daten-explorer/"   class="nav__drawer-link">Daten-Explorer</a></li>
+          <li class="nav__drawer-item"><a href="/meine-interessen/" class="nav__drawer-link">Meine Interessen</a></li>
+          <li class="nav__drawer-item"><a href="/quiz/"             class="nav__drawer-link">Quiz</a></li>
+          <li class="nav__drawer-item"><a href="/projekt/"          class="nav__drawer-link">Über das Projekt</a></li>
+        </ul>
+      </div>
+    </div>
     <main>
       <slot />
     </main>
@@ -160,22 +196,72 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       })();
     </script>
 
-    {/* Scroll-aware nav: adds .is-scrolled once user leaves the hero zone */}
+    {/* Active nav link: sets aria-current + active class from URL */}
     <script is:inline>
       (function () {
-        var header = document.querySelector('header');
-        if (!header) return;
-        // Non-hero pages are always in the "scrolled" (light) state
-        if (!document.body.classList.contains('has-hero')) {
-          header.classList.add('is-scrolled');
-          return;
+        var path = window.location.pathname;
+        document.querySelectorAll('.nav__link, .nav__drawer-link').forEach(function (a) {
+          var href = a.getAttribute('href');
+          var active = href === path || (href !== '/' && path.startsWith(href));
+          if (active) {
+            a.classList.add(
+              a.classList.contains('nav__link') ? 'nav__link--active' : 'nav__drawer-link--active'
+            );
+            a.setAttribute('aria-current', 'page');
+          }
+        });
+      })();
+    </script>
+
+    {/* Scroll elevation: adds .nav--scrolled once user scrolls past threshold */}
+    <script is:inline>
+      (function () {
+        var nav = document.getElementById('mainNav');
+        if (!nav) return;
+        var isHero = document.body.classList.contains('has-hero');
+        var threshold = isHero ? window.innerHeight * 0.85 : 8;
+        if (!isHero) nav.classList.add('nav--scrolled');
+        function onScroll() {
+          nav.classList.toggle('nav--scrolled', window.scrollY > threshold);
         }
-        function update() {
-          // Transition once the user has scrolled ~85 % of viewport height
-          header.classList.toggle('is-scrolled', window.scrollY > window.innerHeight * 0.85);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        if (isHero) onScroll();
+      })();
+    </script>
+
+    {/* Drawer: hamburger open/close, overlay click, Escape key */}
+    <script is:inline>
+      (function () {
+        var btn     = document.getElementById('hamburgerBtn');
+        var overlay = document.getElementById('navDrawer');
+        if (!btn || !overlay) return;
+        function open() {
+          overlay.classList.add('nav__drawer-overlay--open');
+          btn.setAttribute('aria-expanded', 'true');
+          btn.setAttribute('aria-label', 'Menü schließen');
+          document.body.style.overflow = 'hidden';
         }
-        window.addEventListener('scroll', update, { passive: true });
-        update();
+        function close() {
+          overlay.classList.remove('nav__drawer-overlay--open');
+          btn.setAttribute('aria-expanded', 'false');
+          btn.setAttribute('aria-label', 'Menü öffnen');
+          document.body.style.overflow = '';
+        }
+        btn.addEventListener('click', function () {
+          overlay.classList.contains('nav__drawer-overlay--open') ? close() : open();
+        });
+        overlay.addEventListener('click', function (e) {
+          if (e.target === overlay) close();
+        });
+        document.querySelectorAll('.nav__drawer-link').forEach(function (l) {
+          l.addEventListener('click', close);
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && overlay.classList.contains('nav__drawer-overlay--open')) {
+            close();
+            btn.focus();
+          }
+        });
       })();
     </script>
 
@@ -189,7 +275,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         keeps non-quiz pages unaffected. */}
     <script is:inline>
       (function () {
-        var header = document.querySelector('body > header');
+        var header = document.querySelector('.nav-wrapper');
         if (!header) return;
         function publishHeight() {
           var h = header.getBoundingClientRect().height;

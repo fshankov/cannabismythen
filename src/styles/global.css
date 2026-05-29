@@ -130,6 +130,22 @@
   --dur-slide: 320ms;
   --lift-md: 6px;
 
+  /* Nav motion tokens */
+  --duration-short:  200ms;
+  --duration-medium: 300ms;
+  --spring-standard: linear(
+    0, 0.009, 0.035 2.1%, 0.141 5.3%, 0.723 18.4%,
+    0.938 31.7%, 1.007 44.9%, 1.008 52%, 1.003 65%, 1
+  );
+  --spring-expressive: linear(
+    0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%,
+    0.721 25%, 0.849 31.3%, 0.939 38.1%, 0.994 48.1%,
+    1.007 54.1%, 1.011 58.6%, 1.01 63.6%, 1.006 71.4%,
+    1.001 80.2%, 1
+  );
+  --color-on-surface-variant: #475569;
+  --color-outline-variant:    #c0c8d5;
+
   /* Canonical card surface — the Fakten-Karten card is the source of
      truth for every card-shaped surface on the home page. Change one
      value here and the hero fan, four-paths tiles, audience shortcut
@@ -281,105 +297,289 @@ hr {
 
 /* ── Site Layout ────────────────────────────────────────────── */
 
-/* Scoped to the site nav (direct child of body) so that nested
-   <header> elements (e.g. FilterDrawer/ExportDrawer title bars,
-   <section> headers inside content) do NOT inherit fixed-positioning
-   and end up overlaying their own panel bodies. */
-body > header {
+/* ── Nav blur shield ─────────────────────────────────────────── */
+.nav-blur-shield {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  /* Light glass — default for all pages and after hero scroll */
-  background: rgba(244, 244, 240, 0.75);
-  backdrop-filter: blur(22px) saturate(1.6);
-  -webkit-backdrop-filter: blur(22px) saturate(1.6);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.45);
-  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
-  transition:
-    background 0.4s ease,
-    border-color 0.4s ease,
-    box-shadow 0.4s ease;
+  top: 0; left: 0; right: 0;
+  height: 112px;
+  z-index: 99;
+  pointer-events: none;
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(248, 249, 255, 0.50) 0%,
+    rgba(248, 249, 255, 0.20) 55%,
+    rgba(248, 249, 255, 0.00) 100%
+  );
 }
 
-/* ── Hero-page: dark green glass before scroll ───────────────── */
-body.has-hero > header:not(.is-scrolled) {
-  background: rgba(8, 26, 16, 0.22);
-  border-bottom-color: rgba(255, 255, 255, 0.06);
+/* ── Nav wrapper ─────────────────────────────────────────────── */
+.nav-wrapper {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 32px;
+  z-index: 100;
+}
+
+/* ── Nav pill ────────────────────────────────────────────────── */
+.nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1184px;
+  height: 60px;
+  padding: 16px 32px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.60);
+  transition:
+    background   var(--duration-medium) var(--spring-standard),
+    box-shadow   var(--duration-medium) var(--spring-standard),
+    border-color var(--duration-medium) var(--spring-standard);
+}
+
+.nav--scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05),
+              0 4px 12px rgba(0, 0, 0, 0.16);
+  border-color: rgba(255, 255, 255, 0.80);
+}
+
+/* ── Hero mode: transparent before scroll ────────────────────── */
+body.has-hero .nav:not(.nav--scrolled) {
+  background: rgba(8, 26, 16, 0.40);
+  border-color: rgba(255, 255, 255, 0.10);
   box-shadow: none;
 }
+body.has-hero .nav:not(.nav--scrolled) .nav__brand         { color: #95c4ad; }
+body.has-hero .nav:not(.nav--scrolled) .nav__link          { color: rgba(210, 236, 222, 0.80); }
+body.has-hero .nav:not(.nav--scrolled) .nav__link:hover    { color: rgba(255, 255, 255, 0.92); }
+body.has-hero .nav:not(.nav--scrolled) .nav__hamburger-line { background-color: #95c4ad; }
 
-body.has-hero header:not(.is-scrolled) nav a {
-  color: rgba(210, 236, 222, 0.68);
-  border-bottom-color: transparent;
-}
-
-body.has-hero header:not(.is-scrolled) nav a:first-child {
-  color: #95c4ad;
-}
-
-body.has-hero header:not(.is-scrolled) nav a:hover {
-  color: rgba(255, 255, 255, 0.92);
-}
-
-body.has-hero header:not(.is-scrolled) nav a[aria-current="page"],
-body.has-hero header:not(.is-scrolled) nav a.active {
-  color: #b5dbc8;
-  border-bottom-color: rgba(181, 219, 200, 0.55);
-}
-
-header nav {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: var(--space-sm) var(--space-lg);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs) var(--space-lg);
-  align-items: center;
-}
-
-header nav a {
+/* ── Brand ───────────────────────────────────────────────────── */
+.nav__brand {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: lowercase;
+  color: var(--color-accent);
   text-decoration: none;
-  font-family: var(--font-display);
-  font-size: 0.85rem;
+  white-space: nowrap;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: opacity var(--duration-short) var(--spring-standard);
+}
+.nav__brand:hover  { opacity: 0.75; }
+.nav__brand:active { opacity: 0.55; }
+.nav__brand:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+/* ── Link list ───────────────────────────────────────────────── */
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.nav__links li {
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Individual link ─────────────────────────────────────────── */
+.nav__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  font-size: 16px;
   font-weight: 500;
-  color: var(--color-text-secondary);
-  padding: 6px 0;
-  border-bottom: 2px solid transparent;
+  color: var(--color-on-surface-variant);
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1;
   transition:
-    color var(--transition-fast),
-    border-color var(--transition-fast);
+    color       var(--duration-short) var(--spring-standard),
+    font-weight var(--duration-short) var(--spring-standard);
+}
+.nav__link::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background-color: var(--color-accent);
+  border-radius: var(--radius-full);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform var(--duration-medium) var(--spring-expressive);
+}
+.nav__link--active        { font-weight: 600; color: var(--color-accent); }
+.nav__link--active::after { transform: scaleX(1); }
+.nav__link:not(.nav__link--active):hover        { color: var(--color-accent); }
+.nav__link:not(.nav__link--active):hover::after { transform: scaleX(1); }
+.nav__link:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 8px;
 }
 
-header nav a:first-child {
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--color-accent);
-  margin-right: auto;
-  border-bottom: none;
+/* ── Hamburger ───────────────────────────────────────────────── */
+.nav__hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background-color var(--duration-short) var(--spring-standard);
+}
+.nav__hamburger:hover { background-color: rgba(45, 106, 79, 0.08); }
+.nav__hamburger:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.nav__hamburger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: var(--color-accent);
+  border-radius: var(--radius-full);
+  transform-origin: center;
+  transition:
+    transform var(--duration-medium) var(--spring-expressive),
+    opacity   var(--duration-short)  var(--spring-standard);
+}
+.nav__hamburger[aria-expanded="true"] .nav__hamburger-line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav__hamburger[aria-expanded="true"] .nav__hamburger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav__hamburger[aria-expanded="true"] .nav__hamburger-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Drawer overlay ──────────────────────────────────────────── */
+.nav__drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 101;
+  background: rgba(0, 0, 0, 0);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    background  var(--duration-medium) var(--spring-standard),
+    visibility  0s linear var(--duration-medium);
+}
+.nav__drawer-overlay--open {
+  background: rgba(0, 0, 0, 0.28);
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    background  var(--duration-medium) var(--spring-standard),
+    visibility  0s linear 0s;
 }
 
-header nav a:hover {
-  color: var(--color-accent);
+/* ── Drawer panel ────────────────────────────────────────────── */
+.nav__drawer {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: min(320px, 85vw);
+  background: #ffffff;
+  border-left: 1px solid var(--color-outline-variant);
+  padding: 92px 24px 32px;
+  transform: translateX(100%);
+  overflow-y: auto;
+  transition: transform var(--duration-medium) var(--spring-expressive);
+}
+.nav__drawer-overlay--open .nav__drawer { transform: translateX(0); }
+
+.nav__drawer-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-header nav a[aria-current="page"],
-header nav a.active {
-  color: var(--color-accent);
-  border-bottom-color: var(--color-accent);
+/* ── Drawer items with staggered entrance ────────────────────── */
+.nav__drawer-item {
+  opacity: 0;
+  transform: translateX(12px);
+  transition:
+    opacity   var(--duration-medium) var(--spring-standard),
+    transform var(--duration-medium) var(--spring-expressive);
+}
+.nav__drawer-item:nth-child(1) { transition-delay:  80ms; }
+.nav__drawer-item:nth-child(2) { transition-delay: 120ms; }
+.nav__drawer-item:nth-child(3) { transition-delay: 160ms; }
+.nav__drawer-item:nth-child(4) { transition-delay: 200ms; }
+.nav__drawer-item:nth-child(5) { transition-delay: 240ms; }
+.nav__drawer-overlay--open .nav__drawer-item { opacity: 1; transform: translateX(0); }
+
+/* ── Drawer links ────────────────────────────────────────────── */
+.nav__drawer-link {
+  display: block;
+  padding: 12px 16px;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-on-surface-variant);
+  text-decoration: none;
+  border-radius: 12px;
+  transition:
+    background var(--duration-short) var(--spring-standard),
+    color      var(--duration-short) var(--spring-standard);
+}
+.nav__drawer-link:hover        { background: rgba(45, 106, 79, 0.08); color: var(--color-accent); }
+.nav__drawer-link--active      { font-weight: 600; color: var(--color-accent); background: rgba(45, 106, 79, 0.10); }
+.nav__drawer-link:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* ── Responsive breakpoints ──────────────────────────────────── */
+@media (max-width: 1023px) {
+  .nav__links     { display: none; }
+  .nav__hamburger { display: flex; }
+}
+@media (max-width: 767px) {
+  .nav-wrapper     { display: none; }
+  .nav-blur-shield { display: none; }
+  /* Show wrapper only for quiz progress bar on phone */
+  body:has(#quiz-progress-slot.quiz-progress-slot--active) .nav-wrapper     { display: block; }
+  body:has(#quiz-progress-slot.quiz-progress-slot--active) .nav             { display: none; }
+  body:has(#quiz-progress-slot.quiz-progress-slot--active) .nav-blur-shield { display: block; }
 }
 
 main {
   max-width: var(--max-width);
   margin: 0 auto;
-  /* Top padding compensates for the fixed `body > header`. Stage F
-     commit 1 (2026-05-23): use the live `--header-height` published by
-     the inline script in BaseLayout.astro so the page content sits
-     below the actual header height (which expands when the quiz
-     portals its feedback strip into the header). Falls back to the
-     static `--nav-height` token so non-quiz pages stay unaffected. */
-  padding: calc(var(--header-height, var(--nav-height)) + var(--space-md))
+  /* Top padding clears the fixed floating pill nav:
+     60px pill + 16px top offset + 16px breathing room = 92px.
+     --header-height is published live by BaseLayout's ResizeObserver
+     so the quiz progress bar expansion is automatically compensated. */
+  padding: calc(var(--header-height, 92px) + 0px)
            var(--space-lg)
            var(--space-3xl);
   min-height: 60vh;
@@ -1731,29 +1931,6 @@ button.pill[aria-pressed="true"] {
     font-size: 1.3rem;
   }
 
-  header nav {
-    gap: var(--space-xs) var(--space-md);
-    padding: var(--space-xs) var(--space-md);
-  }
-
-  header nav a {
-    font-size: 0.78rem;
-  }
-
-  header nav a:first-child {
-    width: 100%;
-    margin-right: 0;
-    padding-bottom: var(--space-xs);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
-    margin-bottom: 2px;
-    font-size: 0.82rem;
-  }
-
-  /* Tighten nav-height offset on mobile where nav wraps */
-  main {
-    padding-top: calc(var(--nav-height) + 4rem + var(--space-xl));
-  }
-
   body.has-hero main {
     padding-top: 0;
   }
@@ -1778,10 +1955,6 @@ button.pill[aria-pressed="true"] {
 }
 
 @media (max-width: 400px) {
-  header nav {
-    padding: var(--space-sm) var(--space-md);
-  }
-
   main {
     padding-left: var(--space-md);
     padding-right: var(--space-md);
@@ -1795,35 +1968,15 @@ button.pill[aria-pressed="true"] {
   display: none;
 }
 
-@media (max-width: 1023px) {
-  /* On mobile the bottom mobile-tab-bar covers all site navigation, so the
-     top header is redundant — hide it site-wide and reclaim the vertical space
-     the fixed header would otherwise reserve at the top of <main>. */
-  body > header {
-    display: none;
-  }
-
-  /* Exception: during a quiz, the QuizPlayer portals a progress bar into the
-     header via #quiz-progress-slot. Keep the header visible *only* when that
-     slot is active, but hide its nav so we just show the progress bar. */
-  body:has(#quiz-progress-slot.quiz-progress-slot--active) > header {
-    display: block;
-  }
-
-  body:has(#quiz-progress-slot.quiz-progress-slot--active) > header > nav {
-    display: none;
-  }
-
+@media (max-width: 767px) {
   main {
-    /* Drop the calc(var(--nav-height) + …) compensation since there's no
-       fixed header to clear; keep only the standard top breathing room. */
+    /* No top nav on phone — tab bar handles navigation. */
     padding-top: var(--space-xl);
   }
 
-  /* On quiz pages where the header is re-shown for the progress bar, keep
-     enough top padding to clear it. */
+  /* On quiz pages the progress bar shows in the nav-wrapper area */
   body:has(#quiz-progress-slot.quiz-progress-slot--active) main {
-    padding-top: calc(var(--nav-height, 56px) + var(--space-md));
+    padding-top: calc(var(--nav-height, 60px) + var(--space-md));
   }
 
   .mobile-tab-bar {
