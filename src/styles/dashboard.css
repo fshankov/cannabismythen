@@ -7,22 +7,23 @@
  */
 main:has(.carm-explorer) {
   max-width: 1440px;
-  /* 2026-05-28 designer brief — paint the warm cream as the outer
-     dashboard page tone so the white chart panel reads as elevated
-     through contrast. Literal hex (not `var(--color-bg)`) because the
-     dashboard's local override of `--color-bg` lives on `.carm-explorer`
-     and the `main` ancestor sees only the site-wide value. */
-  background: #faf9f5;
+  /* No background override (Fedor 2026-05-29): the dashboard page uses the
+     same site-wide #f4f4f0 + dotted texture as <body> and every other
+     section, so the white chart panel reads as elevated through contrast
+     and there's no tonal seam between the centered column and the gutters.
+     This reverts the 2026-05-28 "warm cream around the panel" brief in
+     favour of one background site-wide. `<main>` stays transparent so the
+     body-level `.dot-texture` shows through uniformly. */
 }
 
 .carm-explorer {
-  /* 2026-05-28 designer-brief refresh (Figma node 403:1976):
-     Dashboard area flips to a warm cream so the white chart panel
-     reads as elevated through contrast, not through heavy shadow.
-     The brief restores the LEFT/RIGHT inactive-tab tint difference
-     (#eeeee9 vs #f2f2f2) — applied via the .carm-explorer__tabs--*
-     scoped rules below, not this token. */
-  --color-bg: #faf9f5;                /* page surface around the panel — warm cream */
+  /* 2026-05-29 (Fedor): the dashboard page surface matches the site-wide
+     #f4f4f0 background — one consistent tone across the whole site, only
+     the chart panel stays white. (Reverts the 2026-05-28 cream-around-the-
+     panel brief, Figma node 403:1976.) The LEFT/RIGHT inactive-tab tint
+     difference (#eeeee9 vs #f2f2f2) still applies via the
+     .carm-explorer__tabs--* scoped rules below, not this token. */
+  --color-bg: #f4f4f0;                /* page surface around the panel — matches the site-wide background */
   --color-surface: #ffffff;           /* chart panel — explicitly white */
   --color-surface-alt: #f8fafc;       /* canvas inner — cool-tint card inside the white panel */
   --color-surface-raised: #f1f5f9;
@@ -682,7 +683,10 @@ main:has(.carm-explorer) {
      div carries its own padding (matches Spannweite layout). */
   padding: 0;
   background: var(--color-surface);
-  border-bottom: 2px solid var(--color-border);
+  /* 2026-05-29: 1px (was 2px) so the table header underline matches the
+     grid header (`.carm-spannweite__cell--header`, also 1px) across all
+     tabs — no thicker line under the Tabelle header. */
+  border-bottom: 1px solid var(--color-border);
   font-weight: 600;
   font-size: 0.75rem;
   /* Indicator columns are mixed-case (matching Spannweite header
@@ -4933,11 +4937,13 @@ body.carm-modal-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* 2026-05-29: shrunk to 30 px so the rotated teardrop's visual extent
-     (≈ side × √2 ≈ 42 px) fits inside the 44 px Exportieren chip — the
-     point no longer dips below the button's bottom edge. */
-  width: 30px;
-  height: 30px;
+  /* 2026-05-29 (v2): sized so the rotated teardrop's visual extent
+     (side × √2 = 31 × 1.414 ≈ 44 px) exactly fills the 44 px Exportieren
+     chip — rounded top at the button's top border, point at its bottom
+     border. The shadow is kept tight (no downward bleed) so no green
+     reads "below" the button. */
+  width: 31px;
+  height: 31px;
   padding: 0;
   border: none;
   /* Teardrop: three rounded corners + one pointed (bottom-left). */
@@ -4946,7 +4952,7 @@ body.carm-modal-open {
   background: var(--color-accent, #2d6a4f);
   color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(45, 106, 79, 0.25);
+  box-shadow: 0 1px 2px rgba(45, 106, 79, 0.22);
   flex-shrink: 0;
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -5226,21 +5232,33 @@ body.carm-modal-open {
    only (aria-hidden); the real clickable Rundgang badge lives in the
    toolbar. Sized to the surrounding text via em + nudged to the
    text baseline. */
+/* 2026-05-29 (v3): the inline ? drop is a miniature of the toolbar pin —
+   same teardrop shape (rounded top, point bottom) + counter-rotated ?
+   icon — but sized in `em` so it sits IN LINE with the surrounding text
+   and scales with the clamp font-size. `vertical-align` is tuned so the
+   pin's tip lands on the text baseline (the letters' lower border). */
 .carm-explorer .carm-explorer__rundgang-hint {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.5em;
-  height: 1.5em;
-  border-radius: 50%;
+  width: 0.72em;
+  height: 0.72em;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
   background: var(--color-accent, #2d6a4f);
   color: #ffffff;
-  vertical-align: -0.35em;
+  box-shadow: 0 1px 2px rgba(45, 106, 79, 0.22);
+  /* Tuned so the rotated tip lands on the text baseline (verified:
+     at -0.1em the tip sat 0.12em low, so +0.02em puts it on the line). */
+  vertical-align: 0.02em;
   flex-shrink: 0;
+  margin: 0 0.15em;
 }
 .carm-explorer .carm-explorer__rundgang-hint svg {
-  width: 0.95em;
-  height: 0.95em;
+  /* Counter-rotate so the ? reads upright inside the rotated pin. */
+  width: 0.5em;
+  height: 0.5em;
+  transform: rotate(45deg);
 }
 .carm-explorer .carm-explorer__page-header__sub a {
   color: var(--color-accent, #2d6a4f);
@@ -5279,9 +5297,9 @@ body.carm-modal-open {
     right: 6px;
   }
   .carm-rundgang-badge {
-    /* 26 px → rotated ≈ 37 px, fits the 36 px mobile chip. */
-    width: 26px;
-    height: 26px;
+    /* 25 px → rotated ≈ 35.4 px, fills the 36 px mobile chip. */
+    width: 25px;
+    height: 25px;
   }
 }
 @media (max-width: 640px) {
@@ -7591,6 +7609,16 @@ body.carm-modal-open {
   height: 8px;
   border-radius: 2px;
   display: inline-block;
+}
+
+/* 2026-05-29: category icon in the Quellen-Übersicht row label — tinted
+   with the category colour, matching the Quellen-Balken first-column
+   icons. Replaces the plain swatch square. */
+.carm-sources-spannweite__row-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Child rows: lower opacity + indented label so a reader sees the

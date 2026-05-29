@@ -71,6 +71,25 @@ const GROUP_FULL_LABELS: Record<string, string> = {
   parents: 'Eltern',
 };
 
+/** Short column-header labels — mirror SpannweiteView's `GROUP_SHORT_DE`
+ *  so the Gruppen column headers read identically in Mythen-Tabelle and
+ *  Mythen-Übersicht (Fedor 2026-05-29). Full forms stay in `fullLabel`
+ *  for the hide/sort tooltips + aria. */
+const GROUP_SHORT_DE: Record<string, string> = {
+  adults: 'Erw.',
+  minors: 'Minderj.',
+  consumers: 'Konsum.',
+  young_adults: 'Junge Erw.',
+  parents: 'Eltern',
+};
+const GROUP_SHORT_EN: Record<string, string> = {
+  adults: 'Adults',
+  minors: 'Minors',
+  consumers: 'Cons.',
+  young_adults: 'Y. Adults',
+  parents: 'Parents',
+};
+
 interface Props {
   myths: Myth[];
   metrics: Metric[];
@@ -239,15 +258,16 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
           defSampleSize: def?.sampleSize,
         };
       }
-      // 'indicator' mode — column is a Zielgruppe.
+      // 'indicator' mode — column is a Zielgruppe. Header shows the short
+      // form (Erw./Minderj./…); tooltips/aria use the full form.
       const gid = col.key as GroupId;
-      const label = t(`igs.group.${gid}` as TranslationKey, lang);
+      const label = lang === 'de' ? GROUP_SHORT_DE[gid] : GROUP_SHORT_EN[gid];
       const def = definitions?.groups?.[gid];
       return {
         key: col.key,
         Icon: col.Icon,
         label,
-        fullLabel: GROUP_FULL_LABELS[gid] ?? label,
+        fullLabel: GROUP_FULL_LABELS[gid] ?? t(`igs.group.${gid}` as TranslationKey, lang),
         defTitle: def?.label,
         defText: def?.definition,
         defScale: undefined as string | undefined,

@@ -800,7 +800,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           </div>
         </div>
 
-        {!isModernView && state.view !== 'sources' && state.view !== 'sources2' && state.view !== 'strips' && state.view !== 'spannweite' && (
+        {!isModernView && state.view !== 'sources' && state.view !== 'sources2' && state.view !== 'sources_table' && state.view !== 'strips' && state.view !== 'spannweite' && (
           <VerdictTags lang={'de'} verdictFilter={state.verdictFilter} onChange={(f: VerdictFilter) => update('verdictFilter', f)} />
         )}
 

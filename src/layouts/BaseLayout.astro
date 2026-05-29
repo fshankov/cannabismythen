@@ -7,6 +7,10 @@ interface Props {
   title: string;
   description?: string;
   heroMode?: boolean;
+  /** When true, paints the subtle dotted page texture (the
+   *  Fakten-Karten look) on <body> via the `.dot-texture` class.
+   *  Used on Fakten-Karten, Quiz, Daten-Explorer and Meine Interessen. */
+  bgTexture?: boolean;
   /** Stage 8: per-page OG image URL (absolute or root-relative). When
    *  set, emits og:image + twitter:card meta. og:title/description
    *  derive from `title`/`description`; og:url from the current request. */
@@ -17,8 +21,13 @@ const {
   title,
   description = "Wissenschaftliche Informationen zu Cannabis-Mythen",
   heroMode = false,
+  bgTexture = false,
   ogImage,
 } = Astro.props;
+
+const bodyClass = [heroMode ? "has-hero" : "", bgTexture ? "dot-texture" : ""]
+  .filter(Boolean)
+  .join(" ");
 
 // Stage 8 — resolve absolute OG URL once for og:image + og:url. `Astro.site`
 // is set in astro.config when the production origin is known. Falls back to
@@ -118,7 +127,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
     </script>
     FEEDBUCKET-DISABLED-END */}
   </head>
-  <body class={heroMode ? "has-hero" : ""}>
+  <body class={bodyClass}>
     <header>
       <nav>
         <a href="/">cannabismythen</a>
