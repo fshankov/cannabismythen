@@ -108,24 +108,23 @@
    ══════════════════════════════════════════════════════════════════ */
 
 .quiz-feedback-strip {
-  /* Stage F commit 3 (2026-05-23) — align horizontally with the
-     `.quiz-header-bar` above it (same max-width container + same
-     `--space-lg` horizontal padding) so brand row + nav + progress
-     bar + feedback strip share one cohesive baseline.
-     Stage G (2026-05-23) — stable min-height reserves the slot
-     even when the strip has no inner content yet (unanswered card).
-     Prevents the QuizCard below from jumping between unanswered
-     and answered states. */
+  /* Aligns with the `.quiz-header-bar` above (same max-width + `--space-lg`
+     padding). 2026-05-29 (polish round 2) — a FIXED height (identical for
+     the filled strip and the `--empty` placeholder) keeps the slot from
+     resizing between unanswered ↔ answered, so the page never jumps. Content
+     is a centered column (row 1 + population line). */
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
+  justify-content: center;
+  gap: 0.3rem;
   max-width: var(--max-width);
   margin: 0 auto;
   padding: var(--space-sm) var(--space-lg);
-  min-height: 4.25rem;
+  height: 4.5rem;
   font-size: 0.9rem;
-  line-height: 1.45;
+  line-height: 1.4;
+  text-align: center;
   color: var(--color-text);
 }
 
@@ -181,44 +180,50 @@
   color: var(--classification-falsch);
 }
 
-.quiz-feedback-strip__statement {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: inline-flex;
+/* Row 1: verdict + points chip + Deine Antwort + Wissenschaftlich,
+   centered and wrapping as one group. */
+.quiz-feedback-strip__line {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.25rem;
-  color: var(--color-text);
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
 }
 
-.quiz-feedback-strip__statement-text {
-  font-weight: 600;
+.quiz-feedback-strip__points {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
+.quiz-feedback-strip__points--exact { color: var(--quiz-fb-exact); }
+.quiz-feedback-strip__points--near  { color: var(--quiz-fb-near); }
+.quiz-feedback-strip__points--off   { color: var(--quiz-fb-off); }
+.quiz-feedback-strip__points--far   { color: var(--quiz-fb-far); }
 
-.quiz-feedback-strip__statement-sep {
+.quiz-feedback-strip__sep {
   color: var(--color-text-muted);
 }
 
+.quiz-feedback-strip__answer,
 .quiz-feedback-strip__scientific {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.3rem;
 }
 
+.quiz-feedback-strip__answer-label,
 .quiz-feedback-strip__scientific-label {
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
-.quiz-feedback-strip__joined {
-  flex-basis: 100%;
+/* Row 2: population mean line, centered under row 1. */
+.quiz-feedback-strip__population {
   margin: 0;
   font-size: 0.82rem;
   color: var(--color-text-muted);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* Stage F commit 1 (2026-05-23) — result-mode strip. Replaces the
@@ -248,14 +253,11 @@
    without crowding. */
 @media (max-width: 640px) {
   .quiz-feedback-strip {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-xs);
-    padding: var(--space-sm) var(--space-md) var(--space-md);
-  }
-  .quiz-feedback-strip__statement {
-    flex-basis: 100%;
-    font-size: 0.85rem;
+    /* Taller fixed height so the wrapped row 1 + population line still fit
+       identically whether answered or not (no jump on mobile either). */
+    height: 6rem;
+    gap: 0.25rem;
+    padding: var(--space-sm) var(--space-md);
   }
 }
 
@@ -574,6 +576,13 @@
   border: 3px solid transparent;
   border-radius: 12px;
   cursor: pointer;
+  /* 2026-05-29 — promote to its own compositor layer (will-change) +
+     center origin so the hover scale() is GPU-composited and the arrow
+     SVG stays crisp (no sub-pixel re-raster jump on hover). */
+  will-change: transform;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   transition:
     border-color 0.18s var(--ease-card),
     transform 0.12s var(--ease-card),
@@ -599,24 +608,27 @@
 .quiz-answer-btn.is-sel-wrong   { border-color: var(--quiz-btn-wrong); }
 .quiz-answer-btn.is-correct-answer { border: 3px dashed var(--quiz-btn-corr-ans); }
 
-/* Answer labels (grid row 2). */
+/* Answer labels (grid row 2). 2026-05-29 — enlarged from the Figma-exact
+   ~6px (too small to read under the ~74px buttons) to 8px (Fedor: "8
+   instead of 6"); the two-word labels go slightly smaller so they still
+   fit the column. */
 .quiz-answer-grid__label {
   font-family: var(--font-display);
-  font-size: 6.378px;
+  font-size: 8px;
   font-weight: 700;
   color: #6b7280;
   text-align: center;
-  line-height: 10.438px;
+  line-height: 12px;
 }
 
 .quiz-answer-grid > .quiz-answer-grid__label:nth-of-type(2),
 .quiz-answer-grid > .quiz-answer-grid__label:nth-of-type(3) {
-  font-size: 5.872px;
-  line-height: 9.609px;
+  font-size: 7.4px;
+  line-height: 11px;
 }
 
 .quiz-answer-grid > .quiz-answer-grid__label:nth-of-type(4) {
-  line-height: 9.609px;
+  line-height: 12px;
 }
 
 /* ── Post-answer feedback cluster — the card's emotional peak ─────────

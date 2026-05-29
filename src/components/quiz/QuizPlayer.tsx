@@ -924,7 +924,6 @@ function QuizPlayerInner({
             statementText={quizTextMap[currentMyth.id]?.statement}
             explanationText={quizTextMap[currentMyth.id]?.explanation}
             deckBehind={cardsRemainingBehind}
-            categoryLabel={t(theme.titleKey)}
             streakCount={streakCount}
           />
 

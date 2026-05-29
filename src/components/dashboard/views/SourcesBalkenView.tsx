@@ -270,10 +270,9 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
           )}
         </div>
 
-        <div
-          className="carm-spannweite__scroller"
-          style={{ maxHeight: '70vh', overflowY: 'auto' }}
-        >
+        {/* 2026-05-29: no inner-scroll cap — page scrolls (matches Balken
+            + Spannweite). overflow-x stays via the scroller CSS rule. */}
+        <div className="carm-spannweite__scroller">
           <div
             className="carm-spannweite__grid"
             style={{ gridTemplateColumns: gridTemplate }}

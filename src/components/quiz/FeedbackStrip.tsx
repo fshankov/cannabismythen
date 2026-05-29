@@ -30,7 +30,7 @@
  */
 
 import type { CardAnswer, QuizMyth, Schritte } from "./types";
-import { schritte } from "./quizData";
+import { schritte, pointsDisplay } from "./quizData";
 import { t } from "./i18n";
 
 /** Format a number the German way for body copy: integers stay bare
@@ -103,7 +103,6 @@ export default function FeedbackStrip({
   variant = "answer",
   myth,
   answer,
-  statementText,
   moduleTitle,
 }: FeedbackStripProps) {
   // ── Result-mode strip ───────────────────────────────────────────────
@@ -144,8 +143,7 @@ export default function FeedbackStrip({
   const verdictText = t(SCHRITTE_LABEL_KEY[s]);
   const verdictModifier = SCHRITTE_MODIFIER[s];
   const VerdictIcon = SCHRITTE_ICON[s];
-
-  const statement = statementText || t(myth.statementKey);
+  const pointsText = pointsDisplay(s);
 
   // 2026-05-29 (QuizCard redesign) — per-question population reveal on the
   // 0–1 per-card points scale (no percentages on cards). populationCorrectPct
@@ -155,28 +153,37 @@ export default function FeedbackStrip({
     points: formatGermanDecimal(myth.populationCorrectPct / 100),
   });
 
+  // 2026-05-29 (polish round 2) — two centered rows, fixed height (no jump).
+  // Row 1: verdict + points + Deine Antwort + Wissenschaftlich. Row 2: the
+  // Erwachsene population line. The myth statement (shown on the card) is no
+  // longer repeated here.
   return (
-    <div
-      className="quiz-feedback-strip"
-      role="status"
-      aria-live="polite"
-    >
-      <div
-        className={`quiz-feedback-strip__verdict quiz-feedback-strip__verdict--${verdictModifier}`}
-      >
-        <VerdictIcon
-          size={18}
-          strokeWidth={2}
-          aria-hidden="true"
-          className="quiz-feedback-strip__verdict-icon"
-        />
-        <span className="quiz-feedback-strip__verdict-text">{verdictText}</span>
-      </div>
-      <div className="quiz-feedback-strip__statement">
-        <span className="quiz-feedback-strip__statement-text">{statement}</span>
-        <span className="quiz-feedback-strip__statement-sep" aria-hidden="true">
-          {" · "}
+    <div className="quiz-feedback-strip" role="status" aria-live="polite">
+      <div className="quiz-feedback-strip__line">
+        <span
+          className={`quiz-feedback-strip__verdict quiz-feedback-strip__verdict--${verdictModifier}`}
+        >
+          <VerdictIcon
+            size={18}
+            strokeWidth={2}
+            aria-hidden="true"
+            className="quiz-feedback-strip__verdict-icon"
+          />
+          <span className="quiz-feedback-strip__verdict-text">{verdictText}</span>
         </span>
+        <span
+          className={`quiz-feedback-strip__points quiz-feedback-strip__points--${verdictModifier}`}
+        >
+          {pointsText}
+        </span>
+        <span className="quiz-feedback-strip__sep" aria-hidden="true">·</span>
+        <span className="quiz-feedback-strip__answer">
+          <span className="quiz-feedback-strip__answer-label">
+            {t("ui.yourAnswerLabel")}:
+          </span>{" "}
+          <VerdictPill verdict={answer.chosenClassification} size="sm" />
+        </span>
+        <span className="quiz-feedback-strip__sep" aria-hidden="true">·</span>
         <span className="quiz-feedback-strip__scientific">
           <span className="quiz-feedback-strip__scientific-label">
             {t("classification.scientific")}:
@@ -184,7 +191,7 @@ export default function FeedbackStrip({
           <VerdictPill verdict={myth.correctClassification} size="sm" />
         </span>
       </div>
-      <p className="quiz-feedback-strip__joined">{populationSentence}</p>
+      <p className="quiz-feedback-strip__population">{populationSentence}</p>
     </div>
   );
 }

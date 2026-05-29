@@ -87,7 +87,18 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         the login gate, API routes, or the Keystatic CMS. Feedbucket's
         documented init doesn't expose a runtime hide/show hook, so
         conditional injection is the equivalent of the previous BugHerd
-        post-load hide pattern. */}
+        post-load hide pattern.
+
+        ⚠ DISABLED again 2026-05-29 — Fedor turned off all feedback widgets
+        while no trial is active. To re-enable Feedbucket: remove the
+        FEEDBUCKET-DISABLED-START and FEEDBUCKET-DISABLED-END marker lines
+        around the script block below, AND flip the footer pill back on
+        (search for FEEDBUCKET-DISABLED-START in this file — there are three
+        marker pairs total: head script, footer pill, trigger script). The
+        vendor key (lpuJyzKJ9oT0o2uKlRSk) and Query Trigger secret
+        (cm-feedback-2026) stay valid as long as the Feedbucket project
+        isn't deleted. */}
+    {/* FEEDBUCKET-DISABLED-START
     <script is:inline>
       (function (k) {
         var path = window.location.pathname;
@@ -105,6 +116,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         document.head.appendChild(s);
       })("lpuJyzKJ9oT0o2uKlRSk");
     </script>
+    FEEDBUCKET-DISABLED-END */}
   </head>
   <body class={heroMode ? "has-hero" : ""}>
     <header>
@@ -122,6 +134,14 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       <slot />
     </main>
     <footer id="main-content">
+      <p>&copy; {new Date().getFullYear()} CaRM-Projekt</p>
+      {/* ⚠ FEEDBUCKET DISABLED 2026-05-29 — all feedback widgets off. To
+          re-enable: delete the simple copyright line above, then uncomment
+          the pill version below by removing the FEEDBUCKET-DISABLED-START
+          and FEEDBUCKET-DISABLED-END marker lines. Also re-enable the head
+          script and trigger script (search for FEEDBUCKET-DISABLED-START in
+          this file — three marker pairs total, all need to flip together). */}
+      {/* FEEDBUCKET-DISABLED-START
       <p>
         &copy; {new Date().getFullYear()} CaRM-Projekt
         <span class="footer-sep" aria-hidden="true">·</span>
@@ -132,9 +152,10 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
           rel="nofollow"
         >Feedback geben</a>
       </p>
+      FEEDBUCKET-DISABLED-END */}
     </footer>
 
-    {/* Reviewer-only feedback trigger.
+    {/* Reviewer-only feedback trigger — DISABLED 2026-05-29.
         Clicking the footer link reloads the current page with
         ?feedbucketKey=<secret> appended; Feedbucket's Query Trigger
         (configured in the project's Widget settings) then activates the
@@ -145,6 +166,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         (e.g. /quiz/?theme=… stays intact, just gains feedbucketKey). The
         secret value here MUST match what's configured in the Feedbucket
         project dashboard. If you rotate the secret, update both places. */}
+    {/* FEEDBUCKET-DISABLED-START
     <script is:inline>
       (function () {
         var a = document.getElementById('footer-feedback-trigger');
@@ -159,6 +181,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         }
       })();
     </script>
+    FEEDBUCKET-DISABLED-END */}
 
     {/* Scroll-aware nav: adds .is-scrolled once user leaves the hero zone */}
     <script is:inline>

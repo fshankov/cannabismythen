@@ -4933,11 +4933,11 @@ body.carm-modal-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* 2026-05-28 PM: shrunk from 44 → 36 px so the rotated teardrop's
-     visual bounding sits inside the chip-row band instead of
-     protruding above it. */
-  width: 36px;
-  height: 36px;
+  /* 2026-05-29: shrunk to 30 px so the rotated teardrop's visual extent
+     (≈ side × √2 ≈ 42 px) fits inside the 44 px Exportieren chip — the
+     point no longer dips below the button's bottom edge. */
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: none;
   /* Teardrop: three rounded corners + one pointed (bottom-left). */
@@ -5214,9 +5214,33 @@ body.carm-modal-open {
   font-size: clamp(1rem, 1.8vw, 1.5rem);
   font-weight: 400;
   color: #404943;
-  max-width: 720px;
+  /* 2026-05-29: full panel width (was max-width 720px) so the subtitle
+     reads as a wide banner under the H1 rather than a narrow column. */
+  max-width: none;
   line-height: 1.4;
   margin: 0;
+}
+
+/* Inline ? hint that sits right after the word "Rundgang" in the intro
+   so readers connect the word to the green toolbar trigger. Decorative
+   only (aria-hidden); the real clickable Rundgang badge lives in the
+   toolbar. Sized to the surrounding text via em + nudged to the
+   text baseline. */
+.carm-explorer .carm-explorer__rundgang-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 50%;
+  background: var(--color-accent, #2d6a4f);
+  color: #ffffff;
+  vertical-align: -0.35em;
+  flex-shrink: 0;
+}
+.carm-explorer .carm-explorer__rundgang-hint svg {
+  width: 0.95em;
+  height: 0.95em;
 }
 .carm-explorer .carm-explorer__page-header__sub a {
   color: var(--color-accent, #2d6a4f);
@@ -5255,8 +5279,9 @@ body.carm-modal-open {
     right: 6px;
   }
   .carm-rundgang-badge {
-    width: 32px;
-    height: 32px;
+    /* 26 px → rotated ≈ 37 px, fits the 36 px mobile chip. */
+    width: 26px;
+    height: 26px;
   }
 }
 @media (max-width: 640px) {

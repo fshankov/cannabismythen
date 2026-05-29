@@ -493,8 +493,11 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             in Deutschland erhoben wurden. Die Sektion{' '}
             <a href="/projekt/">„Über das Projekt"</a> erklärt ausführlich, wie
             die Daten zustande kamen. Jeder Tab im Dashboard enthält einen
-            vierstufigen Rundgang — tippe auf den grünen Button mit Fragezeichen,
-            wenn du beim Navigieren Hilfe brauchst.
+            vierstufigen Rundgang{' '}
+            <span className="carm-explorer__rundgang-hint" aria-hidden="true">
+              <HelpCircle size={16} strokeWidth={2} />
+            </span>{' '}
+            — tippe darauf, wenn du beim Navigieren Hilfe brauchst.
           </p>
         </header>
 

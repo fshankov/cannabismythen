@@ -236,13 +236,16 @@ const translations = {
   'misc.noResults': { de: 'Keine Ergebnisse gefunden', en: 'No results found' },
 
   // Balken view + new dashboard chrome (refactor)
-  'view.balken': { de: 'Balken', en: 'Bars' },
+  // 2026-05-29 tab rename — Mythen-…/Quellen-… prefixes disambiguate the
+  // myth-side vs source-side tab groups; "Übersicht" names the all-values
+  // grid (was "Spannweite"). Labels only; view IDs + URL slugs unchanged.
+  'view.balken': { de: 'Mythen-Balken', en: 'Myths · Bars' },
   'view.streifen': { de: 'Punktwolke', en: 'Point Cloud' },
-  'view.spannweite': { de: 'Spannweite', en: 'Range' },
-  'view.tabelle': { de: 'Tabelle', en: 'Table' },
-  'view.quellen': { de: 'Informationsquellen', en: 'Information Sources' },
-  'view.quellen2': { de: 'Informationsquellen 2', en: 'Information Sources 2' },
-  'view.quellen-tabelle': { de: 'Quellen-Tabelle', en: 'Sources Table' },
+  'view.spannweite': { de: 'Mythen-Übersicht', en: 'Myths · Overview' },
+  'view.tabelle': { de: 'Mythen-Tabelle', en: 'Myths · Table' },
+  'view.quellen': { de: 'Quellen-Balken', en: 'Sources · Bars' },
+  'view.quellen2': { de: 'Quellen-Übersicht', en: 'Sources · Overview' },
+  'view.quellen-tabelle': { de: 'Quellen-Tabelle', en: 'Sources · Table' },
   'igs.indicator.legend': { de: 'Indikatoren', en: 'Indicators' },
   'igs.group.legend': { de: 'Gruppe', en: 'Group' },
   'igs.group.adults': { de: 'Volljährige (18–70)', en: 'Adults (18–70)' },
