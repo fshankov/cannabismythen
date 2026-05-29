@@ -60,10 +60,12 @@ const translations: Record<Lang, Record<string, string>> = {
       "Alkohol-Vergleich, Harmlosigkeit, Heranwachsende, Dosierung und Mischkonsum.",
     // Stage 6 — Schnellcheck (dynamic 7-myth deck across all themes)
     "quiz.schnellcheck.title": "Schnellcheck",
+    // 2026-05-28 (CAR-5/CAR-6) — "Aussagen" → "Mythen" sweep for UI
+    // labels. The site's preferred user-facing unit is "Mythos".
     "quiz.schnellcheck.subtitle":
-      "Sieben zufällige Aussagen aus allen Themen — jeder Besuch ist neu.",
+      "Sieben zufällige Mythen aus allen Themen — jeder Besuch ist neu.",
     "quiz.schnellcheck.description":
-      "Querschnitt durch alle Themen. Jeder Besuch zieht neue Aussagen.",
+      "Querschnitt durch alle Themen. Jeder Besuch zieht neue Mythen.",
 
     // ── Myth statements ───────────────────────────────────────────────
     "myth.m01.statement": "Cannabis ist ein Allheilmittel.",
@@ -227,7 +229,11 @@ const translations: Record<Lang, Record<string, string>> = {
     // Stage A (2026-05-16): counter wording matches Pew's "Question X
     // of Y" and the on-card `ui.questionLabel` so the vocabulary is
     // consistent header ↔ card.
-    "ui.progress": "Aussage {answered} von {total}",
+    // 2026-05-28 (CAR-6, Harald review) — "Aussage N" → "Mythos N" and
+    // the counter now reflects the currently-viewing index, not the
+    // answered count. ProgressBar receives `current` (1-based) from
+    // QuizPlayer = safeIndex + 1.
+    "ui.progress": "Mythos {current} von {total}",
     "ui.resultTitle": "Dein Ergebnis",
     "ui.shareButton": "Ergebnis teilen",
     "ui.copiedToClipboard": "Link kopiert! \u2713",
@@ -239,6 +245,10 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.incorrect": "Leider falsch",
     "ui.mythVerdict": "Der Mythos \u201e{statement}\u201c ist {verdict}.",
     "ui.verdictScale.label": "Antwort w\u00e4hlen",
+    // 2026-05-29 (QuizCard redesign) \u2014 small eyebrow label above the
+    // 4-button answer grid on the card front (Du form; Figma "SELECT
+    // YOUR ANSWER"). Fades out once the user answers. AI draft.
+    "ui.chooseAnswer": "W\u00e4hle deine Antwort",
 
     // \u2500\u2500 Deck overview (Phase C \u00a73.11) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     "ui.close": "Schlie\u00dfen",
@@ -259,20 +269,25 @@ const translations: Record<Lang, Record<string, string>> = {
     // \u2500\u2500 Schritte band labels (Stage 1 \u2014 CaRM Schritte model) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     // BugHerd #25 (Session 3b, 2026-05-07): per-question Schritte band
     // labels updated per ISD ruling — reviewer's set + 'Völlig daneben'
-    // for the 3-Schritte case (English glosses: completely correct /
-    // close to it / unfortunately incorrect / completely off).
-    // Stage E commit 5 (2026-05-23) — revised Schritte verdict wording.
+    // for the 3-Schritte case.
+    // Stage E commit 5 (2026-05-23) — revised Schritte verdict wording
+    // (Richtig! / Fast richtig. / Knapp daneben. / Da liegst du daneben.)
+    // 2026-05-28 (CAR-8, Harald review) — gamified relabel of the
+    // per-Schritte verdict feedback. Applied to every quiz module
+    // (themed + Schnellcheck). All cards use the 4-step Likert
+    // classification (no separate Schätzfrage card type), so the new
+    // estimation-flavoured wording fits the same per-Schritte mapping.
     // Renders in the per-question FeedbackStrip portaled below the
     // progress bar. AI draft — Du form — awaiting ISD review.
     // English glosses:
-    //   exact → "Right!"
-    //   near  → "Almost right."
-    //   off   → "Close, but off."
-    //   far   → "You're off the mark there."
-    "schritte.exact": "Richtig!",
-    "schritte.near": "Fast richtig.",
-    "schritte.off": "Knapp daneben.",
-    "schritte.far": "Da liegst du daneben.",
+    //   exact → "Bullseye!"
+    //   near  → "Right next to it!"
+    //   off   → "Slight miss!"
+    //   far   → "Pretty tricky!"
+    "schritte.exact": "Volltreffer!",
+    "schritte.near": "Ganz nah dran!",
+    "schritte.off": "Leicht verschätzt!",
+    "schritte.far": "Ganz schön knifflig!",
     //\u2500\u2500 Micro-copy table (Phase D \u00a73.7) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     // \u2500\u2500 Result screen \u2014 N\u00e4chstes Modul (Phase C \u00a73.14) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     "ui.nextModule.cta": "N\u00e4chstes Modul: {title} \u2192",
@@ -290,9 +305,9 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.correctAnswerLabel": "Richtige Antwort",
     "ui.swipeHint": "oder nach links wischen",
     "ui.startQuiz": "Los geht's",
-    "ui.quizMeta": "{n} Aussagen · ca. {min} Min.",
+    "ui.quizMeta": "{n} Mythen · ca. {min} Min.",
     "ui.moreLink": "mehr \u2192",
-    "ui.questionLabel": "Aussage {n} von {total}",
+    "ui.questionLabel": "Mythos {n} von {total}",
     "ui.siteName": "Cannabis: Mythen & Evidenz",
     "ui.siteUrl": "cannabismythen.de",
     "ui.questionsCount": "{n} Fragen",
@@ -307,7 +322,10 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.retrospectiveTitle": "Deine Antworten im \u00dcberblick",
     "ui.exploreData": "Daten-Explorer \u00f6ffnen",
     "ui.shareResultHeading": "Ergebnis teilen",
-    "ui.openMythDetail": "Mehr auf der Fakten-Karte \u2192",
+    // 2026-05-29 (QuizCard redesign) \u2014 back-face button now carries a
+    // Lucide Search icon, so the label is the short Figma form "Details"
+    // (was "Mehr auf der Fakten-Karte \u2192"). Opens the FactsheetPanel popup.
+    "ui.openMythDetail": "Details",
     // Stage B (2026-05-16) 4-column comparison table keys removed in
     // Stage D PR3 (2026-05-22). Replaced by the unified
     // `quiz-result__list` pattern. Restore from git history if needed
@@ -317,19 +335,21 @@ const translations: Record<Lang, Record<string, string>> = {
     // tonal headline + score lines.
 
     // ── Stage D PR2 (2026-05-22) — Achievement card + per-row sentence.
+    //    Stage F commit 3 (2026-05-23) — deltaLine.* keys removed.
+    //    2026-05-28 (CAR-9/CAR-10) — scoreLine.* + per-question reveal
+    //    rewritten for honesty: user side now uses userExpectedPunkte
+    //    (Σ pointsForSchritte, 0–N scale, one decimal) instead of the
+    //    binary breakdown.exact count; population side uses the same
+    //    0–N Punkte scale derived from populationCorrectPct. The
+    //    misleading joinedExact / joinedMissed keys were dropped in
+    //    favour of `result.row.populationMean` which states the
+    //    per-myth mean Richtigkeit honestly.
     //    AI draft — Du form — awaiting ISD review.
     //    English glosses for ISD:
     //      profi      → "You really know the cannabis myths."
     //      guterweg   → "For most statements you're closer than most are."
     //      gehtnoch   → "There's room to grow — that's what the Fakten-Karten are for."
     //      erwischt   → "Cannabis is full of myths. The Fakten-Karten sort them out."
-    //      scoreLine.user        → "You: {count} of {total} exactly right"
-    //      scoreLine.population  → "Adults (18–70) avg: {count} of {total}"
-    //      deltaLine.above       → "You're {count} statement(s) above the average."
-    //      deltaLine.below       → "You're {count} statement(s) below the average."
-    //      deltaLine.onPar       → "You're right on the average."
-    //      row.joinedExact       → "You're among the {pct} % of adults (18–70) who placed this statement exactly right."
-    //      row.joinedMissed      → "You're among the {pct} % of adults (18–70) who did NOT place this statement exactly right."
     // Stage E commit 3 (2026-05-23) — revised tonal headlines.
     // Du-form, AI draft, awaiting ISD review. The Keystatic
     // verdict.title in each module .mdoc is an editorial-suggestion
@@ -350,23 +370,37 @@ const translations: Record<Lang, Record<string, string>> = {
     // EN: "Cannabis is more complex than it sounds. The Fakten-Karten show what research says."
     "result.achievementHeadline.erwischt":
       "Cannabis ist komplizierter, als es klingt. Die Fakten-Karten zeigen, was die Forschung dazu sagt.",
-    "result.scoreLine.user": "Du: {count} von {total} genau richtig",
-    // Stage F commit 3 (2026-05-23) — revised population line.
-    // Was: "Erwachsene (18–70) Ø: {count} von {total}" (mathematical).
-    // Now: references the CaRM project name explicitly so the source
-    // is visible to anyone reading the result. AI draft — Du form
-    // applies vacuously (no second-person pronoun). ISD review pending.
-    // English gloss: "Adults (18–70) in Germany — per the CaRM study:
-    // {count} out of {total} placed exactly right."
-    "result.scoreLine.population":
-      "Erwachsene (18–70) in Deutschland — laut der CaRM-Studie: {count} von {total} genau richtig",
-    // Stage F commit 3 (2026-05-23) — deltaLine keys removed alongside
-    // the delta-sentence render. Score line + population line now
-    // carry the comparison without an explicit "X above/below" line.
-    "result.row.joinedExact":
-      "Du gehörst zu {pct} % der Erwachsenen (18–70), die diese Aussage genau richtig eingeordnet haben.",
-    "result.row.joinedMissed":
-      "Du gehörst zu {pct} % der Erwachsenen (18–70), die diese Aussage nicht genau richtig eingeordnet haben.",
+    // 2026-05-28 (CAR-9, Harald review) — user score line rewritten
+    // from binary "Du: K von N genau richtig" (which only counted
+    // Schritte=0 answers) to a Punkt-based reading that uses the full
+    // partial-credit ladder. 2026-05-29 (QuizCard redesign) — dropped
+    // "möglichen" for a tighter line; the percentage comparison now lives
+    // in the delta sentence below (no percentages elsewhere on cards).
+    // EN gloss: "You scored {X,X} out of {total} points."
+    "result.scoreLine.user":
+      "Du hast {points} von {total} Punkten erreicht.",
+    // 2026-05-29 (QuizCard redesign) — the population comparison is now a
+    // percentage-point delta vs the Erwachsene (18–70) average (computed
+    // from moduleScore − populationModuleScore). Sign-aware. Percentages
+    // appear ONLY here on the result page, never inside a card.
+    // EN glosses:
+    //   above → "That's {pp} percentage points above the average of adults
+    //            (18–70) in the CaRM study."
+    //   below → "…below the average…"
+    //   onpar → "That's exactly the average of adults (18–70) in the CaRM study."
+    "result.scoreLine.delta.above":
+      "Das sind {pp} Prozentpunkte über dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie.",
+    "result.scoreLine.delta.below":
+      "Das sind {pp} Prozentpunkte unter dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie.",
+    "result.scoreLine.delta.onpar":
+      "Das entspricht genau dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie.",
+    // 2026-05-29 (QuizCard redesign) — per-question population reveal on
+    // the 0–1 per-card points scale (no percentages on cards). {points} =
+    // populationCorrectPct / 100, one decimal. Apples-to-apples with the
+    // user's on-card points badge (+1 / +0,66 / +0,33 / 0).
+    // EN gloss: "Adults (18–70) score on average {0,8} out of 1 point here."
+    "result.row.populationMean":
+      "Erwachsene (18–70) erreichen hier im Durchschnitt {points} von 1 Punkt.",
 
     // ── Stage D PR3 (2026-05-22) — "Lohnt sich besonders" flag chip on
     //    the top weakest review rows. Removed from rendering in Stage E

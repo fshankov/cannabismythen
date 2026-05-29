@@ -30,8 +30,9 @@
 import { useCallback, useState } from "react";
 import type { QuizResult, ScoreBand } from "./types";
 import {
-  populationExpectedExactCount,
+  populationModuleScore,
   scoreBand,
+  userExpectedPunkte,
 } from "./quizData";
 import { t } from "./i18n";
 import { trackResultCardShared } from "./matomo";
@@ -66,12 +67,16 @@ export default function ShareCard({
   const [copied, setCopied] = useState(false);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
 
-  // Population reference — single decimal, Poisson-binomial mean.
-  // Stage F commit 3 (2026-05-23) dropped the sign-aware delta sentence
-  // ("Du liegst {Δ} Aussagen über/unter dem Schnitt") per Fedor's call
-  // that the comparison framing read as a judgement. Score line +
-  // population line carry the comparison on their own.
-  const populationExpectedCount = populationExpectedExactCount(deckMyths);
+  // 2026-05-29 (QuizCard redesign) — result page shows the user's points
+  // total + a percentage-point delta vs the Erwachsene (18–70) average.
+  // Both sides are mean per-question Richtigkeit on the same 0–100 scale
+  // (moduleScore vs populationModuleScore), so the gap is honest.
+  // userPunkte stays on the 0–N points scale for the headline number.
+  const userPunkte = userExpectedPunkte(deckMyths, result.answers);
+  const populationScore = populationModuleScore(deckMyths);
+  const ppDelta = result.moduleScore - populationScore;
+  const deltaKey =
+    ppDelta > 0 ? "above" : ppDelta < 0 ? "below" : "onpar";
 
   // Share text composition — code-side (Keystatic shareCopy.{band} is
   // a per-module editorial surface but no consumer reads it yet).
@@ -156,16 +161,17 @@ export default function ShareCard({
 
         <p className="share-card__score">
           {t("result.scoreLine.user", {
-            count: result.breakdown.exact,
+            points: formatGermanDecimal(userPunkte),
             total: result.totalQuestions,
           })}
         </p>
 
         <p className="share-card__population">
-          {t("result.scoreLine.population", {
-            count: formatGermanDecimal(populationExpectedCount),
-            total: result.totalQuestions,
-          })}
+          {deltaKey === "onpar"
+            ? t("result.scoreLine.delta.onpar")
+            : t(`result.scoreLine.delta.${deltaKey}`, {
+                pp: Math.abs(ppDelta),
+              })}
         </p>
 
         <div className="share-card__branding">{t("ui.siteUrl")}</div>

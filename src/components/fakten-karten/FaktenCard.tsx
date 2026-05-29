@@ -26,6 +26,14 @@ import type { CorrectnessClass } from "../../lib/dashboard/types";
 export interface FaktenCardMyth {
   mythNumber: number;
   title: string;
+  /**
+   * Ultra-short label from `public/data/carm-data.json` (`text_short_de`).
+   * 1–3 words per myth (e.g. "Allheilmittel", "Harmlos"). Rendered as the
+   * back-face headline so it differs from the long front-face statement.
+   * Optional so consumers that don't have access to carm-data (e.g. the
+   * quiz result screen) can fall back to `title`.
+   */
+  shortLabel?: string;
   classification: string;
   /**
    * Conversational label from Keystatic (e.g. "Das stimmt nicht.").
@@ -120,7 +128,9 @@ export default function FaktenCard({
             style={backFaceStyle}
           >
             <div className="fakten-card__face-body">
-              <p className="fakten-card__back-title">{myth.title}</p>
+              <p className="fakten-card__back-title">
+                {myth.shortLabel || myth.title}
+              </p>
               <span className="fakten-card__back-badge">
                 <VerdictPill verdict={verdict} size="sm" />
               </span>

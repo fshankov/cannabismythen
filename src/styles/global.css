@@ -145,6 +145,46 @@
   --card-radius: var(--radius-lg);
   --card-shadow: var(--shadow-md);
   --card-border-color: var(--color-border);
+
+  /* ── QUIZ CARD TOKENS (Figma 427-2143, 2026-05-29) ─────────────
+     Pixel-exact values from the verified quiz-card-preview.html /
+     QUIZ_CARD_LLM_GUIDE.md. The codegen guide referenced a
+     `variables.css`; this repo keeps tokens here in global.css. */
+  --quiz-card-radius: 37.5px;
+  --quiz-card-bg: #f5faff;
+  --quiz-card-shadow: 0px 19.531px 39.063px -9.375px rgba(0, 0, 0, 0.25);
+
+  /* Card border — Play state post-answer only (backside has none) */
+  --quiz-border-correct: #09ae64;
+  --quiz-border-almost: #ffe8a8;
+  --quiz-border-wrong: #c86a7c;
+
+  /* Answer button fills */
+  --quiz-ans-falsch: #ffe9ed;
+  --quiz-ans-eher-falsch: #ffefbc;
+  --quiz-ans-eher-richtig: #e1ebe2;
+  --quiz-ans-richtig: #d1e8d1;
+
+  /* Answer button post-answer borders */
+  --quiz-btn-correct: #09ae64; /* selected, exact match */
+  --quiz-btn-near: #fbd035; /* selected, 1 off */
+  --quiz-btn-wrong: #c86a7c; /* selected, 2–3 off */
+  --quiz-btn-corr-ans: #047857; /* the correct answer button, dashed */
+
+  /* Backside header — scientific verdict colour (NOT user correctness) */
+  --quiz-back-richtig: #3d7360;
+  --quiz-back-eher-richtig: #92b59a;
+  --quiz-back-eher-falsch: #fbaf35;
+  --quiz-back-falsch: #c86a7c;
+
+  /* Feedback overlay + points badge — per Schritte tier */
+  --quiz-fb-exact: #09ae64;
+  --quiz-fb-near: #2d6a4f;
+  --quiz-fb-off: #d97706;
+  --quiz-fb-far: #c86a7c;
+
+  /* Shared CTA fill (matches Figma #2D6A4F — reuse the accent token) */
+  --quiz-cta-bg: var(--color-accent);
 }
 
 

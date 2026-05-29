@@ -2,15 +2,19 @@
  * ProgressBar — quiet single-line header bar.
  *
  * Stage A (2026-05-16) — Pew minimalism: the live score pill is gone.
- * The bar carries title + thin progress fill + an "Aussage X von Y"
- * counter. Mounted via portal into the site header.
+ * The bar carries title + thin progress fill + a "Mythos N von Y"
+ * counter (CAR-6 2026-05-28; N reflects the currently-viewing index,
+ * not the answered count). Mounted via portal into the site header.
  */
 
 import { t } from "./i18n";
 
 interface ProgressBarProps {
   quizTitle: string;
-  /** Number of questions answered so far. */
+  /** 1-based index of the currently-visible question. Used for the
+   *  "Mythos N von 7" label (CAR-6, 2026-05-28). */
+  current: number;
+  /** Number of questions answered so far. Drives the progress-fill width. */
   answered: number;
   /** Total questions in this module. */
   total: number;
@@ -18,6 +22,7 @@ interface ProgressBarProps {
 
 export default function ProgressBar({
   quizTitle,
+  current,
   answered,
   total,
 }: ProgressBarProps) {
@@ -46,7 +51,7 @@ export default function ProgressBar({
       </div>
 
       <span className="quiz-progress__label" suppressHydrationWarning>
-        {t("ui.progress", { answered, total })}
+        {t("ui.progress", { current, total })}
       </span>
     </div>
   );

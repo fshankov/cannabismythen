@@ -199,20 +199,32 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
   /** Single value for (myth, column) using the picked off-axis dim.
    *  Routes through `getIndicatorValueChecked` so methodologically-
    *  invalid combos (Bev. Relevanz × {consumers, young_adults, parents})
-   *  return null regardless of any stray non-null value in the JSON. */
+   *  return null regardless of any stray non-null value in the JSON.
+   *
+   *  2026-05-28: argument order swapped in both branches — the previous
+   *  code looked up `metric[group_as_indicator]` and similar nonsense,
+   *  so every cell returned NaN/null and the chart showed "k. A." or
+   *  empty value-circles in both modes. Per the v5 comment above, the
+   *  toggle label names the PICKER dimension; the OTHER dimension goes
+   *  on the columns. cellValue must look up by column dim, not picker
+   *  dim. */
   const cellValue = useCallback(
     (mythId: number, colId: string): number | null => {
       if (mode === 'indicator') {
+        // mode='indicator' → cols are GroupId, picker holds the Indicator.
+        // Cell = pickedIndicator value for (myth × column-group).
         return getIndicatorValueChecked(
-          getMythMetric(metrics, mythId, pickedGroup),
-          colId as Indicator,
-          pickedGroup,
+          getMythMetric(metrics, mythId, colId as GroupId),
+          pickedIndicator,
+          colId as GroupId,
         );
       }
+      // mode='group' → cols are Indicator, picker holds the GroupId.
+      // Cell = column-indicator value for (myth × pickedGroup).
       return getIndicatorValueChecked(
-        getMythMetric(metrics, mythId, colId as GroupId),
-        pickedIndicator,
-        colId as GroupId,
+        getMythMetric(metrics, mythId, pickedGroup),
+        colId as Indicator,
+        pickedGroup,
       );
     },
     [mode, metrics, pickedGroup, pickedIndicator],

@@ -51,6 +51,7 @@ const CATEGORY_GROUPS = [
 
 interface MythEntry extends FaktenCardMyth {
   categoryGroup: string;
+  shortLabel: string;
 }
 
 interface FaktenKartenExplorerProps {

@@ -7,13 +7,17 @@
  * the current myth. Carries the feedback that used to live on the
  * QuizCard back face:
  *
- *   • Schritte verdict line (improved wording — see i18n.ts
- *     `schritte.{exact,near,off,far}`).
+ *   • Schritte verdict line (gamified relabel, CAR-8 2026-05-28 —
+ *     Volltreffer! / Ganz nah dran! / Leicht verschätzt! / Ganz
+ *     schön knifflig! — see i18n.ts `schritte.{exact,near,off,far}`).
  *   • Myth statement + `Wissenschaftlich: <pill>` (small inline pair).
- *   • Population sentence: "Du gehörst zu N % der Erwachsenen (18–70),
- *     die diese Aussage [genau richtig / nicht genau richtig]
- *     eingeordnet haben." (reuses `result.row.joinedExact` /
- *     `result.row.joinedMissed` keys from Stage D PR2).
+ *   • Population sentence (CAR-10 rewrite, 2026-05-28):
+ *     "Erwachsene (18–70) erreichen hier im Durchschnitt {X} von 100
+ *     Punkten." (i18n key `result.row.populationMean`). Replaces the
+ *     misleading "Du gehörst zu N% der Erwachsenen…" framing — the
+ *     value is the per-myth mean Richtigkeit (0–100), NOT a binary
+ *     "% who got it exactly right". See CaRM §4.3.3 and the SCORING
+ *     METHODOLOGY block in quizData.ts.
  *
  * The QuizCard back face is now stripped to just the statement
  * summary + `Mehr auf der Fakten-Karte →` button + `Nächste Frage →`
@@ -26,8 +30,19 @@
  */
 
 import type { CardAnswer, QuizMyth, Schritte } from "./types";
-import { schritte, userJoinedPercent } from "./quizData";
+import { schritte } from "./quizData";
 import { t } from "./i18n";
+
+/** Format a number the German way for body copy: integers stay bare
+ *  (no trailing ",0"), non-integers use a comma decimal separator and
+ *  one fractional digit. Mirrors the local helper in ShareCard.tsx. */
+function formatGermanDecimal(n: number): string {
+  const rounded = Math.round(n * 10) / 10;
+  if (rounded === Math.trunc(rounded)) {
+    return String(Math.trunc(rounded));
+  }
+  return rounded.toFixed(1).replace(".", ",");
+}
 import VerdictPill from "../shared/VerdictPill";
 import { CheckCircle, CircleDashed, AlertCircle, XCircle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -132,11 +147,13 @@ export default function FeedbackStrip({
 
   const statement = statementText || t(myth.statementKey);
 
-  const joinedPct = userJoinedPercent(myth, answer.chosenClassification);
-  const joinedSentence =
-    s === 0
-      ? t("result.row.joinedExact", { pct: joinedPct })
-      : t("result.row.joinedMissed", { pct: joinedPct });
+  // 2026-05-29 (QuizCard redesign) — per-question population reveal on the
+  // 0–1 per-card points scale (no percentages on cards). populationCorrectPct
+  // is the mean Richtigkeit per myth (0–100); /100 puts it on the same 0–1
+  // scale as the user's on-card points badge. One decimal → e.g. "0,8".
+  const populationSentence = t("result.row.populationMean", {
+    points: formatGermanDecimal(myth.populationCorrectPct / 100),
+  });
 
   return (
     <div
@@ -167,7 +184,7 @@ export default function FeedbackStrip({
           <VerdictPill verdict={myth.correctClassification} size="sm" />
         </span>
       </div>
-      <p className="quiz-feedback-strip__joined">{joinedSentence}</p>
+      <p className="quiz-feedback-strip__joined">{populationSentence}</p>
     </div>
   );
 }

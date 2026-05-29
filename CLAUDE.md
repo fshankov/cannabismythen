@@ -213,6 +213,65 @@ Pure technical decisions with no user-visible effect (file naming inside a
 folder, type names, refactor patterns, internal helper signatures) don't need
 confirmation.
 
+## Think before coding — when to ask, about what (HARD)
+
+The "Ask before implementing" rule above tells you to use AskUserQuestion before
+touching user-visible decisions. This section tells you the FOUR specific triggers
+that should make you stop and ask, and what shape each question should take. If
+any of these triggers fires, do not implement — invoke AskUserQuestion first.
+
+1. **Unstated assumption.** You're about to act on something Fedor didn't
+   actually say but you inferred. → Ask: "I'm reading this as X. Is that right,
+   or did you mean Y?" Offer both as concrete options. Never act on a silent
+   assumption about taste, scope, or wording.
+
+2. **Multiple plausible interpretations.** The request can be parsed two or
+   more ways (especially common given the language-note rule above). → Ask:
+   list each interpretation as a separate option with what would change under
+   each. Do not pick silently and "fix later if wrong" — that's the failure
+   mode the 2026-05-14 ueber-projekt example warns about.
+
+3. **A simpler approach exists.** What was requested is more elaborate than
+   what the underlying goal actually needs. → Surface the simpler path as one
+   of the options with the tradeoff named. Push back when the simpler path is
+   clearly better — don't just build the longer thing because it was asked
+   for. State the recommendation; let Fedor decide.
+
+4. **Something is unclear.** A word, scope boundary, or success criterion is
+   ambiguous (German wording, "make it look good", "consistent with the rest",
+   "more readable"). → Stop. Name what's confusing in one sentence. Ask via
+   AskUserQuestion with concrete options that pin down the ambiguity.
+
+The test: if you catch yourself thinking "I'll guess and fix later if wrong",
+that's a trigger. Cost of asking = one round-trip; cost of guessing wrong =
+rework, reverted commits, eroded trust.
+
+## Surgical changes by default (HARD)
+
+**Touch only what the task requires. Don't "improve" adjacent code as a side effect.**
+
+For everyday edits:
+- Don't refactor adjacent code, comments, or formatting unless the task is the
+  refactor itself.
+- Match existing style even if you'd write it differently.
+- Clean up imports/variables/functions that YOUR change made unused. Don't
+  delete pre-existing dead code in the same pass without asking.
+- If you notice unrelated dead code or inconsistency, surface it as a separate
+  finding — don't fold it into the current diff.
+
+**Site-wide consistency sweeps are the exception.** Renames, copy flips, term
+replacements (Sie→Du, Evidenz→Wissenschaftlich, URL moves like
+`/ueber-uns/` → `/projekt/`) are by nature cross-cutting — touching adjacent
+code IS the job. Rule for sweeps:
+
+1. Name the sweep explicitly ("this is a site-wide X→Y pass").
+2. Confirm scope and stopping criteria via AskUserQuestion BEFORE starting.
+3. Treat as a Major Revision in its own session, not a side trip during an
+   unrelated fix.
+
+The test: every changed line should trace either to the user's request OR to
+the named sweep — nothing else.
+
 ## German text quality (HARD)
 
 ISD reads the live site post-deploy, so there is **no pre-ship

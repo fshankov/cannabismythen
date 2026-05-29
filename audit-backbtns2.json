@@ -1,0 +1,26 @@
+{
+  "flipped": true,
+  "more": {
+    "text": "Details",
+    "w": 120.5,
+    "h": 56.1,
+    "fw": "900",
+    "fs": "12.48px",
+    "br": "12.5px",
+    "flexBasis": "120px",
+    "gap": "10px",
+    "detailsIconLast": true
+  },
+  "next": {
+    "text": "Nächste Frage",
+    "w": 188.5,
+    "h": 56.8,
+    "fw": "900",
+    "fs": "12.48px",
+    "br": "12.5px",
+    "flexGrow": "1",
+    "gap": "10px"
+  },
+  "rowGap": "18px",
+  "ratio": 1.56
+}

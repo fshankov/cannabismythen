@@ -2,7 +2,7 @@ import type { ECharts } from 'echarts';
 import type { CarmData, CorrectnessClass, GroupId, Indicator, Myth } from './types';
 import { exportCSV } from './data';
 
-const SOURCE_LINE = 'Datenquelle: CaRM-Studie, ISD Hamburg, 2022–2023 · cannabismythen.de';
+const SOURCE_LINE = 'Datenquelle: CaRM-Studie, ISD Hamburg, 2024–2025 · cannabismythen.de';
 const SOURCE_LINE_CSV = `# ${SOURCE_LINE}`;
 
 function downloadBlob(blob: Blob, filename: string) {
@@ -16,6 +16,104 @@ function downloadBlob(blob: Blob, filename: string) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, 0);
+}
+
+/* ========================================================================
+   CAR-4 (Harald 2026-05-28) — German-readable, filter-aware export
+   filenames. Replaces the old dev-style `cannabismythen-<view>-<eng>-<eng>`
+   literals. Shape:
+     cannabismythen_<view>_<indikator>_<zielgruppe>[_<mythos>]_<YYYY-MM-DD>.<ext>
+   - PNG/SVG (a single chart slice) carry indikator + zielgruppe.
+   - CSV/JSON span all five indicators, so they OMIT the indikator block
+     and use `daten-explorer` as the <view> token; the fully-unfiltered
+     dump uses `rohdaten` in place of the myth segment.
+   ===================================================================== */
+
+/** Indicator → German filename token (matches the on-screen column
+ *  labels; `correctness` → `richtigkeit` per Fedor 2026-05-29). */
+const INDICATOR_FILE_DE: Record<Indicator, string> = {
+  awareness: 'kenntnis',
+  significance: 'bedeutung',
+  correctness: 'richtigkeit',
+  prevention_significance: 'praeventionsbedeutung',
+  population_relevance: 'bevoelkerungsrelevanz',
+};
+
+/** Group → German filename token (ASCII-folded). */
+const GROUP_FILE_DE: Record<GroupId, string> = {
+  adults: 'erwachsene',
+  minors: 'minderjaehrige',
+  consumers: 'konsumierende',
+  young_adults: 'junge-erwachsene',
+  parents: 'eltern',
+};
+
+/** Lowercase, ASCII-fold (ü→ue, ä→ae, ö→oe, ß→ss), collapse non-alnum
+ *  runs to single hyphens. Used for the myth-title slug. */
+function slugifyAscii(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/** Today as YYYY-MM-DD (local). */
+function isoDateStamp(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Myth segment: 1 selected → `m<NN>-<slug>`; a strict subset → `<n>-mythen`;
+ *  full deck / unknown → '' (caller decides on `rohdaten`). */
+function mythSegment(myths: Myth[], totalMyths?: number): string {
+  if (myths.length === 1) {
+    const m = myths[0];
+    return `m${String(m.id).padStart(2, '0')}-${slugifyAscii(m.text_short_de)}`;
+  }
+  if (totalMyths && myths.length > 0 && myths.length < totalMyths) {
+    return `${myths.length}-mythen`;
+  }
+  return '';
+}
+
+export interface ExportFilenameOpts {
+  /** 'chart' = PNG/SVG (indicator-specific slice); 'data' = CSV/JSON
+   *  (spans all indicators). */
+  kind: 'chart' | 'data';
+  ext: string;
+  view: string;
+  indicator?: Indicator;
+  group?: GroupId;
+  myths: Myth[];
+  /** Full myth count for "is this the whole deck?" detection. */
+  totalMyths?: number;
+}
+
+export function buildExportFilename(opts: ExportFilenameOpts): string {
+  const { kind, ext, view, indicator, group, myths, totalMyths } = opts;
+  const date = isoDateStamp();
+  const myth = mythSegment(myths, totalMyths);
+
+  if (kind === 'chart') {
+    const ind = indicator ? INDICATOR_FILE_DE[indicator] : '';
+    const grp = group ? GROUP_FILE_DE[group] : '';
+    const parts = ['cannabismythen', view, ind, grp, myth, date].filter(Boolean);
+    return `${parts.join('_')}.${ext}`;
+  }
+
+  // kind === 'data' (CSV/JSON) — spans all indicators, omit the indikator
+  // block. No myth filter → `rohdaten`; otherwise the myth segment.
+  const grp = group ? GROUP_FILE_DE[group] : '';
+  const datasetSeg = myth || 'rohdaten';
+  const parts = ['cannabismythen', 'daten-explorer', grp, datasetSeg, date].filter(Boolean);
+  return `${parts.join('_')}.${ext}`;
 }
 
 /** CSV: full filtered dataset, BOM-prefixed for Excel, with a German source
@@ -41,6 +139,12 @@ export function downloadFullCSV(
  *
  * Stage 3 of the Daten-Explorer refactor added this so the OWID-style
  * export dialog has a "JSON (Rohdaten)" companion to the CSV row.
+ *
+ * TODO (D2, Asana 1215204492126785) — once ISD approves the
+ * Information-Sources export, add `downloadFullSourcesCSV` /
+ * `downloadFullSourcesJSON` here, keyed by source_id × source_metric ×
+ * group, using the same `buildExportFilename` convention with
+ * view='sources'. Blocked on ISD sign-off; do not implement until then.
  */
 export function downloadFullJSON(
   myths: Myth[],
@@ -122,6 +226,11 @@ interface ChartExportOpts extends ExportChrome {
   view: string;
   indicator: Indicator;
   group: GroupId;
+  /** Filtered myth list + full count — drive the German filename's myth
+   *  segment (CAR-4). Optional so legacy callers still compile; when
+   *  omitted the filename omits the myth block. */
+  myths?: Myth[];
+  totalMyths?: number;
 }
 
 const CANVAS_PADDING = 24;
@@ -256,7 +365,7 @@ function chartToPngDataUrl(chart: ChartHandle): Promise<{ dataUrl: string; width
 /** PNG export with title, subtitle, legend, and source baked in. The chart
  *  itself is captured at 2× pixelRatio for retina screens. */
 export async function downloadChartPng(opts: ChartExportOpts) {
-  const { chart, title, subtitle, legend, view, indicator, group } = opts;
+  const { chart, title, subtitle, legend, view, indicator, group, myths, totalMyths } = opts;
   const { dataUrl, width: chartW, height: chartH } = await chartToPngDataUrl(chart);
 
   const img = new Image();
@@ -332,7 +441,10 @@ export async function downloadChartPng(opts: ChartExportOpts) {
         resolve();
         return;
       }
-      const filename = `cannabismythen-${view}-${indicator}-${group}.png`;
+      const filename = buildExportFilename({
+        kind: 'chart', ext: 'png', view, indicator, group,
+        myths: myths ?? [], totalMyths,
+      });
       downloadBlob(blob, filename);
       resolve();
     }, 'image/png');
@@ -402,7 +514,7 @@ function revealExportOnly(root: SVGElement): void {
 
 /** SVG export — the chart itself plus header/footer text wrapped into one SVG. */
 export function downloadChartSvg(opts: ChartExportOpts) {
-  const { chart, title, subtitle, legend, view, indicator, group } = opts;
+  const { chart, title, subtitle, legend, view, indicator, group, myths, totalMyths } = opts;
   const { svg: innerSvg, width: innerW, height: innerH } = chartToSvgString(chart);
 
   const padding = 24;
@@ -442,7 +554,10 @@ export function downloadChartSvg(opts: ChartExportOpts) {
 </svg>`;
 
   const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-  const filename = `cannabismythen-${view}-${indicator}-${group}.svg`;
+  const filename = buildExportFilename({
+    kind: 'chart', ext: 'svg', view, indicator, group,
+    myths: myths ?? [], totalMyths,
+  });
   downloadBlob(blob, filename);
 }
 

@@ -573,11 +573,13 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
   }), [state.sourceMetric, definitions, update]);
 
   const topRow: { items: RowItem[]; caption: string } = useMemo(() => {
+    // 2026-05-28: route through the i18n keys (`Gruppe` / `Indikatoren`)
+    // so this view picks up the same renames Balken + Tabelle get.
     if (mode === 'metric') {
-      return { items: groupRow, caption: 'Bevölkerungsgruppe' };
+      return { items: groupRow, caption: t('igs.group.legend', state.lang) };
     }
-    return { items: metricRow, caption: 'Indikator' };
-  }, [mode, groupRow, metricRow]);
+    return { items: metricRow, caption: t('igs.indicator.legend', state.lang) };
+  }, [mode, groupRow, metricRow, state.lang]);
 
   // ── Source card content (selected state) ──────────────────────────
   // Computed regardless of `sourceData` so the JSX below can stay flat;

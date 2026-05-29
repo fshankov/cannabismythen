@@ -1,25 +1,37 @@
 /**
  * QuizCard — A single myth question rendered as a flippable card.
  *
- * Used in the one-question-at-a-time flow inside QuizPlayer.
- * Front face: myth statement + 4 answer buttons (always visible).
- * Back face (after answering): three-tier feedback message, the user's
- * answer chip plus (when wrong) the correct answer chip, the explanation,
- * a population comparison bar, and a "Nächste Frage" CTA.
+ * Redesign 2026-05-29 (Figma 9Ix8F9bkjVbvU41QsxnxYX node 427-2143).
  *
- * Per-card details:
- * - Answer button order is deterministically randomized by myth.id.
- * - Each card carries a deterministic idle tilt (≤1.5°) so consecutive
- *   cards feel like a hand-shuffled stack.
- * - On mobile coarse pointers (and outside `prefers-reduced-motion`),
- *   the back face supports a horizontal swipe-to-advance gesture.
+ * Three visual states inside one card shell:
+ *   1. Front — unanswered: statement + 4-button colored answer grid
+ *      (Falsch / Eher Falsch / Eher Richtig / Richtig, each an arrow SVG
+ *      + label). Replaces the old VerdictScale spectrum.
+ *   2. Front — post-answer feedback: statement dims, the answer label
+ *      fades, the card border tints by Schritte tier, the chosen button
+ *      gets a result border (correct button shown dashed), and a feedback
+ *      cluster appears (tier icon + phrase + points badge: +1 / +0,66 /
+ *      +0,33 / 0). Holds ~1.8 s.
+ *   3. Back (3D flip): statement tinted by the scientific verdict + a
+ *      VerdictPill + the summary explanation + Details / Nächste buttons.
+ *      No card border on the back.
+ *
+ * Already-answered cards (navigating back, or restored progress) skip the
+ * feedback animation and render the back immediately. prefers-reduced-motion
+ * also skips the celebration delay.
+ *
+ * Per-card details preserved from the prior version: deterministic answer
+ * tilt, deck illusion, front-face swipe nav (coarse pointers), streak chip,
+ * SR-only live region, focus-on-answer.
  */
 
 import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type CSSProperties,
+  type ReactNode,
 } from "react";
 import type {
   QuizMyth,
@@ -28,15 +40,24 @@ import type {
   Schritte,
 } from "./types";
 import { t } from "./i18n";
-import { schritte } from "./quizData";
+import { schritte, pointsDisplay } from "./quizData";
 import {
   usePointerSwipe,
   useIsCoarsePointer,
   usePrefersReducedMotion,
 } from "./usePointerSwipe";
-import VerdictScale from "./VerdictScale";
 import StreakChip from "./StreakChip";
+import VerdictPill from "../shared/VerdictPill";
 import { trackCardSwiped } from "./matomo";
+import {
+  CheckCircle,
+  CircleDashed,
+  AlertCircle,
+  XCircle,
+  Search,
+  ChevronRight,
+  type LucideIcon,
+} from "lucide-react";
 
 /** Stable hash for deterministic randomization. */
 function hashCode(s: string): number {
@@ -49,9 +70,7 @@ function hashCode(s: string): number {
 }
 
 /** Front-face statement display: strip a single trailing `.`, `!`, or `?`
- *  so the card reads as a slogan rather than a sentence. The .mdoc source
- *  keeps full sentences (proper grammar in Keystatic); the result page +
- *  FactsheetPanel render the unmodified text. Stage 2 of the overhaul. */
+ *  so the card reads as a slogan rather than a sentence. */
 function displayStatement(s: string): string {
   return s.replace(/[.!?]\s*$/, "");
 }
@@ -62,7 +81,7 @@ function tiltFromHash(hash: number): number {
   return ((hash % 1000) / 1000) * range - range / 2;
 }
 
-/** Stage 3 — Schritte → editorial label key (no period). */
+/** Schritte → editorial verdict label key (gamified set, CAR-8). */
 const SCHRITTE_LABEL_KEY: Record<Schritte, string> = {
   0: "schritte.exact",
   1: "schritte.near",
@@ -70,14 +89,77 @@ const SCHRITTE_LABEL_KEY: Record<Schritte, string> = {
   3: "schritte.far",
 };
 
-// SCHRITTE_COLOR_CLASS removed in Session 3b (BugHerd #26, 2026-05-07):
-// the back-face Schritte verdict line now renders monochrome — the
-// reviewer wanted the big "Nah dran" / "Genau richtig" headline to read
-// as a calm assessment, not a colour-coded judgement. The smaller
-// classification chips above (Ihre Antwort + Wissenschaftlich) keep
-// their colour, and so do dashboard pills, factsheet panel, fakten-karten
-// flips. The Schritte → classification mapping itself still drives the
-// .quiz-result__item--exact background tint on the result-screen rows.
+/** Schritte → feedback tier icon (same set as the FeedbackStrip, for
+ *  tonal consistency — NOT a single ThumbsUp, which reads wrong for the
+ *  3-Schritte case). */
+const SCHRITTE_ICON: Record<Schritte, LucideIcon> = {
+  0: CheckCircle,
+  1: CircleDashed,
+  2: AlertCircle,
+  3: XCircle,
+};
+
+/** Schritte → feedback tier modifier (drives icon/phrase/points colour). */
+const SCHRITTE_TIER: Record<Schritte, string> = {
+  0: "exact",
+  1: "near",
+  2: "off",
+  3: "far",
+};
+
+/** Schritte → card-border tier (0 green, 1 amber, 2–3 rose). */
+const SCHRITTE_BORDER: Record<Schritte, string> = {
+  0: "correct",
+  1: "almost",
+  2: "wrong",
+  3: "wrong",
+};
+
+/** The 4 answer options in spectrum order (Falsch → Richtig), matching the
+ *  QuizPlayer keyboard map (1→falsch … 4→richtig) and the Figma grid. Each
+ *  carries the exact inline arrow SVG verified in quiz-card-preview.html. */
+const ANSWER_OPTIONS: { value: Classification; svg: ReactNode }[] = [
+  {
+    value: "falsch",
+    svg: (
+      <svg width="26" height="22" viewBox="0 0 26 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1.2666 18.8793C0.567207 18.8798 0 19.4464 0 20.1459C0 20.8454 0.567207 21.4121 1.2666 21.4125L24.2705 21.4125C24.9703 21.4125 25.5371 20.8457 25.5371 20.1459C25.5371 19.4462 24.9703 18.8793 24.2705 18.8793L1.2666 18.8793Z" fill="#E9A8B9" />
+        <path d="M12.771 1.26703L12.771 19.3997" stroke="#BE123C" strokeWidth="2.53404" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M20.8223 10.3315L12.771 19.3978L4.71974 10.3315" stroke="#BE123C" strokeWidth="2.53404" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    value: "eher_falsch",
+    svg: (
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32.2303 13.271L13.271 32.2303" stroke="#E0B58D" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9.47932 9.47998L22.7508 22.7515" stroke="#B45309" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M22.7508 9.47803V22.7495H9.47929" stroke="#B45309" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    value: "eher_richtig",
+    svg: (
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32.2303 20.351L13.271 1.39168" stroke="#C2D3A3" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9.47932 24.142L22.7508 10.8705" stroke="#4D7C0F" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M22.7508 24.144V10.8724H9.47929" stroke="#4D7C0F" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    value: "richtig",
+    svg: (
+      <svg width="30" height="22" viewBox="0 0 30 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M28.2041 1.39285L1.3916 1.39286" stroke="#A7D3C5" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14.7979 20.1604L14.7978 1.39168" stroke="#047857" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M24.1826 10.7776L14.7982 1.39324L5.41386 10.7776" stroke="#047857" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+];
 
 interface QuizCardProps {
   myth: QuizMyth;
@@ -96,13 +178,14 @@ interface QuizCardProps {
   explanationText?: string;
   /** How many phantom cards are stacked behind this one (0–2). */
   deckBehind?: number;
-  /** Quiz theme label shown in the front-face topbar (e.g. "Medizinischer Nutzen"). */
+  /** Quiz theme label shown in the front-face topbar. */
   categoryLabel?: string;
   /** When ≥ 2, render a 🔥 streak chip pinned to the front face top-right. */
   streakCount?: number;
-  /** Population pct of the *general population* — used in micro-copy table. */
-  populationCorrectPct?: number;
 }
+
+/** Delay before the post-answer feedback flips to the back face. */
+const FLIP_DELAY_MS = 1800;
 
 export default function QuizCard({
   myth,
@@ -121,28 +204,44 @@ export default function QuizCard({
   streakCount = 0,
 }: QuizCardProps) {
   const isAnswered = answer !== null;
-  const flipped = isAnswered;
   const cardRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const liveRef = useRef<HTMLDivElement>(null);
 
   const statement = statementText || t(myth.statementKey);
-  // Stage F commit 2 (2026-05-23): explanation restored on the card
-  // back. Stage E commit 5 had stripped this — a mistake; ISD's
-  // cardShortSummary (overlaid onto myth.explanationKey by
-  // `src/pages/quiz/[slug].astro`) is a key learning element and
-  // belongs on the visible back face, not behind a popup click.
   const explanation = explanationText || t(myth.explanationKey);
 
   const isCoarsePointer = useIsCoarsePointer();
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  // Front-face swipe back/forward (Phase C §3.10). Disabled on the back
-  // face so the inner explanation can scroll horizontally without
-  // hijacking. Vertical scroll wins via the SLOP check inside the hook.
-  // Left-swipe (=== "prev") is vetoed at index 0 via canCommit.
+  // ── Three-state flow: front (play) → front (post-answer feedback) →
+  //    back. `showBack` gates the 3D flip; the feedback state is the
+  //    window where isAnswered && !showBack.
+  const [showBack, setShowBack] = useState<boolean>(() => answer !== null);
+  const prevAnswerRef = useRef<CardAnswer | null>(answer);
+
+  useEffect(() => {
+    const wasAnswered = prevAnswerRef.current !== null;
+    prevAnswerRef.current = answer;
+
+    if (answer === null) {
+      setShowBack(false);
+      return;
+    }
+    // Card already carried an answer when shown (nav back / restore) →
+    // straight to the back, no celebration. Also covers reduced-motion.
+    if (wasAnswered || prefersReducedMotion) {
+      setShowBack(true);
+      return;
+    }
+    // Fresh answer (null → set): hold the feedback state, then flip.
+    const tid = window.setTimeout(() => setShowBack(true), FLIP_DELAY_MS);
+    return () => window.clearTimeout(tid);
+  }, [answer, prefersReducedMotion]);
+
+  // Front-face swipe back/forward — disabled once flipped to the back.
   usePointerSwipe(cardRef, {
-    enabled: !flipped && isCoarsePointer && !prefersReducedMotion,
+    enabled: !showBack && !isAnswered && isCoarsePointer && !prefersReducedMotion,
     canCommit: (dir) => (dir === "prev" ? index > 0 : true),
     onCommit: (dir) => {
       trackCardSwiped(dir);
@@ -151,63 +250,48 @@ export default function QuizCard({
     },
   });
 
-  // Idle tilt (deterministic per myth). Falls back to 0 for SSR sanity.
-  // Note: the verdict-scale renders in a fixed left-to-right order
-  // (falsch → richtig). The old shuffled 4-button grid is gone — the
-  // spectrum metaphor only works if the segments stay in spectrum order.
   const tilt = useMemo(() => tiltFromHash(hashCode(myth.id)), [myth.id]);
 
-  // Focus the back when the user answers (announces feedback).
+  // Focus the back when it appears (announces feedback to SR users).
   useEffect(() => {
-    if (isAnswered && resultRef.current) {
+    if (showBack && resultRef.current) {
       resultRef.current.focus();
     }
-  }, [isAnswered, myth.id]);
+  }, [showBack, myth.id]);
 
   const handleAnswerClick = (chosen: Classification) => {
     if (!isAnswered) onAnswer(myth.id, chosen);
   };
 
-  const correctClass = answer
-    ? answer.isCorrect
-      ? "quiz-card--correct"
-      : "quiz-card--incorrect"
-    : "";
-
-  // Stage 3: 4-band Schritte derivation. Replaces the old 3-tier
-  // `is-correct/is-near/is-far` ternary. Drives the verdict text, the
-  // colour token on the verdict line, and the points-line copy.
+  // Schritte-derived feedback state.
   const userSchritte: Schritte | null = answer
     ? schritte(answer.chosenClassification, myth.correctClassification)
     : null;
-  const schritteVerdictText = userSchritte !== null
-    ? t(SCHRITTE_LABEL_KEY[userSchritte])
-    : "";
+  const showFeedback = isAnswered && !showBack && userSchritte !== null;
+  const feedbackTier = userSchritte !== null ? SCHRITTE_TIER[userSchritte] : "";
+  const FeedbackIcon = userSchritte !== null ? SCHRITTE_ICON[userSchritte] : null;
+  const feedbackPhrase =
+    userSchritte !== null ? t(SCHRITTE_LABEL_KEY[userSchritte]) : "";
+  const feedbackPoints =
+    userSchritte !== null ? pointsDisplay(userSchritte) : "";
 
-  const verdictPhrase = t(
-    `ui.classificationPhrase.${myth.correctClassification}`
-  );
-  // The verdict template is split into prefix + bolded verdict + suffix so
-  // we can render the verdict word as a <strong> without relying on dangerouslySet
-  // markup. Template shape: `Der Mythos „{statement}" ist {verdict}.`
-  // Stage 3: stripped trailing period from the template (D5 — "no period").
-  const mythVerdictPrefix = t("ui.mythVerdict", {
-    statement,
-    verdict: "__VERDICT_PH__",
-  }).replace(/\.\s*$/, "").split("__VERDICT_PH__");
+  const schritteVerdictText = feedbackPhrase;
+  const verdictPhrase = t(`ui.classificationPhrase.${myth.correctClassification}`);
   const mythVerdict = t("ui.mythVerdict", {
     statement,
     verdict: verdictPhrase,
   }).replace(/\.\s*$/, "");
 
-  // Stage E commit 5 (2026-05-23): hasPopData / popPct removed — the
-  // population bar moved into the FeedbackStrip portal in the page
-  // header. The strip computes its own `Du gehörst zu N %` sentence
-  // via `userJoinedPercent` (Stage D PR2 helper).
-
   const cellStyle: CSSProperties = {
     ["--card-tilt" as string]: `${tilt.toFixed(2)}deg`,
   };
+
+  // Card-shell classes: the feedback-border tint applies ONLY during the
+  // post-answer feedback window (front face); the back face has no border.
+  const cardBorderClass =
+    showFeedback && userSchritte !== null
+      ? `quiz-card--feedback-${SCHRITTE_BORDER[userSchritte]}`
+      : "";
 
   return (
     <div
@@ -218,9 +302,6 @@ export default function QuizCard({
       data-answered={isAnswered ? "true" : "false"}
       style={cellStyle}
     >
-      {/* Stage 4: edge arrows for desktop nav. On mobile they shrink and
-          tuck in close — swipe + the pill row in the header are the
-          primary touch nav. */}
       {onPrev && index > 0 && (
         <button
           type="button"
@@ -231,7 +312,7 @@ export default function QuizCard({
           ←
         </button>
       )}
-      {(isAnswered && !isLastQuestion) && (
+      {isAnswered && !isLastQuestion && (
         <button
           type="button"
           className="quiz-card__edge-arrow quiz-card__edge-arrow--next"
@@ -247,8 +328,8 @@ export default function QuizCard({
           "quiz-card",
           "quiz-card--flow",
           isAnswered ? "quiz-card--answered" : "",
-          correctClass,
-          flipped ? "quiz-card--flipped" : "",
+          cardBorderClass,
+          showBack ? "quiz-card--flipped" : "",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -256,9 +337,6 @@ export default function QuizCard({
         <div className="quiz-card__inner">
           {/* ── FRONT FACE ──────────────────────────────────────── */}
           <div className="quiz-card__face quiz-card__front">
-            {/* Swipe edge overlays — opacity bound to --swipe-progress-*
-                vars written by usePointerSwipe. Aria-hidden because they
-                are pure visual feedback. */}
             {index > 0 && (
               <div
                 className="quiz-card__swipe-edge quiz-card__swipe-edge--prev"
@@ -274,9 +352,6 @@ export default function QuizCard({
               →
             </div>
 
-            {/* Streak chip lives INSIDE the front face so the 3D flip
-                hides it on the back via backface-visibility. See
-                StreakChip.tsx for the rationale. */}
             <StreakChip count={streakCount} />
 
             <div className="quiz-card__topbar">
@@ -289,13 +364,109 @@ export default function QuizCard({
               )}
             </div>
 
-            <p className="quiz-card__statement">{displayStatement(statement)}</p>
+            <p
+              className={[
+                "quiz-card__statement",
+                showFeedback ? "quiz-card__statement--dimmed" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {displayStatement(statement)}
+            </p>
 
-            <VerdictScale
-              selected={answer ? answer.chosenClassification : null}
-              disabled={isAnswered}
-              onChoose={handleAnswerClick}
-            />
+            {/* ── Bottom block: feedback cluster (flow, in the gap above
+                 the grid so it reliably clears the grid at any card
+                 height — no fragile absolute overlap) + the 4-button
+                 answer area. ─────────────────────────────────────── */}
+            <div className="quiz-card__bottom">
+              {showFeedback && FeedbackIcon && (
+                <div className="quiz-card__feedback" aria-hidden="true">
+                  <div
+                    className={`quiz-card__feedback-icon quiz-card__feedback-icon--${feedbackTier}`}
+                  >
+                    <FeedbackIcon size={44} strokeWidth={2} />
+                  </div>
+                  <div
+                    className={`quiz-card__feedback-line quiz-card__feedback-line--${feedbackTier}`}
+                  >
+                    <span className="quiz-card__feedback-phrase">
+                      {feedbackPhrase}
+                    </span>
+                    <span className="quiz-card__feedback-points">
+                      {feedbackPoints}
+                    </span>
+                  </div>
+                </div>
+              )}
+            <div className="quiz-answer-area">
+              <p
+                className={[
+                  "quiz-answer-area__label",
+                  isAnswered ? "is-hidden" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {t("ui.chooseAnswer")}
+              </p>
+              <div
+                className="quiz-answer-grid"
+                role="radiogroup"
+                aria-label={t("ui.chooseAnswer")}
+              >
+                {ANSWER_OPTIONS.map((opt, i) => {
+                  const isSelected =
+                    answer?.chosenClassification === opt.value;
+                  const isCorrectAnswer =
+                    isAnswered &&
+                    opt.value === myth.correctClassification &&
+                    !isSelected;
+                  const selModifier =
+                    isSelected && userSchritte !== null
+                      ? userSchritte === 0
+                        ? "is-sel-correct"
+                        : userSchritte === 1
+                          ? "is-sel-near"
+                          : "is-sel-wrong"
+                      : "";
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      aria-keyshortcuts={String(i + 1)}
+                      aria-label={t(`answer.${opt.value}`)}
+                      disabled={isAnswered}
+                      className={[
+                        "quiz-answer-btn",
+                        `quiz-answer-btn--${opt.value}`,
+                        selModifier,
+                        isCorrectAnswer ? "is-correct-answer" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      onClick={() => handleAnswerClick(opt.value)}
+                    >
+                      <span className="quiz-answer-btn__icon" aria-hidden="true">
+                        {opt.svg}
+                      </span>
+                    </button>
+                  );
+                })}
+                {ANSWER_OPTIONS.map((opt) => (
+                  <span
+                    key={`lbl-${opt.value}`}
+                    className="quiz-answer-grid__label"
+                    aria-hidden="true"
+                  >
+                    {t(`answer.${opt.value}`)}
+                  </span>
+                ))}
+              </div>
+            </div>
+            </div>
           </div>
 
           {/* ── BACK FACE ───────────────────────────────────────── */}
@@ -306,36 +477,16 @@ export default function QuizCard({
           >
             {isAnswered && answer && (
               <>
-                {/* Stage E commit 5 (2026-05-23) — minimal back face.
-                    The chip pair, big Schritte verdict line, explanation
-                    paragraph, and population bar all moved UP into the
-                    `FeedbackStrip` portaled into the page header (see
-                    `src/components/quiz/FeedbackStrip.tsx`). What stays
-                    here: statement summary (tinted by scientific verdict)
-                    + Mehr-auf-Fakten-Karte + Nächste-Frage. Detail still
-                    one click away via the popup. */}
-
-                <div className="quiz-card__topbar">
-                  <span className="quiz-card__counter">
-                    {String(index + 1).padStart(2, "0")} /{" "}
-                    {String(total).padStart(2, "0")}
-                  </span>
-                </div>
-
                 <p
                   className={`quiz-card__statement quiz-card__statement--back statement--${myth.correctClassification}`}
                 >
                   {displayStatement(statement)}
                 </p>
 
-                {/* Stage F commit 2 (2026-05-23) — explanation restored
-                    on the card back. ISD's cardShortSummary (overlaid
-                    onto the quiz mdoc's explanation field by the Astro
-                    page) renders here between the statement and the
-                    action buttons. The chip pair, big Schritte verdict
-                    line, and population bar STAY removed (those moved
-                    up into the FeedbackStrip in Stage E commit 5) —
-                    only the explanation comes back. */}
+                <div className="quiz-card__back-pill">
+                  <VerdictPill verdict={myth.correctClassification} size="sm" />
+                </div>
+
                 <div className="quiz-card__explanation-wrap">
                   <p className="quiz-card__explanation">{explanation}</p>
                 </div>
@@ -348,6 +499,7 @@ export default function QuizCard({
                       onClick={() => onShowFactsheet(myth)}
                     >
                       {t("ui.openMythDetail")}
+                      <Search size={18} strokeWidth={2} aria-hidden="true" />
                     </button>
                   )}
                   <button
@@ -358,23 +510,13 @@ export default function QuizCard({
                   >
                     {isLastQuestion
                       ? t("ui.finishQuiz")
-                      : t("ui.nextQuestion")}{" "}
-                    →
+                      : t("ui.nextQuestion")}
+                    <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
                   </button>
                 </div>
 
-                <p className="quiz-card__swipe-hint" aria-hidden="true">
-                  {t("ui.swipeHint")}
-                </p>
-
-                {/* SR-only live region — announces the verdict for
-                    screen-reader users when the FeedbackStrip is rendered
-                    elsewhere in the DOM. */}
-                <div
-                  ref={liveRef}
-                  className="sr-only"
-                  aria-live="polite"
-                >
+                {/* SR-only live region — announces the verdict. */}
+                <div ref={liveRef} className="sr-only" aria-live="polite">
                   {t("ui.yourAnswerLabel")}:{" "}
                   {t(`classification.${answer.chosenClassification}`)}.{" "}
                   {schritteVerdictText}. {mythVerdict}

@@ -4,6 +4,8 @@ export const prerender = true;
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getPublishedEntries } from "@lib/content";
 import { getQuizThemeMeta } from "@lib/quiz/categories";
+import { QUIZ_THEMES } from "../../components/quiz/quizData";
+import { t } from "../../components/quiz/i18n";
 import { Send } from "lucide-react";
 import "../../styles/quiz.css";
 
@@ -19,12 +21,24 @@ const tiles = quizzes.map(([slug, entry]) => {
   // Tile uses the short title from QUIZ_THEME_META; entry.title is the
   // long descriptive form used on the quiz play screen and OG images.
   const title = meta.shortTitle || e.title;
+  // 2026-05-28 (CAR-5) — framing question that previously lived on the
+  // TitleCard now surfaces on the tile (hover reveal on desktop,
+  // always visible on mobile). Source: QUIZ_THEMES[slug].subtitleKey
+  // resolved through the same i18n table the in-quiz UI reads.
+  const subtitleKey = QUIZ_THEMES[slug as string]?.subtitleKey;
+  const framingQuestion = subtitleKey ? t(subtitleKey) : "";
+  // Minute estimate — matches the pre-CAR-5 TitleCard calculation
+  // (Math.round(count * 0.5), floor 1) so existing user expectations
+  // around "ca. 4 Min." don't shift.
+  const minutes = Math.max(1, Math.round(count * 0.5));
   return {
     slug: slug as string,
     title,
     Icon: meta.icon,
     theme: meta.theme,
     count,
+    framingQuestion,
+    minutes,
   };
 });
 ---
@@ -39,7 +53,7 @@ const tiles = quizzes.map(([slug, entry]) => {
   <div class="quiz-index__intro">
     <p>
       Teste dein Wissen in fünf thematischen Quiz-Modulen oder im
-      Schnellcheck mit zufälligen Aussagen aus allen Themen. Jede Aussage
+      Schnellcheck mit zufälligen Mythen aus allen Themen. Jeder Mythos
       ist mit dem Stand der Forschung erklärt; deine Einschätzungen
       vergleichen wir mit denen der Erwachsenen (18–70) in einer
       Bevölkerungsbefragung in Deutschland.
@@ -64,11 +78,17 @@ const tiles = quizzes.map(([slug, entry]) => {
             <tile.Icon size={56} strokeWidth={1.75} />
           </span>
           <h2 class="quiz-select-card__title">{tile.title}</h2>
-          {/* AI-drafted German copy (Du baseline). ISD review pending. */}
-          <p class="quiz-select-card__subline">
-            {tile.count} Fragen, die deine Perspektive auf Cannabis verändern könnten.
-          </p>
+          {/* 2026-05-28 (CAR-5) — framing question (desktop hover /
+              mobile always). Replaces the prior AI-drafted
+              "Fragen, die deine Perspektive…" subline. */}
+          <p class="quiz-select-card__framing">{tile.framingQuestion}</p>
         </div>
+
+        {/* 2026-05-29 (Fedor) — meta line centered directly above the
+            CTA button, always visible on every card. */}
+        <p class="quiz-select-card__meta">
+          {tile.count} Mythen · ca. {tile.minutes} Min.
+        </p>
 
         <span class="quiz-select-card__cta" aria-hidden="true">
           <span class="quiz-select-card__cta-text">QUIZ STARTEN</span>

@@ -23,6 +23,7 @@ import {
   forwardRef, useCallback, useEffect, useImperativeHandle, useMemo,
   useRef, useState,
 } from 'react';
+import type { ReactNode } from 'react';
 import type {
   AppState, InformationSourcesData,
   SourceGroupId, SourceMetricType,
@@ -32,6 +33,7 @@ import {
   BalkenBar, SourcesHoverTooltip,
 } from '../grid';
 import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
+import { t } from '../../../lib/dashboard/translations';
 import {
   AUDIENCE_ICONS_BY_GROUP,
   SOURCE_CATEGORY_ICONS, SOURCE_METRIC_ICONS,
@@ -43,9 +45,10 @@ import { getCategoryColor } from '../../../lib/dashboard/colors';
 interface Props {
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
-  /** Reserved for future shared-toolbar slot. Currently unused in this view
-   *  — the metric + group pickers live in the parent ToolbarRow. */
-  sharedActions?: unknown;
+  /** Right-aligned toolbar actions (search input, Exportieren, Rundgang
+   *  badge). Threaded from MythenExplorer's `sharedActions`; on source
+   *  views the Filter button is omitted (myth filter doesn't apply). */
+  sharedActions?: ReactNode;
   /** Definitions singleton — kept for prop-shape parity with the other
    *  source views even though we don't read it here yet (metric labels
    *  come from translations). */
@@ -99,7 +102,7 @@ const GROUP_OPTIONS: DataPickerOption<SourceGroupId>[] = [
 ];
 
 const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
-  function SourcesBalkenView({ state, update }, ref) {
+  function SourcesBalkenView({ state, update, sharedActions }, ref) {
     const selectedMetric: SourceMetricType = state.sourceMetric;
     const selectedGroup: SourceGroupId = state.sourceGroup;
 
@@ -235,30 +238,36 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
 
     return (
       <div className="carm-spannweite carm-balken-view carm-sources-balken" ref={wrapperRef}>
-        {/* Top picker row — Indikator + Bevölkerungsgruppe. Mirrors the
-            LEFT Balken toolbar so the sources tab feels like the same
-            tool, just pivoted to source rows. */}
+        {/* Top picker row — uses the same translation keys + captions as
+            the LEFT Balken toolbar (Indikatoren / Gruppe per 2026-05-28
+            rename) so the sources tab feels like the same tool, just
+            pivoted to source rows. The right-side actions slot
+            (search + Exportieren + Rundgang badge) comes from the parent
+            via `sharedActions`. */}
         <div className="carm-toolbar-row carm-sources-balken__toolbar">
           <div className="carm-toolbar-row__pickers">
             <div className="carm-toolbar-row__picker">
               <DataPicker
-                caption="Indikator"
+                caption={t('igs.indicator.legend', state.lang)}
                 value={selectedMetric}
                 options={METRIC_OPTIONS}
                 onChange={(v) => update('sourceMetric', v)}
-                aria-label="Indikator auswählen"
+                aria-label={t('igs.indicator.legend', state.lang)}
               />
             </div>
             <div className="carm-toolbar-row__picker">
               <DataPicker
-                caption="Bevölkerungsgruppe"
+                caption={t('igs.group.legend', state.lang)}
                 value={selectedGroup}
                 options={GROUP_OPTIONS}
                 onChange={(v) => update('sourceGroup', v)}
-                aria-label="Bevölkerungsgruppe auswählen"
+                aria-label={t('igs.group.legend', state.lang)}
               />
             </div>
           </div>
+          {sharedActions && (
+            <div className="carm-toolbar-row__actions">{sharedActions}</div>
+          )}
         </div>
 
         <div

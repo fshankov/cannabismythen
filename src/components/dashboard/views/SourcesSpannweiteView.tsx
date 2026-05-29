@@ -67,11 +67,24 @@ const METRIC_LABELS: Record<SourceMetricType, string> = {
 
 const METRIC_ICONS: Record<SourceMetricType, IconComponent> = SOURCE_METRIC_ICONS;
 
+/** Full labels — used in tooltips, definition popovers, etc. */
 const GROUP_LABELS: Record<SourceGroupId, string> = {
   adults: 'Volljährige (18–70)',
   minors: 'Minderjährige (16–17)',
   consumers: 'Konsument:innen',
   young_adults: 'Junge Erwachsene (18–26)',
+  parents: 'Eltern',
+};
+
+/** Short column-header labels — mirror Spannweite's `GROUP_SHORT_DE`
+ *  so the Gruppen columns read identical across both myth-side
+ *  Spannweite and source-side Informationsquellen 2 (per Fedor's
+ *  2026-05-28 consistency request). */
+const GROUP_SHORT: Record<SourceGroupId, string> = {
+  adults: 'Erw.',
+  minors: 'Minderj.',
+  consumers: 'Konsum.',
+  young_adults: 'Junge Erw.',
   parents: 'Eltern',
 };
 
@@ -155,9 +168,11 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
         return {
           id: g as string,
           Icon: GROUP_ICONS[g],
-          // Full group names on desktop (parentheticals included). Same
-          // narrow-viewport fallback rationale as metrics above.
-          label: GROUP_LABELS[g],
+          // Short labels for column headers — match Spannweite's
+          // `GROUP_SHORT_DE` so the same Gruppen columns read identical
+          // across both views (Fedor 2026-05-28). Tooltips + definition
+          // popovers still surface the full names via `fullLabel`.
+          label: GROUP_SHORT[g],
           fullLabel: GROUP_LABELS[g],
           defTitle: def?.label,
           defText: def?.definition,

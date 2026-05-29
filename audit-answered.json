@@ -1,0 +1,65 @@
+{
+  "flipped": true,
+  "cardBorderClass": [],
+  "cardBorderColor": "rgba(0, 0, 0, 0)",
+  "statementOpacity": "1",
+  "feedback": {
+    "iconPresent": false,
+    "iconRect": null,
+    "iconColor": null,
+    "linePresent": false,
+    "lineRect": null,
+    "phraseColor": null,
+    "pointsColor": null,
+    "gridRect": {
+      "x": 475,
+      "y": 636.9,
+      "w": 330,
+      "h": 91.4
+    },
+    "iconOverlapsGrid": null,
+    "lineOverlapsGrid": null
+  },
+  "buttons": [
+    {
+      "cls": "quiz-answer-btn--falsch is-sel-near",
+      "borderColor": "rgb(251, 208, 53)",
+      "borderStyle": "solid"
+    },
+    {
+      "cls": "quiz-answer-btn--eher_falsch is-correct-answer",
+      "borderColor": "rgb(4, 120, 87)",
+      "borderStyle": "dashed"
+    },
+    {
+      "cls": "quiz-answer-btn--eher_richtig",
+      "borderColor": "rgba(0, 0, 0, 0)",
+      "borderStyle": "solid"
+    },
+    {
+      "cls": "quiz-answer-btn--richtig",
+      "borderColor": "rgba(0, 0, 0, 0)",
+      "borderStyle": "solid"
+    }
+  ],
+  "back": {
+    "pillPresent": true,
+    "pillRect": {
+      "x": 477,
+      "y": 312.3,
+      "w": 326,
+      "h": 26.4
+    },
+    "backStmtPresent": true,
+    "backStmtColor": "rgb(45, 106, 79)",
+    "moreBtn": {
+      "text": "Details",
+      "bg": "rgba(182, 204, 185, 0.44)",
+      "display": "flex"
+    },
+    "nextBtn": {
+      "text": "Nächste Frage",
+      "bg": "rgb(4, 120, 87)"
+    }
+  }
+}

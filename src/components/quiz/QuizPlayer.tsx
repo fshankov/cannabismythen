@@ -53,7 +53,6 @@ import {
   trackQuizStarted,
 } from "./matomo";
 import QuizCard from "./QuizCard";
-import TitleCard from "./TitleCard";
 import ProgressBar from "./ProgressBar";
 import FeedbackStrip from "./FeedbackStrip";
 import ResultScreen from "./ResultScreen";
@@ -152,11 +151,14 @@ interface PersistedState {
   answers: Record<string, CardAnswer>;
   currentIndex: number;
   finished: boolean;
-  /** True once the user has tapped "Los geht's" on the title card. */
-  introDismissed?: boolean;
   /** Reserved for Stage 2 (random-per-visit question order). When absent,
    *  the deck renders in `theme.myths` natural order. */
   order?: string[];
+  /** Legacy v3 field — true once the user dismissed the intro title
+   *  card. The intro card was removed in CAR-5 (2026-05-28); we still
+   *  accept the field in the parse for back-compat with old localStorage
+   *  records, but no longer read or write it. */
+  introDismissed?: boolean;
 }
 
 function storageKey(slug: string): string {
@@ -389,7 +391,11 @@ function QuizPlayerInner({
   mythContent,
   groupMetrics,
   quizText,
-  quizSummary,
+  // `quizSummary` prop intentionally not destructured here. It is still
+  // declared on QuizPlayerProps for the Astro page's prop chain, but
+  // unused at runtime since the intro TitleCard was removed in CAR-5
+  // (2026-05-28). Drop from the type in a follow-up cleanup once the
+  // Astro page also stops passing it.
   theme,
   verdicts,
   intros,
@@ -434,13 +440,10 @@ function QuizPlayerInner({
     return Boolean(saved?.finished);
   });
 
-  // Title card is dismissed once the user starts (or has any saved answers).
-  const [introDismissed, setIntroDismissed] = useState<boolean>(() => {
-    const saved = loadProgressUnlessFinished(quizSlug);
-    if (!saved) return false;
-    if (saved.introDismissed) return true;
-    return Object.keys(saved.answers ?? {}).length > 0;
-  });
+  // 2026-05-28 (CAR-5) — intro TitleCard removed; user lands on Mythos 1
+  // directly. The `introDismissed` state + persisted field are retired
+  // (legacy v3 records still carry the boolean — see PersistedState
+  // back-compat note).
 
   const [factsheetMyth, setFactsheetMyth] = useState<QuizMyth | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -483,10 +486,9 @@ function QuizPlayerInner({
       answers,
       currentIndex,
       finished,
-      introDismissed,
       order,
     });
-  }, [quizSlug, answers, currentIndex, finished, introDismissed, order]);
+  }, [quizSlug, answers, currentIndex, finished, order]);
 
   // ── Find the portal target inside the site <header>.
   useEffect(() => {
@@ -666,7 +668,6 @@ function QuizPlayerInner({
     setCurrentIndex(0);
     setFinished(false);
     setRestoredNotice(false);
-    setIntroDismissed(false);
     clearProgress(quizSlug);
     // Stage 6: dynamic decks (Schnellcheck) need a fresh pick of myths,
     // which only happens at mount time inside `resolveDynamicTheme`.
@@ -727,10 +728,10 @@ function QuizPlayerInner({
   const currentAnswer = currentMyth ? answers[currentMyth.id] || null : null;
 
   const showResults = finished && result !== null;
-  const showTitleCard = !showResults && !introDismissed;
-  const cardsRemainingBehind = showTitleCard
-    ? Math.min(2, totalQuestions - 1)
-    : Math.min(2, totalQuestions - safeIndex - 1);
+  // 2026-05-28 (CAR-5) — intro TitleCard removed; the user lands on
+  // Mythos 1 directly. Deck-behind depth = the number of unviewed cards
+  // still in the stack after the current one (capped at 2).
+  const cardsRemainingBehind = Math.min(2, totalQuestions - safeIndex - 1);
 
   // ── Streak count for the front-face StreakChip. Computed from the
   //    visible deck so the chip reflects the user's run on the order they
@@ -788,9 +789,9 @@ function QuizPlayerInner({
       // While any overlay is open, only Esc above is wired.
       if (helpOpen || factsheetMyth) return;
 
-      // Don't operate before the user dismisses the title card or after
-      // the result screen has taken over.
-      if (showTitleCard || showResults || !currentMyth) return;
+      // Don't operate after the result screen has taken over, or if
+      // for some reason no current myth resolved.
+      if (showResults || !currentMyth) return;
 
       // 1–4: pick a verdict (only if not already answered).
       const verdict = VERDICT_BY_KEY[e.key];
@@ -850,7 +851,6 @@ function QuizPlayerInner({
   }, [
     helpOpen,
     factsheetMyth,
-    showTitleCard,
     showResults,
     currentMyth,
     currentAnswer,
@@ -860,20 +860,21 @@ function QuizPlayerInner({
   ]);
 
   // Quiet single-line header bar — module title + thin progress fill +
-  // "Aussage X von Y" counter. Stage A (2026-05-16) dropped the
-  // live-score pill (Pew minimalism). Stage E commit 5 (2026-05-23):
-  // added a feedback strip immediately below the progress bar. Stage
-  // F commit 1: same strip slot carries `variant="result"` on the
-  // finished page. Stage G (2026-05-23): strip ALWAYS renders in
-  // quiz mode (even when the current myth hasn't been answered yet)
-  // — the slot reserves a stable min-height so the QuizCard below
-  // doesn't jump up/down between unanswered and answered states.
-  const showAnswerStrip =
-    !showTitleCard && !showResults && currentMyth !== undefined;
+  // "Mythos N von Y" counter (CAR-6 2026-05-28). Stage A (2026-05-16)
+  // dropped the live-score pill (Pew minimalism). Stage E commit 5
+  // (2026-05-23): added a feedback strip immediately below the progress
+  // bar. Stage F commit 1: same strip slot carries `variant="result"`
+  // on the finished page. Stage G: strip ALWAYS renders in quiz mode
+  // (even when the current myth hasn't been answered yet) — the slot
+  // reserves a stable min-height so the QuizCard below doesn't jump
+  // up/down between unanswered and answered states. CAR-5 (2026-05-28)
+  // removed the intro TitleCard guard.
+  const showAnswerStrip = !showResults && currentMyth !== undefined;
   const headerContent = (
     <>
       <ProgressBar
         quizTitle={t(theme.titleKey)}
+        current={safeIndex + 1}
         answered={answeredCount}
         total={totalQuestions}
       />
@@ -909,33 +910,23 @@ function QuizPlayerInner({
 
       {!showResults && currentMyth && (
         <div className="quiz-player__flow">
-          {showTitleCard ? (
-            <TitleCard
-              title={t(theme.titleKey)}
-              subtitle={t(theme.subtitleKey)}
-              summary={quizSummary}
-              questionCount={totalQuestions}
-              onStart={() => setIntroDismissed(true)}
-            />
-          ) : (
-            <QuizCard
-              key={currentMyth.id}
-              myth={currentMyth}
-              index={safeIndex}
-              total={totalQuestions}
-              answer={currentAnswer}
-              onAnswer={handleAnswer}
-              onNext={handleNext}
-              onPrev={handlePrev}
-              onShowFactsheet={handleShowFactsheet}
-              isLastQuestion={safeIndex === totalQuestions - 1}
-              statementText={quizTextMap[currentMyth.id]?.statement}
-              explanationText={quizTextMap[currentMyth.id]?.explanation}
-              deckBehind={cardsRemainingBehind}
-              categoryLabel={t(theme.titleKey)}
-              streakCount={streakCount}
-            />
-          )}
+          <QuizCard
+            key={currentMyth.id}
+            myth={currentMyth}
+            index={safeIndex}
+            total={totalQuestions}
+            answer={currentAnswer}
+            onAnswer={handleAnswer}
+            onNext={handleNext}
+            onPrev={handlePrev}
+            onShowFactsheet={handleShowFactsheet}
+            isLastQuestion={safeIndex === totalQuestions - 1}
+            statementText={quizTextMap[currentMyth.id]?.statement}
+            explanationText={quizTextMap[currentMyth.id]?.explanation}
+            deckBehind={cardsRemainingBehind}
+            categoryLabel={t(theme.titleKey)}
+            streakCount={streakCount}
+          />
 
           {/* Stage 4: bottom Zurück / dots / Nächste row removed. The
               Schritte pill row in the header now doubles as nav (click a

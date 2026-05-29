@@ -30,12 +30,49 @@ import type {
   ScoreBand,
 } from "./types";
 
-// ─── Schritte scoring (matches CaRM "Richtigkeit d. Beurteilung") ──────
+// ─── SCORING METHODOLOGY (CaRM §4.3.3 alignment, 2026-05-28) ───────────
 //
-// Single source of truth for everything score-related. The legacy
-// `+2/+1/-1/-2` scorer used in QuizPlayer was replaced by this module in
-// the Stage 1 overhaul; if you find another scorer anywhere in the quiz
-// codebase, that's a bug — route it through here instead.
+// Single source of truth for everything score-related. If you find
+// another scorer anywhere in the quiz codebase, that's a bug — route it
+// through here instead.
+//
+// PER-QUESTION RICHTIGKEIT (Likert distance → Punkte)
+//   Each classification answer sits on a 4-step Likert scale
+//   (falsch=0 < eher_falsch=1 < eher_richtig=2 < richtig=3). The user's
+//   Schritte is |userPos − sciencePos|, ranging 0 (exact) to 3 (opposite).
+//   Schritte map to Punkte per CaRM's standardisation (Abschlussbericht
+//   §4.3.3 + Tabelle "Indikatoren der quantitativen Analyse", p. 51):
+//
+//     0 Schritte → 100 Punkte    (= pointsForSchritte 1.00)
+//     1 Schritt  →  66.67 Punkte (= pointsForSchritte 0.66)
+//     2 Schritte →  33.33 Punkte (= pointsForSchritte 0.33)
+//     3 Schritte →   0 Punkte    (= pointsForSchritte 0.00)
+//
+//   These are the linear interpolation of the report's "0 Punkte = niedrigste
+//   Ausprägung, 100 Punkte = höchste Ausprägung" across 4 equidistant
+//   Schritte. Same ladder ISD applies to the survey responses.
+//
+// USER DECK TOTAL vs POPULATION DECK TOTAL (apples-to-apples)
+//   User's Punkte for a deck of N myths = Σ pointsForSchritte (0..N).
+//   Population's Punkte for the same deck = Σ (populationCorrectPct / 100)
+//   per `populationExpectedExactCount(myths)` — also 0..N.
+//
+//   Both sides use the SAME per-question Schritte → Punkte ladder. The
+//   user's score for a question of Schritte=1 contributes 0.66 Punkte to
+//   their deck total; the population's mean for that same myth (e.g.
+//   78.32 Richtigkeit) contributes 0.7832 Punkte. Apples-to-apples —
+//   directly comparable, no rescaling needed.
+//
+// BAND THRESHOLDS (scoreBand → profi / guterweg / gehtnoch / erwischt)
+//   Absolute thresholds on the percentage form (moduleScore returns a
+//   rounded percent). ≥80 = profi, ≥60 = guterweg, ≥40 = gehtnoch.
+//   The report defines "75+ Punkte = hohe Ausprägung" (p. 51); our 80
+//   profi cutoff is slightly stricter for editorial reasons.
+//
+// SCHÄTZFRAGEN — NONE EXIST IN THE QUIZ
+//   Every quiz card is a 4-level Likert classification; there is no
+//   numeric-guess card type. Per-Schritte feedback labels in i18n.ts
+//   (`schritte.{exact,near,off,far}`) apply uniformly to all cards.
 
 /** Likert position of each classification on the 4-point scale.
  *  `falsch:0 … richtig:3` ascending matches CaRM's reporting. */
@@ -62,6 +99,16 @@ export function pointsForSchritte(s: Schritte): 1 | 0.66 | 0.33 | 0 {
   if (s === 1) return 0.66;
   if (s === 2) return 0.33;
   return 0;
+}
+
+/** Display string for one answer's points on the 0–1 per-card scale
+ *  (QuizCard redesign, 2026-05-29). German comma; "+" prefix for any
+ *  positive value; the 3-Schritte case shows a bare "0" (rendered in
+ *  rose on the card). Drives the on-card points badge. */
+export function pointsDisplay(s: Schritte): string {
+  const p = pointsForSchritte(s);
+  if (p === 0) return "0";
+  return "+" + String(p).replace(".", ",");
 }
 
 /** Module score as an integer percentage. Sum of per-question points
@@ -137,12 +184,22 @@ export function scoreBand(pct: number): ScoreBand {
 // → Erwischt). It does NOT appear in any user-vs-population sentence;
 // only genau-richtig counts do, since those are apples-to-apples.
 
-/** % of Erwachsene (18–70) the user joined for ONE question.
- *  - If user.classification === myth.correctClassification → returns
- *    `myth.populationCorrectPct` (the slice that matched the science).
- *  - Else → returns `100 − myth.populationCorrectPct` (the slice that
- *    did NOT match exactly).
- *  Rounded to the nearest integer for display. */
+/**
+ * @deprecated 2026-05-28 (CAR-9 / CAR-10, Harald review).
+ *
+ * Reframe of the per-question population reveal: was
+ * "Du gehörst zu N % der Erwachsenen, die diese Aussage genau richtig
+ * eingeordnet haben." — but `populationCorrectPct` is the mean Richtigkeit
+ * score (0–100), NOT the share of fully-correct respondents (see types.ts
+ * JSDoc + the SCORING METHODOLOGY block above). The reveal now says
+ * "Erwachsene (18–70) erreichen hier im Durchschnitt {X} von 100 Punkten."
+ * via the i18n key `result.row.populationMean` — sourced directly from
+ * `myth.populationCorrectPct` rounded to one decimal in FeedbackStrip.
+ *
+ * Function kept inert for one release cycle in case an out-of-tree
+ * branch still calls it. Retire alongside the `populationCorrectPct`
+ * rename in the follow-up Asana task.
+ */
 export function userJoinedPercent(
   myth: QuizMyth,
   userAnswer: Classification
@@ -152,6 +209,26 @@ export function userJoinedPercent(
     ? myth.populationCorrectPct
     : 100 - myth.populationCorrectPct;
   return Math.round(raw);
+}
+
+/** User's deck total in Punkte (0–N scale, N = number of myths).
+ *  Sum of pointsForSchritte across all answers. Rounded to one decimal.
+ *  Apples-to-apples with `populationExpectedExactCount()` — both use the
+ *  same per-question 0/0.33/0.66/1 Punkt ladder per CaRM §4.3.3. */
+export function userExpectedPunkte(
+  myths: QuizMyth[],
+  answers: CardAnswer[]
+): number {
+  if (myths.length === 0) return 0;
+  let sum = 0;
+  for (const a of answers) {
+    const myth = myths.find((m) => m.id === a.mythId);
+    if (!myth) continue;
+    sum += pointsForSchritte(
+      schritte(a.chosenClassification, myth.correctClassification)
+    );
+  }
+  return Math.round(sum * 10) / 10;
 }
 
 /** Expected number of genau-richtig answers a random Erwachsene (18–70)
@@ -165,6 +242,17 @@ export function populationExpectedExactCount(myths: QuizMyth[]): number {
     0
   );
   return Math.round(sum * 10) / 10;
+}
+
+/** Population's module score as a percentage (0–100): the mean
+ *  populationCorrectPct across the deck. Apples-to-apples with the user's
+ *  `moduleScore` (both are mean per-question Richtigkeit on a 0–100 scale).
+ *  Drives the result-page percentage-point delta (QuizCard redesign,
+ *  2026-05-29). */
+export function populationModuleScore(myths: QuizMyth[]): number {
+  if (myths.length === 0) return 0;
+  const sum = myths.reduce((acc, m) => acc + m.populationCorrectPct, 0);
+  return Math.round(sum / myths.length);
 }
 
 /** Signed delta `userExactCount − populationExpectedExactCount`, one

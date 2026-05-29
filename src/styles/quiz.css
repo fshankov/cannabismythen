@@ -436,10 +436,11 @@
   padding: 22px 22px 20px;
   display: flex;
   flex-direction: column;
-  border: 1px solid transparent;
-  border-radius: 30px;
-  background: #f5faff;
-  box-shadow: 0 20px 28px -8px rgba(0, 0, 0, 0.22);
+  /* 3px border so the post-answer tint reads (Figma 427-2503). */
+  border: 3px solid transparent;
+  border-radius: var(--quiz-card-radius);
+  background: var(--quiz-card-bg);
+  box-shadow: var(--quiz-card-shadow);
   /* Card never extends; long explanations scroll inside the back face. */
   overflow: hidden;
   box-sizing: border-box;
@@ -447,13 +448,13 @@
               box-shadow var(--transition-fast);
 }
 
-/* Back face keeps the original surface vocabulary — out of this scope. */
+/* Back face = same card surface, NO border (Figma 427-2144). */
 .quiz-card--flow .quiz-card__back {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  padding: 18px 18px 16px;
+  background: var(--quiz-card-bg);
+  border: 3px solid transparent;
+  border-radius: var(--quiz-card-radius);
+  box-shadow: var(--quiz-card-shadow);
+  padding: 24px 24px 20px;
   /* Stay rotated so it's hidden until the inner flips. */
   transform: rotateY(180deg);
 }
@@ -494,7 +495,217 @@
   font-weight: 700;
   text-align: left;
   padding-top: 4px;
-  margin: 0 0 var(--space-md);
+  margin: 0 0 var(--space-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   QuizCard redesign (Figma 427-2143, 2026-05-29)
+   4-button answer grid · on-card post-answer feedback (icon + phrase +
+   points badge) · back-face verdict pill. Adapted from the verified
+   quiz-card-preview.html into the global token system (no CSS Modules).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Post-answer border tint — front face only; the back has none. */
+.quiz-card--feedback-correct .quiz-card__front { border-color: var(--quiz-border-correct); }
+.quiz-card--feedback-almost  .quiz-card__front { border-color: var(--quiz-border-almost); }
+.quiz-card--feedback-wrong   .quiz-card__front { border-color: var(--quiz-border-wrong); }
+
+/* Statement dims while the feedback cluster is shown. */
+.quiz-card--flow .quiz-card__statement--dimmed {
+  opacity: 0.5;
+  transition: opacity 0.25s ease;
+}
+
+/* ── Bottom block: pins feedback + answer area to the card bottom. The
+   feedback cluster flows ABOVE the grid (in the empty gap) so it never
+   overlaps the buttons, at any card height. ─────────────────────────── */
+.quiz-card__bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Feedback cluster — icon stacked over a phrase + points row, centered. */
+.quiz-card__feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Answer area: eyebrow label + 4-button grid ── */
+.quiz-answer-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quiz-answer-area__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #116c4a;
+  text-align: left;
+  transition: opacity 0.25s ease;
+}
+.quiz-answer-area__label.is-hidden { opacity: 0; }
+
+.quiz-answer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: start;
+}
+
+.quiz-answer-btn {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 3px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.18s var(--ease-card),
+    transform 0.12s var(--ease-card),
+    filter 0.15s ease;
+}
+.quiz-answer-btn--falsch       { background: var(--quiz-ans-falsch); }
+.quiz-answer-btn--eher_falsch  { background: var(--quiz-ans-eher-falsch); }
+.quiz-answer-btn--eher_richtig { background: var(--quiz-ans-eher-richtig); }
+.quiz-answer-btn--richtig      { background: var(--quiz-ans-richtig); }
+
+.quiz-answer-btn:not(:disabled):hover  { transform: scale(1.08); filter: brightness(1.05); }
+.quiz-answer-btn:not(:disabled):active { transform: scale(0.93); filter: brightness(0.97); }
+.quiz-answer-btn:focus-visible { outline: 2px solid #116c4a; outline-offset: 2px; z-index: 1; }
+.quiz-answer-btn:disabled { cursor: default; }
+
+.quiz-answer-btn__icon { display: flex; align-items: center; justify-content: center; }
+.quiz-answer-btn__icon svg { display: block; }
+
+/* Post-answer button borders: selected (solid, by tier) + the correct
+   answer (dashed green) when the user didn't pick it. */
+.quiz-answer-btn.is-sel-correct { border-color: var(--quiz-btn-correct); }
+.quiz-answer-btn.is-sel-near    { border-color: var(--quiz-btn-near); }
+.quiz-answer-btn.is-sel-wrong   { border-color: var(--quiz-btn-wrong); }
+.quiz-answer-btn.is-correct-answer { border: 3px dashed var(--quiz-btn-corr-ans); }
+
+/* Answer labels (grid row 2). */
+.quiz-answer-grid__label {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ── Post-answer feedback cluster — the card's emotional peak ─────────
+   Icon above, then a phrase + points pill on one row, sitting in the gap
+   between the dimmed statement and the locked answer grid. */
+.quiz-card__feedback-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: quiz-fb-pop 0.3s var(--ease-card) both;
+}
+.quiz-card__feedback-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  animation: quiz-fb-rise 0.35s var(--ease-card) 0.05s both;
+}
+.quiz-card__feedback-phrase {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+.quiz-card__feedback-points {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 3px 11px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tier colours (icon + phrase + points share the tier colour). */
+.quiz-card__feedback-icon--exact { color: var(--quiz-fb-exact); }
+.quiz-card__feedback-icon--near  { color: var(--quiz-fb-near); }
+.quiz-card__feedback-icon--off   { color: var(--quiz-fb-off); }
+.quiz-card__feedback-icon--far   { color: var(--quiz-fb-far); }
+.quiz-card__feedback-line--exact { color: var(--quiz-fb-exact); }
+.quiz-card__feedback-line--near  { color: var(--quiz-fb-near); }
+.quiz-card__feedback-line--off   { color: var(--quiz-fb-off); }
+.quiz-card__feedback-line--far   { color: var(--quiz-fb-far); }
+
+@keyframes quiz-fb-pop {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes quiz-fb-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Back face: verdict pill under the statement ── */
+.quiz-card__back-pill {
+  margin: 0 0 12px;
+}
+
+/* Back-face statement tinted by the scientific verdict (Figma 427-2144).
+   Explicit colour with enough specificity to beat the base front-statement
+   green; underscore form matches `statement--${myth.correctClassification}`. */
+.quiz-card--flow .quiz-card__statement--back.statement--richtig { color: var(--quiz-back-richtig); }
+.quiz-card--flow .quiz-card__statement--back.statement--eher_richtig { color: var(--quiz-back-eher-richtig); }
+.quiz-card--flow .quiz-card__statement--back.statement--eher_falsch { color: var(--quiz-back-eher-falsch); }
+.quiz-card--flow .quiz-card__statement--back.statement--falsch { color: var(--quiz-back-falsch); }
+
+/* Back-face action buttons (Figma 427-2144) — flow-card overrides of the
+   shared .quiz-card__more-btn / __next-btn so the Lucide icons align and
+   the Details button uses the sage-translucent fill. */
+.quiz-card--flow .quiz-card__more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(182, 204, 185, 0.44);
+  color: #4b5563;
+  border: none;
+  border-radius: 12px;
+  margin-top: 0;
+}
+.quiz-card--flow .quiz-card__more-btn:hover {
+  background: rgba(182, 204, 185, 0.65);
+  color: #4b5563;
+}
+.quiz-card--flow .quiz-card__next-btn {
+  border-radius: 12px;
+}
+
+/* Reduced motion: drop the celebration animations. */
+@media (prefers-reduced-motion: reduce) {
+  .quiz-card__feedback-icon,
+  .quiz-card__feedback-line { animation: none; }
+}
+
+/* Mobile: slightly smaller feedback phrase. */
+@media (max-width: 640px) {
+  .quiz-card__feedback-phrase { font-size: 1.3rem; }
 }
 
 /* Chip pair: "Deine Antwort: [chip] · Wissenschaftlich: [chip]" on one
@@ -1035,26 +1246,43 @@
   );
 }
 
+/* Figma 427-2144 back-action buttons (2026-05-29): Details = fixed ~120px
+   (sage, left); Nächste = fills the remaining width (accent, right). Both
+   55px tall, radius 12.5px, weight 900, icon-gap 10px, row-gap ~19.5px. */
 .quiz-card--flow .quiz-card__back-actions {
   display: flex;
   flex-wrap: nowrap;
-  justify-content: space-between;
-  gap: 8px;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 18px;
   margin-top: 10px;
   flex-shrink: 0;
 }
 
-.quiz-card--flow .quiz-card__back-actions .quiz-card__next-btn {
-  padding: 9px 16px;
-  font-size: 0.82rem;
-  font-weight: 700;
+.quiz-card--flow .quiz-card__back-actions .quiz-card__more-btn {
+  flex: 0 0 120px;
+  height: 55px;
+  padding: 0 14px;
+  gap: 12px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  border-radius: 12.5px;
+  margin-top: 0;
 }
 
-.quiz-card--flow .quiz-card__back-actions .quiz-card__more-btn {
-  padding: 8px 14px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  margin-top: 0;
+.quiz-card--flow .quiz-card__back-actions .quiz-card__next-btn {
+  flex: 1 1 auto;
+  height: 55px;
+  padding: 0 16px;
+  gap: 12px;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 900;
+  border-radius: 12.5px;
+  /* Figma/HTML: the Nächste button is ALWAYS the brand green #2d6a4f
+     (--quiz-cta-bg), NOT the per-module accent — that would render red on
+     quiz-risiken-koerper-psyche (--classification-falsch). */
+  background: var(--quiz-cta-bg);
 }
 
 .quiz-card__next-btn {
@@ -1464,13 +1692,11 @@
   flex-direction: column;
 }
 
-/* Stage 3: dropped the binary correct/incorrect background tinting on
-   the back face. The Schritte verdict line + colored chips do the
-   diagnostic work; the card body stays neutral so the card itself
-   doesn't shout. (Plan D5 + the back-face rebuild.) */
-.quiz-card--answered:not(.quiz-card--flipped) .quiz-card__front {
-  border-color: var(--color-border);
-}
+/* 2026-05-29 (QuizCard redesign): the answered-not-flipped state is now
+   the on-card feedback state, where the front border is tinted by the
+   Schritte tier (see the .quiz-card--feedback-* rules earlier in this
+   file). The old Stage-3 neutral-gray override that lived here actively
+   fought that tint (higher specificity), so it was removed. */
 
 
 /* ── Card Content ─────────────────────────────────────────────── */
@@ -3240,6 +3466,54 @@ button.quiz-result__cta {
   color: rgba(255, 255, 255, 0.78);
 }
 
+/* 2026-05-28 (CAR-5) — tile meta + framing-question lines. The framing
+   question is the per-module "Wie gut kennst du …?" sentence that used
+   to live on the intro card (TitleCard, now deleted). It appears on
+   hover on desktop (progressive enhancement) and is always visible on
+   mobile / touch devices so the information stays reachable without a
+   two-tap reveal. The meta line ("N Mythen · ca. M Min.") is always
+   visible everywhere. */
+.quiz-select-card__framing {
+  margin: 0;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #fff;
+  /* Touch / mobile default — always visible. The desktop-hover media
+     query below overrides this with an opacity transition. */
+}
+
+/* 2026-05-29 (Fedor) — meta line pinned centered directly above the CTA
+   (which sits at bottom:40, height 47px), always visible on every tile. */
+.quiz-select-card__meta {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  bottom: 99px;
+  margin: 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+@media (hover: hover) and (min-width: 720px) {
+  .quiz-select-card__framing {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition:
+      opacity 180ms ease,
+      max-height 180ms ease;
+  }
+  .quiz-select-card:hover .quiz-select-card__framing,
+  .quiz-select-card:focus-within .quiz-select-card__framing {
+    opacity: 1;
+    max-height: 160px;
+  }
+}
+
 /* White CTA pill at the bottom — Figma calls it "Card / CTA-Button".
    The text + icon color comes from the per-theme --cta-text variable. */
 .quiz-select-card__cta {
@@ -3505,11 +3779,18 @@ button.quiz-result__cta {
 .fakten-card__face--back {
   transform: rotateY(180deg);
   /* Figma 427-3835: card back keeps a white surface but drops the
-     border for a cleaner edge — only the shadow communicates lift. */
+     border for a cleaner edge — only the shadow communicates lift.
+     Radius + padding are % of the 320-wide Figma card. */
   border: none;
-  border-radius: 10.4%;
+  border-radius: 11.72%;
   box-shadow: 0 19.5px 39px -9.4px rgba(0, 0, 0, 0.25);
-  padding: 8.9%;
+  padding: 10%;
+}
+
+/* Tighter vertical rhythm on the back face so the full body summary
+   fits above the green CTA across all 42 myths. */
+.fakten-card__face--back .fakten-card__face-body {
+  gap: 10px;
 }
 
 /* ── Verdict-coloured front face (Figma 427-2043, 2026-05-28) ──────
@@ -3522,12 +3803,12 @@ button.quiz-result__cta {
 .fakten-card__face--front {
   background: none;
   border: none;
-  /* Figma rounded-[37.5px] on a 360-wide card = 10.4% → use percentage so
-     the radius scales with card size. */
-  border-radius: 10.4%;
+  /* Figma 427-2044: card is 320×500, rounded-[37.5px], pt-88 px-32 pb-32.
+     As % of the 320 card width: radius 37.5/320 = 11.72%, padding
+     88/320 = 27.5% top, 32/320 = 10% sides + bottom. */
+  border-radius: 11.72%;
   box-shadow: 0 19.5px 39px -9.4px rgba(0, 0, 0, 0.25);
-  /* 88/360 top, 32/360 sides, 32/360 bottom from Figma. */
-  padding: 24.4% 8.9% 8.9%;
+  padding: 27.5% 10% 10%;
   color: #ffffff;
 }
 
@@ -3561,8 +3842,10 @@ button.quiz-result__cta {
 }
 
 .fakten-card__face--front .fakten-card__face-body {
-  align-items: center;
-  text-align: center;
+  /* Default `align-items: stretch` so the title spans the full width and
+     anchors to the left edge of the padding box. CategoryFooter keeps its
+     own internal centring via the --on-color modifier. */
+  text-align: left;
 }
 
 .fakten-card__statement {
@@ -3575,18 +3858,20 @@ button.quiz-result__cta {
 
 /* Front-face title: Inter Black Italic, white, large. cqi tracks the
    card's own inline size (container-type on .fakten-card), so the
-   title stays at ~7% of card width like Figma's 25/360. */
+   title stays at ~7.8% of card width like Figma's 25/320. Anchored to
+   the top-left of its flex space so the headline sits in the upper
+   third of the card (matches Figma frame). The auto-margin on the
+   CategoryFooter beneath it absorbs the rest of the vertical space
+   and pins the footer to the bottom. */
 .fakten-card__face--front .fakten-card__statement {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex: 0 0 auto;
   color: #ffffff;
   font-style: italic;
   font-weight: 900;
-  font-size: clamp(1.05rem, 7cqi, 1.6rem);
+  font-size: clamp(1.05rem, 7.8cqi, 1.6rem);
   line-height: 1.47;
   letter-spacing: 0;
+  text-align: left;
   word-break: break-word;
 }
 
@@ -3597,8 +3882,10 @@ button.quiz-result__cta {
   margin: 0;
   font-style: italic;
   font-weight: 900;
-  font-size: clamp(1.1rem, 6cqi, 1.4rem);
-  line-height: 1.25;
+  /* Headline is the short ~1–3-word label (text_short_de), not the long
+     statement, so it fits on one or two lines at smaller sizes. */
+  font-size: clamp(0.95rem, 5.5cqi, 1.2rem);
+  line-height: 1.2;
   word-break: break-word;
   color: var(--verdict-heading-color, var(--color-text));
 }
@@ -3610,19 +3897,11 @@ button.quiz-result__cta {
 
 .fakten-card__summary {
   margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.5;
+  /* Compact body size so the longest cardShortSummary in the dataset
+     (m05 ≈ 466 chars) fits cleanly above the CTA without clipping. */
+  font-size: 0.78rem;
+  line-height: 1.45;
   color: var(--color-text-secondary);
-  /* Card height is fixed by aspect-ratio; clamp to 6 lines so the
-     green CTA below never gets pushed off the card. Full summary is
-     still available in the popup when the user taps in. */
-  display: -webkit-box;
-  -webkit-line-clamp: 6;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  /* Soft fade at the cut so the truncation reads as intentional. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent);
-          mask-image: linear-gradient(to bottom, #000 78%, transparent);
 }
 
 /* The outer card is itself a <button>; this span just carries the
@@ -3638,6 +3917,13 @@ button.quiz-result__cta {
   background: var(--color-accent);
   border-radius: 8px;
   white-space: nowrap;
+  transition: background-color 140ms ease-out;
+}
+
+/* Hover/focus state propagates from the outer .fakten-card button. */
+.fakten-card:hover .fakten-card__cta,
+.fakten-card:focus-visible .fakten-card__cta {
+  background: color-mix(in srgb, var(--color-accent) 86%, black);
 }
 
 /* Touch / no-hover devices: skip the flip entirely. The front face
@@ -3751,7 +4037,9 @@ button.quiz-result__cta {
    dashboard.css) and reapply the glassmorphism look for the inline
    Fakten-Karten use. */
 .fakten-filter-bar .carm-filter-search-row {
-  position: static;
+  /* `relative` so the absolutely-positioned magnifier anchors to this
+     glass row and centres vertically against it. */
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -3765,6 +4053,61 @@ button.quiz-result__cta {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   -webkit-backdrop-filter: blur(6px);
           backdrop-filter: blur(6px);
+}
+
+/* Magnifier: absolutely centred on the right edge of the glass row
+   (mirrors the Daten-Explorer drawer's left-side absolute icon). The
+   18-px SVG reads at the field's scale. */
+.fakten-filter-bar .carm-filter-search-row__icon {
+  position: absolute;
+  /* Unset the dashboard rule's `left: 18px`; with both left + right set
+     the icon would stretch full-width and the SVG would render on the
+     left. `left: auto` lets it shrink to the 18-px SVG at the right. */
+  left: auto;
+  right: 25px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: rgba(64, 73, 67, 0.55);
+}
+
+/* When the user has typed, the clear (✕) button renders on the right;
+   hide the magnifier so the two don't collide. */
+.fakten-filter-bar
+  .carm-filter-search-row:has(.carm-filter-search-row__clear)
+  .carm-filter-search-row__icon {
+  display: none;
+}
+
+/* The input sits inside the outer glass row; strip its own pill chrome
+   so the single glass row is the only visible chrome. Text left-aligned
+   (type-on-the-left, like Daten-Explorer); right padding clears the
+   absolutely-positioned magnifier. */
+.fakten-filter-bar .carm-filter-search-row__input {
+  flex: 1 1 auto;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1c1a;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0 32px 0 0;
+  box-shadow: none;
+  height: auto;
+  min-height: 0;
+  text-align: left;
+}
+
+.fakten-filter-bar .carm-filter-search-row__input:focus,
+.fakten-filter-bar .carm-filter-search-row__input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.fakten-filter-bar .carm-filter-search-row__input::placeholder {
+  color: rgba(64, 73, 67, 0.4);
+  font-weight: 500;
 }
 
 /* Two equal columns, each capped so the chrome stays readable on
@@ -3794,22 +4137,20 @@ button.quiz-result__cta {
   width: 100%;
 }
 
-/* Center slot adds explicit positioning so the absolute panel below
-   anchors to the search input. */
-.fakten-filter-bar__center {
-  position: relative;
-}
-
 .fakten-search__panel {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
   right: 0;
   z-index: 25;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  /* Glass chrome matches the trigger row above so the search + panel
+     read as one continuous element rather than two separate surfaces. */
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   padding: 4px;
   animation: fakten-search-fade-in 140ms ease-out;
 }
@@ -3925,7 +4266,8 @@ button.quiz-result__cta {
 }
 
 .fakten-filter-dropdown__trigger {
-  /* Glassmorphism chrome matching the search row beside it. */
+  /* Glassmorphism chrome matching the search row beside it. Type spec
+     mirrors Figma 434:205: Inter Bold 14 px / #1a1c1a. */
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
@@ -3938,9 +4280,9 @@ button.quiz-result__cta {
           backdrop-filter: blur(6px);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--color-text);
+  color: #1a1c1a;
   cursor: pointer;
   transition:
     background var(--transition-fast),
@@ -3962,7 +4304,11 @@ button.quiz-result__cta {
 
 .fakten-filter-dropdown__label {
   flex: 1 1 auto;
-  text-align: left;
+  text-align: center;
+  /* Pull the label back to optical centre — chevron at the left already
+     takes its share of the row, so a literal text-align:center would
+     bias the label rightward. The small negative inset compensates. */
+  margin-right: 22px;
 }
 
 .fakten-filter-dropdown__count {
@@ -3979,7 +4325,9 @@ button.quiz-result__cta {
 }
 
 /* Anchored panel — appears under the trigger, opens downward. On
-   narrow viewports it stretches to fit. */
+   narrow viewports it stretches to fit. Glass chrome mirrors the
+   trigger button above so the dropdown reads as a continuation of the
+   trigger, not a separate surface. */
 .fakten-filter-dropdown__panel {
   position: absolute;
   top: calc(100% + 6px);
@@ -3987,10 +4335,12 @@ button.quiz-result__cta {
   z-index: 20;
   min-width: 320px;
   max-width: min(420px, calc(100vw - 24px));
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   padding: 4px;
   animation: fakten-filter-dropdown-fade-in 140ms ease-out;
 }
@@ -4093,9 +4443,6 @@ button.quiz-result__cta {
   }
 }
 
-/* (The standalone .fakten-explorer__count line was retired 2026-05-14;
-   the result count now lives inside .fakten-filter-bar__left as a chip.) */
-
 /* ── Fakten-Karten grid (flush-to-edges, 2026-05-14) ─────────────
    Three columns at desktop flush to the container's left + right
    rails so the leftmost card aligns with the page heading and the
@@ -4112,7 +4459,11 @@ button.quiz-result__cta {
 }
 
 .fakten-grid .quiz-card__cell {
-  aspect-ratio: 1 / 1.4;
+  /* Figma 427-2043 ships cards at 320 × 500 (1:1.5625). Matching that
+     proportion fixes both the skewed-arrow look (the background SVGs
+     are positioned by % of the Figma frame) and the back-face CTA
+     clipping (the previous 1:1.4 left too little vertical room). */
+  aspect-ratio: 1 / 1.5625;
   max-width: 280px;
   width: 100%;
   /* Release the generic `.quiz-card__cell { min-height: 340px }` rule
@@ -4131,18 +4482,16 @@ button.quiz-result__cta {
   }
 }
 
-/* ── Mobile filter bar: collapse to a clean two-row stack ──────── */
+/* ── Mobile filter bar: stack the two controls vertically ────────
+   At ≤720 px the two-column grid collapses to a single column so
+   each control reads full-width without forcing the user to read
+   shrunken text. */
 @media (max-width: 720px) {
   .fakten-filter-bar {
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "search   dropdown"
-      "count    count";
+    grid-template-columns: 1fr;
     row-gap: var(--space-sm);
+    max-width: none;
   }
-  .fakten-filter-bar__left   { grid-area: count;    justify-self: start; }
-  .fakten-filter-bar__center { grid-area: search;   max-width: none; }
-  .fakten-filter-bar__right  { grid-area: dropdown; }
 }
 
 /* ── Card filter animation ───────────────────────────────────── */

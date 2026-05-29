@@ -22,8 +22,26 @@ export interface QuizMyth {
   correctClassification: Classification;
   /** 1–2 sentence explanation shown after answering */
   explanationKey: string;
-  /** % of Erwachsene (18–70) in the CaRM-Studie who answered the myth
-   *  exactly correctly. Reference: feedback-texte.mdoc table. */
+  /**
+   * Mean Richtigkeit (0–100) for this myth across Erwachsene (18–70) in
+   * der CaRM-Studie — NOT a binary "% who got it exactly right".
+   *
+   * Each respondent's Richtigkeit per myth is the standardised distance
+   * between their Likert pick (richtig / eher richtig / eher falsch /
+   * falsch) and the scientific classification, mapped
+   * 0 Schritte → 100, 1 → 66.67, 2 → 33.33, 3 → 0
+   * (CaRM Abschlussbericht §4.3.3 + Standardisierungstabelle, p. 51 ff.).
+   * The per-myth value is the mean Richtigkeit across the Erwachsene
+   * 18–70 sample (n = 2.097).
+   *
+   * Source: src/content/quiz/feedback-texte.mdoc Richtigkeit-table.
+   *
+   * @todo 2026-05-28 — rename to `populationMeanRichtigkeit` in a
+   *   follow-up Asana task (cross-file refactor deferred from
+   *   CAR-9/CAR-10 to keep this session tight). See the
+   *   "SCORING METHODOLOGY" header in `quizData.ts` for the full
+   *   user-vs-population symmetry argument.
+   */
   populationCorrectPct: number;
   /** Slug for the myth detail page, e.g. "m01-allheilmittel" */
   mythPageSlug: string;

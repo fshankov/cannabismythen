@@ -434,23 +434,29 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           </button>
         )}
       </div>
-      <button
-        type="button"
-        className="carm-btn carm-explorer__filter"
-        onClick={() => setFilterDrawerOpen(true)}
-        aria-label={t('filter.button', 'de')}
-      >
-        <Filter size={14} strokeWidth={2} aria-hidden="true" />
-        {t('filter.button', 'de')}
-        {activeFilterCount > 0 && (
-          <span
-            className="carm-btn__badge"
-            aria-label={`${activeFilterCount} aktiv`}
-          >
-            {activeFilterCount}
-          </span>
-        )}
-      </button>
+      {/* Filter targets myth-classification state (categoryIds, mythIds,
+          verdictFilter) which doesn't apply to source-channel views.
+          Hide it on Informationsquellen / Informationsquellen 2 /
+          Quellen-Tabelle per Fedor's 2026-05-28 request. */}
+      {!isSourceView && (
+        <button
+          type="button"
+          className="carm-btn carm-explorer__filter"
+          onClick={() => setFilterDrawerOpen(true)}
+          aria-label={t('filter.button', 'de')}
+        >
+          <Filter size={14} strokeWidth={2} aria-hidden="true" />
+          {t('filter.button', 'de')}
+          {activeFilterCount > 0 && (
+            <span
+              className="carm-btn__badge"
+              aria-label={`${activeFilterCount} aktiv`}
+            >
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+      )}
       {exportOnlyAction}
     </>
   );
@@ -474,12 +480,15 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           script={RUNDGANG_SCRIPTS[state.view]}
         />
 
-        {/* Newton Variante A intro paragraph (AI draft, see ISD review).
-            Full-width within the dashboard. Cross-references the project
-            background and nudges visitors toward the green Rundgang
-            badge in the toolbar. */}
-        <section className="carm-explorer__intro" aria-label="Daten-Explorer — Einleitung">
-          <p>
+        {/* 2026-05-28: Fakten-Karten-style page header — large H1 +
+            subtitle paragraph. Same visual language as
+            `.fakten-page-header*` on /fakten-karten/. The Newton-voice
+            intro that lived in `.carm-explorer__intro` previously
+            becomes the subtitle. AI-drafted German (flagged for ISD
+            review). */}
+        <header className="carm-explorer__page-header">
+          <h1 className="carm-explorer__page-header__h1">Daten-Explorer</h1>
+          <p className="carm-explorer__page-header__sub">
             Hier kannst du die Forschungsdaten erkunden, die im CaRM-Projekt 2024
             in Deutschland erhoben wurden. Die Sektion{' '}
             <a href="/projekt/">„Über das Projekt"</a> erklärt ausführlich, wie
@@ -487,7 +496,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             vierstufigen Rundgang — tippe auf den grünen Button mit Fragezeichen,
             wenn du beim Navigieren Hilfe brauchst.
           </p>
-        </section>
+        </header>
 
         {/* Two-group tab bar with flex spacers (2026-05-28 designer
             brief). ViewTabs renders twice — once for LEFT myth views,
@@ -820,6 +829,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         groupIds={state.groupIds}
         indicator={state.indicator}
         view={state.view}
+        totalMyths={data.myths.length}
         getChart={getActiveChart}
         chartChrome={() => {
           // Per-tab chart chrome. Streifen + Sources have their own

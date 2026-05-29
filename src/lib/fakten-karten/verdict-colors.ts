@@ -3,9 +3,9 @@
  * card chrome (gradient background, back-side title color, background arrow).
  *
  * Extracted from Figma node 427-2043 (card front) + 427-3899 (back-side
- * heading colors). Positioning values are percentages of the 360 × 500
- * mobile card frame; the card itself uses `aspect-ratio: 360/500` so the
- * arrow stays in the same visual position across responsive widths.
+ * heading colors). Positioning values are percentages of the 320 × 500 card
+ * frame (`aspect-ratio: 1 / 1.5625`), so the arrow stays in the same visual
+ * position across responsive widths.
  */
 import type { CorrectnessClass } from "../dashboard/types";
 
@@ -44,7 +44,7 @@ const VERDICT_VISUALS: Record<CorrectnessClass, VerdictVisual> = {
     headingColor: "#3D7360",
     arrowSrc: ARROW_MAIN,
     arrowTransform: "rotate(180deg)",
-    arrowFrame: { top: "29.2%", left: "-28.6%", width: "128.3%", height: "37.2%" },
+    arrowFrame: { top: "29.2%", left: "-32.2%", width: "144.4%", height: "37.2%" },
   },
   eher_richtig: {
     gradient:
@@ -52,7 +52,7 @@ const VERDICT_VISUALS: Record<CorrectnessClass, VerdictVisual> = {
     headingColor: "#92B59A",
     arrowSrc: ARROW_MAIN,
     arrowTransform: "rotate(-135deg) scaleY(-1) rotate(180deg)",
-    arrowFrame: { top: "38.2%", left: "-31.9%", width: "86.4%", height: "62.2%" },
+    arrowFrame: { top: "38.2%", left: "-35.9%", width: "97.2%", height: "62.2%" },
   },
   eher_falsch: {
     gradient:
@@ -60,7 +60,7 @@ const VERDICT_VISUALS: Record<CorrectnessClass, VerdictVisual> = {
     headingColor: "#FBAF35",
     arrowSrc: ARROW_MAIN,
     arrowTransform: "rotate(135deg) rotate(180deg)",
-    arrowFrame: { top: "27%", left: "-32.5%", width: "86.4%", height: "62.2%" },
+    arrowFrame: { top: "27%", left: "-36.6%", width: "97.2%", height: "62.2%" },
   },
   falsch: {
     gradient:
@@ -68,17 +68,20 @@ const VERDICT_VISUALS: Record<CorrectnessClass, VerdictVisual> = {
     headingColor: "#C86A7C",
     arrowSrc: ARROW_MAIN,
     arrowTransform: "scaleY(-1) rotate(180deg)",
-    arrowFrame: { top: "24.6%", left: "-28.6%", width: "128.3%", height: "37.2%" },
+    arrowFrame: { top: "24.6%", left: "-32.2%", width: "144.4%", height: "37.2%" },
   },
-  // Figma's back-side header palette (node 427-3899) only ships 4 colors;
-  // for the "keine Aussage" verdict we reuse the dark stop of the front
-  // gradient so back and front share the same warm-gray family.
+  // Figma "topic=none" (node 427-2100) uses the same vertical-line SVG as
+  // the other arrows, wrapped in a `-rotate-90` element. We replicate that
+  // here by sizing the wrapper tall-thin (32.096 × 186 in Figma px) and
+  // positioning it so rotate(-90deg) around centre lands the rotated
+  // bounding box at the visual slot (left:32 top:277 w:186 h:32.096 on a
+  // 320 × 500 card). See plan file for the centre-of-rotation math.
   no_classification: {
     gradient: "linear-gradient(148.11deg, #CCC4CC 2.19%, #7B7B7B 100%)",
     headingColor: "#7B7B7B",
     arrowSrc: ARROW_LINE,
-    arrowTransform: "rotate(-90deg) rotate(180deg)",
-    arrowFrame: { top: "55.4%", left: "8.9%", width: "51.7%", height: "6.4%" },
+    arrowTransform: "rotate(-90deg)",
+    arrowFrame: { top: "40%", left: "34.06%", width: "10.03%", height: "37.2%" },
   },
 };
 

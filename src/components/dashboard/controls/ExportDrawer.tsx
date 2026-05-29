@@ -31,6 +31,7 @@ import {
   downloadChartPng,
   downloadChartSvg,
   chartPreviewDataUrl,
+  buildExportFilename,
   type ChartHandle,
 } from '../../../lib/dashboard/export';
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
@@ -48,6 +49,9 @@ interface Props {
   indicator: Indicator;
   /** Slug used in PNG / SVG filenames (e.g. 'balken', 'strips', 'sources'). */
   view: string;
+  /** Full myth count (unfiltered) — lets the export filename detect the
+   *  "whole deck" case (→ `rohdaten`) vs a filtered subset (CAR-4). */
+  totalMyths?: number;
   /** Returns the active chart handle for image exports. May be `null` when
    *  the active view doesn't expose a chart (Tabelle). */
   getChart: () => ChartHandle | null;
@@ -72,6 +76,7 @@ export default function ExportDrawer({
   groupIds,
   indicator,
   view,
+  totalMyths,
   getChart,
   chartChrome,
 }: Props) {
@@ -115,12 +120,24 @@ export default function ExportDrawer({
   const hasChart = !!getChart();
 
   const handleCsv = () => {
-    downloadFullCSV(myths, metrics, groupIds);
+    downloadFullCSV(
+      myths, metrics, groupIds,
+      buildExportFilename({
+        kind: 'data', ext: 'csv', view, group: groupIds[0] ?? 'adults',
+        myths, totalMyths,
+      }),
+    );
     onClose();
   };
 
   const handleJson = () => {
-    downloadFullJSON(myths, metrics, groupIds);
+    downloadFullJSON(
+      myths, metrics, groupIds,
+      buildExportFilename({
+        kind: 'data', ext: 'json', view, group: groupIds[0] ?? 'adults',
+        myths, totalMyths,
+      }),
+    );
     onClose();
   };
 
@@ -163,6 +180,8 @@ export default function ExportDrawer({
       view,
       indicator,
       group: groupIds[0] ?? 'adults',
+      myths,
+      totalMyths,
     });
     onClose();
   };
@@ -179,6 +198,8 @@ export default function ExportDrawer({
       view,
       indicator,
       group: groupIds[0] ?? 'adults',
+      myths,
+      totalMyths,
     });
     onClose();
   };

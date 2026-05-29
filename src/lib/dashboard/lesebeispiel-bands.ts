@@ -151,17 +151,21 @@ export function lesebeispielHtml(
     `<div class="lesebeispiel-tooltip">` +
     `<div class="lesebeispiel-tooltip__heading">Lesebeispiel für die Gruppe der Erwachsenen</div>` +
     `<p class="lesebeispiel-tooltip__body">` +
-    `In der Zielgruppe der Erwachsenen kennen <strong>${kenntnis}&nbsp;%</strong> diesen Mythos. ` +
+    // Sentences 1–4 reworded in the 2026-05-28 Harald sweep — must stay
+    // identical to the per-indicator versions in
+    // `lesebeispielIndicatorHtmlForGroup` (group="adults") so the hover
+    // sentence === the matching sentence in this full paragraph.
+    `Unter den Erwachsenen kennen <strong>${kenntnis}&nbsp;%</strong> diesen Mythos. ` +
     `Das ist ein <strong>${anteilLabel(kenntnis)}</strong>. ` +
-    `Die Bedeutung dieses Mythos für die Erwachsenen, die diesen Mythos kennen <strong>${kenntnis}&nbsp;%</strong>, ` +
-    `für ihren Umgang mit Cannabis hat ein <strong>${niveauLabel(bedeutung)}</strong> ` +
+    `Unter den Erwachsenen, die diesen Mythos kennen (<strong>${kenntnis}&nbsp;%</strong>), ` +
+    `hat die Bedeutung des Mythos für ihren Umgang mit Cannabis ein <strong>${niveauLabel(bedeutung)}</strong> ` +
     `von <strong>${bedeutung}&nbsp;Punkten</strong>. ` +
-    `Die Beurteilung des Mythos in Übereinstimmung mit der wissenschaftlichen Klassifizierung erreicht ` +
-    `bei diesen Erwachsenen ein <strong>${niveauLabel(beurteilung)}</strong> ` +
+    `Unter den Erwachsenen erreicht die Beurteilung des Mythos in Übereinstimmung mit der ` +
+    `wissenschaftlichen Klassifizierung ein <strong>${niveauLabel(beurteilung)}</strong> ` +
     `von <strong>${beurteilung}&nbsp;Punkten</strong>. ` +
     `Aus der individuellen Bedeutung und der Beurteilung der Richtigkeit resultiert ein ` +
     `<strong>${niveauLabel(praevention)}</strong> für die Präventionsbedeutung ` +
-    `(<strong>${praevention}&nbsp;Punkte</strong>) für die Zielgruppe der Erwachsenen, ` +
+    `(<strong>${praevention}&nbsp;Punkte</strong>) für jene Erwachsenen, ` +
     `die diesen Mythos kennen. ` +
     `Mit Blick auf die gesamte volljährige Bevölkerung (nicht nur diejenigen, die den Mythos schon ` +
     `kennen) ergibt sich ein <strong>${niveauLabel(bevoelkerung)}</strong> für die Präventionsbedeutung ` +
@@ -233,33 +237,59 @@ export function lesebeispielIndicatorHtmlForGroup(
 
   const rounded = Math.round(v as number);
   const intro = GROUP_INTRO_GENITIVE[group];
-  const demonstrative = GROUP_DEMONSTRATIVE[group];
+  // `GROUP_DEMONSTRATIVE` is no longer used here — the correctness
+  // sentence switched to the audience-first "Unter den ${intro} …"
+  // form in the 2026-05-28 Harald sweep. The const stays exported for
+  // any external caller.
   const populationNoun = GROUP_POPULATION_NOUN[group];
 
   let sentence = "";
   if (indicator === "awareness") {
+    // Kenntnis. Harald-pattern (2026-05-28): anchor the audience first
+    // with "Unter den …" instead of the report-jargon "In der Zielgruppe
+    // der …".
+    // EN: "Among the {group}, {X}% know this myth. That is a {level}."
+    // AI-adapted from Harald's pattern, pending ISD review.
     sentence =
-      `In der Zielgruppe der ${intro} kennen <strong>${rounded}&nbsp;%</strong> diesen Mythos. ` +
+      `Unter den ${intro} kennen <strong>${rounded}&nbsp;%</strong> diesen Mythos. ` +
       `Das ist ein <strong>${anteilLabel(rounded)}</strong>.`;
   } else if (indicator === "significance") {
     if (metric.awareness === null) return null;
     const kenntnis = Math.round(metric.awareness as number);
+    // Bedeutung — CAR-2. ISD-reviewed wording (Harald 2026-05-28):
+    // audience+condition first, Kenntnis % moved into parentheses.
+    // EN: "Among the {group} who know this myth (X%), the significance of
+    // the myth for their handling of cannabis has a {level} of {Y} points."
     sentence =
-      `Die Bedeutung dieses Mythos für die ${intro}, die diesen Mythos kennen ` +
-      `<strong>${kenntnis}&nbsp;%</strong>, für ihren Umgang mit Cannabis hat ein ` +
+      `Unter den ${intro}, die diesen Mythos kennen (<strong>${kenntnis}&nbsp;%</strong>), ` +
+      `hat die Bedeutung des Mythos für ihren Umgang mit Cannabis ein ` +
       `<strong>${niveauLabel(rounded)}</strong> von <strong>${rounded}&nbsp;Punkten</strong>.`;
   } else if (indicator === "correctness") {
+    // Beurteilung. Harald-pattern: audience-first "Unter den …" (drops the
+    // demonstrative "bei diesen …" framing).
+    // EN: "Among the {group}, the assessment of the myth in agreement with
+    // the scientific classification reaches a {level} of {Y} points."
+    // AI-adapted from Harald's pattern, pending ISD review.
     sentence =
-      `Die Beurteilung des Mythos in Übereinstimmung mit der wissenschaftlichen Klassifizierung ` +
-      `erreicht bei ${demonstrative} <strong>${niveauLabel(rounded)}</strong> ` +
+      `Unter den ${intro} erreicht die Beurteilung des Mythos in Übereinstimmung mit der ` +
+      `wissenschaftlichen Klassifizierung ein <strong>${niveauLabel(rounded)}</strong> ` +
       `von <strong>${rounded}&nbsp;Punkten</strong>.`;
   } else if (indicator === "prevention_significance") {
+    // Prävention — CAR-3. ISD-reviewed wording (Harald 2026-05-28):
+    // "für die Zielgruppe der …" → the simpler demonstrative "für jene …".
+    // EN: "From the individual significance and the assessment of
+    // correctness results a {level} for the prevention significance
+    // ({Y} points) for those {group} who know this myth."
     sentence =
       `Aus der individuellen Bedeutung und der Beurteilung der Richtigkeit resultiert ein ` +
       `<strong>${niveauLabel(rounded)}</strong> für die Präventionsbedeutung ` +
-      `(<strong>${rounded}&nbsp;Punkte</strong>) für die Zielgruppe der ${intro}, ` +
+      `(<strong>${rounded}&nbsp;Punkte</strong>) für jene ${intro}, ` +
       `die diesen Mythos kennen.`;
   } else {
+    // Bevölkerungsrelevanz — intentionally NOT changed in the Harald
+    // 2026-05-28 sweep. This is a whole-population statement ("Mit Blick
+    // auf die gesamte … Bevölkerung"), not an audience-subset sentence, so
+    // neither the "Zielgruppe der" nor the %-parenthetical pattern applies.
     // population_relevance — populationNoun is guaranteed non-null
     // by the early-return above.
     sentence =

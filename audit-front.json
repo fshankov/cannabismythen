@@ -1,0 +1,118 @@
+{
+  "viewport": {
+    "w": 1280,
+    "h": 900
+  },
+  "headerHeightVar": "161.6640625px",
+  "siteHeader": {
+    "x": 0,
+    "y": 0,
+    "w": 1280,
+    "h": 161.7
+  },
+  "headerBar": {
+    "x": 90,
+    "y": 53.4,
+    "w": 1100,
+    "h": 39.2
+  },
+  "progressSlot": {
+    "x": 0,
+    "y": 52.4,
+    "w": 1280,
+    "h": 108.2
+  },
+  "emptyStripPresent": true,
+  "emptyStripRect": {
+    "x": 90,
+    "y": 92.7,
+    "w": 1100,
+    "h": 68
+  },
+  "card": {
+    "x": 447.5,
+    "y": 199.9,
+    "w": 385,
+    "h": 543.5,
+    "borderRadius": "8px",
+    "boxShadow": "none"
+  },
+  "cardBottomVsViewport": -156.6,
+  "face": {
+    "background": "rgb(245, 250, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+    "borderTopWidth": "3px",
+    "borderRadius": "37.5px"
+  },
+  "statement": {
+    "text": "Cannabiskonsum hilft bei Schlafproblemen",
+    "fontSize": "33.6px",
+    "fontWeight": "900",
+    "fontStyle": "italic",
+    "color": "rgb(45, 106, 79)",
+    "textAlign": "center"
+  },
+  "buttons": [
+    {
+      "i": 0,
+      "cls": "quiz-answer-btn--falsch",
+      "x": 476.4,
+      "y": 628.1,
+      "w": 74.2,
+      "h": 74.2,
+      "bg": "rgb(255, 233, 237)",
+      "br": "12px"
+    },
+    {
+      "i": 1,
+      "cls": "quiz-answer-btn--eher_falsch",
+      "x": 561.9,
+      "y": 627.3,
+      "w": 74.2,
+      "h": 74.2,
+      "bg": "rgb(255, 239, 188)",
+      "br": "12px"
+    },
+    {
+      "i": 2,
+      "cls": "quiz-answer-btn--eher_richtig",
+      "x": 647.4,
+      "y": 626.5,
+      "w": 74.2,
+      "h": 74.2,
+      "bg": "rgb(225, 235, 226)",
+      "br": "12px"
+    },
+    {
+      "i": 3,
+      "cls": "quiz-answer-btn--richtig",
+      "x": 732.9,
+      "y": 625.7,
+      "w": 74.2,
+      "h": 74.2,
+      "bg": "rgb(209, 232, 209)",
+      "br": "12px"
+    }
+  ],
+  "labels": [
+    {
+      "t": "Falsch",
+      "fs": "9.92px",
+      "color": "rgb(107, 114, 128)"
+    },
+    {
+      "t": "Eher falsch",
+      "fs": "9.92px",
+      "color": "rgb(107, 114, 128)"
+    },
+    {
+      "t": "Eher richtig",
+      "fs": "9.92px",
+      "color": "rgb(107, 114, 128)"
+    },
+    {
+      "t": "Richtig",
+      "fs": "9.92px",
+      "color": "rgb(107, 114, 128)"
+    }
+  ]
+}
