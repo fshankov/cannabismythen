@@ -27,7 +27,7 @@ import {
   HeartPulse,
   Brain,
   Meh,
-  Users,
+  UsersRound,
   Scale,
   Landmark,
   CircleAlert,
@@ -72,7 +72,7 @@ export const CATEGORY_META: Record<string, CategoryMetaEntry> = {
   },
   'Soziale Auswirkungen und Leistungsfähigkeit': {
     slug: 'sozial',
-    icon: Users,
+    icon: UsersRound, // handoff `fk-soziales` — round-avatar people glyph
     strip: '#ec4899', // Pink-500
     label: '#be185d', // Pink-700
   },

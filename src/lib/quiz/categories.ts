@@ -22,7 +22,7 @@ import {
   BriefcaseMedical,
   Brain,
   Meh,
-  Landmark,
+  UsersRound,
   ShieldAlert,
   Dices,
   CircleAlert,
@@ -70,7 +70,9 @@ export const QUIZ_THEME_META: Record<string, QuizThemeMetaEntry> = {
     shortTitle: 'Stimmung & Wahrnehmung',
   },
   'quiz-soziales-bevoelkerung': {
-    icon: Landmark,
+    // handoff `quiz-soziales` → UsersRound (people), distinct from the
+    // Landmark used for fakten-karten "Gesetz". 2026-05-30 icon sync.
+    icon: UsersRound,
     theme: 'indigo',
     count: 10,
     shortTitle: 'Soziales & Bevölkerung',

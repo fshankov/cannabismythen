@@ -13,5 +13,5 @@
       "@layouts/*": ["src/layouts/*"]
     }
   },
-  "exclude": ["scripts", "_local", "dist", ".netlify"]
+  "exclude": ["scripts", "_local", "dist", ".netlify", "src/lib/icons/_handoff"]
 }

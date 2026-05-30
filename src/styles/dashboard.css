@@ -5029,6 +5029,22 @@ body.carm-modal-open {
   gap: 16px;
 }
 
+/* Data-view tabs carry a leading view-type glyph (2026-05-30): a flex
+   row centres the icon + label with a small gap, matching the Rundgang
+   tab. Scoped to the dashboard groups so the popup TabsBar (no icons)
+   is untouched. The icon's emerald/blue group colour is set inline in
+   ViewTabs.tsx; `flex: none` keeps it from squashing in fixed-width tabs. */
+.carm-explorer__tabs--left .tab-btn,
+.carm-explorer__tabs--right .tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.carm-explorer__tabs--left .tab-btn > svg,
+.carm-explorer__tabs--right .tab-btn > svg {
+  flex: none;
+}
+
 /* "Tabelle" and "Quellen-Tabelle" tabs carry a fixed 163 px width per
    the brief (the other tabs size to content). */
 .carm-explorer__tab-btn--fixed {

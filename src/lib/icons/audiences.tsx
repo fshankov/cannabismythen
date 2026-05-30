@@ -151,44 +151,31 @@ export const IconEltern = forwardRef<SVGSVGElement, IconProps>(
 );
 IconEltern.displayName = 'IconEltern';
 
-/* ─── Lehrkräfte — kept from Iter-7 (Lucide-Glasses-style spectacles).
- *      Not part of the 2026-05-29 update; FAQ surface only. */
+/* ─── Lehrkräfte — handoff `pop-lehrkraefte` (LOCKED Option B, 2026-05-30):
+ *      user-round + glasses + open-book-check. */
 export const IconLehrkraefte = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      <circle cx="12" cy="7.2" r="3.2" />
-      <circle cx="9.2" cy="7.5" r="1.6" />
-      <circle cx="14.8" cy="7.5" r="1.6" />
-      <path d="M13.2 7.5 a1 1 0 0 0 -1.2 -0.8 a1 1 0 0 0 -1.2 0.8" />
-      <path d="M7.6 7 6.2 5.4 c-0.35 -0.4 -0.7 -0.6 -1.2 -0.6" />
-      <path d="M16.4 7 17.8 5.4 c0.35 -0.4 0.7 -0.6 1.2 -0.6" />
-      <path d="M7 21v-4.1c0-2.8 2-4.7 5-4.7s5 1.9 5 4.7V21" />
-      <path d="M7.7 21h8.6" />
-      <path d="M16.9 13.1 20.8 9.2" />
+      <circle cx="10" cy="8" r="5" />
+      <path d="M2 21a8 8 0 0 1 10.821-7.487" />
+      <circle cx="7.6" cy="8" r="1.4" />
+      <circle cx="12.4" cy="8" r="1.4" />
+      <path d="M9 8 H11 M6.2 7.6 L5 6.6 M13.8 7.6 L15 6.6" />
+      <path d="M18 14 V21 M14 14.5 L18 14 L22 14.5 M14 14.5 V20.5 H22 V14.5 M19.2 18 L19.9 18.7 L21.4 17.2" />
     </svg>
   ),
 );
 IconLehrkraefte.displayName = 'IconLehrkraefte';
 
-/* ─── Fachkräfte — kept from Iter-7 (clipboard + magnifier).
- *      Not part of the 2026-05-29 update; FAQ surface only. */
+/* ─── Fachkräfte — handoff `pop-fachkraefte` (2026-05-30):
+ *      user-round + search magnifier. */
 export const IconFachkraefte = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      <circle cx="12" cy="7" r="3" />
-      <path d="M7 21v-4.3c0-2.8 2-4.7 5-4.7s5 1.9 5 4.7V21" />
-      <path d="M7.7 21h8.6" />
-      <g strokeWidth={1.3}>
-        <rect x="7.7" y="13" width="3.6" height="5.2" rx="0.4" />
-        <path d="M8.6 13V12H10.4V13" />
-        <path d="M8.4 14.6H10.6" />
-        <path d="M8.4 16H10.6" />
-        <path d="M8.4 17.3H10.6" />
-      </g>
-      <g strokeWidth={1.6}>
-        <circle cx="19.3" cy="11.5" r="2.1" />
-        <path d="M17.9 12.9 L15.6 15.2" />
-      </g>
+      <circle cx="10" cy="8" r="5" />
+      <path d="M2 21a8 8 0 0 1 10.434-7.62" />
+      <circle cx="18" cy="18" r="3" />
+      <path d="m22 22-1.9-1.9" />
     </svg>
   ),
 );

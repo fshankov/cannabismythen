@@ -1,17 +1,17 @@
 /**
  * Indicator icons — myth-data axis and source axis.
  *
- * Locked variants from Phase 2:
+ * Locked variants (synced to the icon handoff, src/lib/icons/_handoff/):
  *   • Kenntnis  → Eye
- *   • Bedeutung → Bookmark
- *   • Richtigkeit → Target
+ *   • Bedeutung → custom Flag   (myth-bedeutung — pennant with notch)
+ *   • Richtigkeit → LocateFixed
  *   • Prävention → ShieldCheck  (SHARED between myth + source axis)
  *   • Bevölkerungsbezug → Globe
  *   • Suche → Search   (source axis)
  *   • Wahrnehmung → custom antenna-with-waves   (source axis)
- *   • Vertrauen → BadgeCheck   (source axis)
+ *   • Vertrauen → Handshake   (source axis — handoff swap from BadgeCheck)
  *
- * Five of eight are pure Lucide re-exports; one (Wahrnehmung) is custom.
+ * Most are pure Lucide re-exports; Bedeutung + Wahrnehmung are custom SVGs.
  * Prävention appears only once and is consumed by both axes.
  */
 
@@ -19,12 +19,11 @@ import type { SVGProps } from 'react';
 import { forwardRef } from 'react';
 import {
   Eye,
-  Bookmark,
   LocateFixed,
   ShieldCheck,
   Globe,
   Search,
-  BadgeCheck,
+  Handshake,
 } from 'lucide-react';
 
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
@@ -49,9 +48,12 @@ export const IconKenntnis = forwardRef<SVGSVGElement, IconProps>(
 );
 IconKenntnis.displayName = 'IconKenntnis';
 
+/** Bedeutung — custom flag/pennant (handoff `myth-bedeutung`, variant B). */
 export const IconBedeutung = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
-    <Bookmark ref={ref as never} size={size} {...rest} />
+    <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
+      <path d="M5 21 V4 H17 L14.5 8 L17 12 H5" />
+    </svg>
   ),
 );
 IconBedeutung.displayName = 'IconBedeutung';
@@ -102,7 +104,7 @@ IconWahrnehmung.displayName = 'IconWahrnehmung';
 
 export const IconVertrauen = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
-    <BadgeCheck ref={ref as never} size={size} {...rest} />
+    <Handshake ref={ref as never} size={size} {...rest} />
   ),
 );
 IconVertrauen.displayName = 'IconVertrauen';

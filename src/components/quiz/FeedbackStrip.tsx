@@ -44,7 +44,12 @@ function formatGermanDecimal(n: number): string {
   return rounded.toFixed(1).replace(".", ",");
 }
 import VerdictPill from "../shared/VerdictPill";
-import { CheckCircle, CircleDashed, AlertCircle, XCircle } from "lucide-react";
+import {
+  CircleCheckBig,
+  CircleArrowOutUpRight,
+  CircleArrowOutDownLeft,
+  CircleX,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 // 2026-05-30 (Fedor) — the "result" variant was removed. The result page
@@ -86,15 +91,18 @@ const SCHRITTE_MODIFIER: Record<Schritte, string> = {
   3: "far",
 };
 
-/** Stage F commit 2 (2026-05-23) — Lucide icon per Schritte tier.
- *  Replaces the tinted pill background with a single 18 × 18 icon
- *  next to plain text. Calm read; "feedback" iconography from the
- *  same library QuizPlayer's VerdictScale already uses. */
+/** Lucide icon per Schritte tier. 2026-05-30 — synced to the icon
+ *  handoff's `feedback-*` family: the "almost" tiers use directional
+ *  CircleArrowOut glyphs (leaning right/wrong) so the correctness
+ *  spectrum reads as a gradient, not four unrelated circles. Tier
+ *  colours stay on the site classification palette (set in quiz.css)
+ *  so the strip's feedback icon and its verdict pill never show two
+ *  different reds/greens. */
 const SCHRITTE_ICON: Record<Schritte, LucideIcon> = {
-  0: CheckCircle,
-  1: CircleDashed,
-  2: AlertCircle,
-  3: XCircle,
+  0: CircleCheckBig,
+  1: CircleArrowOutUpRight,
+  2: CircleArrowOutDownLeft,
+  3: CircleX,
 };
 
 export default function FeedbackStrip({

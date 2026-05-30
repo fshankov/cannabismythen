@@ -1,0 +1,71 @@
+/* Cannabis Mythen icon colour tokens — generated from the locked set */
+:root {
+  --cmi-pop-volljaehrige: #475569;
+  --cmi-pop-minderjaehrige: #f59e0b;
+  --cmi-pop-junge-erwachsene: #14b8a6;
+  --cmi-pop-konsumierende: #16a34a;
+  --cmi-pop-eltern: #8b5cf6;
+  --cmi-pop-lehrkraefte: #3b82f6;
+  --cmi-pop-fachkraefte: #6366f1;
+  --cmi-srccat-institutionell: #475569;
+  --cmi-srccat-internet: #06b6d4;
+  --cmi-srccat-soziale-medien: #ec4899;
+  --cmi-srccat-traditionelle-medien: #6366f1;
+  --cmi-srccat-print: #b45309;
+  --cmi-srccat-umfeld: #14b8a6;
+  --cmi-quiz-medizin: #3b82f6;
+  --cmi-quiz-risiken: #8b5cf6;
+  --cmi-quiz-stimmung: #eab308;
+  --cmi-quiz-soziales: #6366f1;
+  --cmi-quiz-gefaehrlichkeit: #f97316;
+  --cmi-quiz-schnellcheck: #ec4899;
+  --cmi-fk-medizin: #3b82f6;
+  --cmi-fk-koerper: #06b6d4;
+  --cmi-fk-psyche: #8b5cf6;
+  --cmi-fk-stimmung: #eab308;
+  --cmi-fk-soziales: #ec4899;
+  --cmi-fk-dosis: #64748b;
+  --cmi-fk-gesetz: #6366f1;
+  --cmi-fk-gefahr: #f97316;
+  --cmi-feedback-falsch: #dc2626;
+  --cmi-feedback-fast-falsch: #ea580c;
+  --cmi-feedback-fast-richtig: #65a30d;
+  --cmi-feedback-richtig: #16a34a;
+}
+
+/* base icon class — inherits colour via currentColor */
+.cmi { width: 1.5rem; height: 1.5rem; display: inline-block; vertical-align: middle; color: inherit; }
+svg.cmi { width: 1.5rem; height: 1.5rem; }
+
+/* semantic colour helpers — apply on the icon (or a wrapper) */
+.cmi--pop-volljaehrige { color: var(--cmi-pop-volljaehrige); }
+.cmi--pop-minderjaehrige { color: var(--cmi-pop-minderjaehrige); }
+.cmi--pop-junge-erwachsene { color: var(--cmi-pop-junge-erwachsene); }
+.cmi--pop-konsumierende { color: var(--cmi-pop-konsumierende); }
+.cmi--pop-eltern { color: var(--cmi-pop-eltern); }
+.cmi--pop-lehrkraefte { color: var(--cmi-pop-lehrkraefte); }
+.cmi--pop-fachkraefte { color: var(--cmi-pop-fachkraefte); }
+.cmi--srccat-institutionell { color: var(--cmi-srccat-institutionell); }
+.cmi--srccat-internet { color: var(--cmi-srccat-internet); }
+.cmi--srccat-soziale-medien { color: var(--cmi-srccat-soziale-medien); }
+.cmi--srccat-traditionelle-medien { color: var(--cmi-srccat-traditionelle-medien); }
+.cmi--srccat-print { color: var(--cmi-srccat-print); }
+.cmi--srccat-umfeld { color: var(--cmi-srccat-umfeld); }
+.cmi--quiz-medizin { color: var(--cmi-quiz-medizin); }
+.cmi--quiz-risiken { color: var(--cmi-quiz-risiken); }
+.cmi--quiz-stimmung { color: var(--cmi-quiz-stimmung); }
+.cmi--quiz-soziales { color: var(--cmi-quiz-soziales); }
+.cmi--quiz-gefaehrlichkeit { color: var(--cmi-quiz-gefaehrlichkeit); }
+.cmi--quiz-schnellcheck { color: var(--cmi-quiz-schnellcheck); }
+.cmi--fk-medizin { color: var(--cmi-fk-medizin); }
+.cmi--fk-koerper { color: var(--cmi-fk-koerper); }
+.cmi--fk-psyche { color: var(--cmi-fk-psyche); }
+.cmi--fk-stimmung { color: var(--cmi-fk-stimmung); }
+.cmi--fk-soziales { color: var(--cmi-fk-soziales); }
+.cmi--fk-dosis { color: var(--cmi-fk-dosis); }
+.cmi--fk-gesetz { color: var(--cmi-fk-gesetz); }
+.cmi--fk-gefahr { color: var(--cmi-fk-gefahr); }
+.cmi--feedback-falsch { color: var(--cmi-feedback-falsch); }
+.cmi--feedback-fast-falsch { color: var(--cmi-feedback-fast-falsch); }
+.cmi--feedback-fast-richtig { color: var(--cmi-feedback-fast-richtig); }
+.cmi--feedback-richtig { color: var(--cmi-feedback-richtig); }

@@ -3,7 +3,7 @@ audiences:
   title: Fragen für Eltern minderjähriger Kinder
   cardLabel: Eltern
   emoji: 👨‍👧
-  accentColor: '#4f46e5'
+  accentColor: '#8b5cf6'
   description: Welchen Einfluss haben Sie auf Ihr Kind? Was sagen die aktuellen Studien zu Risiken, Recht und Hilfsangeboten?
     Antworten auf die Fragen, die Eltern minderjähriger Kinder am häufigsten beschäftigen.
   introNote: ''
@@ -26,7 +26,7 @@ audiences:
   title: Deine Fragen rund um Cannabis
   cardLabel: Jugendliche
   emoji: 🧑
-  accentColor: '#f97316'
+  accentColor: '#f59e0b'
   description: Was stimmt eigentlich, was ist nur ein Mythos? Antworten auf die Fragen, die Jugendliche am häufigsten zu Cannabis
     stellen — kurz, faktenbasiert und ohne erhobenen Zeigefinger.
   introNote: ''
@@ -62,7 +62,7 @@ audiences:
   title: Fragen für Lehrkräfte
   cardLabel: Lehrkräfte
   emoji: 🧑‍🏫
-  accentColor: '#0891b2'
+  accentColor: '#3b82f6'
   description: Welche Cannabismythen sind für Schüler:innen besonders relevant — und welche Fakten sind im Klassenzimmer wirklich
     glaubwürdig? Daten und Praxis-Hinweise für Lehrkräfte.
   introNote: ''
@@ -84,7 +84,7 @@ audiences:
   title: Fragen für Fachkräfte
   cardLabel: Fachkräfte
   emoji: 🔬
-  accentColor: '#7c3aed'
+  accentColor: '#6366f1'
   description: 'Präventionsfachkräfte, Suchtberatung, öffentliche Gesundheit: Welche Mythen priorisieren? Welche Zielgruppen
     haben die größten Lücken? Welche Kanäle wirken? Aufbereitete CaRM-Indikatoren für die professionelle Praxis.'
   introNote: 'Hinweis: Schulkontext-spezifische Fragen finden Sie unter [Lehrkräfte](/meine-interessen/lehrkraefte/).'
