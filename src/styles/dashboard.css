@@ -843,10 +843,9 @@ body:has(.carm-explorer) .nav {
   position: relative;
 }
 .carm-myth-search-input {
-  width: 220px;
-  /* 2026-05-27 refresh: aligned to the unified 44px chip baseline so the
-     toolbar reads on a single horizontal rhythm. 8px radius + soft chip
-     shadow match `.carm-btn` below. */
+  width: 180px;
+  /* SSOT (Figma 403:2016): 180px input width, 44px height, shadow-input
+     (0 4px 10px) — lighter than the action-button shadow-chip. */
   height: 44px;
   padding: 0 36px 0 14px;
   border: 1px solid var(--color-border, #cbd5e1);
@@ -856,7 +855,7 @@ body:has(.carm-explorer) .nav {
   font-size: 0.95rem;
   color: var(--color-text, #0f172a);
   outline: none;
-  box-shadow: var(--shadow-chip);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 .carm-myth-search-input::placeholder {
@@ -5023,6 +5022,13 @@ body.carm-modal-open {
   background: #f2f2f2;
 }
 
+/* SSOT (Figma 403:1976) — 16 px gap between tabs within each group.
+   Scoped to the dashboard so the popup TabsBar keeps gap: 0. */
+.carm-explorer__tabs--left .tabs-bar,
+.carm-explorer__tabs--right .tabs-bar {
+  gap: 16px;
+}
+
 /* "Tabelle" and "Quellen-Tabelle" tabs carry a fixed 163 px width per
    the brief (the other tabs size to content). */
 .carm-explorer__tab-btn--fixed {
@@ -5775,9 +5781,12 @@ body.carm-modal-open {
 /* Stage 6: visual properties (height/border/radius/bg/font) come from the
    unified `.carm-btn, .carm-picker__trigger, .carm-pivot-toggle__btn` rule
    above. Trigger-specific tweak: the right-side chevron sits flush with
-   8px right padding rather than 12px so the chevron doesn't feel orphaned. */
+   8px right padding rather than 12px so the chevron doesn't feel orphaned.
+   SSOT shadow-input (0 4px 10px) is subtler than the card shadow-chip
+   (0 4px 20px -2px) used on action buttons — input controls read lighter. */
 .carm-picker__trigger {
   padding: 0 10px 0 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .carm-picker__emoji {
@@ -5972,13 +5981,15 @@ body.carm-modal-open {
   }
 }
 
-/* ToolbarRow — pivot? + pickers[] + right-aligned actions. */
+/* ToolbarRow — pivot? + pickers[] + right-aligned actions.
+   SSOT (Figma 403:1976): row-gap 16px, no extra margin (panel's 32px
+   padding + 24px gap handle all breathing room). */
 .carm-toolbar-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 18px;
-  margin: 6px 4px 12px;
+  gap: 16px 8px;
+  margin: 0;
 }
 
 .carm-toolbar-row__pivot {
@@ -5989,7 +6000,7 @@ body.carm-modal-open {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 18px;
+  gap: 12px 24px;
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -6004,9 +6015,16 @@ body.carm-modal-open {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   flex: 0 0 auto;
   margin-left: auto;
+}
+
+/* SSOT: 32px between search input and the Filter/Export action group.
+   gap: 16px is between all siblings; an extra 16px margin-right on the
+   search row adds up to 32px total before the first action button. */
+.carm-toolbar-row__actions > .carm-myth-search-row {
+  margin-right: 16px;
 }
 
 /* Below desktop (≤1024px) — strict 2-row toolbar layout.
@@ -6052,6 +6070,12 @@ body.carm-modal-open {
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
+  }
+  /* Cancel the desktop search-to-Filter gap since actions are full-width
+     and evenly distributed on tablet/mobile — margin-right would collapse
+     the Filter button's flex-grow share. */
+  .carm-toolbar-row__actions > .carm-myth-search-row {
+    margin-right: 0;
   }
   /* Force the actions row to wrap onto its own line and stretch equally,
      so Mythos suchen / Filter / Exportieren each occupy a third of the
