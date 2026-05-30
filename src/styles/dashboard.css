@@ -2,18 +2,13 @@
 /* Scoped where possible to avoid conflicts with cannabismythen global styles */
 
 /*
- * Override the cannabismythen <main> max-width constraint.
- * The dashboard needs more horizontal space than the default 1100px.
+ * Dashboard uses the same 1100px max-width as all other pages (2026-05-30).
+ * The white chart panel reads as elevated through contrast against the
+ * site-wide #f4f4f0 background — no tonal seam between the column and gutters.
+ * `<main>` stays transparent so the body-level `.dot-texture` shows through uniformly.
  */
 main:has(.carm-explorer) {
-  max-width: 1440px;
-  /* No background override (Fedor 2026-05-29): the dashboard page uses the
-     same site-wide #f4f4f0 + dotted texture as <body> and every other
-     section, so the white chart panel reads as elevated through contrast
-     and there's no tonal seam between the centered column and the gutters.
-     This reverts the 2026-05-28 "warm cream around the panel" brief in
-     favour of one background site-wide. `<main>` stays transparent so the
-     body-level `.dot-texture` shows through uniformly. */
+  max-width: 1350px;
 }
 
 .carm-explorer {
@@ -69,7 +64,7 @@ main:has(.carm-explorer) {
   color: var(--color-text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  max-width: 1440px;
+  max-width: 100%;
   margin: 0 auto;
 }
 

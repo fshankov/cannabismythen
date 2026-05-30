@@ -7,6 +7,11 @@
 
 @import "./peek-stack.css";
 
+/* Anchor links scroll targets below the fixed nav */
+html {
+  scroll-padding-top: var(--header-height, 176px);
+}
+
 /* ── Design Tokens ──────────────────────────────────────────── */
 
 :root {
@@ -591,11 +596,11 @@ body.has-hero .nav:not(.nav--scrolled) .nav__hamburger-line { background-color: 
 main {
   max-width: var(--max-width);
   margin: 0 auto;
-  /* Top padding clears the fixed floating pill nav:
-     60px pill + 16px top offset + 16px breathing room = 92px.
-     --header-height is published live by BaseLayout's ResizeObserver
-     so the quiz progress bar expansion is automatically compensated. */
-  padding: calc(var(--header-height, 92px) + var(--preview-banner-h, 0px))
+  /* Top padding clears the fixed floating pill nav.
+     --header-height = nav bottom edge from viewport top + 16px breathing room
+     (published live by BaseLayout's ResizeObserver via rect.bottom + 16).
+     rect.bottom already incorporates --preview-banner-h so we don't add it again. */
+  padding: var(--header-height, 152px)
            var(--space-lg)
            var(--space-3xl);
   min-height: 60vh;

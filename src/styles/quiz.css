@@ -3387,7 +3387,7 @@ button.quiz-result__cta {
 
 .quiz-index__title {
   max-width: 746px;
-  margin: 32px 0 24px;
+  margin: 0 0 24px;
   color: #1A1C1A;
   font-family: var(--font-display);
   font-size: 48px;

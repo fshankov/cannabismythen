@@ -420,7 +420,8 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         var header = document.querySelector('.nav-wrapper');
         if (!header) return;
         function publishHeight() {
-          var h = header.getBoundingClientRect().height;
+          var rect = header.getBoundingClientRect();
+          var h = Math.max(170, rect.bottom + 16);
           document.documentElement.style.setProperty('--header-height', h + 'px');
         }
         publishHeight();
