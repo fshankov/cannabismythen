@@ -11,6 +11,19 @@ main:has(.carm-explorer) {
   max-width: 1350px;
 }
 
+/* Widen the fixed nav pill to track the dashboard's 1350 px content
+   column. Match nav-wrapper padding to main's --space-lg (24 px) so
+   the pill's left edge aligns with the content left edge exactly.
+   Pill max-width = 1350 - 2×24 = 1302 px. */
+body:has(.carm-explorer) .nav-wrapper {
+  max-width: 1350px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+body:has(.carm-explorer) .nav {
+  max-width: 1302px;
+}
+
 .carm-explorer {
   /* 2026-05-29 (Fedor): the dashboard page surface matches the site-wide
      #f4f4f0 background — one consistent tone across the whole site, only
