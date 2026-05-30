@@ -5200,21 +5200,20 @@ body.carm-modal-open {
   margin: 0 0 32px;
 }
 .carm-explorer .carm-explorer__page-header__h1 {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: 48px;
   font-weight: 900;
   color: #1a1c1a;
-  letter-spacing: -0.025em;
-  line-height: 0.95;
+  letter-spacing: -1.8px;
+  line-height: 52px;
+  max-width: 746px;
   margin: 0;
 }
 .carm-explorer .carm-explorer__page-header__sub {
-  font-size: clamp(1rem, 1.8vw, 1.5rem);
+  font-size: 1.05rem;
   font-weight: 400;
-  color: #404943;
-  /* 2026-05-29: full panel width (was max-width 720px) so the subtitle
-     reads as a wide banner under the H1 rather than a narrow column. */
-  max-width: none;
-  line-height: 1.4;
+  color: var(--color-text-secondary);
+  max-width: 680px;
+  line-height: 1.65;
   margin: 0;
 }
 

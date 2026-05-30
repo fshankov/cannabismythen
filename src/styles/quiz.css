@@ -3769,21 +3769,22 @@ button.quiz-result__cta {
 
 .fakten-page-header__h1 {
   margin: 0;
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  max-width: 746px;
+  font-size: 48px;
   font-weight: 900;
   color: #1a1c1a;
-  letter-spacing: -0.025em;
-  line-height: 0.95;
+  letter-spacing: -1.8px;
+  line-height: 52px;
 }
 
 .fakten-page-header__sub {
   margin: 0;
-  max-width: 672px;
+  max-width: 680px;
   padding-top: 9px;
-  font-size: clamp(1rem, 1.8vw, 1.5rem);
+  font-size: 1.05rem;
   font-weight: 400;
-  color: #404943;
-  line-height: 1.33;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
 }
 
 /* ═══════════════════════════════════════════════════════════════

@@ -32,13 +32,16 @@ for (const audience of audiences) {
 
 <BaseLayout
   title="Meine Interessen"
-  description="Antworten zugeschnitten auf Ihre Lebenssituation — Eltern, Jugendliche, Konsumierende, Lehrkräfte, Fachkräfte."
+  description="Antworten zugeschnitten auf deine Lebenssituation — Eltern, Jugendliche, Konsumierende, Lehrkräfte, Fachkräfte."
   bgTexture
 >
   <section class="faq-hub" aria-labelledby="faq-hub-h1">
-    {/* Heading is rendered for accessibility but visually hidden — the
-        audience cards themselves communicate the page's purpose. */}
-    <h1 id="faq-hub-h1" class="sr-only">Meine Interessen</h1>
+    <div class="faq-hub__intro">
+      <h1 id="faq-hub-h1" class="faq-hub__title">Meine Interessen</h1>
+      <p class="faq-hub__subtitle">
+        Wähle deine Perspektive und erhalte gezielte Antworten auf Cannabis-Mythen — zugeschnitten auf deine Lebenssituation.
+      </p>
+    </div>
 
     <AudienceHubGrid items={items} />
 
