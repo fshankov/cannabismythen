@@ -58,45 +58,136 @@ interface ModuleEntry {
   questionCount: number;
 }
 
-async function loadInterFont(): Promise<ArrayBuffer | null> {
-  // @fontsource-variable/inter ships .woff2 + a copy of the variable
-  // font in subset folders. We need a static .ttf or .woff for Satori
-  // to embed; fall back to a CDN-fetched .ttf if the package's woff2
-  // doesn't load. Wrap in try/catch so a missing font doesn't kill
-  // the whole build — see FALLBACK note at top of file.
+type FontWeight = 400 | 600 | 700 | 800;
+const FONT_WEIGHTS: FontWeight[] = [400, 600, 700, 800];
+const FONT_CACHE_DIR = path.join(
+  REPO_ROOT,
+  "node_modules",
+  ".cache",
+  "og-fonts"
+);
+
+interface LoadedFont {
+  weight: FontWeight;
+  data: ArrayBuffer;
+}
+
+function toArrayBuffer(buf: Buffer): ArrayBuffer {
+  return buf.buffer.slice(
+    buf.byteOffset,
+    buf.byteOffset + buf.byteLength
+  ) as ArrayBuffer;
+}
+
+/**
+ * Load Inter for Satori.
+ *
+ * IMPORTANT: Satori's OpenType parser (@shuding/opentype.js) supports
+ * TTF / OTF / WOFF1 but NOT WOFF2. `@fontsource-variable/inter` only ships
+ * `.woff2`, which is why the previous loader failed with "Unsupported
+ * OpenType signature wOF2" and produced zero OG images. We instead fetch
+ * the `.woff` (WOFF1) builds of `@fontsource/inter` from jsDelivr for the
+ * weights the cards use (400/600/700/800), caching each under
+ * `node_modules/.cache/og-fonts/` so repeat runs (and offline builds after
+ * a first online run) don't need the network. A graceful per-weight
+ * warning keeps the build alive if a weight can't be fetched — see the
+ * FALLBACK note at the top of this file.
+ */
+async function loadInterFonts(): Promise<LoadedFont[] | null> {
+  await fs.mkdir(FONT_CACHE_DIR, { recursive: true }).catch(() => {});
+  const fonts: LoadedFont[] = [];
+
+  for (const weight of FONT_WEIGHTS) {
+    const file = `inter-latin-${weight}-normal.woff`;
+    const cachePath = path.join(FONT_CACHE_DIR, file);
+
+    // 1) Local cache (offline path after the first successful fetch).
+    try {
+      const cached = await fs.readFile(cachePath);
+      if (cached.byteLength > 0) {
+        fonts.push({ weight, data: toArrayBuffer(cached) });
+        continue;
+      }
+    } catch {
+      /* not cached yet — fall through to the CDN fetch */
+    }
+
+    // 2) Fetch the WOFF1 build from jsDelivr (write-through cache).
+    try {
+      const url = `https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/${file}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Inter ${weight} → HTTP ${res.status}`);
+      const ab = await res.arrayBuffer();
+      await fs.writeFile(cachePath, Buffer.from(ab)).catch(() => {});
+      fonts.push({ weight, data: ab });
+    } catch (err) {
+      console.warn(`[generate-quiz-og] Inter ${weight} unavailable:`, err);
+    }
+  }
+
+  if (fonts.length === 0) {
+    console.error(
+      "[generate-quiz-og] No Inter weights could be loaded; aborting. Existing PNGs in public/og/quiz/ are untouched."
+    );
+    return null;
+  }
+  return fonts;
+}
+
+// ── Emoji rendering for Satori ─────────────────────────────────────
+// Satori has no emoji font, so a bare emoji renders as a "NO GLYPH" tofu
+// box. The documented fix is `loadAdditionalAsset`: when Satori hits an
+// emoji grapheme it asks us for an image. We map the grapheme to its
+// Twemoji SVG (jdecked fork — the maintained Twemoji) and return it as a
+// data URI, cached on disk so repeat/offline runs don't re-fetch.
+const EMOJI_CACHE_DIR = path.join(
+  REPO_ROOT,
+  "node_modules",
+  ".cache",
+  "og-emoji"
+);
+
+/** Twemoji filenames drop the FE0F variation selector — strip it so e.g.
+ *  ⚠️ (26a0 fe0f) resolves to `26a0.svg`. */
+function emojiCodepoints(segment: string): string {
+  return [...segment]
+    .map((c) => c.codePointAt(0)!.toString(16))
+    .filter((cp) => cp !== "fe0f")
+    .join("-");
+}
+
+async function loadEmojiDataUri(segment: string): Promise<string | null> {
+  const cp = emojiCodepoints(segment);
+  if (!cp) return null;
+  await fs.mkdir(EMOJI_CACHE_DIR, { recursive: true }).catch(() => {});
+  const cachePath = path.join(EMOJI_CACHE_DIR, `${cp}.svg`);
+
+  let svg: string | null = null;
   try {
-    const fontPath = path.join(
-      REPO_ROOT,
-      "node_modules",
-      "@fontsource-variable",
-      "inter",
-      "files",
-      "inter-latin-wght-normal.woff2"
-    );
-    const data = await fs.readFile(fontPath);
-    return data.buffer.slice(
-      data.byteOffset,
-      data.byteOffset + data.byteLength
-    );
-  } catch (err) {
-    console.warn(
-      "[generate-quiz-og] Could not load @fontsource-variable/inter; fetching from rsms.me as fallback.",
-      err
-    );
+    const cached = await fs.readFile(cachePath, "utf8");
+    if (cached) svg = cached;
+  } catch {
+    /* not cached yet */
+  }
+
+  if (!svg) {
     try {
       const res = await fetch(
-        "https://rsms.me/inter/font-files/Inter-Bold.woff2"
+        `https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/${cp}.svg`
       );
-      if (!res.ok) throw new Error(`Inter CDN ${res.status}`);
-      return await res.arrayBuffer();
-    } catch (err2) {
-      console.error(
-        "[generate-quiz-og] Inter font fallback also failed; aborting.",
-        err2
+      if (!res.ok) throw new Error(`twemoji ${cp} → HTTP ${res.status}`);
+      svg = await res.text();
+      await fs.writeFile(cachePath, svg).catch(() => {});
+    } catch (err) {
+      console.warn(
+        `[generate-quiz-og] emoji ${segment} (${cp}) unavailable:`,
+        err
       );
       return null;
     }
   }
+
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
 function moduleSvgTree(entry: ModuleEntry, fontFamily: string) {
@@ -304,31 +395,24 @@ function hubSvgTree(fontFamily: string) {
 
 async function renderToPng(
   tree: object,
-  font: ArrayBuffer
+  fonts: LoadedFont[]
 ): Promise<Buffer> {
   const svg = await satori(tree as Parameters<typeof satori>[0], {
     width: WIDTH,
     height: HEIGHT,
-    fonts: [
-      {
-        name: "Inter",
-        data: font,
-        weight: 400,
-        style: "normal",
-      },
-      {
-        name: "Inter",
-        data: font,
-        weight: 700,
-        style: "normal",
-      },
-      {
-        name: "Inter",
-        data: font,
-        weight: 800,
-        style: "normal",
-      },
-    ],
+    fonts: fonts.map((f) => ({
+      name: "Inter",
+      data: f.data,
+      weight: f.weight,
+      style: "normal" as const,
+    })),
+    // Render emoji as Twemoji SVGs (Satori has no emoji font). Empty
+    // string on failure → nothing drawn, never a "NO GLYPH" tofu box.
+    loadAdditionalAsset: async (code: string, segment: string) => {
+      if (code !== "emoji") return code;
+      const uri = await loadEmojiDataUri(segment);
+      return uri ?? "";
+    },
   });
 
   const resvg = new Resvg(svg, {
@@ -339,8 +423,8 @@ async function renderToPng(
 }
 
 async function main() {
-  const font = await loadInterFont();
-  if (!font) {
+  const fonts = await loadInterFonts();
+  if (!fonts) {
     console.error(
       "[generate-quiz-og] No font available; aborting. Existing PNGs in public/og/quiz/ are untouched."
     );
@@ -384,7 +468,7 @@ async function main() {
     try {
       const png = await renderToPng(
         moduleSvgTree(entry, "Inter"),
-        font
+        fonts
       );
       const out = path.join(OUT_DIR, `${entry.slug}.png`);
       await fs.writeFile(out, png);
@@ -396,7 +480,7 @@ async function main() {
 
   // Hub image for /quiz/ index
   try {
-    const png = await renderToPng(hubSvgTree("Inter"), font);
+    const png = await renderToPng(hubSvgTree("Inter"), fonts);
     const out = path.join(OUT_DIR, "index.png");
     await fs.writeFile(out, png);
     console.log(`  ✓ index.png (${(png.length / 1024).toFixed(1)} KB)`);

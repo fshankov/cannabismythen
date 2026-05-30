@@ -50,6 +50,7 @@ import { renderSourcesSpannweiteSvg } from '../../../lib/dashboard/sources-spann
 import LesebeispielSource from '../LesebeispielSource';
 import { ValueCircle } from '../grid';
 import { getCategoryDescription } from '../../../lib/dashboard/source-descriptions';
+import { getCategoryColor } from '../../../lib/dashboard/colors';
 import type { SourceCategoryId } from '../../../lib/icons/lookups';
 
 /** Column order for the new sources2 view (Fedor 2026-05-15): Wahrnehmung
@@ -184,9 +185,15 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     }, [mode, definitions]);
 
     // ── Filter compute (parents + children) ────────────────────────
+    // 2026-05-29: colour each category via `getCategoryColor()` (the same
+    // palette Quellen-Balken uses) instead of the data's `c.color`, so the
+    // line + circle + icon + tooltip read identical colours across all
+    // three Quellen tabs.
     const categoryColorMap = useMemo(() => {
       if (!sourceData) return new Map<string, string>();
-      return new Map(sourceData.sourceCategories.map((c) => [c.id, c.color]));
+      return new Map(
+        sourceData.sourceCategories.map((c) => [c.id, getCategoryColor(c.id as SourceCategoryId)]),
+      );
     }, [sourceData]);
 
     const { filteredParents, childrenByParent } = useMemo(() => {

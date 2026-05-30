@@ -175,10 +175,8 @@ html {
   --quiz-card-bg: #f5faff;
   --quiz-card-shadow: 0px 19.531px 39.063px -9.375px rgba(0, 0, 0, 0.25);
 
-  /* Card border — Play state post-answer only (backside has none) */
-  --quiz-border-correct: #09ae64;
-  --quiz-border-almost: #ffe8a8;
-  --quiz-border-wrong: #c86a7c;
+  /* (2026-05-30 Fedor) — post-answer card border removed; the card is now
+     borderless in all states, so the verdict-tint border tokens are gone. */
 
   /* Answer button fills */
   --quiz-ans-falsch: #ffe9ed;
@@ -321,7 +319,7 @@ hr {
 /* ── Nav blur shield ─────────────────────────────────────────── */
 .nav-blur-shield {
   position: fixed;
-  top: var(--preview-banner-h, 0px); left: 0; right: 0;
+  top: 0; left: 0; right: 0;
   height: 112px;
   z-index: 99;
   pointer-events: none;
@@ -340,7 +338,7 @@ hr {
 /* ── Nav wrapper ─────────────────────────────────────────────── */
 .nav-wrapper {
   position: fixed;
-  top: calc(16px + var(--preview-banner-h, 0px));
+  top: 16px;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -2931,17 +2929,18 @@ button.pill[aria-pressed="true"] {
 .preview-banner {
   position: fixed;
   top: 0; left: 0; right: 0;
-  z-index: 101;
+  z-index: 102; /* above the floating nav pill (100) it overlays */
   background: #fef9e4;
   border-bottom: 1px solid #d4a017;
   font-size: 0.8125rem;
   line-height: 1.45;
-  overflow: visible; /* let the peek tab hang below */
 }
 
-/* Collapsed: strip becomes the 4px border, inner shrinks away */
-.preview-banner--collapsed {
-  border-bottom-width: 4px;
+/* While the banner is open it overlays (covers) the nav pill — hide the
+   pill + blur shield so no sliver of the nav peeks below the banner. */
+.cm-preview-open .nav-wrapper,
+.cm-preview-open .nav-blur-shield {
+  display: none;
 }
 
 .preview-banner__inner {
@@ -2951,17 +2950,6 @@ button.pill[aria-pressed="true"] {
   max-width: 1200px;
   margin: 0 auto;
   padding: 9px var(--space-md);
-  overflow: hidden;
-  max-height: 160px; /* generous cap; actual content is ~40–100px */
-  opacity: 1;
-  transition: max-height 260ms ease, padding 260ms ease, opacity 200ms ease;
-}
-
-.preview-banner--collapsed .preview-banner__inner {
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  opacity: 0;
 }
 
 .preview-banner__icon {
@@ -3009,43 +2997,41 @@ button.pill[aria-pressed="true"] {
   background: rgba(180, 83, 9, 0.08);
 }
 
-/* Peek tab — hangs below the 4px strip when collapsed */
-.preview-banner__tab {
-  position: absolute;
-  left: var(--space-md);
-  top: 4px; /* right below the 4px border strip */
-  background: #fef9e4;
-  border: 1px solid #d4a017;
-  border-top: none;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  padding: 4px 10px 5px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  color: #78350f;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
-  font-family: inherit;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms ease, background 150ms;
-}
-
-.preview-banner--collapsed .preview-banner__tab {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.preview-banner__tab:hover {
-  background: #fef3c7;
-}
-
 @media (max-width: 600px) {
   .preview-banner__text {
     font-size: 0.75rem;
   }
+}
+
+/* ── Preview FAB (collapsed state) ──────────────────────────────── */
+/* Height matches the nav pill (60px @ top:16px) so the two sit on the
+   same horizontal band and read as consistent. */
+.preview-fab {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 101;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #d97706;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  transition: background 150ms, transform 150ms;
+}
+
+.preview-fab:hover {
+  background: #b45309;
+  transform: scale(1.08);
+}
+
+.preview-fab--visible {
+  display: flex;
 }
 
 /* ── Preview modal ──────────────────────────────────────────────── */

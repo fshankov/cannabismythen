@@ -25,9 +25,10 @@
 import {
   forwardRef, useEffect, useImperativeHandle, useMemo, useState,
 } from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import type {
-  AppState, InformationSourcesData, SourceGroupId, SourceMetricType,
-  SourcesStripsMode,
+  AppState, InformationSource, InformationSourcesData,
+  SourceGroupId, SourceMetricType, SourcesStripsMode,
 } from '../../../lib/dashboard/types';
 import {
   GridDataHeader, GridLabelHeader,
@@ -48,6 +49,7 @@ import { useHiddenColumns } from '../hooks/useHiddenColumns';
 import { t } from '../../../lib/dashboard/translations';
 import { filterSourcesBySearch } from '../../../lib/dashboard/data';
 import { getCategoryDescription } from '../../../lib/dashboard/source-descriptions';
+import { getCategoryColor } from '../../../lib/dashboard/colors';
 
 /** Whether a source metric uses the %-share band ("…Anteil") or the
  *  point-score band ("…Niveau"). Mirrors the convention in
@@ -123,7 +125,15 @@ const METRIC_FULL_LABELS_DE: Record<SourceMetricType, string> = {
 
 const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
   function SourcesTableView({ state, update }, ref) {
-    void update;
+    // 2026-05-29: expandable parent/child source rows, reusing the shared
+    // `sourcesSpannweiteExpanded` state (consistent across all Quellen tabs).
+    const expanded = state.sourcesSpannweiteExpanded;
+    const toggleExpanded = (parentId: number) => {
+      const next = expanded.includes(parentId)
+        ? expanded.filter((id) => id !== parentId)
+        : [...expanded, parentId];
+      update('sourcesSpannweiteExpanded', next);
+    };
     // v4 (2026-05-26): pivot mode from the shared SourcesSpannweiteToolbar.
     // `state.sourcesStripsMode === 'metric'` → columns = the 4 metrics,
     // off-axis dimension = `state.sourceGroup` (one group fills all cells).
@@ -181,20 +191,12 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
       }
     };
 
-    const rows = useMemo(() => {
-      if (!sourceData) return [];
-      const topLevel = sourceData.sources.filter((s) => s.parentId === null);
-      // Universal source search (Fedor 2026-05-25 PM, item F): filter
-      // by source.name case-insensitive before computing values.
-      const searched = filterSourcesBySearch(topLevel, state.sourcesSearchQuery);
-      return searched.map((src) => {
+    // Per-column value record for any source (v5 pivot logic).
+    const computeValues = useMemo(() => {
+      return (src: InformationSource): Record<string, number | null> => {
         const sourceKey = String(src.id);
-        // v5: pivot label names the picker dimension; columns are
-        // the OTHER dimension. 'metric' mode → picker = metric, cols =
-        // groups → cells = data[selectedMetric][colGroup][source].
-        // 'group' mode → picker = group, cols = metrics → cells =
-        // data[colMetric][selectedGroup][source].
         const values: Record<string, number | null> = {};
+        if (!sourceData) return values;
         if (mode === 'metric') {
           for (const g of GROUP_COLS) {
             const raw = sourceData.metrics[selectedMetric]?.data?.[g.key]?.[sourceKey];
@@ -206,17 +208,48 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
             values[m.key] = typeof raw === 'number' ? raw : null;
           }
         }
-        return {
-          source: src,
-          categoryId: src.category as SourceCategoryId,
-          values,
-        };
-      });
-    }, [sourceData, mode, selectedGroup, selectedMetric, state.sourcesSearchQuery]);
+        return values;
+      };
+    }, [sourceData, mode, selectedGroup, selectedMetric]);
+
+    // Children grouped by parent id (2026-05-29 subcategories).
+    const childrenByParent = useMemo(() => {
+      const m = new Map<number, InformationSource[]>();
+      if (!sourceData) return m;
+      for (const s of sourceData.sources) {
+        if (s.parentId !== null) {
+          const arr = m.get(s.parentId) ?? [];
+          arr.push(s);
+          m.set(s.parentId, arr);
+        }
+      }
+      return m;
+    }, [sourceData]);
+
+    type SrcTableRow = {
+      source: InformationSource;
+      categoryId: SourceCategoryId;
+      values: Record<string, number | null>;
+      isChild: boolean;
+      hasChildren: boolean;
+    };
+    const rows = useMemo<SrcTableRow[]>(() => {
+      if (!sourceData) return [];
+      const topLevel = sourceData.sources.filter((s) => s.parentId === null);
+      // Universal source search (Fedor 2026-05-25 PM, item F).
+      const searched = filterSourcesBySearch(topLevel, state.sourcesSearchQuery);
+      return searched.map((src) => ({
+        source: src,
+        categoryId: src.category as SourceCategoryId,
+        values: computeValues(src),
+        isChild: false,
+        hasChildren: (childrenByParent.get(src.id)?.length ?? 0) > 0,
+      }));
+    }, [sourceData, state.sourcesSearchQuery, computeValues, childrenByParent]);
 
     const sortedRows = useMemo(() => {
       const arr = [...rows];
-      const cmpAz = (a: typeof arr[number], b: typeof arr[number]) =>
+      const cmpAz = (a: SrcTableRow, b: SrcTableRow) =>
         a.source.name.localeCompare(b.source.name, 'de');
       arr.sort((a, b) => {
         let cmp = 0;
@@ -235,6 +268,28 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
       });
       return arr;
     }, [rows, sortKey, sortDir]);
+
+    // Interleave child sub-source rows under each expanded parent.
+    const displayRows = useMemo<SrcTableRow[]>(() => {
+      const expandedSet = new Set(expanded);
+      const out: SrcTableRow[] = [];
+      for (const p of sortedRows) {
+        out.push(p);
+        if (p.hasChildren && expandedSet.has(p.source.id)) {
+          const kids: SrcTableRow[] = (childrenByParent.get(p.source.id) ?? [])
+            .map((src) => ({
+              source: src,
+              categoryId: src.category as SourceCategoryId,
+              values: computeValues(src),
+              isChild: true,
+              hasChildren: false,
+            }))
+            .sort((a, b) => a.source.name.localeCompare(b.source.name, 'de'));
+          out.push(...kids);
+        }
+      }
+      return out;
+    }, [sortedRows, expanded, childrenByParent, computeValues]);
 
     if (!sourceData) {
       return (
@@ -362,8 +417,9 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
             </tr>
           </thead>
           <tbody>
-            {sortedRows.map((row) => {
+            {displayRows.map((row) => {
               const CategoryIcon = SOURCE_CATEGORY_ICONS[row.categoryId];
+              const isExpanded = expanded.includes(row.source.id);
               // v3 (2026-05-26): source-label row header gets a
               // HoverTooltip mirroring Mythen-Tabelle's myth-label
               // tooltip — source name + category description, no
@@ -382,15 +438,47 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                 </div>
               );
               return (
-                <tr key={row.source.id} role="row">
+                <tr
+                  key={row.source.id}
+                  role="row"
+                  className={row.isChild ? 'carm-sources-table__row--child' : undefined}
+                >
                   <HoverTooltip content={labelTooltipContent}>
                     <td className="myth-cell">
                       <div className="carm-spannweite__cell carm-spannweite__cell--label data-table__myth-wrap carm-sources-table__label">
+                        {row.hasChildren ? (
+                          <button
+                            type="button"
+                            className="carm-sources-spannweite__chev"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleExpanded(row.source.id);
+                            }}
+                            aria-expanded={isExpanded}
+                            aria-label={
+                              isExpanded
+                                ? `Unterquellen von ${row.source.name} einklappen`
+                                : `Unterquellen von ${row.source.name} anzeigen`
+                            }
+                            title={isExpanded ? 'Unterquellen einklappen' : 'Unterquellen anzeigen'}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+                            ) : (
+                              <ChevronRight size={14} strokeWidth={2} aria-hidden="true" />
+                            )}
+                          </button>
+                        ) : (
+                          <span className="carm-sources-spannweite__chev-spacer" aria-hidden="true" />
+                        )}
                         {CategoryIcon && (
                           <span
                             className="carm-sources-table__cat-icon"
                             aria-hidden="true"
-                            style={{ color: `var(--source-${row.categoryId.replace(/_/g, '-')}, #6b7280)` }}
+                            /* 2026-05-29: use getCategoryColor (the
+                               Quellen-Balken palette) so icons match the
+                               other two Quellen tabs. */
+                            style={{ color: getCategoryColor(row.categoryId) }}
                           >
                             <CategoryIcon size={16} strokeWidth={1.75} />
                           </span>

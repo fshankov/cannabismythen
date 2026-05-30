@@ -83,7 +83,10 @@ export default function ShareCard({
   // the quiz module page, which unfurls to that module's OG preview image.
   const shareTitle = `Mein Ergebnis: ${moduleTitle}`;
   const shareText = `Ich bin „${t(`result.bandTitle.${band}`)}" im Quiz „${moduleTitle}" auf cannabismythen.de — ${formatGermanDecimal(userPunkte)} von ${result.totalQuestions} Punkten.`;
-  const fullShareText = `${shareText} ${quizUrl}`;
+  // Statement + link kept together (newline-separated). Best-practice fallback:
+  // some platforms drop the dedicated `url` field when a file is attached to a
+  // Web Share, so the link must also live in the shared text body.
+  const fullShareText = `${shareText}\n${quizUrl}`;
 
   const copyToClipboard = useCallback(async () => {
     try {
@@ -112,6 +115,15 @@ export default function ShareCard({
     try {
       const node = visualRef.current;
       if (node) {
+        // Wait for Inter to be fully loaded before capture — otherwise the
+        // first toPng pass can render with a fallback font (or blank).
+        if (typeof document !== "undefined" && document.fonts?.ready) {
+          try {
+            await document.fonts.ready;
+          } catch {
+            /* fonts API unavailable — proceed anyway */
+          }
+        }
         const { toPng } = await import("html-to-image");
         const dataUrl = await toPng(node, {
           pixelRatio: 2,
@@ -140,7 +152,9 @@ export default function ShareCard({
       try {
         await navigator.share({
           files: [file],
-          text: shareText,
+          // fullShareText carries the link inline as well, so it survives
+          // even on share targets that ignore the `url` field with files.
+          text: fullShareText,
           url: quizUrl,
           title: shareTitle,
         });
@@ -169,7 +183,7 @@ export default function ShareCard({
     // No image: native text share (mobile) or clipboard (desktop).
     if (navigator.share) {
       try {
-        await navigator.share({ title: shareTitle, text: shareText, url: quizUrl });
+        await navigator.share({ title: shareTitle, text: fullShareText, url: quizUrl });
         trackResultCardShared("native");
         return;
       } catch {
@@ -178,7 +192,7 @@ export default function ShareCard({
     }
     await copyToClipboard();
     trackResultCardShared("clipboard");
-  }, [shareText, shareTitle, quizUrl, copyToClipboard]);
+  }, [fullShareText, shareTitle, quizUrl, copyToClipboard]);
 
   return (
     <div className={`share-card share-card--${band}`}>
@@ -217,6 +231,15 @@ export default function ShareCard({
             </span>
           )}
         </button>
+
+        {/* 2026-05-30 (Fedor) — module name woven into the verdict card.
+            The old top "Dein Ergebnis — [Modul]" heading + quiz bar were
+            removed; this eyebrow keeps "which quiz" visible AND, because
+            it lives inside .share-card__visual, it is captured in the
+            exported share image too. "Quiz ·" is a neutral structural
+            label (AI draft); {moduleTitle} is the approved titleKey
+            string. EN gloss: "Quiz · <module name>". */}
+        <p className="share-card__module">Quiz · {moduleTitle}</p>
 
         <p className="share-card__band-title">
           {t(`result.bandTitle.${band}`)}

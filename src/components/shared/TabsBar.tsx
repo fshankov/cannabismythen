@@ -27,6 +27,9 @@ export interface TabDef<K extends string> {
    *  Daten-Explorer's `.carm-explorer__tab-btn--fixed` modifier for the
    *  163 px-wide "Tabelle" / "Quellen-Tabelle" tabs). */
   className?: string;
+  /** Optional leading visual, rendered before the label (e.g. the
+   *  Daten-Explorer's compass glyph on the Rundgang tab). */
+  icon?: ReactNode;
 }
 
 interface Props<K extends string> {
@@ -85,6 +88,7 @@ export default function TabsBar<K extends string>({
             aria-selected={isActive}
             onClick={() => onChange(tab.key)}
           >
+            {tab.icon}
             {tab.label}
           </button>
         );

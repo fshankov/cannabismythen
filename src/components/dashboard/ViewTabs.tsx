@@ -1,3 +1,4 @@
+import { Compass } from 'lucide-react';
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import TabsBar, { type TabDef } from '../shared/TabsBar';
@@ -9,7 +10,10 @@ import TabsBar, { type TabDef } from '../shared/TabsBar';
 // MythenExplorer's `.carm-explorer__tab-bar` row.
 const TABS_LEFT: ViewTab[] = ['balken', 'spannweite', 'table'];
 const TABS_RIGHT: ViewTab[] = ['sources', 'sources2', 'sources_table'];
-const TABS: ViewTab[] = [...TABS_LEFT, ...TABS_RIGHT];
+// The Rundgang is a single, set-apart tab at the far right. It isn't a
+// data view — selecting it renders the intro/overview panel.
+const TABS_RUNDGANG: ViewTab[] = ['rundgang'];
+const TABS: ViewTab[] = [...TABS_LEFT, ...TABS_RIGHT, ...TABS_RUNDGANG];
 
 /** "Tabelle" and "Quellen-Tabelle" carry a fixed 163 px width per the
  *  brief — the other tabs size to content. The modifier is applied
@@ -26,6 +30,7 @@ const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
   sources: 'view.quellen',
   sources2: 'view.quellen2',
   sources_table: 'view.quellen-tabelle',
+  rundgang: 'rundgang.label',
   // Retired views — never shown in the tab bar; keys present so the type
   // remains exhaustive and url-state redirects don't crash on lookup.
   strips: null,
@@ -45,28 +50,38 @@ interface Props {
    *  designer brief (2026-05-28, Figma node 403:1976) splits the tab
    *  bar into LEFT myth views + RIGHT source views with flex-1
    *  spacers between them; pass `group="left"` / `group="right"`
-   *  twice from `MythenExplorer` to get the split. */
-  group?: 'left' | 'right' | 'all';
-  /** Kept for back-compat with any caller still passing the prop. The
-   *  Rundgang trigger now lives inside the toolbar as the green
-   *  teardrop badge — see `.carm-rundgang-badge` in MythenExplorer.tsx. */
-  onRundgang?: () => void;
+   *  twice from `MythenExplorer` to get the split. `group="rundgang"`
+   *  renders the single far-right Rundgang tab. */
+  group?: 'left' | 'right' | 'rundgang' | 'all';
+  /** First-visit attention nudge — only meaningful for
+   *  `group="rundgang"`. Adds the `.is-nudge` modifier (a small pulsing
+   *  dot) to draw the eye to the Rundgang tab until the user opens it. */
+  nudge?: boolean;
 }
 
-export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props) {
+export default function ViewTabs({ view, lang, onChange, group = 'all', nudge = false }: Props) {
   // Pick the slice for this render: LEFT (myth views), RIGHT (source
-  // views), or both (back-compat).
+  // views), the single Rundgang tab, or all (back-compat).
   const slice =
     group === 'left' ? TABS_LEFT :
     group === 'right' ? TABS_RIGHT :
+    group === 'rundgang' ? TABS_RUNDGANG :
     TABS;
 
   const tabDefs: TabDef<ViewTab>[] = slice.map((tab) => {
     const key = TAB_LABEL_KEY[tab];
+    const isRundgang = tab === 'rundgang';
     return {
       key: tab,
       label: key ? t(key, lang) : tab,
-      className: TAB_FIXED_WIDTH[tab] ? 'carm-explorer__tab-btn--fixed' : undefined,
+      icon: isRundgang ? (
+        <Compass size={15} strokeWidth={2} aria-hidden="true" />
+      ) : undefined,
+      className: [
+        TAB_FIXED_WIDTH[tab] ? 'carm-explorer__tab-btn--fixed' : '',
+        isRundgang ? 'carm-explorer__tab-btn--rundgang' : '',
+        isRundgang && nudge ? 'is-nudge' : '',
+      ].filter(Boolean).join(' ') || undefined,
     };
   });
 
@@ -75,7 +90,11 @@ export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props)
       tabs={tabDefs}
       activeKey={view}
       onChange={onChange}
-      ariaLabel={group === 'right' ? 'Quellen-Ansicht wählen' : 'Mythos-Ansicht wählen'}
+      ariaLabel={
+        group === 'rundgang' ? 'Rundgang' :
+        group === 'right' ? 'Quellen-Ansicht wählen' :
+        'Mythos-Ansicht wählen'
+      }
     />
   );
 }
