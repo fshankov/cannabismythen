@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CarmData, CorrectnessClass, Myth } from './types';
 import {
   ON_VERDICT_BG_GLYPH,
@@ -8,6 +8,8 @@ import {
 } from './dataLoaders';
 import { MehrPopover } from './MehrPopover';
 import VerdictArrow from '../shared/VerdictArrow';
+import { useFlipPosition, type FlipPosition } from '../dashboard/hooks/useFlipPosition';
+import { withBase } from '../../lib/withBase';
 
 interface Props {
   data: CarmData;
@@ -15,19 +17,20 @@ interface Props {
   mode: 'themed' | 'classified';
 }
 
-// Iter-11: VERDICT_COLOR / VERDICT_LABEL / VERDICT_ORDER / themeColorFor /
-// ON_VERDICT_BG_GLYPH all hoisted to `dataLoaders.ts` and shared with the
-// in-body legend rendering in ScrollytellingViewer. The hover-card and
-// detail-popover paths below still use VERDICT_LABEL with the legacy
-// "stimmt nicht" phrasing because they document the verdict in
-// long-form (matching the daten-explorer); the in-body legend uses
-// VERDICT_LABEL_DE ("richtig / eher richtig / …") via the shared helper.
+// Iter-14 (Harald review, CAR-14): the hover-card + detail-popover
+// labels now use the canonical four-level classification words —
+// `Richtig / Eher richtig / Eher falsch / Falsch / Keine Aussage` —
+// rather than the colloquial "stimmt / stimmt nicht" phrasing flagged
+// as off-brand. These match the in-body legend (VERDICT_LABEL_DE) so
+// the same vocabulary surfaces in every place a verdict is named.
+// English gloss: "Correct / Rather correct / Rather incorrect /
+// Incorrect / No classification".
 const VERDICT_LABEL_LONG: Record<CorrectnessClass, string> = {
-  richtig: 'stimmt',
-  eher_richtig: 'stimmt eher',
-  eher_falsch: 'stimmt eher nicht',
-  falsch: 'stimmt nicht',
-  no_classification: 'keine Aussage',
+  richtig: 'Richtig',
+  eher_richtig: 'Eher richtig',
+  eher_falsch: 'Eher falsch',
+  falsch: 'Falsch',
+  no_classification: 'Keine Aussage',
 };
 
 interface MythSummary {
@@ -40,13 +43,31 @@ export function VizMythGrid({ data, mode }: Props) {
   const myths = sortedMyths(data).slice(0, 42);
   const [summaries, setSummaries] = useState<MythSummaryMap | null>(null);
   const [hoverId, setHoverId] = useState<number | null>(null);
-  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [openMyth, setOpenMyth] = useState<Myth | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
 
+  // Iter-14 (Harald review, CAR-14): swap the bespoke grid-relative
+  // positioning (left:x, top:y-12, transform translate(-50%,-100%))
+  // for the shared useFlipPosition hook with `boundsRef` set to the
+  // grid. Same flip-above-or-below behavior the other vizes use, plus
+  // a clamp inside the viz block so corner-tile tooltips never bleed
+  // past the canvas frame.
+  const {
+    triggerRef,
+    cardRef,
+    pos,
+    open: tooltipOpen,
+    setOpen: setTooltipOpen,
+    updatePosition,
+  } = useFlipPosition<HTMLElement, HTMLDivElement>({
+    maxWidth: 320,
+    gap: 10,
+    boundsRef: gridRef,
+  });
+
   useEffect(() => {
     let cancelled = false;
-    fetch('/data/myth-summaries.json')
+    fetch(withBase('data/myth-summaries.json'))
       .then((r) => (r.ok ? r.json() : {}))
       .then((json: MythSummaryMap) => {
         if (!cancelled) setSummaries(json);
@@ -59,6 +80,66 @@ export function VizMythGrid({ data, mode }: Props) {
     };
   }, []);
 
+  // Iter-20: scroll-driven matrix build. In Step 3 (themed) the 42 cells
+  // reveal in a radial wavefront growing from the bottom-right corner —
+  // exactly where Step 2's messages "fell" — as the user scrolls into
+  // the step. Drives a single `--build` (0→1) CSS var on the grid; each
+  // cell carries a `--rt` reveal threshold (its normalised distance from
+  // the bottom-right corner) and the CSS reveals it once `--build` passes
+  // `--rt`. Step 4 (classified) and reduced-motion pin `--build` to 1 so
+  // the full grid is always present there. useLayoutEffect sets the
+  // initial value before paint (no flash); the listener scrubs it.
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const reduced =
+      typeof window !== 'undefined' &&
+      (window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        document.documentElement.dataset.reducedMotion === 'true');
+
+    if (mode === 'classified' || reduced) {
+      grid.style.setProperty('--build', '1');
+      return;
+    }
+
+    const compute = () => {
+      const step3 = document.querySelector('[data-step="3"]');
+      if (!step3) return 1;
+      const r = (step3 as HTMLElement).getBoundingClientRect();
+      const vh = window.innerHeight;
+      // Build runs as Step 3 settles into the active band and completes a
+      // little further down — picking up the corner pile from Step 2.
+      const HI = vh * 0.5, LO = vh * 0.05;
+      const v = (HI - r.top) / (HI - LO);
+      return v < 0 ? 0 : v > 1 ? 1 : v;
+    };
+
+    let last = -1;
+    const write = () => {
+      const v = compute();
+      if (Math.abs(v - last) < 0.004) return;
+      last = v;
+      grid.style.setProperty('--build', v.toFixed(3));
+    };
+    write();
+
+    let rafId = 0;
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        write();
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [mode]);
+
   // Iter-11: themed-legend (orderedCats) + classified counts (counts)
   // are now derived in ScrollytellingViewer via shared helpers in
   // dataLoaders.ts. The viz column itself no longer renders them.
@@ -67,20 +148,16 @@ export function VizMythGrid({ data, mode }: Props) {
   const hoveredSummary = hoveredMyth && summaries ? summaries[String(hoveredMyth.id)] : null;
 
   function onCellEnter(mythId: number, e: React.MouseEvent | React.FocusEvent) {
-    const target = e.currentTarget as HTMLElement;
-    const grid = gridRef.current;
-    if (!grid) return;
-    const cellRect = target.getBoundingClientRect();
-    const gridRect = grid.getBoundingClientRect();
-    setHoverPos({
-      x: cellRect.left - gridRect.left + cellRect.width / 2,
-      y: cellRect.top - gridRect.top,
-    });
+    const el = e.currentTarget as HTMLElement;
+    (triggerRef as unknown as React.MutableRefObject<Element | null>).current = el;
     setHoverId(mythId);
+    setTooltipOpen(true);
+    updatePosition();
   }
 
   function onCellLeave() {
     setHoverId(null);
+    setTooltipOpen(false);
   }
 
   return (
@@ -100,13 +177,23 @@ export function VizMythGrid({ data, mode }: Props) {
           const themedBg = themeColorFor(m.category_id);
           const classifiedBg = VERDICT_COLOR[m.correctness_class];
           const bg = mode === 'classified' ? classifiedBg : themedBg;
+          // Iter-20: reveal threshold = normalised distance of this cell
+          // from the bottom-right corner (col 6, row 5) of the 7×6 grid,
+          // so the matrix builds outward from that corner as `--build`
+          // rises. Scaled to [0, 1−RAMP] (RAMP=0.18, matching the CSS
+          // divisor) so the FARTHEST cell still reaches full reveal
+          // (cp=1) exactly at --build=1 — otherwise the top-left corner
+          // would never fully appear, even in Step 4.
+          const col = i % 7;
+          const row = Math.floor(i / 7);
+          const rt = (Math.sqrt((6 - col) ** 2 + (5 - row) ** 2) / Math.sqrt(61)) * 0.82;
           return (
             <div
               key={m.id}
               className={`viz-grid__cell viz-grid__cell--${mode}`}
               style={{
                 backgroundColor: bg,
-                ['--cell-delay' as string]: `${i * 30}ms`,
+                ['--rt' as string]: rt.toFixed(3),
                 cursor: mode === 'classified' ? 'pointer' : 'default',
               }}
               tabIndex={0}
@@ -130,10 +217,12 @@ export function VizMythGrid({ data, mode }: Props) {
                   : m.text_de
               }
             >
-              {/* Icon slot is ALWAYS rendered — empty placeholder in themed
-                  mode, actual verdict arrow in classified mode. This keeps the
-                  cell's flex-column layout identical between modes so the
-                  myth text below it doesn't shift down when crossing 3 → 4. */}
+              {/* Iter-20: icon sits in a FIXED top band (always 14px,
+                  placeholder in themed mode, verdict arrow in classified
+                  mode); the text lives in a flex:1 area centred below it.
+                  Because the top band + text area are identical in both
+                  modes, the myth text holds the exact same position when
+                  the verdict SVG appears in Step 4 — it never reflows. */}
               {mode === 'classified' ? (
                 <VerdictArrow
                   verdict={m.correctness_class}
@@ -145,23 +234,29 @@ export function VizMythGrid({ data, mode }: Props) {
               ) : (
                 <span className="viz-grid__cell-icon-slot" aria-hidden="true" />
               )}
-              <span className="viz-grid__cell-text">{m.text_short_de}</span>
+              <div className="viz-grid__cell-textwrap">
+                <span className="viz-grid__cell-text" lang="de">{m.text_short_de}</span>
+              </div>
             </div>
           );
         })}
 
-        {hoveredMyth && hoverPos && (
-          <MythHoverCard
-            myth={hoveredMyth}
-            mode={mode}
-            summary={hoveredSummary}
-            x={hoverPos.x}
-            y={hoverPos.y}
-            categoryName={
-              data.categories.find((c) => c.id === hoveredMyth.category_id)?.name_de ?? null
-            }
-          />
-        )}
+        {/* Iter-14: tooltip card is always rendered (so `useFlipPosition`
+            can measure `cardRef.current?.offsetHeight`) and positioned
+            via inline `position: fixed; top/left/width` from `pos`. */}
+        <MythHoverCard
+          ref={cardRef}
+          myth={hoveredMyth}
+          mode={mode}
+          summary={hoveredSummary}
+          pos={pos}
+          open={tooltipOpen && hoveredMyth !== null}
+          categoryName={
+            hoveredMyth
+              ? data.categories.find((c) => c.id === hoveredMyth.category_id)?.name_de ?? null
+              : null
+          }
+        />
       </div>
 
       {/* Iter-11: theme + verdict legends moved to the LEFT text
@@ -195,7 +290,7 @@ export function VizMythGrid({ data, mode }: Props) {
             })()}
             <a
               className="mehr-popover__cta-link"
-              href={`/fakten-karten/?myth=m${String(openMyth.id).padStart(2, '0')}`}
+              href={withBase(`fakten-karten/?myth=m${String(openMyth.id).padStart(2, '0')}`)}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -209,39 +304,62 @@ export function VizMythGrid({ data, mode }: Props) {
 }
 
 interface HoverCardProps {
-  myth: { id: number; text_de: string; correctness_class: CorrectnessClass; category_id: number | null };
+  myth: { id: number; text_de: string; correctness_class: CorrectnessClass; category_id: number | null } | null;
   mode: 'themed' | 'classified';
   summary: MythSummary | null;
-  x: number;
-  y: number;
+  pos: FlipPosition | null;
+  open: boolean;
   categoryName: string | null;
 }
 
-function MythHoverCard({ myth, mode, summary, x, y, categoryName }: HoverCardProps) {
-  const verdictColor = VERDICT_COLOR[myth.correctness_class];
+/**
+ * MythHoverCard (Iter-14): position-fixed, useFlipPosition-driven. The
+ * card is always mounted (so the hook can measure its real height for
+ * the flip-above-or-below decision) but kept invisible via the
+ * `is-open` class + opacity rule on `.viz-grid__hover`. Position is
+ * applied as inline `position: fixed; top/left/width` taken from
+ * `pos` — clamped inside the grid's bounds by the hook.
+ */
+const MythHoverCard = forwardRef<HTMLDivElement, HoverCardProps>(function MythHoverCard(
+  { myth, mode, summary, pos, open, categoryName },
+  ref,
+) {
+  const verdictColor = myth ? VERDICT_COLOR[myth.correctness_class] : 'transparent';
   return (
     <div
-      className="viz-grid__hover"
+      ref={ref}
+      className={`viz-grid__hover${open ? ' viz-grid__hover--open' : ''}`}
       role="tooltip"
-      style={{
-        left: x,
-        top: Math.max(0, y - 12),
-        transform: 'translate(-50%, -100%)',
-      }}
+      style={
+        pos
+          ? {
+              position: 'fixed',
+              top: pos.top,
+              left: pos.left,
+              width: pos.width,
+            }
+          : undefined
+      }
     >
-      <p className="viz-grid__hover-statement">{myth.text_de}</p>
-      {mode === 'classified' && (
-        <div className="viz-grid__hover-verdict" style={{ color: verdictColor }}>
-          <VerdictArrow verdict={myth.correctness_class} size={14} strokeWidth={2.5} />
-          <span>{VERDICT_LABEL_LONG[myth.correctness_class]}</span>
-        </div>
-      )}
-      {mode === 'themed' && categoryName && (
-        <div className="viz-grid__hover-category">{categoryName}</div>
-      )}
-      {summary && mode === 'classified' && (
-        <p className="viz-grid__hover-summary">{summary.summary_de}</p>
+      {myth && (
+        <>
+          <p className="viz-grid__hover-statement">{myth.text_de}</p>
+          {mode === 'classified' && (
+            <div className="viz-grid__hover-verdict" style={{ color: verdictColor }}>
+              <VerdictArrow verdict={myth.correctness_class} size={14} strokeWidth={2.5} />
+              <span>{VERDICT_LABEL_LONG[myth.correctness_class]}</span>
+            </div>
+          )}
+          {mode === 'themed' && categoryName && (
+            <div className="viz-grid__hover-category">{categoryName}</div>
+          )}
+          {summary && mode === 'classified' && (
+            <p className="viz-grid__hover-summary">{summary.summary_de}</p>
+          )}
+        </>
       )}
     </div>
   );
-}
+});
+
+export { MythHoverCard };

@@ -11,7 +11,7 @@ steps:
 
 
       Das Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD) wollte es genau wissen: Was glaubt die Bevölkerung wirklich über Cannabis — und wie viel davon stimmt?
-    legend: "★ Projektzeitraum CaRM-Studie · April 2024 bis September 2026"
+    legend: "★ Projektzeitraum CaRM-Studie · April 2024 bis Dezember 2025"
     hint: ""
   - heading: |-
       Jede:r in Deutschland
@@ -47,26 +47,29 @@ steps:
       Für jede der 42 Thesen erhoben wir fünf Indikatoren — über fünf Zielgruppen hinweg: Volljährige, Minderjährige, Konsumierende, junge Erwachsene und Eltern minderjähriger Kinder.
     hint: ""
   - heading: |-
-      Was sie wissen.
-      Was sie glauben.
+      Was wir messen.
+      Was wir glauben zu wissen.
     bodyText: |-
-      Für jede These haben wir drei Werte gemessen.
+      Beispiel-These: „Cannabiskonsum verursacht einen generellen Motivationsverlust." [↓ falsch]
 
-      **Kenntnis** — wer hat die Aussage schon einmal gehört? „Cannabis wirkt gegen Schmerzen" [↙ eher falsch] kennen 77 % der Konsumierenden, „Cannabis ist ein Allheilmittel" [↓ falsch] nur 12 % der Erwachsenen.
+      **Kenntnis.** In der Zielgruppe der Erwachsenen kennen 26 % diesen Mythos. Das ist ein niedriger mittlerer Anteil.
 
-      **Bedeutung** — wie stark prägt die Aussage das eigene Verhalten? Was Menschen kennen, wiegt für sie meist auch schwerer; beide Werte laufen eng zusammen.
+      **Bedeutung.** Die Bedeutung dieses Mythos für die Erwachsenen, die ihn kennen (26 %), für ihren Umgang mit Cannabis hat ein hohes mittleres Niveau von 67 Punkten.
 
-      **Richtigkeit** — wie nahe liegt die Einschätzung an der Wissenschaft? „Cannabiskonsum gefährdet die Verkehrssicherheit" [↑ richtig] erreicht bei Erwachsenen 92 von 100, „Cannabiskonsum verursacht einen generellen Motivationsverlust" [↓ falsch] nur 25. Die Mehrheit liegt also daneben.
+      **Richtigkeit.** Die Beurteilung in Übereinstimmung mit der wissenschaftlichen Klassifizierung erreicht bei diesen Erwachsenen ein niedriges Niveau von 25 Punkten — die Mehrheit liegt also daneben.
+    legend: "Stichprobe: 2.097 Volljährige, 18–70 Jahre."
     hint: ""
   - heading: |-
       Wo Aufklärung
       am meisten bewegt.
     bodyText: |-
-      Aus diesen drei Werten lassen sich zwei weitere ableiten.
+      Aus diesen drei Werten leiten sich zwei weitere ab.
 
-      **Präventionsbedeutung** verbindet Bedeutung und Wissenslücke. Sie zeigt, wo Aufklärung am meisten bewegt: dort, wo ein falsches Bild das Verhalten prägt.
+      **Präventionsbedeutung.** Aus der individuellen Bedeutung und der Beurteilung der Richtigkeit resultiert ein mittleres Niveau für die Präventionsbedeutung (60 Punkte) — der höchste Wert unter allen 42 Thesen.
 
-      **Bevölkerungsrisiko** wiegt zusätzlich die Reichweite mit ein — ein weit bekannter Halbmythos erreicht mehr Menschen als ein obskurer. Sinnvoll ist diese Kennzahl nur für Voll- und Minderjährige; die anderen Gruppen sind zu klein für eine belastbare Hochrechnung.
+      **Bevölkerungsrisiko.** Mit Blick auf die gesamte volljährige Bevölkerung (nicht nur diejenigen, die den Mythos schon kennen) ergibt sich ein niedriges Niveau für die Präventionsbedeutung (Bevölkerungsrelevanz: 17 Punkte).
+
+      Bevölkerungsrisiko ist nur für Voll- und Minderjährige belastbar; die anderen Gruppen sind zu klein für eine Hochrechnung.
     hint: ""
   - heading: |-
       Wo wir suchen.
@@ -97,7 +100,7 @@ steps:
     hint: ""
   - heading: Wer hinter der Studie steht.
     bodyText: >-
-      Die CaRM-Studie — Cannabiskonsum: Risiken und Mythen. Durchgeführt vom Institut für interdisziplinäre Sucht- und Drogenforschung (ISD) in Hamburg. Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIöG).
+      Durchgeführt vom Institut für interdisziplinäre Sucht- und Drogenforschung (ISD) in Hamburg. Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIÖG) im Auftrag des Bundesministeriums für Gesundheit.
     hint: ""
 timelineTooltips:
   - anchorDate: "2024-04-01"
@@ -115,9 +118,9 @@ timelineTooltips:
   - anchorDate: "2025-11-15"
     body: >-
       Eine interdisziplinäre Expert:innenrunde bewertet Literatur und Befragung zusammen und legt die endgültige Klassifikation der 42 Thesen fest.
-  - anchorDate: "2026-09-01"
+  - anchorDate: "2025-12-01"
     body: >-
-      Veröffentlichung auf dieser Website: 42 Faktenkarten, ein Selbsttest, ein Daten-Explorer und themenorientierte FAQ.
+      Veröffentlichung des Abschlussberichts und der interaktiven Website: 42 Faktenkarten, ein Selbsttest, ein Daten-Explorer und themenorientierte FAQ.
 teamMembers:
   - initials: CS
     fullName: Christian Schütze
@@ -160,17 +163,11 @@ teamMembers:
     bio: >-
       Verbindet Forschungsergebnisse mit der Präventionspraxis und der Öffentlichkeitsarbeit.
     color: "#10b981"
-namedExperts:
-  - fullName: Dr. Jens Kalke
-    affiliation: ZIS / ISD Hamburg
-    context: >-
-      Langjähriger Präventionsforscher; im Abschlussbericht als befragte:r Expert:in namentlich aufgeführt.
-  - fullName: Dr. Heike Zurhold
-    affiliation: ZIS / ISD Hamburg
-    context: Forscherin am Zentrum für interdisziplinäre Suchtforschung (ZIS).
-  - fullName: Veronika Möller
-    affiliation: ZIS / ISD Hamburg
-    context: Hat ihre Expertise in die Befragung von Präventionsfachkräften eingebracht.
+namedExperts: []  # Iter-14 (CAR-21): three expert entries deleted from
+                  # Step 11; their relocation to a footer credit block
+                  # ships in the separate Footer prompt. Kept as `[]`
+                  # rather than removing the key so the YAML still
+                  # matches `ScrollyContent.namedExperts` typing.
 landesstellenCredit: >-
   Mit Unterstützung der Landesstellen Schleswig-Holstein, Mecklenburg-Vorpommern, Berlin und regionaler Koordinationsstellen.
 footerKontakt:
@@ -198,3 +195,32 @@ internalNotes: >-
 
 
   Iter-10 (2026-05-14) — Synthese als eigener Schritt 7. Die zwei abgeleiteten Indikatoren (Präventionsbedeutung, Bevölkerungsrisiko) leben jetzt in einem eigenen Schritt mit eigener Überschrift, statt als Phase-2 innerhalb Schritt 6. Sources (Suche/Vertrauen, Wahrnehmung/Prävention) wandern zu Schritten 8 + 9, CTA zu Schritt 10, Team zu Schritt 11. Insgesamt 11 Schritte. Bearbeitbar wie zuvor im Keystatic-Editor.
+
+
+  Iter-12 (2026-05-28) — Schritte 6 + 7 zeigen jetzt einen einzelnen Mythos (M28, Motivationsverlust) als Balken-Stack in der Daten-Explorer-Optik, statt 5 Beispiel-Mythen als Parallel-Coordinates. Schritt 6 enthüllt die 3 gemessenen Indikatoren (Kenntnis, Bedeutung, Richtigkeit) als Balken-Zeilen; Schritt 7 die 2 abgeleiteten (Präventionsbedeutung, Bevölkerungsrisiko). Die deutschen Texte folgen der Lesebeispiel-Vorlage aus dem Daten-Explorer-Tooltip (gleiche Wortwahl wie beim Hover über eine Zelle). Zahlen (26 %, 67, 25, 60, 17) stammen direkt aus public/data/carm-data.json — bitte nicht hier nachredigieren, sondern in der JSON.
+
+  Schritte 8 + 9 zeigen Informationsquellen 2 (Apotheke, Angehörige, Foren, Plakat, Kurzbeitrag TV/Radio) als Spannweite-Grid mit Daten-Explorer-Look. Schritt 8 enthüllt Suche + Vertrauen, Schritt 9 zusätzlich Wahrnehmung + Prävention. Hover-Tooltip pro Zelle liefert den entsprechenden LesebeispielSource-Satz für die aktive Zielgruppe.
+
+  Alle 11 Visualisierungen leben jetzt in einem festen Canvas-Rahmen (.scrolly__viz-canvas, max-width 560 px, aspect-ratio 4 / 5) mit `overflow: hidden` — Grundlage für die spätere Mobile-Anpassung.
+
+
+  Iter-13 (2026-05-28) — Canvas-Rahmen unsichtbar gemacht (kein Rand, kein Hintergrund, kein Schatten, kein Padding) und auf Querformat umgestellt: max-width 720 px, aspect-ratio 5 / 4, max-height min(72dvh, 560 px). Die Audience-Picker-Pillen passen jetzt vollständig in den sichtbaren Bereich; die Balken-Zeilen und Quellen-Spalten haben mehr horizontalen Raum.
+
+
+  Iter-14 (2026-05-28, Harald-Review) — Inhaltliche und UX-Korrekturen aus dem ISD-Review:
+
+  • CAR-12/13: Veröffentlichungsdatum von „September 2026 / Diese Website" auf „Dezember 2025 / Abschlussbericht" verschoben (Schritt 1 Timeline-Anker + steps[0].legend + timelineTooltips[5]).  English gloss: publication moved from Sep 2026 to Dec 2025 + subtitle reframed as "Final report" instead of "This website".
+
+  • CAR-14: Verdict-Vokabular im Step-4-Hover umgestellt vom umgangssprachlichen „stimmt / stimmt eher / stimmt eher nicht / stimmt nicht" auf die kanonischen „Richtig / Eher richtig / Eher falsch / Falsch / Keine Aussage". English gloss: switched to the canonical four-level classification used everywhere else on the site.
+
+  • CAR-15/16/17: Vier dezente „Mehr im Daten-Explorer →" Ghost-Buttons unter Schritten 6, 7, 8, 9 — verlinken absolut auf https://cannabismythen.de/daten-explorer/ (Step 6 default · Step 7 ?indicator=praevention · Steps 8 + 9 ?view=quellen2). Englisch: "More in the Daten-Explorer →".
+
+  • CAR-18: Bereits abgedeckt — VizSourcesSpannweite verwendet schon `data.sourceCategories[].name` (deutsche Labels) in Legende + Tooltip; keine englischen Roh-IDs sichtbar.
+
+  • CAR-21: Drei `namedExperts`-Einträge (Dr. Jens Kalke / Dr. Heike Zurhold / Veronika Möller) aus Step 11 gelöscht; UI-Surface in VizTeamRow ebenfalls entfernt. Verlagerung in einen Footer-Credit-Block folgt im separaten Footer-Prompt.
+
+  • CAR-22: Step-11-bodyText auf „Durchgeführt vom Institut für interdisziplinäre Sucht- und Drogenforschung (ISD) in Hamburg. Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIÖG) im Auftrag des Bundesministeriums für Gesundheit." aktualisiert. ISD- und BIÖG-Logos als anklickbare Bildlinks direkt unter dem Studientitel im Viz-Block — SVGs aus cannabismythen/_local/design/logos/ nach public/logos/ kopiert. English gloss: "Conducted by ISD Hamburg, funded by BIÖG on behalf of the Federal Ministry of Health" + clickable institution logos.
+
+  • Cross-cutting #1: `useFlipPosition` um optionalen `boundsRef` erweitert, der zusätzlich an die Viz-Block-Grenzen klammert. Eingesetzt in VizTimeline, VizMythGrid, VizSingleMythBalken, VizSourcesSpannweite — Tooltips bluten nicht mehr über den Canvas-Rahmen hinaus.
+
+  • Cross-cutting #2: `min-height: 300 px` auf den neuen Vizes für vertikale Sicherheit auf schmalen Viewports (z. B. iPhone 13 Pro 390 × 844).

@@ -48,7 +48,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowDown01, ArrowDown10 } from 'lucide-react';
 import type {
   CorrectnessClass,
   GroupId,
@@ -197,12 +197,13 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
   }, [byGroup, sort]);
 
   // Click handler for indicator column headers: cycle desc → asc → off.
+  // Click cycle (Fedor 2026-05-26): match the dashboard Tabelle —
+  // ASC ↔ DESC toggle indefinitely. The corner ↺ button is the only
+  // way back to canonical order.
   const handleSortClick = (col: Indicator) => {
     setSort((prev) => {
-      if (prev.column !== col) return { column: col, dir: 'desc' };
-      if (prev.dir === 'desc') return { column: col, dir: 'asc' };
-      // dir === 'asc' → off (back to canonical)
-      return { column: null, dir: 'desc' };
+      if (prev.column !== col) return { column: col, dir: 'asc' };
+      return { column: col, dir: prev.dir === 'asc' ? 'desc' : 'asc' };
     });
   };
 
@@ -258,6 +259,12 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                     </div>
                   </div>
                 );
+                const isDesc = isActive && dir === 'desc';
+                const sortTooltip = !isActive
+                  ? `Nach ${INDICATOR_LABELS_FULL[indicator]} sortieren`
+                  : isDesc
+                  ? `${INDICATOR_LABELS_FULL[indicator]}: absteigend`
+                  : `${INDICATOR_LABELS_FULL[indicator]}: aufsteigend`;
                 return (
                   <HoverTooltip key={indicator} content={tooltipContent}>
                     <th
@@ -276,6 +283,36 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                           : 'none'
                       }
                     >
+                      {/* Tabelle-style sort button (Fedor 2026-05-26)
+                          — small ArrowDown01/10 glyph absolutely
+                          positioned at the top-left of the cell.
+                          Always rendered; CSS controls its visibility
+                          (hidden by default, hover reveals at low
+                          opacity, .is-active brings it to full
+                          opacity in the primary color). Matches
+                          GridDataHeader's pattern in the dashboard
+                          Tabelle (src/components/dashboard/grid/
+                          GridDataHeader.tsx). */}
+                      <button
+                        type="button"
+                        className={
+                          'factsheet-group-bars__col-sort-btn' +
+                          (isActive ? ' is-active' : '')
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSortClick(indicator);
+                        }}
+                        aria-pressed={isActive}
+                        aria-label={sortTooltip}
+                        title={sortTooltip}
+                      >
+                        {isDesc ? (
+                          <ArrowDown10 size={12} strokeWidth={2} aria-hidden="true" />
+                        ) : (
+                          <ArrowDown01 size={12} strokeWidth={2} aria-hidden="true" />
+                        )}
+                      </button>
                       <button
                         type="button"
                         className="factsheet-group-bars__col-btn"
@@ -290,18 +327,6 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                         </span>
                         <span className="factsheet-group-bars__col-label">
                           {INDICATOR_LABELS_SHORT[indicator]}
-                          {isActive ? (
-                            <span
-                              className="factsheet-group-bars__col-sort"
-                              aria-hidden="true"
-                            >
-                              {dir === 'desc' ? (
-                                <ChevronDown size={11} strokeWidth={2} />
-                              ) : (
-                                <ChevronUp size={11} strokeWidth={2} />
-                              )}
-                            </span>
-                          ) : null}
                         </span>
                       </button>
                     </th>

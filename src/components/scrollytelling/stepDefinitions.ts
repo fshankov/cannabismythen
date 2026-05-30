@@ -17,25 +17,31 @@ export interface StepStructure {
   vizName: VizName;
   gridMode?: 'themed' | 'classified';
   sampleRankedMode?: SampleRankedMode;
+  /** Only set for `singleMythBalken`. 3 → Step 6, 5 → Step 7. */
+  revealedRows?: 3 | 5;
 }
 
-// Iter-10 — the indicator story is now split across TWO steps:
-//   Step 6 reveals the 3 raw indicators (Kenntnis, Bedeutung, Richtigkeit)
-//   Step 7 adds the 2 derived synthesis indicators (Präventionsbedeutung,
-//          Bevölkerungsrisiko)
-// Both share the `sampleAndRanked` viz family so the strips animate in
-// across the step boundary without a remount. Sources, CTA and Team
-// shift down by 1.
+// Iter-12 — Steps 6 + 7 swap from the parallel-coordinates "strips"
+// viz (5 example myths) to a single-myth Balken stack (M28) styled
+// like the Daten-Explorer's BalkenView. Step 6 shows the 3 raw
+// indicators (Kenntnis, Bedeutung, Richtigkeit) as rows; Step 7
+// reveals the 2 derived rows (Präventionsbedeutung, Bevölkerungsrisiko)
+// with the existing reveal-stagger machinery.
+//
+// Steps 8 + 9 swap from the beeswarm `sourcesStrips` viz to a dark
+// port of the Daten-Explorer's SourcesSpannweiteView (5 curated
+// sources × 4 metric columns); the same `revealedColumns` 2 → 4
+// reveal pattern carries the active vs passive split.
 export const STEP_DEFINITIONS: StepStructure[] = [
   { stepNumber: 1,  vizName: 'timeline' },
   { stepNumber: 2,  vizName: 'peopleVoices' },
   { stepNumber: 3,  vizName: 'mythGrid', gridMode: 'themed' },
   { stepNumber: 4,  vizName: 'mythGrid', gridMode: 'classified' },
   { stepNumber: 5,  vizName: 'sampleAndRanked', sampleRankedMode: 'sample' },
-  { stepNumber: 6,  vizName: 'sampleAndRanked', sampleRankedMode: 'ranked-3' },
-  { stepNumber: 7,  vizName: 'sampleAndRanked', sampleRankedMode: 'ranked-5' },
-  { stepNumber: 8,  vizName: 'sourcesStrips' },
-  { stepNumber: 9,  vizName: 'sourcesStrips' },
+  { stepNumber: 6,  vizName: 'singleMythBalken', revealedRows: 3 },
+  { stepNumber: 7,  vizName: 'singleMythBalken', revealedRows: 5 },
+  { stepNumber: 8,  vizName: 'sourcesSpannweite' },
+  { stepNumber: 9,  vizName: 'sourcesSpannweite' },
   { stepNumber: 10, vizName: 'ctaGrid' },
   { stepNumber: 11, vizName: 'teamRow' },
 ];

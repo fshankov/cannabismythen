@@ -2925,15 +2925,19 @@ button.pill[aria-pressed="true"] {
 }
 
 /* ── Preview banner (pre-launch) ─────────────────────────────────
-   PREVIEW BANNER — remove this block before public launch         */
+   PREVIEW BANNER — remove this block before public launch.
+   Styled to mirror the floating nav pill (.nav-wrapper / .nav): same
+   position, height, pill shape, shadow and font size, with a light
+   amber tint + ⚠ icon so it still reads as a notice.                */
 .preview-banner {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 32px;
   z-index: 102; /* above the floating nav pill (100) it overlays */
-  background: #fef9e4;
-  border-bottom: 1px solid #d4a017;
-  font-size: 0.8125rem;
-  line-height: 1.45;
 }
 
 /* While the banner is open it overlays (covers) the nav pill — hide the
@@ -2943,13 +2947,21 @@ button.pill[aria-pressed="true"] {
   display: none;
 }
 
+/* The pill — mirrors .nav */
 .preview-banner__inner {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 9px var(--space-md);
+  gap: var(--space-md);
+  width: 100%;
+  max-width: 1184px;
+  min-height: 60px;
+  padding: 10px 32px;
+  border-radius: 28px;
+  background: rgba(254, 249, 228, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(212, 160, 23, 0.45);
 }
 
 .preview-banner__icon {
@@ -2961,19 +2973,24 @@ button.pill[aria-pressed="true"] {
   flex: 1;
   color: #78350f;
   min-width: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .preview-banner__details-btn {
   flex-shrink: 0;
   background: none;
   border: 1px solid #b45309;
-  border-radius: var(--radius-sm);
-  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  padding: 5px 16px;
   cursor: pointer;
-  font-size: 0.8125rem;
+  font-size: 15px;
+  font-weight: 500;
   color: #78350f;
   white-space: nowrap;
   font-family: inherit;
+  transition: background var(--duration-short) var(--spring-standard);
 }
 
 .preview-banner__details-btn:hover {
@@ -2987,7 +3004,7 @@ button.pill[aria-pressed="true"] {
   cursor: pointer;
   padding: 3px 7px;
   color: #78350f;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   line-height: 1;
   border-radius: var(--radius-sm);
   font-family: inherit;
@@ -2999,7 +3016,11 @@ button.pill[aria-pressed="true"] {
 
 @media (max-width: 600px) {
   .preview-banner__text {
-    font-size: 0.75rem;
+    font-size: 14px;
+  }
+  .preview-banner__inner {
+    padding: 10px 20px;
+    gap: var(--space-sm);
   }
 }
 

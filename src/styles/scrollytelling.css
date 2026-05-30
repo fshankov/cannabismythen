@@ -150,34 +150,66 @@ html, body {
 }
 #root { min-height: 100vh; }
 
-/* ── Dark site header on /projekt/ ──────────────────────────────
-   The global site header (BaseLayout) defaults to a light beige
-   glass. On the scrollytelling page that backdrop reads light-on-
-   light against the dark body. Override with a dark glass tuned
-   to match the page's --bg, plus lighter nav text. */
-body:has(.scrolly) > header {
-  background: rgba(15, 19, 24, 0.85);
-  border-bottom-color: rgba(45, 55, 72, 0.55);
+/* ── Dark site nav on /projekt/ (Iter-21) ───────────────────────
+   The global floating nav pill (.nav-wrapper > .nav) + mobile tab
+   bar default to a light beige glass, which reads light-on-light
+   against the dark scrollytelling body. (The earlier override
+   targeted a `<header>` element that BaseLayout does NOT render, so
+   it never applied.) Retarget the real nav classes so the pill goes
+   dark glass with white text. Scoped via `body:has(.scrolly)` so
+   ONLY pages containing a `.scrolly` section (i.e. /projekt/) are
+   affected — every other page keeps the light nav. */
+/* Iter-21b: the nav is NOT pinned on the scrolly page — it sits at the
+   top of the page and scrolls away as you dive into the story (instead
+   of the global `position: fixed` pill that follows the scroll). */
+body:has(.scrolly) .nav-wrapper {
+  position: absolute;
+}
+/* Iter-21b: hide the global `.nav-blur-shield` — a fixed light-white
+   gradient strip (rgba(248,249,255,…)) that reads as a white fade over
+   the dark page. */
+body:has(.scrolly) .nav-blur-shield {
+  display: none;
+}
+/* Iter-21b: solid (opaque) pill fill — no translucent glass / gradient
+   bleed-through. */
+body:has(.scrolly) .nav,
+body:has(.scrolly) .nav.nav--scrolled {
+  background: var(--bg-elev, #161b22);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: rgba(45, 55, 72, 0.55);
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
 }
+body:has(.scrolly) .nav__brand { color: var(--fg); }
+body:has(.scrolly) .nav__link { color: var(--fg-muted); }
+body:has(.scrolly) .nav__link:not(.nav__link--active):hover { color: var(--fg); }
+body:has(.scrolly) .nav__link--active { color: var(--fg); }
+body:has(.scrolly) .nav__link::after { background-color: var(--fg); }
+body:has(.scrolly) .nav__hamburger-line { background-color: var(--fg-muted); }
+body:has(.scrolly) .nav__hamburger:hover { background-color: rgba(255, 255, 255, 0.08); }
 
-body:has(.scrolly) header nav a {
-  color: var(--fg-muted);
+/* Mobile slide-in drawer */
+body:has(.scrolly) .nav__drawer {
+  background: var(--bg-elev, #161b22);
+  border-color: rgba(45, 55, 72, 0.55);
 }
-
-body:has(.scrolly) header nav a:first-child {
+body:has(.scrolly) .nav__drawer-link { color: var(--fg-muted); }
+body:has(.scrolly) .nav__drawer-link:hover,
+body:has(.scrolly) .nav__drawer-link--active {
   color: var(--fg);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-body:has(.scrolly) header nav a:hover {
-  color: var(--fg);
+/* Mobile bottom tab bar */
+body:has(.scrolly) .mobile-tab-bar {
+  background: rgba(15, 19, 24, 0.92);
+  border-top-color: rgba(45, 55, 72, 0.55);
 }
-
-body:has(.scrolly) header nav a[aria-current="page"],
-body:has(.scrolly) header nav a.active {
-  color: var(--fg);
-  border-bottom-color: var(--fg);
-}
+body:has(.scrolly) .mobile-tab-bar__item { color: var(--fg-muted); }
+body:has(.scrolly) .mobile-tab-bar__item:hover,
+body:has(.scrolly) .mobile-tab-bar__item[aria-current="page"],
+body:has(.scrolly) .mobile-tab-bar__item.active { color: var(--fg); }
 
 /* ════════════════════════════════════════════════════════════════
    Viewer layout (from prototypes/scrollytelling-v3/src/styles/viewer.css)
@@ -241,7 +273,7 @@ body:has(.scrolly) header nav a.active {
   padding-top: 8vh;
 }
 .scrolly__phase-block:first-of-type {
-  padding-top: 0;
+  padding-top: 4vh;
   min-height: 60vh;
 }
 
@@ -446,6 +478,35 @@ body:has(.scrolly) header nav a.active {
   to   { opacity: 1; }
 }
 
+/* Iter-13 invisible canvas — every step's viz lives inside one shared
+   extent box so the visual block has the same horizontal/vertical
+   footprint across the entire scrolly. NO border, no background, no
+   shadow — the canvas is purely a geometry container. Landscape
+   aspect (5 / 4) so the picker pills + the 5 indicator rows + the
+   caption all fit on one row band; the Sources Spannweite grid sits
+   with room to breathe. `overflow: hidden` is the hard guardrail —
+   nothing spills past the column edges, which keeps the mobile port
+   downstream a CSS-only swap. */
+.scrolly__viz-canvas {
+  width: 100%;
+  max-width: 720px;
+  aspect-ratio: 5 / 4;
+  /* Iter-15 (2026-05-29): drop the hard `min-height: 360px` floor so
+     narrow desktop columns (≤480 px wide) can shrink with their
+     content rather than clip. The container-query rules below let
+     each viz's internals scale down proportionally. */
+  min-height: 0;
+  max-height: min(72dvh, 560px);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  container-type: inline-size;
+  container-name: scrolly-canvas;
+}
+
 .scrolly__viz-mobile {
   display: none;
 }
@@ -466,7 +527,19 @@ body:has(.scrolly) header nav a.active {
     z-index: 10;
     align-items: center;
     justify-content: center;
-    padding: var(--space-md);
+    padding: var(--space-sm);
+  }
+  /* Mobile canvas — auto aspect-ratio, capped at the sticky 45vh band.
+     Inherits the invisible-frame styling from the desktop rule
+     (no border/bg/shadow); only width and max-height are constrained
+     so the viz fills the available band naturally. */
+  .scrolly__viz-mobile .scrolly__viz-canvas {
+    aspect-ratio: auto;
+    max-width: min(96vw, 640px);
+    max-height: calc(45vh - 16px);
+    min-height: 0;
+    height: 100%;
+    padding: 0;
   }
   .scrolly__step {
     min-height: 75vh;
@@ -608,20 +681,22 @@ body:has(.scrolly) header nav a.active {
   box-shadow: 0 0 8px rgba(58, 140, 90, 0.45);
   /* height set inline (drawn × 100%) */
 }
+/* Iter-18: gliding yellow locator at the green line's tip. `top` is set
+   inline every frame from `drawn`, so NO CSS transition on top (it would
+   lag the per-frame updates). A soft halo sells the "traveling light". */
 .viz-timeline-v__locator {
   position: absolute;
   left: 50%;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: #f5c542;
   transform: translate(-50%, -50%);
   box-shadow:
-    0 0 12px rgba(245, 197, 66, 0.7),
-    0 0 24px rgba(245, 197, 66, 0.35);
+    0 0 10px rgba(245, 197, 66, 0.75),
+    0 0 22px rgba(245, 197, 66, 0.4);
   pointer-events: none;
-  z-index: 3;
-  transition: top 80ms linear;
+  z-index: 4;
 }
 
 /* One row per anchor — 3-cell grid. minmax(0, 1fr) lets the fr cells
@@ -653,25 +728,53 @@ body:has(.scrolly) header nav a.active {
   position: relative;
 }
 
-/* Dot + hit area inside the track cell */
+/* Dot + hit area inside the track cell. Iter-18: dots start GREY and
+   light GREEN ("reached") as the locator passes — so the timeline reads
+   as "completed stages". */
 .viz-timeline-v__dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #3a8c5a;
+  background: #4b5563;            /* unreached = grey */
   border: 2px solid var(--bg);
-  box-shadow: 0 0 0 1px rgba(58, 140, 90, 0.4);
-  transition: width 160ms ease, height 160ms ease;
+  box-shadow: 0 0 0 1px rgba(75, 85, 99, 0.4);
+  transition: width 160ms ease, height 160ms ease,
+    background 220ms ease, box-shadow 220ms ease;
   z-index: 2;
   position: relative;
 }
+.viz-timeline-v__dot.is-reached {
+  background: #3a8c5a;            /* reached = green */
+  box-shadow: 0 0 0 1px rgba(58, 140, 90, 0.4);
+  animation: viz-timeline-dot-flash 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Final/publication anchor stays golden once reached (override the green). */
 .viz-timeline-v__row--highlight .viz-timeline-v__dot {
+  background: #4b5563;
+  box-shadow: 0 0 0 1px rgba(75, 85, 99, 0.4);
+}
+.viz-timeline-v__row--highlight .viz-timeline-v__dot.is-reached {
   background: #f5c542;
   box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.5);
 }
 .viz-timeline-v__row--hovered .viz-timeline-v__dot {
   width: 15px;
   height: 15px;
+}
+/* One-shot grow as a dot becomes reached. */
+@keyframes viz-timeline-dot-flash {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.55); }
+  100% { transform: scale(1); }
+}
+/* Label gives a subtle one-shot brighten/pop as its stage is reached. */
+.viz-timeline-v__row[data-reached='true'] .viz-timeline-v__label-title {
+  animation: viz-timeline-label-flash 520ms ease;
+}
+@keyframes viz-timeline-label-flash {
+  0%   { text-shadow: 0 0 0 rgba(245, 197, 66, 0); }
+  35%  { text-shadow: 0 0 10px rgba(245, 197, 66, 0.55); }
+  100% { text-shadow: 0 0 0 rgba(245, 197, 66, 0); }
 }
 .viz-timeline-v__dot-pulse {
   position: absolute;
@@ -776,157 +879,139 @@ body:has(.scrolly) header nav a.active {
 }
 .scrolly-hover-tooltip__metrics b { color: var(--fg); }
 
-/* ───── VizPeopleVoices (step 2) ───── */
-.viz-voices {
-  position: relative;
+/* ───── VizPeopleVoices (step 2) — Iter-17 (2026-05-30) message sphere
+   Billboarded 3-D sphere of horizontal chat messages + media-source
+   tags + iceberg specks. JS perspective projection writes each chip's
+   transform/opacity/blur per frame; the chip itself never rotates in
+   3-D, so text stays upright and front messages are dramatically
+   larger than back ones (real tag-sphere depth). See VizPeopleVoices.tsx.
+     • messages = horizontal iMessage bubbles, group-tinted, with an
+                  INTEGRATED rounded tail (left/right/top) — not a
+                  detached spike.
+     • sources  = clean media tags (icon + Quelle-tag + text, right-edge
+                  clip-path arrow, no rail).
+     • specks   = tiny dim fragments; one gold easter egg.
+   Scroll toward Step 3 → messages sort into the 42-cell matrix and
+   dissolve (the JS owns that transition inline). */
+.viz-voice-cloud {
   width: 100%;
-  /* Iter-16: removed conflicting `max-height: 600px` — the JSX sets an
-     inline `height: 640px`, and the prior `max-height: 600` capped the
-     real container height to 600, which left the JS sim measuring 600
-     but expecting 640. Now the container is exactly the inline height. */
+  height: 100%;
+  position: relative;
 }
-@keyframes viz-voice-card-in {
-  /* Iter-16: subtler scale (0.96 vs 0.92) so the entrance reads as a
-     gentle pop rather than a bounce. */
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
-  to   { opacity: var(--card-opacity, 1); transform: translate(-50%, -50%) scale(1); }
-}
-
-.viz-voice-card {
+.viz-voice-cloud__sphere {
   position: absolute;
-  /* Frosted-glass surface with subtle per-source tint (see [data-source]
-     rules below). Each card sits above the dark backdrop with a soft blur
-     so neighboring cards don't melt into a wall of text. */
-  background:
-    linear-gradient(135deg, var(--card-tint, transparent) 0%, transparent 60%),
-    rgba(22, 30, 41, 0.78);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
-  /* Radius pinches at the bottom-left corner where the tail + source icon
-     sit — the "this voice came from here" anchor. */
-  border-radius: 14px 14px 14px 4px;
-  padding: 0.6rem 0.85rem 0.7rem 0.85rem;
-  line-height: 1.35;
-  color: var(--fg);
-  max-width: 260px;
-  /* Card starts invisible and animates in via `viz-voice-card--in` once the
-     d3 simulation has settled and positions are committed (see TS). */
-  opacity: 0;
-  transform: translate(-50%, -50%);
-  cursor: default;
-  box-shadow:
-    0 4px 12px -4px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition:
-    box-shadow 0.3s ease,
-    border-color 0.3s ease,
-    background 0.3s ease;
-  will-change: transform, opacity;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: scale(var(--fit, 1));
+  transform-origin: center;
 }
-.viz-voice-card--in {
-  /* Iter-16: 380 ms → 200 ms. Combined with the tighter per-card
-     stagger (4 ms × 30 = 120 ms) the cloud is fully visible in
-     ≈320 ms after `settled` flips — vs ≈1.1 s before. */
-  animation: viz-voice-card-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.viz-voice-card:hover,
-.viz-voice-card:focus {
-  transform: translate(-50%, -50%) scale(1.06);
-  background:
-    linear-gradient(135deg, var(--card-tint-hover, transparent) 0%, transparent 60%),
-    rgba(28, 38, 52, 0.95);
-  box-shadow:
-    0 8px 22px -6px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10);
-  border-color: var(--card-border-hover, rgba(250, 204, 21, 0.45));
-  z-index: 2;
-  outline: none;
-  opacity: 1 !important;
-}
-
-/* Per-source tint (Iter-5). Bubbles get a very faint hue in the top-left so
-   the three CaRM sources read as distinct without dominating. */
-.viz-voice-card[data-source="survey"] {
-  --card-tint: rgba(99, 102, 241, 0.16);          /* indigo */
-  --card-tint-hover: rgba(99, 102, 241, 0.26);
-  --card-border: rgba(99, 102, 241, 0.20);
-  --card-border-hover: rgba(129, 140, 248, 0.55);
-}
-.viz-voice-card[data-source="professional"] {
-  --card-tint: rgba(20, 184, 166, 0.16);          /* teal */
-  --card-tint-hover: rgba(20, 184, 166, 0.26);
-  --card-border: rgba(20, 184, 166, 0.22);
-  --card-border-hover: rgba(45, 212, 191, 0.55);
-}
-.viz-voice-card[data-source="media"] {
-  --card-tint: rgba(245, 158, 11, 0.16);          /* amber */
-  --card-tint-hover: rgba(245, 158, 11, 0.26);
-  --card-border: rgba(245, 158, 11, 0.22);
-  --card-border-hover: rgba(251, 191, 36, 0.55);
-}
-.viz-voice-card__quote { font-style: italic; }
-/* Source icon — moved to the bottom-left of the card (Iter-4). Sits next
-   to the speech-bubble tail to read as "this statement comes from this
-   source (person or document)". */
-.viz-voice-card__glyph {
+.viz-chip {
   position: absolute;
-  bottom: -10px;
-  left: -6px;
+  left: 0;
+  top: 0;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: #cbd5e1;
-  background: rgba(22, 30, 41, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  padding: 3px 5px;
-  line-height: 1;
-  border-radius: 999px;
+  gap: 5px;
+  line-height: 1.25;
+  color: var(--fg);
+  will-change: transform, opacity;
+  /* Only the hover look-changes transition; position is written each
+     frame by the RAF loop (no transition on transform during spin). */
+  transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
-.viz-voice-card__tail {
-  position: absolute;
-  bottom: -7px;
-  left: 14px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 7px 7px 0 0;
-  border-color: rgba(22, 30, 41, 0.72) transparent transparent transparent;
-}
-.viz-voice-card__tail::before {
-  content: '';
-  position: absolute;
-  left: -8px;
-  top: -1px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 8px 8px 0 0;
-  border-color: rgba(255, 255, 255, 0.08) transparent transparent transparent;
-  z-index: -1;
+.viz-chip svg { flex-shrink: 0; display: block; }
+.viz-chip__icon { color: var(--accent, var(--fg-muted)); }
+
+/* ── MESSAGE — clean rounded pill (Iter-20). The earlier per-side
+      `::after` tail nubs read as stray "pizza-slice" shards on the
+      rotating/scaling sphere, so the bubbles are now uniform pills.
+      The `viz-msg--l/r/t` classes remain in the markup but are inert. ── */
+.viz-msg {
+  padding: 4px 10px;
+  font-size: 11.5px;
+  white-space: nowrap;
+  border-radius: 13px;
+  border: 1px solid var(--bubble-bd, rgba(99, 102, 241, 0.34));
+  background: var(--bubble-bg, rgba(99, 102, 241, 0.20));
+  color: var(--fg);
 }
 
-/* Funnel caption below the voice cloud — "7.408 Aussagen · 53 Themenfelder
-   · 42 prüfbare Thesen" (Iter-4). */
-.viz-voices__caption {
-  margin: 1.25rem auto 0;
-  max-width: 720px;
-  text-align: center;
-  font-size: 0.92rem;
-  color: var(--fg-muted);
-  line-height: 1.6;
-  font-family: var(--font-body);
-  letter-spacing: 0.01em;
+/* ── SOURCE — clean media tag pill (Iter-20). Dropped the right-edge
+      `clip-path` arrow (the "pizza slice"); now a tidy rounded tag. ── */
+.viz-src {
+  padding: 4px 9px;
+  font-size: 11px;
+  white-space: nowrap;
+  background: rgba(15, 19, 24, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  color: var(--fg);
 }
-.viz-voices__caption-num {
-  color: #f3f4f6;
-  font-family: var(--font-display);
+.viz-src__tag {
+  font-family: var(--font-mono);
+  font-size: 0.62em;
   font-weight: 600;
-  font-size: 1.08em;
+  color: var(--fg-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-right: 4px;
 }
-.viz-voices__caption-sep { color: var(--fg-dim); margin: 0 0.15rem; }
+
+/* ── SPECK — tiny background fragment, non-interactive. ── */
+.viz-speck {
+  font-size: 9px;
+  color: var(--fg-muted);
+  gap: 3px;
+  pointer-events: none;
+}
+.viz-speck::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--accent, var(--fg-dim));
+  flex-shrink: 0;
+}
+
+/* ── EASTER EGG — readable-depth gold speck, no bubble chrome. ── */
+.viz-egg {
+  font-size: 11px;
+  font-style: italic;
+  color: #fcd34d;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 0 8px rgba(252, 211, 77, 0.35);
+}
+
+/* Hover magnify — glass-morphism plate so the enlarged message stays
+   readable over its neighbours. The RAF loop pauses while hovering, so
+   the transform set here is the chip's last projected transform + 1.4×;
+   we approximate via a CSS scale on top of the inline transform by
+   letting the inline transform remain and adding a box-shadow/plate. */
+.viz-chip.is-hover {
+  background: rgba(22, 27, 34, 0.97) !important;
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-color: rgba(255, 255, 255, 0.30) !important;
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.10) inset;
+  z-index: 1500 !important;
+}
+
+/* Per-audience accent (bubble bg + border + icon) */
+.viz-chip[data-group="adults"]       { --accent: var(--group-adults); --bubble-bg: rgba(99, 102, 241, 0.20); --bubble-bd: rgba(99, 102, 241, 0.34); }
+.viz-chip[data-group="minors"]       { --accent: var(--group-minors); --bubble-bg: rgba(249, 115, 22, 0.20); --bubble-bd: rgba(249, 115, 22, 0.34); }
+.viz-chip[data-group="consumers"]    { --accent: var(--group-consumers); --bubble-bg: rgba(20, 184, 166, 0.20); --bubble-bd: rgba(20, 184, 166, 0.34); }
+.viz-chip[data-group="young_adults"] { --accent: var(--group-young_adults); --bubble-bg: rgba(234, 179, 8, 0.20); --bubble-bd: rgba(234, 179, 8, 0.34); }
+.viz-chip[data-group="parents"]      { --accent: var(--group-parents); --bubble-bg: rgba(168, 85, 247, 0.20); --bubble-bd: rgba(168, 85, 247, 0.34); }
+.viz-chip[data-group="professional"] { --accent: #38bdf8; --bubble-bg: rgba(56, 189, 248, 0.20); --bubble-bd: rgba(56, 189, 248, 0.34); }
+
+/* Source-category accent (icon only — media/social categories) */
+.viz-chip[data-source="internet"]           { --accent: var(--source-cat-internet); }
+.viz-chip[data-source="social_media"]       { --accent: var(--source-cat-social_media); }
+.viz-chip[data-source="traditional_media"]  { --accent: var(--source-cat-traditional_media); }
+.viz-chip[data-source="print_physical"]     { --accent: var(--source-cat-print_physical); }
 
 /* ───── VizMythGrid (steps 3 + 4 — shared DOM) ───── */
 .viz-grid {
@@ -939,14 +1024,14 @@ body:has(.scrolly) header nav a.active {
   aspect-ratio: 7 / 6;
 }
 .viz-grid__cell {
-  /* Always flex-column with two children (icon slot + text) so the text
-     position is fixed regardless of mode. In themed mode the icon is an
-     empty placeholder; in classified mode the verdict arrow renders into
-     the same slot. */
+  /* Iter-20: flex-column, TOP-anchored. Two children — a fixed-height
+     icon band (placeholder slot or verdict arrow) + a flex:1 text area
+     centred below it. The icon band reserves the same space in both
+     modes, so the text never moves when the Step-4 verdict SVG appears. */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
   gap: 2px;
   font-size: 0.6875rem;
@@ -964,8 +1049,16 @@ body:has(.scrolly) header nav a.active {
   outline-offset: 1px;
   overflow: hidden;
   cursor: pointer;
-  animation: viz-pop-in var(--anim-entry-dur) var(--anim-entry-ease) both;
-  animation-delay: var(--cell-delay, 0ms);
+  /* Iter-20: scroll-driven build (replaces the one-shot viz-pop-in
+     stagger). `--build` (0→1, set on .viz-grid by JS) sweeps past each
+     cell's `--rt` (distance from the bottom-right corner), so the matrix
+     grows outward from that corner. opacity reveals; the independent
+     `scale` property (NOT transform, so it's not eased by the hover
+     transition) gives a subtle pop. Defaults keep cells visible if JS
+     never runs. */
+  --cp: clamp(0, calc((var(--build, 1) - var(--rt, 0)) / 0.18), 1);
+  opacity: var(--cp);
+  scale: calc(0.85 + 0.15 * var(--cp));
 }
 .viz-grid__cell:hover,
 .viz-grid__cell:focus {
@@ -998,6 +1091,17 @@ body:has(.scrolly) header nav a.active {
   height: 14px;
   flex-shrink: 0;
 }
+/* Iter-20: text lives in a flex:1 area centred in the space below the
+   fixed icon band. Identical in themed + classified modes ⇒ the text
+   block sits in the exact same place across Steps 3 and 4. */
+.viz-grid__cell-textwrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .viz-grid__cell-text {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -1006,7 +1110,19 @@ body:has(.scrolly) header nav a.active {
   text-overflow: ellipsis;
   font-size: 0.625rem;
   line-height: 1.15;
-  word-break: break-word;
+  /* Iter-20: pin the weight so it never inherits the classified cell's
+     font-weight:500 only in Step 4 — same weight + size ⇒ identical line
+     breaks ⇒ the text never re-wraps when the verdict SVG appears. */
+  font-weight: 500;
+  /* Iter-18: German syllable hyphenation (lang="de" on the span +
+     <html lang="de">) so long words like „Wahr-neh-mun-gen" /
+     „Schlaf-pro-ble-men" break at valid points WITH a dash, instead of
+     `word-break` dumping a single orphan letter on the next line.
+     `overflow-wrap: break-word` is only the last-resort fallback for an
+     unbreakable string; it no longer drives normal wrapping. */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 /* Theme legend (step 3) */
@@ -1074,32 +1190,35 @@ body:has(.scrolly) header nav a.active {
   animation: viz-fade-up var(--anim-entry-dur) var(--anim-entry-ease) 500ms both;
 }
 
+/* Iter-14 (Harald review, CAR-14): swapped from
+   `position: absolute; transform: translate(-50%,-100%)` to a
+   `position: fixed` card driven by `useFlipPosition({ boundsRef })`.
+   The card is always mounted (the hook measures `cardRef.current?.
+   offsetHeight` to decide flip-above vs flip-below) but visually
+   hidden until `--open` lands. The decorative ::after caret was
+   dropped — the flip-above-or-below clamp inside the grid bounds
+   means we no longer know in advance which edge the caret should
+   point at. */
 .viz-grid__hover {
-  position: absolute;
-  z-index: 10;
+  position: fixed;
+  z-index: 30;
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 12px 14px;
-  width: min(320px, 90vw);
+  max-width: 320px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   pointer-events: none;
   font-size: 0.8125rem;
   line-height: 1.45;
   color: var(--fg);
-  animation: viz-fade-up 180ms var(--anim-entry-ease) both;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 160ms ease;
 }
-.viz-grid__hover::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -6px;
-  width: 12px;
-  height: 12px;
-  background: var(--bg-elev);
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  transform: translateX(-50%) rotate(45deg);
+.viz-grid__hover--open {
+  opacity: 1;
+  visibility: visible;
 }
 .viz-grid__hover-statement {
   margin: 0 0 8px;
@@ -1953,7 +2072,7 @@ body:has(.scrolly) header nav a.active {
 /* ───── Reduced motion ───── */
 @media (prefers-reduced-motion: reduce) {
   .viz-grid__cell,
-  .viz-voice-card,
+  .viz-chip,
   .viz-cta__card,
   .viz-sr__bar-fill,
   .viz-sr__row,
@@ -1966,7 +2085,7 @@ body:has(.scrolly) header nav a.active {
   }
 }
 [data-reduced-motion='true'] .viz-grid__cell,
-[data-reduced-motion='true'] .viz-voice-card,
+[data-reduced-motion='true'] .viz-voice-chip,
 [data-reduced-motion='true'] .viz-cta__card,
 [data-reduced-motion='true'] .viz-sr__bar-fill,
 [data-reduced-motion='true'] .viz-sr__row,
@@ -2396,3 +2515,833 @@ body:has(.scrolly) header nav a.active {
   text-decoration-thickness: 1px;
 }
 .scrolly-page-footer__body a:hover { color: #fde047; }
+
+/* ════════════════════════════════════════════════════════════════
+   Iter-12 — Daten-Explorer Balken + Spannweite primitives (dark)
+   ════════════════════════════════════════════════════════════════
+   Class names are 1:1 with cannabismythen/src/styles/dashboard.css
+   (lines 6974–7012, 7334–7424) so this dark adaptation can be
+   ported back to the production light theme by swapping just the
+   surface tokens at the top of the block. The new components in
+   VizSingleMythBalken + VizSourcesSpannweite consume these via
+   the shared primitives in src/components/shared/. */
+
+.carm-balken__plot {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: var(--carm-balken-bar-height, 22px);
+  display: block;
+}
+
+.carm-balken__axis {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.carm-balken__axis-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dotted var(--carm-axis-tick-color, rgba(229, 231, 235, 0.10));
+}
+.carm-balken__axis-tick[data-pos="0"]   { left: 0; }
+.carm-balken__axis-tick[data-pos="25"]  { left: 25%; }
+.carm-balken__axis-tick[data-pos="50"]  { left: 50%; border-left-color: var(--carm-axis-tick-color-mid, rgba(229, 231, 235, 0.20)); }
+.carm-balken__axis-tick[data-pos="75"]  { left: 75%; }
+.carm-balken__axis-tick[data-pos="100"] { left: 100%; }
+
+.carm-balken__wash {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: var(--carm-balken-bar-height, 22px);
+  transform: translateY(-50%);
+  border-radius: 3px;
+  opacity: var(--carm-balken-wash-opacity, 0.32);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 160ms ease;
+}
+.viz-balken-myth__row.is-hover .carm-balken__wash,
+.viz-balken-myth__row:focus-visible .carm-balken__wash {
+  opacity: var(--carm-balken-wash-opacity-hover, 0.46);
+}
+
+/* Spannweite-style 2 px stem (used by VizSourcesSpannweite cells). */
+.carm-spannweite__plot {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.carm-spannweite__bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 1px;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 1;
+}
+.carm-spannweite__no-data {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.7rem;
+  color: var(--fg-dim);
+  font-style: italic;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Shared 22 px value marker — solid disc with white rounded number.
+   Center sits at `left: <value>%`; cell wrapper's `overflow: hidden`
+   clips for very small / very large values. */
+.carm-value-circle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--carm-circle-size, 22px);
+  height: var(--carm-circle-size, 22px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font: 600 var(--carm-circle-num-size, 0.6875rem) / 1
+        ui-monospace, 'SF Mono', Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: 0 0 0 1px rgba(15, 19, 24, 0.55);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.viz-balken-myth__row.is-hover .carm-value-circle,
+.viz-balken-myth__row:focus-visible .carm-value-circle,
+.viz-spannweite-sources__cell--plot.is-hover .carm-value-circle,
+.viz-spannweite-sources__cell--plot:focus-visible .carm-value-circle {
+  transform: translate(-50%, -50%) scale(1.08);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   InfoDot (i-tooltip) chrome — used by the column / row headers
+   inside the new Step 6/7/8/9 vizes.
+   ════════════════════════════════════════════════════════════════ */
+.info-dot-wrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+.info-dot-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg-dim);
+  border: 0;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 160ms ease, color 160ms ease;
+}
+.info-dot-trigger:hover,
+.info-dot-trigger:focus-visible {
+  opacity: 1;
+  color: var(--fg);
+  outline: none;
+}
+.info-dot-card {
+  /* Always taken out of the layout flow so the closed popover doesn't
+     hijack horizontal space inside the row-label cluster. When open,
+     `useFlipPosition` writes inline `position: fixed; top/left/width`. */
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: 280px;
+  z-index: 60;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+.info-dot-card--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.info-dot-title {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.info-dot-body {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--fg);
+}
+.info-dot-meta {
+  margin: 6px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   VizSingleMythBalken (Steps 6 + 7) — single myth, 3 → 5 indicator
+   rows in Balken view.
+   ════════════════════════════════════════════════════════════════ */
+.viz-balken-myth {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 2px 4px;
+}
+
+.viz-balken-myth__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.viz-balken-myth__header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.viz-balken-myth__header-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-dim);
+}
+.viz-balken-myth__statement {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(0.95rem, 1.4vw, 1.06rem);
+  line-height: 1.35;
+  color: var(--fg);
+}
+
+.viz-balken-myth__picker {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.viz-balken-myth__picker::-webkit-scrollbar { display: none; }
+.viz-balken-myth__pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--bg-elev);
+  color: var(--fg-muted);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--anim-hover-dur, 200ms) ease,
+    color var(--anim-hover-dur, 200ms) ease,
+    border-color var(--anim-hover-dur, 200ms) ease;
+}
+.viz-balken-myth__pick:hover {
+  border-color: var(--classification-richtig);
+  color: var(--fg);
+}
+.viz-balken-myth__pick--active {
+  background: var(--bg-elev);
+  color: var(--fg);
+  border-color: var(--classification-richtig);
+  box-shadow: 0 0 0 1px var(--classification-richtig);
+  font-weight: 500;
+}
+
+.viz-balken-myth__caption {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.viz-balken-myth__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+}
+.viz-balken-myth__row {
+  display: grid;
+  grid-template-columns: clamp(168px, 44%, 232px) minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: var(--carm-spannweite-row-h, 2.625rem);
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  cursor: default;
+  outline: none;
+  transition: background-color 160ms ease;
+}
+.viz-balken-myth__row:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.015);
+}
+.viz-balken-myth__row.is-hover,
+.viz-balken-myth__row:focus-visible {
+  background: rgba(255, 255, 255, 0.04);
+}
+.viz-balken-myth__row[data-revealed='false'] {
+  pointer-events: none;
+}
+
+.viz-balken-myth__row-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+  min-width: 0;
+  font-size: 0.86rem;
+}
+.viz-balken-myth__row-name {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.viz-balken-myth__row-plot {
+  position: relative;
+  height: 28px;
+  min-width: 0;
+}
+/* Iter-18: compact Daten-Explorer pill anchored to the right of the
+   Bevölkerungsrisiko (last) row plot, vertically centred. Sits over
+   the empty right portion of that low-valued row. */
+.viz-balken-myth__row-plot > .scrolly-de-link--compact {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+.viz-balken-myth__row-plot > .scrolly-de-link--compact:hover,
+.viz-balken-myth__row-plot > .scrolly-de-link--compact:focus-visible {
+  transform: translateY(-50%) translateY(-1px);
+}
+
+.viz-balken-myth__tooltip {
+  max-width: 360px;
+}
+.scrolly-hover-tooltip__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+  margin: 0 0 6px;
+}
+.scrolly-hover-tooltip__body {
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--fg);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   VizSourcesSpannweite (Steps 8 + 9) — 5 curated sources × 4
+   metric columns, lollipop-stem cells, dark.
+   ════════════════════════════════════════════════════════════════ */
+.viz-spannweite-sources {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 2px 4px;
+}
+
+.viz-spannweite-sources__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.viz-spannweite-sources__header-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-dim);
+}
+.viz-spannweite-sources__header-list {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--fg);
+  line-height: 1.4;
+}
+
+.viz-spannweite-sources__picker {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.viz-spannweite-sources__picker::-webkit-scrollbar { display: none; }
+
+.viz-spannweite-sources__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--border);
+  padding-top: 4px;
+  --label-col: clamp(120px, 30%, 170px);
+}
+.viz-spannweite-sources__row {
+  display: grid;
+  grid-template-columns: var(--label-col) repeat(var(--source-cols, 4), minmax(0, 1fr));
+  gap: 4px;
+  align-items: center;
+  min-height: var(--carm-spannweite-row-h, 2.625rem);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+}
+.viz-spannweite-sources__row--head {
+  min-height: 32px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.viz-spannweite-sources__row:not(.viz-spannweite-sources__row--head):nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.viz-spannweite-sources__cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.78rem;
+  color: var(--fg);
+}
+.viz-spannweite-sources__cell--header {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: 0.01em;
+  justify-content: flex-start;
+  /* Iter-18: headers ease between their 0.35 placeholder opacity
+     (Step 8) and full opacity (Step 9) instead of flashing from 0. */
+  transition: opacity 360ms ease;
+}
+.viz-spannweite-sources__cell--header.viz-spannweite-sources__cell--label {
+  justify-content: flex-start;
+}
+.viz-spannweite-sources__col-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.viz-spannweite-sources__col-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.viz-spannweite-sources__cell--label {
+  gap: 6px;
+}
+.viz-spannweite-sources__cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.viz-spannweite-sources__cat-icon {
+  flex-shrink: 0;
+  /* Icon colour cascades from the row label cell's inline
+     `color: var(--source-cat-…)` so each row reads in its category
+     accent without needing a per-cell hardcode. */
+}
+.viz-spannweite-sources__source-name {
+  font-size: 0.78rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* The row label cell's inline `color` tints the category icon; the
+     source name text reverts to the neutral foreground so only the
+     glyph carries the category accent. */
+  color: var(--fg);
+}
+
+.viz-spannweite-sources__cell--plot {
+  position: relative;
+  height: 28px;
+  padding: 0;
+  cursor: default;
+  outline: none;
+  border-radius: var(--radius-sm);
+  transition: background-color 160ms ease;
+}
+.viz-spannweite-sources__cell--plot.is-hover,
+.viz-spannweite-sources__cell--plot:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+}
+.viz-spannweite-sources__cell--plot[data-revealed='false'] {
+  pointer-events: none;
+}
+/* Iter-18: unrevealed column keeps its dotted axis as a faint
+   placeholder (so Step 9 fills in over the Step-8 scaffold rather than
+   appearing from blank). The axis eases up to full on reveal. */
+.viz-spannweite-sources__cell--plot .carm-balken__axis {
+  transition: opacity 360ms ease;
+}
+.viz-spannweite-sources__cell--plot[data-revealed='false'] .carm-balken__axis {
+  opacity: 0.4;
+}
+/* The fill wrapper (stem + ValueCircle) carries the staggered reveal
+   animation; it overlays the plot without affecting the absolutely-
+   positioned stem/circle (they still anchor to `.carm-spannweite__plot`). */
+.viz-spannweite-sources__fill {
+  position: absolute;
+  inset: 0;
+}
+
+.viz-spannweite-sources__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+}
+.viz-spannweite-sources__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.viz-spannweite-sources__legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.viz-spannweite-sources__legend-icon {
+  flex-shrink: 0;
+}
+/* Iter-18: the Daten-Explorer link trails the legend on the right. */
+.viz-spannweite-sources__legend > .scrolly-de-link--compact {
+  margin-left: auto;
+}
+/* Iter-18: colored category icon in the hover tooltip's eyebrow. */
+.viz-spannweite-sources__tip-icon {
+  flex-shrink: 0;
+}
+
+/* Narrow canvases — collapse to a single content column on really
+   tight widths inside the canvas (e.g. mobile portrait). */
+@media (max-width: 520px) {
+  .viz-balken-myth__row {
+    grid-template-columns: clamp(110px, 40%, 160px) minmax(0, 1fr);
+    gap: 6px;
+  }
+  .viz-spannweite-sources__grid {
+    --label-col: clamp(96px, 36%, 140px);
+  }
+  .viz-spannweite-sources__col-name {
+    display: none;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Iter-14 — Harald review additions
+   ════════════════════════════════════════════════════════════════ */
+
+/* Subtle ghost link rendered under Steps 6, 7, 8, 9 (CAR-15/16/17). */
+.scrolly-de-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+  margin-top: var(--space-sm);
+  padding: 6px 14px;
+  border: 1px solid var(--classification-richtig);
+  border-radius: 99px;
+  background: transparent;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background 200ms ease,
+    color 200ms ease,
+    transform 200ms ease;
+}
+.scrolly-de-link:hover,
+.scrolly-de-link:focus-visible {
+  background: var(--classification-richtig);
+  color: #ffffff;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+/* Iter-18 — compact inline variant. Smaller pill so it fits at the
+   right of a 28 px Balken row (Steps 6/7) or trailing the sources
+   legend (Steps 8/9). `align-self` is neutralised so the parent can
+   place it (absolute on a row, or margin-left:auto in a flex legend). */
+.scrolly-de-link--compact {
+  align-self: auto;
+  margin-top: 0;
+  padding: 2px 9px;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Iter-15 (2026-05-29): 2-column institution stack. Each column is
+   an `<a>` link wrapping a logo (centered on the column axis) plus
+   the institution credit line directly underneath. Replaces the
+   Iter-14 horizontal logo row + separate `.viz-team__funder` line. */
+.viz-team__institutions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  justify-items: center;
+  gap: 0.25rem 2.5rem;
+  margin: var(--space-sm) auto 0;
+  max-width: 420px;
+  width: 100%;
+}
+.viz-team__institution {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border-bottom: 0;
+  text-decoration: none;
+  color: var(--fg-muted);
+  transition: background 160ms ease, color 160ms ease;
+}
+.viz-team__institution:hover,
+.viz-team__institution:focus-visible {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fg);
+  outline: none;
+}
+.viz-team__logo {
+  display: block;
+  height: 44px;
+  width: auto;
+}
+.viz-team__institution-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Iter-15 compact pass on Step 11 — smaller gap rhythm + tighter
+   avatars + reduced landesstellen margin so the whole right viz
+   block reads as a single compact unit, no taller than the left
+   text column. */
+.viz-team {
+  gap: var(--space-md);
+}
+.viz-team__avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 0.68rem;
+}
+.viz-team__caption {
+  max-width: 340px;
+  font-size: 0.84rem;
+}
+.viz-team__landesstellen {
+  margin-top: var(--space-sm);
+  font-size: 0.74rem;
+  max-width: 460px;
+}
+
+/* Cross-cutting #2 (Harald): narrow-screen vertical safety. The new
+   Iter-12 Balken + Sources Spannweite vizes need a guaranteed floor
+   so the whole stack (header + picker + caption + 5 rows + DE link)
+   stays visible without inner scroll on iPhone-13-Pro-sized
+   viewports. The canvas's `max-height: min(72dvh, 560px)` enforces
+   the ceiling. */
+.viz-balken-myth,
+.viz-spannweite-sources {
+  min-height: 320px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Iter-15 narrow-canvas responsiveness (2026-05-29)
+   ════════════════════════════════════════════════════════════════
+   The shared `.scrolly__viz-canvas` is now a container; the rules
+   below shrink each viz's internals when the canvas itself is
+   narrow enough that the previously-fixed cell / row / avatar sizes
+   would force overflow:hidden to clip content. Steps 1, 3, 4, 10,
+   11 are the surfaces Fedor flagged on 2026-05-29 for narrow-screen
+   cropping. */
+
+@container scrolly-canvas (max-width: 560px) {
+  /* Step 1 — Timeline: tighter row spacing + smaller labels. */
+  .viz-timeline-v {
+    gap: 1rem;
+  }
+  .viz-timeline-v__label-title {
+    font-size: 0.92rem;
+  }
+  .viz-timeline-v__label-date,
+  .viz-timeline-v__label-subtitle {
+    font-size: 0.72rem;
+  }
+
+  /* Steps 3 + 4 — MythGrid: smaller cells so the 7×6 grid fits. */
+  .viz-matrix {
+    padding: var(--space-sm);
+  }
+  .viz-matrix__cell {
+    min-height: 44px;
+    padding: 4px 6px;
+  }
+  .viz-matrix__cell-text {
+    font-size: 0.56rem;
+  }
+  .viz-grid__cell {
+    min-height: 44px;
+    padding: 4px 6px;
+  }
+  .viz-grid__cell-text {
+    font-size: 0.58rem;
+  }
+
+  /* Step 6 + 7 — Balken: less floor, tighter row padding. */
+  .viz-balken-myth,
+  .viz-spannweite-sources {
+    min-height: 0;
+    gap: 6px;
+  }
+  .viz-balken-myth__row {
+    min-height: 32px;
+    padding: 2px 4px;
+  }
+  .viz-balken-myth__row-name {
+    font-size: 0.82rem;
+  }
+  .viz-spannweite-sources__row {
+    min-height: 32px;
+  }
+
+  /* Step 11 — team: smaller avatars + tighter outer gap. */
+  .viz-team {
+    gap: 12px;
+  }
+  .viz-team__avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 0.62rem;
+  }
+  .viz-team__caption {
+    font-size: 0.78rem;
+  }
+  .viz-team__logo {
+    height: 36px;
+  }
+  .viz-team__institution-label {
+    font-size: 0.66rem;
+  }
+  .viz-team__landesstellen {
+    font-size: 0.68rem;
+  }
+
+  /* Step 5 — Stichprobe: shrink the person-icon row so 555 + 143
+     glyph rows don't run off the right edge. */
+  .viz-sr__icon-row {
+    font-size: 9px;
+  }
+}
+
+@container scrolly-canvas (max-width: 420px) {
+  /* The deep-narrow tier — applied on top of the 560 rule when the
+     canvas is really cramped (e.g. <1024-px viewports tucked into a
+     45 vh mobile band that's also shallow). */
+  .viz-matrix__cell,
+  .viz-grid__cell {
+    min-height: 36px;
+  }
+  .viz-grid__cell-text {
+    font-size: 0.52rem;
+  }
+  .viz-team__avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 0.56rem;
+  }
+  .viz-team__logo {
+    height: 30px;
+  }
+  .viz-team__institutions {
+    gap: 0.25rem 1rem;
+  }
+}
+

@@ -46,10 +46,18 @@ const ANCHORS: Anchor[] = [
     title: 'Expert:innen-Diskussion',
   },
   {
-    date: '2026-09-01',
-    labelDate: 'September 2026',
+    // Iter-14 (Harald review, CAR-12 + CAR-13): publication moved from
+    // September 2026 to December 2025; subtitle reframed from "Diese
+    // Website" to "Abschlussbericht" so the timeline anchor reads as
+    // "Veröffentlichung — Dezember 2025 — Abschlussbericht". The
+    // matching `timelineTooltips[5].anchorDate` in
+    // src/content/ueber-uns-scrolly.yaml moved to "2025-12-01" so the
+    // tooltipMap lookup still resolves.
+    // English gloss: "Publication — December 2025 — Final report".
+    date: '2025-12-01',
+    labelDate: 'Dezember 2025',
     title: 'Veröffentlichung',
-    subtitle: 'Diese Website',
+    subtitle: 'Abschlussbericht',
     highlight: true,
   },
 ];
@@ -151,6 +159,10 @@ export function VizTimeline({ active, tooltips }: Props) {
   } = useFlipPosition<HTMLButtonElement, HTMLDivElement>({
     maxWidth: 320,
     gap: 12,
+    // Iter-14: clamp the tooltip inside the timeline column so the
+    // publication anchor's card no longer bleeds past the right edge
+    // when the user hovers near it.
+    boundsRef: containerRef,
   });
 
   useEffect(() => {
@@ -167,7 +179,9 @@ export function VizTimeline({ active, tooltips }: Props) {
       return;
     }
     const start = performance.now();
-    const dur = 1400;
+    // Iter-18: slower, calmer sweep (1.4s → 3.5s) so the yellow locator
+    // visibly glides stage-by-stage from top to bottom.
+    const dur = 3500;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / dur);
       const eased = 1 - Math.pow(1 - t, 3);
@@ -193,10 +207,16 @@ export function VizTimeline({ active, tooltips }: Props) {
     setHoveredIdx(null);
   }
 
-  // Inline styles for the three line-related elements, based on the
-  // measured first/last dot positions. Until the first measurement
-  // commits (one paint frame) we render the line at zero height,
-  // hidden — avoids a flash of full-height line on initial mount.
+  // Inline styles for the two line elements, based on the measured
+  // first/last dot positions. Until the first measurement commits
+  // (one paint frame) we render the line at zero height — avoids a
+  // flash of full-height line on initial mount.
+  //
+  // Iter-18: the yellow locator dot is back (it was removed in Iter-15),
+  // but now done well — it glides smoothly down the green line as `drawn`
+  // goes 0→1 over 3.5 s, and each stage dot it passes lights grey→green +
+  // flashes (see `reached` below). It hides at the very end so it doesn't
+  // sit on top of the golden publication anchor.
   const lineBgStyle = lineGeom
     ? { top: lineGeom.top, height: lineGeom.height, bottom: 'auto' as const }
     : { top: 0, height: 0, bottom: 'auto' as const };
@@ -207,6 +227,7 @@ export function VizTimeline({ active, tooltips }: Props) {
         bottom: 'auto' as const,
       }
     : { top: 0, height: 0, bottom: 'auto' as const };
+  const showLocator = lineGeom !== null && drawn > 0.005 && drawn < 0.985;
   const locatorStyle = lineGeom
     ? { top: lineGeom.top + drawn * lineGeom.height }
     : { top: 0 };
@@ -231,17 +252,21 @@ export function VizTimeline({ active, tooltips }: Props) {
         style={lineFgStyle}
         aria-hidden="true"
       />
-      {drawn > 0.01 && drawn < 1 && lineGeom && (
+      {/* Iter-18: gliding yellow locator at the green line's growing tip. */}
+      {showLocator && (
         <div
           className="viz-timeline-v__locator"
           style={locatorStyle}
           aria-hidden="true"
         />
       )}
-
       {ANCHORS.map((a, i) => {
         const labelOnRight = i % 2 === 0;
         const visible = drawn >= (i + 0.5) / ANCHORS.length;
+        // A stage dot's centre sits at i/(N-1) of the line span; it's
+        // "reached" (lit green + flashes) the moment the locator tip
+        // passes it.
+        const reached = drawn >= i / (ANCHORS.length - 1) - 0.001;
         const isHovered = hoveredIdx === i;
         return (
           <div
@@ -253,6 +278,7 @@ export function VizTimeline({ active, tooltips }: Props) {
             ]
               .filter(Boolean)
               .join(' ')}
+            data-reached={reached}
             style={{ opacity: visible ? 1 : 0 }}
           >
             <div className="viz-timeline-v__row-cell viz-timeline-v__row-cell--left">
@@ -267,7 +293,7 @@ export function VizTimeline({ active, tooltips }: Props) {
                 />
               )}
               <span
-                className="viz-timeline-v__dot"
+                className={`viz-timeline-v__dot${reached ? ' is-reached' : ''}`}
                 ref={(el) => {
                   dotRefs.current[i] = el;
                 }}

@@ -1,5 +1,6 @@
 import { BarChart3, Brain, ListChecks, ScrollText } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { withBase } from '../../lib/withBase';
 
 interface Cta {
   title: string;
@@ -12,25 +13,25 @@ const CTAS: Cta[] = [
   {
     title: '42 Faktenkarten',
     desc: 'Wissenschaftliche Klassifikation, Quellen und Erklärungen je Mythos.',
-    href: '/fakten-karten/',
+    href: withBase('fakten-karten/'),
     icon: ScrollText,
   },
   {
     title: 'Quiz',
     desc: 'Wie steht dein Wissen im Vergleich zur Bevölkerungsbefragung?',
-    href: '/quiz/',
+    href: withBase('quiz/'),
     icon: Brain,
   },
   {
     title: 'Daten-Explorer',
     desc: 'Vier Sichten: allg. Publikum · Eltern · Fachkräfte · Forschung.',
-    href: '/daten-explorer/',
+    href: withBase('daten-explorer/'),
     icon: BarChart3,
   },
   {
     title: 'Meine Interessen',
     desc: 'FAQ, sortiert nach Themen und Zielgruppen.',
-    href: '/meine-interessen/',
+    href: withBase('meine-interessen/'),
     icon: ListChecks,
   },
 ];

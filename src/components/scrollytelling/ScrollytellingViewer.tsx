@@ -33,7 +33,9 @@ import { VizTimeline } from './VizTimeline';
 import { VizPeopleVoices } from './VizPeopleVoices';
 import { VizMythGrid } from './VizMythGrid';
 import { VizSampleAndRanked } from './VizSampleAndRanked';
+import { VizSingleMythBalken } from './VizSingleMythBalken';
 import { VizSourcesStrips } from './VizSourcesStrips';
+import { VizSourcesSpannweite } from './VizSourcesSpannweite';
 import { VizCtaGrid } from './VizCtaGrid';
 import { VizTeamRow } from './VizTeamRow';
 import VerdictPill from '../shared/VerdictPill';
@@ -150,15 +152,30 @@ function StepVisualization({
       return <VizMythGrid data={data} mode={step.gridMode ?? 'themed'} />;
     case 'sampleAndRanked':
       return <VizSampleAndRanked data={data} mode={sampleRankedMode} />;
+    case 'singleMythBalken':
+      return (
+        <VizSingleMythBalken
+          data={data}
+          revealedRows={step.revealedRows ?? 3}
+          step={step.stepNumber === 7 ? 7 : 6}
+        />
+      );
     case 'sourcesStrips':
       return <VizSourcesStrips data={sources} revealedColumns={revealedColumns} />;
+    case 'sourcesSpannweite':
+      return (
+        <VizSourcesSpannweite
+          data={sources}
+          revealedColumns={revealedColumns}
+          step={step.stepNumber === 9 ? 9 : 8}
+        />
+      );
     case 'ctaGrid':
       return <VizCtaGrid />;
     case 'teamRow':
       return (
         <VizTeamRow
           teamMembers={content.teamMembers}
-          namedExperts={content.namedExperts}
           landesstellenCredit={content.landesstellenCredit}
         />
       );
@@ -243,10 +260,11 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
   const sampleRankedMode: SampleRankedMode =
     currentStep.sampleRankedMode ?? 'sample';
 
-  // Iter-10: Steps 8 and 9 split the sources story (active vs passive).
-  // Each step enters with its full set of source columns already visible;
-  // the active/passive narrative split is carried by the BETWEEN-step
-  // boundary, not by phased gating within a step.
+  // Iter-12: Steps 8 and 9 split the sources story (active vs passive).
+  // Step 8 → cols 1 + 2 (Suche + Vertrauen). Step 9 → cols 3 + 4 added
+  // (Wahrnehmung + Prävention). Applies to both the legacy
+  // `sourcesStrips` viz (kept for reference) and the new
+  // `sourcesSpannweite` viz.
   const revealedColumns: 0 | 1 | 2 | 3 | 4 = (() => {
     if (currentStep.stepNumber === 8) return 2;
     if (currentStep.stepNumber === 9) return 4;
@@ -262,15 +280,17 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
           aria-hidden="true"
           key={`mob-${currentStep.vizName}-${currentStep.gridMode ?? ''}`}
         >
-          <StepVisualization
-            step={currentStep}
-            active
-            data={data}
-            sources={sources}
-            content={content}
-            sampleRankedMode={sampleRankedMode}
-            revealedColumns={revealedColumns}
-          />
+          <div className="scrolly__viz-canvas">
+            <StepVisualization
+              step={currentStep}
+              active
+              data={data}
+              sources={sources}
+              content={content}
+              sampleRankedMode={sampleRankedMode}
+              revealedColumns={revealedColumns}
+            />
+          </div>
         </div>
 
         <div className="scrolly__container">
@@ -379,15 +399,17 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
 
           <div className="scrolly__viz-col" aria-live="polite">
             <div className="scrolly__viz-stage" key={vizFamilyKey(currentStep)}>
-              <StepVisualization
-                step={currentStep}
-                active
-                data={data}
-                sources={sources}
-                content={content}
-                sampleRankedMode={sampleRankedMode}
-                revealedColumns={revealedColumns}
-              />
+              <div className="scrolly__viz-canvas">
+                <StepVisualization
+                  step={currentStep}
+                  active
+                  data={data}
+                  sources={sources}
+                  content={content}
+                  sampleRankedMode={sampleRankedMode}
+                  revealedColumns={revealedColumns}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -448,8 +470,12 @@ function vizFamilyKey(step: StepStructure): string {
       return 'family-mythGrid';
     case 'sampleAndRanked':
       return 'family-sampleAndRanked';
+    case 'singleMythBalken':
+      return 'family-singleMythBalken';
     case 'sourcesStrips':
       return 'family-sourcesStrips';
+    case 'sourcesSpannweite':
+      return 'family-sourcesSpannweite';
     default:
       return `family-${step.vizName}`;
   }

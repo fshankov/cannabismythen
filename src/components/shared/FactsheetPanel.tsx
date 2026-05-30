@@ -28,23 +28,6 @@ import type {
   CorrectnessClass,
   MythGroupMetrics,
 } from '../../lib/dashboard/types';
-import {
-  AUDIENCE_ICONS_BY_FAQ_ID,
-  type FaqAudienceId,
-} from '../../lib/icons/lookups';
-
-/** Travel pipeline 4C (2026-05-23) — full audience label, used as the
- *  tooltip on the audience icon beside each FAQ-backlink row.
- *  (The 2-char "El/Ju/Ko/Le/Fa" chips were replaced by the audience
- *   icons themselves on 2026-05-25 — see FAQ backlinks block below.) */
-const FAQ_AUDIENCE_LABEL: Record<string, string> = {
-  eltern: 'Eltern',
-  jugendliche: 'Jugendliche',
-  konsumierende: 'Konsumierende',
-  lehrkraefte: 'Lehrkräfte',
-  fachkraefte: 'Fachkräfte',
-};
-
 /** Reference to a related myth — surfaced inside the popup as a click
  *  target that swaps the panel to the related myth. Pre-resolved at
  *  build-time so the popup never round-trips for title/verdict lookups.
@@ -471,51 +454,12 @@ export default function FactsheetPanel({
                 </details>
               )}
 
-              {mythContentEntry.faqBacklinks && mythContentEntry.faqBacklinks.length > 0 && (
-                <details className="factsheet-panel__section factsheet-panel__section--collapsible factsheet-panel__extras factsheet-panel__backlinks">
-                  <summary className="factsheet-panel__section-toggle">
-                    <span className="factsheet-panel__section-title">
-                      In Meine Interessen referenziert
-                    </span>
-                    <span className="factsheet-panel__chevron" aria-hidden="true">
-                      &#9662;
-                    </span>
-                  </summary>
-                  <ul className="factsheet-panel__extras-list">
-                    {mythContentEntry.faqBacklinks.map((b) => {
-                      // Look up the audience icon component (Fedor 2026-05-25:
-                      // the 2-char EL/JU/KO/LE/FA chips were replaced by the
-                      // real audience icons from src/lib/icons/audiences.ts).
-                      // Fallback to a neutral chip if the audience id isn't
-                      // in the known set — shouldn't happen but defensive.
-                      const AudienceIcon =
-                        AUDIENCE_ICONS_BY_FAQ_ID[b.audience as FaqAudienceId];
-                      return (
-                        <li key={`${b.audience}-${b.slug}`} className="factsheet-panel__extras-item">
-                          <a href={b.href} className="factsheet-panel__extras-link">
-                            <span
-                              className={`factsheet-panel__extras-audience-icon factsheet-panel__extras-audience-icon--${b.audience}`}
-                              aria-hidden="true"
-                              title={FAQ_AUDIENCE_LABEL[b.audience] ?? b.audience}
-                            >
-                              {AudienceIcon ? (
-                                <AudienceIcon size={16} strokeWidth={1.75} />
-                              ) : (
-                                <span className="factsheet-panel__extras-audience-fallback">
-                                  {b.audience.slice(0, 2).toUpperCase()}
-                                </span>
-                              )}
-                            </span>
-                            <span className="factsheet-panel__extras-label">
-                              {b.title}
-                            </span>
-                          </a>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </details>
-              )}
+              {/* "In Meine Interessen referenziert" section removed
+                  per Fedor 2026-05-26 — the FAQ-backlinks data is
+                  still built (myth-content.ts + faq.ts) and exposed
+                  on `mythContentEntry.faqBacklinks` for any future
+                  surface that wants it, but the popup no longer
+                  renders the collapsible. */}
 
             </>
           ) : (

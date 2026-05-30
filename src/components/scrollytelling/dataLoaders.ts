@@ -6,7 +6,9 @@ import type {
   InformationSourcesData,
   Metric,
   Myth,
+  SourceMetricId,
 } from './types';
+import { withBase } from '../../lib/withBase';
 
 let cached: CarmData | null = null;
 let cachedSources: InformationSourcesData | null = null;
@@ -16,7 +18,7 @@ let cachedSources: InformationSourcesData | null = null;
  */
 export async function loadCarmData(): Promise<CarmData> {
   if (cached) return cached;
-  const res = await fetch('/data/carm-data.json');
+  const res = await fetch(withBase('data/carm-data.json'));
   if (!res.ok) throw new Error(`Failed to load carm-data.json: ${res.status}`);
   cached = (await res.json()) as CarmData;
   return cached;
@@ -25,7 +27,7 @@ export async function loadCarmData(): Promise<CarmData> {
 /** Load information-sources.json from public/data/. */
 export async function loadInformationSources(): Promise<InformationSourcesData> {
   if (cachedSources) return cachedSources;
-  const res = await fetch('/data/information-sources.json');
+  const res = await fetch(withBase('data/information-sources.json'));
   if (!res.ok) throw new Error(`Failed to load information-sources.json: ${res.status}`);
   cachedSources = (await res.json()) as InformationSourcesData;
   return cachedSources;
@@ -85,6 +87,45 @@ export const INDICATOR_LABEL_DE: Record<Indicator, string> = {
   correctness: 'Richtigkeit',
   prevention_significance: 'Präventionsbedeutung',
   population_relevance: 'Bevölkerungsrisiko',
+};
+
+/** Per-source-metric short label + body, used by the InfoDot popovers
+ *  in the Step 8/9 column headers. Mirrors `cannabismythen`'s
+ *  `definitions.sourcesIndicators` content; inlined here for the same
+ *  Keystatic-independence reason as `INDICATOR_DEFS_DE` above. */
+export const SOURCE_METRIC_DEFS_DE: Record<
+  SourceMetricId,
+  { label: string; body: string; scale: string }
+> = {
+  search: {
+    label: 'Suche',
+    body:
+      'Anteil der Befragten, die bei dieser Quelle aktiv nach ' +
+      'Informationen über Cannabis suchen.',
+    scale: '0–100 % der Zielgruppe',
+  },
+  trust: {
+    label: 'Vertrauen',
+    body:
+      'Wie sehr vertraut die Zielgruppe den Informationen, die sie bei ' +
+      'dieser Quelle erhält?',
+    scale: '0–100 Punkte',
+  },
+  perception: {
+    label: 'Wahrnehmung',
+    body:
+      'Anteil der Befragten, die Informationen über Cannabis von dieser ' +
+      'Quelle wahrnehmen — auch ohne aktive Suche.',
+    scale: '0–100 % der Zielgruppe',
+  },
+  prevention: {
+    label: 'Prävention',
+    body:
+      'Wahrnehmung × Vertrauen. Das Präventionspotenzial einer Quelle: ' +
+      'der größte Hebel liegt dort, wo Reichweite und Glaubwürdigkeit ' +
+      'zusammenfallen.',
+    scale: '0–100 Punkte',
+  },
 };
 
 /* ──────────────────────────────────────────────────────────────────
@@ -165,6 +206,73 @@ export function orderedCategoriesFromData(
     }
   }
   return out;
+}
+
+/** Indicator definitions (label + short body + scale + sample-size hint),
+ *  consumed by the InfoDot popovers inside the new Step 6/7/8/9 vizes.
+ *  Mirrors what `cannabismythen` pulls from a Keystatic singleton —
+ *  inlined here to keep the scrolly free of the Keystatic dependency. */
+export const INDICATOR_DEFS_DE: Record<
+  Indicator,
+  { label: string; body: string; scale: string; sampleSize?: string }
+> = {
+  awareness: {
+    label: 'Kenntnis',
+    body:
+      'Anteil der Befragten, die diese Aussage schon einmal gehört haben.',
+    scale: '0–100 % der Zielgruppe',
+  },
+  significance: {
+    label: 'Bedeutung',
+    body:
+      'Wie stark prägt die Aussage den eigenen Umgang mit Cannabis bei ' +
+      'denen, die sie kennen?',
+    scale: '0–100 Punkte',
+  },
+  correctness: {
+    label: 'Richtigkeit',
+    body:
+      'Wie nahe liegt die Einschätzung der Befragten an der ' +
+      'wissenschaftlichen Klassifikation?',
+    scale: '0–100 Punkte',
+  },
+  prevention_significance: {
+    label: 'Präventionsbedeutung',
+    body:
+      'Bedeutung × Wissenslücke. Zeigt, wo Aufklärung am meisten ' +
+      'Wirkung zeigt — dort, wo ein falsches Bild das Verhalten prägt.',
+    scale: '0–100 Punkte',
+  },
+  population_relevance: {
+    label: 'Bevölkerungsrisiko',
+    body:
+      'Präventionsbedeutung × Kenntnisanteil. Berücksichtigt die ' +
+      'Reichweite — ein weit bekannter Halbmythos erreicht mehr Menschen ' +
+      'als ein obskurer. Nur sinnvoll für Voll- und Minderjährige.',
+    scale: '0–100 Punkte',
+  },
+};
+
+/** Bevölkerungsrisiko has meaningful per-group data only for
+ *  Voll- + Minderjährige. The other three groups inherit the
+ *  Volljährige values in the JSON, which would be misleading to show. */
+export const BEV_RISIKO_VALID_GROUPS: ReadonlySet<GroupId> = new Set<GroupId>(['adults', 'minors']);
+
+/** Value lookup that routes through the Bev.risiko validity guard:
+ *  `population_relevance` × non-{adults,minors} returns null even when
+ *  the JSON contains a stray value. */
+export function getIndicatorValueChecked(
+  data: CarmData,
+  mythId: number,
+  groupId: GroupId,
+  indicator: Indicator,
+): number | null {
+  const metric = getMetric(data, mythId, groupId);
+  if (!metric) return null;
+  if (indicator === 'population_relevance' && !BEV_RISIKO_VALID_GROUPS.has(groupId)) {
+    return null;
+  }
+  return metric[indicator];
 }
 
 /** Verdict-count tally across the first 42 myths. Used by the in-body

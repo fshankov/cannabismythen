@@ -142,7 +142,9 @@ export type VizName =
   | 'peopleVoices'
   | 'mythGrid'
   | 'sampleAndRanked'
+  | 'singleMythBalken'
   | 'sourcesStrips'
+  | 'sourcesSpannweite'
   | 'ctaGrid'
   | 'teamRow';
 

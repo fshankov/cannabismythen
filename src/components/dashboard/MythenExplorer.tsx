@@ -26,7 +26,6 @@ import {
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import { urlToState, getDefaultState, pushState } from '../../lib/dashboard/url-state';
 import { buildWalkthrough } from './rundgang/walkthrough';
-import type { Driver } from 'driver.js';
 import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
 import VerdictTags from './VerdictTags';
@@ -53,7 +52,6 @@ import SpannweiteToolbar from './controls/SpannweiteToolbar';
 import SourcesSpannweiteToolbar from './controls/SourcesSpannweiteToolbar';
 import SourcesBalkenToolbar from './controls/SourcesBalkenToolbar';
 import FactsheetPanel from './FactsheetPanel';
-import RundgangPanel from './RundgangPanel';
 import type { MythContentEntry } from './FactsheetPanel';
 
 const INDICATORS: Indicator[] = [
@@ -330,9 +328,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   }, [data, factsheetMyth]);
 
   // ---- Rundgang: first-visit nudge + guided walkthrough ----
-  // The far-right "Rundgang" tab opens an intro panel; from there the user
-  // launches a short Driver.js walkthrough. A subtle nudge draws first-time
-  // visitors to the tab until they open it once (persisted in localStorage).
+  // The far-right "Rundgang" tab starts a short Driver.js walkthrough
+  // directly (no intro panel). A subtle nudge draws first-time visitors to
+  // it until they launch it once (persisted in localStorage).
   const [rundgangSeen, setRundgangSeen] = useState(true); // start true → no SSR flash
   useEffect(() => {
     try {
@@ -349,28 +347,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       /* ignore — incognito etc. */
     }
   }, []);
-  // Opening the Rundgang (tab click OR ?view=rundgang deep-link) clears the nudge.
-  useEffect(() => {
-    if (state.view === 'rundgang') markRundgangSeen();
-  }, [state.view, markRundgangSeen]);
-
-  // Live mirror of `state` so the Driver.js highlight callback (built once)
-  // reads fresh values instead of a stale closure.
-  const stateRef = useRef(state);
-  stateRef.current = state;
-  const tourRef = useRef<Driver | null>(null);
-  /** Snapshot taken when a "try it" step is highlighted, so we can detect
-   *  the user's action and auto-advance. */
-  const tryItRef = useRef<{ step: number; sig: string } | null>(null);
-
-  /** Signature of the state slice each "try it" step watches. Step index 1
-   *  ("2 / 4", pick group/indicator) and index 2 ("3 / 4", sort a column)
-   *  are the action steps; the rest return '' and never auto-advance. */
-  const tryItSignature = useCallback((step: number, s: AppState): string => {
-    if (step === 1) return JSON.stringify([s.groupIds, s.indicator]);
-    if (step === 2) return JSON.stringify([s.spannweiteSort, s.spannweiteSortColumn]);
-    return '';
-  }, []);
 
   const startWalkthrough = useCallback(() => {
     markRundgangSeen();
@@ -378,36 +354,13 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     // so switch there first, then drive once the DOM is painted.
     update('view', 'spannweite');
     requestAnimationFrame(() => {
-      const tour = buildWalkthrough({
-        onHighlighted: (index) => {
-          tryItRef.current = { step: index, sig: tryItSignature(index, stateRef.current) };
-        },
-        onDestroy: () => {
-          tourRef.current = null;
-          tryItRef.current = null;
-        },
-      });
-      tourRef.current = tour;
+      const tour = buildWalkthrough();
       const drive = () => tour.drive();
       // Retry once if the first anchor hasn't mounted yet (view just switched).
       if (document.querySelector('.carm-explorer__tab-bar')) drive();
       else window.setTimeout(drive, 150);
     });
-  }, [update, markRundgangSeen, tryItSignature]);
-
-  // "Try it" auto-advance: when the active step is a watched one and its
-  // signature changed (user picked a group / sorted a column), move on.
-  // "Weiter" still works manually, so the tour never traps anyone.
-  useEffect(() => {
-    const tour = tourRef.current;
-    const base = tryItRef.current;
-    if (!tour || !base || (base.step !== 1 && base.step !== 2)) return;
-    if (!tour.isActive() || tour.getActiveIndex() !== base.step) return;
-    if (tryItSignature(base.step, stateRef.current) !== base.sig) {
-      tryItRef.current = null; // advance once
-      tour.moveNext();
-    }
-  }, [state.groupIds, state.indicator, state.spannweiteSort, state.spannweiteSortColumn, tryItSignature]);
+  }, [update, markRundgangSeen]);
 
   if (!data) {
     return <div className="carm-loading">Daten werden geladen…</div>;
@@ -562,12 +515,14 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
               the intro panel (state.view === 'rundgang'); a first-visit
               nudge draws the eye until it's been opened once. */}
           <div className="carm-explorer__tabs--rundgang">
+            {/* Acts as a button: clicking starts the walkthrough directly
+                (it never becomes the active view). */}
             <ViewTabs
               view={state.view}
               lang={'de'}
               group="rundgang"
               nudge={!rundgangSeen}
-              onChange={(v: ViewTab) => update('view', v)}
+              onChange={() => startWalkthrough()}
             />
           </div>
         </div>
@@ -577,14 +532,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             active tab merges into the panel; the other three corners
             pick up the 16 px radius. */}
         <div className="carm-explorer__panel">
-
-        {state.view === 'rundgang' ? (
-          <RundgangPanel
-            onStart={startWalkthrough}
-            onExplore={() => update('view', 'balken')}
-          />
-        ) : (
-        <>
 
         {state.view === 'balken' && (() => {
           // Balken renders the indicator + group pickers. Tabelle and
@@ -862,8 +809,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         {/* Bottom utility bar (Link kopieren / CSV / Vollbild) was
             removed — Exportieren dialog covers Link kopieren + CSV +
             JSON + PNG + SVG; Vollbild dropped. */}
-        </>
-        )}
         </div>{/* /.carm-explorer__panel */}
       </div>
 

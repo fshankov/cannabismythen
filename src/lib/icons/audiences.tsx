@@ -1,20 +1,17 @@
 /**
- * Audience / population-group icons.
+ * Audience / population-group icons (Iter-15 sync 2026-05-29).
  *
- * Single source of truth for the visual representation of each CaRM audience.
- * Edit a path here and every surface (dashboard, Meine Interessen, scrollytelling,
- * "Über das Projekt") updates.
+ * Locked SVG paths shipped by Fedor on 2026-05-29 to match the
+ * production cannabismythen Über-Uns icons. The stroke colour was
+ * `#1a1a18` in the source SVGs (light-theme); rewritten here to
+ * `stroke="currentColor"` so the dark scrolly cascade renders them in
+ * the local accent (group-* tokens passed via the `color` style).
  *
- * Design conventions (locked in Phase 2 brainstorm):
- *   - viewBox 24×24, stroke="currentColor", fill="none" (default)
- *   - stroke-width 1.75 default, round caps/joins
- *   - shared person base: head circle cx=12 cy=7 r=3, U-shaped torso
- *   - Konsumierende reuses the verdict-falsch arrow paths (scaled 0.36), recoloured green
- *   - Jugendliche ALIASES Minderjährige (same SVG, same colour token)
- *   - Volljährige = Lucide UsersRound (asymmetric main + partial behind)
+ * The Konsumierende icon keeps its hardcoded `#16a34a` green arrow —
+ * the green is the brand "leaf" cue rather than the audience accent.
  *
- * Consumers should import via `@/lib/icons` (the central index), not from
- * this file directly, so future re-organisation stays a one-line change.
+ * Single source of truth: a path edit here propagates to dashboard,
+ * scrollytelling, Meine Interessen, etc.
  */
 
 import type { SVGProps } from 'react';
@@ -24,7 +21,6 @@ export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
   size?: number | string;
 }
 
-/** Default SVG props for every custom icon in this module. */
 const baseProps = {
   viewBox: '0 0 24 24',
   fill: 'none',
@@ -34,174 +30,154 @@ const baseProps = {
   strokeLinejoin: 'round' as const,
 };
 
-/** Shared person-base paths used inside most audience icons. */
-const BasePerson = () => (
-  <g>
-    <circle cx="12" cy="7" r="3" />
-    <path d="M7 21v-4.3c0-2.8 2-4.7 5-4.7s5 1.9 5 4.7V21" />
-    <path d="M7.7 21h8.6" />
-  </g>
-);
-
-/* ------------------------------------------------------------------ */
-/* Volljährige — custom group of 3 (v6, 2026-05-23).
- * Main figure (base proportions) + back-left and back-right figures
- * lowered ~2 units vs v5 so the main figure reads as more dominant
- * and the back pair feels visually receded. Heads now at cy=11.2 r=2.2
- * (was cy=9.2), shoulder anchor at y=22 (was y=20). Bottom of back
- * figures aligns with the main body baseline so the group sits on
- * a single visual ground.
- */
-/* ------------------------------------------------------------------ */
+/* ─── Erwachsene (Volljährige) — Lucide UsersRound family ───────── */
 export const IconVolljaehrige = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      <circle cx="12" cy="7" r="3" />
-      <path d="M7 21v-4.3c0-2.8 2-4.7 5-4.7s5 1.9 5 4.7V21" />
-      <path d="M7.7 21h8.6" />
-      <circle cx="5.8" cy="11.2" r="2.2" />
-      <path d="M2.4 22v-2.4c0-2 1.3-3.4 3.4-3.4" />
-      <circle cx="18.2" cy="11.2" r="2.2" />
-      <path d="M21.6 22v-2.4c0-2-1.3-3.4-3.4-3.4" />
+      <path d="M18 21a8 8 0 0 0-16 0" />
+      <circle cx="10" cy="8" r="5" />
+      <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
     </svg>
   ),
 );
 IconVolljaehrige.displayName = 'IconVolljaehrige';
 
-/* ------------------------------------------------------------------ */
-/* Minderjährige — smaller solo figure + filled baseball cap (brim right) */
-/* ------------------------------------------------------------------ */
+/* ─── Minderjährige — head + body + headphones + phone ──────────── */
 export const IconMinderjaehrige = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      <circle cx="12" cy="8" r="2.5" />
-      <path d="M8 21v-3.7c0-2.4 1.7-4 4-4s4 1.6 4 4V21" />
-      <path d="M8.5 21h7" />
-      {/* cap dome (front-half filled) */}
-      <path d="M9.7 5.5 Q12 3 14.3 5.5 Z" fill="currentColor" />
-      <path d="M9.7 5.5 Q12 3 14.3 5.5" />
-      {/* brim — RIGHT */}
-      <path d="M14.3 6 H18.5" />
+      {/* head */}
+      <circle cx="10" cy="9.3" r="4" />
+      {/* body */}
+      <path d="M3 21a7 7 0 0 1 9.5-6.6" />
+      {/* beanie / rounded top */}
+      <path d="M6.2 7.4 C6.9 5.5 8.2 4.5 10 4.5 C11.8 4.5 13.1 5.5 13.8 7.4" />
+      {/* headphones band */}
+      <path d="M5.7 8.7 C6.0 6.2 7.7 4.7 10 4.7 C12.3 4.7 14.0 6.2 14.3 8.7" />
+      {/* left headphone pad */}
+      <rect
+        x="4.9"
+        y="8.5"
+        width="1.6"
+        height="2.8"
+        rx="0.5"
+        fill="currentColor"
+        stroke="currentColor"
+      />
+      {/* right headphone pad */}
+      <rect
+        x="13.5"
+        y="8.5"
+        width="1.6"
+        height="2.8"
+        rx="0.5"
+        fill="currentColor"
+        stroke="currentColor"
+      />
+      {/* phone / tablet */}
+      <rect x="14.5" y="14.5" width="4.5" height="6.5" rx="0.6" />
     </svg>
   ),
 );
 IconMinderjaehrige.displayName = 'IconMinderjaehrige';
 
-/* ------------------------------------------------------------------ */
-/* Jugendliche — aliases Minderjährige (same SVG + same colour token).
- * Exposed under a separate name so the FAQ audience side has a stable
- * import; future divergence becomes a single-file edit here.            */
-/* ------------------------------------------------------------------ */
+/** Alias: FAQ surface uses `IconJugendliche` for the same Minderjährige
+ *  visual. Future divergence becomes a single-file edit here. */
 export const IconJugendliche = IconMinderjaehrige;
 
-/* ------------------------------------------------------------------ */
-/* Junge Erwachsene — base + headphones + smartphone in torso          */
-/* ------------------------------------------------------------------ */
+/* ─── Junge Erwachsene — head + minimal cap + cup ───────────────── */
 export const IconJungeErwachsene = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      <BasePerson />
-      {/* headphones */}
-      <path d="M8.8 5 Q12 1.5 15.2 5" />
-      <rect x="8.2" y="5.4" width="1.6" height="2.6" rx="0.6" />
-      <rect x="14.2" y="5.4" width="1.6" height="2.6" rx="0.6" />
-      {/* smartphone inside torso, lighter stroke */}
-      <g strokeWidth={1.3}>
-        <rect x="10.5" y="14.5" width="3" height="5" rx="0.5" />
-        <path d="M11.2 18.4 H12.8" />
-      </g>
+      {/* head */}
+      <circle cx="10" cy="8" r="5" />
+      {/* minimal cap outline */}
+      <path
+        d="M5.8 6.8 C6.7 4.8 8.2 3.8 10.2 3.8 C12.0 3.8 13.4 4.8 14.1 6.8"
+        fill="none"
+      />
+      {/* filled cap band */}
+      <path
+        d="M5.8 6.8 C8.1 6.2 11.9 6.2 14.1 6.8 C11.9 7.3 8.1 7.3 5.8 6.8Z"
+        fill="currentColor"
+        stroke="none"
+      />
+      {/* small visor */}
+      <path
+        d="M14.0 6.8 C15.1 6.8 16.0 7.0 16.7 7.4 C15.8 7.7 14.8 7.7 13.9 7.3"
+        fill="currentColor"
+        stroke="none"
+      />
+      {/* body */}
+      <path d="M2 21a8 8 0 0 1 10.434-7.62" />
+      {/* cup */}
+      <path d="M14.5 14 H20 V19 a1.5 1.5 0 0 1 -1.5 1.5 H16 a1.5 1.5 0 0 1 -1.5 -1.5 Z" />
+      {/* cup handle */}
+      <path d="M20 15.5 a1.4 1.4 0 0 1 0 3" />
+      {/* steam */}
+      <path d="M16.6 13 V11.5 M19 13 V12" />
     </svg>
   ),
 );
 IconJungeErwachsene.displayName = 'IconJungeErwachsene';
 
-/* ------------------------------------------------------------------ */
-/* Konsumierende — base + verdict-falsch arrow (scaled 0.36) recoloured green */
-/* ------------------------------------------------------------------ */
+/* ─── Konsumierende — head + body + green check-down arrow ──────── */
 export const IconKonsumierende = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      <BasePerson />
-      {/* Verdict-falsch exact paths — translate+scale to fit torso interior.
-       *  Colour is forced green-600 (--classification-richtig is too dark,
-       *  --audience-konsumierende is the audience accent). We use the
-       *  emerald green family to read as "leaf". */}
-      <g
-        transform="translate(7.68 11.68) scale(0.36)"
-        stroke="#16a34a"
-        strokeWidth={4.2}
-      >
-        <path d="M2 16h20" />
-        <path d="M12 2v14" />
-        <path d="m5 9 7 7 7-7" />
+      <circle cx="10" cy="8" r="5" />
+      <path d="M2 21a8 8 0 0 1 10.434-7.62" />
+      {/* leaf-green check-down — brand cue, not the audience accent */}
+      <g stroke="#16a34a">
+        <path d="M14 22 H23" />
+        <path d="M18.5 14 V22" />
+        <path d="M14.5 18 L18.5 22 L22.5 18" />
       </g>
     </svg>
   ),
 );
 IconKonsumierende.displayName = 'IconKonsumierende';
 
-/* ------------------------------------------------------------------ */
-/* Eltern — adult base + filled (no-stroke) child silhouette (locked v6).
- * Child scaled up: head r=2.2 at cy=14.2. Child body fill extends to
- * y=21.7 so it matches the parent baseline-stroke's visual bottom
- * (baseline path stroke-width=1.75 → bottom edge at y≈21.875). The
- * earlier v5 child ended at y=21 and appeared to float above the
- * baseline.                                                            */
-/* ------------------------------------------------------------------ */
+/* ─── Eltern — parent + smaller child silhouette ────────────────── */
 export const IconEltern = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      <BasePerson />
-      <g fill="currentColor" stroke="none">
-        <circle cx="8" cy="14.2" r="2.2" />
-        <path d="M4.7 21.7v-3.5C4.7 16.4 6.1 15.4 8 15.4c1.9 0 3.3 1 3.3 2.9V21.7Z" />
-      </g>
+      <circle cx="10" cy="8" r="5" />
+      <path d="M2 21a8 8 0 0 1 12.8-6.4" />
+      <circle cx="18" cy="14" r="2.5" />
+      <path d="M22 21a4 4 0 0 0-8 0" />
     </svg>
   ),
 );
 IconEltern.displayName = 'IconEltern';
 
-/* ------------------------------------------------------------------ */
-/* Lehrkräfte — locked v7 (Lucide-Glasses-style spectacles).
- * Head r=3.2 + glasses styled after Lucide Glasses: round lenses with
- * a small dipping bridge between them, and temples curving up and out
- * toward where the ears would be (instead of the flat horizontal
- * temples used in v5). The pointer stick stays diagonal from hand to
- * upper-right.                                                        */
-/* ------------------------------------------------------------------ */
+/* ─── Lehrkräfte — kept from Iter-7 (Lucide-Glasses-style spectacles).
+ *      Not part of the 2026-05-29 update; FAQ surface only. */
 export const IconLehrkraefte = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      {/* head */}
       <circle cx="12" cy="7.2" r="3.2" />
-      {/* glasses — lenses */}
       <circle cx="9.2" cy="7.5" r="1.6" />
       <circle cx="14.8" cy="7.5" r="1.6" />
-      {/* glasses — dipping bridge (Lucide style: arc dipping down) */}
       <path d="M13.2 7.5 a1 1 0 0 0 -1.2 -0.8 a1 1 0 0 0 -1.2 0.8" />
-      {/* glasses — temples curving up and out toward the ears */}
       <path d="M7.6 7 6.2 5.4 c-0.35 -0.4 -0.7 -0.6 -1.2 -0.6" />
       <path d="M16.4 7 17.8 5.4 c0.35 -0.4 0.7 -0.6 1.2 -0.6" />
-      {/* torso */}
       <path d="M7 21v-4.1c0-2.8 2-4.7 5-4.7s5 1.9 5 4.7V21" />
       <path d="M7.7 21h8.6" />
-      {/* pointer stick */}
       <path d="M16.9 13.1 20.8 9.2" />
     </svg>
   ),
 );
 IconLehrkraefte.displayName = 'IconLehrkraefte';
 
-/* ------------------------------------------------------------------ */
-/* Fachkräfte — locked v5 (variant B from brainstorm).
- * Bigger clipboard inside body (3.6 × 5.2, three text lines, clip at
- * top) + magnifier on right with handle pointing back toward body.    */
-/* ------------------------------------------------------------------ */
+/* ─── Fachkräfte — kept from Iter-7 (clipboard + magnifier).
+ *      Not part of the 2026-05-29 update; FAQ surface only. */
 export const IconFachkraefte = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <svg ref={ref} width={size} height={size} {...baseProps} {...rest}>
-      <BasePerson />
-      {/* bigger clipboard inside torso */}
+      <circle cx="12" cy="7" r="3" />
+      <path d="M7 21v-4.3c0-2.8 2-4.7 5-4.7s5 1.9 5 4.7V21" />
+      <path d="M7.7 21h8.6" />
       <g strokeWidth={1.3}>
         <rect x="7.7" y="13" width="3.6" height="5.2" rx="0.4" />
         <path d="M8.6 13V12H10.4V13" />
@@ -209,7 +185,6 @@ export const IconFachkraefte = forwardRef<SVGSVGElement, IconProps>(
         <path d="M8.4 16H10.6" />
         <path d="M8.4 17.3H10.6" />
       </g>
-      {/* magnifier outside on right, handle pointing toward body */}
       <g strokeWidth={1.6}>
         <circle cx="19.3" cy="11.5" r="2.1" />
         <path d="M17.9 12.9 L15.6 15.2" />
