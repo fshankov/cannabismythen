@@ -226,40 +226,9 @@
   line-height: 1.4;
 }
 
-/* Stage F commit 1 (2026-05-23) — result-mode strip. Replaces the
-   per-question feedback content with a single title row when the
-   quiz is finished. Same DOM slot, same max-width container, same
-   horizontal padding rhythm as the answer-mode strip. */
-.quiz-feedback-strip--result {
-  /* (padding inherits from .quiz-feedback-strip above) */
-}
-
-.quiz-feedback-strip__result-title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--color-text);
-}
-
-.quiz-feedback-strip__result-module {
-  color: var(--color-accent);
-  font-weight: 700;
-}
-
-/* Stage 2 (2026-05-29) — the quiz bar rendered INLINE on the result page
-   (scrolls away with the page; the site menu stays pinned). Drop the fixed
-   slot height + the slot divider since it's now a single line in normal
-   flow, and give it a little breathing room above the result hero. */
-.quiz-player__result-bar {
-  width: 100%;
-  margin-bottom: var(--space-md);
-}
-.quiz-player__result-bar .quiz-feedback-strip {
-  height: auto;
-  border-top: none;
-}
+/* 2026-05-30 (Fedor) — the result-mode strip + inline result bar were
+   removed. The result page leads straight into the verdict card; the
+   module name moved into the ShareCard eyebrow (.share-card__module). */
 
 /* Mobile: progress bar + strip share the same portal target; keep
    the strip's content readable by allowing the body lines to wrap
@@ -513,10 +482,12 @@
    quiz-card-preview.html into the global token system (no CSS Modules).
    ═══════════════════════════════════════════════════════════════ */
 
-/* Post-answer border tint — front face only; the back has none. */
-.quiz-card--feedback-correct .quiz-card__front { border-color: var(--quiz-border-correct); }
-.quiz-card--feedback-almost  .quiz-card__front { border-color: var(--quiz-border-almost); }
-.quiz-card--feedback-wrong   .quiz-card__front { border-color: var(--quiz-border-wrong); }
+/* 2026-05-30 (Fedor) — no visible border on the card in any state. The
+   post-answer verdict tint was removed; the verdict is already carried by
+   the on-card feedback (icon + phrase) and the header strip. The 3px
+   transparent border on the face stays so nothing reflows, and hover only
+   changes the shadow (no border), so the card now reads borderless at
+   rest, on hover, and after answering. */
 
 /* Statement dims while the feedback cluster is shown. */
 .quiz-card--flow .quiz-card__statement--dimmed {
@@ -2818,6 +2789,22 @@ button.quiz-result__cta {
 .share-card--guterweg .share-card__visual { background: linear-gradient(140deg, #166534 0%, #16a34a 50%, #4d7c0f 100%); }
 .share-card--gehtnoch .share-card__visual { background: linear-gradient(140deg, #0f766e 0%, #0e7490 50%, #0369a1 100%); }
 .share-card--erwischt .share-card__visual { background: linear-gradient(140deg, #1f6f5c 0%, #2d6a4f 50%, #3f6212 100%); }
+
+/* 2026-05-30 (Fedor) — module-name eyebrow. Names the quiz inside the
+   verdict card now that the top "Dein Ergebnis — [Modul]" heading is
+   gone. Subtle uppercase label on the gradient; matches the
+   .share-card__branding treatment. Captured in the exported share image. */
+.share-card__module {
+  margin: 0 auto var(--space-sm);
+  max-width: 32ch;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
 
 .share-card__band-title {
   margin: 0 auto var(--space-sm);

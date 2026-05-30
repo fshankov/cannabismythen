@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Download, Filter, HelpCircle,
+  Download, Filter,
   Eye, TrendingUp, Target, Shield, Globe,
   Baby, Cannabis, GraduationCap, UsersRound,
 } from 'lucide-react';
@@ -25,7 +25,8 @@ import {
 } from '../../lib/dashboard/data';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import { urlToState, getDefaultState, pushState } from '../../lib/dashboard/url-state';
-import { RUNDGANG_SCRIPTS } from '../../lib/dashboard/rundgang-scripts';
+import { buildWalkthrough } from './rundgang/walkthrough';
+import type { Driver } from 'driver.js';
 import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
 import VerdictTags from './VerdictTags';
@@ -52,7 +53,7 @@ import SpannweiteToolbar from './controls/SpannweiteToolbar';
 import SourcesSpannweiteToolbar from './controls/SourcesSpannweiteToolbar';
 import SourcesBalkenToolbar from './controls/SourcesBalkenToolbar';
 import FactsheetPanel from './FactsheetPanel';
-import DashboardOnboarding from './DashboardOnboarding';
+import RundgangPanel from './RundgangPanel';
 import type { MythContentEntry } from './FactsheetPanel';
 
 const INDICATORS: Indicator[] = [
@@ -193,20 +194,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     state.view === 'balken' ||
     state.view === 'table';
 
-  /** Counter that, when bumped, opens the DashboardOnboarding modal. */
-  const [rundgangSignal, setRundgangSignal] = useState(0);
-  const handleRundgang = useCallback(() => {
-    // If the active tab has its own Rundgang script in the registry, the
-    // tour anchors to that tab's DOM — no view switch needed. Otherwise
-    // fall back to the legacy Streifen-anchored tour (current behaviour).
-    setState((prev) => {
-      const script = RUNDGANG_SCRIPTS[prev.view];
-      if (script && script.steps.length > 0) return prev;
-      return prev.view === 'strips' ? prev : { ...prev, view: 'strips' as const };
-    });
-    setRundgangSignal((n) => n + 1);
-  }, []);
-
   // Parse pre-rendered myth content passed as JSON from Astro
   const mythContentMap: Record<number, MythContentEntry> = useMemo(() => {
     if (!mythContent) return {};
@@ -342,6 +329,86 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       }));
   }, [data, factsheetMyth]);
 
+  // ---- Rundgang: first-visit nudge + guided walkthrough ----
+  // The far-right "Rundgang" tab opens an intro panel; from there the user
+  // launches a short Driver.js walkthrough. A subtle nudge draws first-time
+  // visitors to the tab until they open it once (persisted in localStorage).
+  const [rundgangSeen, setRundgangSeen] = useState(true); // start true → no SSR flash
+  useEffect(() => {
+    try {
+      setRundgangSeen(window.localStorage.getItem('carm-rundgang-seen-v1') === '1');
+    } catch {
+      setRundgangSeen(true); // localStorage disabled (incognito) → treat as seen
+    }
+  }, []);
+  const markRundgangSeen = useCallback(() => {
+    setRundgangSeen(true);
+    try {
+      window.localStorage.setItem('carm-rundgang-seen-v1', '1');
+    } catch {
+      /* ignore — incognito etc. */
+    }
+  }, []);
+  // Opening the Rundgang (tab click OR ?view=rundgang deep-link) clears the nudge.
+  useEffect(() => {
+    if (state.view === 'rundgang') markRundgangSeen();
+  }, [state.view, markRundgangSeen]);
+
+  // Live mirror of `state` so the Driver.js highlight callback (built once)
+  // reads fresh values instead of a stale closure.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const tourRef = useRef<Driver | null>(null);
+  /** Snapshot taken when a "try it" step is highlighted, so we can detect
+   *  the user's action and auto-advance. */
+  const tryItRef = useRef<{ step: number; sig: string } | null>(null);
+
+  /** Signature of the state slice each "try it" step watches. Step index 1
+   *  ("2 / 4", pick group/indicator) and index 2 ("3 / 4", sort a column)
+   *  are the action steps; the rest return '' and never auto-advance. */
+  const tryItSignature = useCallback((step: number, s: AppState): string => {
+    if (step === 1) return JSON.stringify([s.groupIds, s.indicator]);
+    if (step === 2) return JSON.stringify([s.spannweiteSort, s.spannweiteSortColumn]);
+    return '';
+  }, []);
+
+  const startWalkthrough = useCallback(() => {
+    markRundgangSeen();
+    // The walkthrough anchors to Spannweite's controls (sort/hide/rows),
+    // so switch there first, then drive once the DOM is painted.
+    update('view', 'spannweite');
+    requestAnimationFrame(() => {
+      const tour = buildWalkthrough({
+        onHighlighted: (index) => {
+          tryItRef.current = { step: index, sig: tryItSignature(index, stateRef.current) };
+        },
+        onDestroy: () => {
+          tourRef.current = null;
+          tryItRef.current = null;
+        },
+      });
+      tourRef.current = tour;
+      const drive = () => tour.drive();
+      // Retry once if the first anchor hasn't mounted yet (view just switched).
+      if (document.querySelector('.carm-explorer__tab-bar')) drive();
+      else window.setTimeout(drive, 150);
+    });
+  }, [update, markRundgangSeen, tryItSignature]);
+
+  // "Try it" auto-advance: when the active step is a watched one and its
+  // signature changed (user picked a group / sorted a column), move on.
+  // "Weiter" still works manually, so the tour never traps anyone.
+  useEffect(() => {
+    const tour = tourRef.current;
+    const base = tryItRef.current;
+    if (!tour || !base || (base.step !== 1 && base.step !== 2)) return;
+    if (!tour.isActive() || tour.getActiveIndex() !== base.step) return;
+    if (tryItSignature(base.step, stateRef.current) !== base.sig) {
+      tryItRef.current = null; // advance once
+      tour.moveNext();
+    }
+  }, [state.groupIds, state.indicator, state.spannweiteSort, state.spannweiteSortColumn, tryItSignature]);
+
   if (!data) {
     return <div className="carm-loading">Daten werden geladen…</div>;
   }
@@ -350,39 +417,19 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    *  Modern views (Balken, Tabelle) embed it directly in the ToolbarRow
    *  below; Streifen + Sources accept it as a prop and slot it next to
    *  their own pivot toggle so the bar stays in lockstep across tabs. */
-  /** Green map-pin Rundgang launcher (2026-05-27 PM). Same instance is
-   *  rendered on every toolbar — bundled with exportOnlyAction so views
-   *  that opt out of search/Filter (Streifen + Sources family) still
-   *  surface the per-tab tour affordance. */
-  const rundgangBadge: ReactNode = (
+  /** Exportieren chip — used on Streifen / Informationsquellen / Sources2
+   *  / Quellen-Tabelle, where the Filter drawer targets Mythen state and
+   *  doesn't apply to source/channel data. */
+  const exportOnlyAction: ReactNode = (
     <button
       type="button"
-      className="carm-rundgang-badge"
-      onClick={handleRundgang}
-      aria-label={t('rundgang.label', 'de')}
-      title={t('rundgang.label', 'de')}
+      className="carm-btn carm-explorer__export"
+      onClick={() => setExportDrawerOpen(true)}
+      aria-label={t('export.button', 'de')}
     >
-      <HelpCircle size={16} strokeWidth={2} aria-hidden="true" />
+      <Download size={14} strokeWidth={2} aria-hidden="true" />
+      {t('export.button', 'de')}
     </button>
-  );
-
-  /** Exportieren chip + the Rundgang badge — used on Streifen /
-   *  Informationsquellen / Sources2 / Quellen-Tabelle, where the Filter
-   *  drawer targets Mythen state and doesn't apply to source/channel
-   *  data, but the per-tab tour still belongs in the toolbar. */
-  const exportOnlyAction: ReactNode = (
-    <>
-      <button
-        type="button"
-        className="carm-btn carm-explorer__export"
-        onClick={() => setExportDrawerOpen(true)}
-        aria-label={t('export.button', 'de')}
-      >
-        <Download size={14} strokeWidth={2} aria-hidden="true" />
-        {t('export.button', 'de')}
-      </button>
-      {rundgangBadge}
-    </>
   );
 
   /** 2026-05-22 v5: search input is inline with Filter / Export
@@ -468,19 +515,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           Stage 1 of the Daten-Explorer refactor — the global nav already
           labels the page, and the tab bar communicates view state. */}
       <div className="app-layout">
-        {/* First-visit guidance for the Streifen view: welcome card +
-            opt-in 4-step Driver.js tour. The persistent Rundgang
-            button now lives inside the ToolbarRow's `actions` slot as
-            the green circular badge — `rundgangSignal` opens the modal
-            regardless of the active view. The optional `script` prop
-            picks up a per-tab tour from RUNDGANG_SCRIPTS when one is
-            registered; null falls back to the legacy Streifen tour. */}
-        <DashboardOnboarding
-          active={state.view === 'strips'}
-          openTrigger={rundgangSignal}
-          script={RUNDGANG_SCRIPTS[state.view]}
-        />
-
         {/* 2026-05-28: Fakten-Karten-style page header — large H1 +
             subtitle paragraph. Same visual language as
             `.fakten-page-header*` on /fakten-karten/. The Newton-voice
@@ -490,15 +524,11 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         <header className="carm-explorer__page-header">
           <h1 className="carm-explorer__page-header__h1">Daten-Explorer</h1>
           <p className="carm-explorer__page-header__sub">
-            Hier kannst du die Forschungsdaten erkunden, die im CaRM-Projekt 2024
-            in Deutschland erhoben wurden. Die Sektion{' '}
-            <a href="/projekt/">„Über das Projekt"</a> erklärt ausführlich, wie
-            die Daten zustande kamen. Jeder Tab im Dashboard enthält einen
-            vierstufigen Rundgang{' '}
-            <span className="carm-explorer__rundgang-hint" aria-hidden="true">
-              <HelpCircle size={16} strokeWidth={2} />
-            </span>{' '}
-            — tippe darauf, wenn du beim Navigieren Hilfe brauchst.
+            Hier erkundest du die Daten der CaRM-Studie, 2025 in Deutschland
+            erhoben. <strong>Neu hier?</strong> Der <strong>Rundgang</strong>{' '}
+            (Tab ganz rechts) führt dich in etwa einer Minute durch den Explorer.
+            Wie die Daten entstanden, erklärt{' '}
+            <a href="/projekt/">„Über das Projekt"</a>.
           </p>
         </header>
 
@@ -528,6 +558,18 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             />
           </div>
           <div className="carm-explorer__tab-spacer" aria-hidden="true" />
+          {/* Far-right Rundgang tab — set apart from the data views. Opens
+              the intro panel (state.view === 'rundgang'); a first-visit
+              nudge draws the eye until it's been opened once. */}
+          <div className="carm-explorer__tabs--rundgang">
+            <ViewTabs
+              view={state.view}
+              lang={'de'}
+              group="rundgang"
+              nudge={!rundgangSeen}
+              onChange={(v: ViewTab) => update('view', v)}
+            />
+          </div>
         </div>
 
         {/* Outer white panel — wraps the toolbar + chart canvas per
@@ -535,6 +577,14 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             active tab merges into the panel; the other three corners
             pick up the 16 px radius. */}
         <div className="carm-explorer__panel">
+
+        {state.view === 'rundgang' ? (
+          <RundgangPanel
+            onStart={startWalkthrough}
+            onExplore={() => update('view', 'balken')}
+          />
+        ) : (
+        <>
 
         {state.view === 'balken' && (() => {
           // Balken renders the indicator + group pickers. Tabelle and
@@ -657,7 +707,12 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             state={state}
             update={update}
             definitions={defs}
-            sharedActions={state.view === 'sources_table' ? sharedActions : exportOnlyAction}
+            // 2026-05-29: both Quellen-Übersicht (sources2) and
+            // Quellen-Tabelle use the search-inclusive `sharedActions`
+            // (auto-scoped "Quellen suchen" + Exportieren + Rundgang;
+            // Filter is hidden on source views). Übersicht previously got
+            // `exportOnlyAction` and so lacked the search input.
+            sharedActions={sharedActions}
           />
         )}
 
@@ -807,6 +862,8 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         {/* Bottom utility bar (Link kopieren / CSV / Vollbild) was
             removed — Exportieren dialog covers Link kopieren + CSV +
             JSON + PNG + SVG; Vollbild dropped. */}
+        </>
+        )}
         </div>{/* /.carm-explorer__panel */}
       </div>
 

@@ -7667,6 +7667,19 @@ body.carm-modal-open {
   font-size: 0.74rem;
 }
 
+/* 2026-05-29: child (sub-source) rows in Quellen-Tabelle — dim the cells
+   + indent the source name, mirroring the grid views. The chevron-spacer
+   already supplies the base indent; the extra padding matches Übersicht. */
+.carm-explorer .data-table tr.carm-sources-table__row--child td {
+  opacity: 0.62;
+}
+.carm-explorer .data-table tr.carm-sources-table__row--child .carm-sources-table__label {
+  padding-left: 1.5rem;
+}
+.carm-explorer .data-table tr.carm-sources-table__row--child .carm-sources-table__name {
+  font-size: 0.78rem;
+}
+
 /* Cell marker = filled circle in the source's category color. Replaces
    the verdict-arrow glyph used in the Mythen Spannweite. */
 .carm-sources-spannweite__circle {
@@ -7824,4 +7837,172 @@ body.carm-modal-open {
   .carm-sources-balken.carm-spannweite {
     --carm-spannweite-label-col: minmax(120px, 35vw);
   }
+}
+
+/* ==================== RUNDGANG TAB + INTRO PANEL ====================
+   The far-right "Rundgang" tab (a pseudo-view) and the intro/overview
+   panel it opens. Replaces the old first-visit welcome modal + green
+   `.carm-rundgang-badge`. See ViewTabs.tsx / RundgangPanel.tsx. */
+
+/* The tab is set apart from the data-view tabs: accent text + leading
+   compass glyph, transparent resting background. */
+.carm-explorer__tabs--rundgang {
+  display: flex;
+  align-items: flex-end;
+}
+.carm-explorer__tab-btn--rundgang {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary, #047857);
+  background: transparent;
+  border-color: transparent;
+}
+.carm-explorer__tab-btn--rundgang:hover {
+  color: var(--color-primary, #047857);
+  background: rgba(4, 120, 87, 0.06);
+}
+.carm-explorer__tab-btn--rundgang.active {
+  background: var(--color-surface, #ffffff);
+  color: var(--color-primary, #047857);
+  font-weight: 700;
+}
+.carm-explorer__tab-btn--rundgang > svg { flex: none; }
+
+/* First-visit nudge — a small pulsing dot until the tab is opened once. */
+.carm-explorer__tab-btn--rundgang.is-nudge { position: relative; }
+.carm-explorer__tab-btn--rundgang.is-nudge::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary, #047857);
+  box-shadow: 0 0 0 0 rgba(4, 120, 87, 0.45);
+  animation: carm-rundgang-pulse 1.8s var(--ease-out, ease-out) infinite;
+}
+@keyframes carm-rundgang-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(4, 120, 87, 0.45); }
+  70%  { box-shadow: 0 0 0 7px rgba(4, 120, 87, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(4, 120, 87, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .carm-explorer__tab-btn--rundgang.is-nudge::after { animation: none; }
+}
+
+/* Intro/overview panel (RundgangPanel) shown when the tab is active. */
+.carm-rundgang-panel {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 44px) clamp(12px, 3vw, 28px);
+}
+.carm-rundgang-panel__eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary, #047857);
+  margin: 0 0 8px;
+}
+.carm-rundgang-panel__title {
+  font-family: var(--font-sans);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1a1a2e;
+  margin: 0 0 12px;
+}
+.carm-rundgang-panel__lede {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0 0 28px;
+}
+.carm-rundgang-panel__domains {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.carm-rundgang-panel__domain {
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 12px;
+  padding: 18px 20px;
+  background: var(--color-bg-subtle, #f8f8f5);
+}
+.carm-rundgang-panel__domain-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary, #047857);
+  margin-bottom: 4px;
+}
+.carm-rundgang-panel__domain-title {
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+.carm-rundgang-panel__domain-tabs {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary, #047857);
+  margin: 0 0 8px;
+}
+.carm-rundgang-panel__domain-text {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #4b5563;
+  margin: 0;
+}
+.carm-rundgang-panel__shared {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0 0 28px;
+  padding: 14px 16px;
+  background: var(--color-bg-subtle, #f8f8f5);
+  border-radius: 10px;
+}
+.carm-rundgang-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.carm-rundgang-panel__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 11px 18px;
+  cursor: pointer;
+  transition: background var(--duration-fast, 150ms) var(--ease-out, ease-out),
+              box-shadow var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+.carm-rundgang-panel__cta--primary {
+  background: var(--color-primary, #047857);
+  color: #ffffff;
+  border: 1px solid var(--color-primary, #047857);
+}
+.carm-rundgang-panel__cta--primary:hover { background: #036647; }
+.carm-rundgang-panel__cta--ghost {
+  background: transparent;
+  color: #1f2937;
+  border: 1px solid var(--color-border, #d1d5db);
+}
+.carm-rundgang-panel__cta--ghost:hover { background: rgba(0, 0, 0, 0.04); }
+.carm-rundgang-panel__cta:focus-visible {
+  outline: 2px solid var(--color-primary, #047857);
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .carm-rundgang-panel__domains { grid-template-columns: 1fr; }
 }

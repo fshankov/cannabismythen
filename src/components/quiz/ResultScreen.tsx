@@ -153,11 +153,11 @@ export default function ResultScreen({
       tabIndex={-1}
       aria-label={t("ui.resultTitle")}
     >
-      {/* Stage F commit 1 (2026-05-23) — the in-page `Dein Ergebnis —
-          {module}` h1 moved up into the sticky `#quiz-progress-slot`
-          via FeedbackStrip's `variant="result"` mode. Same DOM slot
-          as the per-question feedback strip; consistent sticky header
-          rhythm between quiz mode and result mode. */}
+      {/* 2026-05-30 (Fedor) — the visible `Dein Ergebnis — {module}`
+          heading and the inline quiz progress bar were removed from the
+          result page. The section keeps "Dein Ergebnis" only as an
+          aria-label (above) for screen readers; the module name is now
+          woven into the ShareCard verdict card eyebrow below. */}
 
       {/* Stage E commit 3 (2026-05-23) — Consolidated ShareCard hero.
           The Stage A Keystatic verdict + Stage D standalone achievement

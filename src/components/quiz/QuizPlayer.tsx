@@ -893,18 +893,11 @@ function QuizPlayerInner({
     </>
   );
 
-  // Result header (rendered INLINE on the result page so it scrolls away).
-  const resultHeader = (
-    <>
-      <ProgressBar
-        quizTitle={t(theme.titleKey)}
-        current={totalQuestions}
-        answered={answeredCount}
-        total={totalQuestions}
-      />
-      <FeedbackStrip variant="result" moduleTitle={t(theme.titleKey)} />
-    </>
-  );
+  // 2026-05-30 (Fedor) — the result page no longer renders a top quiz bar
+  // or a "Dein Ergebnis — [Modul]" heading. The module name now lives
+  // organically inside the verdict card (ShareCard eyebrow). So there is
+  // no `resultHeader` anymore; ResultScreen renders directly under the
+  // normal site nav.
 
   return (
     <div
@@ -982,10 +975,9 @@ function QuizPlayerInner({
 
       {showResults && result && (
         <>
-          {/* Stage 2: the quiz bar renders inline here (not in the fixed
-              header portal) so it scrolls away with the result page while
-              the site menu stays pinned. */}
-          <div className="quiz-player__result-bar">{resultHeader}</div>
+          {/* 2026-05-30 (Fedor) — no inline quiz bar on the result page.
+              The module name is carried inside the ResultScreen verdict
+              card instead. */}
           <ResultScreen
             result={result}
             theme={theme}
