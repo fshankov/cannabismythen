@@ -5016,10 +5016,10 @@ body.carm-modal-open {
    difference. The active tab in both groups still overrides to white
    via the .tab-btn.active rule above. */
 .carm-explorer__tabs--left .tab-btn:not(.active) {
-  background: #eeeee9;
+  background: #e7e7e0;
 }
 .carm-explorer__tabs--right .tab-btn:not(.active) {
-  background: #f2f2f2;
+  background: #e3e3e3;
 }
 
 /* SSOT (Figma 403:1976) — 16 px gap between tabs within each group.

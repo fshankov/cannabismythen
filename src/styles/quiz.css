@@ -3383,6 +3383,14 @@ button.quiz-result__cta {
 }
 
 
+/* ── Page-width match: quiz index + fakten-karten aligned to nav pill ─
+   Nav pill effective width = nav-wrapper max-width (1200px) − 2×32px padding = 1136px.
+   Setting main to the same max-width makes page content edges flush with the pill. */
+body.quiz-index-page main,
+body.fakten-karten-page main {
+  max-width: 1136px;
+}
+
 /* ── Quiz Index Page ──────────────────────────────────────────── */
 
 .quiz-index__title {

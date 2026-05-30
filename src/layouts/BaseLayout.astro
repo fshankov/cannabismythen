@@ -11,6 +11,9 @@ interface Props {
    *  Fakten-Karten look) on <body> via the `.dot-texture` class.
    *  Used on Fakten-Karten, Quiz, Daten-Explorer and Meine Interessen. */
   bgTexture?: boolean;
+  /** Extra class(es) added verbatim to <body>. Use for page-specific
+   *  CSS hooks (e.g. "fakten-karten-page" for the SVG tile texture). */
+  extraBodyClass?: string;
   /** Stage 8: per-page OG image URL (absolute or root-relative). When
    *  set, emits og:image + twitter:card meta. og:title/description
    *  derive from `title`/`description`; og:url from the current request. */
@@ -22,13 +25,18 @@ const {
   description = "Wissenschaftliche Informationen zu Cannabis-Mythen",
   heroMode = false,
   bgTexture = false,
+  extraBodyClass,
   ogImage,
 } = Astro.props;
 
 // PREVIEW BANNER — flip to false before public launch
 const SHOW_PREVIEW_BANNER = true;
 
-const bodyClass = [heroMode ? "has-hero" : "", bgTexture ? "dot-texture" : ""]
+const bodyClass = [
+  heroMode ? "has-hero" : "",
+  bgTexture ? "dot-texture" : "",
+  extraBodyClass ?? "",
+]
   .filter(Boolean)
   .join(" ");
 
@@ -130,7 +138,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
     </script>
     FEEDBUCKET-DISABLED-END */}
   </head>
-  <body class={heroMode ? "has-hero" : ""}>
+  <body class={bodyClass}>
 
     {/* PREVIEW BANNER — remove Fragment + dialog before public launch */}
     {SHOW_PREVIEW_BANNER && (
