@@ -183,7 +183,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
   align-items: center;
   justify-content: space-between;
   height: 44px;
-  padding-left: 16px;
+  padding-left: 48px;
   padding-right: 32px;
   background: #ffffff;
   border-radius: 0 16px 16px 0;
@@ -228,10 +228,11 @@ const isFachkraefte = activeAudience === "fachkraefte";
   opacity: 1;
 }
 
-/* Active indicator: 4 × 4 px square, left edge */
+/* Active indicator: 4 × 4 px square, 8px gap to the label.
+   Label starts at padding-left 48px, dot is 4px wide → left = 48 - 8 - 4 = 36px. */
 .mi-nav-item__dot {
   position: absolute;
-  left: -2px;
+  left: 36px;
   top: 50%;
   transform: translateY(-50%);
   width: 4px;

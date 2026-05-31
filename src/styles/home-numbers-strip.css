@@ -11,24 +11,6 @@
   position: relative;
 }
 
-/* Soft bridge from the (forest-green) hero above. */
-.numbers-strip::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 96px;
-  background: linear-gradient(
-    to bottom,
-    #1f4f3a 0%,
-    rgba(31, 79, 58, 0.35) 35%,
-    var(--color-accent-light) 100%
-  );
-  pointer-events: none;
-  transform: translateY(-100%);
-}
-
 .numbers-strip__inner {
   max-width: var(--max-width);
   margin: 0 auto;

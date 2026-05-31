@@ -139,11 +139,20 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
     FEEDBUCKET-DISABLED-END */}
 
     {/* Mark <html> as preview-open before body renders so the nav pill stays
-        hidden under the overlay banner from first paint (no flash). Cleared
-        by the body script if the banner was collapsed earlier this session. */}
+        hidden under the overlay banner from first paint (no flash).
+        Behaviour: once dismissed, the banner stays closed across in-session
+        navigation. A full page reload (Cmd-R / F5 / browser reload button)
+        clears the dismissed flag so the banner reappears. */}
     {SHOW_PREVIEW_BANNER && (
       <script is:inline>
         (function() {
+          try {
+            var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+            var navType = entries && entries[0] && entries[0].type;
+            if (navType === 'reload') {
+              sessionStorage.removeItem('cm-preview-state');
+            }
+          } catch (e) { /* sessionStorage / performance API unavailable */ }
           if (sessionStorage.getItem('cm-preview-state') !== 'collapsed') {
             document.documentElement.classList.add('cm-preview-open');
           }
@@ -386,18 +395,19 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
             banner.style.display = 'none';
             root.classList.remove('cm-preview-open');
             if (fab) fab.classList.add('preview-fab--visible');
-            sessionStorage.setItem('cm-preview-state', 'collapsed');
+            try { sessionStorage.setItem('cm-preview-state', 'collapsed'); } catch (e) {}
           }
 
           function expand() {
             banner.style.display = '';
             root.classList.add('cm-preview-open');
             if (fab) fab.classList.remove('preview-fab--visible');
-            sessionStorage.removeItem('cm-preview-state');
+            try { sessionStorage.removeItem('cm-preview-state'); } catch (e) {}
           }
 
           /* Restore collapsed state from earlier this session. The head
-             script already added cm-preview-open when not collapsed. */
+             script already added cm-preview-open when not collapsed, and
+             clears the flag entirely on a hard reload. */
           if (sessionStorage.getItem('cm-preview-state') === 'collapsed') {
             banner.style.display = 'none';
             if (fab) fab.classList.add('preview-fab--visible');

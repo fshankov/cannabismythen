@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { ChevronDown, Hand } from "lucide-react";
+import { Hand } from "lucide-react";
 import type { MythPosition } from "./mythPositions";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -328,10 +328,6 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
         </div>
       </div>
 
-      <a className="cmhero__cue" href="#main-content" aria-label="Zum Inhalt scrollen">
-        <ChevronDown size={22} color="rgba(255,255,255,.95)" strokeWidth={2} />
-      </a>
-
       <style>{`
         /* ── Hero (matches v3 prototype 1:1) ─────────────────────────────── */
         .cmhero {
@@ -474,22 +470,6 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
           .cmhero__plate  { width: 112vw; }
         }
 
-        /* Scroll cue */
-        .cmhero__cue {
-          position: absolute; bottom: 20px; left: 50%; margin-left: -22px;
-          z-index: 8; display: flex; opacity: .5;
-          width: 44px; height: 44px;
-          align-items: center; justify-content: center;
-          color: #fff; text-decoration: none;
-          animation: cmheroBounce 2.6s ease-in-out infinite;
-          transition: opacity .2s ease;
-        }
-        .cmhero__cue:hover { opacity: .85; }
-        @keyframes cmheroBounce {
-          0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(8px); }
-        }
-
         /* Mobile hint */
         .cmhero__hint {
           position: absolute; bottom: 23%; left: 50%;
@@ -508,7 +488,7 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .cmhero__blob, .cmhero__cue, .cmhero__float { animation: none !important; }
+          .cmhero__blob, .cmhero__float { animation: none !important; }
         }
       `}</style>
     </section>
