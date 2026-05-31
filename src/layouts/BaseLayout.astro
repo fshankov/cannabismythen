@@ -162,24 +162,29 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
   </head>
   <body class={bodyClass}>
 
-    {/* PREVIEW BANNER — remove Fragment + dialog before public launch */}
+    {/* PREVIEW BANNER — remove Fragment before public launch */}
     {SHOW_PREVIEW_BANNER && (
       <Fragment>
         <div id="preview-banner" class="preview-banner" role="note" aria-label="Vorabversion-Hinweis">
           <div class="preview-banner__inner">
-            <svg class="preview-banner__icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="preview-banner__icon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
               <line x1="12" y1="9" x2="12" y2="13"/>
               <line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
-            <span class="preview-banner__text">
-              Vorschauversion: Diese Website befindet sich noch in der Entwicklung und wurde nicht abschließend freigegeben.
-            </span>
-            <button class="preview-banner__details-btn" type="button" id="previewBannerDetails" aria-haspopup="dialog">
-              Details
-            </button>
+            <div class="preview-banner__text">
+              <p>
+                <strong>Vorschauversion:</strong> Diese Website befindet sich noch in der Entwicklung und wurde noch nicht offiziell durch das ISD&nbsp;Hamburg abschließend freigegeben. Inhalte können sich bis zum offiziellen Start noch ändern.
+              </p>
+              <p>
+                Für die Vollständigkeit und Richtigkeit der bereitgestellten Informationen wird keine Gewähr übernommen.
+              </p>
+              <p>
+                Alle Inhalte dienen ausschließlich Informations- und Forschungszwecken und ersetzen keine persönliche ärztliche Beratung. Bei gesundheitlichen Fragen wenden Sie sich bitte an eine qualifizierte Fachkraft.
+              </p>
+            </div>
             <button class="preview-banner__close-btn" type="button" id="previewBannerClose" aria-label="Hinweis schließen">
-              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/>
                 <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
@@ -195,22 +200,6 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
             <line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
         </button>
-
-        <dialog id="preview-modal" class="preview-modal" aria-labelledby="preview-modal-title">
-          <div class="preview-modal__content">
-            <button class="preview-modal__close" type="button" id="previewModalClose" aria-label="Schließen">&times;</button>
-            <h2 id="preview-modal-title" class="preview-modal__title">Vorabversion &ndash; Hinweis</h2>
-            <p>
-              <strong>Diese Website befindet sich noch in der Entwicklung</strong> und wurde noch nicht offiziell durch das ISD Hamburg abschließend freigegeben. Inhalte können sich bis zum offiziellen Start noch ändern.
-            </p>
-            <p>
-              Alle Inhalte dienen ausschließlich <strong>Informations- und Forschungszwecken</strong> und ersetzen keine persönliche ärztliche Beratung. Bei gesundheitlichen Fragen wenden Sie sich bitte an eine qualifizierte Fachkraft.
-            </p>
-            <p>
-              Für die Vollständigkeit und Richtigkeit der bereitgestellten Informationen wird <strong>keine Gewähr übernommen</strong>. Die Inhalte basieren auf der CaRM-Studie (n&#8201;=&#8201;2.097), einer Bevölkerungsbefragung in Deutschland (Erwachsene&#160;18–70).
-            </p>
-          </div>
-        </dialog>
       </Fragment>
     )}
 
@@ -417,15 +406,6 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
           if (closeBtn) closeBtn.addEventListener('click', collapse);
 
           if (fab) fab.addEventListener('click', expand);
-
-          var detailsBtn = document.getElementById('previewBannerDetails');
-          var modal = document.getElementById('preview-modal');
-          if (detailsBtn && modal) {
-            detailsBtn.addEventListener('click', function () { modal.showModal(); });
-            var modalClose = document.getElementById('previewModalClose');
-            if (modalClose) modalClose.addEventListener('click', function () { modal.close(); });
-            modal.addEventListener('click', function (e) { if (e.target === modal) modal.close(); });
-          }
         })();
       </script>
     )}

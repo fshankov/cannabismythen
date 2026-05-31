@@ -5343,7 +5343,8 @@ body.fakten-karten-page main {
 }
 
 /* Tabelle-style sort button (mirror of dashboard.css; see comment
-   there for rationale). */
+   there for rationale). Always-visible grey, darkens to text on
+   hover (Fedor 2026-05-30). */
 .factsheet-group-bars__col-sort-btn {
   position: absolute;
   top: 2px;
@@ -5359,25 +5360,18 @@ body.fakten-karten-page main {
   border-radius: 3px;
   cursor: pointer;
   color: var(--color-text-muted);
-  opacity: 0;
   transition:
-    opacity var(--transition-fast, 150ms ease),
     color var(--transition-fast, 150ms ease),
     background var(--transition-fast, 150ms ease);
   z-index: 1;
 }
 
-.factsheet-group-bars__col-header:hover .factsheet-group-bars__col-sort-btn {
-  opacity: 0.45;
-}
-
 .factsheet-group-bars__col-sort-btn:hover {
   background: var(--color-surface-soft, rgba(15, 23, 42, 0.06));
-  opacity: 0.85;
+  color: var(--color-text);
 }
 
 .factsheet-group-bars__col-sort-btn.is-active {
-  opacity: 1;
   color: var(--color-primary, #2d6a4f);
 }
 

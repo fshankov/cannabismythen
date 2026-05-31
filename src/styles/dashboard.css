@@ -5039,6 +5039,10 @@ body.carm-modal-open {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  /* Compact: each tab now carries just a short label + icon under a
+     permanent "Mythen"/"Quellen" group label, so it doesn't need the
+     default 24 px side padding. */
+  padding: 9px 16px;
 }
 .carm-explorer__tabs--left .tab-btn > svg,
 .carm-explorer__tabs--right .tab-btn > svg {
@@ -5052,10 +5056,11 @@ body.carm-modal-open {
   justify-content: center;
 }
 
-/* Outer white panel — holds the toolbar + chart canvas. The top-left
-   stays flat so the active tab merges into it; the other three
-   corners pick up the 16 px radius. The 1 px top border is OMITTED
-   so the active tab's bottom edge can sit flush. */
+/* Outer white panel — holds the toolbar + chart canvas. BOTH top corners
+   stay flat: the top-left so the active data tab merges into it, the
+   top-right so the yellow "?" Rundgang bookmark fuses into it. Only the
+   two bottom corners pick up the 16 px radius. The 1 px top border is
+   OMITTED so the active tab's bottom edge can sit flush. */
 .carm-explorer__panel {
   display: flex;
   flex-direction: column;
@@ -5064,7 +5069,7 @@ body.carm-modal-open {
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border-soft, #e5e7eb);
   border-top: none;
-  border-radius: 0 var(--radius-lg, 16px) var(--radius-lg, 16px) var(--radius-lg, 16px);
+  border-radius: 0 0 var(--radius-lg, 16px) var(--radius-lg, 16px);
   box-shadow: var(--shadow-chip, 0 4px 20px -2px rgba(0, 0, 0, 0.05));
   flex: 1 1 auto;
   min-width: 0;
@@ -5148,22 +5153,12 @@ body.carm-modal-open {
   color: rgba(148, 161, 176, 0.7);
 }
 
-/* Mobile (≤768 px): collapse the tab-bar spacers + drop fixed widths
-   on the two long tabs so the row can scroll horizontally without
-   gaps. */
+/* Mobile (≤768 px): tighten the panel padding. The tab row already
+   collapses to icons + "Mythen"/"Quellen" group labels at ≤1080 px (see
+   the Rundgang section), so it fits the panel width WITHOUT horizontal
+   scroll — keeping the row above the panel and the "?" bookmark fused at
+   the top-right instead of scrolling away. */
 @media (max-width: 768px) {
-  .carm-explorer__tab-bar > .carm-explorer__tab-spacer {
-    display: none;
-  }
-  .carm-explorer__tab-btn--fixed {
-    width: auto;
-  }
-  .carm-explorer__tab-bar {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .carm-explorer__tab-bar::-webkit-scrollbar { display: none; }
   .carm-explorer__panel {
     padding: 16px;
     gap: 16px;
@@ -6664,12 +6659,13 @@ body.carm-modal-open {
   padding: 4px 2px;
 }
 
-/* Tabelle-style sort button (Fedor 2026-05-26) — small ArrowDown01/10
-   glyph absolutely positioned top-left of each column header. Hidden
-   by default; hovering the parent <th> reveals it at low opacity;
-   .is-active brings it to full opacity in the primary color. Mirrors
-   the dashboard Tabelle's .carm-spannweite__col-sort-btn affordance
-   so the popup table reads as the same control idiom. */
+/* Tabelle-style sort button (Fedor 2026-05-26, visibility tweak
+   2026-05-30) — small ArrowDown01/10 glyph absolutely positioned
+   top-left of each column header. ALWAYS visible in muted grey;
+   darkens to --color-text on hover. .is-active brings it to the
+   primary color. Mirrors the dashboard Tabelle's
+   .carm-spannweite__col-sort-btn affordance so the popup table reads
+   as the same control idiom. */
 .factsheet-group-bars__col-sort-btn {
   position: absolute;
   top: 2px;
@@ -6685,22 +6681,16 @@ body.carm-modal-open {
   border-radius: 3px;
   cursor: pointer;
   color: var(--color-text-muted, #64748b);
-  opacity: 0;
-  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+  transition: color 0.15s ease, background 0.15s ease;
   z-index: 1;
-}
-
-.factsheet-group-bars__col-header:hover .factsheet-group-bars__col-sort-btn {
-  opacity: 0.45;
 }
 
 .factsheet-group-bars__col-sort-btn:hover {
   background: var(--color-surface-soft, rgba(15, 23, 42, 0.06));
-  opacity: 0.85;
+  color: var(--color-text, #0f172a);
 }
 
 .factsheet-group-bars__col-sort-btn.is-active {
-  opacity: 1;
   color: var(--color-primary, #2d6a4f);
 }
 
@@ -7872,54 +7862,138 @@ body.carm-modal-open {
   }
 }
 
-/* ==================== RUNDGANG TAB + INTRO PANEL ====================
-   The far-right "Rundgang" tab (a pseudo-view) and the intro/overview
-   panel it opens. Replaces the old first-visit welcome modal + green
-   `.carm-rundgang-badge`. See ViewTabs.tsx / RundgangPanel.tsx. */
+/* ==================== RUNDGANG BOOKMARK + WALKTHROUGH ===============
+   The Rundgang is a yellow "?" BOOKMARK (rounded top like the data tabs,
+   V-notch tail at the bottom — see RundgangBookmark.tsx) fused into the
+   panel's flat top-right corner. Clicking it starts the Driver.js
+   walkthrough. The tour popover reuses `.carm-tour-popover`. */
 
-/* The tab is set apart from the data-view tabs: accent text + leading
-   compass glyph, transparent resting background. */
-.carm-explorer__tabs--rundgang {
-  display: flex;
-  align-items: flex-end;
+/* Fixed gap between the Mythen and Quellen tab groups (within-group gap
+   stays 16px) so each group reads as a tight cluster with a clear break. */
+.carm-explorer__tab-bar > .carm-explorer__tab-gap {
+  flex: 0 0 auto;
+  width: 40px;
 }
-/* Solid dark-green CTA — distinct from the data-view tabs. It never
-   becomes the "active" view; clicking it just starts the walkthrough. */
-.carm-explorer__tab-btn--rundgang {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #065f46;
-  color: #ffffff;
-  border-color: #065f46;
-  font-weight: 700;
-}
-.carm-explorer__tab-btn--rundgang:hover,
-.carm-explorer__tab-btn--rundgang:focus-visible {
-  background: #054c38;
-  color: #ffffff;
-}
-.carm-explorer__tab-btn--rundgang > svg { flex: none; color: #ffffff; }
 
-/* First-visit nudge — a small pulsing dot until the tab is opened once. */
-.carm-explorer__tab-btn--rundgang.is-nudge { position: relative; }
-.carm-explorer__tab-btn--rundgang.is-nudge::after {
-  content: '';
-  position: absolute;
-  top: 7px;
-  right: 9px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+/* The "?" bookmark sits at the far upper-right. Its SVG provides the
+   shape (rounded top + notch tail); the button is a bare, transparent
+   wrapper. align-self:flex-end + a negative bottom margin let the notch
+   hang into the panel's flat top-right corner, fusing it to the panel —
+   mirroring how the active data tab fuses into the top-left. The tab
+   bar's own z-index:1 keeps it above the panel. */
+.carm-explorer__rundgang-help {
+  flex: none;
+  align-self: flex-end;
+  margin-bottom: -13px;
+  width: 44px;
+  height: 57px;
+  padding: 0;
+  border: none;
+  background: none;
+  line-height: 0;
+  cursor: pointer;
+  transition: filter var(--duration-fast, 150ms) var(--ease-out, ease-out);
+}
+.carm-explorer__rundgang-help svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.carm-explorer__rundgang-help:hover { filter: brightness(0.94); }
+.carm-explorer__rundgang-help:focus-visible {
+  outline: 2px solid #1a1a2e;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* First-visit nudge — a soft amber glow that follows the bookmark shape
+   (drop-shadow, not a box ring) until the walkthrough is opened once. */
+.carm-explorer__rundgang-help.is-nudge svg {
   animation: carm-rundgang-pulse 1.8s var(--ease-out, ease-out) infinite;
 }
 @keyframes carm-rundgang-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6); }
-  70%  { box-shadow: 0 0 0 7px rgba(255, 255, 255, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  0%   { filter: drop-shadow(0 0 0 rgba(234, 179, 8, 0)); }
+  35%  { filter: drop-shadow(0 0 6px rgba(234, 179, 8, 0.85)); }
+  100% { filter: drop-shadow(0 0 0 rgba(234, 179, 8, 0)); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .carm-explorer__tab-btn--rundgang.is-nudge::after { animation: none; }
+  .carm-explorer__rundgang-help.is-nudge svg { animation: none; }
+}
+
+/* Inline bookmark in the Daten-Explorer intro paragraph — matches the
+   dashboard glyph so readers know exactly what to look for. */
+.carm-rundgang-bookmark-inline {
+  height: 1.25em;
+  width: auto;
+  vertical-align: -0.32em;
+  margin: 0 0.12em;
+}
+
+/* Permanent per-group label ("Mythen" / "Quellen") — it carries the
+   group context so the tabs themselves only show the view type (Balken /
+   Übersicht / Tabelle), which in turn collapse to icon-only on narrow
+   screens while these labels stay put. */
+.carm-explorer__group-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  /* Vertically centre on the same line as the tab text (the tab buttons
+     centre their icon+label too), with no extra bottom padding to push
+     the text up. The underline floats just beneath via ::after. */
+  align-self: center;
+  margin: 0 12px 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  /* Neutral dark-grey, consistent with the dashboard's active-tab text —
+     NOT coloured (per Fedor). The emerald/blue stays on the view icons. */
+  color: #1f2937;
+}
+/* Nav-style underline (cf. global.css `.nav__link::after`). Uses
+   currentColor, so it inherits the neutral grey above. Static — these are
+   labels, not links. Floated just below the text so the word stays on the
+   tab-text line. */
+.carm-explorer__group-label::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: var(--radius-full, 999px);
+}
+/* (No per-group text colour — Mythen/Quellen stay neutral grey. The
+   modifier classes remain in the markup for potential future use.) */
+
+/* Inline lucide glyphs embedded in the walkthrough popover copy + the
+   "Erkunden" done button (Driver renders both via innerHTML). */
+.carm-tour-popover .driver-popover-description .carm-tour-icon,
+.carm-tour-popover .driver-popover-footer .carm-tour-icon {
+  display: inline-block;
+  vertical-align: -0.15em;
+  margin: 0 2px;
+}
+
+/* ---- Responsive: keep the tab row ABOVE the panel (never spilling to
+   the right). Below the breakpoint, drop only the per-tab short label so
+   each tab is just its view-type icon; the "Mythen"/"Quellen" group
+   labels and the "?" bookmark stay put. The short-label row needs
+   ~992 px of viewport, so we collapse just below that. ---- */
+@media (max-width: 1010px) {
+  .carm-explorer__tabs--left .tab-btn__label,
+  .carm-explorer__tabs--right .tab-btn__label {
+    display: none;
+  }
+  .carm-explorer__tabs--left .tab-btn,
+  .carm-explorer__tabs--right .tab-btn {
+    padding: 9px 12px;
+    gap: 0;
+  }
+  .carm-explorer__tabs--left .tabs-bar,
+  .carm-explorer__tabs--right .tabs-bar {
+    gap: 8px;
+  }
+  .carm-explorer__tab-bar > .carm-explorer__tab-gap { width: 20px; }
 }

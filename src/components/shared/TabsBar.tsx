@@ -28,8 +28,12 @@ export interface TabDef<K extends string> {
    *  163 px-wide "Tabelle" / "Quellen-Tabelle" tabs). */
   className?: string;
   /** Optional leading visual, rendered before the label (e.g. the
-   *  Daten-Explorer's compass glyph on the Rundgang tab). */
+   *  Daten-Explorer's view-type glyph). */
   icon?: ReactNode;
+  /** Optional accessible name. Defaults to `label`. Used when the visible
+   *  label is shortened (e.g. "Balken") but the full name ("Mythen-Balken")
+   *  should still reach assistive tech. */
+  ariaLabel?: string;
 }
 
 interface Props<K extends string> {
@@ -86,10 +90,11 @@ export default function TabsBar<K extends string>({
             className={classes}
             role="tab"
             aria-selected={isActive}
+            aria-label={tab.ariaLabel ?? tab.label}
             onClick={() => onChange(tab.key)}
           >
             {tab.icon}
-            {tab.label}
+            <span className="tab-btn__label">{tab.label}</span>
           </button>
         );
       })}

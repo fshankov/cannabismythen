@@ -1,20 +1,16 @@
-import { Compass } from 'lucide-react';
 import type { ViewTab, Lang } from '../../lib/dashboard/types';
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import TabsBar, { type TabDef } from '../shared/TabsBar';
 import { ChartBarIcon, Grid3x3Icon, Table2Icon } from '../../lib/icons/viewTypeIcons';
 
 // Public tab order — split into LEFT (myth views) and RIGHT (source
-// views) groups per the 2026-05-28 designer brief (Figma node 403:1976).
-// The two groups carry different inactive backgrounds (#eeeee9 vs.
-// #f2f2f2) and are separated visually by flex-1 spacers in
-// MythenExplorer's `.carm-explorer__tab-bar` row.
+// views) groups. Each group is preceded by a permanent "Mythen" /
+// "Quellen" label (rendered in MythenExplorer), so the tabs themselves
+// only need the view type. (The Rundgang is not a tab — it's the yellow
+// "?" bookmark rendered directly in MythenExplorer's tab bar.)
 const TABS_LEFT: ViewTab[] = ['balken', 'spannweite', 'table'];
 const TABS_RIGHT: ViewTab[] = ['sources', 'sources2', 'sources_table'];
-// The Rundgang is a single, set-apart tab at the far right. It isn't a
-// data view — selecting it renders the intro/overview panel.
-const TABS_RUNDGANG: ViewTab[] = ['rundgang'];
-const TABS: ViewTab[] = [...TABS_LEFT, ...TABS_RIGHT, ...TABS_RUNDGANG];
+const TABS: ViewTab[] = [...TABS_LEFT, ...TABS_RIGHT];
 
 // Leading view-type glyph per data view (2026-05-30, Fedor). The same
 // three view types appear in both groups, so Balken/Übersicht/Tabelle
@@ -34,12 +30,17 @@ const VIEW_ICON: Partial<Record<ViewTab, typeof ChartBarIcon>> = {
 const MYTHEN_ICON_COLOR = '#047857';
 const QUELLEN_ICON_COLOR = '#3b82f6';
 
-/** "Tabelle" and "Quellen-Tabelle" carry a fixed 163 px width per the
- *  brief — the other tabs size to content. The modifier is applied
- *  through the TabsBar primitive's per-tab `className` slot. */
-const TAB_FIXED_WIDTH: Partial<Record<ViewTab, true>> = {
-  table: true,
-  sources_table: true,
+// Short, group-relative visible labels — the permanent "Mythen"/"Quellen"
+// group label supplies the context, so each tab shows only its view type
+// (and collapses to just its icon on narrow screens). The full name
+// ("Mythen-Balken" …) is kept as the button's aria-label.
+const SHORT_LABEL: Partial<Record<ViewTab, string>> = {
+  balken: 'Balken',
+  spannweite: 'Übersicht',
+  table: 'Tabelle',
+  sources: 'Balken',
+  sources2: 'Übersicht',
+  sources_table: 'Tabelle',
 };
 
 const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
@@ -49,7 +50,6 @@ const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
   sources: 'view.quellen',
   sources2: 'view.quellen2',
   sources_table: 'view.quellen-tabelle',
-  rundgang: 'rundgang.label',
   // Retired views — never shown in the tab bar; keys present so the type
   // remains exhaustive and url-state redirects don't crash on lookup.
   strips: null,
@@ -65,46 +65,34 @@ interface Props {
   view: ViewTab;
   lang: Lang;
   onChange: (v: ViewTab) => void;
-  /** Which slice to render. Defaults to all tabs (back-compat). The
-   *  designer brief (2026-05-28, Figma node 403:1976) splits the tab
-   *  bar into LEFT myth views + RIGHT source views with flex-1
-   *  spacers between them; pass `group="left"` / `group="right"`
-   *  twice from `MythenExplorer` to get the split. `group="rundgang"`
-   *  renders the single far-right Rundgang tab. */
-  group?: 'left' | 'right' | 'rundgang' | 'all';
-  /** First-visit attention nudge — only meaningful for
-   *  `group="rundgang"`. Adds the `.is-nudge` modifier (a small pulsing
-   *  dot) to draw the eye to the Rundgang tab until the user opens it. */
-  nudge?: boolean;
+  /** Which slice to render. Defaults to all tabs (back-compat). Pass
+   *  `group="left"` / `group="right"` twice from `MythenExplorer` to get
+   *  the Mythen / Quellen split. */
+  group?: 'left' | 'right' | 'all';
 }
 
-export default function ViewTabs({ view, lang, onChange, group = 'all', nudge = false }: Props) {
+export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props) {
   // Pick the slice for this render: LEFT (myth views), RIGHT (source
-  // views), the single Rundgang tab, or all (back-compat).
+  // views), or all (back-compat).
   const slice =
     group === 'left' ? TABS_LEFT :
     group === 'right' ? TABS_RIGHT :
-    group === 'rundgang' ? TABS_RUNDGANG :
     TABS;
 
   const tabDefs: TabDef<ViewTab>[] = slice.map((tab) => {
     const key = TAB_LABEL_KEY[tab];
-    const isRundgang = tab === 'rundgang';
+    const fullLabel = key ? t(key, lang) : tab;
     const ViewIcon = VIEW_ICON[tab];
     const iconColor = TABS_LEFT.includes(tab) ? MYTHEN_ICON_COLOR : QUELLEN_ICON_COLOR;
     return {
       key: tab,
-      label: key ? t(key, lang) : tab,
-      icon: isRundgang ? (
-        <Compass size={15} strokeWidth={2} aria-hidden="true" />
-      ) : ViewIcon ? (
+      label: SHORT_LABEL[tab] ?? fullLabel,
+      // Keep the full, unambiguous name for assistive tech (the visible
+      // short label leans on the adjacent group label for context).
+      ariaLabel: fullLabel,
+      icon: ViewIcon ? (
         <ViewIcon size={15} aria-hidden="true" style={{ color: iconColor }} />
       ) : undefined,
-      className: [
-        TAB_FIXED_WIDTH[tab] ? 'carm-explorer__tab-btn--fixed' : '',
-        isRundgang ? 'carm-explorer__tab-btn--rundgang' : '',
-        isRundgang && nudge ? 'is-nudge' : '',
-      ].filter(Boolean).join(' ') || undefined,
     };
   });
 
@@ -113,11 +101,7 @@ export default function ViewTabs({ view, lang, onChange, group = 'all', nudge = 
       tabs={tabDefs}
       activeKey={view}
       onChange={onChange}
-      ariaLabel={
-        group === 'rundgang' ? 'Rundgang' :
-        group === 'right' ? 'Quellen-Ansicht wählen' :
-        'Mythos-Ansicht wählen'
-      }
+      ariaLabel={group === 'right' ? 'Quellen-Ansicht wählen' : 'Mythos-Ansicht wählen'}
     />
   );
 }

@@ -2987,54 +2987,49 @@ button.pill[aria-pressed="true"] {
   }
 }
 
-/* The pill — mirrors .nav */
+/* The card — pill styling from .nav, but holds the full multi-line notice.
+   align-items: flex-start so the icon + close button hug the top edge. */
 .preview-banner__inner {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-md);
   width: 100%;
   max-width: 1184px;
-  min-height: 60px;
-  padding: 10px 32px;
+  padding: 16px 28px;
   border-radius: 28px;
-  background: rgba(254, 249, 228, 0.88);
+  background: rgba(254, 249, 228, 0.92);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.12);
   border: 1px solid rgba(212, 160, 23, 0.45);
 }
 
 .preview-banner__icon {
   flex-shrink: 0;
+  margin-top: 1px;
   color: #b45309;
 }
 
 .preview-banner__text {
   flex: 1;
-  color: #78350f;
   min-width: 0;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.preview-banner__details-btn {
-  flex-shrink: 0;
-  background: none;
-  border: 1px solid #b45309;
-  border-radius: var(--radius-full);
-  padding: 5px 16px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
   color: #78350f;
-  white-space: nowrap;
-  font-family: inherit;
-  transition: background var(--duration-short) var(--spring-standard);
 }
 
-.preview-banner__details-btn:hover {
-  background: rgba(180, 83, 9, 0.08);
+.preview-banner__text p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: #78350f;
+}
+
+.preview-banner__text p + p {
+  margin-top: 7px;
+}
+
+.preview-banner__text strong {
+  font-weight: 700;
 }
 
 .preview-banner__close-btn {
@@ -3068,12 +3063,17 @@ button.pill[aria-pressed="true"] {
 }
 
 @media (max-width: 600px) {
-  .preview-banner__text {
-    font-size: 14px;
+  .preview-banner__text p {
+    font-size: 13px;
+    line-height: 1.5;
   }
   .preview-banner__inner {
-    padding: 10px 20px;
+    padding: 14px 18px;
     gap: var(--space-sm);
+  }
+  .preview-banner__close-btn {
+    padding: 5px 10px;
+    font-size: 13px;
   }
 }
 
@@ -3106,68 +3106,4 @@ button.pill[aria-pressed="true"] {
 
 .preview-fab--visible {
   display: flex;
-}
-
-/* ── Preview modal ──────────────────────────────────────────────── */
-.preview-modal {
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  max-width: 540px;
-  width: calc(100% - 2 * var(--space-md));
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
-}
-
-.preview-modal::backdrop {
-  background: rgba(26, 26, 46, 0.45);
-}
-
-.preview-modal__content {
-  position: relative;
-}
-
-.preview-modal__close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  font-size: 1.4rem;
-  line-height: 1;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-}
-
-.preview-modal__close:hover {
-  background: var(--color-bg-subtle);
-}
-
-.preview-modal__title {
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 var(--space-md);
-  padding-right: var(--space-xl);
-  color: var(--color-text);
-}
-
-.preview-modal p {
-  font-size: 0.875rem;
-  line-height: 1.65;
-  color: var(--color-text-secondary);
-  margin: 0 0 var(--space-sm);
-}
-
-.preview-modal p:last-child {
-  margin-bottom: 0;
-}
-
-.preview-modal p strong {
-  color: var(--color-text);
-  font-weight: 600;
 }

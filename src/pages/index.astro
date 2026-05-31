@@ -5,7 +5,6 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader, getPublishedEntries } from "@lib/content";
 import HeroBlock from "@components/home/HeroBlock";
 import type { HeroMyth } from "@components/home/HeroBlock";
-import { HERO_MYTHS } from "@components/home/mythPositions";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
 import AudienceShortcutBlock from "@components/home/AudienceShortcutBlock.astro";
@@ -42,19 +41,12 @@ function audienceEmoji(id: string): string {
   return AUDIENCE_EMOJI_BY_ID[id as FaqAudienceId] ?? "•";
 }
 
-// ── Interactive hero (floating myth field) ─────────────────────────────────
-// The new hero replaces the rotating belief/science card with a cursor-driven
-// "field of statements" canvas. Seed data + curated positions come from
-// `mythPositions.ts` (design data; matches the handoff prototype 1:1). Once
-// Keystatic gets a `floatingMyths` collection, the text+classification side
-// can move into the CMS while positions stay in code.
-const heroMyths: HeroMyth[] = HERO_MYTHS.map((m) => ({
-  id: m.id,
-  text: m.text,
-  classification: m.classification,
-  position: m.position,
-}));
-
+// ── Interactive hero (Pendel-Lupe-Ring) ────────────────────────────────────
+// All 42 myth statements ride a raised oval ring around the central question
+// and reveal one at a time in the spotlight (or on hover). `heroMyths` is built
+// below from the published myth content (accurate titles, stripped of the
+// "Mythos N:" prefix) — see the mythRecords loop. Design spec:
+// docs/superpowers/specs/2026-05-31-homepage-hero-pendulum-design.md
 const heroHeadline1 = "Was glauben wir zu wissen —";
 const heroHeadline2 = "und was stimmt wirklich?";
 const heroEyebrow   = "ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft";
@@ -86,6 +78,11 @@ for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
     summary: e.cardShortSummary ?? "",
   });
 }
+
+// All 42 statements for the hero ring, in m01→m42 order (accurate titles).
+const heroMyths: HeroMyth[] = [...mythRecords]
+  .sort((a, b) => a.prefix.localeCompare(b.prefix))
+  .map((r) => ({ text: r.title, classification: r.classification }));
 
 function pickShortest(cls: string): MythRecord | undefined {
   return mythRecords

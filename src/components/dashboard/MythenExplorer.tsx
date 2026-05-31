@@ -26,6 +26,7 @@ import {
 import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import { urlToState, getDefaultState, pushState } from '../../lib/dashboard/url-state';
 import { buildWalkthrough } from './rundgang/walkthrough';
+import RundgangBookmark from './RundgangBookmark';
 import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
 import VerdictTags from './VerdictTags';
@@ -479,9 +480,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           <p className="carm-explorer__page-header__sub">
             Hier erkundest du die Daten der CaRM-Studie, 2025 in Deutschland
             erhoben. <strong>Neu hier?</strong> Der <strong>Rundgang</strong>{' '}
-            (Tab ganz rechts) führt dich in etwa einer Minute durch den Explorer.
-            Wie die Daten entstanden, erklärt{' '}
-            <a href="/projekt/">„Über das Projekt"</a>.
+            <RundgangBookmark className="carm-rundgang-bookmark-inline" /> führt
+            dich in etwa einer Minute durch den Explorer. Wie die Daten
+            entstanden, erklärt <a href="/projekt/">„Über das Projekt"</a>.
           </p>
         </header>
 
@@ -494,6 +495,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             above the bar was removed 2026-05-28 PM per Fedor. */}
         <div className="carm-explorer__tab-bar">
           <div className="carm-explorer__tabs--left">
+            <span className="carm-explorer__group-label carm-explorer__group-label--mythen" aria-hidden="true">Mythen</span>
             <ViewTabs
               view={state.view}
               lang={'de'}
@@ -501,8 +503,11 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
               onChange={(v: ViewTab) => update('view', v)}
             />
           </div>
-          <div className="carm-explorer__tab-spacer" aria-hidden="true" />
+          {/* Fixed gap between the Mythen group and the Quellen group —
+              keeps each group tight while clearly separating the two. */}
+          <div className="carm-explorer__tab-gap" aria-hidden="true" />
           <div className="carm-explorer__tabs--right">
+            <span className="carm-explorer__group-label carm-explorer__group-label--quellen" aria-hidden="true">Quellen</span>
             <ViewTabs
               view={state.view}
               lang={'de'}
@@ -511,20 +516,19 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             />
           </div>
           <div className="carm-explorer__tab-spacer" aria-hidden="true" />
-          {/* Far-right Rundgang tab — set apart from the data views. Opens
-              the intro panel (state.view === 'rundgang'); a first-visit
-              nudge draws the eye until it's been opened once. */}
-          <div className="carm-explorer__tabs--rundgang">
-            {/* Acts as a button: clicking starts the walkthrough directly
-                (it never becomes the active view). */}
-            <ViewTabs
-              view={state.view}
-              lang={'de'}
-              group="rundgang"
-              nudge={!rundgangSeen}
-              onChange={() => startWalkthrough()}
-            />
-          </div>
+          {/* Rundgang affordance — a yellow "?" bookmark fused to the
+              panel's (flat) top-right corner, at the far upper-right.
+              Clicking it starts the walkthrough; a first-visit nudge
+              draws the eye until it's been opened once. */}
+          <button
+            type="button"
+            className={`carm-explorer__rundgang-help${rundgangSeen ? '' : ' is-nudge'}`}
+            onClick={startWalkthrough}
+            aria-label={t('rundgang.label', 'de')}
+            title={t('rundgang.label', 'de')}
+          >
+            <RundgangBookmark />
+          </button>
         </div>
 
         {/* Outer white panel — wraps the toolbar + chart canvas per
