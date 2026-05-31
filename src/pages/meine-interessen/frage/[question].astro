@@ -54,7 +54,10 @@ if (q.primaryMyth) {
 }
 
 // Popup data for inline myth links (same data the audience page uses).
-const { mythIndex, mythContentMap } = await loadMythPopupData();
+// Loaded once and passed to FaqQuestionComponent via `popupData` prop so
+// the nested FaqRelatedRail doesn't re-invoke the helper.
+const popupData = await loadMythPopupData();
+const { mythIndex, mythContentMap } = popupData;
 const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
 
 const description =
@@ -80,6 +83,7 @@ const description =
       index={1}
       open={true}
       quizTitles={quizTitles}
+      popupData={popupData}
     />
 
     {siblings.length > 0 && (

@@ -3,6 +3,7 @@ import {
   dashboardLinkLabel,
   loadMythPopupData,
   normalizeMythId,
+  type FaqMythPopupIndexEntry,
   type FaqQuestion,
 } from "@lib/faq";
 
@@ -10,14 +11,21 @@ interface Props {
   question: FaqQuestion;
   /** Optional override of quiz titles by slug, looked up at the page level. */
   quizTitles?: Record<string, string>;
+  /** Popup myth index — pass down from the page to skip the per-component
+   *  `loadMythPopupData()` call. When omitted the helper is loaded here,
+   *  which is cached so the cost is one-time per dev-server process. */
+  mythIndex?: Record<string, FaqMythPopupIndexEntry>;
 }
 
-const { question, quizTitles = {} } = Astro.props;
+const { question, quizTitles = {}, mythIndex: mythIndexProp } = Astro.props;
 
 // Resolve myth IDs to popup-ready entries (id + full statement). The myth
 // IS the popup — the related rail no longer links to standalone factsheet
-// pages, it triggers the same slide-in panel MythPopupHost manages.
-const { mythIndex } = await loadMythPopupData();
+// pages, it triggers the same slide-in panel MythPopupHost manages. The
+// data is normally hoisted to the page level and passed in via the
+// `mythIndex` prop; we fall back to the (now-cached) helper for any
+// callsite that doesn't yet pass it.
+const mythIndex = mythIndexProp ?? (await loadMythPopupData()).mythIndex;
 
 type RailMyth = { id: string; title: string };
 function lookupMyth(rawId: string): RailMyth | null {

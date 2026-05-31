@@ -193,10 +193,14 @@ function normalizeQuestion(slug: string, raw: FaqQuestionRaw): FaqQuestion {
 
 let cachedQuestions: FaqQuestion[] | null = null;
 
-/** Load all published FAQ questions. Cached per-process in production —
- *  bypassed in dev so editor edits to .mdoc files reflect on reload. */
+/** Load all published FAQ questions. Cached per-process. In dev the cache
+ *  persists for the lifetime of the module — Vite restarts the dev server
+ *  when source changes, so the cache invalidates naturally. .mdoc edits
+ *  via Keystatic Admin or direct file edits require a dev-server restart
+ *  to appear (`./_local/render.sh`). Trade-off: ~30× faster page reloads
+ *  in dev because callers no longer re-parse all 75+ FAQ files per render. */
 export async function loadAllQuestions(): Promise<FaqQuestion[]> {
-  if (cachedQuestions && import.meta.env?.PROD) return cachedQuestions;
+  if (cachedQuestions) return cachedQuestions;
   const slugs = await reader.collections.faqQuestions.list();
   const out: FaqQuestion[] = [];
   for (const slug of slugs) {
@@ -361,13 +365,17 @@ let cachedPopupData: FaqMythPopupData | null = null;
  * metadata, a map of pre-rendered factsheet HTML, and a placeholder-resolver
  * that swaps `__FAQ_MYTH_TITLE:mNN__` sentinels for actual statements.
  *
- * Cached for the build process — same approach Fakten-Karten + Daten-Explorer
- * use. Group-metric data is intentionally NOT bundled here; callers that
- * need the interactive group-bars chart inside the panel can pass it
- * separately (we keep this helper small).
+ * Cached per-process — including dev. Vite restarts the module when source
+ * files change, so the cache invalidates naturally. Editing a myth's .mdoc
+ * via Keystatic Admin or directly requires a dev-server restart to appear
+ * (`./_local/render.sh`). Trade-off: meine-interessen pages used to call
+ * this helper ~30× per render (once at page + once inside each FaqQuestion
+ * + once inside each FaqRelatedRail), rebuilding 42 myths each time in
+ * dev — that took ~28s SSR. With the cache active in dev too, those
+ * 30 calls collapse to ~1s total.
  */
 export async function loadMythPopupData(): Promise<FaqMythPopupData> {
-  if (cachedPopupData && import.meta.env?.PROD) return cachedPopupData;
+  if (cachedPopupData) return cachedPopupData;
 
   const Markdoc = (await import("@markdoc/markdoc")).default;
   const slugs = await reader.collections.zahlenUndFakten.list();

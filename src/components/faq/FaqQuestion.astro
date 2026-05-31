@@ -1,7 +1,11 @@
 ---
 import Markdoc, { type Node } from "@markdoc/markdoc";
 import { faqMarkdocConfig } from "@lib/markdoc/faq-nodes";
-import { loadMythPopupData, type FaqQuestion } from "@lib/faq";
+import {
+  loadMythPopupData,
+  type FaqMythPopupData,
+  type FaqQuestion,
+} from "@lib/faq";
 import FaqVerdictPill from "./FaqVerdictPill.astro";
 import FaqRelatedRail from "./FaqRelatedRail.astro";
 import HelplineBox from "./HelplineBox.astro";
@@ -14,17 +18,31 @@ interface Props {
   index: number;
   /** Slug → display title for quiz modules. */
   quizTitles?: Record<string, string>;
+  /** Popup data, hoisted to the page level so the helper is invoked once
+   *  per render instead of once per FaqQuestion (the page typically has
+   *  15 of these; before hoisting each one re-parsed all 42 myth .mdoc
+   *  files, costing ~1s per call in dev). When omitted we fall back to
+   *  loading it ourselves — the helper is now cached so the cost is
+   *  one-time per dev-server process. */
+  popupData?: FaqMythPopupData;
 }
 
-const { question, open = false, index, quizTitles = {} } = Astro.props;
+const {
+  question,
+  open = false,
+  index,
+  quizTitles = {},
+  popupData: popupDataProp,
+} = Astro.props;
+
+const popupData = popupDataProp ?? (await loadMythPopupData());
+const { resolveTitlesInHtml, mythIndex } = popupData;
 
 const { node } = await question.answer();
 const rawHtml = Markdoc.renderers.html(
   Markdoc.transform(node as Node, faqMarkdocConfig as any),
 );
 // Resolve the {% factsheet-link %} placeholders into actual myth statements.
-// Cached per build, so cost is amortised across all questions on the page.
-const { resolveTitlesInHtml } = await loadMythPopupData();
 const html = resolveTitlesInHtml(rawHtml);
 
 const id = `faq-${question.slug}`;
@@ -52,7 +70,7 @@ const id = `faq-${question.slug}`;
 
       <div class="faq-question__answer" set:html={html} />
 
-      <FaqRelatedRail question={question} quizTitles={quizTitles} />
+      <FaqRelatedRail question={question} quizTitles={quizTitles} mythIndex={mythIndex} />
 
       {question.helpline && question.helpline.url && (
         <HelplineBox helpline={question.helpline} variant="inline" />

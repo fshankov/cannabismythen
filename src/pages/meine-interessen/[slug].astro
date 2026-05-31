@@ -49,9 +49,13 @@ for (const [qSlug, e] of quizEntries) {
   if (title) quizTitles[qSlug] = title;
 }
 
-// Build the popup data once per page. Powers the slide-in FactsheetPanel
-// that opens when readers click an inline myth link inside an FAQ answer.
-const { mythIndex, mythContentMap } = await loadMythPopupData();
+// Build the popup data once per page and pass it down to every FaqQuestion
+// via a `popupData` prop. Avoids the previous ~30 redundant calls per render
+// (one inside each FaqQuestion + each FaqRelatedRail) that made the dev
+// server take ~28s to SSR the page; the helper is also cached now so even
+// fallback callsites are cheap.
+const popupData = await loadMythPopupData();
+const { mythIndex, mythContentMap } = popupData;
 const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
 
 const pageTitle = audience.title;
@@ -86,6 +90,7 @@ const pageDescription = audience.description;
           index={i + 1}
           open={false}
           quizTitles={quizTitles}
+          popupData={popupData}
         />
       ))}
     </div>
