@@ -2967,25 +2967,24 @@ button.pill[aria-pressed="true"] {
 
 /* ── Preview banner (pre-launch) ─────────────────────────────────
    PREVIEW BANNER — remove this block before public launch.
-   Styled to mirror the floating nav pill (.nav-wrapper / .nav): same
-   position, height, pill shape, shadow and font size, with a light
-   amber tint + ⚠ icon so it still reads as a notice.                */
+   Initial position: bottom of the viewport, 100px from the bottom edge,
+   pill-shaped with a light amber tint + ⚠ icon. On close it collapses
+   to the FAB at the top-left.                                       */
 .preview-banner {
   position: fixed;
-  top: 16px;
+  bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   max-width: 1200px;
   padding: 0 32px;
-  z-index: 102; /* above the floating nav pill (100) it overlays */
+  z-index: 102;
 }
 
-/* While the banner is open it overlays (covers) the nav pill — hide the
-   pill + blur shield so no sliver of the nav peeks below the banner. */
-.cm-preview-open .nav-wrapper,
-.cm-preview-open .nav-blur-shield {
-  display: none;
+@media (max-width: 767px) {
+  .preview-banner {
+    bottom: calc(56px + env(safe-area-inset-bottom, 0) + 16px);
+  }
 }
 
 /* The pill — mirrors .nav */
@@ -3040,19 +3039,32 @@ button.pill[aria-pressed="true"] {
 
 .preview-banner__close-btn {
   flex-shrink: 0;
-  background: none;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #78350f;
+  border: 1px solid #78350f;
+  color: #fff;
   cursor: pointer;
-  padding: 3px 7px;
-  color: #78350f;
-  font-size: 1.25rem;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   font-family: inherit;
+  white-space: nowrap;
+  transition: background var(--duration-short) var(--spring-standard),
+              border-color var(--duration-short) var(--spring-standard);
 }
 
 .preview-banner__close-btn:hover {
-  background: rgba(180, 83, 9, 0.08);
+  background: #5a270a;
+  border-color: #5a270a;
+}
+
+.preview-banner__close-btn:focus-visible {
+  outline: 2px solid #b45309;
+  outline-offset: 2px;
 }
 
 @media (max-width: 600px) {
