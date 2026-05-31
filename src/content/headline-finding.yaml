@@ -11,7 +11,9 @@
 # Startseite". A schema-label rename to "Vier Wege – Intro" is queued
 # for the next schema-touching session.
 
-eyebrow: 'Vier Wege'
+# Copy refreshed 2026-05-31 (brand voice "Erkunden", Du-form). AI-drafted —
+# ISD review pending. Gloss: "Explore · Discover the evidence your way."
+eyebrow: 'Erkunden'
 leadClause: 'Was interessiert dich?'
-counterClause: 'Vier Wege in die Forschung.'
+counterClause: 'Entdecke die Evidenz auf deine Art.'
 counterClassification: 'no_classification'

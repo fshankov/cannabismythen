@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import VerdictArrow from "../../shared/VerdictArrow";
+import type { CorrectnessClass } from "../../../lib/dashboard/types";
 
 export interface Props {
   title: string;
@@ -8,33 +10,27 @@ export interface Props {
   targetUrl: string;
 }
 
-interface Group {
+interface Row {
   label: string;
-  /** Share (%) per verdict in the order of VERDICTS below. Adds up to ~100. */
-  values: readonly [number, number, number, number, number];
+  verdict: CorrectnessClass;
+  cssVar: string;
+  /** Illustrative values (%) for three population columns. */
+  v: readonly [number, number, number];
 }
 
-/** Illustrative distributions — visually plausible, not real data.
- *  These convey "the data shifts when you switch Zielgruppe" without
- *  needing the full CaRM dataset on the homepage. */
-const GROUPS: ReadonlyArray<Group> = [
-  { label: "Alle (18–70)",            values: [22, 28, 25, 18, 7] },
-  { label: "Konsumierende",            values: [35, 30, 18, 12, 5] },
-  { label: "Junge Erwachsene (18–26)", values: [15, 25, 30, 25, 5] },
-  { label: "Eltern",                   values: [20, 30, 28, 17, 5] },
+// Illustrative rows — visually plausible, NOT real CaRM data. They exist only
+// to echo the look of the Daten-Explorer's three views on the homepage tile.
+const ROWS: ReadonlyArray<Row> = [
+  { label: "Harmlos",        verdict: "falsch",      cssVar: "--classification-falsch",      v: [28, 22, 33] },
+  { label: "Einstiegsdroge", verdict: "eher_falsch", cssVar: "--classification-eher-falsch", v: [52, 46, 58] },
+  { label: "Abhängigkeit",   verdict: "richtig",     cssVar: "--classification-richtig",     v: [63, 69, 60] },
+  { label: "Schädigt Fötus", verdict: "richtig",     cssVar: "--classification-richtig",     v: [71, 66, 74] },
 ];
 
-/** Verdict order matches the canonical site order (richtig at top).
- *  Color tokens are the site-wide --classification-* variables. */
-const VERDICTS = [
-  { key: "richtig",       label: "Richtig",       cssVar: "--classification-richtig" },
-  { key: "eher_richtig",  label: "Eher richtig",  cssVar: "--classification-eher-richtig" },
-  { key: "eher_falsch",   label: "Eher falsch",   cssVar: "--classification-eher-falsch" },
-  { key: "falsch",        label: "Falsch",        cssVar: "--classification-falsch" },
-  { key: "keine_aussage", label: "Keine Aussage", cssVar: "--classification-keine-aussage" },
-] as const;
-
-const SWITCH_MS = 3000;
+// The dashboard's three view types, in the same order as its ViewTabs.
+const VIEWS = ["Balken", "Spannweite", "Tabelle"] as const;
+const COLS = ["Erw.", "Jung", "Eltern"] as const;
+const SWITCH_MS = 3200;
 
 export default function DatenExplorerPreviewTile({
   title,
@@ -42,78 +38,86 @@ export default function DatenExplorerPreviewTile({
   ctaLabel,
   targetUrl,
 }: Props) {
-  const [idx, setIdx] = useState(0);
+  const [view, setView] = useState(0);
   const wrapperRef = useRef<HTMLAnchorElement | null>(null);
 
-  // Gate the auto-cycle on visibility. Without this the interval keeps
-  // ticking while the tile is scrolled off the mobile carousel, which
-  // shows up as a visible "skip" when the tile re-enters the viewport.
+  // Auto-cycle the three views, gated on visibility so it doesn't "skip"
+  // while scrolled off the mobile carousel.
   useEffect(() => {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) return;
-
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const root = wrapperRef.current;
     if (!root) return;
 
     let interval: number | null = null;
     const start = () => {
-      if (interval !== null) return;
-      interval = window.setInterval(() => {
-        setIdx((i) => (i + 1) % GROUPS.length);
-      }, SWITCH_MS);
+      if (interval === null) interval = window.setInterval(() => setView((i) => (i + 1) % VIEWS.length), SWITCH_MS);
     };
-    const stop = () => {
-      if (interval !== null) {
-        window.clearInterval(interval);
-        interval = null;
-      }
-    };
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) start();
-        else stop();
-      },
-      { threshold: 0.5 },
-    );
+    const stop = () => { if (interval !== null) { window.clearInterval(interval); interval = null; } };
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.5 });
     io.observe(root);
-
-    return () => {
-      io.disconnect();
-      stop();
-    };
+    return () => { io.disconnect(); stop(); };
   }, []);
 
-  const group = GROUPS[idx];
+  const arrow = (r: Row) => (
+    <span className="dp__arrow"><VerdictArrow verdict={r.verdict} size={13} strokeWidth={2.2} /></span>
+  );
+  const colorOf = (r: Row) => ({ ["--v" as string]: `var(${r.cssVar})` } as CSSProperties);
 
   return (
     <a ref={wrapperRef} className="path-tile path-tile--daten" href={targetUrl}>
       <div className="path-tile__preview">
         <div className="daten-preview" aria-hidden="true">
-          <div className="daten-preview__chip-row">
-            <span className="daten-preview__chip-label">Zielgruppe</span>
-            <span className="daten-preview__chip">{group.label}</span>
+          <div className="daten-preview__tabs" role="presentation">
+            {VIEWS.map((v, i) => (
+              <span key={v} className="daten-preview__tab" data-active={i === view ? "true" : "false"}>{v}</span>
+            ))}
           </div>
-          <div className="daten-preview__bars">
-            {VERDICTS.map((v, i) => {
-              const pct = group.values[i];
-              return (
-                <div className="daten-preview__bar-row" key={v.key}>
-                  <span className="daten-preview__bar-label">{v.label}</span>
-                  <div className="daten-preview__bar-track">
-                    <div
-                      className="daten-preview__bar-fill"
-                      style={{
-                        width: `${pct}%`,
-                        backgroundColor: `var(${v.cssVar})`,
-                      } as CSSProperties}
-                    />
-                  </div>
-                  <span className="daten-preview__bar-value">{pct} %</span>
+
+          {/* Balken — verdict arrow + label + a verdict-coloured fill bar */}
+          {view === 0 && (
+            <div className="dp-viz dp-balken">
+              {ROWS.map((r) => (
+                <div className="dp-row" key={r.label} style={colorOf(r)}>
+                  {arrow(r)}
+                  <span className="dp-label">{r.label}</span>
+                  <span className="dp-track"><span className="dp-fill" style={{ width: `${r.v[0]}%` }} /></span>
+                  <span className="dp-val">{r.v[0]}</span>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {/* Spannweite — thin stem + lollipop dot at the value (range marker) */}
+          {view === 1 && (
+            <div className="dp-viz dp-spann">
+              {ROWS.map((r) => (
+                <div className="dp-row" key={r.label} style={colorOf(r)}>
+                  {arrow(r)}
+                  <span className="dp-label">{r.label}</span>
+                  <span className="dp-track dp-track--stem">
+                    <span className="dp-stem" style={{ width: `${r.v[0]}%` }} />
+                    <span className="dp-dot" style={{ left: `${r.v[0]}%` }} />
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Tabelle — numeric grid across three population columns */}
+          {view === 2 && (
+            <div className="dp-viz dp-table">
+              <div className="dp-trow dp-trow--head">
+                <span className="dp-tcell dp-tcell--corner" />
+                {COLS.map((c) => <span key={c} className="dp-tcell dp-tcell--head">{c}</span>)}
+              </div>
+              {ROWS.map((r) => (
+                <div className="dp-trow" key={r.label} style={colorOf(r)}>
+                  <span className="dp-tcell dp-tcell--label">{arrow(r)}<span className="dp-label">{r.label}</span></span>
+                  {r.v.map((n, i) => <span key={i} className="dp-tcell dp-tcell--num">{n}</span>)}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

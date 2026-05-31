@@ -1,10 +1,10 @@
 ---
-import MeineInteressenPreviewDeck from "./MeineInteressenPreviewDeck";
-import type { AudienceDeckEntry } from "./MeineInteressenPreviewDeck";
+import MeineInteressenPreviewRows from "./MeineInteressenPreviewRows";
+import type { AudienceRow } from "./MeineInteressenPreviewRows";
 
-/* The chip / deck-entry shape stays exported under the old name so
-   `src/pages/index.astro` doesn't have to chase the rename. */
-export type AudienceChip = AudienceDeckEntry;
+/* The audience shape stays exported under the old name `AudienceChip` so
+   `src/pages/index.astro` + FourPathsBlock don't have to chase the rename. */
+export type AudienceChip = AudienceRow;
 
 export interface Props {
   title: string;
@@ -19,7 +19,7 @@ const { title, description, ctaLabel, targetUrl, chips } = Astro.props;
 
 <a class="path-tile path-tile--meine" href={targetUrl}>
   <div class="path-tile__preview">
-    <MeineInteressenPreviewDeck audiences={chips} client:visible />
+    <MeineInteressenPreviewRows audiences={chips} />
   </div>
 
   <div class="path-tile__body">

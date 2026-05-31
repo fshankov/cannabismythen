@@ -7,39 +7,10 @@ import HeroBlock from "@components/home/HeroBlock";
 import type { HeroMyth } from "@components/home/HeroBlock";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
-import AudienceShortcutBlock from "@components/home/AudienceShortcutBlock.astro";
-import type { AudienceCard } from "@components/home/AudienceShortcutBlock.astro";
 import ProjectStripBlock from "@components/home/ProjectStripBlock.astro";
 import type { PreviewMyth } from "@components/home/previews/FaktenKartenPreviewTile.astro";
 import type { AudienceChip } from "@components/home/previews/MeineInteressenPreviewTile.astro";
 import { getAllAudiences } from "@lib/faq";
-import { AUDIENCE_COLOR_VAR_BY_FAQ_ID } from "@lib/icons/lookups";
-import type { FaqAudienceId } from "@lib/icons/lookups";
-
-/* The icon-registry refactor (commit 4e08023) removed `emoji` and
- * `accentColor` from the FAQ audience meta — those now live as Lucide
- * icon components and CSS custom properties. The Round-1 home page
- * still wants string-shaped values for emoji + color so it can pass
- * them through Astro/JSX props without forwarding React components.
- *
- * Map per-audience-id to fallback strings here. When the home page
- * gets the icon-swap pass too, this map disappears in favour of
- * <Icon /> components and `var(--audience-{id})` references. */
-const AUDIENCE_EMOJI_BY_ID: Record<FaqAudienceId, string> = {
-  eltern: "👨‍👩‍👧",
-  jugendliche: "🧒",
-  konsumierende: "🌿",
-  lehrkraefte: "🏫",
-  fachkraefte: "🩺",
-};
-
-function audienceAccentColor(id: string): string {
-  const v = AUDIENCE_COLOR_VAR_BY_FAQ_ID[id as FaqAudienceId];
-  return v ? `var(${v})` : "var(--color-accent)";
-}
-function audienceEmoji(id: string): string {
-  return AUDIENCE_EMOJI_BY_ID[id as FaqAudienceId] ?? "•";
-}
 
 // ── Interactive hero (Pendel-Lupe-Ring) ────────────────────────────────────
 // All 42 myth statements ride a raised oval ring around the central question
@@ -79,10 +50,28 @@ for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
   });
 }
 
-// All 42 statements for the hero ring, in m01→m42 order (accurate titles).
+// Short forms ONLY for the long myth titles (they otherwise wrap to 3–4 lines and
+// overlap on the hero ring). Where the project already has a short phrasing
+// (src/components/home/mythPositions.ts HERO_MYTHS) it is reused; the remainder are
+// AI-drafted short statements — ISD review pending — with the English gloss noted.
+// All other myths keep their accurate stripped title.
+const HERO_SHORT_OVERRIDES: Record<string, string> = {
+  m03: "Jüngere sind stärker gefährdet",               // project seed — younger people are more at risk
+  m06: "Mischkonsum ist besonders riskant",            // project seed — mixing substances is especially risky
+  m07: "Zusätze erhöhen die Gesundheitsrisiken",       // AI draft — additives increase health risks
+  m15: "Konsum schadet den Atemwegen",                 // project seed — use harms the airways
+  m28: "Cannabis macht antriebslos",                   // project seed — cannabis makes you unmotivated
+  m35: "Konsumierende halten sich weniger an Regeln",  // AI draft — consumers follow social rules less
+  m37: "Konsum steht für niedriges soziales Niveau",   // AI draft — use signals low social status
+  m41: "Die Legalisierung steigert den Konsum",        // AI draft — legalisation increases consumption
+  m42: "Legalisierung steigert Konsum bei Minderjährigen", // AI draft — legalisation increases minors' use
+};
+
+// All 42 statements for the hero ring, in m01→m42 order (accurate titles, with the
+// long ones swapped to the short forms above).
 const heroMyths: HeroMyth[] = [...mythRecords]
   .sort((a, b) => a.prefix.localeCompare(b.prefix))
-  .map((r) => ({ text: r.title, classification: r.classification }));
+  .map((r) => ({ text: HERO_SHORT_OVERRIDES[r.prefix] ?? r.title, classification: r.classification }));
 
 function pickShortest(cls: string): MythRecord | undefined {
   return mythRecords
@@ -102,43 +91,13 @@ const previewMyths: PreviewMyth[] = [
 const numbersStripData = await reader.singletons.numbersStrip.read();
 const headlineFinding = await reader.singletons.headlineFinding.read();
 const fourPathsData = await reader.singletons.fourPaths.read();
-const audienceShortcutData = await reader.singletons.audienceShortcut.read();
 const projectStripData = await reader.singletons.projectStrip.read();
 
-// Audience metadata for the audience-shortcut block AND the Meine-Interessen tile.
+// The five FAQ audiences, as colour-coded rows for the Meine-Interessen tile.
 const audienceMetaList = await getAllAudiences();
-const audienceMetaById = new Map(audienceMetaList.map((a) => [a.id, a]));
-
-const audienceCards: AudienceCard[] = (audienceShortcutData?.cards ?? [])
-  .flatMap((card): AudienceCard[] => {
-    const meta = audienceMetaById.get(card.audienceId as never);
-    if (!meta) return [];
-    return [
-      {
-        audienceId: card.audienceId,
-        recommendation: card.recommendation,
-        targetUrl: card.targetUrl,
-        additionalTargets: card.additionalTargets ?? [],
-        cardLabel: meta.cardLabel,
-        emoji: audienceEmoji(card.audienceId),
-        accentColor: audienceAccentColor(card.audienceId),
-      },
-    ];
-  });
-
-/* The Meine-Interessen tile rotates one card at a time and shows the
- * audience-shortcut recommendation underneath the name, so we join the
- * audience meta with the recommendation from the shortcut YAML. If a
- * meta entry isn't covered by a card, we fall back to the empty string
- * — the tile then shows just emoji + label for that audience. */
-const recommendationByAudienceId = new Map(
-  (audienceShortcutData?.cards ?? []).map((c) => [c.audienceId, c.recommendation]),
-);
 const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
-  emoji: audienceEmoji(a.id),
-  cardLabel: a.cardLabel,
-  accentColor: audienceAccentColor(a.id),
-  recommendation: recommendationByAudienceId.get(a.id as never) ?? "",
+  id: a.id,
+  label: a.cardLabel,
 }));
 ---
 
@@ -174,15 +133,6 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
       meineInteressenTile={fourPathsData.meineInteressenTile}
       previewMyths={previewMyths}
       audienceChips={audienceChips}
-    />
-  )}
-
-  {audienceShortcutData && audienceCards.length > 0 && (
-    <AudienceShortcutBlock
-      eyebrow={audienceShortcutData.eyebrow}
-      headline={audienceShortcutData.headline}
-      lede={audienceShortcutData.lede}
-      cards={audienceCards}
     />
   )}
 

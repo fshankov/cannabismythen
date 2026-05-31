@@ -30,7 +30,10 @@
 
 .cmhero__oval { position: absolute; left: 50%; top: 40%; width: 0; height: 0; z-index: 3; transform: scaleY(var(--s)); }
 .cmhero__cloud { transform: rotate(var(--cmh-sway)) scale(var(--cmh-breathe)); }
-.cmh__slot { position: absolute; left: 0; top: 0; transform: rotate(var(--a)) translateY(var(--r)); }
+.cmh__slot { position: absolute; left: 0; top: 0; transform: rotate(var(--a)) translateY(var(--r));
+  opacity: 0; animation: cmhSlotIn .6s cubic-bezier(.2,.7,.3,1) both;
+  animation-delay: calc(var(--i, 0) * 14ms); }
+@keyframes cmhSlotIn { from { opacity: 0; } to { opacity: 1; } }
 .cmh__counter { transform: rotate(calc(-1 * var(--cmh-sway))); }
 .cmh__label { transform: rotate(calc(-1 * var(--a))); }
 .cmh__fix { transform: scaleY(calc(1 / var(--s))); }
@@ -42,8 +45,13 @@
   will-change: opacity, filter, transform;
 }
 
+/* Center radial seats the headline; top/bottom linear fades feather the myth
+ * field into the fixed header band and the bottom banner/tab-bar zone. */
 .cmhero__vig { position: absolute; inset: 0; z-index: 4; pointer-events: none;
-  background: radial-gradient(ellipse 52% 26% at 50% 46%, rgba(13,33,24,.85) 0%, rgba(13,33,24,.34) 52%, transparent 76%); }
+  background:
+    linear-gradient(to bottom, rgba(13,33,24,.92) 0, rgba(13,33,24,0) 132px),
+    linear-gradient(to top, rgba(13,33,24,.78) 0, rgba(13,33,24,0) 150px),
+    radial-gradient(ellipse 52% 26% at 50% 46%, rgba(13,33,24,.85) 0%, rgba(13,33,24,.34) 52%, transparent 76%); }
 
 .cmhero__center { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center; padding: 40px 16px;
@@ -60,22 +68,26 @@
   letter-spacing: .3px; text-shadow: 0 2px 30px rgba(0,0,0,.6); }
 
 .cmhero__glass { position: absolute; left: 50%; top: 60%; z-index: 7; transform: translate(-50%,-50%);
-  pointer-events: none; width: clamp(66px, 11.5vmin, 92px); aspect-ratio: 1; }
-/* Real magnifying glass: outline only + frosted (glassmorphism) interior — no fill.
- * backdrop-filter blurs the background showing through the lens. Falls back to the
- * faint translucent background on browsers without backdrop-filter support. */
-.cmhero__lens { position: absolute; left: 0; top: 0; width: 80%; height: 80%; box-sizing: border-box;
-  border-radius: 50%; border: 2.5px solid var(--cmh-lupe);
-  background: rgba(236, 244, 240, .08);
+  pointer-events: none; width: clamp(64px, 11vmin, 88px); aspect-ratio: 1; }
+/* Real magnifying glass: ONE connected SVG outline (rim + handle) over a frosted
+ * (glassmorphism) lens disc — no fill, the blurred background shows through.
+ * The frosted disc is aligned to the SVG circle (cx11 cy11 r8 in a 24-box →
+ * left/top 12.5%, w/h 66.67%, radius 50%). */
+.cmhero__lens-frost { position: absolute; left: 12.5%; top: 12.5%; width: 66.67%; height: 66.67%;
+  border-radius: 50%; background: rgba(236, 244, 240, .10);
   -webkit-backdrop-filter: blur(7px) saturate(1.15);
           backdrop-filter: blur(7px) saturate(1.15);
-  box-shadow: inset 0 1px 8px rgba(255,255,255,.30), inset 0 -6px 14px rgba(0,0,0,.18), 0 6px 18px rgba(0,0,0,.30);
-  display: grid; place-items: center; }
-.cmhero__handle { position: absolute; left: 64%; top: 64%; width: 6px; height: 36%;
-  border-radius: 5px; background: var(--cmh-lupe); transform: translate(-50%, 0) rotate(45deg);
-  transform-origin: top center; box-shadow: 0 3px 8px rgba(0,0,0,.3); }
-.cmhero__arrow { width: 48%; height: 48%; display: block; }
+  box-shadow: inset 0 1px 8px rgba(255,255,255,.28), inset 0 -6px 14px rgba(0,0,0,.16); }
+/* Fallback when backdrop-filter is unsupported (old browsers): faint pale fill */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cmhero__lens-frost { background: rgba(236, 244, 240, .90); }
+}
+.cmhero__mag { position: absolute; inset: 0; width: 100%; height: 100%;
+  stroke: var(--cmh-lupe); filter: drop-shadow(0 3px 10px rgba(0,0,0,.35)); }
+.cmhero__arrow { position: absolute; left: 45.83%; top: 45.83%; width: 52%; height: 52%;
+  transform: translate(-50%,-50%); display: block; }
 .cmhero__arrow svg { width: 100%; height: 100%; }
+.cmhero__arrow svg path { transition: stroke .4s ease; }
 
 .cmhero__flash { position: absolute; left: 0; top: 0; z-index: 2; width: 320px; height: 320px;
   margin: -160px 0 0 -160px; border-radius: 50%; pointer-events: none; opacity: 0; mix-blend-mode: screen;
@@ -91,4 +103,5 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .cmhero__bg::before, .cmhero__bg::after { animation: none !important; }
+  .cmh__slot { animation: none !important; opacity: 1; }
 }
