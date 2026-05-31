@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
+import MeineInteressenLayout from "@components/faq/MeineInteressenLayout.astro";
 import { getPublishedEntries } from "@lib/content";
 import {
   getAudience,
@@ -57,7 +58,8 @@ const pageTitle = audience.title;
 const pageDescription = audience.description;
 ---
 
-<BaseLayout title={pageTitle} description={pageDescription || undefined} bgTexture>
+<BaseLayout title={pageTitle} description={pageDescription || undefined} bgTexture extraBodyClass="mi-page">
+  <MeineInteressenLayout activeAudience={slug}>
   <article class="faq-audience-page" data-audience={audience.id}>
     <AudienceHeader audience={audience} questionCount={questions.length} />
 
@@ -82,7 +84,7 @@ const pageDescription = audience.description;
         <FaqQuestionComponent
           question={q}
           index={i + 1}
-          open={i === 0}
+          open={false}
           quizTitles={quizTitles}
         />
       ))}
@@ -105,6 +107,7 @@ const pageDescription = audience.description;
       <a href="/meine-interessen/">← Alle Zielgruppen</a>
     </footer>
   </article>
+  </MeineInteressenLayout>
 
   <MythPopupHost
     client:load
