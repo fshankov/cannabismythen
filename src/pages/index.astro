@@ -1,12 +1,11 @@
 ---
 export const prerender = true;
 
-import "../styles/home-hero-frage.css";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader, getPublishedEntries } from "@lib/content";
-import HeroFrageBlock from "@components/home/HeroFrageBlock";
-import type { HeroPair } from "@components/home/HeroFrageBlock";
-import type { CorrectnessClass } from "@lib/dashboard/types";
+import HeroBlock from "@components/home/HeroBlock";
+import type { HeroMyth } from "@components/home/HeroBlock";
+import { HERO_MYTHS } from "@components/home/mythPositions";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
 import AudienceShortcutBlock from "@components/home/AudienceShortcutBlock.astro";
@@ -43,28 +42,22 @@ function audienceEmoji(id: string): string {
   return AUDIENCE_EMOJI_BY_ID[id as FaqAudienceId] ?? "•";
 }
 
-// ── Hero content from Keystatic ─────────────────────────────────────────────
-const heroBlockData = await reader.singletons.heroBlock.read();
-
-// The Keystatic schema uses `keine_aussage` for the no-classification option;
-// the rest of the site uses the canonical `no_classification` key. Translate
-// once at the boundary so HeroFrageBlock can speak the same type everywhere.
-const YAML_TO_CORRECTNESS: Record<string, CorrectnessClass> = {
-  richtig: "richtig",
-  eher_richtig: "eher_richtig",
-  eher_falsch: "eher_falsch",
-  falsch: "falsch",
-  keine_aussage: "no_classification",
-};
-
-const heroPairs: HeroPair[] = (heroBlockData?.pairs ?? []).map((p) => ({
-  belief: p.belief,
-  science: p.science,
-  mythSlug: p.mythSlug,
-  verdict: YAML_TO_CORRECTNESS[p.verdict] ?? "no_classification",
+// ── Interactive hero (floating myth field) ─────────────────────────────────
+// The new hero replaces the rotating belief/science card with a cursor-driven
+// "field of statements" canvas. Seed data + curated positions come from
+// `mythPositions.ts` (design data; matches the handoff prototype 1:1). Once
+// Keystatic gets a `floatingMyths` collection, the text+classification side
+// can move into the CMS while positions stay in code.
+const heroMyths: HeroMyth[] = HERO_MYTHS.map((m) => ({
+  id: m.id,
+  text: m.text,
+  classification: m.classification,
+  position: m.position,
 }));
 
-const heroBackgroundQuestions: string[] = [...(heroBlockData?.backgroundQuestions ?? [])];
+const heroHeadline1 = "Was glauben wir zu wissen —";
+const heroHeadline2 = "und was stimmt wirklich?";
+const heroEyebrow   = "ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft";
 
 // ── Fakten-Karten preview: pick three short representative myths ───────────
 type MythRecord = {
@@ -153,17 +146,13 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
 ---
 
 <BaseLayout title="Startseite" heroMode={true}>
-  {heroBlockData && heroPairs.length > 0 && (
-    <HeroFrageBlock
-      eyebrow={heroBlockData.eyebrow}
-      beliefLabel={heroBlockData.beliefLabel}
-      scienceLabel={heroBlockData.scienceLabel}
-      backgroundQuestions={heroBackgroundQuestions}
-      pairs={heroPairs}
-      rotationSeconds={heroBlockData.rotationSeconds ?? 6}
-      client:load
-    />
-  )}
+  <HeroBlock
+    myths={heroMyths}
+    headline1={heroHeadline1}
+    headline2={heroHeadline2}
+    eyebrow={heroEyebrow}
+    client:load
+  />
 
   {numbersStripData && (
     <NumbersStripBlock
