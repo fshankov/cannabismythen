@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Download, Filter,
+  Download, Filter, Search,
   Eye, TrendingUp, Target, Shield, Globe,
   Baby, Cannabis, GraduationCap, UsersRound,
 } from 'lucide-react';
@@ -414,6 +414,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   const sharedActions: ReactNode = (
     <>
       <div className="carm-myth-search-row" role="search">
+        <Search size={16} className="carm-myth-search-icon" aria-hidden="true" />
         <input
           type="search"
           className="carm-myth-search-input"
@@ -479,9 +480,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           <h1 className="carm-explorer__page-header__h1">Daten-Explorer</h1>
           <p className="carm-explorer__page-header__sub">
             Hier erkundest du die Daten der CaRM-Studie, 2025 in Deutschland
-            erhoben. <strong>Neu hier?</strong> Der <strong>Rundgang</strong>{' '}
+            erhoben.<br /><strong>Neu hier?</strong> Der <strong>Rundgang</strong>{' '}
             <RundgangBookmark className="carm-rundgang-bookmark-inline" /> führt
-            dich in etwa einer Minute durch den Explorer. Wie die Daten
+            dich in etwa einer Minute durch den Explorer.<br />Wie die Daten
             entstanden, erklärt <a href="/projekt/">„Über das Projekt"</a>.
           </p>
         </header>
@@ -494,7 +495,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             The "EXPLORE" eyebrow that the brief originally placed
             above the bar was removed 2026-05-28 PM per Fedor. */}
         <div className="carm-explorer__tab-bar">
-          <div className="carm-explorer__tabs--left">
+          <div className={`carm-explorer__tabs--left${['balken','spannweite','table'].includes(state.view) ? ' is-group-active' : ''}`}>
             <span className="carm-explorer__group-label carm-explorer__group-label--mythen" aria-hidden="true">Mythen</span>
             <ViewTabs
               view={state.view}
@@ -506,7 +507,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           {/* Fixed gap between the Mythen group and the Quellen group —
               keeps each group tight while clearly separating the two. */}
           <div className="carm-explorer__tab-gap" aria-hidden="true" />
-          <div className="carm-explorer__tabs--right">
+          <div className={`carm-explorer__tabs--right${['sources','sources2','sources_table'].includes(state.view) ? ' is-group-active' : ''}`}>
             <span className="carm-explorer__group-label carm-explorer__group-label--quellen" aria-hidden="true">Quellen</span>
             <ViewTabs
               view={state.view}

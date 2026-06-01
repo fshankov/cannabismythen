@@ -1,19 +1,16 @@
 ---
 /**
- * MeineInteressenLayout — sidebar + content shell for all /meine-interessen/{slug}/ pages.
+ * MeineInteressenLayout — top-tab + white-panel shell for /meine-interessen/.
  *
- * Desktop (≥1024px): fixed 280px left sidebar with the 5 audience categories.
- * Tablet / mobile (<1024px): horizontal sticky pill rail at the top of the
- * content area, scrollable when it overflows. Both surfaces use the same
- * AUDIENCES list, the same active-state colour, and the same audience icons.
+ * Mirrors the Daten-Explorer layout pattern exactly:
+ *   • Page header (h1 + subtitle) above the tab bar
+ *   • Chrome-style top tabs (same .tabs-bar / .tab-btn shared primitive)
+ *   • White panel (.mi-panel) below the tabs — active tab merges into it
+ *   • Accordions inside the panel use the page BG so they contrast against white
  *
- * The active item is highlighted from the `activeAudience` prop. All FAQ
- * accordion mechanics, content, verdict pills, and routing are unchanged.
- *
- * Backgrounds: the cream surface tone for /meine-interessen/ is painted on
- * <body.mi-page> so the global `.dot-texture` pattern remains visible
- * underneath. The layout itself is transparent so the dotted background
- * shows through the sidebar area and the content area uniformly.
+ * All structural CSS uses :global() to guarantee application independent of
+ * Astro's hash-scoping cache. Component-internal styles (tab icons, etc.) are
+ * scoped normally.
  */
 import type { FaqAudienceId } from "@lib/faq";
 import { AUDIENCE_ICONS_BY_FAQ_ID } from "@lib/icons";
@@ -38,9 +35,6 @@ const resolved = AUDIENCES.map((a) => ({
   isActive: activeAudience === a.id,
 }));
 
-// Per-audience page title shown above the question accordions.
-// EN gloss: "Questions for parents of underage children" / "Your questions
-// about cannabis" / "Questions for {Consumers|Teachers|Professionals}".
 const TITLE_BY_AUDIENCE: Record<string, string> = {
   eltern:        "Fragen für Eltern minderjähriger Kinder",
   jugendliche:   "Deine Fragen rund um Cannabis",
@@ -50,229 +44,110 @@ const TITLE_BY_AUDIENCE: Record<string, string> = {
 };
 const pageTitle = TITLE_BY_AUDIENCE[activeAudience] ?? "Meine Interessen";
 
-// Fachkräfte page carries one extra Sie-form note pointing professionals
-// with school-context questions over to the Lehrkräfte page. Only the
-// word "Lehrkräfte" is the link, not the full sentence.
 const isFachkraefte = activeAudience === "fachkraefte";
 ---
 
 <div class="mi-layout">
 
-  <!-- Desktop sidebar -->
-  <aside class="mi-sidebar" aria-label="Zielgruppe wählen">
-    <nav class="mi-sidebar__nav">
+  <!-- Page header -->
+  <header class="mi-header">
+    <h1 class="mi-header__title">{pageTitle}</h1>
+    <p class="mi-header__subtitle">
+      Wähle deine Perspektive und erhalte gezielte Antworten auf Cannabis-Mythen&nbsp;—
+      zugeschnitten auf deine Lebenssituation.
+    </p>
+  </header>
+
+  <!-- Audience tab bar — scrollable, same Chrome-tab style as Daten-Explorer -->
+  <div class="mi-tab-bar">
+    <div class="tabs-bar" role="tablist" aria-label="Zielgruppe wählen">
       {resolved.map((item) => (
         <a
           href={`/meine-interessen/${item.id}/`}
-          class:list={["mi-nav-item", { "mi-nav-item--active": item.isActive }]}
+          class:list={["tab-btn", { "active": item.isActive }]}
+          role="tab"
           aria-current={item.isActive ? "page" : undefined}
+          aria-selected={item.isActive ? "true" : "false"}
         >
-          {item.isActive && <span class="mi-nav-item__dot" aria-hidden="true" />}
-          <span class="mi-nav-item__label">{item.label}</span>
-          <span class="mi-nav-item__icon" aria-hidden="true">
-            <item.Icon size={20} />
+          <span class="mi-tab-icon" aria-hidden="true">
+            <item.Icon size={15} />
           </span>
+          <span class="mi-tab-label">{item.label}</span>
         </a>
       ))}
-    </nav>
-  </aside>
-
-  <!-- Right content panel -->
-  <div class="mi-content">
-    <div class="mi-content__inner">
-
-      <!-- Page header -->
-      <header class="mi-header">
-        <h1 class="mi-header__title">{pageTitle}</h1>
-        {isFachkraefte && (
-          <p class="mi-header__hinweis">
-            <strong>Hinweis:</strong> Schulkontext-spezifische Fragen finden Sie unter{' '}
-            <a href="/meine-interessen/lehrkraefte/">Lehrkräfte</a>.
-          </p>
-        )}
-        <p class="mi-header__subtitle">
-          Wähle deine Perspektive und erhalte gezielte Antworten auf Cannabis-Mythen&nbsp;—
-          zugeschnitten auf deine Lebenssituation.
-        </p>
-      </header>
-
-      <!-- Tablet / mobile audience rail (visible <1024px) -->
-      <nav class="mi-rail" aria-label="Zielgruppe wählen">
-        <div class="mi-rail__track" role="tablist">
-          {resolved.map((item) => (
-            <a
-              href={`/meine-interessen/${item.id}/`}
-              class:list={["mi-rail__pill", { "mi-rail__pill--active": item.isActive }]}
-              aria-current={item.isActive ? "page" : undefined}
-              role="tab"
-              aria-selected={item.isActive ? "true" : "false"}
-            >
-              <span class="mi-rail__pill-icon" aria-hidden="true">
-                <item.Icon size={18} />
-              </span>
-              <span class="mi-rail__pill-label">{item.label}</span>
-            </a>
-          ))}
-        </div>
-        <span class="mi-rail__fade mi-rail__fade--right" aria-hidden="true"></span>
-      </nav>
-
-      <!-- Accordion questions (slotted from the audience page) -->
-      <div class="mi-questions">
-        <slot />
-      </div>
-
     </div>
   </div>
+
+  <!-- White panel — border-top omitted so active tab merges flush into it -->
+  <div class="mi-panel">
+    {isFachkraefte && (
+      <p class="mi-hinweis">
+        <strong>Hinweis:</strong> Schulkontext-spezifische Fragen finden Sie unter{' '}
+        <a href="/meine-interessen/lehrkraefte/">Lehrkräfte</a>.
+      </p>
+    )}
+    <div class="mi-questions">
+      <slot />
+    </div>
+  </div>
+
 </div>
 
 <style>
-/* ── Layout wrapper ──────────────────────────────────────────────────── */
-.mi-layout {
-  position: relative;
-  display: flex;
+/* ══════════════════════════════════════════════════════════════════════
+   GLOBAL layout rules — :global() so they always apply regardless of
+   Astro's hash-based CSS scoping. Mirrors how dashboard.css handles
+   main:has(.carm-explorer) but scoped to body.mi-page.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:global(body.mi-page) {
+  background-color: #faf9f5;
+}
+
+:global(body.mi-page main) {
+  max-width: none !important;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: unset !important;
+}
+
+:global(.mi-layout) {
+  display: flex !important;
+  flex-direction: column !important;
   width: 100%;
-  min-height: calc(100vh - var(--header-height, 140px));
-  /* Transparent — the page's dot-textured cream body shows through. */
-  background: transparent;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  box-sizing: border-box;
+
+  --color-surface: #ffffff;
+  --color-bg-subtle: #eeeee9;
+  --color-border-soft: rgba(191, 201, 193, 0.35);
+  --color-border: rgba(191, 201, 193, 0.5);
+  --radius-lg: 16px;
+  --shadow-chip: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* Full-height vertical divider between sidebar and content. The sidebar
-   itself only renders the divider while it's in view (fixed); this
-   pseudo-element makes the line span the entire viewport height
-   including the header strip and any over-scroll, so it never "cuts".
-   Hidden on tablet/mobile where the sidebar is replaced by the rail. */
-.mi-layout::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 280px;
-  width: 1px;
-  background: rgba(191, 201, 193, 0.5);
-  z-index: 49;
-  pointer-events: none;
-}
-
-/* ── Desktop sidebar ─────────────────────────────────────────────────── */
-.mi-sidebar {
-  position: fixed;
-  top: var(--header-height, 140px);
-  left: 0;
-  bottom: 0;
-  width: 280px;
-  /* Transparent — dot-textured body shows through here too. */
-  background: transparent;
-  overflow-y: auto;
-  overflow-x: hidden;
-  z-index: 50;
-}
-
-.mi-sidebar__nav {
-  padding: 10px;
+:global(.mi-layout .mi-header) {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 24px;
+  margin-bottom: 28px;
+  padding-top: 16px;
 }
 
-/* ── Sidebar nav items ───────────────────────────────────────────────── */
-.mi-nav-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 44px;
-  padding-left: 48px;
-  padding-right: 32px;
-  background: #ffffff;
-  border-radius: 0 16px 16px 0;
-  margin-left: -10px;
-  text-decoration: none;
-  color: #404943;
-  transition: background 0.15s;
-}
-
-.mi-nav-item:hover { background: #f0f4ee; }
-
-.mi-nav-item--active {
-  background: #e9f0e1;
-  color: #0f5238;
-}
-
-.mi-nav-item__label {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.mi-nav-item--active .mi-nav-item__label {
-  font-weight: 700;
-  color: #0f5238;
-}
-
-.mi-nav-item__icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #404943;
-  opacity: 0.65;
-}
-
-.mi-nav-item--active .mi-nav-item__icon {
-  color: #0f5238;
-  opacity: 1;
-}
-
-/* Active indicator: 4 × 4 px square, 8px gap to the label.
-   Label starts at padding-left 48px, dot is 4px wide → left = 48 - 8 - 4 = 36px. */
-.mi-nav-item__dot {
-  position: absolute;
-  left: 36px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 4px;
-  background: #0f5238;
-  border-radius: 2px;
-  display: block;
-}
-
-/* ── Right content panel ─────────────────────────────────────────────── */
-.mi-content {
-  margin-left: 280px;
-  flex: 1;
-  padding-top: 56px;
-  padding-bottom: 80px;
-}
-
-.mi-content__inner {
-  max-width: 740px;
-  margin-left: 130px;
-}
-
-/* ── Page header ─────────────────────────────────────────────────────── */
-.mi-header {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-bottom: 54px;
-}
-
-.mi-header__title {
+:global(.mi-layout .mi-header__title) {
   font-size: 40px;
   font-weight: 800;
   line-height: 48px;
-  color: #1a1c1a;
+  color: var(--color-accent, #2d6a4f);
   letter-spacing: -0.5px;
   margin: 0;
 }
 
-.mi-header__subtitle {
+:global(.mi-layout .mi-header__subtitle) {
   font-size: 16px;
   font-weight: 400;
   line-height: 1.7;
@@ -280,99 +155,98 @@ const isFachkraefte = activeAudience === "fachkraefte";
   margin: 0;
 }
 
-/* Fachkräfte-only cross-reference. Rendered as a small inset card with a
-   green accent stripe so it reads as a guiding note, not a content block. */
-.mi-header__hinweis {
+:global(.mi-layout .mi-tab-bar) {
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  z-index: 1;
+}
+
+:global(.mi-layout .mi-tab-bar .tabs-bar) {
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+  border-bottom: 0px;
+}
+
+:global(.mi-layout .mi-tab-bar .tab-btn) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--color-bg-subtle, #eeeee9);
+  text-decoration: none;
+  border-radius: 16px 16px 0 0;
+}
+
+:global(.mi-layout .mi-tab-bar .tab-btn.active) {
+  background: var(--color-surface, #ffffff);
+  border: none;
+  border-radius: 16px 16px 0 0;
+}
+
+:global(.mi-layout .mi-panel) {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border-soft, rgba(191, 201, 193, 0.35));
+  border-top: none;
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-chip, 0 4px 20px -2px rgba(0, 0, 0, 0.05));
+  padding: 32px;
+}
+
+:global(.mi-layout .mi-hinweis) {
   font-size: 14.5px;
-  font-weight: 400;
   line-height: 1.55;
   color: #2f3a33;
-  margin: 0;
+  margin: 0 0 24px;
   padding: 12px 16px;
   background: rgba(233, 240, 225, 0.55);
   border-left: 3px solid #0f5238;
   border-radius: 0 10px 10px 0;
 }
 
-.mi-header__hinweis strong {
-  font-weight: 700;
-  color: #0f5238;
-  letter-spacing: 0.01em;
-}
+:global(.mi-layout .mi-hinweis strong) { font-weight: 700; color: #0f5238; }
 
-.mi-header__hinweis a {
+:global(.mi-layout .mi-hinweis a) {
   color: #0f5238;
   font-weight: 600;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
-  transition: color 0.15s;
 }
 
-.mi-header__hinweis a:hover {
-  color: #0b3d2a;
-  text-decoration-thickness: 2px;
+:global(.mi-layout .mi-questions) {
+  display: flex;
+  flex-direction: column;
 }
 
-/* ── Tablet / mobile audience rail ───────────────────────────────────── */
-/* Hidden on desktop — desktop uses the fixed sidebar. */
-.mi-rail { display: none; }
-
-/* ── Questions slot wrapper ──────────────────────────────────────────── */
-.mi-questions {
-  /* transparent — gap handled by .faq-audience-questions inside */
+:global(.mi-layout .faq-audience-questions) {
+  gap: 24px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   Global overrides — scoped to .mi-layout, cannot bleed elsewhere.
-   Only layout, spacing, card shape. Verdict pills: zero changes.
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Paint the page's cream surface tone on <body> so the global
-   `.dot-texture` background-image (set on body.dot-texture) sits on top
-   of the same warm colour the sidebar previously painted on its own. */
-:global(body.mi-page) {
-  background-color: #faf9f5;
-}
-
-/* Full-width <main> on meine-interessen pages */
-:global(body.mi-page main) {
-  max-width: none;
-  margin: 0;
-  padding-left: 0;
-  padding-right: 0;
-  padding-bottom: 0;
-  min-height: unset;
-}
-
-/* Remove built-in centering from the audience page article */
-:global(.mi-layout .faq-audience-page) {
-  max-width: none;
-  margin: 0;
-}
-
-/* Hide elements replaced by the sidebar */
-:global(.mi-layout .faq-audience-header)       { display: none; }
-:global(.mi-layout .faq-toc)                   { display: none; }
+/* ── Audience page overrides ───────────────────────────────────────── */
+:global(.mi-layout .faq-audience-page)       { max-width: none; margin: 0; }
+:global(.mi-layout .faq-audience-header)     { display: none; }
+:global(.mi-layout .faq-toc)                 { display: none; }
 :global(.mi-layout .faq-audience-page__footer) { display: none; }
+:global(.mi-layout .faq-audience-questions)  { margin-top: 0; }
 
-/* Remove top margin that used to push questions away from the header */
-:global(.mi-layout .faq-audience-questions) { margin-top: 0; }
-
-/* ── FAQ accordion cards: shape + shadow only ────────────────────────── */
+/* ── FAQ accordion cards ───────────────────────────────────────────── */
 :global(.mi-layout .faq-question) {
-  background: #ffffff;
-  border: 1px solid rgba(191, 201, 193, 0.1);
+  background: #faf9f5;
+  border: 1px solid rgba(191, 201, 193, 0.2);
   border-radius: 24px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 :global(.mi-layout .faq-question:hover) {
-  border-color: rgba(191, 201, 193, 0.35);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+  border-color: rgba(191, 201, 193, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-/* Summary row: 24px padding, 24px column gap */
 :global(.mi-layout .faq-question__summary) {
   display: grid;
   grid-template-columns: 32px 1fr auto auto;
@@ -385,7 +259,6 @@ const isFachkraefte = activeAudience === "fachkraefte";
   border-bottom: 1px solid rgba(191, 201, 193, 0.3);
 }
 
-/* Number: large muted counter */
 :global(.mi-layout .faq-question__index) {
   font-family: var(--font-display);
   font-size: 24px;
@@ -395,7 +268,6 @@ const isFachkraefte = activeAudience === "fachkraefte";
   min-width: unset;
 }
 
-/* Question heading */
 :global(.mi-layout .faq-question__heading) {
   font-size: 18px;
   font-weight: 400;
@@ -404,7 +276,6 @@ const isFachkraefte = activeAudience === "fachkraefte";
   margin: 0;
 }
 
-/* Chevron: hide ▾ text, show SVG arrow via background-image */
 :global(.mi-layout .faq-question__chevron) {
   font-size: 0;
   line-height: 0;
@@ -420,13 +291,11 @@ const isFachkraefte = activeAudience === "fachkraefte";
   background-size: 12px 8px;
 }
 
-/* Body: left-aligned with question text (24 outer + 32 number + 24 gap = 80px) */
 :global(.mi-layout .faq-question__body) {
   padding: 0 24px 25px;
   padding-left: 80px;
 }
 
-/* Lead answer */
 :global(.mi-layout .faq-question__lead) {
   font-size: 16px;
   font-weight: 700;
@@ -435,7 +304,6 @@ const isFachkraefte = activeAudience === "fachkraefte";
   margin-bottom: 15px;
 }
 
-/* Answer body text */
 :global(.mi-layout .faq-question__answer),
 :global(.mi-layout .faq-question__answer p) {
   font-size: 16px;
@@ -444,143 +312,48 @@ const isFachkraefte = activeAudience === "fachkraefte";
   line-height: 1.7;
 }
 
-/* ── Tablet / mobile: collapse sidebar → top rail ────────────────────── */
-@media (max-width: 1023px) {
-  /* Hide desktop sidebar + its full-height divider line. */
-  .mi-sidebar { display: none; }
-  .mi-layout::before { display: none; }
-
-  /* Content panel reflows to full width. */
-  .mi-content {
-    margin-left: 0;
-    padding-top: 24px;
-    padding-left: var(--space-lg, 1.5rem);
-    padding-right: var(--space-lg, 1.5rem);
-  }
-  .mi-content__inner { margin-left: 0; max-width: none; }
-
-  .mi-header { margin-bottom: 24px; }
-  .mi-header__title { font-size: 32px; line-height: 1.15; }
-
-  /* Pill rail: sticky right under the floating nav, scrolls horizontally
-     when the five pills overflow. The fade gradient on the right edge
-     hints at scrollability without a visible scrollbar. */
-  .mi-rail {
-    display: block;
-    position: sticky;
-    top: calc(var(--header-height, 140px) - 16px);
-    z-index: 30;
-    margin: 0 calc(var(--space-lg, 1.5rem) * -1) 24px;
-    padding: 8px 0;
-    background:
-      linear-gradient(
-        to bottom,
-        rgba(250, 249, 245, 0.96) 0%,
-        rgba(250, 249, 245, 0.96) 70%,
-        rgba(250, 249, 245, 0) 100%
-      );
-    backdrop-filter: saturate(140%) blur(6px);
-    -webkit-backdrop-filter: saturate(140%) blur(6px);
-  }
-
-  .mi-rail__track {
-    display: flex;
-    gap: 8px;
-    padding: 4px var(--space-lg, 1.5rem);
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .mi-rail__track::-webkit-scrollbar { display: none; }
-
-  .mi-rail__pill {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    height: 38px;
-    padding: 0 16px;
-    border-radius: 999px;
-    background: #ffffff;
-    border: 1px solid rgba(191, 201, 193, 0.45);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    text-decoration: none;
-    color: #404943;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1;
-    white-space: nowrap;
-    scroll-snap-align: start;
-    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
-  }
-
-  .mi-rail__pill:hover { background: #f0f4ee; }
-  .mi-rail__pill:active { transform: translateY(1px); }
-
-  .mi-rail__pill--active {
-    background: #e9f0e1;
-    color: #0f5238;
-    border-color: rgba(15, 82, 56, 0.35);
-    font-weight: 700;
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.05),
-      inset 0 0 0 1px rgba(15, 82, 56, 0.15);
-  }
-
-  .mi-rail__pill-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    color: currentColor;
-    opacity: 0.7;
-  }
-  .mi-rail__pill--active .mi-rail__pill-icon { opacity: 1; }
-
-  /* Right-edge fade hinting at horizontal scroll. Sits inside the rail
-     so it tracks the rail's sticky position. */
-  .mi-rail__fade {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 32px;
-    pointer-events: none;
-  }
-  .mi-rail__fade--right {
-    right: 0;
-    background: linear-gradient(
-      to right,
-      rgba(250, 249, 245, 0) 0%,
-      rgba(250, 249, 245, 0.95) 100%
-    );
-  }
+/* ── Scoped: tab icon ──────────────────────────────────────────────── */
+.mi-tab-icon {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  opacity: 0.65;
 }
 
-/* Extra-tight phone widths: drop the label on inactive pills to save room
-   (active pill keeps its label for orientation). */
-@media (max-width: 460px) {
-  .mi-rail__pill {
-    padding: 0 12px;
-    gap: 6px;
+:global(.mi-layout .mi-tab-bar .tab-btn.active) .mi-tab-icon {
+  opacity: 1;
+  color: var(--color-accent, #2d6a4f);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :global(.mi-layout .mi-tab-bar) {
+    position: sticky;
+    top: calc(var(--header-height, 60px) - 1px);
+    z-index: 50;
+    background: #faf9f5;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
-  .mi-rail__pill:not(.mi-rail__pill--active) .mi-rail__pill-label {
+  :global(.mi-layout .mi-tab-bar)::-webkit-scrollbar { display: none; }
+
+  :global(.mi-layout .mi-panel) { padding: 20px 16px 24px; }
+}
+
+@media (max-width: 640px) {
+  :global(.mi-layout) { padding-left: 16px; padding-right: 16px; }
+  :global(.mi-layout .mi-header__title) { font-size: 30px; line-height: 1.15; }
+
+  :global(.mi-layout .mi-tab-bar .tab-btn:not(.active) .mi-tab-label) {
     position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
+    clip: rect(0,0,0,0);
     white-space: nowrap;
     border: 0;
   }
-  .mi-rail__pill:not(.mi-rail__pill--active) {
-    width: 38px;
-    padding: 0;
-    justify-content: center;
-  }
+  :global(.mi-layout .mi-tab-bar .tab-btn:not(.active)) { padding: 9px 14px; }
 }
 </style>

@@ -90,7 +90,6 @@ export default function FaktenCard({
     left: visual.arrowFrame.left,
     width: visual.arrowFrame.width,
     height: visual.arrowFrame.height,
-    transform: visual.arrowTransform,
   };
   // Phase-3-ready: back face consumes this var for its verdict-tinted
   // title. Set now so Phase 3 only adds CSS rules.

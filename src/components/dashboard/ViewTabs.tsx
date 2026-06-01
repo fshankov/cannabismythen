@@ -15,7 +15,7 @@ const TABS: ViewTab[] = [...TABS_LEFT, ...TABS_RIGHT];
 // Leading view-type glyph per data view (2026-05-30, Fedor). The same
 // three view types appear in both groups, so Balken/Übersicht/Tabelle
 // each map to one icon, mirrored across the Mythen (left) and Quellen
-// (right) groups. Colour is set per group in the render body below.
+// (right) groups. Icon colour inherits currentColor from the button text.
 const VIEW_ICON: Partial<Record<ViewTab, typeof ChartBarIcon>> = {
   balken: ChartBarIcon,
   spannweite: Grid3x3Icon,
@@ -24,11 +24,6 @@ const VIEW_ICON: Partial<Record<ViewTab, typeof ChartBarIcon>> = {
   sources2: Grid3x3Icon,
   sources_table: Table2Icon,
 };
-// Always-on wayfinding accent for the leading icon: emerald = Mythen
-// views, blue = Quellen views (Fedor 2026-05-30). Emerald reuses the
-// site's `--classification-richtig` brand green.
-const MYTHEN_ICON_COLOR = '#047857';
-const QUELLEN_ICON_COLOR = '#3b82f6';
 
 // Short, group-relative visible labels — the permanent "Mythen"/"Quellen"
 // group label supplies the context, so each tab shows only its view type
@@ -83,7 +78,6 @@ export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props)
     const key = TAB_LABEL_KEY[tab];
     const fullLabel = key ? t(key, lang) : tab;
     const ViewIcon = VIEW_ICON[tab];
-    const iconColor = TABS_LEFT.includes(tab) ? MYTHEN_ICON_COLOR : QUELLEN_ICON_COLOR;
     return {
       key: tab,
       label: SHORT_LABEL[tab] ?? fullLabel,
@@ -91,7 +85,7 @@ export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props)
       // short label leans on the adjacent group label for context).
       ariaLabel: fullLabel,
       icon: ViewIcon ? (
-        <ViewIcon size={15} aria-hidden="true" style={{ color: iconColor }} />
+        <ViewIcon size={15} aria-hidden="true" />
       ) : undefined,
     };
   });

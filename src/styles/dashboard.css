@@ -234,7 +234,7 @@ body:has(.carm-explorer) .nav {
   padding: 10px 24px;
   border: 1px solid var(--color-border-soft, #e5e7eb);
   border-bottom: none;
-  border-radius: 8px 8px 0 0;
+  border-radius: var(--radius-lg, 16px) var(--radius-lg, 16px) 0 0;
   background: var(--color-bg-subtle, #eeeee9);
   font-size: 0.875rem;
   font-weight: 500;
@@ -842,43 +842,54 @@ body:has(.carm-explorer) .nav {
   align-items: center;
   position: relative;
 }
-.carm-myth-search-input {
-  width: 180px;
-  /* SSOT (Figma 403:2016): 180px input width, 44px height, shadow-input
-     (0 4px 10px) — lighter than the action-button shadow-chip. */
+/* Search row matches the export/filter chip exactly: same height,
+   padding, gap, border, radius, shadow. The icon sits inline at the
+   left; the bare input fills the middle; the clear × sits at the right. */
+.carm-myth-search-row {
   height: 44px;
-  padding: 0 36px 0 14px;
-  border: 1px solid var(--color-border, #cbd5e1);
+  padding: 0 16px;
+  gap: 8px;
   border-radius: 8px;
+  border: 1px solid var(--color-border, #e2e8f0);
   background: var(--color-surface, #ffffff);
-  font: inherit;
-  font-size: 0.95rem;
-  color: var(--color-text, #0f172a);
-  outline: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  box-shadow: var(--shadow-chip);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.carm-myth-search-input::placeholder {
-  color: var(--color-text-muted, #94a3b8);
-}
-.carm-myth-search-input:focus-visible {
+.carm-myth-search-row:focus-within {
   border-color: var(--color-accent, #2d6a4f);
   box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.18);
 }
+.carm-myth-search-icon {
+  flex: none;
+  color: var(--color-text-muted, #94a3b8);
+  pointer-events: none;
+}
+.carm-myth-search-input {
+  width: 148px;
+  border: none;
+  background: transparent;
+  outline: none;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text, #1a1a2e);
+  padding: 0;
+}
+.carm-myth-search-input::placeholder {
+  color: var(--color-text-muted, #94a3b8);
+  font-weight: 400;
+}
 .carm-myth-search-clear {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 26px;
-  height: 26px;
+  flex: none;
+  width: 20px;
+  height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 0;
   background: transparent;
   color: var(--color-text-muted, #64748b);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
   cursor: pointer;
   border-radius: 50%;
@@ -892,7 +903,7 @@ body:has(.carm-explorer) .nav {
   outline: none;
 }
 @media (max-width: 480px) {
-  .carm-myth-search-input { width: 160px; }
+  .carm-myth-search-input { width: 120px; }
 }
 
 /* ==================== CHIPS ==================== */
@@ -5007,6 +5018,12 @@ body.carm-modal-open {
   flex-shrink: 0;
 }
 
+@media (min-width: 1011px) {
+  .carm-explorer__tabs--left {
+    margin-left: 64px;
+  }
+}
+
 .carm-explorer__tab-bar > .carm-explorer__tab-spacer {
   flex: 1 1 0;
   min-width: 0;
@@ -5048,6 +5065,10 @@ body.carm-modal-open {
 .carm-explorer__tabs--right .tab-btn > svg {
   flex: none;
 }
+.carm-explorer__tabs--left .tab-btn.active > svg,
+.carm-explorer__tabs--right .tab-btn.active > svg {
+  color: var(--color-accent, #2d6a4f);
+}
 
 /* "Tabelle" and "Quellen-Tabelle" tabs carry a fixed 163 px width per
    the brief (the other tabs size to content). */
@@ -5069,7 +5090,7 @@ body.carm-modal-open {
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border-soft, #e5e7eb);
   border-top: none;
-  border-radius: 0 0 var(--radius-lg, 16px) var(--radius-lg, 16px);
+  border-radius: var(--radius-lg, 16px);
   box-shadow: var(--shadow-chip, 0 4px 20px -2px rgba(0, 0, 0, 0.05));
   flex: 1 1 auto;
   min-width: 0;
@@ -5232,7 +5253,7 @@ body.carm-modal-open {
 .carm-explorer .carm-explorer__page-header__h1 {
   font-size: 48px;
   font-weight: 900;
-  color: #1a1c1a;
+  color: var(--color-accent, #2d6a4f);
   letter-spacing: -1.8px;
   line-height: 52px;
   max-width: 746px;
@@ -7872,7 +7893,7 @@ body.carm-modal-open {
    stays 16px) so each group reads as a tight cluster with a clear break. */
 .carm-explorer__tab-bar > .carm-explorer__tab-gap {
   flex: 0 0 auto;
-  width: 40px;
+  width: 104px;
 }
 
 /* The "?" bookmark sits at the far upper-right. Its SVG provides the
@@ -7912,9 +7933,9 @@ body.carm-modal-open {
   animation: carm-rundgang-pulse 1.8s var(--ease-out, ease-out) infinite;
 }
 @keyframes carm-rundgang-pulse {
-  0%   { filter: drop-shadow(0 0 0 rgba(234, 179, 8, 0)); }
-  35%  { filter: drop-shadow(0 0 6px rgba(234, 179, 8, 0.85)); }
-  100% { filter: drop-shadow(0 0 0 rgba(234, 179, 8, 0)); }
+  0%   { filter: drop-shadow(0 0 0 rgba(45, 106, 79, 0)); }
+  35%  { filter: drop-shadow(0 0 6px rgba(45, 106, 79, 0.85)); }
+  100% { filter: drop-shadow(0 0 0 rgba(45, 106, 79, 0)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .carm-explorer__rundgang-help.is-nudge svg { animation: none; }
@@ -7937,35 +7958,18 @@ body.carm-modal-open {
   position: relative;
   display: inline-flex;
   align-items: center;
-  /* Vertically centre on the same line as the tab text (the tab buttons
-     centre their icon+label too), with no extra bottom padding to push
-     the text up. The underline floats just beneath via ::after. */
   align-self: center;
-  margin: 0 12px 0 0;
+  margin: 0 32px 0 0;
   font-family: var(--font-sans);
   font-size: 0.875rem;
   font-weight: 700;
   white-space: nowrap;
-  /* Neutral dark-grey, consistent with the dashboard's active-tab text —
-     NOT coloured (per Fedor). The emerald/blue stays on the view icons. */
   color: #1f2937;
+  transition: color 0.15s ease;
 }
-/* Nav-style underline (cf. global.css `.nav__link::after`). Uses
-   currentColor, so it inherits the neutral grey above. Static — these are
-   labels, not links. Floated just below the text so the word stays on the
-   tab-text line. */
-.carm-explorer__group-label::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -4px;
-  height: 2px;
-  background-color: currentColor;
-  border-radius: var(--radius-full, 999px);
+.is-group-active .carm-explorer__group-label {
+  color: var(--color-accent, #2d6a4f);
 }
-/* (No per-group text colour — Mythen/Quellen stay neutral grey. The
-   modifier classes remain in the markup for potential future use.) */
 
 /* Inline lucide glyphs embedded in the walkthrough popover copy + the
    "Erkunden" done button (Driver renders both via innerHTML). */

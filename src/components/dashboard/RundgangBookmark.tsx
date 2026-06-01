@@ -34,7 +34,7 @@ export default function RundgangBookmark({ className, title, style }: Props) {
     >
       <path
         d="M8 0 H32 A8 8 0 0 1 40 8 V52 L20 40 L0 52 V8 A8 8 0 0 1 8 0 Z"
-        fill="#facc15"
+        fill="#2d6a4f"
       />
       <text
         x="20"
@@ -43,7 +43,7 @@ export default function RundgangBookmark({ className, title, style }: Props) {
         dominantBaseline="central"
         fontSize="23"
         fontWeight="800"
-        fill="#1a1a2e"
+        fill="#ffffff"
         fontFamily="'Inter Variable', 'Inter', system-ui, sans-serif"
       >
         ?

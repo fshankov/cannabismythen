@@ -3383,7 +3383,7 @@ body.fakten-karten-page main {
 .quiz-index__title {
   max-width: 746px;
   margin: 0 0 24px;
-  color: #1A1C1A;
+  color: var(--color-accent, #2d6a4f);
   font-family: var(--font-display);
   font-size: 48px;
   font-style: normal;
@@ -3767,7 +3767,7 @@ body.fakten-karten-page main {
   max-width: 746px;
   font-size: 48px;
   font-weight: 900;
-  color: #1a1c1a;
+  color: var(--color-accent, #2d6a4f);
   letter-spacing: -1.8px;
   line-height: 52px;
 }
@@ -3828,6 +3828,7 @@ body.fakten-karten-page main {
   position: relative;
   width: 100%;
   height: 100%;
+  -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
   transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -3850,19 +3851,47 @@ body.fakten-karten-page main {
      the face, not the outer button. */
   box-shadow: var(--shadow-md);
   overflow: hidden;
+  /* `backface-visibility: hidden` is kept (it works in Chrome/Firefox) but
+     CANNOT be relied on: in WebKit/Safari the away-facing face is NOT
+     culled here (it stays painted regardless of overflow/containment), so
+     the front bled through the back after the flip. The real fix is the
+     opacity swap below — the away-facing face is forced to opacity:0,
+     toggled exactly at the 90° edge-on midpoint of the 520ms flip (260ms
+     delay, 0s duration) so the swap is invisible. See the `--front`/`--back`
+     opacity rules. */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  transition: opacity 0s linear 260ms;
   padding: var(--space-lg);
+}
+
+/* Opacity swap — the reliable cross-browser face-hiding (Safari backface
+   bug workaround). Idle: front shown, back hidden. Flipped: back shown,
+   front hidden. The 260ms delay = half the 520ms flip, so faces swap while
+   the card is edge-on and the change is imperceptible. */
+.fakten-card__face--back {
+  opacity: 0;
+}
+.fakten-card:hover .fakten-card__face--front,
+.fakten-card:focus-visible .fakten-card__face--front {
+  opacity: 0;
+}
+.fakten-card:hover .fakten-card__face--back,
+.fakten-card:focus-visible .fakten-card__face--back {
+  opacity: 1;
 }
 
 .fakten-card__face--back {
   transform: rotateY(180deg);
   /* Figma 427-3835: card back keeps a white surface but drops the
      border for a cleaner edge — only the shadow communicates lift.
-     Radius + padding are % of the 320-wide Figma card. */
+     Radius uses cqi (% of card width) so the corners stay CIRCULAR and
+     match the front face exactly (37.5/320 = 11.72cqi); a plain `%` gave
+     elliptical corners on the taller-than-wide card. Shadow matches the
+     front's exact Figma values so the card looks identical mid-flip. */
   border: none;
-  border-radius: 11.72%;
-  box-shadow: 0 19.5px 39px -9.4px rgba(0, 0, 0, 0.25);
+  border-radius: 11.72cqi;
+  box-shadow: 0 19.531px 39.063px -9.375px rgba(0, 0, 0, 0.25);
   padding: 10%;
 }
 
@@ -3883,10 +3912,13 @@ body.fakten-karten-page main {
   background: none;
   border: none;
   /* Figma 427-2044: card is 320×500, rounded-[37.5px], pt-88 px-32 pb-32.
-     As % of the 320 card width: radius 37.5/320 = 11.72%, padding
-     88/320 = 27.5% top, 32/320 = 10% sides + bottom. */
-  border-radius: 11.72%;
-  box-shadow: 0 19.5px 39px -9.4px rgba(0, 0, 0, 0.25);
+     Radius uses cqi (% of card width) so the corners stay CIRCULAR — a
+     plain `%` resolves the vertical radius against the taller card height,
+     giving elliptical corners. 37.5/320 = 11.72cqi. Padding as % of width:
+     88/320 = 27.5% top, 32/320 = 10% sides + bottom (proportional because
+     the card aspect-ratio is locked to 320:500). */
+  border-radius: 11.72cqi;
+  box-shadow: 0 19.531px 39.063px -9.375px rgba(0, 0, 0, 0.25);
   padding: 27.5% 10% 10%;
   color: #ffffff;
 }
@@ -4006,16 +4038,31 @@ body.fakten-karten-page main {
 }
 
 /* Touch / no-hover devices: skip the flip entirely. The front face
-   stays visible, the back face is never shown. Tap → popup. */
+   stays visible, the back face is never shown. Tap → popup. The opacity
+   swap must also be neutralised here, or a tap-focus would hide the
+   (un-rotated) front and reveal the back. */
 @media (hover: none) {
   .fakten-card:hover .fakten-card__inner,
   .fakten-card:focus-visible .fakten-card__inner {
     transform: none;
   }
+  .fakten-card:hover .fakten-card__face--front,
+  .fakten-card:focus-visible .fakten-card__face--front {
+    opacity: 1;
+  }
+  .fakten-card:hover .fakten-card__face--back,
+  .fakten-card:focus-visible .fakten-card__face--back {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .fakten-card__inner {
+    transition: none;
+  }
+  /* Flip is instant, so the face swap must be instant too (drop the
+     260ms midpoint delay) or the wrong face shows for 260ms. */
+  .fakten-card__face {
     transition: none;
   }
 }
@@ -4048,11 +4095,12 @@ body.fakten-karten-page main {
 }
 
 /* On-color variant: white icon + text stacked vertically (icon above
-   the name), centred. Matches the Figma card-front footer where the
-   24-px icon sits directly above the 11-px name line. */
+   the name), centred. Matches the Figma card-front footer (427-2048):
+   24-px icon directly above the 11-px name line with a 16-px gap
+   (Figma card-footer `gap-[16px]`). */
 .fakten-card-cat--on-color {
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   color: #ffffff;
   font-size: 0.7rem;
   text-align: center;

@@ -93,9 +93,9 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
 
     const N = myths.length;
     const SWAY_AMP = (12 * Math.PI) / 180;
-    const SWAY_PERIOD = 22000;
-    const BREATHE_PERIOD = 16000;
-    const AUTO_STEP = 3400;
+    const SWAY_PERIOD = 27500;
+    const BREATHE_PERIOD = 20000;
+    const AUTO_STEP = 4250;
     const R_CUR = 190;
 
     // ── Build the 42 myth nodes ─────────────────────────────────────────────
@@ -163,7 +163,7 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
       // Lupe: parked in the clear gap under the headline, never into bottom chrome.
       const hb = h1!.getBoundingClientRect(), hr = hero!.getBoundingClientRect();
       const glassH = glass!.offsetHeight || 84, glassW = glass!.offsetWidth || 84;
-      let gtop = (hb.bottom - hr.top) + 24;
+      let gtop = (hb.bottom - hr.top) + 64;
       gtop = Math.min(Math.max(gtop, ovalCY + 8), usableBot - glassH);
       glass!.style.top = gtop + "px";
       lupeCx = cx; lupeCy = gtop; lupeR = glassW / 2 + 18;
