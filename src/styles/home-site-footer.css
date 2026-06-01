@@ -1,0 +1,39 @@
+/* Rich "about the project" footer for the homepage — Kontakt · Förderung ·
+   Zitierweise · Abschlussbericht + credit/links + copyright, on one beige
+   surface (no stripes). Content comes from the ueberUnsScrolly singleton. */
+
+.site-footer {
+  background: #efe7d6;                 /* beige */
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem) 2rem;
+  color: var(--color-text);
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+}
+.site-footer__inner { max-width: var(--max-width); margin: 0 auto; }
+
+.site-footer__cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+.site-footer__h {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--color-text-muted); margin: 0 0 0.6rem;
+}
+.site-footer__line {
+  font-size: 0.84rem; line-height: 1.5; color: var(--color-text-secondary); margin: 0 0 0.25rem;
+}
+.site-footer__line a { color: var(--color-primary); text-decoration: none; }
+.site-footer__line a:hover { text-decoration: underline; }
+
+.site-footer__bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 1rem; margin-top: clamp(2rem, 4vw, 3rem); padding-top: 1.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.site-footer__credit { font-size: 0.82rem; color: var(--color-text-secondary); margin: 0; }
+.site-footer__links { list-style: none; display: flex; flex-wrap: wrap; gap: 1.25rem; margin: 0; padding: 0; }
+.site-footer__links a { font-size: 0.84rem; font-weight: 600; color: var(--color-primary); text-decoration: none; }
+.site-footer__links a:hover { text-decoration: underline; }
+
+.site-footer__copy { font-size: 0.72rem; color: var(--color-text-muted); margin: 1.25rem 0 0; }

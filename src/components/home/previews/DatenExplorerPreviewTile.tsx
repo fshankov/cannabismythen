@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import VerdictArrow from "../../shared/VerdictArrow";
-import type { CorrectnessClass } from "../../../lib/dashboard/types";
+import { ChartBarIcon, Grid3x3Icon, Table2Icon } from "../../../lib/icons/viewTypeIcons";
 
 export interface Props {
   title: string;
@@ -10,125 +9,86 @@ export interface Props {
   targetUrl: string;
 }
 
-interface Row {
-  label: string;
-  verdict: CorrectnessClass;
-  cssVar: string;
-  /** Illustrative values (%) for three population columns. */
-  v: readonly [number, number, number];
-}
+// The dashboard's view tabs: two groups (Mythen / Quellen) × Balken/Übersicht/
+// Tabelle. Each deep-links to that view (?view=<code>, src/lib/dashboard/url-state.ts).
+const GROUPS = [
+  { label: "Mythen", tabs: [
+    { label: "Balken", Icon: ChartBarIcon, view: "balken" },
+    { label: "Übersicht", Icon: Grid3x3Icon, view: "spannweite" },
+    { label: "Tabelle", Icon: Table2Icon, view: "tabelle" },
+  ] },
+  { label: "Quellen", tabs: [
+    { label: "Balken", Icon: ChartBarIcon, view: "quellen" },
+    { label: "Übersicht", Icon: Grid3x3Icon, view: "quellen2" },
+    { label: "Tabelle", Icon: Table2Icon, view: "quellen-tabelle" },
+  ] },
+] as const;
 
-// Illustrative rows — visually plausible, NOT real CaRM data. They exist only
-// to echo the look of the Daten-Explorer's three views on the homepage tile.
-const ROWS: ReadonlyArray<Row> = [
-  { label: "Harmlos",        verdict: "falsch",      cssVar: "--classification-falsch",      v: [28, 22, 33] },
-  { label: "Einstiegsdroge", verdict: "eher_falsch", cssVar: "--classification-eher-falsch", v: [52, 46, 58] },
-  { label: "Abhängigkeit",   verdict: "richtig",     cssVar: "--classification-richtig",     v: [63, 69, 60] },
-  { label: "Schädigt Fötus", verdict: "richtig",     cssVar: "--classification-richtig",     v: [71, 66, 74] },
-];
+// Illustrative 3-bar states (verdict colours) — cycle as a small "Balken"
+// animation above the tabs. Not real data.
+const BAR_STATES = [
+  [{ c: "--classification-falsch", v: 74 }, { c: "--classification-eher-falsch", v: 52 }, { c: "--classification-richtig", v: 38 }],
+  [{ c: "--classification-richtig", v: 63 }, { c: "--classification-eher-richtig", v: 47 }, { c: "--classification-falsch", v: 81 }],
+  [{ c: "--classification-eher-falsch", v: 57 }, { c: "--classification-richtig", v: 44 }, { c: "--classification-keine-aussage", v: 29 }],
+] as const;
+const SWITCH_MS = 2600;
 
-// The dashboard's three view types, in the same order as its ViewTabs.
-const VIEWS = ["Balken", "Spannweite", "Tabelle"] as const;
-const COLS = ["Erw.", "Jung", "Eltern"] as const;
-const SWITCH_MS = 3200;
+export default function DatenExplorerPreviewTile({ title, description, targetUrl }: Props) {
+  const [bi, setBi] = useState(0);
+  const ref = useRef<HTMLDivElement | null>(null);
 
-export default function DatenExplorerPreviewTile({
-  title,
-  description,
-  ctaLabel,
-  targetUrl,
-}: Props) {
-  const [view, setView] = useState(0);
-  const wrapperRef = useRef<HTMLAnchorElement | null>(null);
-
-  // Auto-cycle the three views, gated on visibility so it doesn't "skip"
-  // while scrolled off the mobile carousel.
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const root = wrapperRef.current;
+    const root = ref.current;
     if (!root) return;
-
-    let interval: number | null = null;
-    const start = () => {
-      if (interval === null) interval = window.setInterval(() => setView((i) => (i + 1) % VIEWS.length), SWITCH_MS);
-    };
-    const stop = () => { if (interval !== null) { window.clearInterval(interval); interval = null; } };
-    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.5 });
+    let iv: number | null = null;
+    const start = () => { if (iv === null) iv = window.setInterval(() => setBi((i) => (i + 1) % BAR_STATES.length), SWITCH_MS); };
+    const stop = () => { if (iv !== null) { window.clearInterval(iv); iv = null; } };
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.4 });
     io.observe(root);
     return () => { io.disconnect(); stop(); };
   }, []);
 
-  const arrow = (r: Row) => (
-    <span className="dp__arrow"><VerdictArrow verdict={r.verdict} size={13} strokeWidth={2.2} /></span>
-  );
-  const colorOf = (r: Row) => ({ ["--v" as string]: `var(${r.cssVar})` } as CSSProperties);
+  const bars = BAR_STATES[bi];
 
   return (
-    <a ref={wrapperRef} className="path-tile path-tile--daten" href={targetUrl}>
+    <div className="path-tile path-tile--daten" ref={ref}>
       <div className="path-tile__preview">
-        <div className="daten-preview" aria-hidden="true">
-          <div className="daten-preview__tabs" role="presentation">
-            {VIEWS.map((v, i) => (
-              <span key={v} className="daten-preview__tab" data-active={i === view ? "true" : "false"}>{v}</span>
+        <div className="daten-field">
+          <div className="daten-bars" aria-hidden="true">
+            {bars.map((b, i) => (
+              <span className="daten-bar" key={i}>
+                <span className="daten-bar__fill" style={{ width: `${b.v}%`, background: `var(${b.c})` } as CSSProperties} />
+              </span>
             ))}
           </div>
-
-          {/* Balken — verdict arrow + label + a verdict-coloured fill bar */}
-          {view === 0 && (
-            <div className="dp-viz dp-balken">
-              {ROWS.map((r) => (
-                <div className="dp-row" key={r.label} style={colorOf(r)}>
-                  {arrow(r)}
-                  <span className="dp-label">{r.label}</span>
-                  <span className="dp-track"><span className="dp-fill" style={{ width: `${r.v[0]}%` }} /></span>
-                  <span className="dp-val">{r.v[0]}</span>
+          <div className="daten-tabs">
+            {GROUPS.map((g) => (
+              <div className="daten-tabs__group" key={g.label}>
+                <span className="daten-tabs__label">{g.label}</span>
+                <div className="daten-tabs__row">
+                  {g.tabs.map((t) => (
+                    <a className="daten-tab" key={t.view} href={`/daten-explorer/?view=${t.view}`} aria-label={`${g.label}: ${t.label}`}>
+                      <t.Icon size={15} aria-hidden="true" />
+                      <span>{t.label}</span>
+                    </a>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Spannweite — thin stem + lollipop dot at the value (range marker) */}
-          {view === 1 && (
-            <div className="dp-viz dp-spann">
-              {ROWS.map((r) => (
-                <div className="dp-row" key={r.label} style={colorOf(r)}>
-                  {arrow(r)}
-                  <span className="dp-label">{r.label}</span>
-                  <span className="dp-track dp-track--stem">
-                    <span className="dp-stem" style={{ width: `${r.v[0]}%` }} />
-                    <span className="dp-dot" style={{ left: `${r.v[0]}%` }} />
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Tabelle — numeric grid across three population columns */}
-          {view === 2 && (
-            <div className="dp-viz dp-table">
-              <div className="dp-trow dp-trow--head">
-                <span className="dp-tcell dp-tcell--corner" />
-                {COLS.map((c) => <span key={c} className="dp-tcell dp-tcell--head">{c}</span>)}
               </div>
-              {ROWS.map((r) => (
-                <div className="dp-trow" key={r.label} style={colorOf(r)}>
-                  <span className="dp-tcell dp-tcell--label">{arrow(r)}<span className="dp-label">{r.label}</span></span>
-                  {r.v.map((n, i) => <span key={i} className="dp-tcell dp-tcell--num">{n}</span>)}
-                </div>
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="path-tile__body">
-        <h3 className="path-tile__title">
-          {title}
-          <span className="path-tile__title-arrow" aria-hidden="true">→</span>
-        </h3>
+        <a className="path-tile__title-link" href={targetUrl}>
+          <h3 className="path-tile__title">
+            {title}
+            <span className="path-tile__title-arrow" aria-hidden="true">→</span>
+          </h3>
+        </a>
         <p className="path-tile__description">{description}</p>
-        <p className="path-tile__cta">{ctaLabel}</p>
       </div>
-    </a>
+    </div>
   );
 }

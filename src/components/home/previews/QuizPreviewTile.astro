@@ -1,5 +1,5 @@
 ---
-import QuizPreviewDeck from "./QuizPreviewDeck";
+import { QUIZ_THEME_META } from "../../../lib/quiz/categories";
 
 export interface Props {
   title: string;
@@ -8,20 +8,45 @@ export interface Props {
   targetUrl: string;
 }
 
-const { title, description, ctaLabel, targetUrl } = Astro.props;
+const { title, description, targetUrl } = Astro.props;
+
+// The six quiz categories as clickable decks — same icons/colours as the real
+// /quiz/ index, each starting that quiz directly. Fills the top field; the name
+// + description sit in the body below (shared 2×2 tile division).
+const decks = Object.entries(QUIZ_THEME_META);
 ---
 
-<a class="path-tile path-tile--quiz" href={targetUrl}>
+<div class="path-tile path-tile--quiz">
   <div class="path-tile__preview">
-    <QuizPreviewDeck client:visible />
+    <ul class="quiz-decks">
+      {decks.map(([slug, m]) => {
+        const Icon = m.icon;
+        return (
+          <li>
+            <a
+              class={`quiz-deck quiz-deck--${m.theme}`}
+              href={`/quiz/${slug}/`}
+              aria-label={`Quiz starten: ${m.shortTitle}`}
+            >
+              <span class="quiz-deck__icon" aria-hidden="true"><Icon size={18} strokeWidth={1.9} /></span>
+              <span class="quiz-deck__text">
+                <span class="quiz-deck__title">{m.shortTitle}</span>
+                <span class="quiz-deck__count">{m.count} Mythen</span>
+              </span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
   </div>
 
   <div class="path-tile__body">
-    <h3 class="path-tile__title">
-      {title}
-      <span class="path-tile__title-arrow" aria-hidden="true">→</span>
-    </h3>
+    <a class="path-tile__title-link" href={targetUrl}>
+      <h3 class="path-tile__title">
+        {title}
+        <span class="path-tile__title-arrow" aria-hidden="true">→</span>
+      </h3>
+    </a>
     <p class="path-tile__description">{description}</p>
-    <p class="path-tile__cta">{ctaLabel}</p>
   </div>
-</a>
+</div>

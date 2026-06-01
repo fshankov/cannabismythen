@@ -354,8 +354,43 @@ body:has(.scrolly) main {
   border-radius: 2px;
   flex-shrink: 0;
 }
+/* Iter-22: category icon (tinted with the theme colour) replacing the
+   plain swatch in the Step-3 Themenfelder legend. */
+.scrolly__theme-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
 .scrolly__theme-name {
   white-space: nowrap;
+}
+
+/* ── Iter-22: inline `{icon:…}` body icons + icon lists ──────────── */
+/* Inline icon (e.g. before a bold indicator label in Steps 6/7). */
+.scrolly__body-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  vertical-align: -0.18em;
+  margin-right: 0.1em;
+}
+/* Icon list (Step 5 target groups, Step 10 offerings): each item on its
+   own row as [icon | text], wrapped text aligns under the text. */
+.scrolly__body-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  margin-top: 0.15em;
+}
+.scrolly__body-li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55em;
+}
+.scrolly__body-li .scrolly__body-icon {
+  margin-right: 0;
+  margin-top: 0.12em;
+  vertical-align: baseline;
 }
 
 /* In-body classified verdict tally (Step 4) — 5 rows, each:

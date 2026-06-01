@@ -1,17 +1,18 @@
-/* Pendel-Lupe-Ring hero — styles for HeroBlock.tsx.
- * Kept in a separate stylesheet (not an inline <style> in the React island)
- * so the hydrated island has no big style text node to diff — an inline
- * <style> string trips React's hydration text-mismatch (SSR escapes the
- * apostrophes in 'Inter Variable', the client renders them raw), which forces
- * a client re-render / flash. Class names are cmhero* / cmh__* (global, unique).
- * Design spec: docs/superpowers/specs/2026-05-31-homepage-hero-pendulum-design.md */
+/* Scattered-myth hero — styles for HeroBlock.tsx.
+ * Kept in a separate stylesheet (not an inline <style> in the React island) so
+ * the hydrated island has no big style text node to diff (avoids a React
+ * hydration text-mismatch / flash). Class names are cmhero* / cmh__* (global).
+ * Design: 42 myth statements scattered across the field, white + blurred at
+ * rest, gaining verdict colour only on hover / in the spotlight. The Lupe under
+ * the headline reveals the verdict glyph at the same slow pace (--lupe-reveal). */
 
 .cmhero {
-  --cmh-smoke: #bcd6c6; --cmh-lupe: #d2e6db;
-  --cmh-sway: 0deg; --cmh-breathe: 1; --s: 0.58;
+  --cmh-lupe: #d2e6db;
+  --lupe-reveal: 0;
   position: relative; overflow: hidden; background: #1d4a37;
   min-height: 560px; height: 100vh; height: 100svh; max-height: 1040px;
   touch-action: manipulation;
+  margin-bottom: 0;          /* override global section gap — blocks touch, no stripe */
 }
 .cmhero__bg {
   position: absolute; inset: 0; z-index: 0; pointer-events: none;
@@ -28,30 +29,45 @@
   animation: cmhDrift 64s ease-in-out infinite reverse; }
 @keyframes cmhDrift { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(80px,60px) scale(1.07);} }
 
-.cmhero__oval { position: absolute; left: 50%; top: 40%; width: 0; height: 0; z-index: 3; transform: scaleY(var(--s)); }
-.cmhero__cloud { transform: rotate(var(--cmh-sway)) scale(var(--cmh-breathe)); }
-.cmh__slot { position: absolute; left: 0; top: 0; transform: rotate(var(--a)) translateY(var(--r));
+/* Scattered field — slots are absolutely positioned (left/top set in JS). */
+.cmhero__cloud { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.cmh__slot { position: absolute; left: 0; top: 0;
   opacity: 0; animation: cmhSlotIn .6s cubic-bezier(.2,.7,.3,1) both;
   animation-delay: calc(var(--i, 0) * 14ms); }
 @keyframes cmhSlotIn { from { opacity: 0; } to { opacity: 1; } }
-.cmh__counter { transform: rotate(calc(-1 * var(--cmh-sway))); }
-.cmh__label { transform: rotate(calc(-1 * var(--a))); }
-.cmh__fix { transform: scaleY(calc(1 / var(--s))); }
+/* Per-myth float: each label slowly traces a small ellipse around its placed
+   point (`translate -50% -50%` centres the text; the animation orbits it). The
+   perpendicular axis is derived from --fx/--fy (-0.5·fy, 0.5·fx) so the orbit
+   stays within the same per-axis bound the layout guarantees → no overlap. */
+.cmh__float { translate: -50% -50%; will-change: transform;
+  animation: cmhFloat var(--fdur, 14s) ease-in-out var(--fdelay, 0s) infinite; }
+@keyframes cmhFloat {
+  0%,100% { transform: translate(var(--fx,0), var(--fy,0)); }
+  25%     { transform: translate(calc(var(--fy,0) * -0.5), calc(var(--fx,0) * 0.5)); }
+  50%     { transform: translate(calc(var(--fx,0) * -1), calc(var(--fy,0) * -1)); }
+  75%     { transform: translate(calc(var(--fy,0) * 0.5), calc(var(--fx,0) * -0.5)); }
+}
 .cmh__text {
-  position: absolute; left: 0; top: 0; translate: -50% -50%; transform-origin: center;
-  width: max-content; max-width: min(42vw, 340px); text-align: center; white-space: normal;
-  line-height: 1.22; font-weight: 600; font-size: clamp(13px, 1.3vmin + 8px, 17px);
+  /* width is capped (set in JS) + 2-line clamp so resting labels never overlap */
+  width: var(--cmh-lw, 130px); text-align: center; white-space: normal;
+  line-height: 1.2; font-weight: 500; font-size: clamp(12px, 1.1vmin + 8px, 15px);
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
   will-change: opacity, filter, transform;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* Spotlit / hovered: show the FULL short statement (no cap, no clamp, no "…"),
+   lifted above its neighbours (slot z-index set in JS). */
+.cmh__text--full {
+  width: auto; max-width: 15rem; overflow: visible;
+  display: block; -webkit-line-clamp: unset;
 }
 
-/* Center radial seats the headline; top/bottom linear fades feather the myth
- * field into the fixed header band and the bottom banner/tab-bar zone. */
+/* Center radial seats the headline; top/bottom fades feather the field. */
 .cmhero__vig { position: absolute; inset: 0; z-index: 4; pointer-events: none;
   background:
     linear-gradient(to bottom, rgba(13,33,24,.92) 0, rgba(13,33,24,0) 132px),
     linear-gradient(to top, rgba(13,33,24,.78) 0, rgba(13,33,24,0) 150px),
-    radial-gradient(ellipse 52% 26% at 50% 46%, rgba(13,33,24,.85) 0%, rgba(13,33,24,.34) 52%, transparent 76%); }
+    radial-gradient(ellipse 50% 30% at 50% 46%, rgba(13,33,24,.9) 0%, rgba(13,33,24,.42) 52%, transparent 78%); }
 
 .cmhero__center { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center; padding: 40px 16px;
@@ -67,27 +83,24 @@
   font-weight: 400; color: #9bd0b6; font-size: clamp(25px, 4.4vw, 45px); margin-top: 6px;
   letter-spacing: .3px; text-shadow: 0 2px 30px rgba(0,0,0,.6); }
 
+/* Lupe — connected SVG outline (rim + handle) over a frosted lens disc. The
+   verdict glyph inside fades + scales in with the active myth (--lupe-reveal). */
 .cmhero__glass { position: absolute; left: 50%; top: 60%; z-index: 7; transform: translate(-50%,-50%);
-  pointer-events: none; width: 56px; aspect-ratio: 1; }
-/* Real magnifying glass: ONE connected SVG outline (rim + handle) over a frosted
- * (glassmorphism) lens disc — no fill, the blurred background shows through.
- * The frosted disc is aligned to the SVG circle (cx11 cy11 r8 in a 24-box →
- * left/top 12.5%, w/h 66.67%, radius 50%). */
+  pointer-events: none; width: clamp(64px, 11vmin, 88px); aspect-ratio: 1; }
 .cmhero__lens-frost { position: absolute; left: 12.5%; top: 12.5%; width: 66.67%; height: 66.67%;
   border-radius: 50%; background: rgba(236, 244, 240, .10);
   -webkit-backdrop-filter: blur(7px) saturate(1.15);
           backdrop-filter: blur(7px) saturate(1.15);
   box-shadow: inset 0 1px 8px rgba(255,255,255,.28), inset 0 -6px 14px rgba(0,0,0,.16); }
-/* Fallback when backdrop-filter is unsupported (old browsers): faint pale fill */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .cmhero__lens-frost { background: rgba(236, 244, 240, .90); }
 }
 .cmhero__mag { position: absolute; inset: 0; width: 100%; height: 100%;
   stroke: var(--cmh-lupe); filter: drop-shadow(0 3px 10px rgba(0,0,0,.35)); }
-.cmhero__arrow { position: absolute; left: 45.83%; top: 45.83%; width: 24px; height: 24px;
-  transform: translate(-50%,-50%); display: block; }
-.cmhero__arrow svg { width: 24px; height: 24px; }
-.cmhero__arrow svg path { transition: stroke .4s ease; }
+.cmhero__arrow { position: absolute; left: 45.83%; top: 45.83%; width: 52%; height: 52%;
+  transform: translate(-50%,-50%) scale(calc(.5 + var(--lupe-reveal, 0) * .5));
+  opacity: var(--lupe-reveal, 0); display: block; }
+.cmhero__arrow svg { width: 100%; height: 100%; }
 
 .cmhero__flash { position: absolute; left: 0; top: 0; z-index: 2; width: 320px; height: 320px;
   margin: -160px 0 0 -160px; border-radius: 50%; pointer-events: none; opacity: 0; mix-blend-mode: screen;
@@ -104,4 +117,5 @@
 @media (prefers-reduced-motion: reduce) {
   .cmhero__bg::before, .cmhero__bg::after { animation: none !important; }
   .cmh__slot { animation: none !important; opacity: 1; }
+  .cmh__float { animation: none !important; }
 }

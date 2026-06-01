@@ -7,10 +7,11 @@ import HeroBlock from "@components/home/HeroBlock";
 import type { HeroMyth } from "@components/home/HeroBlock";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
-import ProjectStripBlock from "@components/home/ProjectStripBlock.astro";
+import SiteFooter from "@components/home/SiteFooter.astro";
 import type { PreviewMyth } from "@components/home/previews/FaktenKartenPreviewTile.astro";
 import type { AudienceChip } from "@components/home/previews/MeineInteressenPreviewTile.astro";
 import { getAllAudiences } from "@lib/faq";
+import carmData from "../../public/data/carm-data.json";
 
 // ── Interactive hero (Pendel-Lupe-Ring) ────────────────────────────────────
 // All 42 myth statements ride a raised oval ring around the central question
@@ -27,6 +28,7 @@ type MythRecord = {
   prefix: string;
   classification: string;
   title: string;
+  categoryGroup: string;
   summary: string;
 };
 const mythRecords: MythRecord[] = [];
@@ -34,7 +36,7 @@ const mythRecords: MythRecord[] = [];
 for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
   const prefixMatch = slug.match(/^m\d+/);
   if (!prefixMatch) continue;
-  const e = entry as { classification: string; title?: string; cardShortSummary?: string };
+  const e = entry as { classification: string; title?: string; cardShortSummary?: string; categoryGroup?: string };
   // Strip the "Mythos N: " prefix and trailing period so the title alone
   // fits the small preview-card stripes.
   const title = (e.title ?? "")
@@ -46,32 +48,27 @@ for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
     prefix: prefixMatch[0],
     classification: e.classification,
     title,
+    categoryGroup: e.categoryGroup ?? "",
     summary: e.cardShortSummary ?? "",
   });
 }
 
-// Short forms ONLY for the long myth titles (they otherwise wrap to 3–4 lines and
-// overlap on the hero ring). Where the project already has a short phrasing
-// (src/components/home/mythPositions.ts HERO_MYTHS) it is reused; the remainder are
-// AI-drafted short statements — ISD review pending — with the English gloss noted.
-// All other myths keep their accurate stripped title.
-const HERO_SHORT_OVERRIDES: Record<string, string> = {
-  m03: "Jüngere sind stärker gefährdet",               // project seed — younger people are more at risk
-  m06: "Mischkonsum ist besonders riskant",            // project seed — mixing substances is especially risky
-  m07: "Zusätze erhöhen die Gesundheitsrisiken",       // AI draft — additives increase health risks
-  m15: "Konsum schadet den Atemwegen",                 // project seed — use harms the airways
-  m28: "Cannabis macht antriebslos",                   // project seed — cannabis makes you unmotivated
-  m35: "Konsumierende halten sich weniger an Regeln",  // AI draft — consumers follow social rules less
-  m37: "Konsum steht für niedriges soziales Niveau",   // AI draft — use signals low social status
-  m41: "Die Legalisierung steigert den Konsum",        // AI draft — legalisation increases consumption
-  m42: "Legalisierung steigert Konsum bei Minderjährigen", // AI draft — legalisation increases minors' use
-};
+// Short myth labels for the hero scatter — the project's canonical
+// `text_short_de` from carm-data.json (the same concise, ISD-approved versions
+// shown in the Daten-Explorer Tabelle), keyed by myth number. Short enough to
+// show in full in the spotlight (no "…") and to scatter without overlap.
+const shortById = new Map<number, string>(
+  ((carmData as { myths?: Array<{ id: number; text_short_de?: string }> }).myths ?? [])
+    .map((m) => [m.id, m.text_short_de ?? ""]),
+);
 
-// All 42 statements for the hero ring, in m01→m42 order (accurate titles, with the
-// long ones swapped to the short forms above).
+// All 42 hero myths in m01→m42 order; text = short label (fallback: stripped title).
 const heroMyths: HeroMyth[] = [...mythRecords]
   .sort((a, b) => a.prefix.localeCompare(b.prefix))
-  .map((r) => ({ text: HERO_SHORT_OVERRIDES[r.prefix] ?? r.title, classification: r.classification }));
+  .map((r) => {
+    const num = parseInt(r.prefix.slice(1), 10);
+    return { text: shortById.get(num) || r.title, classification: r.classification };
+  });
 
 function pickShortest(cls: string): MythRecord | undefined {
   return mythRecords
@@ -79,19 +76,25 @@ function pickShortest(cls: string): MythRecord | undefined {
     .sort((a, b) => a.title.length - b.title.length)[0];
 }
 
+// One representative myth per verdict → the Fakten-Karten tile cycles the real
+// card front (gradient + arrow + statement + category) across all verdicts.
 const previewMyths: PreviewMyth[] = [
   pickShortest("richtig"),
+  pickShortest("eher_richtig"),
   pickShortest("eher_falsch"),
   pickShortest("falsch"),
+  pickShortest("keine_aussage"),
 ]
   .filter((r): r is MythRecord => r !== undefined)
-  .map((r) => ({ text: r.title, classification: r.classification, summary: r.summary }));
+  .map((r) => ({ text: r.title, classification: r.classification, categoryGroup: r.categoryGroup, summary: r.summary }));
 
 // ── Editorial section content ──────────────────────────────────────────────
 const numbersStripData = await reader.singletons.numbersStrip.read();
 const headlineFinding = await reader.singletons.headlineFinding.read();
 const fourPathsData = await reader.singletons.fourPaths.read();
 const projectStripData = await reader.singletons.projectStrip.read();
+// Rich "about" footer content lives in the Über-das-Projekt singleton.
+const projektFooter = await reader.singletons.ueberUnsScrolly.read();
 
 // The five FAQ audiences, as colour-coded rows for the Meine-Interessen tile.
 const audienceMetaList = await getAllAudiences();
@@ -101,7 +104,7 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
 }));
 ---
 
-<BaseLayout title="Startseite" heroMode={true}>
+<BaseLayout title="Startseite" heroMode={true} hideFooter={true}>
   <HeroBlock
     myths={heroMyths}
     headline1={heroHeadline1}
@@ -136,7 +139,12 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
     />
   )}
 
-  {projectStripData && (
-    <ProjectStripBlock credit={projectStripData.credit} links={projectStripData.links} />
-  )}
+  <SiteFooter
+    kontakt={projektFooter?.footerKontakt}
+    foerderung={projektFooter?.footerFoerderung}
+    zitierweise={projektFooter?.footerZitierweise}
+    abschlussbericht={projektFooter?.footerAbschlussbericht}
+    credit={projectStripData?.credit}
+    links={projectStripData?.links ?? []}
+  />
 </BaseLayout>

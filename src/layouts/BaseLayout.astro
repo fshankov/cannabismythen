@@ -20,6 +20,9 @@ interface Props {
    *  set, emits og:image + twitter:card meta. og:title/description
    *  derive from `title`/`description`; og:url from the current request. */
   ogImage?: string;
+  /** When true, suppress the default minimal copyright footer — the page
+   *  provides its own footer (e.g. the homepage's rich SiteFooter). */
+  hideFooter?: boolean;
 }
 
 const {
@@ -29,6 +32,7 @@ const {
   bgTexture = false,
   extraBodyClass,
   ogImage,
+  hideFooter = false,
 } = Astro.props;
 
 // PREVIEW BANNER — flip to false before public launch
@@ -213,7 +217,42 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       <nav class="nav" id="mainNav" aria-label="Hauptnavigation">
 
         <a href="/" class="nav__brand" aria-label="Cannabis Mythen – Startseite">
-          Cannabis<span class="nav__brand-myth">Mythen</span>
+          <span class="cm-logo" aria-hidden="true">
+            <span class="cm-lens" aria-hidden="true"></span>
+            <svg class="cm-art" viewBox="0 0 64 64" aria-hidden="true">
+              <defs>
+                <clipPath id="cmLens"><circle cx="30" cy="30" r="14.6"/></clipPath>
+                <radialGradient id="cmSpec" cx="0.5" cy="0.5" r="0.5">
+                  <stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="cmDepth" cx="0.5" cy="0.62" r="0.62">
+                  <stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0a140f" stop-opacity=".2"/>
+                </radialGradient>
+                <linearGradient id="cmRim" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+                </linearGradient>
+                <filter id="cmBB" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.15"/></filter>
+                <filter id="cmSB" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.5"/></filter>
+                <filter id="cmHZ" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation=".26"/></filter>
+              </defs>
+              <g clip-path="url(#cmLens)">
+                <g filter="url(#cmBB)" opacity=".42" transform="translate(30 26.5) scale(1.18) translate(-12 -9)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 16h20" stroke="var(--cm-mark-soft)"/><path d="M12 2v14" stroke="var(--cm-mark)"/><path d="m5 9 7 7 7-7" stroke="var(--cm-mark)"/>
+                </g>
+                <g filter="url(#cmHZ)" transform="translate(30 26.5) scale(.86) translate(-12 -9)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 16h20" stroke="var(--cm-mark-soft)"/><path d="M12 2v14" stroke="var(--cm-mark)"/><path d="m5 9 7 7 7-7" stroke="var(--cm-mark)"/>
+                </g>
+                <circle cx="30" cy="30" r="14.6" fill="#fff" fill-opacity=".08"/>
+                <circle cx="30" cy="30" r="14.6" fill="url(#cmDepth)"/>
+                <g filter="url(#cmSB)"><ellipse cx="24.5" cy="23" rx="9.5" ry="6" transform="rotate(-32 24.5 23)" fill="url(#cmSpec)"/></g>
+                <path d="M19.5 24 A14.6 14.6 0 0 1 40 19" fill="none" stroke="url(#cmRim)" stroke-width="1.4" stroke-linecap="round"/>
+              </g>
+              <g fill="none" stroke="var(--cm-ring)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="30" cy="30" r="16"/><path d="M50 50 41.3 41.3"/>
+              </g>
+            </svg>
+          </span>
+          <span class="nav__brand-text">Cannabis<span class="nav__brand-myth">Mythen</span></span>
         </a>
 
         <ul class="nav__links" role="list">
@@ -254,7 +293,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
     <main>
       <slot />
     </main>
-    <footer id="main-content">
+    <footer id="main-content" style={hideFooter ? "display:none" : undefined}>
       <p>&copy; {new Date().getFullYear()} CaRM-Projekt</p>
       {/* ⚠ FEEDBUCKET DISABLED 2026-05-29 — all feedback widgets off. To
           re-enable: delete the simple copyright line above, then uncomment

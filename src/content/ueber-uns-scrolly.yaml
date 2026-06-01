@@ -7,7 +7,7 @@ steps:
       Hand aufs Herz:
       Wie viel von dem, was du über Cannabis weißt, stimmt eigentlich?
     bodyText: >-
-      Im April 2024 wurde Cannabis in Deutschland teil-legalisiert. Das Konsumcannabisgesetz beendete eine jahrzehntelange Verbotskultur. Auf einmal stehen Fragen im Raum, die vorher selten gestellt wurden — und alle haben eine Meinung dazu.
+      Im April 2024 wurde Cannabis in Deutschland teil-legalisiert. Das Konsumcannabisgesetz beendete eine jahrzehntelange Verbotskultur. Seitdem stehen Fragen im Raum, die vorher kaum gestellt wurden — und fast jede:r hat eine Meinung dazu.
 
 
       Das Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD) wollte es genau wissen: Was glaubt die Bevölkerung wirklich über Cannabis — und wie viel davon stimmt?
@@ -17,17 +17,17 @@ steps:
       Jede:r in Deutschland
       hat eine Meinung über Cannabis.
     bodyText: >-
-      Online, am Küchentisch, im Wartezimmer — Cannabis ist ein Thema. Das ISD sammelte Aussagen systematisch: eine Online-Befragung von 1.041 Personen, Gespräche mit 60 Präventionsfachkräften, eine Analyse einschlägiger (Online-)Medien.
+      Online, am Küchentisch, im Wartezimmer — Cannabis ist ein Thema. Das ISD trug die Aussagen systematisch zusammen: 7.408 frei formulierte Aussagen — aus einer Online-Befragung von 1.041 Personen, Gesprächen mit 60 Präventionsfachkräften und einer Analyse einschlägiger (Online-)Medien.
 
 
       Manches klingt plausibel, manches widersprüchlich. Was davon stimmt eigentlich? Genau das wollten wir herausfinden.
     legend: "7.408 Aussagen · 53 Themenfelder · 42 prüfbare Thesen"
     hint: ""
   - heading: |-
-      Aus tausenden Stimmen
-      blieben 42 prüfbare Thesen.
+      Tausende Stimmen, verdichtet
+      zu 42 prüfbaren Thesen.
     bodyText: >-
-      Drei Quellen, gegeneinander abgeglichen: Online-Befragung, Fachgespräche, Medienanalyse. Was immer wieder auftauchte, haben wir gebündelt und zu **42 prüfbaren Thesen** verdichtet — thematisch sortiert.
+      Drei Quellen, gegeneinander abgeglichen: Online-Befragung, Fachgespräche, Medienanalyse. Aus 7.408 Aussagen wurden 53 Themenfelder — und daraus **42 prüfbare Thesen**, thematisch geordnet.
     hint: ""
   - heading: |-
       Jede These wurde
@@ -40,23 +40,28 @@ steps:
   - heading: |-
       Dann fragten wir 2.795 Menschen,
       was sie für richtig halten.
-    bodyText: >-
+    bodyText: |-
       Bevölkerungsbefragung in Deutschland: 2.097 Erwachsene (18–70 Jahre), 555 Minderjährige (16–17 Jahre), 143 Mitglieder von Cannabis-Anbauvereinigungen.
 
+      Für jede der 42 Thesen erhoben wir fünf Indikatoren — über fünf Zielgruppen hinweg:
 
-      Für jede der 42 Thesen erhoben wir fünf Indikatoren — über fünf Zielgruppen hinweg: Volljährige, Minderjährige, Konsumierende, junge Erwachsene und Eltern minderjähriger Kinder.
+      {icon:adults} Volljährige
+      {icon:minors} Minderjährige
+      {icon:consumers} Konsumierende
+      {icon:young_adults} junge Erwachsene
+      {icon:parents} Eltern minderjähriger Kinder
     hint: ""
   - heading: |-
-      Was wir messen.
-      Was wir glauben zu wissen.
+      Bekannt, bedeutsam —
+      und falsch eingeschätzt.
     bodyText: |-
       Beispiel-These: „Cannabiskonsum verursacht einen generellen Motivationsverlust." [↓ falsch]
 
-      **Kenntnis.** In der Zielgruppe der Erwachsenen kennen 26 % diesen Mythos. Das ist ein niedriger mittlerer Anteil.
+      {icon:awareness} **Kenntnis.** 26 % der Erwachsenen kennen diesen Mythos — ein niedriger mittlerer Wert.
 
-      **Bedeutung.** Die Bedeutung dieses Mythos für die Erwachsenen, die ihn kennen (26 %), für ihren Umgang mit Cannabis hat ein hohes mittleres Niveau von 67 Punkten.
+      {icon:significance} **Bedeutung.** Für die Erwachsenen, die ihn kennen, ist er durchaus wichtig: 67 von 100 Punkten für den eigenen Umgang mit Cannabis.
 
-      **Richtigkeit.** Die Beurteilung in Übereinstimmung mit der wissenschaftlichen Klassifizierung erreicht bei diesen Erwachsenen ein niedriges Niveau von 25 Punkten — die Mehrheit liegt also daneben.
+      {icon:correctness} **Richtigkeit.** Die Einordnung im Sinne der wissenschaftlichen Klassifikation erreicht nur 25 von 100 Punkten — die meisten liegen also daneben. Dabei ist der Befund eindeutig: Aktuelle Studien können einen Zusammenhang zwischen Cannabis und einem generellen Motivationsverlust nicht bestätigen.
     legend: "Stichprobe: 2.097 Volljährige, 18–70 Jahre."
     hint: ""
   - heading: |-
@@ -65,9 +70,9 @@ steps:
     bodyText: |-
       Aus diesen drei Werten leiten sich zwei weitere ab.
 
-      **Präventionsbedeutung.** Aus der individuellen Bedeutung und der Beurteilung der Richtigkeit resultiert ein mittleres Niveau für die Präventionsbedeutung (60 Punkte) — der höchste Wert unter allen 42 Thesen.
+      {icon:prevention_significance} **Präventionsbedeutung.** Aus individueller Bedeutung und Beurteilung ergibt sich ein mittleres Niveau von 60 Punkten — einer der höchsten Werte unter allen 42 Thesen.
 
-      **Bevölkerungsrisiko.** Mit Blick auf die gesamte volljährige Bevölkerung (nicht nur diejenigen, die den Mythos schon kennen) ergibt sich ein niedriges Niveau für die Präventionsbedeutung (Bevölkerungsrelevanz: 17 Punkte).
+      {icon:population_relevance} **Bevölkerungsrisiko.** Doch über die gesamte volljährige Bevölkerung gerechnet — nicht nur über jene, die den Mythos schon kennen — fällt die Präventionsbedeutung niedrig aus (Bevölkerungsrelevanz: 17 Punkte).
 
       Bevölkerungsrisiko ist nur für Voll- und Minderjährige belastbar; die anderen Gruppen sind zu klein für eine Hochrechnung.
     hint: ""
@@ -75,11 +80,11 @@ steps:
       Wo wir suchen.
       Wem wir vertrauen.
     bodyText: |-
-      Wo suchen Menschen aktiv nach Informationen zu Cannabis — und wem vertrauen sie dabei?
+      In einem eigenen Studienteil haben wir gefragt: Wo suchen Menschen aktiv nach Informationen zu Cannabis — und wem vertrauen sie dabei?
 
-      Erwachsene gehen am häufigsten in die Apotheke oder Arztpraxis (60 %). Minderjährige greifen dort nur zu 37 % zu und fragen lieber Angehörige (53 %). Foren und Influencer:innen spielen vor allem in jüngeren Zielgruppen eine Rolle.
+      Erwachsene gehen am häufigsten in die Apotheke oder Arztpraxis (60 %). Minderjährige nur zu 37 % — sie fragen lieber Angehörige (53 %). Foren und Influencer:innen spielen vor allem in jüngeren Zielgruppen eine Rolle.
 
-      Beim Vertrauen liegen Apotheken über alle Gruppen vorn (92 von 100). Doch wer vertraut, sucht nicht zwangsläufig dort — die Lücke zwischen Vertrauen und Nutzung ist der eigentliche Befund.
+      Beim Vertrauen liegen Apotheken über alle Gruppen vorn (92 von 100). Doch wer ihnen vertraut, sucht dort nicht zwangsläufig — die Lücke zwischen Vertrauen und tatsächlicher Informationssuche ist der eigentliche Befund.
     hint: ""
   - heading: |-
       Was uns nebenbei erreicht.
@@ -91,12 +96,12 @@ steps:
     hint: ""
   - heading: Was wir daraus gemacht haben.
     bodyText: |-
-      Diese Website verwertet die Befunde der CaRM-Studie für unterschiedliche Bedürfnisse:
+      Diese Website verwertet die Befunde der CaRM-Studie — für unterschiedliche Bedürfnisse:
 
-      — 42 Faktenkarten mit wissenschaftlicher Klassifikation, Quellen und Erklärungen je Mythos.
-      — Ein Quiz, das dein eigenes Wissen mit den Ergebnissen der Bevölkerungsbefragung vergleicht.
-      — Den Daten-Explorer mit Sichten für allgemeines Publikum, Eltern, Fachkräfte und Forschung.
-      — Meine Interessen — die FAQ, sortiert nach Themen und Zielgruppen.
+      {icon:faktenkarten} 42 Faktenkarten mit wissenschaftlicher Klassifikation, Quellen und Erklärungen je Mythos.
+      {icon:quiz} Ein Quiz, das dein Wissen mit den Ergebnissen der Bevölkerungsbefragung vergleicht.
+      {icon:daten-explorer} Den Daten-Explorer mit Sichten für allgemeines Publikum, Eltern, Fachkräfte und Forschung.
+      {icon:meine-interessen} Meine Interessen — die FAQ, sortiert nach Themen und Zielgruppen.
     hint: ""
   - heading: Wer hinter der Studie steht.
     bodyText: >-
@@ -188,6 +193,30 @@ footerAbschlussbericht:
   body: >-
     Schütze, C., Schulte, B., Buth, S., Degkwitz, P., Rosenkranz, M., & Lahusen, H. (2026). Cannabiskonsum — Risiken und Mythen (CaRM): Abschlussbericht. ISD Hamburg.
 internalNotes: >-
+  Iter-22 (2026-06-01) — Linke-Spalte-Copy + Inline-Icons (Fedor-Review,
+  faktengeprüft am CaRM-Abschlussbericht). AI-Entwurf, wartet auf ISD-Abnahme.
+  Newton-Stimme: Zahl vor Behauptung, ein Qualifier, kein Drama, du-Form.
+  Änderungen: 1/11 weicher ("Seitdem … fast jede:r" statt "Auf einmal … alle").
+  2/11 reale Zahl ergänzt: 7.408 frei formulierte Aussagen (Bericht §3.1.4).
+  3/11 Überschrift "Tausende Stimmen, verdichtet zu 42 prüfbaren Thesen" +
+  Trichter 7.408 → 53 Themenfelder → 42 Thesen. 5/11 Zielgruppen als Icon-
+  Liste (Volljährige/Minderjährige/Konsumierende/junge Erwachsene/Eltern).
+  6/11 neue Überschrift "Bekannt, bedeutsam — und falsch eingeschätzt." +
+  Indikator-Icons + Genauigkeit: "Aktuelle Studien können einen Zusammenhang
+  zwischen Cannabis und einem generellen Motivationsverlust nicht bestätigen"
+  (Bericht §7.28; Prüfthese 28 = falsch). 7/11 Indikator-Icons, "Doch"-
+  Kontrast, "der höchste Wert" → "einer der höchsten Werte" (Bericht: zwei
+  Mythen teilen sich die höchste individuelle Präventionsbedeutung). 8/11
+  "In einem eigenen Studienteil …" + Lücke zwischen Vertrauen und
+  *tatsächlicher Informationssuche* (Bericht §4.5: hohes Vertrauen, aber
+  Apotheke wird nicht zwangsläufig aktiv aufgesucht — also "suchen/fragen",
+  nicht "kaufen"). 10/11 Angebote als Icon-Liste (Faktenkarten/Quiz/Daten-
+  Explorer/Meine Interessen, Icons wie in der Mobile-Navigation). Icons via
+  `{icon:KEY}`-Token (ScrollytellingViewer renderBodyWithVerdicts); Step-3
+  Kategorie-Icons (CATEGORY_META) in Legende + Matrix, Farben unverändert.
+  English gloss of the changed lines is in the Iter-22 plan section.
+
+
   Iter-4 production migration (2026-05-11). All German strings AI-drafted from the legacy /ueber-uns/{projekt,methodik,team,klassifikation}.mdoc files. Pending ISD review per Asana task https://app.asana.com/1/1214692075439040/project/1214704634010891/task/1214715500051497. Open numerical questions also tracked there (n=2.795 vs 2.777; Klassifikation counts 16/6/11/7/2 vs 15/5/11/9/2; 39 vs 42 Fact-Sheets; Dr. Rosenkranz title; bio lines).
 
 

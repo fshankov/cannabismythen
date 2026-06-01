@@ -41,6 +41,46 @@ import { VizTeamRow } from './VizTeamRow';
 import VerdictPill from '../shared/VerdictPill';
 import VerdictArrow from '../shared/VerdictArrow';
 import type { CorrectnessClass } from '../../lib/dashboard/types';
+import type { ComponentType } from 'react';
+import {
+  AUDIENCE_ICONS_BY_GROUP,
+  AUDIENCE_COLOR_VAR_BY_GROUP,
+  INDICATOR_ICONS,
+} from '../../lib/icons';
+import { CATEGORY_META } from '../../lib/fakten-karten/categories';
+import { FileText, Brain, Table, CircleHelp } from 'lucide-react';
+
+/**
+ * Iter-22: inline `{icon:KEY}` tokens for the left-column body copy.
+ * Maps a token key → its icon component + (optional) color. Audience
+ * icons reuse the dashboard accent vars so they match the right-column
+ * viz ("in line with the icons on the right"); indicator + section
+ * icons inherit a muted tone. SECTION_ICONS mirror the mobile-tab-bar
+ * glyphs (Fakten-Karten / Quiz / Daten-Explorer / Meine Interessen).
+ */
+type InlineIconEntry = {
+  // Custom IconComponent (audiences/indicators) and Lucide icons
+  // (sections) have different prop signatures; `any` lets both into one
+  // registry. Rendered with size + an aria-hidden wrapper below.
+  Icon: ComponentType<any>;
+  color?: string;
+};
+const SCROLLY_INLINE_ICONS: Record<string, InlineIconEntry> = {
+  adults: { Icon: AUDIENCE_ICONS_BY_GROUP.adults, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.adults})` },
+  minors: { Icon: AUDIENCE_ICONS_BY_GROUP.minors, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.minors})` },
+  consumers: { Icon: AUDIENCE_ICONS_BY_GROUP.consumers, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.consumers})` },
+  young_adults: { Icon: AUDIENCE_ICONS_BY_GROUP.young_adults, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.young_adults})` },
+  parents: { Icon: AUDIENCE_ICONS_BY_GROUP.parents, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.parents})` },
+  awareness: { Icon: INDICATOR_ICONS.awareness },
+  significance: { Icon: INDICATOR_ICONS.significance },
+  correctness: { Icon: INDICATOR_ICONS.correctness },
+  prevention_significance: { Icon: INDICATOR_ICONS.prevention_significance },
+  population_relevance: { Icon: INDICATOR_ICONS.population_relevance },
+  faktenkarten: { Icon: FileText },
+  quiz: { Icon: Brain },
+  'daten-explorer': { Icon: Table },
+  'meine-interessen': { Icon: CircleHelp },
+};
 
 /** Inline matchers for body copy:
  *   - `[↑ richtig]`  → <VerdictPill>  (arrow glyph + verdict label)
@@ -51,7 +91,7 @@ import type { CorrectnessClass } from '../../lib/dashboard/types';
  * Both bracket forms accept the same set of arrow/verdict pairs so the
  * editor can pick "with label" vs "icon only" depending on context. */
 const INLINE_RE =
-  /\[([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\]|\{([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\}|\*\*([^*]+)\*\*/g;
+  /\[([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\]|\{([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\}|\*\*([^*]+)\*\*|\{icon:([a-z_-]+)\}/g;
 const VERDICT_LABEL_TO_CLASS: Record<string, CorrectnessClass> = {
   richtig: 'richtig',
   'eher richtig': 'eher_richtig',
@@ -105,12 +145,57 @@ function renderBodyWithVerdicts(text: string): ReactNode[] {
           {match[5]}
         </strong>,
       );
+    } else if (match[6]) {
+      // `{icon:KEY}` — inline icon (Iter-22). Unknown keys render nothing.
+      const entry = SCROLLY_INLINE_ICONS[match[6]];
+      if (entry) {
+        const { Icon, color } = entry;
+        out.push(
+          <span
+            key={key++}
+            className="scrolly__body-icon"
+            style={color ? { color } : undefined}
+            aria-hidden="true"
+          >
+            <Icon size={16} />
+          </span>,
+        );
+      }
     }
     lastIndex = start + match[0].length;
   }
   if (lastIndex < text.length) {
     out.push(<Fragment key={key++}>{text.slice(lastIndex)}</Fragment>);
   }
+  return out;
+}
+
+/**
+ * Iter-22: render one `\n\n`-delimited paragraph. Single `\n` lines become
+ * separate lines. A paragraph whose every line starts with `{icon:…}` is
+ * rendered as an icon list (flex rows: icon + text, wrapped text aligns
+ * under the text) — used for the Step-5 target groups and Step-10 offerings.
+ */
+function renderParagraph(para: string): ReactNode {
+  const lines = para.split('\n').filter((l) => l.trim().length > 0);
+  const isIconList =
+    lines.length >= 2 && lines.every((l) => l.trimStart().startsWith('{icon:'));
+  if (isIconList) {
+    return (
+      <span className="scrolly__body-list">
+        {lines.map((line, i) => (
+          <span key={i} className="scrolly__body-li">
+            {renderBodyWithVerdicts(line.trim())}
+          </span>
+        ))}
+      </span>
+    );
+  }
+  const out: ReactNode[] = [];
+  lines.forEach((line, i) => {
+    out.push(<Fragment key={`l${i}`}>{renderBodyWithVerdicts(line)}</Fragment>);
+    if (i < lines.length - 1) out.push(<br key={`b${i}`} />);
+  });
   return out;
 }
 
@@ -326,7 +411,7 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                       because the synthesis lives in its own Step 7 now. */}
                   {editorial.bodyText.split('\n\n').map((para, pi) => (
                     <p key={pi} className="scrolly__body">
-                      {renderBodyWithVerdicts(para)}
+                      {renderParagraph(para)}
                     </p>
                   ))}
                   {/* Iter-11: themed grid (Step 3) gets a Themenfelder
@@ -338,19 +423,33 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                       className="scrolly__theme-legend"
                       aria-label="Themenfelder"
                     >
-                      {orderedCategoriesFromData(data).map((c) => (
-                        <span
-                          key={c.id}
-                          className="scrolly__theme-chip"
-                        >
-                          <span
-                            className="scrolly__theme-swatch"
-                            style={{ background: themeColorFor(c.id) }}
-                            aria-hidden="true"
-                          />
-                          <span className="scrolly__theme-name">{c.name}</span>
-                        </span>
-                      ))}
+                      {orderedCategoriesFromData(data).map((c) => {
+                        // Iter-22: category icon (Fakten-Karten set) instead of
+                        // a plain colored square — tinted with the existing
+                        // themeColorFor() colour. Falls back to the swatch if a
+                        // category has no CATEGORY_META entry.
+                        const CatIcon = CATEGORY_META[c.name]?.icon ?? null;
+                        return (
+                          <span key={c.id} className="scrolly__theme-chip">
+                            {CatIcon ? (
+                              <span
+                                className="scrolly__theme-icon"
+                                style={{ color: themeColorFor(c.id) }}
+                                aria-hidden="true"
+                              >
+                                <CatIcon size={15} />
+                              </span>
+                            ) : (
+                              <span
+                                className="scrolly__theme-swatch"
+                                style={{ background: themeColorFor(c.id) }}
+                                aria-hidden="true"
+                              />
+                            )}
+                            <span className="scrolly__theme-name">{c.name}</span>
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                   {/* Iter-11: classified grid (Step 4) gets a verdict

@@ -1,13 +1,12 @@
 ---
-import VerdictArrow from "@components/shared/VerdictArrow";
-import type { CorrectnessClass } from "@lib/dashboard/types";
+import FaktenKartenPreviewDeck from "./FaktenKartenPreviewDeck";
 
 export interface PreviewMyth {
   text: string;
   classification: string;
-  /** ISD-finalised short summary, rendered under the title on the preview
-   *  card. Optional — older callers may not supply it; the JSX below skips
-   *  the paragraph cleanly when empty. */
+  /** Myth taxonomy group — drives the card-front category footer. */
+  categoryGroup?: string;
+  /** Optional; no longer rendered on the card front (kept for back-compat). */
   summary?: string;
 }
 
@@ -21,53 +20,16 @@ export interface Props {
 
 const { title, description, ctaLabel, targetUrl, previewMyths } = Astro.props;
 
-// The Keystatic classification value can also be "no_classification"; cast
-// safely at the boundary.
-function toCorrectness(c: string): CorrectnessClass {
-  if (c === "richtig" || c === "eher_richtig" || c === "eher_falsch" || c === "falsch") {
-    return c;
-  }
-  return "no_classification";
-}
-
-const cards = previewMyths.slice(0, 3).map((m) => ({
+const deckMyths = previewMyths.map((m) => ({
   text: m.text,
-  summary: m.summary ?? "",
-  verdict: toCorrectness(m.classification),
+  classification: m.classification,
+  categoryGroup: m.categoryGroup ?? "",
 }));
-
-const positions = ["back", "mid", "front"] as const;
-
-const STRIPE_COLOR: Record<CorrectnessClass, string> = {
-  richtig: "var(--classification-richtig)",
-  eher_richtig: "var(--classification-eher-richtig)",
-  eher_falsch: "var(--classification-eher-falsch)",
-  falsch: "var(--classification-falsch)",
-  no_classification: "var(--classification-keine-aussage)",
-};
 ---
 
 <a class="path-tile path-tile--karten" href={targetUrl}>
   <div class="path-tile__preview">
-    <div class="karten-preview" aria-hidden="true">
-      {cards.map((card, i) => (
-        <div class={`karten-preview__card karten-preview__card--${positions[i] ?? "front"}`}>
-          <span
-            class="karten-preview__stripe"
-            style={`background: ${STRIPE_COLOR[card.verdict]}`}
-          ></span>
-          <span class="karten-preview__arrow">
-            <VerdictArrow verdict={card.verdict} size={18} strokeWidth={2.25} />
-          </span>
-          <p class={`karten-preview__statement karten-preview__statement--${card.verdict}`}>
-            {card.text}
-          </p>
-          {card.summary && (
-            <p class="karten-preview__summary">{card.summary}</p>
-          )}
-        </div>
-      ))}
-    </div>
+    <FaktenKartenPreviewDeck myths={deckMyths} client:visible />
   </div>
 
   <div class="path-tile__body">
@@ -76,6 +38,5 @@ const STRIPE_COLOR: Record<CorrectnessClass, string> = {
       <span class="path-tile__title-arrow" aria-hidden="true">→</span>
     </h3>
     <p class="path-tile__description">{description}</p>
-    <p class="path-tile__cta">{ctaLabel}</p>
   </div>
 </a>

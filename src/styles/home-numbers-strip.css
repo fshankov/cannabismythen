@@ -6,9 +6,12 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .numbers-strip {
+  /* "Forschung in Zahlen" — its own mint block, flush against the hero and
+     the milky Erkunden block below (no global section gap / stripe). */
   background: var(--color-accent-light);
   padding: clamp(4rem, 9vw, 7rem) clamp(1.25rem, 4vw, 3rem);
   position: relative;
+  margin-bottom: 0;
 }
 
 .numbers-strip__inner {

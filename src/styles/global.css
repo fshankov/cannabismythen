@@ -423,17 +423,21 @@ body.has-hero .nav:not(.nav--scrolled) {
   border-color: rgba(255, 255, 255, 0.10);
   box-shadow: none;
 }
-body.has-hero .nav:not(.nav--scrolled) .nav__brand         { color: #95c4ad; }
+body.has-hero .nav:not(.nav--scrolled) .nav__brand         { color: rgba(223, 230, 226, 0.82); }  /* "Cannabis" — light grey on dark hero */
+body.has-hero .nav:not(.nav--scrolled) .nav__brand-myth    { color: #95c4ad; }                     /* "Mythen" — soft green */
 body.has-hero .nav:not(.nav--scrolled) .nav__link          { color: rgba(210, 236, 222, 0.80); }
 body.has-hero .nav:not(.nav--scrolled) .nav__link:hover    { color: rgba(255, 255, 255, 0.92); }
 body.has-hero .nav:not(.nav--scrolled) .nav__hamburger-line { background-color: #95c4ad; }
 
 /* ── Brand ───────────────────────────────────────────────────── */
 .nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: "Source Serif 4", Charter, "Iowan Old Style", Georgia, serif;
   font-size: 24px;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-text-secondary);  /* "Cannabis" half — grey */
   text-decoration: none;
   white-space: nowrap;
   line-height: 1;
@@ -442,7 +446,55 @@ body.has-hero .nav:not(.nav--scrolled) .nav__hamburger-line { background-color: 
 }
 /* "Mythen" half of the wordmark — Source Serif 4 Bold Italic (Figma 650:15) */
 .nav__brand-myth {
+  color: var(--color-accent);  /* green */
   font-style: italic;
+}
+
+/* ── Brand logo (Lupe magnifying-glass mark) ─────────────────── */
+.cm-logo {
+  --cm-size: 32px;
+  --cm-ring: #e2e2db;        /* light Lupe ring          */
+  --cm-mark: #a7afaa;        /* mark stem + chevron, grey */
+  --cm-mark-soft: #cdd3ce;   /* mark baseline, lighter    */
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  line-height: 0;
+  width: var(--cm-size);
+  height: var(--cm-size);
+}
+.cm-logo .cm-lens {  /* the real glass — frosted, translucent, lifted */
+  position: absolute;
+  left: 25%;
+  top: 25%;
+  width: 43.75%;
+  height: 43.75%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.06));
+  box-shadow:
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.60),   /* top edge highlight   */
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.28),   /* crisp glass rim      */
+    inset 0 -2px 4px rgba(8, 20, 14, 0.16),        /* inner bottom shadow  */
+    0 2px 5px rgba(8, 20, 14, 0.16);               /* soft drop / lift     */
+  -webkit-backdrop-filter: blur(5px) brightness(1.08) saturate(1.4);
+  backdrop-filter: blur(5px) brightness(1.08) saturate(1.4);
+  transition: backdrop-filter .25s ease, -webkit-backdrop-filter .25s ease, box-shadow .25s ease;
+}
+.nav__brand:hover .cm-lens {
+  -webkit-backdrop-filter: blur(6.5px) brightness(1.12) saturate(1.5);
+  backdrop-filter: blur(6.5px) brightness(1.12) saturate(1.5);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.70),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.34),
+    inset 0 -2px 5px rgba(8, 20, 14, 0.18),
+    0 3px 7px rgba(8, 20, 14, 0.20);
+}
+.cm-logo .cm-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 .nav__brand:hover  { opacity: 0.75; }
 .nav__brand:active { opacity: 0.55; }

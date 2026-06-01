@@ -10,6 +10,7 @@ import { MehrPopover } from './MehrPopover';
 import VerdictArrow from '../shared/VerdictArrow';
 import { useFlipPosition, type FlipPosition } from '../dashboard/hooks/useFlipPosition';
 import { withBase } from '../../lib/withBase';
+import { CATEGORY_META } from '../../lib/fakten-karten/categories';
 
 interface Props {
   data: CarmData;
@@ -231,9 +232,22 @@ export function VizMythGrid({ data, mode }: Props) {
                   strokeWidth={2.5}
                   colorOverride={ON_VERDICT_BG_GLYPH}
                 />
-              ) : (
-                <span className="viz-grid__cell-icon-slot" aria-hidden="true" />
-              )}
+              ) : (() => {
+                // Iter-22: themed mode shows the myth's category icon
+                // (Fakten-Karten set) on the existing category-coloured
+                // cell — so each square reads as its Themenfeld. Inherits
+                // the cell text colour; falls back to the empty slot.
+                const catName =
+                  m.category_id != null
+                    ? data.categories.find((c) => c.id === m.category_id)?.name_de
+                    : undefined;
+                const CatIcon = catName ? CATEGORY_META[catName]?.icon : undefined;
+                return CatIcon ? (
+                  <CatIcon size={14} className="viz-grid__cell-icon" aria-hidden="true" />
+                ) : (
+                  <span className="viz-grid__cell-icon-slot" aria-hidden="true" />
+                );
+              })()}
               <div className="viz-grid__cell-textwrap">
                 <span className="viz-grid__cell-text" lang="de">{m.text_short_de}</span>
               </div>

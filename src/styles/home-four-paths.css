@@ -8,8 +8,12 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .four-paths {
-  background: var(--color-surface);
+  /* The "Erkunden" block — milky (design.md --color-bg #f4f4f0), distinct from
+     the mint Numbers strip above and the beige footer below. Flush against both
+     (no global section gap / stripe). */
+  background: var(--color-bg);
   padding: clamp(4rem, 9vw, 7rem) clamp(1.25rem, 4vw, 3rem);
+  margin-bottom: 0;
 }
 
 .four-paths__inner {
@@ -146,7 +150,9 @@
   align-items: center;
   justify-content: center;
   padding: 1rem 0.875rem;
-  background: var(--color-bg);
+  /* Transparent so the whole tile reads as one clean white card on the milky
+     section; the border-bottom marks the field / comment division. */
+  background: transparent;
   border-bottom: 1px solid var(--card-border-color);
   position: relative;
   overflow: hidden;
@@ -502,7 +508,7 @@
 @container preview (min-width: 0) {
   .quiz-preview-deck  { width: min(52cqw, 13rem); }
   .meine-rows        { width: min(94cqw, 16rem); }
-  .karten-preview     { width: min(52cqw, 14rem); }
+  .karten-deck        { width: min(52cqw, 13rem); }
   .daten-preview      { width: min(92cqw, 24rem); }
 }
 
@@ -511,4 +517,93 @@
    the bigger square card. */
 @container preview (min-width: 360px) {
   .quiz-preview-deck__myth { font-size: 0.9rem; }
+}
+
+/* ═══ Tiles: consistent top-field + bottom(name + description) division ═══ */
+
+/* Quiz/Daten tiles are containers (inner links), so their body title links. */
+.path-tile__title-link { text-decoration: none; color: inherit; display: block; }
+.path-tile--quiz, .path-tile--daten { color: inherit; }
+
+/* ── Quiz: six clickable category decks, filling the top field ──── */
+.quiz-decks {
+  list-style: none; margin: 0; padding: 0; width: 100%; height: 100%;
+  display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 0.5rem;
+}
+.quiz-decks > li { display: flex; min-height: 0; }
+.quiz-deck {
+  flex: 1 1 auto; display: flex; align-items: center; gap: 0.5rem; min-width: 0;
+  padding: 0.45rem 0.6rem; border-radius: 0.7rem; text-decoration: none; color: #fff;
+  background: var(--deck-bg, #047857); box-shadow: 0 4px 12px -6px rgba(0,0,0,.4);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.quiz-deck:hover, .quiz-deck:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow-md, 0 8px 18px -8px rgba(0,0,0,.45)); outline: none; }
+.quiz-deck__icon { flex: 0 0 auto; display: inline-flex; opacity: .95; }
+.quiz-deck__text { min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
+.quiz-deck__title { font-family: 'Inter Variable','Inter',system-ui,sans-serif; font-size: 0.74rem; font-weight: 700;
+  letter-spacing: -0.005em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.quiz-deck__count { font-size: 0.62rem; font-weight: 500; opacity: .85; margin-top: 1px; }
+.quiz-deck--green    { --deck-bg: #047857; }
+.quiz-deck--blue     { --deck-bg: #0f78d5; }
+.quiz-deck--purple   { --deck-bg: #bc5ed3; }
+.quiz-deck--indigo   { --deck-bg: #508ad7; }
+.quiz-deck--yellow   { --deck-bg: #f5b02f; }
+.quiz-deck--gradient { --deck-bg: linear-gradient(146.93deg, rgb(39,165,248) 4%, rgba(154,203,185,.97) 49%, rgb(255,192,75) 94%); }
+
+/* ── Daten-Explorer: changing bars (illustration) + the six view-tabs ── */
+.daten-field { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 0.85rem; }
+.daten-bars { display: flex; flex-direction: column; gap: 0.4rem; }
+.daten-bar { height: 0.5rem; border-radius: 3px; background: rgba(20, 59, 44, 0.10); overflow: hidden; }
+.daten-bar__fill { display: block; height: 100%; border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.6s ease; }
+.daten-tabs { display: flex; flex-direction: column; gap: 0.6rem; }
+.daten-tabs__group { display: flex; flex-direction: column; gap: 0.3rem; }
+.daten-tabs__label {
+  font-family: 'Inter Variable','Inter',system-ui,sans-serif; font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 1.6px; text-transform: uppercase; color: var(--color-text-muted);
+}
+.daten-tabs__row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+.daten-tab {
+  display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+  padding: 0.4rem 0.25rem; border-radius: 0.5rem; text-decoration: none;
+  font-family: 'Inter Variable','Inter',system-ui,sans-serif; font-size: 0.68rem; font-weight: 600;
+  color: var(--color-text); background: var(--color-surface);
+  border: 1px solid var(--card-border-color); transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast); }
+.daten-tab:hover, .daten-tab:focus-visible { background: var(--color-primary); border-color: var(--color-primary); color: #fff; outline: none; }
+.daten-tab svg { flex: 0 0 auto; }
+@media (prefers-reduced-motion: reduce) { .daten-bar__fill { transition: none; } }
+
+/* ── Meine Interessen: the five audience rows fill the top field ── */
+.path-tile--meine .meine-rows { width: 100%; height: 100%; max-width: none; }
+.meine-row { flex: 1 1 0; }
+
+/* ── Fakten-Karten: the real card front, cycling ─────────────────── */
+.karten-deck { width: min(52cqw, 13rem); }
+.karten-deck__card {
+  position: relative; width: 100%; aspect-ratio: 1 / 1.5625; overflow: hidden;
+  border-radius: var(--card-radius, 0.875rem); display: flex;
+  box-shadow: 0 12px 28px -12px rgba(0,0,0,.4);
+  animation: karten-deck-fade 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes karten-deck-fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.karten-deck__arrow { position: absolute; color: #fff; opacity: 0.16; pointer-events: none; }
+.karten-deck__arrow img { display: block; width: 100%; height: 100%; }
+.karten-deck__body { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0.5rem; width: 100%; padding: 0.85rem 0.8rem; }
+.karten-deck__statement {
+  margin: 0; color: #fff; font-style: italic; font-weight: 700; letter-spacing: -0.005em;
+  font-size: clamp(0.82rem, 3.4cqw, 1.02rem); line-height: 1.3;
+  font-family: 'Source Serif 4', Georgia, serif;
+}
+.karten-deck__cat {
+  margin-top: auto; display: inline-flex; align-items: center; gap: 0.35rem; color: #fff; opacity: 0.92;
+  font-family: 'Inter Variable','Inter',system-ui,sans-serif; font-size: 0.66rem; font-weight: 600;
+}
+.karten-deck__cat svg { flex: 0 0 auto; }
+.karten-deck__cat-name { line-height: 1.2; }
+@media (prefers-reduced-motion: reduce) { .karten-deck__card { animation: none; } }
+
+/* On the narrow mobile carousel the grid tiles get a touch more room. */
+@media (max-width: 700px) {
+  .quiz-decks { gap: 0.45rem; }
+  .quiz-deck__title { font-size: 0.7rem; }
 }
