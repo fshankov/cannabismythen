@@ -3850,35 +3850,15 @@ body.fakten-karten-page main {
      while idle. The shadow flips with the card because it lives on
      the face, not the outer button. */
   box-shadow: var(--shadow-md);
-  overflow: hidden;
-  /* `backface-visibility: hidden` is kept (it works in Chrome/Firefox) but
-     CANNOT be relied on: in WebKit/Safari the away-facing face is NOT
-     culled here (it stays painted regardless of overflow/containment), so
-     the front bled through the back after the flip. The real fix is the
-     opacity swap below — the away-facing face is forced to opacity:0,
-     toggled exactly at the 90° edge-on midpoint of the 520ms flip (260ms
-     delay, 0s duration) so the swap is invisible. See the `--front`/`--back`
-     opacity rules. */
+  /* Hide the away-facing side during the flip. Do NOT add `overflow: hidden`
+     here: in WebKit/Safari, `overflow: hidden` on the SAME element as
+     `backface-visibility: hidden` defeats the backface culling, leaving the
+     front face painted through the back after the flip. No overflow clip is
+     needed anyway — `border-radius` already clips each face's surface, and
+     the front arrow self-clips to its own SVG viewBox. */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  transition: opacity 0s linear 260ms;
   padding: var(--space-lg);
-}
-
-/* Opacity swap — the reliable cross-browser face-hiding (Safari backface
-   bug workaround). Idle: front shown, back hidden. Flipped: back shown,
-   front hidden. The 260ms delay = half the 520ms flip, so faces swap while
-   the card is edge-on and the change is imperceptible. */
-.fakten-card__face--back {
-  opacity: 0;
-}
-.fakten-card:hover .fakten-card__face--front,
-.fakten-card:focus-visible .fakten-card__face--front {
-  opacity: 0;
-}
-.fakten-card:hover .fakten-card__face--back,
-.fakten-card:focus-visible .fakten-card__face--back {
-  opacity: 1;
 }
 
 .fakten-card__face--back {
@@ -4038,31 +4018,16 @@ body.fakten-karten-page main {
 }
 
 /* Touch / no-hover devices: skip the flip entirely. The front face
-   stays visible, the back face is never shown. Tap → popup. The opacity
-   swap must also be neutralised here, or a tap-focus would hide the
-   (un-rotated) front and reveal the back. */
+   stays visible, the back face is never shown. Tap → popup. */
 @media (hover: none) {
   .fakten-card:hover .fakten-card__inner,
   .fakten-card:focus-visible .fakten-card__inner {
     transform: none;
   }
-  .fakten-card:hover .fakten-card__face--front,
-  .fakten-card:focus-visible .fakten-card__face--front {
-    opacity: 1;
-  }
-  .fakten-card:hover .fakten-card__face--back,
-  .fakten-card:focus-visible .fakten-card__face--back {
-    opacity: 0;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .fakten-card__inner {
-    transition: none;
-  }
-  /* Flip is instant, so the face swap must be instant too (drop the
-     260ms midpoint delay) or the wrong face shows for 260ms. */
-  .fakten-card__face {
     transition: none;
   }
 }
