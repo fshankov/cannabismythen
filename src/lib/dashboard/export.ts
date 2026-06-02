@@ -174,7 +174,7 @@ export function downloadFullJSON(
     eher_richtig: 'Eher richtig',
     eher_falsch: 'Eher falsch',
     falsch: 'Falsch',
-    no_classification: 'Keine Aussage möglich',
+    keine_aussage_moeglich: 'Keine Aussage möglich',
   };
   const rows: Row[] = [];
   for (const m of myths) {
@@ -247,7 +247,7 @@ const VERDICT_GLYPH_GEOMETRY: Record<CorrectnessClass, { fg: string; shadow: str
   eher_richtig:      { fg: '#4d7c0f', shadow: '#c2d3a3', rotation: -3 * Math.PI / 4 }, // -135°
   eher_falsch:       { fg: '#b45309', shadow: '#e0b58d', rotation: Math.PI / 4 }, // 45°
   falsch:            { fg: '#be123c', shadow: '#e9a8b9', rotation: 0 },
-  no_classification: { fg: '#6b7280', shadow: '#94a3b8', rotation: 0 },
+  keine_aussage_moeglich: { fg: '#6b7280', shadow: '#94a3b8', rotation: 0 },
 };
 
 /** Draw a verdict-arrow glyph centred at (cx, cy) on a 2D canvas. Size
@@ -278,7 +278,7 @@ function drawVerdictGlyph(
   ctx.strokeStyle = shadow;
   ctx.stroke();
 
-  if (verdict !== 'no_classification') {
+  if (verdict !== 'keine_aussage_moeglich') {
     // Shaft.
     ctx.beginPath();
     ctx.moveTo(12, 2);

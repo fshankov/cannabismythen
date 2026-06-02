@@ -16,7 +16,7 @@ const SAMPLES: ReadonlyArray<SampleMyth> = [
   { text: "Cannabis entspannt.",                  verdict: "eher_richtig" },
   { text: "Cannabis ist eine Einstiegsdroge.",    verdict: "eher_falsch" },
   { text: "Cannabis macht nicht abhängig.",       verdict: "falsch" },
-  { text: "Cannabis hilft beim Abnehmen.",        verdict: "no_classification" },
+  { text: "Cannabis hilft beim Abnehmen.",        verdict: "keine_aussage_moeglich" },
 ];
 
 /** Pill order matches the canonical VerdictScale row inside the quiz. */

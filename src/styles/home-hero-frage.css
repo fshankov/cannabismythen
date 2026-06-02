@@ -198,7 +198,7 @@
 .hero-frage__pip--eher_richtig { --tint: var(--classification-eher-richtig); }
 .hero-frage__pip--eher_falsch  { --tint: var(--classification-eher-falsch); }
 .hero-frage__pip--falsch       { --tint: var(--classification-falsch); }
-.hero-frage__pip--no_classification { --tint: var(--classification-keine-aussage); }
+.hero-frage__pip--keine_aussage_moeglich { --tint: var(--classification-keine-aussage); }
 
 .hero-frage__pip[data-active="true"] {
   opacity: 1;
@@ -300,7 +300,7 @@
 .hero-frage__card--eher_richtig { --tint: var(--classification-eher-richtig); --tint-bg: var(--classification-eher-richtig-bg); }
 .hero-frage__card--eher_falsch  { --tint: var(--classification-eher-falsch);  --tint-bg: var(--classification-eher-falsch-bg); }
 .hero-frage__card--falsch       { --tint: var(--classification-falsch);       --tint-bg: var(--classification-falsch-bg); }
-.hero-frage__card--no_classification { --tint: var(--classification-keine-aussage); --tint-bg: var(--classification-keine-aussage-bg); }
+.hero-frage__card--keine_aussage_moeglich { --tint: var(--classification-keine-aussage); --tint-bg: var(--classification-keine-aussage-bg); }
 
 .hero-frage__card[data-front="true"] {
   background: rgba(255, 255, 255, 0.10);

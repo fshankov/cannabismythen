@@ -244,7 +244,7 @@ function VizColorReveal({ active }: { active: boolean }) {
     { label: "Eher richtig", count: 6, color: "#a16207", symbol: "▲" },
     { label: "Eher falsch", count: 11, color: "#c2410c", symbol: "▲" },
     { label: "Stimmt nicht", count: 7, color: "#be123c", symbol: "⬡" },
-    { label: "Keine Aussage", count: 2, color: "#6B7280", symbol: "—" },
+    { label: "Keine Aussage möglich", count: 2, color: "#6B7280", symbol: "—" },
   ];
 
   const words = [

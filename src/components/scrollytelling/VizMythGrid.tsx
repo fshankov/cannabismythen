@@ -33,7 +33,7 @@ const VERDICT_LABEL_LONG: Record<CorrectnessClass, string> = {
   eher_richtig: 'Eher richtig',
   eher_falsch: 'Eher falsch',
   falsch: 'Falsch',
-  no_classification: 'Keine Aussage',
+  keine_aussage_moeglich: 'Keine Aussage möglich',
 };
 
 interface MythSummary {

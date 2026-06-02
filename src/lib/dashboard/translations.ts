@@ -146,7 +146,7 @@ const translations = {
   'verdict.eher_richtig': { de: 'Eher richtig', en: 'Tends to be correct' },
   'verdict.eher_falsch': { de: 'Eher falsch', en: 'Tends to be incorrect' },
   'verdict.falsch': { de: 'Falsch', en: 'Incorrect' },
-  'verdict.no_classification': { de: 'Keine Aussage möglich', en: 'No classification possible' },
+  'verdict.keine_aussage_moeglich': { de: 'Keine Aussage möglich', en: 'No classification possible' },
 
   // Utility buttons
   'util.fullscreen': { de: 'Vollbild', en: 'Fullscreen' },

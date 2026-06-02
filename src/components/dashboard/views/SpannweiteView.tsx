@@ -235,7 +235,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
    *   - 'value-asc'/'value-desc' — per-column numeric (sortColumn).
    *     Nulls sort to the bottom in both directions. A-Z tie-break.
    *   - 'verdict-asc'/'verdict-desc' — by scientific verdict band
-   *     (richtig=1 → falsch=4, no_classification=5). A-Z tie-break. */
+   *     (richtig=1 → falsch=4, keine_aussage_moeglich=5). A-Z tie-break. */
   const sortedMyths = useMemo(() => {
     const rows = [...myths];
     const cmpAz = (a: Myth, b: Myth) =>
@@ -255,7 +255,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
     } else if (sort === 'verdict-asc' || sort === 'verdict-desc') {
       const dir = sort === 'verdict-asc' ? 1 : -1;
       const order: Record<string, number> = {
-        richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, no_classification: 5,
+        richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, keine_aussage_moeglich: 5,
       };
       rows.sort((a, b) => {
         const oa = order[a.correctness_class] ?? 5;

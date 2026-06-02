@@ -145,7 +145,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     } else if (sort === 'verdict-asc' || sort === 'verdict-desc') {
       const dir = sort === 'verdict-asc' ? 1 : -1;
       const order: Record<string, number> = {
-        richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, no_classification: 5,
+        richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, keine_aussage_moeglich: 5,
       };
       rows.sort((a, b) => {
         const oa = order[a.correctness_class] ?? 5;

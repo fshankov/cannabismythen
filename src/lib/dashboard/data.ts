@@ -312,19 +312,19 @@ function verdictArrowSvgString(verdict: Myth['correctness_class']): string {
     eher_richtig: { fg: '#4d7c0f', shadow: '#c2d3a3' },
     eher_falsch: { fg: '#b45309', shadow: '#e0b58d' },
     falsch: { fg: '#be123c', shadow: '#e9a8b9' },
-    no_classification: { fg: '#6b7280', shadow: '#94a3b8' },
+    keine_aussage_moeglich: { fg: '#6b7280', shadow: '#94a3b8' },
   };
   const rotations: Record<Myth['correctness_class'], string> = {
     richtig: 'rotate(180 12 12)',
     eher_richtig: 'rotate(-135 12 12)',
     eher_falsch: 'rotate(45 12 12)',
     falsch: '',
-    no_classification: '',
+    keine_aussage_moeglich: '',
   };
   const { fg, shadow } = colors[verdict];
   const rot = rotations[verdict];
   const tx = rot ? ` transform="${rot}"` : '';
-  if (verdict === 'no_classification') {
+  if (verdict === 'keine_aussage_moeglich') {
     return `<svg width="22" height="22" viewBox="0 0 24 24" style="display:block"><g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16h20" stroke="${shadow}"/></g></svg>`;
   }
   return `<svg width="22" height="22" viewBox="0 0 24 24" style="display:block"><g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"${tx}><path d="M2 16h20" stroke="${shadow}"/><path d="M12 2v14" stroke="${fg}"/><path d="m5 9 7 7 7-7" stroke="${fg}"/></g></svg>`;
@@ -343,9 +343,9 @@ export function buildTooltipHtml(opts: {
   // Canonical verdict label (lowercased for the "Wissenschaftlich …"
   // sentence; matches verdict.* in translations.ts).
   const verdictLabel = lang === 'de'
-    ? ({ richtig: 'richtig', eher_richtig: 'eher richtig', eher_falsch: 'eher falsch', falsch: 'falsch', no_classification: 'keine Einordnung möglich' }[myth.correctness_class])
-    : ({ richtig: 'correct', eher_richtig: 'tends to be correct', eher_falsch: 'tends to be incorrect', falsch: 'incorrect', no_classification: 'not classified' }[myth.correctness_class]);
-  const wissenschaftlich = myth.correctness_class === 'no_classification'
+    ? ({ richtig: 'richtig', eher_richtig: 'eher richtig', eher_falsch: 'eher falsch', falsch: 'falsch', keine_aussage_moeglich: 'keine Einordnung möglich' }[myth.correctness_class])
+    : ({ richtig: 'correct', eher_richtig: 'tends to be correct', eher_falsch: 'tends to be incorrect', falsch: 'incorrect', keine_aussage_moeglich: 'not classified' }[myth.correctness_class]);
+  const wissenschaftlich = myth.correctness_class === 'keine_aussage_moeglich'
     ? (lang === 'de' ? 'Wissenschaftlich: keine Einordnung möglich' : 'Scientific verdict: not classified')
     : `${lang === 'de' ? 'Wissenschaftlich' : 'Scientifically'}: ${verdictLabel}`;
   const indLabel = lang === 'de'
@@ -356,11 +356,11 @@ export function buildTooltipHtml(opts: {
   // Verdict tinting (matches getCorrectnessColor / getCorrectnessBgColor).
   const verdictColor = ({
     richtig: '#047857', eher_richtig: '#4d7c0f', eher_falsch: '#b45309',
-    falsch: '#be123c', no_classification: '#6b7280',
+    falsch: '#be123c', keine_aussage_moeglich: '#6b7280',
   } as const)[myth.correctness_class];
   const verdictBg = ({
     richtig: '#ecfdf5', eher_richtig: '#f7fee7', eher_falsch: '#fffbeb',
-    falsch: '#fff1f2', no_classification: '#f3f4f6',
+    falsch: '#fff1f2', keine_aussage_moeglich: '#f3f4f6',
   } as const)[myth.correctness_class];
 
   // Meta line: gruppe · indikator · value. Omit empty pieces gracefully.

@@ -68,7 +68,7 @@ export default function GridHoverTooltip({
   const verdictBg = getCorrectnessBgColor(verdict);
 
   const wissenschaftlich = useMemo(() => {
-    if (verdict === 'no_classification') {
+    if (verdict === 'keine_aussage_moeglich') {
       return lang === 'de'
         ? 'Wissenschaftlich: keine Einordnung möglich'
         : 'Scientific verdict: not classified';

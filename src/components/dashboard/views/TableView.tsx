@@ -211,7 +211,7 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
     const cmpAz = (a: Myth, b: Myth) =>
       getMythShortText(a, lang).localeCompare(getMythShortText(b, lang), 'de');
     const verdictOrder: Record<string, number> = {
-      richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, no_classification: 5,
+      richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, keine_aussage_moeglich: 5,
     };
     arr.sort((a, b) => {
       let cmp = 0;

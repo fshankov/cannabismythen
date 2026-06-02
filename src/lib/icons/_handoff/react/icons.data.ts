@@ -36,7 +36,7 @@ export const ICONS = {
   },
   "verdict-keine-aussage": {
     "key": "verdict-keine-aussage",
-    "title": "Keine Aussage",
+    "title": "Keine Aussage möglich",
     "strokeWidth": 2,
     "twoTone": true,
     "color": "multi",

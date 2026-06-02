@@ -69,7 +69,7 @@ const VERDICT_VISUALS: Record<CorrectnessClass, VerdictVisual> = {
     arrowFrame: { top: "42.3%", left: "0%", width: "56.5625%", height: "37.2%" },
   },
   // — horizontal line. SVG viewBox 186×32 → card (32, 277).
-  no_classification: {
+  keine_aussage_moeglich: {
     gradient: "linear-gradient(148.11deg, #CCC4CC 2.19%, #7B7B7B 100%)",
     headingColor: "#7B7B7B",
     arrowSrc: "/icons/fakten-karten/verdict-arrow-none.svg",

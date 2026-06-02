@@ -102,7 +102,7 @@ const CORRECTNESS_PATH_COLOR: Record<string, string> = {
   eher_richtig: 'var(--classification-eher-richtig)',
   eher_falsch: 'var(--classification-eher-falsch)',
   falsch: 'var(--classification-falsch)',
-  no_classification: 'var(--classification-keine-aussage)',
+  keine_aussage_moeglich: 'var(--classification-keine-aussage)',
 };
 
 /** Bevölkerungsrisiko (population_relevance) only has meaningful per-group

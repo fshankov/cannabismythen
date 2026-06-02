@@ -13,8 +13,8 @@ interface Props {
   myths: ReadonlyArray<FaktenDeckMyth>;
 }
 
-const VALID = new Set(["richtig", "eher_richtig", "eher_falsch", "falsch", "no_classification"]);
-const toVerdict = (c: string): CorrectnessClass => (VALID.has(c) ? (c as CorrectnessClass) : "no_classification");
+const VALID = new Set(["richtig", "eher_richtig", "eher_falsch", "falsch", "keine_aussage_moeglich"]);
+const toVerdict = (c: string): CorrectnessClass => (VALID.has(c) ? (c as CorrectnessClass) : "keine_aussage_moeglich");
 const ROTATE_MS = 3200;
 
 // Cycles the REAL Fakten-Karten card front (verdict gradient + faint direction

@@ -24,7 +24,7 @@ export const CORRECTNESS_COLORS: Record<CorrectnessClass, string> = {
   eher_richtig: '#4d7c0f',      // Lime-700
   eher_falsch: '#b45309',       // Amber-700
   falsch: '#be123c',            // Rose-700
-  no_classification: '#6b7280', // Gray-500
+  keine_aussage_moeglich: '#6b7280', // Gray-500
 };
 
 export function getCorrectnessColor(cls: CorrectnessClass): string {
@@ -37,7 +37,7 @@ export const CORRECTNESS_BG_COLORS: Record<CorrectnessClass, string> = {
   eher_richtig: '#f7fee7',      // Lime-50
   eher_falsch: '#fffbeb',       // Amber-50
   falsch: '#fff1f2',            // Rose-50
-  no_classification: '#f3f4f6', // Gray-100
+  keine_aussage_moeglich: '#f3f4f6', // Gray-100
 };
 
 export function getCorrectnessBgColor(cls: CorrectnessClass): string {
@@ -56,7 +56,7 @@ export const CORRECTNESS_FILL_COLORS: Record<CorrectnessClass, string> = {
   eher_richtig: '#65a30d',      // Lime-600
   eher_falsch: '#d97706',       // Amber-600
   falsch: '#e11d48',            // Rose-600
-  no_classification: '#6b7280', // Gray-500 (kept — no -600 for neutral)
+  keine_aussage_moeglich: '#6b7280', // Gray-500 (kept — no -600 for neutral)
 };
 
 export function getCorrectnessFillColor(cls: CorrectnessClass): string {
@@ -73,14 +73,14 @@ export function getCorrectnessFillColor(cls: CorrectnessClass): string {
  *   eher_richtig     → ArrowUpRight   ↗
  *   eher_falsch      → ArrowDownLeft  ↙
  *   falsch           → ArrowDown      ↓
- *   no_classification → Minus         —
+ *   keine_aussage_moeglich → Minus         —
  */
 export const CORRECTNESS_ARROWS: Record<CorrectnessClass, LucideIcon> = {
   richtig: ArrowUp,
   eher_richtig: ArrowUpRight,
   eher_falsch: ArrowDownLeft,
   falsch: ArrowDown,
-  no_classification: Minus,
+  keine_aussage_moeglich: Minus,
 };
 
 export function getCorrectnessArrow(cls: CorrectnessClass): LucideIcon {
@@ -101,7 +101,7 @@ export const CORRECTNESS_ICONS: Record<CorrectnessClass, string> = {
   eher_richtig: '↗',
   eher_falsch: '↙',
   falsch: '↓',
-  no_classification: '—',
+  keine_aussage_moeglich: '—',
 };
 
 /**

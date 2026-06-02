@@ -17,7 +17,7 @@ const label = customLabel?.trim() || CLASSIFICATION_LABEL[classification];
 // no-classification verdict in the .pill system.
 const verdict: CorrectnessClass =
   classification === "n_a" || classification === "keine_aussage"
-    ? "no_classification"
+    ? "keine_aussage_moeglich"
     : classification;
 ---
 

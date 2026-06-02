@@ -918,8 +918,15 @@ a.version-card:hover {
   color: var(--classification-falsch);
 }
 
+/* Iter-23b (2026-06-02): CorrectnessClass renamed
+   `no_classification` → `keine_aussage_moeglich`. The new canonical
+   selector is `.classification--keine_aussage_moeglich`; the older
+   aliases (`keine_aussage`, `no_classification`, `n_a`) stay as
+   legacy fallbacks for mdoc-authored content + any third-party
+   embeds that haven't been re-rendered. */
+.classification--keine_aussage_moeglich,
 .classification--keine_aussage,
-.classification--no_classification,
+.classification--keine_aussage_moeglich,
 .classification--n_a {
   background: var(--classification-keine-aussage-bg);
   color: var(--classification-keine-aussage);
@@ -967,7 +974,7 @@ a.version-card:hover {
 .pill--eher_falsch   { background: var(--classification-eher-falsch-bg);   color: var(--classification-eher-falsch); }
 .pill--falsch        { background: var(--classification-falsch-bg);        color: var(--classification-falsch); }
 .pill--keine_aussage,
-.pill--no_classification {
+.pill--keine_aussage_moeglich {
   background: var(--classification-keine-aussage-bg);
   color: var(--classification-keine-aussage);
 }
@@ -1010,7 +1017,7 @@ button.pill[aria-pressed="true"] {
 .statement--eher_falsch      { color: var(--classification-eher-falsch); }
 .statement--falsch           { color: var(--classification-falsch); }
 .statement--no-classification,
-.statement--no_classification { color: var(--color-text); }
+.statement--keine_aussage_moeglich { color: var(--color-text); }
 
 
 /* ── Bold verdict statement + trailing arrow (v3) ────────────
@@ -1048,7 +1055,7 @@ button.pill[aria-pressed="true"] {
   color: var(--classification-falsch);
 }
 .stmt.stmt--keine_aussage,
-.stmt.stmt--no_classification {
+.stmt.stmt--keine_aussage_moeglich {
   font-weight: 700;
   color: var(--classification-keine-aussage);
 }

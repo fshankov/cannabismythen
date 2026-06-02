@@ -32,7 +32,7 @@ const VERDICT_KEYS: CorrectnessClass[] = [
   'eher_richtig',
   'eher_falsch',
   'falsch',
-  'no_classification',
+  'keine_aussage_moeglich',
 ];
 
 export default function VerdictTags({ lang, verdictFilter, onChange }: Props) {

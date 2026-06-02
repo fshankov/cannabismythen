@@ -81,10 +81,10 @@ export default function VerdictArrowWithInfo({
     };
   }, [open, setOpen, triggerRef, cardRef]);
 
-  // No info card for the "no_classification" sentinel — there is no
+  // No info card for the "keine_aussage_moeglich" sentinel — there is no
   // explanation copy registered for it; the arrow alone communicates
   // "no verdict possible". Render a bare <VerdictArrow>.
-  if (verdict === 'no_classification') {
+  if (verdict === 'keine_aussage_moeglich') {
     return (
       <VerdictArrow
         verdict={verdict}

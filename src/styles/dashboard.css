@@ -933,7 +933,7 @@ body:has(.carm-explorer) .nav {
   background: #fff1f2;
   color: #be123c;
 }
-.carm-explorer .class-chip.no_classification {
+.carm-explorer .class-chip.keine_aussage_moeglich {
   background: #f3f4f6;
   color: #6b7280;
 }
@@ -1390,7 +1390,10 @@ body:has(.carm-explorer) .nav {
   color: #be123c;
 }
 
-.classification--no_classification {
+/* Iter-23b: canonical selector is `keine_aussage_moeglich`; the
+   `no_classification` alias stays for legacy callers. */
+.classification--keine_aussage_moeglich,
+.classification--keine_aussage_moeglich {
   background: #f3f4f6;
   color: #6b7280;
 }
@@ -3562,7 +3565,8 @@ body:has(.carm-explorer) .nav {
 .strips-myth-card__bar.classification--eher_richtig { background: #4d7c0f; }
 .strips-myth-card__bar.classification--eher_falsch { background: #b45309; }
 .strips-myth-card__bar.classification--falsch { background: #be123c; }
-.strips-myth-card__bar.classification--no_classification { background: #6b7280; }
+.strips-myth-card__bar.classification--keine_aussage_moeglich,
+.strips-myth-card__bar.classification--keine_aussage_moeglich { background: #6b7280; }
 
 .strips-myth-card__bar-icon {
   font-size: 0.86rem;

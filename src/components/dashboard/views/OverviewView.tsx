@@ -35,7 +35,7 @@ const VERDICT_LABELS: Record<string, string> = {
   eher_richtig: 'Eher richtig',
   eher_falsch: 'Eher falsch',
   falsch: 'Falsch',
-  no_classification: 'Keine Aussage',
+  keine_aussage_moeglich: 'Keine Aussage möglich',
 };
 
 export default function OverviewView({ myths, metrics, state, update, onSelectMyth, categories }: Props) {
@@ -93,7 +93,7 @@ export default function OverviewView({ myths, metrics, state, update, onSelectMy
         <div className="overview-summary-verdicts">
           {Object.entries(verdictCounts)
             .sort(([a], [b]) => {
-              const order = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'no_classification'];
+              const order = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'keine_aussage_moeglich'];
               return order.indexOf(a) - order.indexOf(b);
             })
             .map(([verdict, count]) => (

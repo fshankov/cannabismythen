@@ -40,14 +40,14 @@ const VERDICT_FG: Record<CorrectnessClass, string> = {
   eher_richtig: '#4d7c0f',
   eher_falsch: '#b45309',
   falsch: '#be123c',
-  no_classification: '#6b7280',
+  keine_aussage_moeglich: '#6b7280',
 };
 const VERDICT_SHADOW: Record<CorrectnessClass, string> = {
   richtig: '#a7d3c5',
   eher_richtig: '#c2d3a3',
   eher_falsch: '#e0b58d',
   falsch: '#e9a8b9',
-  no_classification: '#94a3b8',
+  keine_aussage_moeglich: '#94a3b8',
 };
 // Per-verdict y-shift (px) so the chevron tip lands on the bar
 // midline, matching the on-page CSS `--y-shift`.
@@ -56,7 +56,7 @@ const VERDICT_Y_SHIFT: Record<CorrectnessClass, number> = {
   eher_richtig: 1.89,
   eher_falsch: -1.89,
   falsch: -2.67,
-  no_classification: 0,
+  keine_aussage_moeglich: 0,
 };
 
 const TOTAL_W = 1000;
@@ -90,7 +90,7 @@ function symbolDefs(): string {
     sym('strips-arrow-eher_richtig', 'rotate(-135 12 12)', full(VERDICT_FG.eher_richtig, VERDICT_SHADOW.eher_richtig)),
     sym('strips-arrow-eher_falsch', 'rotate(45 12 12)', full(VERDICT_FG.eher_falsch, VERDICT_SHADOW.eher_falsch)),
     sym('strips-arrow-falsch', '', full(VERDICT_FG.falsch, VERDICT_SHADOW.falsch)),
-    sym('strips-arrow-no_classification', '', lineOnly(VERDICT_SHADOW.no_classification)),
+    sym('strips-arrow-keine_aussage_moeglich', '', lineOnly(VERDICT_SHADOW.keine_aussage_moeglich)),
   ].join('');
 }
 

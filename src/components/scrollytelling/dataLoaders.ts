@@ -146,7 +146,7 @@ export const VERDICT_COLOR: Record<CorrectnessClass, string> = {
   eher_richtig: 'var(--classification-eher-richtig)',
   eher_falsch: 'var(--classification-eher-falsch)',
   falsch: 'var(--classification-falsch)',
-  no_classification: 'var(--classification-keine-aussage)',
+  keine_aussage_moeglich: 'var(--classification-keine-aussage)',
 };
 
 /** Step 4 / in-body legend uses the canonical verdict names (richtig,
@@ -157,17 +157,17 @@ export const VERDICT_LABEL_DE: Record<CorrectnessClass, string> = {
   eher_richtig: 'eher richtig',
   eher_falsch: 'eher falsch',
   falsch: 'falsch',
-  no_classification: 'keine Aussage',
+  keine_aussage_moeglich: 'keine Aussage möglich',
 };
 
 /** Display order — falsch → richtig (matches the daten-explorer
- *  filter row site-wide). `no_classification` lands last. */
+ *  filter row site-wide). `keine_aussage_moeglich` lands last. */
 export const VERDICT_ORDER: CorrectnessClass[] = [
   'falsch',
   'eher_falsch',
   'eher_richtig',
   'richtig',
-  'no_classification',
+  'keine_aussage_moeglich',
 ];
 
 /** Override for the verdict glyph when it renders ON a verdict-colored
@@ -285,7 +285,7 @@ export function verdictCountsFromData(
     eher_richtig: 0,
     eher_falsch: 0,
     falsch: 0,
-    no_classification: 0,
+    keine_aussage_moeglich: 0,
   };
   for (const m of sortedMyths(data).slice(0, 42)) {
     counts[m.correctness_class]++;

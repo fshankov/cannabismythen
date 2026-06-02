@@ -64,7 +64,7 @@
 .four-paths__quote-counter[data-classification="eher_falsch"] { box-shadow: inset 0 -0.25em 0 var(--classification-eher-falsch-bg); }
 .four-paths__quote-counter[data-classification="eher_richtig"]{ box-shadow: inset 0 -0.25em 0 var(--classification-eher-richtig-bg); }
 .four-paths__quote-counter[data-classification="richtig"]     { box-shadow: inset 0 -0.25em 0 var(--classification-richtig-bg); }
-.four-paths__quote-counter[data-classification="no_classification"] { box-shadow: inset 0 -0.25em 0 var(--classification-keine-aussage-bg); }
+.four-paths__quote-counter[data-classification="keine_aussage_moeglich"] { box-shadow: inset 0 -0.25em 0 var(--classification-keine-aussage-bg); }
 
 /* ── Tile grid ───────────────────────────────────────────────── */
 
@@ -378,7 +378,7 @@
 .karten-preview__statement--eher_richtig { color: var(--classification-eher-richtig); }
 .karten-preview__statement--eher_falsch  { color: var(--classification-eher-falsch); }
 .karten-preview__statement--falsch       { color: var(--classification-falsch); }
-.karten-preview__statement--no_classification { color: var(--classification-keine-aussage); }
+.karten-preview__statement--keine_aussage_moeglich { color: var(--classification-keine-aussage); }
 
 /* Mini-card summary glimpse — a small fragment of the cardShortSummary
    that appears under the title, with line-clamp so the preview tile

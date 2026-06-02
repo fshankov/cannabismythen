@@ -90,14 +90,19 @@ const SCROLLY_INLINE_ICONS: Record<string, InlineIconEntry> = {
  *
  * Both bracket forms accept the same set of arrow/verdict pairs so the
  * editor can pick "with label" vs "icon only" depending on context. */
+// Iter-23b (2026-06-02): the inline verdict-puck token accepts both the
+// new canonical label "keine Aussage möglich" (Harald's Feedbucket
+// #796936) and the legacy short form "keine Aussage" so historical
+// content still renders correctly until each surface is re-edited.
 const INLINE_RE =
-  /\[([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\]|\{([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage)\}|\*\*([^*]+)\*\*|\{icon:([a-z_-]+)\}/g;
+  /\[([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage möglich|keine Aussage)\]|\{([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage möglich|keine Aussage)\}|\*\*([^*]+)\*\*|\{icon:([a-z_-]+)\}/g;
 const VERDICT_LABEL_TO_CLASS: Record<string, CorrectnessClass> = {
   richtig: 'richtig',
   'eher richtig': 'eher_richtig',
   'eher falsch': 'eher_falsch',
   falsch: 'falsch',
-  'keine Aussage': 'no_classification',
+  'keine Aussage möglich': 'keine_aussage_moeglich',
+  'keine Aussage': 'keine_aussage_moeglich',
 };
 
 function renderBodyWithVerdicts(text: string): ReactNode[] {

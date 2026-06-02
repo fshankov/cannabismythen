@@ -329,7 +329,7 @@ body:has(.scrolly) main {
 .verdict-puck--eher_richtig { background: var(--classification-eher-richtig); }
 .verdict-puck--eher_falsch  { background: var(--classification-eher-falsch); }
 .verdict-puck--falsch       { background: var(--classification-falsch); }
-.verdict-puck--no_classification { background: var(--classification-keine-aussage); }
+.verdict-puck--keine_aussage_moeglich { background: var(--classification-keine-aussage); }
 
 /* In-body Themenfelder legend (Step 3) — small colored swatches +
    names, wrapping inline. Replaces the legend block that used to sit

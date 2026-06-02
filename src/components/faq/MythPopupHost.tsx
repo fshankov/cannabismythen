@@ -21,13 +21,13 @@ const VALID_VERDICTS: ReadonlySet<CorrectnessClass> = new Set([
   "eher_richtig",
   "eher_falsch",
   "falsch",
-  "no_classification",
+  "keine_aussage_moeglich",
 ]);
 
 function toVerdict(raw: string): CorrectnessClass {
   return VALID_VERDICTS.has(raw as CorrectnessClass)
     ? (raw as CorrectnessClass)
-    : "no_classification";
+    : "keine_aussage_moeglich";
 }
 
 /** Compact metadata for one myth, used to populate the panel header. */

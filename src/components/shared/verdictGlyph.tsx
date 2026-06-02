@@ -21,7 +21,7 @@
  *   eher_richtig      → rotate -135°  (tip up-right  ↗)
  *   eher_falsch       → rotate  45°   (tip down-left ↙)
  *   falsch            → rotate   0°   (tip down      ↓)
- *   no_classification →               (no arrow — shadow line only)
+ *   keine_aussage_moeglich →               (no arrow — shadow line only)
  *
  * Hex values track the `--classification-*` tokens in global.css.
  * Shadow colors are perceptual lighter shades (~50% blend toward the
@@ -41,7 +41,7 @@ interface GlyphSpec {
 }
 
 export const VERDICT_GLYPHS: Record<
-  Exclude<CorrectnessClass, 'no_classification'>,
+  Exclude<CorrectnessClass, 'keine_aussage_moeglich'>,
   GlyphSpec
 > = {
   richtig: { rotation: 180, main: '#047857', shadow: '#a7d3c5' },
@@ -96,13 +96,13 @@ export function VerdictGlyphPaths({
 }: VerdictGlyphPathsProps): JSX.Element {
   // Defensive lookup: a handful of older `.mdoc` entries still use the
   // legacy spelling `keine_aussage` instead of the canonical
-  // `no_classification`, and FAQ uses `n_a` for meta questions. Any
+  // `keine_aussage_moeglich`, and FAQ uses `n_a` for meta questions. Any
   // verdict that isn't one of the four directional variants renders the
   // flat shadow-line glyph (= "no scientific verdict") rather than
   // crashing on `spec.rotation` when the lookup misses.
   const spec =
-    verdict !== 'no_classification'
-      ? VERDICT_GLYPHS[verdict as Exclude<CorrectnessClass, 'no_classification'>]
+    verdict !== 'keine_aussage_moeglich'
+      ? VERDICT_GLYPHS[verdict as Exclude<CorrectnessClass, 'keine_aussage_moeglich'>]
       : undefined;
   if (!spec) {
     return (
