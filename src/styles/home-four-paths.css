@@ -1,37 +1,51 @@
 /* ═══════════════════════════════════════════════════════════════
-   Vier Wege ins Thema — third block on the new home page.
-   Hook quote on top + four equally-weighted preview tiles
-   (Quiz, Fakten-Karten, Daten-Explorer, Meine Interessen) below.
-   Each tile previews its target page using the canonical site
-   primitives (<VerdictPill>, <VerdictArrow>, <VerdictStatement>,
-   fakten-card-shaped surfaces, dashboard-matched bars).
+   Vier Wege ins Thema (Block 4) — light redesign (Figma 677:987).
+   A greige card (#F0F0EB, r24) matching the Numbers-Strip, 64px below
+   it, on the #FAF9F5 canvas. The card is a grid: the "Erkunden" header
+   in row 1 (top-left, kept as on the live site), then four equal nav
+   cards in a 2×2 below. Each card is white (rgba 255 .89) with an icon
+   badge + title + body; the area below the body is left as white space
+   for preview content (added later).
    ═══════════════════════════════════════════════════════════════ */
 
 .four-paths {
-  /* The "Erkunden" block — milky (design.md --color-bg #f4f4f0), distinct from
-     the mint Numbers strip above and the beige footer below. Flush against both
-     (no global section gap / stripe). */
-  background: var(--color-bg);
-  padding: clamp(4rem, 9vw, 7rem) clamp(1.25rem, 4vw, 3rem);
-  margin-bottom: 0;
+  margin-top: 64px; /* gap from block 3 (Numbers-Strip) */
 }
 
 .four-paths__inner {
-  max-width: var(--max-width);
-  margin: 0 auto;
+  max-width: var(--home-container, 1200px);
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 3rem);
 }
 
-/* ── Hook quote ──────────────────────────────────────────────── */
+/* ── Card container — same surface as the Numbers-Strip card ── */
+.four-paths__card {
+  display: grid;
+  width: 100%;
+  padding: 48px;
+  border-radius: 24px;
+  background: #f0f0eb;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, fit-content(100%));
+  column-gap: 51px;
+  row-gap: 44px;
+}
 
+/* ── Header — kept as on the live site, placed top-left (row 1) ── */
 .four-paths__quote {
-  text-align: center;
-  margin: 0 auto clamp(3rem, 6vw, 4.5rem);
-  max-width: 60ch;
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  max-width: 528px;
+  text-align: left;
 }
 
 .four-paths__quote-eyebrow {
   display: block;
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 2.6px;
@@ -41,8 +55,7 @@
 }
 
 .four-paths__quote-lead {
-  display: inline;
-  font-family: 'DM Serif Display', Georgia, serif;
+  font-family: "DM Serif Display", Georgia, serif;
   font-style: italic;
   font-weight: 400;
   font-size: clamp(22px, 3.4vw, 32px);
@@ -51,8 +64,7 @@
 }
 
 .four-paths__quote-counter {
-  display: inline;
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(22px, 3.4vw, 32px);
   line-height: 1.3;
@@ -66,544 +78,106 @@
 .four-paths__quote-counter[data-classification="richtig"]     { box-shadow: inset 0 -0.25em 0 var(--classification-richtig-bg); }
 .four-paths__quote-counter[data-classification="keine_aussage_moeglich"] { box-shadow: inset 0 -0.25em 0 var(--classification-keine-aussage-bg); }
 
-/* ── Tile grid ───────────────────────────────────────────────── */
-
-.four-paths__grid {
-  display: grid;
-  /* Always a 2×2 square matrix at 701 px+. The four tiles ARE the
-     matrix segments — bigger than the old 4-in-a-row layout, which
-     gives each inner preview (peek-stack, mini-card, bars chart,
-     audience deck) room to breathe and to scale with the tile via
-     container queries (see .path-tile__preview below). */
-  grid-template-columns: repeat(2, 1fr);
-  gap: clamp(1rem, 2.4vw, 1.75rem);
-  max-width: calc(2 * var(--card-width-max-square) + 1.75rem);
-  margin-inline: auto;
-}
-
-@media (max-width: 700px) {
-  .four-paths__grid {
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(70%, calc(var(--card-width-max) - 1rem));
-    max-width: none;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: 1rem;
-    padding: 0.25rem 1rem 1rem;
-    margin: 0 -1rem;
-    scrollbar-width: thin;
-  }
-  /* Snap on the tile itself rather than on `> *` — the React tile is
-     wrapped in <astro-island> (display: contents), so a `>*` selector
-     would attach the snap point to a boxless wrapper and the swipe
-     would skip the tile entirely. Targeting .path-tile puts the snap
-     point on the actual <a> regardless of wrapper. */
-  .four-paths__grid .path-tile {
-    scroll-snap-align: start;
-    /* Carousel cards revert to the canonical portrait Fakten-Karten
-       footprint — square wouldn't work in a horizontal swipe row, the
-       card would be too narrow. */
-    aspect-ratio: var(--card-aspect-ratio);
-    max-width: var(--card-width-max);
-  }
-}
-
-/* ── Shared tile shell (mirrors .fakten-card__face) ─────────── */
-
-.path-tile {
-  --tile-accent: var(--color-accent);
+/* ── The four nav cards (icon + title + body; white space below) ── */
+.path-card {
   display: flex;
   flex-direction: column;
+  align-self: stretch;
+  justify-self: stretch;
+  min-height: 400px; /* placeholder height — keeps white space below the body */
+  padding: 24px 32px; /* 24 top/bottom · 32 left/right */
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.89);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  -webkit-backdrop-filter: blur(10.35px);
+  backdrop-filter: blur(10.35px);
   text-decoration: none;
   color: inherit;
-  background: var(--color-surface);
-  border: 1px solid var(--card-border-color);
-  border-radius: var(--card-radius);
-  overflow: hidden;
-  /* Square aspect — the four tiles ARE the 2×2 matrix segments.
-     Preview area on top, body (title + desc + cta) underneath. The
-     mobile carousel below overrides this to portrait so each swipe
-     card retains the canonical Fakten-Karten footprint. */
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  max-width: var(--card-width-max-square);
-  box-shadow: var(--card-shadow);
   transition:
     transform var(--transition-fast),
-    border-color var(--transition-fast),
     box-shadow var(--transition-fast);
 }
 
-.path-tile:hover,
-.path-tile:focus-visible {
+.path-card:hover,
+.path-card:focus-visible {
   transform: translateY(-3px);
-  border-color: var(--tile-accent);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.1);
   outline: none;
 }
 
-.path-tile__preview {
-  flex: 1 1 auto;
+.path-card--quiz {
+  grid-column: 1;
+  grid-row: 2;
+}
+.path-card--fakten {
+  grid-column: 2;
+  grid-row: 2;
+}
+.path-card--daten {
+  grid-column: 1;
+  grid-row: 3;
+}
+.path-card--meine {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* icon badge — 32px key-green circle, white 17.5px icon */
+.path-card__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 0.875rem;
-  /* Transparent so the whole tile reads as one clean white card on the milky
-     section; the border-bottom marks the field / comment division. */
-  background: transparent;
-  border-bottom: 1px solid var(--card-border-color);
-  position: relative;
-  overflow: hidden;
-  /* Container query root — inner peek-stack / mini-card / bars / audience
-     deck size off cqw so they scale with the tile (whose width varies
-     from ~340 px at 700 vw up to 460 px (--card-width-max-square) on
-     desktop). Without this, the inner content was sized off viewport
-     vw and looked lost inside the bigger 2×2 tiles. */
-  container-type: inline-size;
-  container-name: preview;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background: #0f5238;
+  color: #ffffff;
 }
 
-.path-tile__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.875rem 1rem 1rem;
+/* title — 24px below the icon */
+.path-card__title {
+  margin: 24px 0 0 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 32px;
+  line-height: 57.194px;
+  letter-spacing: -1.3px;
+  color: #1a1c1a;
 }
 
-.path-tile__title {
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-text);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin: 0;
-  letter-spacing: -0.005em;
-}
-
-.path-tile__title-arrow {
-  color: var(--tile-accent);
-  opacity: 0.65;
-  transition: transform var(--transition-fast), opacity var(--transition-fast);
-}
-
-.path-tile:hover .path-tile__title-arrow,
-.path-tile:focus-visible .path-tile__title-arrow {
-  opacity: 1;
-  transform: translateX(3px);
-}
-
-.path-tile__description {
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-size: 0.8125rem;
-  line-height: 1.45;
-  color: var(--color-text-secondary);
-  margin: 0;
-  /* Two-line clamp keeps the body height predictable across tiles
-     with naturally different description lengths. */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.path-tile__cta {
-  margin-top: 0.25rem;
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--tile-accent);
-}
-
-/* ── Quiz preview (rotating peek-stack) ──────────────────────── */
-
-.path-tile--quiz { --tile-accent: var(--classification-eher-richtig); }
-
-/* Front-face layout — eyebrow, rotating myth statement, 4 pills.
-   The .peek-stack base from peek-stack.css supplies the aspect-ratio,
-   border, radius, shadow and pseudo-card peeks behind. Width is
-   capped so the portrait deck (height = width × 1.4) plus the 16 px
-   peek margin fits inside .path-tile__preview without overflowing. */
-.quiz-preview-deck {
-  width: clamp(7rem, 16vw, 9rem);
-}
-
-.quiz-preview-deck__face {
-  gap: 0.5rem;
-  padding: 0.8rem 0.85rem 0.85rem;
-}
-
-.quiz-preview-deck__eyebrow {
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin: 0;
-}
-
-.quiz-preview-deck__myth {
-  font-family: 'DM Serif Display', Georgia, serif;
-  font-style: italic;
-  font-size: 0.8125rem;
-  line-height: 1.3;
-  color: var(--color-text);
-  margin: 0;
-  /* Soft fade-in when the rotation changes the statement (the React
-     component remounts the <p> on idx change via the `key` prop, so
-     this animation runs on every cycle). */
-  animation: quiz-preview-deck-fade 600ms cubic-bezier(0.22, 1, 0.36, 1);
-  /* Clamp so unusually long myths don't push the pills off the card. */
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-@keyframes quiz-preview-deck-fade {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .quiz-preview-deck__myth { animation: none; }
-}
-
-.quiz-preview-deck__pills {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.3rem;
-  margin-top: auto;
-}
-
-.quiz-preview-deck__pills .pill {
-  /* Compact: shrink the canonical small pill another notch so all four
-     fit comfortably inside the portrait card. */
-  font-size: 0.625rem;
-  padding: 2px 6px;
-  opacity: 0.7;
-  justify-content: center;
-  text-align: center;
-}
-
-.quiz-preview-deck__pills .pill.is-correct {
-  opacity: 1;
-  font-weight: 700;
-  outline: 1.5px solid currentColor;
-  outline-offset: -1.5px;
-}
-
-/* ── Fakten-Karten preview (3 stacked mini-cards) ────────────── */
-
-.path-tile--karten { --tile-accent: var(--classification-eher-falsch); }
-
-.karten-preview {
-  position: relative;
-  width: clamp(8rem, 18vw, 10rem);
-  /* Portrait, matching the canonical card. Height derives from the
-     shared --card-aspect-ratio so a global proportion change flips
-     these mini cards too. */
-  aspect-ratio: var(--card-aspect-ratio);
-}
-
-/* Mini variant of the canonical .fakten-card__face surface, scaled
-   for the inside-tile preview area. Tokens drive radius / shadow /
-   border so this stays in sync with the real Fakten-Karten card. */
-.karten-preview__card {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--color-surface);
-  border: 1px solid var(--card-border-color);
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
-  padding: 0.7rem 0.85rem 0.85rem;
-  overflow: hidden;
-}
-
-/* Category stripe — same 6 px width as the real fakten card so the
-   mini deck reads as the canonical card at a smaller scale. */
-.karten-preview__stripe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 6px;
-  background: var(--color-accent-muted);
-}
-
-.karten-preview__card--back  { transform: rotate(-7deg) translate(-14px, 6px); z-index: 1; }
-.karten-preview__card--mid   { transform: rotate(3deg) translate(6px, -3px);   z-index: 2; }
-.karten-preview__card--front { transform: rotate(-1deg);                       z-index: 3; }
-
-.karten-preview__arrow {
-  position: absolute;
-  top: 0.55rem;
-  right: 0.7rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.karten-preview__arrow svg {
-  display: block;
-}
-
-.karten-preview__statement {
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 0.7rem;
-  line-height: 1.3;
-  letter-spacing: -0.005em;
-  /* Portrait cards have more vertical room than the old 10rem-tall
-     landscape mini-cards, so the title can breathe more. With the
-     summary preview added below, cap the title at 3 lines so the
-     summary glimpse has room. */
-  margin: 0.6rem 0 0 0.6rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.karten-preview__statement--richtig      { color: var(--classification-richtig); }
-.karten-preview__statement--eher_richtig { color: var(--classification-eher-richtig); }
-.karten-preview__statement--eher_falsch  { color: var(--classification-eher-falsch); }
-.karten-preview__statement--falsch       { color: var(--classification-falsch); }
-.karten-preview__statement--keine_aussage_moeglich { color: var(--classification-keine-aussage); }
-
-/* Mini-card summary glimpse — a small fragment of the cardShortSummary
-   that appears under the title, with line-clamp so the preview tile
-   keeps its compact illustrative scale (the deck is a teaser of the
-   Fakten-Karten page, not the page itself). The truncation is the point:
-   "tap to read more" is the implicit affordance. */
-.karten-preview__summary {
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+/* body — 24px below the title, capped at 240px */
+.path-card__body {
+  margin: 24px 0 0 0;
+  max-width: 240px;
+  font-family: var(--font-display);
   font-weight: 400;
-  font-size: 0.58rem;
-  line-height: 1.35;
-  letter-spacing: -0.003em;
-  color: var(--color-text-secondary, #4a5568);
-  margin: 0.35rem 0 0 0.6rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 16px;
+  line-height: 20px;
+  color: rgba(64, 73, 67, 0.8);
 }
 
-/* ── Daten-Explorer preview ─────────────────────────────────── */
-
-.path-tile--daten { --tile-accent: var(--classification-falsch); }
-
-.daten-preview {
-  width: 100%;
-  max-width: 22rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-}
-
-/* View-type tabs — echo the dashboard's Balken / Spannweite / Tabelle switcher. */
-.daten-preview__tabs { display: flex; gap: 0.3rem; justify-content: center; }
-.daten-preview__tab {
-  font-size: 0.62rem; font-weight: 600;
-  padding: 2px 8px; border-radius: var(--radius-full);
-  color: var(--color-text-muted); border: 1px solid transparent;
-  transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
-}
-.daten-preview__tab[data-active="true"] {
-  color: var(--color-primary);
-  background: var(--color-primary-light);
-  border-color: var(--color-primary-light);
-}
-
-.dp-viz { display: flex; flex-direction: column; gap: 0.4rem; }
-.dp-row { display: grid; align-items: center; gap: 0.4rem; }
-.dp-balken .dp-row, .dp-spann .dp-row { grid-template-columns: 0.95rem 4.6rem 1fr 1.4rem; }
-.dp__arrow { display: inline-flex; }
-.dp-label {
-  font-size: 0.68rem; color: var(--color-text-secondary);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
-}
-
-/* Balken — verdict-coloured fill bar (mirrors the dashboard Balken view). */
-.dp-track { position: relative; height: 0.5rem; border-radius: 2px; background: var(--color-bg-subtle); overflow: hidden; }
-.dp-fill { display: block; height: 100%; border-radius: 2px; background: var(--v);
-  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1); }
-.dp-val { font-size: 0.66rem; color: var(--color-text-muted); text-align: right; font-variant-numeric: tabular-nums; }
-
-/* Spannweite — thin stem + lollipop dot at the value (mirrors the range view). */
-.dp-track--stem { background: transparent; overflow: visible; }
-.dp-track--stem::before { content: ""; position: absolute; left: 0; right: 0; top: 50%;
-  height: 1px; background: var(--color-border); transform: translateY(-50%); }
-.dp-stem { position: absolute; left: 0; top: 50%; height: 2px; transform: translateY(-50%); background: var(--v); border-radius: 2px; }
-.dp-dot { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%;
-  background: var(--v); transform: translate(-50%, -50%); box-shadow: 0 0 0 2px var(--color-bg); }
-
-/* Tabelle — numeric grid across three population columns. */
-.dp-table { display: flex; flex-direction: column; gap: 0.2rem; }
-.dp-trow { display: grid; grid-template-columns: 1fr 1.5rem 1.5rem 1.5rem; align-items: center; gap: 0.3rem; }
-.dp-trow--head { border-bottom: 1px solid var(--color-border); padding-bottom: 2px; margin-bottom: 1px; }
-.dp-tcell { font-size: 0.66rem; }
-.dp-tcell--head, .dp-tcell--num { text-align: center; font-variant-numeric: tabular-nums; }
-.dp-tcell--head { color: var(--color-text-muted); font-weight: 600; }
-.dp-tcell--num { color: var(--color-text-secondary); }
-.dp-tcell--label { display: flex; align-items: center; gap: 0.3rem; min-width: 0; }
-
-@media (prefers-reduced-motion: reduce) {
-  .dp-fill { transition: none; }
-  .daten-preview__tab { transition: none; }
-}
-
-/* ── Meine Interessen preview (5 colour-coded audience rows) ──── */
-
-.path-tile--meine { --tile-accent: #4f46e5; }
-
-.meine-rows {
-  list-style: none; margin: 0; padding: 0;
-  width: 100%; max-width: 16rem;
-  display: flex; flex-direction: column; gap: 0.4rem;
-}
-
-/* One row per audience group: icon + label, in the group's own colour.
-   The left accent + faint colour wash echo the per-audience identity used
-   on the /meine-interessen/ picker. */
-.meine-row {
-  --audience-color: var(--color-accent);
-  display: flex; align-items: center; gap: 0.55rem;
-  padding: 0.38rem 0.6rem;
-  border-radius: var(--radius-md, 0.5rem);
-  border-left: 3px solid var(--audience-color);
-  background: color-mix(in srgb, var(--audience-color) 10%, transparent);
-}
-
-.meine-row__icon { display: inline-flex; flex: 0 0 auto; color: var(--audience-color); }
-
-.meine-row__label {
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  font-size: 0.78rem; font-weight: 600; color: var(--color-text);
-  white-space: nowrap; letter-spacing: -0.005em;
-}
-
-/* ── 2×2 square mode: container-query inner scaling ──────────── */
-/* The tile is the matrix segment; its preview area is a container
-   query root (set above). Every inner preview surface sizes off the
-   preview's inline-size (cqw) so it scales with the tile across
-   viewports without per-breakpoint media queries.
-   Targets ≈ 50 % of preview width for the portrait peek-stack decks
-   (so their height = width × 1.4 fits inside the preview area, which
-   in a square tile is ≈ 70 % of tile-width tall), and ≈ 92 % for the
-   landscape dashboard bars (which adapt naturally). All capped so
-   the previews never balloon past their canonical max footprint on
-   ultra-wide tiles. */
-@container preview (min-width: 0) {
-  .quiz-preview-deck  { width: min(52cqw, 13rem); }
-  .meine-rows        { width: min(94cqw, 16rem); }
-  .karten-deck        { width: min(52cqw, 13rem); }
-  .daten-preview      { width: min(92cqw, 24rem); }
-}
-
-/* Above ~360 px preview width (≈ tablet 700 px viewport+), bump the
-   rotating myth statement a touch so it doesn't look anaemic inside
-   the bigger square card. */
-@container preview (min-width: 360px) {
-  .quiz-preview-deck__myth { font-size: 0.9rem; }
-}
-
-/* ═══ Tiles: consistent top-field + bottom(name + description) division ═══ */
-
-/* Quiz/Daten tiles are containers (inner links), so their body title links. */
-.path-tile__title-link { text-decoration: none; color: inherit; display: block; }
-.path-tile--quiz, .path-tile--daten { color: inherit; }
-
-/* ── Quiz: six clickable category decks, filling the top field ──── */
-.quiz-decks {
-  list-style: none; margin: 0; padding: 0; width: 100%; height: 100%;
-  display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 0.5rem;
-}
-.quiz-decks > li { display: flex; min-height: 0; }
-.quiz-deck {
-  flex: 1 1 auto; display: flex; align-items: center; gap: 0.5rem; min-width: 0;
-  padding: 0.45rem 0.6rem; border-radius: 0.7rem; text-decoration: none; color: #fff;
-  background: var(--deck-bg, #047857); box-shadow: 0 4px 12px -6px rgba(0,0,0,.4);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-.quiz-deck:hover, .quiz-deck:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow-md, 0 8px 18px -8px rgba(0,0,0,.45)); outline: none; }
-.quiz-deck__icon { flex: 0 0 auto; display: inline-flex; opacity: .95; }
-.quiz-deck__text { min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
-.quiz-deck__title { font-family: 'Inter Variable','Inter',system-ui,sans-serif; font-size: 0.74rem; font-weight: 700;
-  letter-spacing: -0.005em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.quiz-deck__count { font-size: 0.62rem; font-weight: 500; opacity: .85; margin-top: 1px; }
-.quiz-deck--green    { --deck-bg: #047857; }
-.quiz-deck--blue     { --deck-bg: #0f78d5; }
-.quiz-deck--purple   { --deck-bg: #bc5ed3; }
-.quiz-deck--indigo   { --deck-bg: #508ad7; }
-.quiz-deck--yellow   { --deck-bg: #f5b02f; }
-.quiz-deck--gradient { --deck-bg: linear-gradient(146.93deg, rgb(39,165,248) 4%, rgba(154,203,185,.97) 49%, rgb(255,192,75) 94%); }
-
-/* ── Daten-Explorer: changing bars (illustration) + the six view-tabs ── */
-.daten-field { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 0.85rem; }
-.daten-bars { display: flex; flex-direction: column; gap: 0.4rem; }
-.daten-bar { height: 0.5rem; border-radius: 3px; background: rgba(20, 59, 44, 0.10); overflow: hidden; }
-.daten-bar__fill { display: block; height: 100%; border-radius: 3px;
-  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.6s ease; }
-.daten-tabs { display: flex; flex-direction: column; gap: 0.6rem; }
-.daten-tabs__group { display: flex; flex-direction: column; gap: 0.3rem; }
-.daten-tabs__label {
-  font-family: 'Inter Variable','Inter',system-ui,sans-serif; font-size: 0.6rem; font-weight: 700;
-  letter-spacing: 1.6px; text-transform: uppercase; color: var(--color-text-muted);
-}
-.daten-tabs__row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
-.daten-tab {
-  display: flex; align-items: center; justify-content: center; gap: 0.3rem;
-  padding: 0.4rem 0.25rem; border-radius: 0.5rem; text-decoration: none;
-  font-family: 'Inter Variable','Inter',system-ui,sans-serif; font-size: 0.68rem; font-weight: 600;
-  color: var(--color-text); background: var(--color-surface);
-  border: 1px solid var(--card-border-color); transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast); }
-.daten-tab:hover, .daten-tab:focus-visible { background: var(--color-primary); border-color: var(--color-primary); color: #fff; outline: none; }
-.daten-tab svg { flex: 0 0 auto; }
-@media (prefers-reduced-motion: reduce) { .daten-bar__fill { transition: none; } }
-
-/* ── Meine Interessen: the five audience rows fill the top field ── */
-.path-tile--meine .meine-rows { width: 100%; height: 100%; max-width: none; }
-.meine-row { flex: 1 1 0; }
-
-/* ── Fakten-Karten: the real card front, cycling ─────────────────── */
-.karten-deck { width: min(52cqw, 13rem); }
-.karten-deck__card {
-  position: relative; width: 100%; aspect-ratio: 1 / 1.5625; overflow: hidden;
-  border-radius: var(--card-radius, 0.875rem); display: flex;
-  box-shadow: 0 12px 28px -12px rgba(0,0,0,.4);
-  animation: karten-deck-fade 600ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes karten-deck-fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-.karten-deck__arrow { position: absolute; color: #fff; opacity: 0.16; pointer-events: none; }
-.karten-deck__arrow img { display: block; width: 100%; height: 100%; }
-.karten-deck__body { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0.5rem; width: 100%; padding: 0.85rem 0.8rem; }
-.karten-deck__statement {
-  margin: 0; color: #fff; font-style: italic; font-weight: 700; letter-spacing: -0.005em;
-  font-size: clamp(0.82rem, 3.4cqw, 1.02rem); line-height: 1.3;
-  font-family: 'Source Serif 4', Georgia, serif;
-}
-.karten-deck__cat {
-  margin-top: auto; display: inline-flex; align-items: center; gap: 0.35rem; color: #fff; opacity: 0.92;
-  font-family: 'Inter Variable','Inter',system-ui,sans-serif; font-size: 0.66rem; font-weight: 600;
-}
-.karten-deck__cat svg { flex: 0 0 auto; }
-.karten-deck__cat-name { line-height: 1.2; }
-@media (prefers-reduced-motion: reduce) { .karten-deck__card { animation: none; } }
-
-/* On the narrow mobile carousel the grid tiles get a touch more room. */
-@media (max-width: 700px) {
-  .quiz-decks { gap: 0.45rem; }
-  .quiz-deck__title { font-size: 0.7rem; }
+/* ── Mobile: single column, cards stack ── */
+@media (max-width: 859px) {
+  .four-paths__card {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: auto;
+    padding: 32px;
+    row-gap: 24px;
+  }
+  .four-paths__quote,
+  .path-card--quiz,
+  .path-card--fakten,
+  .path-card--daten,
+  .path-card--meine {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .four-paths__quote {
+    max-width: 100%;
+  }
+  .path-card {
+    min-height: 280px;
+  }
 }
