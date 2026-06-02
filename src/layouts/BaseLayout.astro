@@ -124,6 +124,62 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         blocks back in FEEDBUCKET-DISABLED-START / FEEDBUCKET-DISABLED-END
         comment markers and restore the plain copyright line in the
         footer. */}
+
+    {/* Per-browser reporter token for Feedbucket's User Feedback mode.
+        Generates a stable v4 UUID in localStorage (key cm-feedback-token)
+        on first visit, then sets window.feedbucketConfig.reporter.token
+        before the Feedbucket loader runs below. Name + email are left
+        undefined — Feedbucket prompts the reviewer for them on first pin
+        submission (its default flow). The token isolates each reviewer's
+        view of the feedback list in Feedbucket's dashboard so reviewers
+        don't see each other's pins.
+
+        Requires Feedbucket project-side configuration: support@feedbucket
+        must enable "User Feedback" on the project. Until they do, the
+        widget alerts on submission — this is expected per Feedbucket's
+        docs. Token is unguessable (crypto.randomUUID for modern browsers,
+        crypto.getRandomValues polyfill otherwise) and contains no PII. */}
+    <script is:inline>
+      (function () {
+        try {
+          var key = 'cm-feedback-token';
+          var token = localStorage.getItem(key);
+          if (!token) {
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+              token = window.crypto.randomUUID();
+            } else {
+              // Polyfill for older browsers / non-secure contexts (e.g.
+              // dev over http://localhost where crypto.randomUUID is gated).
+              var rnd;
+              if (window.crypto && window.crypto.getRandomValues) {
+                rnd = function () {
+                  var buf = new Uint8Array(1);
+                  window.crypto.getRandomValues(buf);
+                  return buf[0] / 256;
+                };
+              } else {
+                rnd = Math.random;
+              }
+              token = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = (rnd() * 16) | 0;
+                var v = c === 'x' ? r : (r & 0x3) | 0x8;
+                return v.toString(16);
+              });
+            }
+            localStorage.setItem(key, token);
+          }
+          window.feedbucketConfig = {
+            reporter: { token: token }
+          };
+        } catch (e) {
+          // localStorage / crypto unavailable (e.g. cookies blocked, very
+          // old browser). Skip silently — Feedbucket falls back to its
+          // default anonymous behavior; no privacy isolation, but feedback
+          // still works. Same as before User Feedback was enabled.
+        }
+      })();
+    </script>
+
     <script is:inline>
       (function (k) {
         var path = window.location.pathname;
