@@ -73,11 +73,20 @@ export const ACTIVE_GROUPS: GroupId[] = [
   'parents',
 ];
 
+// Iter-24 (2026-06-02, Harald-Backlog): canonical Zielgruppe labels
+// for the /projekt/ scrolly. Matches the daten-explorer (igs.group.*
+// in src/lib/dashboard/translations.ts) AND the audience picker on
+// the dashboard screenshot Harald referenced — age ranges in parens,
+// capital "Junge", gender-inclusive "Konsument:innen". This is the
+// SINGLE SOURCE OF TRUTH for the scrollytelling left-column inline
+// `{icon:KEY} <label>` text AND every right-column picker tab.
+// VizSourcesStrips.tsx now imports from here instead of carrying its
+// own GROUP_OPTIONS map.
 export const GROUP_LABEL_DE: Record<GroupId, string> = {
-  adults: 'Volljährige',
-  minors: 'Minderjährige',
-  consumers: 'Konsumierende',
-  young_adults: 'junge Erwachsene',
+  adults: 'Volljährige (18–70)',
+  minors: 'Minderjährige (16–17)',
+  consumers: 'Konsument:innen',
+  young_adults: 'Junge Erwachsene (18–26)',
   parents: 'Eltern',
 };
 

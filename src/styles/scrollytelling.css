@@ -35,12 +35,21 @@ body:has(.scrolly) {
   --indicator-correctness: 152 60% 40%;         /* green */
   --indicator-prevention_significance: 32 95% 50%; /* amber */
 
-  /* Group colors for the heatmap — distinct, accessible */
-  --group-adults: #6366f1;        /* indigo */
-  --group-minors: #f97316;        /* orange */
-  --group-consumers: #14b8a6;     /* teal */
-  --group-young_adults: #eab308;  /* yellow */
-  --group-parents: #a855f7;       /* purple */
+  /* Iter-24 (2026-06-02, Harald-Backlog): Zielgruppe colors are now
+     aliases of the cross-site Meine-Interessen palette
+     (`--cmi-pop-*` from global.css), so the LEFT-column inline icon
+     for `{icon:adults}` (rendered via `AUDIENCE_COLOR_VAR_BY_GROUP`
+     in `src/lib/icons/lookups.ts`, which targets `--audience-*` →
+     `--cmi-pop-*`) and the RIGHT-column viz picker (which reads
+     `var(--group-*)` directly) resolve to the SAME hex per group.
+     One source of truth — change a `--cmi-pop-*` value in global.css
+     and both sides update. Previous hardcoded indigo/orange/teal/
+     yellow/purple values are retired. */
+  --group-adults:       var(--cmi-pop-volljaehrige);
+  --group-minors:       var(--cmi-pop-minderjaehrige);
+  --group-consumers:    var(--cmi-pop-konsumierende);
+  --group-young_adults: var(--cmi-pop-junge-erwachsene);
+  --group-parents:      var(--cmi-pop-eltern);
 
   /* Theme — dark research backdrop */
   --bg: #0f1318;

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { User } from 'lucide-react';
 import {
   AUDIENCE_ICONS_BY_GROUP,
   IconVolljaehrige,
@@ -417,9 +416,13 @@ function ExampleMythStrips({
               onClick={() => setActiveGroup(g)}
               className={`viz-sr__example-pick ${isActive ? 'viz-sr__example-pick--active' : ''}`}
             >
-              <User
+              {/* Iter-24: per-audience icon (same shape the left-column
+                  `{icon:adults}` inline marker draws). Was the generic
+                  Lucide `<User>`, which looked identical for all five
+                  groups. */}
+              <Icon
                 size="1em"
-                strokeWidth={2}
+                strokeWidth={1.75}
                 color={GROUP_COLOR[g]}
                 aria-hidden="true"
                 style={{ flexShrink: 0 }}

@@ -43,13 +43,13 @@ steps:
     bodyText: |-
       Bevölkerungsbefragung in Deutschland: 2.097 Erwachsene (18–70 Jahre), 555 Minderjährige (16–17 Jahre), 143 Mitglieder von Cannabis-Anbauvereinigungen.
 
-      Für jede der 42 Thesen erhoben wir fünf Indikatoren — über fünf Zielgruppen hinweg:
+      Für jede der 42 Thesen wurden fünf Indikatoren erhoben — über fünf Zielgruppen hinweg:
 
-      {icon:adults} Volljährige
-      {icon:minors} Minderjährige
-      {icon:consumers} Konsumierende
-      {icon:young_adults} junge Erwachsene
-      {icon:parents} Eltern minderjähriger Kinder
+      {icon:adults} Volljährige (18–70)
+      {icon:minors} Minderjährige (16–17)
+      {icon:consumers} Konsument:innen
+      {icon:young_adults} Junge Erwachsene (18–26)
+      {icon:parents} Eltern
     hint: ""
   - heading: |-
       Bekannt, bedeutsam —

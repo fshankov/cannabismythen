@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { User } from 'lucide-react';
 import { AUDIENCE_ICONS_BY_GROUP } from '../../lib/icons';
 import type {
   GroupId,
@@ -12,6 +11,7 @@ import type {
 } from './types';
 import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
 import { useAutoCycleGroup } from './hooks/useAutoCycleGroup';
+import { ACTIVE_GROUPS, GROUP_LABEL_DE } from './dataLoaders';
 
 /** Per-group color tokens — must match GROUP_COLOR in VizSampleAndRanked.tsx
  *  so the User icons in both pickers (step 6 + step 7/8) read as the same
@@ -68,13 +68,12 @@ const UNIFIED_EXEMPLARY_SOURCE_IDS: ReadonlyArray<number> = [
 
 const UNIFIED_HEADER = 'Apotheke · Angehörige · Foren · Plakat · Kurzbeitrag TV';
 
-const GROUP_OPTIONS: { id: GroupId; label: string }[] = [
-  { id: 'adults', label: 'Volljährige' },
-  { id: 'minors', label: 'Minderjährige' },
-  { id: 'consumers', label: 'Konsumierende' },
-  { id: 'young_adults', label: 'Junge Erwachsene' },
-  { id: 'parents', label: 'Eltern' },
-];
+// Iter-24 (2026-06-02, Harald-Backlog): the local GROUP_OPTIONS map
+// has been deleted — labels now come from `GROUP_LABEL_DE` in
+// `./dataLoaders.ts` (SINGLE SOURCE OF TRUTH for Zielgruppen). The
+// picker iterates `ACTIVE_GROUPS` and reads `GROUP_LABEL_DE[id]` to
+// stay in sync with the left-column inline-icon labels in
+// `ueber-uns-scrolly.yaml` and with every other viz picker.
 
 function categoryColor(cat: SourceCategoryId | string): string {
   return `var(--source-cat-${cat})`;
@@ -222,32 +221,35 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         aria-label="Zielgruppe"
         data-auto-cycling={isAutoCycling ? 'true' : 'false'}
       >
-        {GROUP_OPTIONS.map((g) => {
-          const isActive = activeGroup === g.id;
-          const Icon = AUDIENCE_ICONS_BY_GROUP[g.id];
+        {ACTIVE_GROUPS.map((id) => {
+          const isActive = activeGroup === id;
+          const Icon = AUDIENCE_ICONS_BY_GROUP[id];
           return (
           <button
-            key={g.id}
+            key={id}
             role="tab"
             aria-selected={isActive}
             className={`viz-strips__pick ${isActive ? 'viz-strips__pick--active' : ''}`}
-            onClick={() => setActiveGroup(g.id)}
+            onClick={() => setActiveGroup(id)}
             type="button"
           >
-            <User
+            {/* Iter-24: per-audience icon (same shape the left-column
+                `{icon:adults}` inline marker draws). Was the generic
+                Lucide `<User>`. */}
+            <Icon
               size="1em"
-              strokeWidth={2}
-              color={GROUP_COLOR[g.id]}
+              strokeWidth={1.75}
+              color={GROUP_COLOR[id]}
               aria-hidden="true"
               style={{ flexShrink: 0 }}
             />
-            {g.label}
+            {GROUP_LABEL_DE[id]}
             {/* Auto-cycle progress bar — only mounts under the ACTIVE
                 pill while cycling is on. Keyed by activeGroup so the
                 CSS animation restarts on every tick. */}
             {isActive && isAutoCycling && (
               <span
-                key={`pb-${g.id}`}
+                key={`pb-${id}`}
                 className="viz-strips__pick-progress"
                 style={{ animationDuration: `${cycleMs}ms` }}
                 aria-hidden="true"
