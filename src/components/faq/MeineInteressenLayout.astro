@@ -46,10 +46,10 @@ const pageIntro =
   "Wähle die Gruppe, die zu dir passt, und tippe auf eine Frage, um die Antwort zu lesen. " +
   "Quellen und weiterführende Hinweise findest du am Ende der Seite.";
 
-// Per-category title + description — rendered per group at the TOP of the white
-// panel, above the first accordion (a section heading subordinate to the page
-// h1, so the hierarchy reads h1 → section title → question). Sourced from
-// audiences.yaml so editors keep a single source of truth; no code edit needed.
+// Per-group intro description — rendered per group at the TOP of the white
+// panel, above the first accordion. (The per-group title was dropped per
+// request; only the body description remains.) Sourced from audiences.yaml so
+// editors keep a single source of truth; no code edit needed.
 const audienceData = await getAudience(activeAudience as FaqAudienceId);
 
 const isFachkraefte = activeAudience === "fachkraefte";
@@ -89,14 +89,12 @@ const isFachkraefte = activeAudience === "fachkraefte";
 
   <!-- White panel — border-top omitted so active tab merges flush into it -->
   <div class="mi-panel">
-    <!-- Per-group title + description: first thing inside the panel, above the
-         first accordion. Subordinate to the page h1 → clear hierarchy. -->
-    {audienceData && (
+    <!-- Per-group intro description: first thing inside the panel, above the
+         first accordion. (The per-group title was removed per request — only
+         the body description remains.) -->
+    {audienceData?.description && (
       <div class="mi-panel-intro">
-        <h2 class="mi-panel-intro__title">{audienceData.title}</h2>
-        {audienceData.description && (
-          <p class="mi-panel-intro__desc">{audienceData.description}</p>
-        )}
+        <p class="mi-panel-intro__desc">{audienceData.description}</p>
       </div>
     )}
     {isFachkraefte && (
@@ -183,22 +181,11 @@ const isFachkraefte = activeAudience === "fachkraefte";
   color: var(--color-text-secondary);
 }
 
-/* ── Per-group title + description (inside the white panel) ──────────
-   First block in the panel, above the first accordion. A section heading
-   clearly subordinate to the page h1 (30px vs 48px) so the hierarchy
-   reads h1 → section title → question. */
+/* ── Per-group intro description (inside the white panel) ───────────
+   First block in the panel, above the first accordion. (The per-group title
+   was removed — only the body description remains.) */
 :global(.mi-layout .mi-panel-intro) {
   margin: 0 0 28px;
-}
-
-:global(.mi-layout .mi-panel-intro__title) {
-  margin: 0 0 12px;
-  color: var(--color-accent, #2d6a4f);
-  font-family: var(--font-display);
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.5px;
 }
 
 :global(.mi-layout .mi-panel-intro__desc) {
@@ -506,7 +493,6 @@ const isFachkraefte = activeAudience === "fachkraefte";
 @media (max-width: 640px) {
   :global(.mi-layout) { padding-left: 16px; padding-right: 16px; }
   :global(.mi-layout .mi-header__title) { font-size: 30px; line-height: 1.15; }
-  :global(.mi-layout .mi-panel-intro__title) { font-size: 24px; }
   /* Full-width description on phones — 60% would be too cramped for the text. */
   :global(.mi-layout .mi-panel-intro__desc) { max-width: 100%; }
   /* Wide data tables scroll horizontally on phones instead of overflowing. */

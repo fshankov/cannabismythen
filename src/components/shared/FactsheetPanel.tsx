@@ -228,14 +228,14 @@ export default function FactsheetPanel({
 
     document.addEventListener('keydown', handleKeyDown);
 
-    // Dashboard context locks body scroll; quiz manages its own
-    if (context === 'dashboard') {
+    // Dashboard and fakten-karten contexts lock body scroll; quiz manages its own
+    if (context === 'dashboard' || context === 'fakten-karten') {
       document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      if (context === 'dashboard') {
+      if (context === 'dashboard' || context === 'fakten-karten') {
         document.body.style.overflow = '';
       }
     };

@@ -1,11 +1,5 @@
 ---
 import "../../styles/home-four-paths.css";
-import QuizPreviewTile from "./previews/QuizPreviewTile.astro";
-import FaktenKartenPreviewTile from "./previews/FaktenKartenPreviewTile.astro";
-import DatenExplorerPreviewTile from "./previews/DatenExplorerPreviewTile";
-import MeineInteressenPreviewTile from "./previews/MeineInteressenPreviewTile.astro";
-import type { PreviewMyth } from "./previews/FaktenKartenPreviewTile.astro";
-import type { AudienceChip } from "./previews/MeineInteressenPreviewTile.astro";
 
 export interface HookQuote {
   eyebrow: string;
@@ -21,11 +15,8 @@ export interface TileBase {
   targetUrl: string;
 }
 
-/* Legacy alias — the sampleX fields the old static QuizPreviewTile took
- * are now baked into the rotating <QuizPreviewDeck> component, but the
- * Keystatic YAML still carries them so editors don't see schema churn
- * on every refactor. We accept the wider shape and only forward the
- * TileBase fields to the new tile. */
+/* Quiz tile still carries the legacy sampleX fields in Keystatic; we accept
+ * the wider shape and only use the TileBase fields here. */
 export interface QuizTileConfig extends TileBase {
   sampleEyebrow?: string;
   sampleMythText?: string;
@@ -38,8 +29,10 @@ export interface Props {
   faktenKartenTile: TileBase;
   datenExplorerTile: TileBase;
   meineInteressenTile: TileBase;
-  previewMyths: ReadonlyArray<PreviewMyth>;
-  audienceChips: ReadonlyArray<AudienceChip>;
+  /* No longer rendered in the simplified cards — kept optional so index.astro
+   * needs no change while the per-card "white space" content is pending. */
+  previewMyths?: unknown;
+  audienceChips?: unknown;
 }
 
 const {
@@ -48,34 +41,58 @@ const {
   faktenKartenTile,
   datenExplorerTile,
   meineInteressenTile,
-  previewMyths,
-  audienceChips,
 } = Astro.props;
+
+// Per-topic icons lifted from the mobile tab bar (BaseLayout) — Lucide 24×24,
+// drawn in currentColor so the badge can paint them white.
+const ICONS: Record<string, string> = {
+  quiz: `<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/>`,
+  fakten: `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>`,
+  daten: `<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/>`,
+  meine: `<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>`,
+};
+
+const cards = [
+  { mod: "quiz", icon: ICONS.quiz, ...quizTile },
+  { mod: "fakten", icon: ICONS.fakten, ...faktenKartenTile },
+  { mod: "daten", icon: ICONS.daten, ...datenExplorerTile },
+  { mod: "meine", icon: ICONS.meine, ...meineInteressenTile },
+];
 ---
 
 <section class="four-paths" aria-labelledby="four-paths-quote">
   <div class="four-paths__inner">
-    <blockquote class="four-paths__quote" id="four-paths-quote">
-      <span class="four-paths__quote-eyebrow">{hookQuote.eyebrow}</span>
-      <span class="four-paths__quote-lead">{hookQuote.leadClause}</span>{" "}
-      <span
-        class="four-paths__quote-counter"
-        data-classification={hookQuote.counterClassification}
-      >
-        {hookQuote.counterClause}
-      </span>
-    </blockquote>
+    <div class="four-paths__card">
+      <blockquote class="four-paths__quote" id="four-paths-quote">
+        <span class="four-paths__quote-eyebrow">{hookQuote.eyebrow}</span>
+        <span class="four-paths__quote-lead">{hookQuote.leadClause}</span>{" "}
+        <span
+          class="four-paths__quote-counter"
+          data-classification={hookQuote.counterClassification}
+        >
+          {hookQuote.counterClause}
+        </span>
+      </blockquote>
 
-    <div class="four-paths__grid">
-      <QuizPreviewTile
-        title={quizTile.title}
-        description={quizTile.description}
-        ctaLabel={quizTile.ctaLabel}
-        targetUrl={quizTile.targetUrl}
-      />
-      <FaktenKartenPreviewTile {...faktenKartenTile} previewMyths={previewMyths} />
-      <DatenExplorerPreviewTile {...datenExplorerTile} client:visible />
-      <MeineInteressenPreviewTile {...meineInteressenTile} chips={audienceChips} />
+      {cards.map((c) => (
+        <a class={`path-card path-card--${c.mod}`} href={c.targetUrl}>
+          <span class="path-card__icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="17.5"
+              height="17.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              set:html={c.icon}
+            ></svg>
+          </span>
+          <h3 class="path-card__title">{c.title}</h3>
+          <p class="path-card__body">{c.description}</p>
+        </a>
+      ))}
     </div>
   </div>
 </section>

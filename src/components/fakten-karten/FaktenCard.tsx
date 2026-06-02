@@ -54,6 +54,8 @@ interface FaktenCardProps {
   /** Drives the CategoryFooter rendered at the bottom of each face. */
   categoryGroup: string;
   onShowFactsheet?: (slug: string) => void;
+  /** When true, keeps the card showing its back face (panel is open for this card). */
+  isActive?: boolean;
 }
 
 const VALID_VERDICTS: ReadonlySet<CorrectnessClass> = new Set([
@@ -74,6 +76,7 @@ export default function FaktenCard({
   myth,
   categoryGroup,
   onShowFactsheet,
+  isActive = false,
 }: FaktenCardProps) {
   const verdict = toVerdict(myth.classification);
   const visual = getVerdictVisual(verdict);
@@ -101,7 +104,7 @@ export default function FaktenCard({
     <div className="quiz-card__cell">
       <button
         type="button"
-        className="fakten-card"
+        className={`fakten-card${isActive ? " fakten-card--active" : ""}`}
         onClick={handleClick}
         aria-label={`${myth.title} — Factsheet öffnen`}
       >

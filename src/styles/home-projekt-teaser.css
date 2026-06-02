@@ -23,7 +23,7 @@
 .projekt-teaser__text {
   flex: 1 1 auto;
   min-width: 0;
-  max-width: 627px; /* Figma text column */
+  max-width: 500px; /* body text container */
 }
 
 /* ── Heading — Inter Black, up to 40px, breaks after "Forschung —" ── */
@@ -96,6 +96,7 @@
 /* ── Illustration column ── */
 .projekt-teaser__art {
   flex: 0 0 auto;
+  margin-left: auto; /* push the illustration to the right edge */
   display: flex;
   justify-content: center;
 }
@@ -112,6 +113,7 @@
   }
   .projekt-teaser__art {
     align-self: center;
+    margin-left: 0; /* cancel the desktop right-push; centre on mobile */
     width: min(240px, 62vw); /* scaled down to fit */
   }
 }

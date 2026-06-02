@@ -3793,14 +3793,11 @@ body.fakten-karten-page main {
 
 .fakten-card {
   /* Outer is a transparent button — the visible card surfaces live on
-     the two .fakten-card__face elements below. This lets the 3D flip
-     animate cleanly without the outer chrome (border, shadow) flipping
-     out of sync. */
+     the two .fakten-card__face elements below, stacked via position:absolute. */
   position: relative;
   display: block;
   width: 100%;
   height: 100%;
-  perspective: 1200px;
   background: transparent;
   border: none;
   padding: 0;
@@ -3821,21 +3818,11 @@ body.fakten-karten-page main {
   border-radius: var(--radius-lg);
 }
 
-/* Inner rotates on the Y axis when the user hovers (or focuses) the
-   button. `transform-style: preserve-3d` keeps the two faces in real
-   3D space so backface-visibility works. */
+/* Inner is a plain stacking context — no 3D transform needed for dissolve. */
 .fakten-card__inner {
   position: relative;
   width: 100%;
   height: 100%;
-  -webkit-transform-style: preserve-3d;
-  transform-style: preserve-3d;
-  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.fakten-card:hover .fakten-card__inner,
-.fakten-card:focus-visible .fakten-card__inner {
-  transform: rotateY(180deg);
 }
 
 .fakten-card__face {
@@ -3850,19 +3837,13 @@ body.fakten-karten-page main {
      while idle. The shadow flips with the card because it lives on
      the face, not the outer button. */
   box-shadow: var(--shadow-md);
-  /* Hide the away-facing side during the flip. Do NOT add `overflow: hidden`
-     here: in WebKit/Safari, `overflow: hidden` on the SAME element as
-     `backface-visibility: hidden` defeats the backface culling, leaving the
-     front face painted through the back after the flip. No overflow clip is
-     needed anyway — `border-radius` already clips each face's surface, and
-     the front arrow self-clips to its own SVG viewBox. */
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  transition: opacity 500ms ease-in-out;
+  will-change: opacity;
   padding: var(--space-lg);
 }
 
 .fakten-card__face--back {
-  transform: rotateY(180deg);
+  opacity: 0;
   /* Figma 427-3835: card back keeps a white surface but drops the
      border for a cleaner edge — only the shadow communicates lift.
      Radius uses cqi (% of card width) so the corners stay CIRCULAR and
@@ -4008,26 +3989,60 @@ body.fakten-karten-page main {
   background: var(--color-accent);
   border-radius: 8px;
   white-space: nowrap;
-  transition: background-color 140ms ease-out;
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.18);
+  transition:
+    background-color 200ms ease-out,
+    box-shadow 200ms ease-out;
 }
 
-/* Hover/focus state propagates from the outer .fakten-card button. */
+/* Card-level hover: slightly darkens CTA to signal the card is active/flipped. */
 .fakten-card:hover .fakten-card__cta,
 .fakten-card:focus-visible .fakten-card__cta {
   background: color-mix(in srgb, var(--color-accent) 86%, black);
 }
 
-/* Touch / no-hover devices: skip the flip entirely. The front face
-   stays visible, the back face is never shown. Tap → popup. */
+/* CTA-specific hover: lighter green + green glow ring + lift.
+   Specificity 0,4,0 intentionally beats the card-level rule above (0,3,0)
+   so the bright shift overrides the darkening when the cursor lands on the button. */
+.fakten-card:hover .fakten-card__cta:hover {
+  background: color-mix(in srgb, var(--color-accent) 68%, white);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.20);
+}
+
+/* Active / press: snap to darker green, compress shadow. */
+.fakten-card:active .fakten-card__cta {
+  background: var(--color-accent-hover);
+  box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.14);
+  transition-duration: 80ms;
+}
+
+/* Dissolve: fade front out, back in. */
+.fakten-card:hover .fakten-card__face--front,
+.fakten-card:focus-visible .fakten-card__face--front,
+.fakten-card--active .fakten-card__face--front {
+  opacity: 0;
+}
+
+.fakten-card:hover .fakten-card__face--back,
+.fakten-card:focus-visible .fakten-card__face--back,
+.fakten-card--active .fakten-card__face--back {
+  opacity: 1;
+}
+
+/* Touch / no-hover devices: skip the dissolve. Tap → popup. */
 @media (hover: none) {
-  .fakten-card:hover .fakten-card__inner,
-  .fakten-card:focus-visible .fakten-card__inner {
-    transform: none;
+  .fakten-card:hover .fakten-card__face--front,
+  .fakten-card:focus-visible .fakten-card__face--front {
+    opacity: 1;
+  }
+  .fakten-card:hover .fakten-card__face--back,
+  .fakten-card:focus-visible .fakten-card__face--back {
+    opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fakten-card__inner {
+  .fakten-card__face {
     transition: none;
   }
 }
@@ -4112,7 +4127,7 @@ body.fakten-karten-page main {
 .fakten-filter-section {
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--space-xl);
+  margin-bottom: 64px;
 }
 
 .fakten-filter-section__label {
@@ -4423,15 +4438,13 @@ body.fakten-karten-page main {
 .fakten-filter-dropdown__panel {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
+  left: 0;
   z-index: 20;
-  min-width: 320px;
-  max-width: min(420px, calc(100vw - 24px));
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  width: 100%;
+  max-width: calc(100vw - 24px);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  -webkit-backdrop-filter: blur(6px);
-          backdrop-filter: blur(6px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   padding: 4px;
   animation: fakten-filter-dropdown-fade-in 140ms ease-out;
@@ -4485,12 +4498,17 @@ body.fakten-karten-page main {
 
 /* CategoryFooter used as a Kategorien dropdown row — slightly larger
    than the card footer for the 8 fixed rows. Color is inline from
-   CATEGORY_META.label. */
+   CATEGORY_META.label (applies to the icon via currentColor). */
 .fakten-filter-checkbox__cat {
   flex: 1 1 auto;
   font-size: 0.88rem;
   font-weight: 600;
   line-height: 1.3;
+}
+
+/* Icon keeps the inline category color; text is always black. */
+.fakten-filter-checkbox__cat .fakten-card-cat__name {
+  color: var(--color-text);
 }
 
 .fakten-filter-checkbox__count {

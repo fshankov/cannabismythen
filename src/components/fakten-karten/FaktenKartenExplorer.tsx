@@ -80,6 +80,7 @@ export default function FaktenKartenExplorer({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [factsheetMyth, setFactsheetMyth] = useState<string | null>(null);
+  const [allFlipped, setAllFlipped] = useState(false);
 
   const allMyths: MythEntry[] = useMemo(() => {
     try {
@@ -210,6 +211,7 @@ export default function FaktenKartenExplorer({
               myth={myth}
               categoryGroup={myth.categoryGroup}
               onShowFactsheet={handleShowFactsheet}
+              isActive={factsheetMyth === myth.slug}
             />
           ))}
         </div>
