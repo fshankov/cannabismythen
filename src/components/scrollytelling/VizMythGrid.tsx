@@ -1,12 +1,14 @@
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { CarmData, CorrectnessClass, Myth } from './types';
+import type { CarmData, CorrectnessClass } from './types';
 import {
   ON_VERDICT_BG_GLYPH,
   VERDICT_COLOR,
   sortedMyths,
   themeColorFor,
 } from './dataLoaders';
-import { MehrPopover } from './MehrPopover';
+// MehrPopover removed (CAR-?? 2026-05-30) — myth grid is read-only on
+// both step 3 (themed) and step 4 (classified). Full detail lives in
+// /fakten-karten/ and is reachable from the hover-card aria-label.
 import VerdictArrow from '../shared/VerdictArrow';
 import { useFlipPosition, type FlipPosition } from '../dashboard/hooks/useFlipPosition';
 import { withBase } from '../../lib/withBase';
@@ -44,7 +46,8 @@ export function VizMythGrid({ data, mode }: Props) {
   const myths = sortedMyths(data).slice(0, 42);
   const [summaries, setSummaries] = useState<MythSummaryMap | null>(null);
   const [hoverId, setHoverId] = useState<number | null>(null);
-  const [openMyth, setOpenMyth] = useState<Myth | null>(null);
+  // CAR-?? (2026-05-30): the MehrPopover detail card was removed; both
+  // step 3 (themed) and step 4 (classified) are now read-only chips.
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   // Iter-14 (Harald review, CAR-14): swap the bespoke grid-relative
@@ -195,26 +198,19 @@ export function VizMythGrid({ data, mode }: Props) {
               style={{
                 backgroundColor: bg,
                 ['--rt' as string]: rt.toFixed(3),
-                cursor: mode === 'classified' ? 'pointer' : 'default',
+                cursor: 'default',
               }}
-              tabIndex={0}
-              role={mode === 'classified' ? 'button' : undefined}
+              // CAR-?? (2026-05-30): no click affordance on either mode.
+              // The grid is purely visual — full myth detail lives in
+              // /fakten-karten/. Hover tooltip (driven by onMouseEnter)
+              // is retained so reading the statement on hover still
+              // works, but the cells aren't focusable and don't trigger
+              // a popup on tap or keypress.
               onMouseEnter={(e) => onCellEnter(m.id, e)}
               onMouseLeave={onCellLeave}
-              onFocus={(e) => onCellEnter(m.id, e)}
-              onBlur={onCellLeave}
-              onClick={() => {
-                if (mode === 'classified') setOpenMyth(m);
-              }}
-              onKeyDown={(e) => {
-                if (mode === 'classified' && (e.key === 'Enter' || e.key === ' ')) {
-                  e.preventDefault();
-                  setOpenMyth(m);
-                }
-              }}
               aria-label={
                 mode === 'classified'
-                  ? `${m.text_de} — ${VERDICT_LABEL_LONG[m.correctness_class]} — Details öffnen`
+                  ? `${m.text_de} — ${VERDICT_LABEL_LONG[m.correctness_class]}`
                   : m.text_de
               }
             >
@@ -275,44 +271,9 @@ export function VizMythGrid({ data, mode }: Props) {
 
       {/* Iter-11: theme + verdict legends moved to the LEFT text
           column (rendered by ScrollytellingViewer based on step.gridMode).
-          The viz column now shows ONLY the data — no metadata blocks. */}
-
-      <MehrPopover
-        open={openMyth !== null}
-        onClose={() => setOpenMyth(null)}
-        title={openMyth?.text_de ?? ''}
-        subtitle={openMyth?.category_de ?? undefined}
-      >
-        {openMyth && (
-          <>
-            <div
-              className="mehr-popover__verdict-pill"
-              style={{ background: VERDICT_COLOR[openMyth.correctness_class] }}
-            >
-              {VERDICT_LABEL_LONG[openMyth.correctness_class]}
-            </div>
-            {(() => {
-              const summary = summaries?.[String(openMyth.id)];
-              if (summary?.summary_de) return <p>{summary.summary_de}</p>;
-              if (openMyth.classification_de) return <p>{openMyth.classification_de}</p>;
-              return (
-                <p>
-                  Eine ausführliche Erklärung mit Quellen findest du in der
-                  Faktenkarte zu diesem Mythos.
-                </p>
-              );
-            })()}
-            <a
-              className="mehr-popover__cta-link"
-              href={withBase(`fakten-karten/?myth=m${String(openMyth.id).padStart(2, '0')}`)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Zur vollständigen Faktenkarte →
-            </a>
-          </>
-        )}
-      </MehrPopover>
+          The viz column now shows ONLY the data — no metadata blocks.
+          CAR-?? (2026-05-30): MehrPopover detail card removed; full
+          factsheet remains reachable from /fakten-karten/. */}
     </div>
   );
 }

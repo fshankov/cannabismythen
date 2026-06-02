@@ -1,12 +1,14 @@
 import { useRef, useEffect, useState } from "react";
 import VerdictArrow from "../shared/VerdictArrow";
+import { VERDICT_GLYPHS } from "../shared/verdictGlyph";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
 import "./HeroBlock.css";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface HeroMyth {
-  /** The myth statement, already stripped of the "Mythos N:" prefix. */
+  /** The FULL myth statement (stripped of the "Mythos N:" prefix) — shown as
+   *  the caption that fades in when the glyph reveals. */
   text: string;
   /** richtig | eher_richtig | eher_falsch | falsch | keine_aussage */
   classification: string;
@@ -16,33 +18,26 @@ interface Props {
   myths: HeroMyth[];
   headline1: string;
   headline2: string;
+  headline3: string;
   eyebrow: string;
 }
 
-// ── Scattered myth field ────────────────────────────────────────────────────
-// The 42 myth statements are scattered across the whole hero (jittered grid:
-// no overlap, breathing room, and the centre — headline + Lupe — stays clear).
-// At rest every statement is WHITE + blurred (no colour). When the visitor
-// hovers the nearest one, or the auto-spotlight cycles to one, that statement
-// GRADUALLY gains its verdict colour and sharpens; the others stay white.
-// The verdict glyph inside the Lupe reveals at the same slow pace.
+// ── Scattered verdict-glyph field ────────────────────────────────────────────
+// The 42 myths are scattered across the hero as VERDICT GLYPHS (the same
+// chevron/arrow marker the Lupe and the dashboard use — one per myth's
+// classification). Poisson-disk placement keeps them non-overlapping with the
+// centre (headline + Lupe) and chrome kept clear.
+// At rest every glyph is WHITE + blurred (colourless) and no text shows. When
+// the visitor hovers the nearest one — or the auto-spotlight cycles to one —
+// that glyph GRADUALLY gains its verdict colour, sharpens, and its FULL
+// statement fades in below it. The Lupe mirrors the active verdict at the
+// same slow pace.
 //
-// Motion: only a whisper-subtle per-myth float (CSS) — no global sway/breathing.
+// Motion: only a gentle per-myth orbit (CSS) — no global sway/breathing.
 // Reveal is JS-eased (slow); only the active node gets per-frame style writes.
 
-// Verdict colours for the revealed (lit) state + glow.
-interface VColor { c: string; g: string }
-const TXT: Record<string, VColor> = {
-  richtig:       { c: "#6bc4a0", g: "rgba(107,196,160,.55)" },
-  eher_richtig:  { c: "#9bcc6b", g: "rgba(155,204,107,.5)" },
-  eher_falsch:   { c: "#e0b07a", g: "rgba(224,176,122,.5)" },
-  falsch:        { c: "#e58d83", g: "rgba(229,141,131,.55)" },
-  keine_aussage: { c: "#aebbc2", g: "rgba(174,187,194,.4)" },
-};
+// Rest colour for the colourless (white, blurred) glyph field.
 const REST_WHITE: [number, number, number] = [237, 244, 240]; // #edf4f0
-function txt(cls: string) {
-  return TXT[cls] || TXT.keine_aussage;
-}
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
   return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
@@ -54,6 +49,60 @@ function mix(a: [number, number, number], b: [number, number, number], t: number
 function asVerdict(cls: string): CorrectnessClass {
   return (cls === "keine_aussage" ? "no_classification" : cls) as CorrectnessClass;
 }
+
+// Lit (revealed) glyph colours — the LIGHTER dark-background verdict palette
+// (the dashboard's own colours are too dark to read on the forest hero). main =
+// chevron + vertical shaft, shadow = the flat base line. Keyed by class string.
+const LIT_GLYPH: Record<string, { main: [number, number, number]; shadow: [number, number, number] }> = {
+  richtig:       { main: hexToRgb("#6bc4a0"), shadow: hexToRgb("#a7d3c5") },
+  eher_richtig:  { main: hexToRgb("#9bcc6b"), shadow: hexToRgb("#c2d3a3") },
+  eher_falsch:   { main: hexToRgb("#e0b07a"), shadow: hexToRgb("#e0b58d") },
+  falsch:        { main: hexToRgb("#e58d83"), shadow: hexToRgb("#e9a8b9") },
+  keine_aussage: { main: hexToRgb("#aebbc2"), shadow: hexToRgb("#aebbc2") },
+};
+function litGlyph(cls: string) {
+  return LIT_GLYPH[cls] ?? LIT_GLYPH.keine_aussage;
+}
+
+// Build the verdict glyph as an inline SVG (same marker as VerdictArrow /
+// verdictGlyph): a rotated chevron + vertical shaft (.cmh-g-mn) over a flat
+// base line (.cmh-g-sh). The two stroke colours are driven by CSS vars
+// (--gmain / --gshadow) so the reveal can lerp white→verdict per frame.
+const SVGNS = "http://www.w3.org/2000/svg";
+function buildGlyph(cls: string): SVGSVGElement {
+  const svg = document.createElementNS(SVGNS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", "32");
+  svg.setAttribute("height", "32");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke-width", "2");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("class", "cmh__glyph");
+  const mk = (d: string, cssClass: string) => {
+    const p = document.createElementNS(SVGNS, "path");
+    p.setAttribute("d", d);
+    p.setAttribute("class", cssClass);
+    return p;
+  };
+  const v = asVerdict(cls);
+  const spec =
+    v !== "no_classification"
+      ? VERDICT_GLYPHS[v as Exclude<CorrectnessClass, "no_classification">]
+      : undefined;
+  if (!spec) {
+    svg.appendChild(mk("M2 16h20", "cmh-g-sh")); // flat line — no scientific verdict
+    return svg;
+  }
+  const g = document.createElementNS(SVGNS, "g");
+  g.setAttribute("transform", `rotate(${spec.rotation} 12 12)`);
+  g.appendChild(mk("M2 16h20", "cmh-g-sh"));
+  g.appendChild(mk("M12 2v14", "cmh-g-mn"));
+  g.appendChild(mk("m5 9 7 7 7-7", "cmh-g-mn"));
+  svg.appendChild(g);
+  return svg;
+}
+
 const smooth = (t: number) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
 // Tiny seeded RNG (deterministic, stable layout/float across reloads).
 function makeRng(seed: number) {
@@ -112,11 +161,12 @@ function bridson(
 interface Node {
   slot: HTMLDivElement;
   float: HTMLDivElement;
-  span: HTMLDivElement;
+  glyph: SVGSVGElement;       // the floating verdict marker
+  cap: HTMLDivElement;        // the full-statement caption (hidden at rest)
   cls: string;
-  t: VColor;
-  rgb: [number, number, number];
-  fdx: number;            // float direction (unit) — amplitude applied in layout
+  litMain: [number, number, number];
+  litShadow: [number, number, number];
+  fdx: number;            // orbit direction (unit) — amplitude applied in layout
   fdy: number;
   x: number;
   y: number;
@@ -124,7 +174,7 @@ interface Node {
   state: "rest" | "lit";
 }
 
-export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
+export function HeroBlock({ myths, headline1, headline2, headline3, eyebrow }: Props) {
   const heroRef  = useRef<HTMLElement>(null);
   const cloudRef = useRef<HTMLDivElement>(null);
   const glassRef = useRef<HTMLDivElement>(null);
@@ -151,7 +201,7 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
     const R_CUR = 180;            // hover reveal radius (px)
     const REVEAL = 0.06;          // myth reveal lerp — slow ease-in (~1s)
 
-    // ── Build the 42 myth nodes (slot > float > text) ───────────────────────
+    // ── Build the 42 myth nodes (slot > float > glyph + caption) ────────────
     cloud.replaceChildren();
     const frng = makeRng(9173);
     const nodes: Node[] = myths.map((m, i) => {
@@ -163,13 +213,18 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
       const ang = frng() * Math.PI * 2;                       // random orbit orientation
       float.style.setProperty("--fdur", (10 + frng() * 7).toFixed(1) + "s");
       float.style.setProperty("--fdelay", (-frng() * 20).toFixed(1) + "s");
-      const span = document.createElement("div");
-      span.className = "cmh__text";
-      span.textContent = m.text;
-      float.appendChild(span); slot.appendChild(float); cloud.appendChild(slot);
+      const glyph = buildGlyph(m.classification);
+      const cap = document.createElement("div");
+      cap.className = "cmh__cap";
+      cap.textContent = m.text;                               // FULL myth statement
+      const lit = litGlyph(m.classification);
+      cap.style.color = `rgb(${lit.main[0]},${lit.main[1]},${lit.main[2]})`;
+      float.appendChild(glyph); float.appendChild(cap);
+      slot.appendChild(float); cloud.appendChild(slot);
       return {
-        slot, float, span, cls: m.classification, t: txt(m.classification),
-        rgb: hexToRgb(txt(m.classification).c), fdx: Math.cos(ang), fdy: Math.sin(ang),
+        slot, float, glyph, cap, cls: m.classification,
+        litMain: lit.main, litShadow: lit.shadow,
+        fdx: Math.cos(ang), fdy: Math.sin(ang),
         x: 0, y: 0, curT: 0, state: "rest",
       };
     });
@@ -207,10 +262,9 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
 
       // Chaotic scatter via Poisson-disk (Bridson): organic random placement with
       // a guaranteed minimum distance `rDist` between every pair → no overlap, no
-      // grid look. Centre (headline + Lupe) and chrome are excluded. Labels are
-      // short (text_short_de) so the rest width can stay narrow → room to float.
-      const restLabelW = Math.max(50, Math.min(uW / 20, 66));
-      cloud!.style.setProperty("--cmh-lw", restLabelW.toFixed(0) + "px");
+      // grid look. Centre (headline + Lupe) and chrome are excluded. The glyphs
+      // are small + uniform (~32px), so spacing is generous and they float freely.
+      const glyphW = 34;
       const accept = (x: number, y: number) =>
         !(x > ex0 && x < ex1 && y > ey0 && y < ey1) && x >= uL && x <= uR && y >= uT && y <= uB;
 
@@ -219,7 +273,7 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
       const availArea = Math.max(1, uW * uH - exclW * exclH);
       // Bridson packs ~N points when r ≈ sqrt(area / (1.25·N)); start near there
       // and shrink r until all N land (smaller r packs more). Bounded → no spin.
-      let rDist = Math.max(restLabelW + 14, Math.sqrt(availArea / (1.25 * N)));
+      let rDist = Math.max(glyphW + 18, Math.sqrt(availArea / (1.25 * N)));
       let placed: { x: number; y: number }[] = [];
       for (let attempt = 0; attempt < 12 && placed.length < N; attempt++) {
         placed = bridson(uL, uT, uW, uH, rDist, accept, makeRng(4242 + attempt), N);
@@ -236,10 +290,10 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
         const k = placed.length;
         placed.push({ x: uL + (((k * 53) % 100) / 100) * uW, y: k % 2 ? uT + 12 : uB - 12 });
       }
-      // Orbit amplitude: as large as the inter-label spacing safely allows
-      // (peak per-axis excursion ≤ floatAmp; min pair distance is rDist, label
-      // width restLabelW → 2·floatAmp < gap keeps neighbours from ever touching).
-      const floatAmp = Math.max(5, Math.min(18, (rDist - restLabelW) / 2 - 2));
+      // Orbit amplitude: as large as the spacing safely allows (peak per-axis
+      // excursion ≤ floatAmp; min pair distance rDist, glyph footprint glyphW →
+      // 2·floatAmp < gap keeps neighbours from ever touching).
+      const floatAmp = Math.max(6, Math.min(20, (rDist - glyphW) / 2 - 2));
       for (let i = 0; i < N; i++) {
         const n = nodes[i], p = placed[i];
         n.x = p.x; n.y = p.y;
@@ -250,27 +304,28 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
       }
     }
 
-    // ── Rest / lit styling — white at rest, verdict colour as it reveals ─────
+    // ── Rest / lit styling — white blurred glyph at rest; verdict colour +
+    //    full-statement caption as it reveals. ────────────────────────────────
+    const WHITE = `rgb(${REST_WHITE[0]},${REST_WHITE[1]},${REST_WHITE[2]})`;
     function applyRest(n: Node) {
-      n.span.style.color = `rgb(${REST_WHITE[0]},${REST_WHITE[1]},${REST_WHITE[2]})`;
-      n.span.style.opacity = "0.5";
-      n.span.style.filter = "blur(3px)";
-      n.span.style.transform = "scale(1)";
-      n.span.style.fontWeight = "500";
-      n.span.style.textShadow = "none";
-      n.span.classList.remove("cmh__text--full");   // back to capped + clamped
+      n.glyph.style.setProperty("--gmain", WHITE);
+      n.glyph.style.setProperty("--gshadow", WHITE);
+      n.glyph.style.opacity = "0.5";
+      n.glyph.style.filter = "blur(2.4px)";
+      n.glyph.style.transform = "scale(1)";
+      n.cap.style.opacity = "0";
       n.slot.style.zIndex = "";
     }
     function applyLit(n: Node, t: number) {
-      n.span.style.color = mix(REST_WHITE, n.rgb, t);
-      n.span.style.opacity = (0.5 + t * 0.5).toFixed(3);
-      n.span.style.filter = `blur(${((1 - t) * 3).toFixed(2)}px)`;
-      n.span.style.transform = `scale(${(1 + t * 0.16).toFixed(3)})`;
-      n.span.style.fontWeight = t > 0.55 ? "700" : "500";
-      n.span.style.textShadow = t > 0.05 ? `0 0 ${(24 * t).toFixed(1)}px ${n.t.g}, 0 0 8px ${n.t.g}` : "none";
-      // Once revealing, show the FULL statement (no width cap / clamp) above the
-      // others — so the spotlit myth is never truncated with "…".
-      if (t > 0.25) { n.span.classList.add("cmh__text--full"); n.slot.style.zIndex = "5"; }
+      n.glyph.style.setProperty("--gmain", mix(REST_WHITE, n.litMain, t));
+      n.glyph.style.setProperty("--gshadow", mix(REST_WHITE, n.litShadow, t));
+      n.glyph.style.opacity = (0.5 + t * 0.5).toFixed(3);
+      n.glyph.style.filter = `blur(${((1 - t) * 2.4).toFixed(2)}px)`;
+      n.glyph.style.transform = `scale(${(1 + t * 0.2).toFixed(3)})`;
+      // Full statement fades in (a touch ahead of the glyph) and lifts above
+      // the neighbouring glyphs.
+      n.cap.style.opacity = Math.min(1, t * 1.25).toFixed(3);
+      if (t > 0.2) n.slot.style.zIndex = "6";
     }
 
     let curX = -1e5, curY = -1e5, curOn = false;
@@ -383,7 +438,8 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
         <p className="cmhero__eyebrow">{eyebrow}</p>
         <h1 className="cmhero__head" ref={h1Ref}>
           <span className="cmhero__head-a">{headline1}</span>
-          <span className="cmhero__head-b">{headline2}</span>
+          <span className="cmhero__head-a cmhero__head-a2">{headline2}</span>
+          <span className="cmhero__head-b">{headline3}</span>
         </h1>
       </div>
 
@@ -407,6 +463,34 @@ export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
           <VerdictArrow verdict={asVerdict(activeVerdict)} size={32} strokeWidth={2} />
         </span>
       </div>
+
+      {/* Scroll-down cue — gently bobbing chevron; scrolls to the
+          "Über das Projekt" block. Desktop only (the mobile tab bar owns the
+          bottom edge there). */}
+      <a
+        className="cmhero__scroll"
+        href="#projekt-teaser"
+        aria-label="Mehr über das Projekt — nach unten scrollen"
+        onClick={(e) => {
+          const t = document.getElementById("projekt-teaser");
+          if (!t) return;
+          e.preventDefault();
+          const rm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          t.scrollIntoView({ behavior: rm ? "auto" : "smooth", block: "start" });
+        }}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </a>
     </section>
   );
 }

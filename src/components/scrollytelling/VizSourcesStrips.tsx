@@ -11,6 +11,7 @@ import type {
   SourceMetricId,
 } from './types';
 import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
+import { useAutoCycleGroup } from './hooks/useAutoCycleGroup';
 
 /** Per-group color tokens — must match GROUP_COLOR in VizSampleAndRanked.tsx
  *  so the User icons in both pickers (step 6 + step 7/8) read as the same
@@ -96,8 +97,31 @@ const STRIP_GAP = 36;
 const PADDING_TOP = 38;
 const PADDING_BOTTOM = 24;
 
+// CAR-?? (2026-05-30): GROUP_ROTATION drives the auto-rotation order
+// of the Zielgruppe tab. Matches GROUP_OPTIONS but typed as the more
+// general `ReadonlyArray<GroupId>` expected by useAutoCycleGroup.
+const GROUP_ROTATION: ReadonlyArray<GroupId> = [
+  'adults',
+  'minors',
+  'consumers',
+  'young_adults',
+  'parents',
+];
+
 export function VizSourcesStrips({ data, revealedColumns }: Props) {
-  const [activeGroup, setActiveGroup] = useState<GroupId>('adults');
+  // CAR-?? (2026-05-30 revised): Zielgruppe tab auto-rotates every 4 s
+  // on steps 8 + 9 so readers see the source patterns shift across
+  // audiences without manually clicking. Manual click stops the
+  // cycle; hover pauses temporarily. Visible feedback: a progress
+  // bar fills inside the active pill (see CSS .viz-strips__pick-
+  // progress) so the rotation is obvious at a glance.
+  const {
+    activeGroup,
+    selectGroup: setActiveGroup,
+    hoverHandlers,
+    isAutoCycling,
+    intervalMs: cycleMs,
+  } = useAutoCycleGroup(GROUP_ROTATION, { intervalMs: 4000 });
   const [hoverId, setHoverId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -182,7 +206,9 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
     : null;
 
   return (
-    <div className="viz viz-strips" ref={containerRef}>
+    // hoverHandlers pause the Zielgruppe auto-cycle while the user
+    // is reading or interacting with the strips.
+    <div className="viz viz-strips" ref={containerRef} {...hoverHandlers}>
       <div className="viz-strips__header">
         <span className="viz-strips__header-label">Beispiel-Auswahl</span>
         <span className="viz-strips__header-list">{UNIFIED_HEADER}</span>
@@ -190,15 +216,21 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
 
       {/* Group picker — registry audience icons in the local --group-* palette
           (shared with step 6 via the same icon registry). */}
-      <div className="viz-strips__picker" role="tablist" aria-label="Zielgruppe">
+      <div
+        className="viz-strips__picker"
+        role="tablist"
+        aria-label="Zielgruppe"
+        data-auto-cycling={isAutoCycling ? 'true' : 'false'}
+      >
         {GROUP_OPTIONS.map((g) => {
+          const isActive = activeGroup === g.id;
           const Icon = AUDIENCE_ICONS_BY_GROUP[g.id];
           return (
           <button
             key={g.id}
             role="tab"
-            aria-selected={activeGroup === g.id}
-            className={`viz-strips__pick ${activeGroup === g.id ? 'viz-strips__pick--active' : ''}`}
+            aria-selected={isActive}
+            className={`viz-strips__pick ${isActive ? 'viz-strips__pick--active' : ''}`}
             onClick={() => setActiveGroup(g.id)}
             type="button"
           >
@@ -210,6 +242,17 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
               style={{ flexShrink: 0 }}
             />
             {g.label}
+            {/* Auto-cycle progress bar — only mounts under the ACTIVE
+                pill while cycling is on. Keyed by activeGroup so the
+                CSS animation restarts on every tick. */}
+            {isActive && isAutoCycling && (
+              <span
+                key={`pb-${g.id}`}
+                className="viz-strips__pick-progress"
+                style={{ animationDuration: `${cycleMs}ms` }}
+                aria-hidden="true"
+              />
+            )}
           </button>
           );
         })}

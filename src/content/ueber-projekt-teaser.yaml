@@ -1,0 +1,14 @@
+# "Über das Projekt"-Kurzfassung für die Startseite (zwischen Hero und
+# Zahlen-Leiste). AI-Entwurf (2026-06-02), faktengeprüft am CaRM-Material
+# (Projektzeitraum, Träger, Förderung). Wartet auf ISD-Abnahme.
+# English gloss:
+#   lead   — "From research — for everyone."
+#   body   — "Between April 2024 and December 2025 the ISD Hamburg gathered the
+#             most widespread assumptions about cannabis and classified them
+#             scientifically. This website turns the results into something
+#             anyone can explore — from teenagers to professionals."
+#   funder — "Funded by the Federal Institute for Public Health (BIÖG)."
+eyebrow: 'Über das Projekt'
+lead: 'Aus der Forschung — für alle.'
+body: 'Zwischen April 2024 und Dezember 2025 hat das ISD Hamburg die verbreitetsten Annahmen über Cannabis gesammelt und wissenschaftlich eingeordnet. Diese Website übersetzt die Ergebnisse in etwas, das jede:r erkunden kann — von Jugendlichen bis zu Fachkräften.'
+funder: 'Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIÖG).'

@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { MehrPopover } from './MehrPopover';
 import type { TeamMember } from './types';
 import { withBase } from '../../lib/withBase';
 
@@ -8,7 +6,10 @@ interface Props {
   landesstellenCredit: string;
 }
 
-type OpenTarget = { kind: 'team'; member: TeamMember } | null;
+// CAR-?? (2026-05-30): the per-member bio popover was removed — the
+// team row is now a static credit display. Avatars are non-interactive
+// (no MehrPopover, no `useState` for an open target, no `<button>`
+// element). The full bios live in the team listing on /projekt/team.
 
 /**
  * VizTeamRow — Step 11 (Iter-15 layout, 2026-05-29).
@@ -36,26 +37,22 @@ export function VizTeamRow({
   teamMembers,
   landesstellenCredit,
 }: Props) {
-  const [open, setOpen] = useState<OpenTarget>(null);
-
   return (
     <div className="viz viz-team">
       <ul className="viz-team__avatars" aria-label="Projektteam">
         {teamMembers.map((m, i) => (
           <li key={m.initials} style={{ listStyle: 'none' }}>
-            <button
-              type="button"
+            <div
               className="viz-team__avatar"
               style={{
                 background: m.color,
                 animationDelay: `${i * 80}ms`,
               }}
-              aria-label={`${m.fullName}, ${m.role}, ${m.affiliation} — Details öffnen`}
-              onClick={() => setOpen({ kind: 'team', member: m })}
+              aria-label={`${m.fullName}, ${m.role}, ${m.affiliation}`}
             >
               <span className="viz-team__avatar-initials">{m.initials}</span>
               <span className="viz-team__avatar-name">{m.fullName}</span>
-            </button>
+            </div>
           </li>
         ))}
       </ul>
@@ -101,19 +98,6 @@ export function VizTeamRow({
       </div>
 
       <p className="viz-team__landesstellen">{landesstellenCredit}</p>
-
-      <MehrPopover
-        open={open !== null}
-        onClose={() => setOpen(null)}
-        title={open?.kind === 'team' ? open.member.fullName : ''}
-        subtitle={
-          open?.kind === 'team'
-            ? `${open.member.role} · ${open.member.affiliation}`
-            : undefined
-        }
-      >
-        {open?.kind === 'team' && <p>{open.member.bio}</p>}
-      </MehrPopover>
     </div>
   );
 }

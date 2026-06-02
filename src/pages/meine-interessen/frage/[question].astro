@@ -2,7 +2,6 @@
 export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { getPublishedEntries } from "@lib/content";
 import {
   loadAllQuestions,
   getQuestionBySlug,
@@ -29,14 +28,6 @@ if (!q) return Astro.redirect("/meine-interessen/");
 
 // Resolve current audience meta for the breadcrumb.
 const currentAudience = await getAudience(q.audience);
-
-// Pre-compute quiz titles for the related rail.
-const quizTitles: Record<string, string> = {};
-const quizEntries = await getPublishedEntries("quiz");
-for (const [qSlug, e] of quizEntries) {
-  const title = (e as { title?: string }).title;
-  if (title) quizTitles[qSlug] = title;
-}
 
 // Find sibling questions in OTHER audiences that share the same primaryMyth —
 // the new schema gives one file per audience-question, so audience-specific
@@ -82,7 +73,6 @@ const description =
       question={q}
       index={1}
       open={true}
-      quizTitles={quizTitles}
       popupData={popupData}
     />
 

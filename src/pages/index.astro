@@ -7,11 +7,11 @@ import HeroBlock from "@components/home/HeroBlock";
 import type { HeroMyth } from "@components/home/HeroBlock";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
+import ProjektTeaserBlock from "@components/home/ProjektTeaserBlock.astro";
 import SiteFooter from "@components/home/SiteFooter.astro";
 import type { PreviewMyth } from "@components/home/previews/FaktenKartenPreviewTile.astro";
 import type { AudienceChip } from "@components/home/previews/MeineInteressenPreviewTile.astro";
 import { getAllAudiences } from "@lib/faq";
-import carmData from "../../public/data/carm-data.json";
 
 // ── Interactive hero (Pendel-Lupe-Ring) ────────────────────────────────────
 // All 42 myth statements ride a raised oval ring around the central question
@@ -19,9 +19,12 @@ import carmData from "../../public/data/carm-data.json";
 // below from the published myth content (accurate titles, stripped of the
 // "Mythos N:" prefix) — see the mythRecords loop. Design spec:
 // docs/superpowers/specs/2026-05-31-homepage-hero-pendulum-design.md
-const heroHeadline1 = "Was glauben wir zu wissen —";
-const heroHeadline2 = "und was stimmt wirklich?";
-const heroEyebrow   = "ISD Hamburg · Bevölkerungsbefragung in Deutschland · Wissenschaftlich geprüft";
+// H1 leads with the "Cannabis" keyword for search (SEO) and breaks across three
+// lines: keyword, then the glauben↔stimmen question. AI-drafted — ISD review pending.
+const heroHeadline1 = "Cannabis:";
+const heroHeadline2 = "Was wir zu wissen glauben —";
+const heroHeadline3 = "und was wirklich stimmt";
+const heroEyebrow   = "ISD Hamburg · Bevölkerungsbefragung zu Cannabis in Deutschland · Wissenschaftlich geprüft";
 
 // ── Fakten-Karten preview: pick three short representative myths ───────────
 type MythRecord = {
@@ -53,22 +56,12 @@ for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
   });
 }
 
-// Short myth labels for the hero scatter — the project's canonical
-// `text_short_de` from carm-data.json (the same concise, ISD-approved versions
-// shown in the Daten-Explorer Tabelle), keyed by myth number. Short enough to
-// show in full in the spotlight (no "…") and to scatter without overlap.
-const shortById = new Map<number, string>(
-  ((carmData as { myths?: Array<{ id: number; text_short_de?: string }> }).myths ?? [])
-    .map((m) => [m.id, m.text_short_de ?? ""]),
-);
-
-// All 42 hero myths in m01→m42 order; text = short label (fallback: stripped title).
+// All 42 hero myths in m01→m42 order. The hero floats a verdict GLYPH per myth;
+// `text` is the FULL statement (stripped .mdoc title) shown as the caption that
+// fades in on hover / auto-spotlight.
 const heroMyths: HeroMyth[] = [...mythRecords]
   .sort((a, b) => a.prefix.localeCompare(b.prefix))
-  .map((r) => {
-    const num = parseInt(r.prefix.slice(1), 10);
-    return { text: shortById.get(num) || r.title, classification: r.classification };
-  });
+  .map((r) => ({ text: r.title, classification: r.classification }));
 
 function pickShortest(cls: string): MythRecord | undefined {
   return mythRecords
@@ -89,6 +82,7 @@ const previewMyths: PreviewMyth[] = [
   .map((r) => ({ text: r.title, classification: r.classification, categoryGroup: r.categoryGroup, summary: r.summary }));
 
 // ── Editorial section content ──────────────────────────────────────────────
+const ueberProjektData = await reader.singletons.ueberProjektTeaser.read();
 const numbersStripData = await reader.singletons.numbersStrip.read();
 const headlineFinding = await reader.singletons.headlineFinding.read();
 const fourPathsData = await reader.singletons.fourPaths.read();
@@ -109,9 +103,19 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
     myths={heroMyths}
     headline1={heroHeadline1}
     headline2={heroHeadline2}
+    headline3={heroHeadline3}
     eyebrow={heroEyebrow}
     client:load
   />
+
+  {ueberProjektData && (
+    <ProjektTeaserBlock
+      eyebrow={ueberProjektData.eyebrow}
+      lead={ueberProjektData.lead}
+      body={ueberProjektData.body}
+      funder={ueberProjektData.funder}
+    />
+  )}
 
   {numbersStripData && (
     <NumbersStripBlock

@@ -1,6 +1,21 @@
 ---
 export const prerender = true;
 
-// Redirect to the first audience so the sidebar always shows an active item.
-return Astro.redirect("/meine-interessen/eltern/", 302);
+import BaseLayout from "@layouts/BaseLayout.astro";
+import MeineInteressenAudience from "@components/faq/MeineInteressenAudience.astro";
+import { getAudience } from "@lib/faq";
+
+// The section landing renders the Eltern audience directly (no redirect) under
+// the single general "Meine Interessen" title. The audience tabs switch to the
+// other groups; Eltern is shown first.
+const audience = await getAudience("eltern");
 ---
+
+<BaseLayout
+  title="Meine Interessen"
+  description={audience?.description || "Antworten auf häufige Fragen zu Cannabis — nach Zielgruppe sortiert."}
+  bgTexture
+  extraBodyClass="mi-page"
+>
+  <MeineInteressenAudience slug="eltern" />
+</BaseLayout>

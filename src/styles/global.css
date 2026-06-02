@@ -1693,7 +1693,7 @@ button.pill[aria-pressed="true"] {
 }
 .faq-question__summary {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--space-sm) var(--space-md);
   padding: var(--space-md) var(--space-lg);
@@ -1761,11 +1761,36 @@ button.pill[aria-pressed="true"] {
   color: var(--color-text-muted);
   text-decoration: none;
   letter-spacing: 0.02em;
-  padding-top: var(--space-sm);
-  border-top: 1px solid var(--color-border);
-  width: 100%;
 }
 .faq-question__permalink:hover { color: var(--audience-accent, var(--color-accent)); }
+
+/* Full-width fold bar at the bottom of an open question. Breaks out of the
+   body padding to span the card edge-to-edge; clicking anywhere on it collapses
+   the question (see the script in FaqQuestion.astro). */
+.faq-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  /* span edge-to-edge: 100% of the body content box + its left/right padding */
+  width: calc(100% + 2 * var(--space-lg));
+  margin: var(--space-md) calc(-1 * var(--space-lg)) calc(-1 * var(--space-lg));
+  padding: var(--space-sm) 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.faq-collapse:hover,
+.faq-collapse:focus-visible {
+  background: var(--color-bg);
+  color: var(--audience-accent, var(--color-accent));
+  outline: none;
+}
+.faq-collapse__arrow { font-size: 1.05rem; line-height: 1; }
 
 /* Verdict pill (size variant) */
 .faq-verdict--sm {

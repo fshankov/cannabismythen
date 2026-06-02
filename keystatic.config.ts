@@ -1249,6 +1249,41 @@ const numbersStrip = singleton({
   },
 });
 
+// "Über das Projekt"-Kurzfassung, die zwischen dem Hero und der Zahlen-Leiste
+// auf der Startseite steht. Erklärt in wenigen Sätzen, was die Website ist und
+// woher die Daten stammen. AI-Entwurf — wartet auf ISD-Abnahme.
+const ueberProjektTeaser = singleton({
+  label: "🔬 Über das Projekt (Kurz) – Startseite",
+  path: "src/content/ueber-projekt-teaser",
+  format: { data: "yaml" },
+  schema: {
+    eyebrow: fields.text({
+      label: "Eyebrow",
+      defaultValue: "Über das Projekt",
+    }),
+    lead: fields.text({
+      label: "Lead (Serifen-Kursiv)",
+      multiline: true,
+      description: "Kurze, einleitende Zeile (DM Serif Italic, dunkelgrün).",
+      defaultValue: "Aus der Forschung — für alle.",
+    }),
+    body: fields.text({
+      label: "Fließtext",
+      multiline: true,
+      description: "Zwei, drei Sätze: was die Website ist und woher die Daten stammen.",
+      defaultValue:
+        "Zwischen April 2024 und Dezember 2025 hat das ISD Hamburg die verbreitetsten Annahmen über Cannabis gesammelt und wissenschaftlich eingeordnet. Diese Website übersetzt die Ergebnisse in etwas, das jede:r erkunden kann — von Jugendlichen bis zu Fachkräften.",
+    }),
+    funder: fields.text({
+      label: "Förderzeile",
+      multiline: true,
+      description: "Kleine, gedämpfte Förder-Credit-Zeile unter dem Fließtext.",
+      defaultValue:
+        "Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIÖG).",
+    }),
+  },
+});
+
 const audienceShortcut = singleton({
   label: "🧭 Dein Einstieg – Startseite (Audience-Shortcut)",
   path: "src/content/audience-shortcut",
@@ -1400,6 +1435,7 @@ export default config({
     heroBlock,
     headlineFinding,
     fourPaths,
+    ueberProjektTeaser,
     numbersStrip,
     audienceShortcut,
     projectStrip,

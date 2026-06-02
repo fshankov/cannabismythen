@@ -39,7 +39,7 @@
    point (`translate -50% -50%` centres the text; the animation orbits it). The
    perpendicular axis is derived from --fx/--fy (-0.5·fy, 0.5·fx) so the orbit
    stays within the same per-axis bound the layout guarantees → no overlap. */
-.cmh__float { translate: -50% -50%; will-change: transform;
+.cmh__float { position: relative; translate: -50% -50%; will-change: transform;
   animation: cmhFloat var(--fdur, 14s) ease-in-out var(--fdelay, 0s) infinite; }
 @keyframes cmhFloat {
   0%,100% { transform: translate(var(--fx,0), var(--fy,0)); }
@@ -47,19 +47,23 @@
   50%     { transform: translate(calc(var(--fx,0) * -1), calc(var(--fy,0) * -1)); }
   75%     { transform: translate(calc(var(--fy,0) * 0.5), calc(var(--fx,0) * -0.5)); }
 }
-.cmh__text {
-  /* width is capped (set in JS) + 2-line clamp so resting labels never overlap */
-  width: var(--cmh-lw, 130px); text-align: center; white-space: normal;
-  line-height: 1.2; font-weight: 500; font-size: clamp(12px, 1.1vmin + 8px, 15px);
+/* Floating verdict glyph — the site's verdict marker (chevron + shaft + base
+   line). White + blurred at rest; the two stroke colours lerp white→verdict
+   as it reveals (--gmain / --gshadow set per-frame in JS). */
+.cmh__glyph { display: block; will-change: opacity, filter, transform; }
+.cmh__glyph .cmh-g-mn { stroke: var(--gmain, #edf4f0); fill: none; }
+.cmh__glyph .cmh-g-sh { stroke: var(--gshadow, #edf4f0); fill: none; }
+
+/* Full myth statement — hidden at rest, fades in centred below the active glyph
+   (colour set per-node in JS to the verdict's light variant). */
+.cmh__cap {
+  position: absolute; top: calc(100% + 7px); left: 50%; transform: translateX(-50%);
+  width: max-content; max-width: 15rem; text-align: center;
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  will-change: opacity, filter, transform;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-/* Spotlit / hovered: show the FULL short statement (no cap, no clamp, no "…"),
-   lifted above its neighbours (slot z-index set in JS). */
-.cmh__text--full {
-  width: auto; max-width: 15rem; overflow: visible;
-  display: block; -webkit-line-clamp: unset;
+  font-size: 13.5px; font-weight: 600; line-height: 1.35;
+  opacity: 0; pointer-events: none;
+  text-shadow: 0 1px 14px rgba(8,22,15,.78), 0 0 3px rgba(8,22,15,.65);
+  will-change: opacity;
 }
 
 /* Center radial seats the headline; top/bottom fades feather the field. */
@@ -76,11 +80,15 @@
   color: #7ebb9a; margin: 0 0 18px; white-space: nowrap;
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif; }
 .cmhero__head { margin: 0; line-height: 1.12; }
+/* Line 1 — the "Cannabis:" keyword, dominant. */
 .cmhero__head-a { display: block; font-weight: 800; letter-spacing: -.6px; color: #edf4f0;
-  font-size: clamp(26px, 4.6vw, 48px); text-shadow: 0 2px 30px rgba(0,0,0,.6);
+  font-size: clamp(28px, 4.8vw, 50px); text-shadow: 0 2px 30px rgba(0,0,0,.6);
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif; }
+/* Line 2 — first half of the question (bold), a step smaller than the keyword. */
+.cmhero__head-a2 { font-size: clamp(20px, 3.3vw, 34px); letter-spacing: -.2px; margin-top: 4px; }
+/* Line 3 — second half of the question (serif italic), matched to line 2. */
 .cmhero__head-b { display: block; font-family: 'DM Serif Display', Georgia, serif; font-style: italic;
-  font-weight: 400; color: #9bd0b6; font-size: clamp(25px, 4.4vw, 45px); margin-top: 6px;
+  font-weight: 400; color: #9bd0b6; font-size: clamp(20px, 3.3vw, 34px); margin-top: 6px;
   letter-spacing: .3px; text-shadow: 0 2px 30px rgba(0,0,0,.6); }
 
 /* Lupe — connected SVG outline (rim + handle) over a frosted lens disc. The
@@ -102,6 +110,25 @@
   opacity: var(--lupe-reveal, 0); display: block; }
 .cmhero__arrow svg { width: 100%; height: 100%; }
 
+/* Scroll-down cue — animated chevron at the foot of the hero, above the bottom
+   vignette. Scrolls to the "Über das Projekt" block. Hidden on <1024px where the
+   mobile tab bar owns the bottom edge. */
+.cmhero__scroll {
+  position: absolute; left: 50%; bottom: clamp(16px, 3.2vh, 30px); z-index: 8;
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  color: #9bd0b6; opacity: .72; cursor: pointer; border-radius: 50%;
+  transition: opacity .25s ease, color .25s ease;
+  animation: cmhScrollBob 1.9s ease-in-out infinite;
+}
+.cmhero__scroll svg { width: 28px; height: 28px; display: block;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.4)); }
+.cmhero__scroll:hover, .cmhero__scroll:focus-visible { opacity: 1; color: #c8e8d6; outline: none; }
+@keyframes cmhScrollBob {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50%     { transform: translateX(-50%) translateY(7px); }
+}
+@media (max-width: 1024px) { .cmhero__scroll { display: none; } }
+
 .cmhero__flash { position: absolute; left: 0; top: 0; z-index: 2; width: 320px; height: 320px;
   margin: -160px 0 0 -160px; border-radius: 50%; pointer-events: none; opacity: 0; mix-blend-mode: screen;
   transition: opacity .3s ease; will-change: transform;
@@ -118,4 +145,5 @@
   .cmhero__bg::before, .cmhero__bg::after { animation: none !important; }
   .cmh__slot { animation: none !important; opacity: 1; }
   .cmh__float { animation: none !important; }
+  .cmhero__scroll { animation: none !important; }
 }

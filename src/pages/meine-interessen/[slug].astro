@@ -2,26 +2,8 @@
 export const prerender = true;
 
 import BaseLayout from "@layouts/BaseLayout.astro";
-import MeineInteressenLayout from "@components/faq/MeineInteressenLayout.astro";
-import { getPublishedEntries } from "@lib/content";
-import {
-  getAudience,
-  getQuestionsByAudience,
-  loadMythPopupData,
-  VALID_AUDIENCES,
-  type FaqAudienceId,
-} from "@lib/faq";
-import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
-import carmRawJson from "../../../public/data/carm-data.json";
-import AudienceHeader from "@components/faq/AudienceHeader.astro";
-import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
-import HelplineBox from "@components/faq/HelplineBox.astro";
-import WeiterfuehrendList from "@components/faq/WeiterfuehrendList.astro";
-import MythPopupHost from "@components/faq/MythPopupHost";
-// quiz.css carries the .factsheet-panel__* rules the shared FactsheetPanel
-// component depends on. Pulled in here so the popup renders correctly on
-// FAQ pages (same approach as fakten-karten/index.astro).
-import "../../styles/quiz.css";
+import MeineInteressenAudience from "@components/faq/MeineInteressenAudience.astro";
+import { getAudience, VALID_AUDIENCES, type FaqAudienceId } from "@lib/faq";
 
 // Legacy theme slugs (`/meine-interessen/gesundheit/`, etc.) are redirected to
 // the appropriate audience page via `astro.config.mjs#redirects`.
@@ -38,104 +20,8 @@ if (!VALID_AUDIENCES.includes(slug as FaqAudienceId)) {
 
 const audience = await getAudience(slug as FaqAudienceId);
 if (!audience) return Astro.redirect("/meine-interessen/");
-
-const questions = await getQuestionsByAudience(slug as FaqAudienceId);
-
-// Pre-compute quiz titles for the related rail.
-const quizTitles: Record<string, string> = {};
-const quizEntries = await getPublishedEntries("quiz");
-for (const [qSlug, e] of quizEntries) {
-  const title = (e as { title?: string }).title;
-  if (title) quizTitles[qSlug] = title;
-}
-
-// Build the popup data once per page and pass it down to every FaqQuestion
-// via a `popupData` prop. Avoids the previous ~30 redundant calls per render
-// (one inside each FaqQuestion + each FaqRelatedRail) that made the dev
-// server take ~28s to SSR the page; the helper is also cached now so even
-// fallback callsites are cheap.
-const popupData = await loadMythPopupData();
-const { mythIndex, mythContentMap } = popupData;
-const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
-
-const pageTitle = audience.title;
-const pageDescription = audience.description;
 ---
 
-<BaseLayout title={pageTitle} description={pageDescription || undefined} bgTexture extraBodyClass="mi-page">
-  <MeineInteressenLayout activeAudience={slug}>
-  <article class="faq-audience-page" data-audience={audience.id}>
-    <AudienceHeader audience={audience} questionCount={questions.length} />
-
-    {questions.length > 1 && (
-      <nav class="faq-toc" aria-label="Inhaltsübersicht">
-        <p class="faq-toc__label">Auf dieser Seite ({questions.length}):</p>
-        <ul class="faq-toc__list">
-          {questions.map((q, i) => (
-            <li>
-              <a href={`#faq-${q.slug}`}>
-                <span class="faq-toc__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                {q.questionLong}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    )}
-
-    <div class="faq-audience-questions">
-      {questions.map((q, i) => (
-        <FaqQuestionComponent
-          question={q}
-          index={i + 1}
-          open={false}
-          quizTitles={quizTitles}
-          popupData={popupData}
-        />
-      ))}
-    </div>
-
-    {audience.helplines.length > 0 && (
-      <div class="faq-audience-helplines">
-        <h2 class="faq-audience-helplines__heading">Hilfeangebote</h2>
-        <div class="faq-audience-helplines__list">
-          {audience.helplines.map((h) => (
-            <HelplineBox helpline={h} variant="footer" />
-          ))}
-        </div>
-      </div>
-    )}
-
-    <WeiterfuehrendList items={audience.weiterfuehrend} />
-
-    <footer class="faq-audience-page__footer">
-      <a href="/meine-interessen/">← Alle Zielgruppen</a>
-    </footer>
-  </article>
-  </MeineInteressenLayout>
-
-  <MythPopupHost
-    client:load
-    mythIndex={JSON.stringify(mythIndex)}
-    mythContent={JSON.stringify(mythContentMap)}
-    groupMetrics={JSON.stringify(groupMetricsByMyth)}
-  />
+<BaseLayout title={audience.title} description={audience.description || undefined} bgTexture extraBodyClass="mi-page">
+  <MeineInteressenAudience slug={slug as FaqAudienceId} />
 </BaseLayout>
-
-<script is:inline>
-  // Open the <details> matching the URL hash on first paint.
-  (function () {
-    function openByHash() {
-      var hash = window.location.hash.replace(/^#/, "");
-      if (!hash) return;
-      var el = document.getElementById(hash);
-      if (el && el.tagName === "ARTICLE") {
-        var d = el.querySelector("details");
-        if (d) d.open = true;
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }
-    openByHash();
-    window.addEventListener("hashchange", openByHash);
-  })();
-</script>

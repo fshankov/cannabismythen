@@ -1,0 +1,27 @@
+---
+import "../../styles/home-projekt-teaser.css";
+
+export interface Props {
+  eyebrow: string;
+  lead: string;
+  body: string;
+  funder: string;
+  /** Anchor id so the hero's scroll-down cue can target this block. */
+  anchorId?: string;
+}
+
+const { eyebrow, lead, body, funder, anchorId = "projekt-teaser" } = Astro.props;
+---
+
+<section
+  class="projekt-teaser"
+  id={anchorId}
+  aria-labelledby="projekt-teaser-eyebrow"
+>
+  <div class="projekt-teaser__inner">
+    <p class="projekt-teaser__eyebrow" id="projekt-teaser-eyebrow">{eyebrow}</p>
+    <p class="projekt-teaser__lead">{lead}</p>
+    <p class="projekt-teaser__body">{body}</p>
+    {funder && <p class="projekt-teaser__funder">{funder}</p>}
+  </div>
+</section>

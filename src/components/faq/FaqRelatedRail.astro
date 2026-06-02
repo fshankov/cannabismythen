@@ -9,15 +9,13 @@ import {
 
 interface Props {
   question: FaqQuestion;
-  /** Optional override of quiz titles by slug, looked up at the page level. */
-  quizTitles?: Record<string, string>;
   /** Popup myth index — pass down from the page to skip the per-component
    *  `loadMythPopupData()` call. When omitted the helper is loaded here,
    *  which is cached so the cost is one-time per dev-server process. */
   mythIndex?: Record<string, FaqMythPopupIndexEntry>;
 }
 
-const { question, quizTitles = {}, mythIndex: mythIndexProp } = Astro.props;
+const { question, mythIndex: mythIndexProp } = Astro.props;
 
 // Resolve myth IDs to popup-ready entries (id + full statement). The myth
 // IS the popup — the related rail no longer links to standalone factsheet
@@ -43,20 +41,12 @@ const related: RailMyth[] = question.relatedMyths
   .map((m) => lookupMyth(m))
   .filter((m): m is RailMyth => m !== null);
 
-const quiz = question.relatedQuiz
-  .filter((slug) => Boolean(slug))
-  .map((slug) => ({
-    slug,
-    title: quizTitles[slug] ?? slug.replace(/^quiz-/, "").replace(/-/g, " "),
-    url: `/quiz/${slug}/`,
-  }));
-
 const dashboard = question.relatedDashboard.map((url) => ({
   url,
   label: dashboardLinkLabel(url),
 }));
 
-const hasRail = primary || related.length > 0 || quiz.length > 0 || dashboard.length > 0;
+const hasRail = primary || related.length > 0 || dashboard.length > 0;
 ---
 
 {hasRail && (
@@ -90,21 +80,6 @@ const hasRail = primary || related.length > 0 || quiz.length > 0 || dashboard.le
               >
                 {m.title}
               </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-
-    {quiz.length > 0 && (
-      <div class="faq-related-rail__group">
-        <span class="faq-related-rail__heading">Quiz</span>
-        <ul class="faq-related-rail__list">
-          {quiz.map((q) => (
-            <li>
-              <a href={q.url} class="faq-related-rail__link">
-                {q.title}
-              </a>
             </li>
           ))}
         </ul>

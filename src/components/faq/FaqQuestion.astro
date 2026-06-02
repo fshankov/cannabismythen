@@ -6,7 +6,6 @@ import {
   type FaqMythPopupData,
   type FaqQuestion,
 } from "@lib/faq";
-import FaqVerdictPill from "./FaqVerdictPill.astro";
 import FaqRelatedRail from "./FaqRelatedRail.astro";
 import HelplineBox from "./HelplineBox.astro";
 
@@ -16,8 +15,6 @@ interface Props {
   open?: boolean;
   /** Index in the audience listing, used for the visible numbering. */
   index: number;
-  /** Slug → display title for quiz modules. */
-  quizTitles?: Record<string, string>;
   /** Popup data, hoisted to the page level so the helper is invoked once
    *  per render instead of once per FaqQuestion (the page typically has
    *  15 of these; before hoisting each one re-parsed all 42 myth .mdoc
@@ -31,7 +28,6 @@ const {
   question,
   open = false,
   index,
-  quizTitles = {},
   popupData: popupDataProp,
 } = Astro.props;
 
@@ -49,17 +45,11 @@ const id = `faq-${question.slug}`;
 ---
 
 <article id={id} class="faq-question" data-classification={question.classification}>
-  <details class="faq-question__details" open={open}>
+  <!-- name= makes the questions an exclusive (single-open) accordion natively. -->
+  <details class="faq-question__details" name="faq-accordion" open={open}>
     <summary class="faq-question__summary">
       <span class="faq-question__index" aria-hidden="true">{String(index).padStart(2, "0")}</span>
       <h3 class="faq-question__heading">{question.questionLong}</h3>
-      {question.classification !== "n_a" && (
-        <FaqVerdictPill
-          classification={question.classification}
-          customLabel={question.classificationLabel || undefined}
-          size="sm"
-        />
-      )}
       <span class="faq-question__chevron" aria-hidden="true">▾</span>
     </summary>
 
@@ -70,7 +60,7 @@ const id = `faq-${question.slug}`;
 
       <div class="faq-question__answer" set:html={html} />
 
-      <FaqRelatedRail question={question} quizTitles={quizTitles} mythIndex={mythIndex} />
+      <FaqRelatedRail question={question} mythIndex={mythIndex} />
 
       {question.helpline && question.helpline.url && (
         <HelplineBox helpline={question.helpline} variant="inline" />
@@ -79,6 +69,62 @@ const id = `faq-${question.slug}`;
       <a href={`#${id}`} class="faq-question__permalink" aria-label="Direktlink zu dieser Frage">
         Permalink
       </a>
+
+      <button type="button" class="faq-collapse" aria-label="Frage einklappen">
+        <span class="faq-collapse__arrow" aria-hidden="true">▴</span>
+      </button>
     </div>
   </details>
 </article>
+
+<script>
+  // FAQ accordion behaviour, attached once globally (Astro hoists & dedupes
+  // this module script across all <FaqQuestion> instances on the page):
+  //   1. The full-width fold bar at the bottom of an open question collapses it
+  //      and scrolls its summary back into view.
+  //   2. Single-open fallback: opening one question closes any open sibling in
+  //      the same questions container — a safety net for browsers without
+  //      <details name> exclusive-accordion support.
+  (() => {
+    if ((window as any).__faqAccordionInit) return;
+    (window as any).__faqAccordionInit = true;
+
+    // 1) Fold bar → collapse + scroll summary into view.
+    document.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement | null)?.closest(".faq-collapse");
+      if (!btn) return;
+      const details = btn.closest("details.faq-question__details") as HTMLDetailsElement | null;
+      if (!details) return;
+      details.open = false;
+      const summary = details.querySelector(".faq-question__summary");
+      if (summary) {
+        (summary as HTMLElement).scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
+
+    // 2) On open: close any open sibling (single-open) AND bring the opened
+    //    question's title to the top of the view, so the answer starts right
+    //    there instead of leaving the viewport on the question that just
+    //    collapsed. toggle doesn't bubble → bind per element.
+    const all = Array.from(
+      document.querySelectorAll<HTMLDetailsElement>("details.faq-question__details"),
+    );
+    for (const d of all) {
+      d.addEventListener("toggle", () => {
+        if (!d.open) return;
+        for (const other of all) {
+          if (other !== d && other.open) other.open = false;
+        }
+        // Scroll after the sibling-close reflow has been applied so we land on
+        // the final position. block:"start" respects the card's
+        // scroll-margin-top, so the title sits just below the sticky header/tabs.
+        const article = d.closest(".faq-question");
+        if (article) {
+          requestAnimationFrame(() => {
+            article.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }
+      });
+    }
+  })();
+</script>

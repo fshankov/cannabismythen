@@ -18,10 +18,9 @@ audiences:
     url: https://www.cannabiselternabend.de/videos/
   - label: Suchthilfeangebote in der Nähe
     url: https://www.dhs.de/service/suchthilfeverzeichnis
-  helplines:
-  - label: Suchen Sie Hilfe wegen Problemen mit Cannabis?
-    title: Suchthilfeverzeichnis der DHS
-    url: https://www.suchthilfeverzeichnis.de/
+  # Helplines belong inline in the specific question they relate to (per the ISD
+  # source doc), not as a global block at the page bottom. Kept empty here.
+  helplines: []
 - id: jugendliche
   title: Deine Fragen rund um Cannabis
   cardLabel: Jugendliche
@@ -35,10 +34,7 @@ audiences:
     url: https://www.cannabispraevention.de/jugendliche/
   - label: Suchthilfeangebote in der Nähe
     url: https://www.dhs.de/service/suchthilfeverzeichnis
-  helplines:
-  - label: Suchst Du Hilfe wegen Depressionen?
-    title: ich-bin-alles.de
-    url: https://www.ich-bin-alles.de
+  helplines: []
 - id: konsumierende
   title: Fragen für Konsumierende
   cardLabel: Konsumierende
@@ -54,10 +50,7 @@ audiences:
     url: https://shop.bioeg.de/care-instructions-fuer-einen-bewussten-umgang-mit-cannabis/
   - label: Suchthilfeangebote in der Nähe
     url: https://www.dhs.de/service/suchthilfeverzeichnis
-  helplines:
-  - label: Suchen Sie Hilfe wegen Problemen mit Cannabis oder anderen Substanzen?
-    title: Suchthilfeverzeichnis der DHS
-    url: https://www.suchthilfeverzeichnis.de/
+  helplines: []
 - id: lehrkraefte
   title: Fragen für Lehrkräfte
   cardLabel: Lehrkräfte

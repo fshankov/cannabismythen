@@ -1,10 +1,20 @@
-# AI-drafted native rewrite (2026-05-16). Tile descriptions condensed
-# to one punchy line each. Awaiting ISD editorial review before merge
-# to main.
+# Tile descriptions rewritten for factual accuracy (2026-06-02, Fedor-approved):
+#  - Daten-Explorer now names both data domains (Mythen + Informationsquellen),
+#    not just beliefs.
+#  - Quiz reflects the 6 theme decks (not a fixed "10 questions").
+# AI-drafted German — ISD review pending.
+# English glosses:
+#  quiz   — "6 quizzes, sorted by topic — test your knowledge in a few minutes."
+#  fakten — "All 42 myths on flip cards: the myth on the front, the scientific
+#            classification on the back."
+#  daten  — "Who believes what? Which information sources are used? — up to 5
+#            indicators across 5 audiences, side by side."
+#  meine  — "Questions and facts, prepared for 5 audiences: parents, young
+#            people, users, teachers and professionals."
 
 quizTile:
   title: 'Quiz'
-  description: '10 Fragen aus den 42 Mythen — in 3 Minuten ein Bild deines Wissens.'
+  description: '6 Quiz, thematisch sortiert — teste dein Wissen in wenigen Minuten.'
   ctaLabel: 'Quiz starten'
   targetUrl: '/quiz/'
   sampleEyebrow: 'Beispielfrage'
@@ -12,16 +22,16 @@ quizTile:
   sampleMythClassification: 'richtig'
 faktenKartenTile:
   title: 'Fakten-Karten'
-  description: 'Alle 42 Aussagen, einzeln umdrehbar: vorn der Mythos, hinten die Einordnung der Forschung.'
+  description: 'Alle 42 Mythen auf Karten zum Umdrehen: vorn der Mythos, hinten die wissenschaftliche Einordnung.'
   ctaLabel: 'Karten durchstöbern'
   targetUrl: '/fakten-karten/'
 datenExplorerTile:
   title: 'Daten-Explorer'
-  description: 'Wer glaubt was — 5 Indikatoren über 5 Zielgruppen, direkt nebeneinander.'
+  description: 'Wer glaubt was? Welche Informationsquellen werden genutzt? — bis zu 5 Indikatoren für 5 Zielgruppen im Vergleich.'
   ctaLabel: 'Daten erkunden'
   targetUrl: '/daten-explorer/'
 meineInteressenTile:
   title: 'Meine Interessen'
-  description: 'Fragen und Fakten, sortiert nach Thema und Zielgruppe — von Eltern bis Fachkräften.'
+  description: 'Fragen und Fakten, aufbereitet für 5 Zielgruppen: Eltern, Jugendliche, Konsumierende, Lehrkräfte und Fachkräfte.'
   ctaLabel: 'Themen auswählen'
   targetUrl: '/meine-interessen/'

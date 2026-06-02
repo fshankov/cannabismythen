@@ -1,0 +1,112 @@
+---
+/**
+ * MeineInteressenAudience — renders one audience's FAQ panel inside the shared
+ * MeineInteressenLayout, plus the myth-popup host and the hash-open script.
+ *
+ * Extracted from `pages/meine-interessen/[slug].astro` so both that dynamic
+ * route AND the section landing (`index.astro`, which renders Eltern with no
+ * redirect) can reuse the exact same markup. The page files keep the
+ * <BaseLayout> wrapper (they set the per-audience <title>/description); this
+ * component owns everything inside it.
+ */
+import MeineInteressenLayout from "@components/faq/MeineInteressenLayout.astro";
+import {
+  getAudience,
+  getQuestionsByAudience,
+  loadMythPopupData,
+  type FaqAudienceId,
+} from "@lib/faq";
+import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
+import carmRawJson from "../../../public/data/carm-data.json";
+import AudienceHeader from "@components/faq/AudienceHeader.astro";
+import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
+import WeiterfuehrendList from "@components/faq/WeiterfuehrendList.astro";
+import MythPopupHost from "@components/faq/MythPopupHost";
+// quiz.css carries the .factsheet-panel__* rules the shared FactsheetPanel
+// component depends on. Pulled in here so the popup renders correctly on
+// FAQ pages (same approach as fakten-karten/index.astro).
+import "../../styles/quiz.css";
+
+interface Props {
+  /** Audience whose questions this panel renders (e.g. "eltern"). */
+  slug: FaqAudienceId;
+}
+
+const { slug } = Astro.props;
+
+const audience = await getAudience(slug);
+const questions = audience ? await getQuestionsByAudience(slug) : [];
+
+// Build the popup data once and pass it down to every FaqQuestion via a
+// `popupData` prop. Avoids ~30 redundant calls per render; the helper is
+// cached so even fallback callsites are cheap.
+const popupData = await loadMythPopupData();
+const { mythIndex, mythContentMap } = popupData;
+const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
+---
+
+{audience && (
+  <MeineInteressenLayout activeAudience={slug}>
+    <article class="faq-audience-page" data-audience={audience.id}>
+      <AudienceHeader audience={audience} questionCount={questions.length} />
+
+      {questions.length > 1 && (
+        <nav class="faq-toc" aria-label="Inhaltsübersicht">
+          <p class="faq-toc__label">Auf dieser Seite ({questions.length}):</p>
+          <ul class="faq-toc__list">
+            {questions.map((q, i) => (
+              <li>
+                <a href={`#faq-${q.slug}`}>
+                  <span class="faq-toc__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                  {q.questionLong}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      <div class="faq-audience-questions">
+        {questions.map((q, i) => (
+          <FaqQuestionComponent
+            question={q}
+            index={i + 1}
+            open={false}
+            popupData={popupData}
+          />
+        ))}
+      </div>
+
+      <WeiterfuehrendList items={audience.weiterfuehrend} />
+
+      <footer class="faq-audience-page__footer">
+        <a href="/meine-interessen/">← Alle Zielgruppen</a>
+      </footer>
+    </article>
+  </MeineInteressenLayout>
+)}
+
+<MythPopupHost
+  client:load
+  mythIndex={JSON.stringify(mythIndex)}
+  mythContent={JSON.stringify(mythContentMap)}
+  groupMetrics={JSON.stringify(groupMetricsByMyth)}
+/>
+
+<script is:inline>
+  // Open the <details> matching the URL hash on first paint.
+  (function () {
+    function openByHash() {
+      var hash = window.location.hash.replace(/^#/, "");
+      if (!hash) return;
+      var el = document.getElementById(hash);
+      if (el && el.tagName === "ARTICLE") {
+        var d = el.querySelector("details");
+        if (d) d.open = true;
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+    openByHash();
+    window.addEventListener("hashchange", openByHash);
+  })();
+</script>

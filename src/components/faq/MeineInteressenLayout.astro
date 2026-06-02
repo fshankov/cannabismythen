@@ -35,14 +35,16 @@ const resolved = AUDIENCES.map((a) => ({
   isActive: activeAudience === a.id,
 }));
 
-const TITLE_BY_AUDIENCE: Record<string, string> = {
-  eltern:        "Fragen für Eltern minderjähriger Kinder",
-  jugendliche:   "Deine Fragen rund um Cannabis",
-  konsumierende: "Fragen für Konsumierende",
-  lehrkraefte:   "Fragen für Lehrkräfte",
-  fachkraefte:   "Fragen für Fachkräfte",
-};
-const pageTitle = TITLE_BY_AUDIENCE[activeAudience] ?? "Meine Interessen";
+// Single general section title + intro for the whole section (one title, like
+// Fakten-Karten). The active tab — not a per-audience heading — signals which
+// group is shown. Title matches the nav label "Meine Interessen".
+// AI draft (Du-form), pending ISD review.
+// EN gloss: "Choose the group that fits you and tap a question to read the
+// answer. Sources and further reading are at the end of the page."
+const pageTitle = "Meine Interessen";
+const pageIntro =
+  "Wähle die Gruppe, die zu dir passt, und tippe auf eine Frage, um die Antwort zu lesen. " +
+  "Quellen und weiterführende Hinweise findest du am Ende der Seite.";
 
 const isFachkraefte = activeAudience === "fachkraefte";
 ---
@@ -52,10 +54,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
   <!-- Page header -->
   <header class="mi-header">
     <h1 class="mi-header__title">{pageTitle}</h1>
-    <p class="mi-header__subtitle">
-      Wähle deine Perspektive und erhalte gezielte Antworten auf Cannabis-Mythen&nbsp;—
-      zugeschnitten auf deine Lebenssituation.
-    </p>
+    <p class="mi-header__subtitle">{pageIntro}</p>
   </header>
 
   <!-- Audience tab bar — scrollable, same Chrome-tab style as Daten-Explorer -->
@@ -249,7 +248,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
 
 :global(.mi-layout .faq-question__summary) {
   display: grid;
-  grid-template-columns: 32px 1fr auto auto;
+  grid-template-columns: 32px 1fr auto;
   align-items: center;
   gap: 0 24px;
   padding: 24px;
@@ -310,6 +309,22 @@ const isFachkraefte = activeAudience === "fachkraefte";
   font-weight: 400;
   color: #404943;
   line-height: 1.7;
+}
+
+/* Fold bar — break out of the MI body padding (0 24px 25px, padding-left 80px)
+   so it spans the card edge-to-edge and sits flush at the rounded bottom. */
+:global(.mi-layout .faq-collapse) {
+  /* MI body padding is 0 24px 25px with padding-left 80px → span 100% + 80 + 24 */
+  width: calc(100% + 104px);
+  margin: 20px -24px -25px -80px;
+  border-top: 1px solid rgba(191, 201, 193, 0.3);
+  border-radius: 0 0 24px 24px;
+  color: #6b7770;
+}
+:global(.mi-layout .faq-collapse:hover),
+:global(.mi-layout .faq-collapse:focus-visible) {
+  background: rgba(45, 106, 79, 0.05);
+  color: var(--color-accent, #2d6a4f);
 }
 
 /* ── Scoped: tab icon ──────────────────────────────────────────────── */

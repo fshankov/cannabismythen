@@ -22,6 +22,7 @@ import {
 import VerdictPill from '../shared/VerdictPill';
 import { VerdictGlyphPaths } from '../shared/verdictGlyph';
 import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
+import { useAutoCycleGroup } from './hooks/useAutoCycleGroup';
 import type { CorrectnessClass } from '../../lib/dashboard/types';
 
 interface Props {
@@ -242,7 +243,19 @@ function ExampleMythStrips({
    *  so the eye knows where the new reading lives. */
   revealedStrips: number;
 }) {
-  const [activeGroup, setActiveGroup] = useState<GroupId>('adults');
+  // CAR-?? (2026-05-30 revised): the Bevölkerungsgruppe tab now
+  // auto-rotates every 4 s so first-time readers see the data shift
+  // across the 5 audiences. Manual click stops the cycle; hover over
+  // the viz pauses temporarily. Visible feedback: a thin progress
+  // bar fills inside the active pill so the rotation is OBVIOUS
+  // rather than something the reader has to wait to notice.
+  const {
+    activeGroup,
+    selectGroup: setActiveGroup,
+    hoverHandlers,
+    isAutoCycling,
+    intervalMs: cycleMs,
+  } = useAutoCycleGroup(ACTIVE_GROUPS, { intervalMs: 4000 });
   const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   // Iter-10: hover tooltip is now driven by `useFlipPosition` so it
@@ -373,7 +386,9 @@ function ExampleMythStrips({
     : null;
 
   return (
-    <div className="viz-sr__example">
+    // hoverHandlers pause the auto-cycle while the user is interacting
+    // with the chart. Includes the picker row + the strips SVG itself.
+    <div className="viz-sr__example" {...hoverHandlers}>
       <div className="viz-sr__example-header">
         <span className="viz-sr__example-label">Beispiel-Auswahl</span>
         {/* Static description — no longer swaps with hovered-myth text. The
@@ -384,7 +399,12 @@ function ExampleMythStrips({
         </p>
       </div>
 
-      <div className="viz-sr__example-picker" role="tablist" aria-label="Zielgruppe">
+      <div
+        className="viz-sr__example-picker"
+        role="tablist"
+        aria-label="Zielgruppe"
+        data-auto-cycling={isAutoCycling ? 'true' : 'false'}
+      >
         {ACTIVE_GROUPS.map((g) => {
           const isActive = activeGroup === g;
           const Icon = AUDIENCE_ICONS_BY_GROUP[g];
@@ -405,6 +425,17 @@ function ExampleMythStrips({
                 style={{ flexShrink: 0 }}
               />
               {GROUP_LABEL_DE[g]}
+              {/* Progress bar — only mounts under the ACTIVE pill while
+                  auto-cycling is on. Keyed by `activeGroup` so the CSS
+                  animation restarts on every tick / manual change. */}
+              {isActive && isAutoCycling && (
+                <span
+                  key={`pb-${g}`}
+                  className="viz-sr__example-pick-progress"
+                  style={{ animationDuration: `${cycleMs}ms` }}
+                  aria-hidden="true"
+                />
+              )}
             </button>
           );
         })}

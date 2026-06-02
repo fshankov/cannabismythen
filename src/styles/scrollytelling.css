@@ -1688,11 +1688,44 @@ body:has(.scrolly) main {
   color: var(--fg);
 }
 .viz-sr__example-pick--active {
+  /* Sharper green ring + small lift so the auto-rotation is visible
+     out of the corner of the eye. Active pill stays put — only the
+     border / shadow / weight change. */
   background: var(--bg-elev);
   color: var(--fg);
   border-color: var(--classification-richtig);
-  box-shadow: 0 0 0 1px var(--classification-richtig);
-  font-weight: 500;
+  box-shadow: 0 0 0 1.5px var(--classification-richtig);
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+/* CAR-?? (2026-05-30): the active pill carries a thin progress bar
+   along its bottom edge that fills 0→100 % over `intervalMs`. Keyed
+   by `activeGroup` in JSX so the CSS animation restarts on every
+   auto-tick or manual selection. */
+.viz-sr__example-pick-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--classification-richtig);
+  transform-origin: left center;
+  animation-name: viz-pick-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  /* animation-duration is inlined per-instance from JS so it matches
+     the hook's intervalMs exactly. */
+  pointer-events: none;
+}
+@keyframes viz-pick-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 .viz-sr__example-pick-dot {
   width: 8px;
@@ -1913,13 +1946,33 @@ body:has(.scrolly) main {
   color: var(--fg);
 }
 .viz-strips__pick--active {
-  /* Border-only highlight (matches step 6 picker). Preserves text + colored
-     User icon legibility; the thicker green ring is a box-shadow so the pill
-     width stays exactly the same on active/inactive toggle. */
+  /* Sharper green ring + bold weight so the auto-rotation reads at a
+     glance. Pill width stays put on toggle — only border / shadow /
+     weight change. */
   background: var(--bg-elev);
   color: var(--fg);
   border-color: var(--classification-richtig);
-  box-shadow: 0 0 0 1px var(--classification-richtig);
+  box-shadow: 0 0 0 1.5px var(--classification-richtig);
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Auto-cycle progress bar (mirrors .viz-sr__example-pick-progress —
+   same animation name, same timing). Mounts only under the active
+   pill while the cycle is running. */
+.viz-strips__pick-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--classification-richtig);
+  transform-origin: left center;
+  animation-name: viz-pick-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  pointer-events: none;
 }
 .viz-strips__chart {
   width: 100%;
@@ -2060,7 +2113,11 @@ body:has(.scrolly) main {
   color: white;
   border: 2px solid var(--bg);
   margin-left: -8px;
-  cursor: pointer;
+  /* CAR-?? (2026-05-30): bio popover removed — avatars are static
+     credit chips now. Cursor is default to match the non-interactive
+     team-row redesign. The hover-name tooltip (small label below the
+     avatar) is preserved so each face stays identifiable. */
+  cursor: default;
   outline: none;
   transition: transform var(--anim-hover-dur) ease, z-index 0s;
   animation: viz-pop-in var(--anim-entry-dur) var(--anim-entry-ease) both;
