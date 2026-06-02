@@ -4241,6 +4241,11 @@ body.fakten-karten-page main {
   margin-left: 48px; /* 48 + 16px grid gap = 64px from search bar */
 }
 
+.fakten-filter-bar__flip .carm-pivot-switch__track[data-active="right"] {
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
 /* ── Search autocomplete (2026-05-15 redesign) ──────────────────
    The input element itself is .carm-filter-search-row* from
    dashboard.css (shared with the Daten-Explorer drawer). The wrapper
