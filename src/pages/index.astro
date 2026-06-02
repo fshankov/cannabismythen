@@ -108,9 +108,9 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
     client:load
   />
 
+  <div class="home-canvas">
   {ueberProjektData && (
     <ProjektTeaserBlock
-      eyebrow={ueberProjektData.eyebrow}
       lead={ueberProjektData.lead}
       body={ueberProjektData.body}
       funder={ueberProjektData.funder}
@@ -121,8 +121,6 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
     <NumbersStripBlock
       eyebrow={numbersStripData.eyebrow}
       numerals={numbersStripData.numerals}
-      linkLabel={numbersStripData.linkLabel}
-      linkUrl={numbersStripData.linkUrl}
     />
   )}
 
@@ -142,6 +140,7 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
       audienceChips={audienceChips}
     />
   )}
+  </div>
 
   <SiteFooter
     kontakt={projektFooter?.footerKontakt}
@@ -152,3 +151,15 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
     links={projectStripData?.links ?? []}
   />
 </BaseLayout>
+
+<style>
+  /* Home canvas — the warm off-white field blocks 2–4 sit on. The dark hero
+     above and the footer below own their own backgrounds. Full-bleed inside
+     the hero page's edge-to-edge <main>; each block's __inner owns the
+     homepage-local ~1200px container width via --home-container. */
+  .home-canvas {
+    --home-container: 1200px;
+    background: #faf9f5;
+    padding-top: 96px; /* 64 + 32 — gap below the dark hero */
+  }
+</style>

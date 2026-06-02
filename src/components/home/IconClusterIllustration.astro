@@ -1,0 +1,185 @@
+---
+/**
+ * IconClusterIllustration — the "Icon Cluster Illustration v2" from the Claude
+ * Design handoff bundle (svg-icons-for-carm-dis). Six CaRM-facet icons
+ * (Volljährige · Fachkräfte · Institutionell · Pers. Umfeld · Kenntnis · Risiken)
+ * arranged in a flat-top hexagon ring with dotted connectors. v2 dropped the
+ * centre glyph, leaving just the ring. Ring fill "Stein" (#e8e8e0), icons
+ * "Tinte" (#2c333d), connector ≈ mix(#FAF9F5, #5b6472, .62).
+ *
+ * Motion (v2): a subtle cursor-driven 3D tilt that only reacts while the pointer
+ * is inside THIS block (design chat: "slightly rotates when cursor is … in a
+ * same block"), plus a faint idle float and a soft entrance — all gated behind
+ * prefers-reduced-motion and paused while offscreen. Static inline SVG (the
+ * homepage is prerendered); the tilt is a tiny scoped script, no React island.
+ */
+export interface Props {
+  /** Rendered width in px; height follows the 660×580 viewBox. */
+  size?: number;
+}
+const { size = 324 } = Astro.props;
+
+// Geometry — exact from the prototype: hexagon with vertices left & right and
+// flat edges top & bottom. CX/CY centre, R orbit radius, RO satellite radius.
+const CX = 330,
+  CY = 290,
+  R = 200,
+  RO = 80;
+const ANGLES = [120, 60, 0, 300, 240, 180]; // top-left → clockwise
+const POS = ANGLES.map((a) => {
+  const rad = (a * Math.PI) / 180;
+  return { x: CX + R * Math.cos(rad), y: CY - R * Math.sin(rad) };
+});
+
+// The six satellite icons — inner markup lifted verbatim from the locked set.
+const ICONS = [
+  `<path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/>`,
+  `<circle cx="10" cy="8" r="5"/><path d="M2 21a8 8 0 0 1 10.434-7.62"/><circle cx="18" cy="18" r="3"/><path d="m22 22-1.9-1.9"/>`,
+  `<path d="M12 6v4"/><path d="M14 14h-4"/><path d="M14 18h-4"/><path d="M14 8h-4"/><path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h2"/><path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18"/>`,
+  `<path d="M8.8 20v-4.1l1.9.2a2.3 2.3 0 0 0 2.164-2.1V8.3A5.37 5.37 0 0 0 2 8.25c0 2.8.656 3.054 1 4.55a5.77 5.77 0 0 1 .029 2.758L2 20"/><path d="M19.8 17.8a7.5 7.5 0 0 0 .003-10.603"/><path d="M17 15a3.5 3.5 0 0 0-.025-4.975"/>`,
+  `<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>`,
+  `<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 0 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 0 1 12 18Z"/>`,
+];
+
+const GLYPH = 58; // icon box, centred on each satellite circle
+---
+
+<div class="icon-cluster" style={`width:${size}px;max-width:100%;`} aria-hidden="true">
+  <div class="icon-cluster__tilt">
+    <svg viewBox="0 0 660 580" fill="none" role="img" aria-label="Icon-Cluster">
+      {/* dotted hexagon connectors (under the circles, only the gaps show) */}
+      {POS.map((p, i) => {
+        const q = POS[(i + 1) % POS.length];
+        return (
+          <line
+            x1={p.x}
+            y1={p.y}
+            x2={q.x}
+            y2={q.y}
+            stroke="#979da4"
+            stroke-width="2.4"
+            stroke-dasharray="0.1 8"
+            stroke-linecap="round"
+          />
+        );
+      })}
+      {/* satellite circles + facet icons */}
+      {POS.map((p, i) => (
+        <g>
+          <circle cx={p.x} cy={p.y} r={RO} fill="#e8e8e0" />
+          <svg
+            x={p.x - GLYPH / 2}
+            y={p.y - GLYPH / 2}
+            width={GLYPH}
+            height={GLYPH}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#2c333d"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            set:html={ICONS[i]}
+          />
+        </g>
+      ))}
+    </svg>
+  </div>
+</div>
+
+<style>
+  .icon-cluster {
+    max-width: 100%;
+    perspective: 1300px;
+    animation: icon-cluster-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .icon-cluster__tilt {
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .icon-cluster svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  @keyframes icon-cluster-in {
+    from {
+      opacity: 0;
+      transform: scale(0.93) translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .icon-cluster {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Subtle cursor tilt + idle float, scoped to the block the cluster sits in.
+  // Mirrors the v2 prototype but reacts only while the pointer is inside the
+  // nearest <section> (the design's "same block" rule), and pauses offscreen.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduce) {
+    document.querySelectorAll<HTMLElement>(".icon-cluster").forEach((cluster) => {
+      const tilt = cluster.querySelector<HTMLElement>(".icon-cluster__tilt");
+      if (!tilt) return;
+      const block = cluster.closest("section") ?? cluster;
+      const MAX = 8; // peak tilt in degrees
+      const cur = { rx: 0, ry: 0, tx: 0, ty: 0 };
+      const tgt = { rx: 0, ry: 0, tx: 0, ty: 0 };
+      const start = performance.now();
+
+      const onMove = (e: PointerEvent) => {
+        const r = block.getBoundingClientRect();
+        const nx = ((e.clientX - r.left) / r.width - 0.5) * 2; // -1..1
+        const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
+        tgt.ry = nx * MAX;
+        tgt.rx = -ny * MAX;
+        tgt.tx = nx * MAX * 1.1;
+        tgt.ty = ny * MAX * 1.1;
+      };
+      const rest = () => {
+        tgt.rx = tgt.ry = tgt.tx = tgt.ty = 0;
+      };
+      block.addEventListener("pointermove", onMove, { passive: true });
+      block.addEventListener("pointerleave", rest);
+
+      let raf = 0;
+      let running = false;
+      const loop = (now: number) => {
+        const k = 0.07;
+        cur.rx += (tgt.rx - cur.rx) * k;
+        cur.ry += (tgt.ry - cur.ry) * k;
+        cur.tx += (tgt.tx - cur.tx) * k;
+        cur.ty += (tgt.ty - cur.ty) * k;
+        const s = (now - start) / 1000;
+        const ir = Math.sin(s * 0.5) * 0.7; // ±0.7° idle sway
+        const iy = Math.sin(s * 0.4) * 2.4; // ±2.4px idle drift
+        tilt.style.transform =
+          `rotateX(${cur.rx.toFixed(3)}deg) rotateY(${cur.ry.toFixed(3)}deg) ` +
+          `rotate(${ir.toFixed(3)}deg) translate3d(${cur.tx.toFixed(2)}px, ${(cur.ty + iy).toFixed(2)}px, 0)`;
+        raf = requestAnimationFrame(loop);
+      };
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            if (!running) {
+              running = true;
+              raf = requestAnimationFrame(loop);
+            }
+          } else if (running) {
+            running = false;
+            cancelAnimationFrame(raf);
+          }
+        },
+        { threshold: 0 },
+      );
+      io.observe(cluster);
+    });
+  }
+</script>

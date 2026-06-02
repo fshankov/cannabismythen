@@ -1,61 +1,117 @@
 /* ═══════════════════════════════════════════════════════════════
-   Über das Projekt (Kurzfassung) — sits between the hero and the
-   "Forschung in Zahlen" strip. Same mint as the numbers strip and
-   flush against it (no stripe), so the project statement and the
-   numbers that back it read as one "about the research" zone.
-   The hero's scroll-down cue targets this block (#projekt-teaser).
+   Projekt-Teaser (Block 2) — light redesign (Figma 678:80 / 677:1090).
+   Two columns: the research statement (left) + the Icon-Cluster (right).
+   Sits on the #FAF9F5 home canvas, 64px below the dark hero. Type and
+   rhythm are exact to Figma: heading 40 / body 24 / funder 16; gaps
+   40 (heading→body) · 24 (between paragraphs) · 32 (→funder) · 32 (→button).
+   Brand green (#0f5238) is local to the redesign — global tokens untouched.
    ═══════════════════════════════════════════════════════════════ */
 
 .projekt-teaser {
-  background: var(--color-accent-light);
-  /* more top room (lands after the dark hero) than bottom (flows into the
-     numbers strip, which carries its own top padding). */
-  padding: clamp(4rem, 9vw, 7rem) clamp(1.25rem, 4vw, 3rem) clamp(2.5rem, 5vw, 4rem);
-  margin-bottom: 0;          /* flush with the numbers strip — no section gap */
-  scroll-margin-top: 96px;   /* clear the fixed header when scrolled into view */
+  scroll-margin-top: 96px; /* clear the fixed header when scrolled into view */
 }
 
 .projekt-teaser__inner {
-  max-width: 640px;          /* narrower than the numbers grid — a focused statement */
-  margin: 0 auto;
-  text-align: center;
+  max-width: var(--home-container, 1200px);
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 3rem);
+  display: flex;
+  align-items: center; /* cluster vertically centred against the text */
+  gap: clamp(2rem, 5vw, 4rem);
 }
 
-.projekt-teaser__eyebrow {
+.projekt-teaser__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 627px; /* Figma text column */
+}
+
+/* ── Heading — Inter Black, up to 40px, breaks after "Forschung —" ── */
+.projekt-teaser__heading {
+  margin: 0;
+  max-width: 410px; /* forces the two-line break */
   font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 2.6px;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin: 0 0 clamp(1rem, 2.5vw, 1.5rem) 0;
+  font-weight: 900;
+  font-size: clamp(2rem, 4vw, 2.5rem); /* → 40px */
+  line-height: 1.21; /* 48.4 / 40 */
+  letter-spacing: -0.03em; /* ≈ -1.1px @ 40px */
+  color: #1a1c1a;
 }
 
-/* DM Serif italic — ties the lead back to the hero's serif headline line. */
-.projekt-teaser__lead {
-  font-family: 'DM Serif Display', Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(1.5rem, 3.4vw, 2.15rem);
-  line-height: 1.18;
-  letter-spacing: 0.01em;
-  color: var(--color-accent);
-  margin: 0 0 clamp(1rem, 2.2vw, 1.4rem) 0;
-}
-
+/* ── Body — two paragraphs, up to 24px, 24px between them ── */
 .projekt-teaser__body {
-  font-family: var(--font-display);
-  font-size: clamp(1.0625rem, 1.5vw, 1.1875rem);
-  line-height: 1.62;
-  color: var(--color-text);
-  max-width: 56ch;
-  margin: 0 auto;
+  margin: 40px 0 0 0; /* heading → body */
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* between paragraphs */
 }
 
-.projekt-teaser__funder {
+.projekt-teaser__para {
+  margin: 0;
   font-family: var(--font-display);
-  font-size: 0.8125rem;
+  font-weight: 400;
+  font-size: 1rem; /* 16px */
   line-height: 1.5;
-  color: var(--color-text-secondary);
-  margin: clamp(1.25rem, 2.5vw, 1.75rem) 0 0 0;
+  color: #1a1c1a;
+}
+
+/* ── Funder credit — 16px, muted ── */
+.projekt-teaser__funder {
+  margin: 56px 0 0 0; /* body → funder (32 + 24) */
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1rem; /* 16px */
+  line-height: 1.25; /* 20 / 16 */
+  color: rgba(64, 73, 67, 0.8);
+}
+
+/* ── Button → /projekt/ ── */
+.projekt-teaser__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-top: 32px; /* funder → button */
+  padding: 17px 32px 16px;
+  background: #0f5238;
+  color: #ffffff;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.5; /* 21 / 14 */
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+.projekt-teaser__button:hover {
+  background: #0c4530;
+}
+.projekt-teaser__button:active {
+  transform: translateY(1px);
+}
+
+/* ── Illustration column ── */
+.projekt-teaser__art {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Mobile: cluster stacks ABOVE the text, scaled down, 24px gap ── */
+@media (max-width: 859px) {
+  .projekt-teaser__inner {
+    flex-direction: column-reverse; /* art (2nd in DOM) renders on top */
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .projekt-teaser__text {
+    max-width: 100%;
+  }
+  .projekt-teaser__art {
+    align-self: center;
+    width: min(240px, 62vw); /* scaled down to fit */
+  }
 }

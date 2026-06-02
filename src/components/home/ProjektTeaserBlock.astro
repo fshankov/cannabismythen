@@ -1,27 +1,44 @@
 ---
 import "../../styles/home-projekt-teaser.css";
+import IconClusterIllustration from "./IconClusterIllustration.astro";
 
 export interface Props {
-  eyebrow: string;
+  /** Big lead line, promoted to the section heading (Inter Black). */
   lead: string;
+  /** Multiline Keystatic field — blank lines separate paragraphs. */
   body: string;
   funder: string;
   /** Anchor id so the hero's scroll-down cue can target this block. */
   anchorId?: string;
 }
 
-const { eyebrow, lead, body, funder, anchorId = "projekt-teaser" } = Astro.props;
+const { lead, body, funder, anchorId = "projekt-teaser" } = Astro.props;
+
+// Blank lines in the multiline `body` field mark paragraph breaks.
+const paragraphs = body
+  .split(/\n\s*\n/)
+  .map((p) => p.trim())
+  .filter(Boolean);
 ---
 
-<section
-  class="projekt-teaser"
-  id={anchorId}
-  aria-labelledby="projekt-teaser-eyebrow"
->
+<section class="projekt-teaser" id={anchorId} aria-labelledby="projekt-teaser-heading">
   <div class="projekt-teaser__inner">
-    <p class="projekt-teaser__eyebrow" id="projekt-teaser-eyebrow">{eyebrow}</p>
-    <p class="projekt-teaser__lead">{lead}</p>
-    <p class="projekt-teaser__body">{body}</p>
-    {funder && <p class="projekt-teaser__funder">{funder}</p>}
+    <div class="projekt-teaser__text">
+      <h2 class="projekt-teaser__heading" id="projekt-teaser-heading">{lead}</h2>
+
+      <div class="projekt-teaser__body">
+        {paragraphs.map((p) => <p class="projekt-teaser__para">{p}</p>)}
+      </div>
+
+      {funder && <p class="projekt-teaser__funder">{funder}</p>}
+
+      <a class="projekt-teaser__button" href="/projekt/">
+        Mehr über das Projekt <span aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <div class="projekt-teaser__art">
+      <IconClusterIllustration size={324} />
+    </div>
   </div>
 </section>

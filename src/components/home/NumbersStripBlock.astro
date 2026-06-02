@@ -9,13 +9,12 @@ export interface Numeral {
 }
 
 export interface Props {
+  /** Section heading — rendered lowercase, Inter Black (Figma 677:1075). */
   eyebrow: string;
   numerals: ReadonlyArray<Numeral>;
-  linkLabel: string;
-  linkUrl: string;
 }
 
-const { eyebrow, numerals, linkLabel, linkUrl } = Astro.props;
+const { eyebrow, numerals } = Astro.props;
 
 const formatter = new Intl.NumberFormat("de-DE");
 
@@ -30,31 +29,28 @@ function suffixOf(n: { suffix?: string | null }) {
 }
 ---
 
-<section class="numbers-strip" aria-labelledby="numbers-strip-eyebrow">
+<section class="numbers-strip" aria-labelledby="numbers-strip-heading">
   <div class="numbers-strip__inner">
-    <p id="numbers-strip-eyebrow" class="numbers-strip__eyebrow">{eyebrow}</p>
+    <div class="numbers-strip__card">
+      <h2 id="numbers-strip-heading" class="numbers-strip__heading">{eyebrow}</h2>
 
-    <ol class="numbers-strip__grid">
-      {validNumerals.map((n) => (
-        <li class="numbers-strip__item">
-          <span
-            class="numbers-strip__numeral"
-            data-final={String(n.value)}
-            data-suffix={suffixOf(n)}
-            aria-label={`${formatter.format(n.value)}${suffixOf(n)} ${n.label}`}
-          >
-            {formatter.format(n.value)}{suffixOf(n)}
-          </span>
-          <span class="numbers-strip__label">{n.label}</span>
-          <span class="numbers-strip__description">{n.description}</span>
-        </li>
-      ))}
-    </ol>
-
-    <a class="numbers-strip__link" href={linkUrl}>
-      {linkLabel}
-      <span aria-hidden="true">→</span>
-    </a>
+      <ol class="numbers-strip__grid">
+        {validNumerals.map((n) => (
+          <li class="numbers-strip__item">
+            <span
+              class="numbers-strip__numeral"
+              data-final={String(n.value)}
+              data-suffix={suffixOf(n)}
+              aria-label={`${formatter.format(n.value)}${suffixOf(n)} ${n.label}`}
+            >
+              {formatter.format(n.value)}{suffixOf(n)}
+            </span>
+            <span class="numbers-strip__label">{n.label}</span>
+            <span class="numbers-strip__description">{n.description}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
   </div>
 </section>
 

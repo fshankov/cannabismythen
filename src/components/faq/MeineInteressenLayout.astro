@@ -12,7 +12,7 @@
  * Astro's hash-scoping cache. Component-internal styles (tab icons, etc.) are
  * scoped normally.
  */
-import type { FaqAudienceId } from "@lib/faq";
+import { getAudience, type FaqAudienceId } from "@lib/faq";
 import { AUDIENCE_ICONS_BY_FAQ_ID } from "@lib/icons";
 
 interface Props {
@@ -35,16 +35,22 @@ const resolved = AUDIENCES.map((a) => ({
   isActive: activeAudience === a.id,
 }));
 
-// Single general section title + intro for the whole section (one title, like
-// Fakten-Karten). The active tab — not a per-audience heading — signals which
-// group is shown. Title matches the nav label "Meine Interessen".
-// AI draft (Du-form), pending ISD review.
+// The page h1 is a single general section title ("Meine Interessen", matching
+// the nav label) + intro. The per-audience title + description render inside the
+// white panel above the first accordion (see audienceData / .mi-panel-intro).
+// Intro is an AI draft (Du-form), pending ISD review.
 // EN gloss: "Choose the group that fits you and tap a question to read the
 // answer. Sources and further reading are at the end of the page."
 const pageTitle = "Meine Interessen";
 const pageIntro =
   "Wähle die Gruppe, die zu dir passt, und tippe auf eine Frage, um die Antwort zu lesen. " +
   "Quellen und weiterführende Hinweise findest du am Ende der Seite.";
+
+// Per-category title + description — rendered per group at the TOP of the white
+// panel, above the first accordion (a section heading subordinate to the page
+// h1, so the hierarchy reads h1 → section title → question). Sourced from
+// audiences.yaml so editors keep a single source of truth; no code edit needed.
+const audienceData = await getAudience(activeAudience as FaqAudienceId);
 
 const isFachkraefte = activeAudience === "fachkraefte";
 ---
@@ -56,6 +62,10 @@ const isFachkraefte = activeAudience === "fachkraefte";
     <h1 class="mi-header__title">{pageTitle}</h1>
     <p class="mi-header__subtitle">{pageIntro}</p>
   </header>
+
+  <!-- Category selector caption — mirrors the quiz index "Wählen Sie eine
+       Kategorie aus" label, placed directly above the tabs. -->
+  <p class="mi-category-label">Wählen Sie eine Kategorie aus</p>
 
   <!-- Audience tab bar — scrollable, same Chrome-tab style as Daten-Explorer -->
   <div class="mi-tab-bar">
@@ -79,6 +89,16 @@ const isFachkraefte = activeAudience === "fachkraefte";
 
   <!-- White panel — border-top omitted so active tab merges flush into it -->
   <div class="mi-panel">
+    <!-- Per-group title + description: first thing inside the panel, above the
+         first accordion. Subordinate to the page h1 → clear hierarchy. -->
+    {audienceData && (
+      <div class="mi-panel-intro">
+        <h2 class="mi-panel-intro__title">{audienceData.title}</h2>
+        {audienceData.description && (
+          <p class="mi-panel-intro__desc">{audienceData.description}</p>
+        )}
+      </div>
+    )}
     {isFachkraefte && (
       <p class="mi-hinweis">
         <strong>Hinweis:</strong> Schulkontext-spezifische Fragen finden Sie unter{' '}
@@ -116,7 +136,10 @@ const isFachkraefte = activeAudience === "fachkraefte";
   display: flex !important;
   flex-direction: column !important;
   width: 100%;
-  max-width: 900px;
+  /* Matches the quiz index content width: nav pill (1200px) − 2×32px = 1136px.
+     The 24px horizontal padding below equals --space-lg, so the content edges
+     line up flush with the quiz page and the nav pill. */
+  max-width: 1136px;
   margin: 0 auto;
   padding: 0 24px 80px;
   box-sizing: border-box;
@@ -132,26 +155,73 @@ const isFachkraefte = activeAudience === "fachkraefte";
 :global(.mi-layout .mi-header) {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 28px;
+  gap: 24px;
+  /* 48px gap under the header part (h1 + intro) → per-category text. */
+  margin-bottom: 48px;
   padding-top: 16px;
 }
 
+/* h1 — matches .quiz-index__title (quiz index page). */
 :global(.mi-layout .mi-header__title) {
-  font-size: 40px;
-  font-weight: 800;
-  line-height: 48px;
-  color: var(--color-accent, #2d6a4f);
-  letter-spacing: -0.5px;
+  max-width: 746px;
   margin: 0;
+  color: var(--color-accent, #2d6a4f);
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 52px;
+  letter-spacing: -1.8px;
 }
 
+/* Intro body — matches .quiz-index__intro p. */
 :global(.mi-layout .mi-header__subtitle) {
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.7;
-  color: #404943;
+  max-width: 680px;
   margin: 0;
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+}
+
+/* ── Per-group title + description (inside the white panel) ──────────
+   First block in the panel, above the first accordion. A section heading
+   clearly subordinate to the page h1 (30px vs 48px) so the hierarchy
+   reads h1 → section title → question. */
+:global(.mi-layout .mi-panel-intro) {
+  margin: 0 0 28px;
+}
+
+:global(.mi-layout .mi-panel-intro__title) {
+  margin: 0 0 12px;
+  color: var(--color-accent, #2d6a4f);
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+:global(.mi-layout .mi-panel-intro__desc) {
+  margin: 0;
+  max-width: 60%;
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+}
+
+/* Category selector caption. Proper German sentence case (no all-caps):
+   "Wählen Sie eine Kategorie aus" — Sie + the noun Kategorie stay capitalised.
+   Left-aligned so it lines up with the tabs and the white container's left edge. */
+:global(.mi-layout .mi-category-label) {
+  margin: 0 0 16px;
+  color: rgba(64, 73, 67, 0.60);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 15px;
+  letter-spacing: 4px;
+  text-align: left;
 }
 
 :global(.mi-layout .mi-tab-bar) {
@@ -164,7 +234,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
 :global(.mi-layout .mi-tab-bar .tabs-bar) {
   gap: 16px;
   width: 100%;
-  justify-content: center;
+  justify-content: flex-start;
   border-bottom: 0px;
 }
 
@@ -189,9 +259,9 @@ const isFachkraefte = activeAudience === "fachkraefte";
   flex-direction: column;
   gap: 0;
   background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border-soft, rgba(191, 201, 193, 0.35));
-  border-top: none;
-  border-radius: var(--radius-lg, 16px);
+  /* No stroke — the box-shadow alone defines the panel. Top-left squared off so
+     the left-aligned active tab merges flush into it. */
+  border-radius: 0 var(--radius-lg, 16px) var(--radius-lg, 16px) var(--radius-lg, 16px);
   box-shadow: var(--shadow-chip, 0 4px 20px -2px rgba(0, 0, 0, 0.05));
   padding: 32px;
 }
@@ -220,6 +290,8 @@ const isFachkraefte = activeAudience === "fachkraefte";
 :global(.mi-layout .mi-questions) {
   display: flex;
   flex-direction: column;
+  /* +16px before the first accordion (on top of the panel-intro's 28px). */
+  margin-top: 16px;
 }
 
 :global(.mi-layout .faq-audience-questions) {
@@ -235,15 +307,14 @@ const isFachkraefte = activeAudience === "fachkraefte";
 
 /* ── FAQ accordion cards ───────────────────────────────────────────── */
 :global(.mi-layout .faq-question) {
-  background: #faf9f5;
-  border: 1px solid rgba(191, 201, 193, 0.2);
+  background: #ffffff;
+  border: 1px solid rgba(191, 201, 193, 0.38);
   border-radius: 24px;
   box-shadow: none;
 }
 
 :global(.mi-layout .faq-question:hover) {
-  border-color: rgba(191, 201, 193, 0.5);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-color: rgba(191, 201, 193, 0.95);
 }
 
 :global(.mi-layout .faq-question__summary) {
@@ -291,16 +362,35 @@ const isFachkraefte = activeAudience === "fachkraefte";
 }
 
 :global(.mi-layout .faq-question__body) {
-  padding: 0 24px 25px;
+  /* 32px top so the lead "header" sits 32px below the question summary. */
+  padding: 32px 24px 25px;
   padding-left: 80px;
 }
 
 :global(.mi-layout .faq-question__lead) {
+  position: relative;
   font-size: 16px;
   font-weight: 700;
   color: #1a1c1a;
   line-height: 1.7;
-  margin-bottom: 15px;
+  /* 32px gap after the lead before the body text (matches the 32px above it). */
+  margin: 0 0 32px;
+  /* No salad-green fill — keep only a rounded-ended accent bar (the ::before).
+     A plain border-left can't have rounded ends, hence the pseudo-element. */
+  background: none;
+  border-left: none;
+  padding: 0 0 0 18px;
+}
+
+:global(.mi-layout .faq-question__lead)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 99px;
+  background: var(--audience-accent, var(--color-accent));
 }
 
 :global(.mi-layout .faq-question__answer),
@@ -309,6 +399,63 @@ const isFachkraefte = activeAudience === "fachkraefte";
   font-weight: 400;
   color: #404943;
   line-height: 1.7;
+}
+
+/* Links inside the answer (everything above the rail line) — bold. Scoped to
+   .faq-question__answer so the rail's own links BELOW the line (which share the
+   .faq-myth-link class) keep their normal weight. */
+:global(.mi-layout .faq-question__answer a),
+:global(.mi-layout .faq-question__answer .faq-myth-link) {
+  font-weight: 700;
+}
+
+/* Data tables inside FAQ answers. They previously had NO styling, so browser
+   defaults applied: <th> centered, <td> left-aligned → numbers drifted left of
+   their headers and you couldn't tell which column they belonged to. Aligning
+   headers AND cells the same way (left) puts every value directly under its
+   heading; a header rule + row separators make the rows scannable. */
+:global(.mi-layout .faq-question__answer table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0 24px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+:global(.mi-layout .faq-question__answer th) {
+  text-align: left;
+  vertical-align: bottom;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: #404943;
+  padding: 0 20px 10px 0;
+  border-bottom: 2px solid rgba(191, 201, 193, 0.6);
+}
+
+:global(.mi-layout .faq-question__answer td) {
+  text-align: left;
+  vertical-align: top;
+  padding: 11px 20px 11px 0;
+  border-bottom: 1px solid rgba(191, 201, 193, 0.3);
+  color: #1a1c1a;
+}
+
+/* Right-most column flush to the edge; no trailing border on the last row. */
+:global(.mi-layout .faq-question__answer th:last-child),
+:global(.mi-layout .faq-question__answer td:last-child) {
+  padding-right: 0;
+}
+:global(.mi-layout .faq-question__answer tbody tr:last-child td) {
+  border-bottom: none;
+}
+
+/* Related-myths rail divider (the line above MYTHOS / VERWANDTE MYTHEN):
+   +8px before the line (margin-top) and +16px after it (padding-top),
+   on top of the global --space-md (16px) base. */
+:global(.mi-layout .faq-related-rail) {
+  margin-top: calc(var(--space-md) + 8px);
+  padding-top: calc(var(--space-md) + 16px);
 }
 
 /* Fold bar — break out of the MI body padding (0 24px 25px, padding-left 80px)
@@ -359,6 +506,16 @@ const isFachkraefte = activeAudience === "fachkraefte";
 @media (max-width: 640px) {
   :global(.mi-layout) { padding-left: 16px; padding-right: 16px; }
   :global(.mi-layout .mi-header__title) { font-size: 30px; line-height: 1.15; }
+  :global(.mi-layout .mi-panel-intro__title) { font-size: 24px; }
+  /* Full-width description on phones — 60% would be too cramped for the text. */
+  :global(.mi-layout .mi-panel-intro__desc) { max-width: 100%; }
+  /* Wide data tables scroll horizontally on phones instead of overflowing. */
+  :global(.mi-layout .faq-question__answer table) {
+    display: block;
+    overflow-x: auto;
+    font-size: 14px;
+    -webkit-overflow-scrolling: touch;
+  }
 
   :global(.mi-layout .mi-tab-bar .tab-btn:not(.active) .mi-tab-label) {
     position: absolute;
