@@ -190,6 +190,8 @@ export default function FaktenKartenExplorer({
         onReset={resetFilters}
         totalCount={allMyths.length}
         filteredCount={filteredMyths.length}
+        allFlipped={allFlipped}
+        onSetAllFlipped={setAllFlipped}
       />
 
       {filteredMyths.length === 0 ? (
@@ -211,7 +213,7 @@ export default function FaktenKartenExplorer({
               myth={myth}
               categoryGroup={myth.categoryGroup}
               onShowFactsheet={handleShowFactsheet}
-              isActive={factsheetMyth === myth.slug}
+              isActive={allFlipped || factsheetMyth === myth.slug}
             />
           ))}
         </div>

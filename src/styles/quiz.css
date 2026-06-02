@@ -4221,7 +4221,8 @@ body.fakten-karten-page main {
    wide viewports. Mobile collapses to a stack below. */
 .fakten-filter-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
   gap: 16px;
   max-width: 912px;
 }
@@ -4231,6 +4232,13 @@ body.fakten-karten-page main {
   display: flex;
   align-items: stretch;
   min-width: 0;
+}
+
+.fakten-filter-bar__flip {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  margin-left: 48px; /* 48 + 16px grid gap = 64px from search bar */
 }
 
 /* ── Search autocomplete (2026-05-15 redesign) ──────────────────

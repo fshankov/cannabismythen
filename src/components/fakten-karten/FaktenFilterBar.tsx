@@ -28,6 +28,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import VerdictStatement from "../shared/VerdictStatement";
 import CategoryFooter from "./CategoryFooter";
+import PivotToggle from "../dashboard/controls/PivotToggle";
 import { getCategoryMeta } from "../../lib/fakten-karten/categories";
 import { normalize } from "../../lib/text-normalize";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
@@ -51,6 +52,8 @@ interface Props {
   onReset: () => void;
   totalCount: number;
   filteredCount: number;
+  allFlipped: boolean;
+  onSetAllFlipped: (v: boolean) => void;
 }
 
 const VALID_VERDICTS: ReadonlySet<CorrectnessClass> = new Set([
@@ -79,6 +82,8 @@ export default function FaktenFilterBar({
   onReset,
   totalCount,
   filteredCount,
+  allFlipped,
+  onSetAllFlipped,
 }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [catDropdownOpen, setCatDropdownOpen] = useState(false);
@@ -380,6 +385,18 @@ export default function FaktenFilterBar({
             )}
           </div>
         )}
+      </div>
+
+      <div className="fakten-filter-bar__flip">
+        <PivotToggle
+          options={[
+            { value: "front", label: "Mythos" },
+            { value: "back", label: "Nur Fakten-Seite" },
+          ]}
+          value={allFlipped ? "back" : "front"}
+          onChange={(v) => onSetAllFlipped(v === "back")}
+          aria-label="Kartenansicht umschalten"
+        />
       </div>
 
       </div>
