@@ -7,7 +7,7 @@ steps:
       Hand aufs Herz:
       Wie viel von dem, was du über Cannabis weißt, stimmt eigentlich?
     bodyText: >-
-      Im April 2024 wurde Cannabis in Deutschland teil-legalisiert. Das Konsumcannabisgesetz beendete eine jahrzehntelange Verbotskultur. Seitdem stehen Fragen im Raum, die vorher kaum gestellt wurden — und fast jede:r hat eine Meinung dazu.
+      Im April 2024 wurde Cannabis in Deutschland teil-legalisiert. Das Konsumcannabisgesetz beendete eine jahrzehntelange Verbotskultur. Aber immer noch stehen viele Fragen rund um Cannabis im Raum — und fast jede:r hat eine Meinung dazu.
 
 
       Das Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD) wollte es genau wissen: Was glaubt die Bevölkerung wirklich über Cannabis — und wie viel davon stimmt?
@@ -17,7 +17,7 @@ steps:
       Jede:r in Deutschland
       hat eine Meinung über Cannabis.
     bodyText: >-
-      Online, am Küchentisch, im Wartezimmer — Cannabis ist ein Thema. Das ISD trug die Aussagen systematisch zusammen: 7.408 frei formulierte Aussagen — aus einer Online-Befragung von 1.041 Personen, Gesprächen mit 60 Präventionsfachkräften und einer Analyse einschlägiger (Online-)Medien.
+      Online, am Küchentisch, im Wartezimmer — Cannabis ist ein Thema. Das ISD trug unterschiedliche Aussagen zu Cannabis systematisch zusammen: 7.408 frei formulierte Aussagen — aus einer Online-Befragung von 1.041 Personen, Gesprächen mit 60 Präventionsfachkräften und einer Analyse einschlägiger (Online-)Medien.
 
 
       Manches klingt plausibel, manches widersprüchlich. Was davon stimmt eigentlich? Genau das wollten wir herausfinden.
@@ -33,12 +33,12 @@ steps:
       Jede These wurde
       gegen die Forschungsliteratur geprüft.
     bodyText: >-
-      Jede der 42 Thesen — abgeglichen mit der aktuellen wissenschaftlichen Evidenz. Vierstufige Skala von **falsch** bis **richtig**, plus „keine Aussage", wenn die Forschungslage uneindeutig bleibt.
+      Jede der 42 Thesen wurde mit der aktuellen wissenschaftlichen Evidenz abgeglichen und auf einer vierstufigen Skala (**falsch** — **eher falsch** — **eher richtig** — **richtig**) eingeordnet. Bei uneindeutiger Forschungslage wurde mit „keine Aussage möglich" klassifiziert.
     legend: >-
       548 wissenschaftliche Quellen — systematische Literaturrecherche in PubMed, PsychInfo, SocIndex, Google Scholar (Stand 09/2025).
     hint: ""
   - heading: |-
-      Dann fragten wir 2.795 Menschen,
+      Dann haben wir 2.795 Menschen befragt,
       was sie für richtig halten.
     bodyText: |-
       Bevölkerungsbefragung in Deutschland: 2.097 Erwachsene (18–70 Jahre), 555 Minderjährige (16–17 Jahre), 143 Mitglieder von Cannabis-Anbauvereinigungen.
@@ -193,6 +193,38 @@ footerAbschlussbericht:
   body: >-
     Schütze, C., Schulte, B., Buth, S., Degkwitz, P., Rosenkranz, M., & Lahusen, H. (2026). Cannabiskonsum — Risiken und Mythen (CaRM): Abschlussbericht. ISD Hamburg.
 internalNotes: >-
+  Iter-23 (2026-06-02) — Harald Lahusen Feedbucket-Runde auf /projekt/
+  (https://dashboard.feedbucket.app/projects/23874, Tasks #797504/#797518/
+  #797521/#797522/#797538/#797540 + sitebreitenes #796936). Vier Texteingriffe:
+  Step 1 ersetzt "Seitdem stehen Fragen im Raum…" durch "Aber immer noch
+  stehen viele Fragen rund um Cannabis im Raum…" (#797504 — emphasis on
+  continuity rather than novelty). Step 2 verschärft das ISD-Verb von
+  "die Aussagen" auf "unterschiedliche Aussagen zu Cannabis" (#797518).
+  Step 4 vollständig umformuliert zu zwei kompletten Sätzen mit der
+  vierstufigen Skala in Klammern und Em-Dashes als Trenner; das Inline-
+  Label "keine Aussage" wird zu "keine Aussage möglich" (#797521 / #797522
+  / #797538). Step 5 wechselt vom Präteritum ins Perfekt: "Dann fragten
+  wir" → "Dann haben wir … befragt" (#797540). Zwei Tippfehler von Harald
+  wurden bei der Integration stillschweigend behoben (doppeltes "wir" in
+  Step 5; fehlende schließende Klammer + Satztrennung in Step 4); Asana-
+  Close-out-Kommentare verweisen darauf, damit Harald die Endfassung
+  gegenprüfen kann. English gloss: applied 4 text edits per Harald's
+  Feedbucket batch + folded the site-wide "Keine Aussage möglich" rename
+  into Step 4's inline label.
+
+
+  Iter-23b (2026-06-02) — sitebreiter Rename "Keine Aussage" →
+  "Keine Aussage möglich" als Sweep (CLAUDE.md HARD-rule für
+  cross-cutting renames). Interne CorrectnessClass-Union wurde gleich-
+  zeitig von `no_classification` auf `keine_aussage_moeglich` umbenannt
+  (Konsistenz mit dem Rest der deutschsprachigen Token-Namen). Affects
+  TS union, JSON dataset (carm-data.json correctness_classes + per-myth
+  correctness_class), CSS custom properties (--classification-keine-
+  aussage-moeglich), alle Record<CorrectnessClass, X>-Maps, sowie die
+  beiden .mdoc-Mythen (m17, m12) die diesen Verdict tragen. See git
+  commit für die vollständige Dateiliste.
+
+
   Iter-22 (2026-06-01) — Linke-Spalte-Copy + Inline-Icons (Fedor-Review,
   faktengeprüft am CaRM-Abschlussbericht). AI-Entwurf, wartet auf ISD-Abnahme.
   Newton-Stimme: Zahl vor Behauptung, ein Qualifier, kein Drama, du-Form.

@@ -114,7 +114,7 @@
       "id": 12,
       "text_de": "Cannabis hemmt Entzündungen.",
       "classification_de": "keine Aussage möglich",
-      "correctness_class": "no_classification",
+      "correctness_class": "keine_aussage_moeglich",
       "scientifically_checked": false,
       "category_id": 1,
       "category_de": "Medizinischer und therapeutischer Nutzen",
@@ -164,7 +164,7 @@
       "id": 17,
       "text_de": "Cannabiskonsum hilft beim Abnehmen.",
       "classification_de": "keine Aussage möglich",
-      "correctness_class": "no_classification",
+      "correctness_class": "keine_aussage_moeglich",
       "scientifically_checked": false,
       "category_id": 1,
       "category_de": "Medizinischer und therapeutischer Nutzen",
@@ -2775,7 +2775,7 @@
     "falsch": {
       "de": "Falsch"
     },
-    "no_classification": {
+    "keine_aussage_moeglich": {
       "de": "Keine Aussage möglich"
     }
   }

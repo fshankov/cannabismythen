@@ -2,13 +2,10 @@
  * Kept in a separate stylesheet (not an inline <style> in the React island) so
  * the hydrated island has no big style text node to diff (avoids a React
  * hydration text-mismatch / flash). Class names are cmhero* / cmh__* (global).
- * Design: 42 myth statements scattered across the field, white + blurred at
- * rest, gaining verdict colour only on hover / in the spotlight. The Lupe under
- * the headline reveals the verdict glyph at the same slow pace (--lupe-reveal). */
+ * Design: 42 verdict glyphs scattered across the field, white + blurred at
+ * rest, gaining verdict colour + a full-statement caption on hover / spotlight. */
 
 .cmhero {
-  --cmh-lupe: #d2e6db;
-  --lupe-reveal: 0;
   position: relative; overflow: hidden; background: #1d4a37;
   min-height: 560px; height: 100vh; height: 100svh; max-height: 1040px;
   touch-action: manipulation;
@@ -75,57 +72,41 @@
 
 .cmhero__center { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center; padding: 40px 16px;
-  pointer-events: none; transform: translateY(-4%); }
+  pointer-events: none; }
 .cmhero__eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 1.7px; text-transform: uppercase;
   color: #7ebb9a; margin: 0 0 18px; white-space: nowrap;
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif; }
 .cmhero__head { margin: 0; line-height: 1.12; }
-/* Line 1 — the "Cannabis:" keyword, dominant. */
+/* Line 1 — bold statement. */
 .cmhero__head-a { display: block; font-weight: 800; letter-spacing: -.6px; color: #edf4f0;
-  font-size: clamp(28px, 4.8vw, 50px); text-shadow: 0 2px 30px rgba(0,0,0,.6);
+  font-size: clamp(28px, 4.6vw, 48px); text-shadow: 0 2px 30px rgba(0,0,0,.6);
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif; }
-/* Line 2 — first half of the question (bold), a step smaller than the keyword. */
-.cmhero__head-a2 { font-size: clamp(20px, 3.3vw, 34px); letter-spacing: -.2px; margin-top: 4px; }
-/* Line 3 — second half of the question (serif italic), matched to line 2. */
+/* Line 2 — serif italic, balanced to the bold line. */
 .cmhero__head-b { display: block; font-family: 'DM Serif Display', Georgia, serif; font-style: italic;
-  font-weight: 400; color: #9bd0b6; font-size: clamp(20px, 3.3vw, 34px); margin-top: 6px;
+  font-weight: 400; color: #9bd0b6; font-size: clamp(24px, 4.2vw, 42px); margin-top: 6px;
   letter-spacing: .3px; text-shadow: 0 2px 30px rgba(0,0,0,.6); }
 
-/* Lupe — connected SVG outline (rim + handle) over a frosted lens disc. The
-   verdict glyph inside fades + scales in with the active myth (--lupe-reveal). */
-.cmhero__glass { position: absolute; left: 50%; top: 60%; z-index: 7; transform: translate(-50%,-50%);
-  pointer-events: none; width: clamp(64px, 11vmin, 88px); aspect-ratio: 1; }
-.cmhero__lens-frost { position: absolute; left: 12.5%; top: 12.5%; width: 66.67%; height: 66.67%;
-  border-radius: 50%; background: rgba(236, 244, 240, .10);
-  -webkit-backdrop-filter: blur(7px) saturate(1.15);
-          backdrop-filter: blur(7px) saturate(1.15);
-  box-shadow: inset 0 1px 8px rgba(255,255,255,.28), inset 0 -6px 14px rgba(0,0,0,.16); }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .cmhero__lens-frost { background: rgba(236, 244, 240, .90); }
-}
-.cmhero__mag { position: absolute; inset: 0; width: 100%; height: 100%;
-  stroke: var(--cmh-lupe); filter: drop-shadow(0 3px 10px rgba(0,0,0,.35)); }
-.cmhero__arrow { position: absolute; left: 45.83%; top: 45.83%; width: 52%; height: 52%;
-  transform: translate(-50%,-50%) scale(calc(.5 + var(--lupe-reveal, 0) * .5));
-  opacity: var(--lupe-reveal, 0); display: block; }
-.cmhero__arrow svg { width: 100%; height: 100%; }
-
-/* Scroll-down cue — animated chevron at the foot of the hero, above the bottom
-   vignette. Scrolls to the "Über das Projekt" block. Hidden on <1024px where the
-   mobile tab bar owns the bottom edge. */
+/* Scroll-down cue — the site's verdict glyph at the foot of the hero. The arrow
+   rests with its tip ON the baseline (= the original verdict glyph), hops up and
+   falls back to touch it; ONLY the arrow moves — the baseline stays fixed.
+   Scrolls to the "Über das Projekt" block. Hidden <1024px (mobile tab bar). */
 .cmhero__scroll {
   position: absolute; left: 50%; bottom: clamp(16px, 3.2vh, 30px); z-index: 8;
-  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
-  color: #9bd0b6; opacity: .72; cursor: pointer; border-radius: 50%;
+  transform: translateX(-50%);
+  color: #9bd0b6; opacity: .72; cursor: pointer;
   transition: opacity .25s ease, color .25s ease;
-  animation: cmhScrollBob 1.9s ease-in-out infinite;
 }
-.cmhero__scroll svg { width: 28px; height: 28px; display: block;
+.cmhero__scroll-glyph { width: 32px; height: 32px; display: block; overflow: visible;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,.4)); }
+/* arrow = green (currentColor); base line = more transparent, never animates */
+.cmhero__scroll-arrow path { stroke: currentColor; }
+.cmhero__scroll-line { stroke: rgba(155, 208, 182, .42); }
+/* only the arrow jumps off the static baseline */
+.cmhero__scroll-arrow { animation: cmhScrollBob 1.6s ease-in-out infinite; }
 .cmhero__scroll:hover, .cmhero__scroll:focus-visible { opacity: 1; color: #c8e8d6; outline: none; }
 @keyframes cmhScrollBob {
-  0%,100% { transform: translateX(-50%) translateY(0); }
-  50%     { transform: translateX(-50%) translateY(7px); }
+  0%, 100% { transform: translateY(0); }   /* tip resting on the line */
+  45%      { transform: translateY(-5px); } /* jumped up */
 }
 @media (max-width: 1024px) { .cmhero__scroll { display: none; } }
 
@@ -145,5 +126,5 @@
   .cmhero__bg::before, .cmhero__bg::after { animation: none !important; }
   .cmh__slot { animation: none !important; opacity: 1; }
   .cmh__float { animation: none !important; }
-  .cmhero__scroll { animation: none !important; }
+  .cmhero__scroll-arrow { animation: none !important; }
 }

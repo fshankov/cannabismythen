@@ -453,7 +453,7 @@ async function main() {
       subtitle:
         eAny.summary?.trim() ||
         (slug === "quiz-schnellcheck"
-          ? "Sieben zufällige Aussagen aus allen Themen — jeder Besuch ist neu."
+          ? "7 zufällige Mythen aus allen Themenbereichen – jedes Mal neu zusammengestellt."
           : "Cannabis-Mythen — wissenschaftlich eingeordnet."),
       questionCount:
         eAny.questionCount ?? eAny.questions?.length ?? 7,

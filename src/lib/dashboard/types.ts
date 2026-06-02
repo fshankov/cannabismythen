@@ -3,7 +3,7 @@ export type CorrectnessClass =
   | 'eher_richtig'
   | 'eher_falsch'
   | 'falsch'
-  | 'no_classification';
+  | 'keine_aussage_moeglich';
 
 export type GroupId = 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
 

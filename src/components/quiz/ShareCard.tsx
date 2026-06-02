@@ -30,7 +30,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { QuizResult, ScoreBand } from "./types";
 import {
-  populationModuleScore,
+  populationExpectedExactCount,
   scoreBand,
   userExpectedPunkte,
 } from "./quizData";
@@ -68,16 +68,12 @@ export default function ShareCard({
   const visualRef = useRef<HTMLDivElement>(null);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
 
-  // 2026-05-29 (QuizCard redesign) — result page shows the user's points
-  // total + a percentage-point delta vs the Erwachsene (18–70) average.
-  // Both sides are mean per-question Richtigkeit on the same 0–100 scale
-  // (moduleScore vs populationModuleScore), so the gap is honest.
-  // userPunkte stays on the 0–N points scale for the headline number.
+  // 2026-06-02 (ISD/HL review) — result page now compares in POINTS, not
+  // percentage points. The user's points and the population's average points
+  // are on the same 0–N scale (both Σ of the per-question Richtigkeit ladder),
+  // so the comparison is honest. populationPunkte = Σ populationCorrectPct/100.
   const userPunkte = userExpectedPunkte(deckMyths, result.answers);
-  const populationScore = populationModuleScore(deckMyths);
-  const ppDelta = result.moduleScore - populationScore;
-  const deltaKey =
-    ppDelta > 0 ? "above" : ppDelta < 0 ? "below" : "onpar";
+  const populationPunkte = populationExpectedExactCount(deckMyths);
 
   // Share text — band title + points (Newton-Youth voice). The shared URL is
   // the quiz module page, which unfurls to that module's OG preview image.
@@ -257,11 +253,10 @@ export default function ShareCard({
         </p>
 
         <p className="share-card__population">
-          {deltaKey === "onpar"
-            ? t("result.scoreLine.delta.onpar")
-            : t(`result.scoreLine.delta.${deltaKey}`, {
-                pp: Math.abs(ppDelta),
-              })}
+          {t("result.scoreLine.populationPoints", {
+            points: formatGermanDecimal(populationPunkte),
+            total: result.totalQuestions,
+          })}
         </p>
 
         <div className="share-card__branding">{t("ui.siteUrl")}</div>

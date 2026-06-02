@@ -1,5 +1,4 @@
-import { useRef, useEffect, useState } from "react";
-import VerdictArrow from "../shared/VerdictArrow";
+import { useRef, useEffect } from "react";
 import { VERDICT_GLYPHS } from "../shared/verdictGlyph";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
 import "./HeroBlock.css";
@@ -18,20 +17,18 @@ interface Props {
   myths: HeroMyth[];
   headline1: string;
   headline2: string;
-  headline3: string;
   eyebrow: string;
 }
 
 // ── Scattered verdict-glyph field ────────────────────────────────────────────
 // The 42 myths are scattered across the hero as VERDICT GLYPHS (the same
-// chevron/arrow marker the Lupe and the dashboard use — one per myth's
-// classification). Poisson-disk placement keeps them non-overlapping with the
-// centre (headline + Lupe) and chrome kept clear.
+// chevron/arrow marker the dashboard uses — one per myth's classification).
+// Poisson-disk placement keeps them non-overlapping, with the centre (headline)
+// and chrome kept clear.
 // At rest every glyph is WHITE + blurred (colourless) and no text shows. When
 // the visitor hovers the nearest one — or the auto-spotlight cycles to one —
 // that glyph GRADUALLY gains its verdict colour, sharpens, and its FULL
-// statement fades in below it. The Lupe mirrors the active verdict at the
-// same slow pace.
+// statement fades in below it.
 //
 // Motion: only a gentle per-myth orbit (CSS) — no global sway/breathing.
 // Reveal is JS-eased (slow); only the active node gets per-frame style writes.
@@ -47,7 +44,7 @@ function mix(a: [number, number, number], b: [number, number, number], t: number
 }
 // Map the legacy `keine_aussage` spelling to the canonical glyph verdict.
 function asVerdict(cls: string): CorrectnessClass {
-  return (cls === "keine_aussage" ? "no_classification" : cls) as CorrectnessClass;
+  return (cls === "keine_aussage" ? "keine_aussage_moeglich" : cls) as CorrectnessClass;
 }
 
 // Lit (revealed) glyph colours — the LIGHTER dark-background verdict palette
@@ -87,8 +84,8 @@ function buildGlyph(cls: string): SVGSVGElement {
   };
   const v = asVerdict(cls);
   const spec =
-    v !== "no_classification"
-      ? VERDICT_GLYPHS[v as Exclude<CorrectnessClass, "no_classification">]
+    v !== "keine_aussage_moeglich"
+      ? VERDICT_GLYPHS[v as Exclude<CorrectnessClass, "keine_aussage_moeglich">]
       : undefined;
   if (!spec) {
     svg.appendChild(mk("M2 16h20", "cmh-g-sh")); // flat line — no scientific verdict
@@ -174,24 +171,18 @@ interface Node {
   state: "rest" | "lit";
 }
 
-export function HeroBlock({ myths, headline1, headline2, headline3, eyebrow }: Props) {
+export function HeroBlock({ myths, headline1, headline2, eyebrow }: Props) {
   const heroRef  = useRef<HTMLElement>(null);
   const cloudRef = useRef<HTMLDivElement>(null);
-  const glassRef = useRef<HTMLDivElement>(null);
   const flashRef = useRef<HTMLDivElement>(null);
   const h1Ref    = useRef<HTMLHeadingElement>(null);
-
-  const [activeVerdict, setActiveVerdict] = useState<string>(
-    myths[0]?.classification ?? "keine_aussage",
-  );
 
   useEffect(() => {
     const hero  = heroRef.current;
     const cloud = cloudRef.current;
-    const glass = glassRef.current;
     const flash = flashRef.current;
     const h1    = h1Ref.current;
-    if (!hero || !cloud || !glass || !h1) return;
+    if (!hero || !cloud || !h1) return;
 
     const isTouch = window.matchMedia("(hover: none)").matches;
     const reduce  = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -230,27 +221,18 @@ export function HeroBlock({ myths, headline1, headline2, headline3, eyebrow }: P
     });
 
     // ── Layout: jittered-grid scatter, central zone + chrome kept clear ──────
-    let cx = 0, lupeCx = 0, lupeCy = 0, lupeR = 0;
     function layout() {
       const W = hero!.clientWidth, H = hero!.clientHeight;
-      cx = W / 2;
       const mobile = W < 768;
       const topSafe = 112, botSafe = mobile ? 150 : 132;
       const gutter = Math.min(Math.max(W * 0.04, 18), 72);
       const uL = gutter, uR = W - gutter, uT = topSafe, uB = H - botSafe;
       const uW = uR - uL, uH = uB - uT;
 
-      // Park the Lupe in the clear gap under the headline (never into chrome).
-      const hb = h1!.getBoundingClientRect(), hr = hero!.getBoundingClientRect();
-      const glassH = glass!.offsetHeight || 84, glassW = glass!.offsetWidth || 84;
-      let gtop = (hb.bottom - hr.top) + 56;
-      gtop = Math.min(Math.max(gtop, uT + 8), uB - glassH);
-      glass!.style.top = gtop + "px";
-      lupeCx = cx; lupeCy = gtop; lupeR = glassW / 2 + 20;
-
-      // Central exclusion zone = bbox of eyebrow + headline + Lupe (+ padding).
+      // Central exclusion zone = bbox of eyebrow + headline (+ padding).
+      const hr = hero!.getBoundingClientRect();
       const eyebrow = hero!.querySelector<HTMLElement>(".cmhero__eyebrow");
-      const boxes = [h1!, eyebrow, glass!].filter(Boolean) as HTMLElement[];
+      const boxes = [h1!, eyebrow].filter(Boolean) as HTMLElement[];
       let ex0 = Infinity, ey0 = Infinity, ex1 = -Infinity, ey1 = -Infinity;
       for (const el of boxes) {
         const r = el.getBoundingClientRect();
@@ -262,7 +244,7 @@ export function HeroBlock({ myths, headline1, headline2, headline3, eyebrow }: P
 
       // Chaotic scatter via Poisson-disk (Bridson): organic random placement with
       // a guaranteed minimum distance `rDist` between every pair → no overlap, no
-      // grid look. Centre (headline + Lupe) and chrome are excluded. The glyphs
+      // grid look. Centre (headline) and chrome are excluded. The glyphs
       // are small + uniform (~32px), so spacing is generous and they float freely.
       const glyphW = 34;
       const accept = (x: number, y: number) =>
@@ -329,11 +311,6 @@ export function HeroBlock({ myths, headline1, headline2, headline3, eyebrow }: P
     }
 
     let curX = -1e5, curY = -1e5, curOn = false;
-    let shownCls = nodes[0]?.cls ?? "keine_aussage";
-    let lupeReveal = 0;
-    function setVerdict(cls: string) {
-      if (cls !== shownCls) { shownCls = cls; setActiveVerdict(cls); }
-    }
 
     layout();
     nodes.forEach(applyRest);
@@ -354,14 +331,8 @@ export function HeroBlock({ myths, headline1, headline2, headline3, eyebrow }: P
       }
       const hoverActive = curOn && nearestI >= 0 && nearestD < R_CUR;
 
-      // Auto-spotlight: cycle by index; skip if it would sit on the Lupe.
-      let autoIdx = Math.floor(el / AUTO_STEP) % N;
-      if (!hoverActive) {
-        if (Math.hypot(nodes[autoIdx].x - lupeCx, nodes[autoIdx].y - lupeCy) < lupeR + 60)
-          autoIdx = (autoIdx + 1) % N;
-      }
-      const activeI = hoverActive ? nearestI : autoIdx;
-      const desiredCls = nodes[activeI].cls;
+      // Auto-spotlight: cycle by index.
+      const autoIdx = Math.floor(el / AUTO_STEP) % N;
 
       for (let i = 0; i < N; i++) {
         const n = nodes[i];
@@ -373,23 +344,12 @@ export function HeroBlock({ myths, headline1, headline2, headline3, eyebrow }: P
         else if (n.state === "lit") { applyRest(n); n.curT = 0; n.state = "rest"; }
       }
 
-      // Lupe glyph reveals at the same slow pace: fade out on verdict change,
-      // swap while invisible, fade in (mirrors the active myth's reveal).
-      if (desiredCls === shownCls) lupeReveal += (1 - lupeReveal) * REVEAL;
-      else {
-        lupeReveal += (0 - lupeReveal) * 0.09;
-        if (lupeReveal < 0.04) setVerdict(desiredCls);
-      }
-      glass!.style.setProperty("--lupe-reveal", lupeReveal.toFixed(3));
-
       raf = requestAnimationFrame(frame);
     }
 
     if (reduce) {
       const spread = [0, Math.floor(N / 4), Math.floor(N / 2), Math.floor((3 * N) / 4)];
       spread.forEach((i) => { if (nodes[i]) { applyLit(nodes[i], 1); nodes[i].curT = 1; nodes[i].state = "lit"; } });
-      glass.style.setProperty("--lupe-reveal", "1");
-      setVerdict(nodes[0]?.cls ?? "keine_aussage");
     } else {
       raf = requestAnimationFrame(frame);
     }
@@ -438,33 +398,12 @@ export function HeroBlock({ myths, headline1, headline2, headline3, eyebrow }: P
         <p className="cmhero__eyebrow">{eyebrow}</p>
         <h1 className="cmhero__head" ref={h1Ref}>
           <span className="cmhero__head-a">{headline1}</span>
-          <span className="cmhero__head-a cmhero__head-a2">{headline2}</span>
-          <span className="cmhero__head-b">{headline3}</span>
+          <span className="cmhero__head-b">{headline2}</span>
         </h1>
       </div>
 
-      {/* Lupe — one connected SVG outline (rim + handle) over a frosted lens disc.
-          The neutral outline never recolours; the verdict glyph inside fades in
-          with the active myth (--lupe-reveal). */}
-      <div className="cmhero__glass" ref={glassRef} aria-hidden="true">
-        <div className="cmhero__lens-frost"></div>
-        <svg
-          className="cmhero__mag"
-          viewBox="0 0 24 24"
-          fill="none"
-          strokeWidth={1.7}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.34-4.34" />
-        </svg>
-        <span className="cmhero__arrow">
-          <VerdictArrow verdict={asVerdict(activeVerdict)} size={32} strokeWidth={2} />
-        </span>
-      </div>
-
-      {/* Scroll-down cue — gently bobbing chevron; scrolls to the
+      {/* Scroll-down cue — a down arrow that bobs ABOVE a STATIC baseline (only
+          the arrow moves; the line stays fixed at the bottom). Scrolls to the
           "Über das Projekt" block. Desktop only (the mobile tab bar owns the
           bottom edge there). */}
       <a
@@ -480,15 +419,22 @@ export function HeroBlock({ myths, headline1, headline2, headline3, eyebrow }: P
         }}
       >
         <svg
+          className="cmhero__scroll-glyph"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="currentColor"
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="m6 9 6 6 6-6" />
+          {/* static baseline — never moves */}
+          <path className="cmhero__scroll-line" d="M2 16h20" />
+          {/* the only moving part — rests tip-on-line (= the original verdict
+              glyph), hops up and falls back to touch the line */}
+          <g className="cmhero__scroll-arrow">
+            <path d="M12 2v14" />
+            <path d="m5 9 7 7 7-7" />
+          </g>
         </svg>
       </a>
     </section>

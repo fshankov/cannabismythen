@@ -81,7 +81,8 @@ export const QUIZ_THEME_META: Record<string, QuizThemeMetaEntry> = {
     icon: ShieldAlert,
     theme: 'green',
     count: 7,
-    shortTitle: 'Gefährlichkeit',
+    // 2026-06-02 (ISD/Fedor) — renamed from 'Gefährlichkeit'.
+    shortTitle: 'Allgemeine Gefährlichkeit',
   },
   'quiz-schnellcheck': {
     icon: Dices,

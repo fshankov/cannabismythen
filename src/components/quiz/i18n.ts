@@ -52,7 +52,10 @@ const translations: Record<Lang, Record<string, string>> = {
       "Was weißt du über Cannabis, Gesellschaft und die neue Gesetzeslage?",
     "quiz.gesellschaft.description":
       "Verbreitung, Verkehr, soziale Folgen, Legalisierung und Vorurteile.",
-    "quiz.gefaehrlichkeit.title": "Allgemeine Einschätzung der Gefährlichkeit",
+    // 2026-06-02 (ISD/Fedor) — renamed from "Allgemeine Einschätzung der
+    // Gefährlichkeit" to the shorter "Allgemeine Gefährlichkeit" (tile + full
+    // title). The dashboard/Fakten-Karten category taxonomy keeps the long form.
+    "quiz.gefaehrlichkeit.title": "Allgemeine Gefährlichkeit",
     // EN: "How do you assess the general risks of cannabis — and where does research stand?"
     "quiz.gefaehrlichkeit.subtitle":
       "Wie schätzt du die Gefährlichkeit von Cannabis ein — und was zeigt die Forschung?",
@@ -62,8 +65,10 @@ const translations: Record<Lang, Record<string, string>> = {
     "quiz.schnellcheck.title": "Schnellcheck",
     // 2026-05-28 (CAR-5/CAR-6) — "Aussagen" → "Mythen" sweep for UI
     // labels. The site's preferred user-facing unit is "Mythos".
+    // 2026-06-02 (ISD/HL) — reworded per review. EN: "7 random myths from all
+    // topic areas – freshly assembled every time."
     "quiz.schnellcheck.subtitle":
-      "Sieben zufällige Mythen aus allen Themen — jeder Besuch ist neu.",
+      "7 zufällige Mythen aus allen Themenbereichen – jedes Mal neu zusammengestellt.",
     "quiz.schnellcheck.description":
       "Querschnitt durch alle Themen. Jeder Besuch zieht neue Mythen.",
 
@@ -369,15 +374,21 @@ const translations: Record<Lang, Record<string, string>> = {
     "result.bandTitle.guterweg": "Gut im Bilde",
     "result.bandTitle.gehtnoch": "Da geht noch was",
     "result.bandTitle.erwischt": "Viel zu entdecken",
+    // 2026-06-02 (ISD/HL review) — headlines rewritten by Harald Lahusen
+    // (tracked changes in the methodology .docx) for a warmer, punchier
+    // Du-voice. EN glosses below.
+    // EN: "Nobody fools you that easily – your knowledge is scientifically rock-solid."
     "result.achievementHeadline.profi":
-      "Du erkennst die Mythen klar — wissenschaftlich solide.",
+      "Dir macht so schnell niemand was vor – dein Wissen ist wissenschaftlich absolut solide.",
+    // EN: "You're usually closer to the scientific facts than the average."
     "result.achievementHeadline.guterweg":
-      "Du liegst meist näher an der Forschung als der Schnitt.",
+      "Du bist an den wissenschaftlichen Fakten meist näher dran als der Durchschnitt.",
+    // EN: "A few myths are still unclear. No worries – the Fakten-Karten show you what's actually true."
     "result.achievementHeadline.gehtnoch":
-      "Ein paar Mythen halten sich hartnäckig. Die Fakten-Karten helfen.",
-    // EN: "Cannabis is more complex than it sounds. The Fakten-Karten show what research says."
+      "Ein paar Mythen sind noch unklar. Macht nichts – die Fakten-Karten zeigen dir, was wirklich stimmt.",
+    // EN: "Not so easy to keep track, right? Our Fakten-Karten show you what the research says."
     "result.achievementHeadline.erwischt":
-      "Cannabis ist komplizierter, als es klingt. Die Fakten-Karten zeigen, was die Forschung dazu sagt.",
+      "Gar nicht so leicht, den Durchblick zu behalten, oder? Unsere Fakten-Karten zeigen dir, was die Forschung sagt.",
     // 2026-05-28 (CAR-9, Harald review) — user score line rewritten
     // from binary "Du: K von N genau richtig" (which only counted
     // Schritte=0 answers) to a Punkt-based reading that uses the full
@@ -387,21 +398,15 @@ const translations: Record<Lang, Record<string, string>> = {
     // EN gloss: "You scored {X,X} out of {total} points."
     "result.scoreLine.user":
       "Du hast {points} von {total} Punkten erreicht.",
-    // 2026-05-29 (QuizCard redesign) — the population comparison is now a
-    // percentage-point delta vs the Erwachsene (18–70) average (computed
-    // from moduleScore − populationModuleScore). Sign-aware. Percentages
-    // appear ONLY here on the result page, never inside a card.
-    // EN glosses:
-    //   above → "That's {pp} percentage points above the average of adults
-    //            (18–70) in the CaRM study."
-    //   below → "…below the average…"
-    //   onpar → "That's exactly the average of adults (18–70) in the CaRM study."
-    "result.scoreLine.delta.above":
-      "Das sind {pp} Prozentpunkte über dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie.",
-    "result.scoreLine.delta.below":
-      "Das sind {pp} Prozentpunkte unter dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie.",
-    "result.scoreLine.delta.onpar":
-      "Das entspricht genau dem Schnitt der Erwachsenen (18–70) in der CaRM-Studie.",
+    // 2026-06-02 (ISD/HL review) — the result-page comparison now stays in
+    // POINTS (same 0–N scale as the user line), not percentage points. Per
+    // Fedor's explicit ruling this line drops the "(18–70)" qualifier
+    // (sanctioned exception, like the homepage credibility lede); the
+    // qualifier still appears on the per-question strip (result.row.populationMean).
+    // {points} = population's expected points = populationExpectedExactCount(deck).
+    // EN gloss: "For comparison: in the CaRM study, adults scored {X,X} out of {N} points on average."
+    "result.scoreLine.populationPoints":
+      "Zum Vergleich: In der CaRM-Studie haben Erwachsene im Durchschnitt {points} von {total} Punkten erreicht.",
     // 2026-05-29 (QuizCard redesign) — per-question population reveal on
     // the 0–1 per-card points scale (no percentages on cards). {points} =
     // populationCorrectPct / 100, one decimal. Apples-to-apples with the
