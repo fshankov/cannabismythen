@@ -390,8 +390,8 @@ export default function FaktenFilterBar({
       <div className="fakten-filter-bar__flip">
         <PivotToggle
           options={[
-            { value: "front", label: "Aussage" },
-            { value: "back", label: "Befund" },
+            { value: "front", label: "Mythen" },
+            { value: "back", label: "Fakten" },
           ]}
           value={allFlipped ? "back" : "front"}
           onChange={(v) => onSetAllFlipped(v === "back")}
