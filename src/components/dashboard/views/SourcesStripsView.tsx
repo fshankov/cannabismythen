@@ -653,13 +653,13 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
             const ALL = '__all__';
             const catOptions: DataPickerOption<string>[] = sourceData
               ? [
-                  { value: ALL, label: 'Alle Quellen', Icon: Layers },
+                  { value: ALL, label: 'Alle Informationswege', Icon: Layers },
                   ...sourceData.sourceCategories.map((c) => ({
                     value: c.id,
                     label: c.name,
                   })),
                 ]
-              : [{ value: ALL, label: 'Alle Quellen', Icon: Layers }];
+              : [{ value: ALL, label: 'Alle Informationswege', Icon: Layers }];
             const catValue =
               categoryFilter.length === 0 ? ALL : categoryFilter[0];
 
@@ -735,7 +735,7 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                   />,
                   <DataPicker<string>
                     key="quellen-kategorie"
-                    caption="Quellen-Kategorie"
+                    caption="Informationswege-Kategorie"
                     value={catValue}
                     options={catOptions}
                     onChange={(next) => {
@@ -758,7 +758,7 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
                         }
                       }
                     }}
-                    aria-label="Quellen-Kategorie"
+                    aria-label="Informationswege-Kategorie"
                     searchable
                     searchPlaceholder="Kategorie suchen…"
                     lang="de"
@@ -1264,7 +1264,7 @@ const SourcesStripsView = forwardRef<SourcesStripsViewHandle, Props>(
               read on how many parent sources are visible after
               filtering. */}
           <p className="strips-cat-pills__count" aria-live="polite">
-            {parentCount} Quellen
+            {parentCount} Informationswege
           </p>
 
           </> /* /sourceData loaded */ )}

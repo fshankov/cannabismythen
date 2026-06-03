@@ -403,13 +403,13 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   const searchValue = isSourceView ? state.sourcesSearchQuery : state.searchQuery;
   const searchKey: keyof AppState = isSourceView ? 'sourcesSearchQuery' : 'searchQuery';
   const searchPlaceholder = isSourceView
-    ? 'Quellen suchen…'
+    ? 'suchen…'
     : t('search.myths.placeholder', 'de');
   const searchAria = isSourceView
-    ? 'Quellen-Suche'
+    ? 'Informationswege-Suche'
     : t('search.myths.aria', 'de');
   const searchClearAria = isSourceView
-    ? 'Quellen-Suche löschen'
+    ? 'Informationswege-Suche löschen'
     : t('search.myths.clear', 'de');
   const sharedActions: ReactNode = (
     <>
@@ -508,7 +508,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
               keeps each group tight while clearly separating the two. */}
           <div className="carm-explorer__tab-gap" aria-hidden="true" />
           <div className={`carm-explorer__tabs--right${['sources','sources2','sources_table'].includes(state.view) ? ' is-group-active' : ''}`}>
-            <span className="carm-explorer__group-label carm-explorer__group-label--quellen" aria-hidden="true">Quellen</span>
+            <span className="carm-explorer__group-label carm-explorer__group-label--quellen" aria-hidden="true">Informationswege</span>
             <ViewTabs
               view={state.view}
               lang={'de'}

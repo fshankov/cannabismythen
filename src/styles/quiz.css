@@ -2684,6 +2684,8 @@
 }
 .quiz-result__cta--primary:hover {
   background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: var(--color-text-inverse);
   transform: translateY(-1px);
 }
 
@@ -2711,20 +2713,28 @@
 
 /* Stage G (2026-05-23) — flat 4-button action row. Replaces the
    Stage D primary/secondary/tertiary split. All four CTAs render as
-   filled primary buttons of equal weight. Wraps to a column on
-   mobile via flex-wrap + flex-basis. */
+   filled primary buttons of equal weight. 2×2 grid on desktop,
+   single column on mobile. */
 .quiz-result__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 4rem;
+  align-items: stretch;
   gap: var(--space-md);
   margin-top: var(--space-xl);
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .quiz-result__cta {
   font-size: 1rem;
   padding: 12px 22px;
-  min-width: 240px;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
@@ -2735,12 +2745,9 @@ button.quiz-result__cta {
   cursor: pointer;
 }
 
-@media (max-width: 640px) {
-  /* Stage G mobile: each CTA takes the full row width so the four
-     buttons stack vertically and stay readable. */
-  .quiz-result__cta {
-    flex-basis: 100%;
-    min-width: 0;
+@media (max-width: 560px) {
+  .quiz-result__actions {
+    grid-template-columns: 1fr;
   }
 }
 

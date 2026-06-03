@@ -672,6 +672,8 @@ body:has(.carm-explorer) .nav {
   /* 2026-05-21: Tabelle MUST fit the viewport — never overflow
      horizontally. Container clips any sub-pixel rounding. */
   overflow-x: hidden;
+  overflow-y: auto;
+  max-height: calc(100vh - 300px);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -6999,7 +7001,8 @@ body.carm-modal-open {
 .carm-spannweite__scroller {
   width: 100%;
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: auto;
+  max-height: calc(100vh - 300px);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -7014,7 +7017,7 @@ body.carm-modal-open {
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border, #e5e7eb);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .carm-spannweite__row {

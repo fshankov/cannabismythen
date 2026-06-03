@@ -133,8 +133,8 @@ const translations = {
   'sources_strips.picker.group': { de: 'Bevölkerungsgruppe', en: 'Population group' },
   'sources_strips.picker.metric': { de: 'Indikator', en: 'Indicator' },
   'sources_strips.children.show': { de: 'Unterkategorien einblenden', en: 'Show subcategories' },
-  'sources_strips.category.all': { de: 'Alle Quellen', en: 'All sources' },
-  'sources_strips.count': { de: '{n} Quellen', en: '{n} sources' },
+  'sources_strips.category.all': { de: 'Alle Informationswege', en: 'All sources' },
+  'sources_strips.count': { de: '{n} Informationswege', en: '{n} sources' },
   'sources_strips.action.showChildren': { de: 'Unterkategorien zeigen', en: 'Show subcategories' },
   'sources_strips.action.gotoParent': { de: 'Zum Hauptthema', en: 'Go to parent' },
 
@@ -243,9 +243,9 @@ const translations = {
   'view.streifen': { de: 'Punktwolke', en: 'Point Cloud' },
   'view.spannweite': { de: 'Mythen-Übersicht', en: 'Myths · Overview' },
   'view.tabelle': { de: 'Mythen-Tabelle', en: 'Myths · Table' },
-  'view.quellen': { de: 'Quellen-Balken', en: 'Sources · Bars' },
-  'view.quellen2': { de: 'Quellen-Übersicht', en: 'Sources · Overview' },
-  'view.quellen-tabelle': { de: 'Quellen-Tabelle', en: 'Sources · Table' },
+  'view.quellen': { de: 'Informationswege-Balken', en: 'Sources · Bars' },
+  'view.quellen2': { de: 'Informationswege-Übersicht', en: 'Sources · Overview' },
+  'view.quellen-tabelle': { de: 'Informationswege-Tabelle', en: 'Sources · Table' },
   'igs.indicator.legend': { de: 'Indikatoren', en: 'Indicators' },
   'igs.group.legend': { de: 'Gruppe', en: 'Group' },
   'igs.group.adults': { de: 'Volljährige (18–70)', en: 'Adults (18–70)' },
@@ -417,7 +417,7 @@ const translations = {
   },
   'sources2.title': { de: 'Informationsquellen-Spannweite', en: 'Information-sources range' },
   'sources.sort.alpha.tooltip': {
-    de: 'Quellen alphabetisch sortieren (A → Z)',
+    de: 'Informationswege alphabetisch sortieren (A → Z)',
     en: 'Sort sources alphabetically (A → Z)',
   },
   // Category-rank sort affordance (added 2026-05-23) — second sort
@@ -426,7 +426,7 @@ const translations = {
   // source-category order (Institutionell → Persönlich); second click
   // reverses (Persönlich → Institutionell).
   'sources.sort.category.activate.tooltip': {
-    de: 'Nach Quellen-Kategorie sortieren (Institutionell → Persönlich)',
+    de: 'Nach Informationswege-Kategorie sortieren (Institutionell → Persönlich)',
     en: 'Sort by source category (Institutional → Personal)',
   },
   'sources.sort.category.asc.tooltip': {

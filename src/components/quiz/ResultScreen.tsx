@@ -227,6 +227,12 @@ export default function ResultScreen({
             {t("ui.nextModule.cta", { title: nextThemeTitle })}
           </a>
         )}
+        <a
+          href="/quiz/"
+          className="quiz-result__cta quiz-result__cta--primary"
+        >
+          ← {t("ui.backToQuizzes")}
+        </a>
         <button
           type="button"
           className="quiz-result__cta quiz-result__cta--primary"
@@ -234,12 +240,6 @@ export default function ResultScreen({
         >
           {t("ui.restartQuiz")}
         </button>
-        <a
-          href="/quiz/"
-          className="quiz-result__cta quiz-result__cta--primary"
-        >
-          ← {t("ui.backToQuizzes")}
-        </a>
       </div>
     </section>
   );

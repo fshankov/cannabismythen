@@ -95,7 +95,7 @@ export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props)
       tabs={tabDefs}
       activeKey={view}
       onChange={onChange}
-      ariaLabel={group === 'right' ? 'Quellen-Ansicht wählen' : 'Mythos-Ansicht wählen'}
+      ariaLabel={group === 'right' ? 'Informationswege-Ansicht wählen' : 'Mythos-Ansicht wählen'}
     />
   );
 }

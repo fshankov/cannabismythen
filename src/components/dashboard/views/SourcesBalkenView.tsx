@@ -286,7 +286,7 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
               role="columnheader"
             >
               <GridLabelHeader
-                labelText="Quellen"
+                labelText="Informationswege"
                 isAzActive={isAzActive}
                 azTooltip="Alphabetisch sortieren"
                 onAzClick={() => setSort('a-z')}

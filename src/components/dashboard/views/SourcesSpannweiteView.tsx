@@ -485,7 +485,7 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                 <ArrowDownAZ size={14} strokeWidth={2} aria-hidden="true" />
               </button>
               <span className="carm-spannweite__header-text">
-                {lang === 'de' ? 'QUELLEN' : 'SOURCES'}
+                {lang === 'de' ? 'INFORMATIONSWEGE' : 'SOURCES'}
               </span>
               {(() => {
                 const isCatActive = sort === 'category-asc' || sort === 'category-desc';
