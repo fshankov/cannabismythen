@@ -17,6 +17,18 @@ import "../../styles/quiz.css";
 
 const groupMetricsByMythId = buildGroupMetricsByMythId(carmRawJson.metrics);
 
+// mythNumber → text_short_de (ultra-short Daten-Explorer label, e.g.
+// "Allheilmittel"). Mirrors fakten-karten/index.astro so the wrong-myths
+// FaktenCard on the result page shows the short label on its back-face
+// headline instead of falling back to the long statement — keeping the
+// quiz cards format-identical to the /fakten-karten/ page.
+const shortLabelByMythNumber = new Map<number, string>();
+for (const m of carmRawJson.myths as Array<{ id: number; text_short_de: string }>) {
+  if (typeof m.text_short_de === "string" && m.text_short_de.length > 0) {
+    shortLabelByMythNumber.set(m.id, m.text_short_de);
+  }
+}
+
 export async function getStaticPaths() {
   const slugs = await reader.collections.quiz.list();
   const paths = [];
@@ -118,6 +130,7 @@ const quizFaktenContentMap: Record<
   {
     mythNumber: number;
     title: string;
+    shortLabel: string;
     classification: string;
     classificationLabel: string;
     cardSummary: string;
@@ -184,6 +197,10 @@ if (theme) {
         quizFaktenContentMap[myth.id] = {
           mythNumber: Number.isFinite(mythNumber) ? mythNumber : 0,
           title: cleanMythTitle,
+          // Back-face headline: short Daten-Explorer label, same source the
+          // /fakten-karten/ page uses. Falls back to the cleaned full title
+          // (matches index.astro:72) if a myth has no text_short_de.
+          shortLabel: shortLabelByMythNumber.get(mythNumber) ?? cleanMythTitle,
           classification: mythEntry.classification as string,
           classificationLabel: mythEntry.classificationLabel as string,
           cardSummary: mythEntryAny.cardSummary ?? "",
