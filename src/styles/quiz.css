@@ -115,7 +115,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
+  gap: 16px;
   padding: var(--space-md) var(--space-lg);
   font-size: 0.9rem;
   line-height: 1.4;
@@ -230,7 +230,7 @@
    without crowding. */
 @media (max-width: 640px) {
   .quiz-feedback-strip {
-    gap: 0.25rem;
+    gap: 16px;
     padding: var(--space-sm) var(--space-md);
   }
 }
@@ -497,7 +497,7 @@
    blocks the buttons. */
 .quiz-card__feedback {
   margin-top: auto;
-  margin-bottom: 32px;
+  margin-bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -511,6 +511,13 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* When feedback is visible it already consumes margin-top:auto and lands
+   just above the buttons — the answer-area drops its own auto margin so
+   the two sit exactly 24px apart instead of splitting the free space. */
+.quiz-card__feedback + .quiz-answer-area {
+  margin-top: 16px;
 }
 
 .quiz-card .quiz-answer-area__label {
