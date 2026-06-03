@@ -4405,9 +4405,9 @@ body.fakten-karten-page main {
 .fakten-search__footer {
   display: flex;
   justify-content: flex-end;
-  padding: 6px 4px 2px;
-  border-top: 1px solid var(--color-border);
-  margin-top: 4px;
+  padding: 2px 4px 6px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 4px;
 }
 
 .fakten-search__reset {
@@ -4416,6 +4416,7 @@ body.fakten-karten-page main {
   border: none;
   font: inherit;
   font-size: 0.85rem;
+  font-weight: 700;
   color: var(--color-accent);
   cursor: pointer;
   padding: 4px 8px;
@@ -4587,9 +4588,9 @@ body.fakten-karten-page main {
 .fakten-filter-dropdown__footer {
   display: flex;
   justify-content: flex-end;
-  padding: 6px 4px 2px;
-  border-top: 1px solid var(--color-border);
-  margin-top: 4px;
+  padding: 2px 4px 6px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 4px;
 }
 
 .fakten-filter-dropdown__reset {
@@ -4598,6 +4599,7 @@ body.fakten-karten-page main {
   border: none;
   font: inherit;
   font-size: 0.85rem;
+  font-weight: 700;
   color: var(--color-accent);
   cursor: pointer;
   padding: 4px 8px;

@@ -196,7 +196,6 @@ export default function FaktenKartenExplorer({
         onToggleGroup={toggleGroup}
         onToggleMyth={toggleMyth}
         onReset={resetFilters}
-        totalCount={allMyths.length}
         allFlipped={allFlipped}
         onSetAllFlipped={setAllFlipped}
       />

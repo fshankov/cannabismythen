@@ -53,7 +53,6 @@ interface Props {
   onToggleGroup: (group: string) => void;
   onToggleMyth: (mythNumber: number) => void;
   onReset: () => void;
-  totalCount: number;
   allFlipped: boolean;
   onSetAllFlipped: (v: boolean) => void;
 }
@@ -121,7 +120,6 @@ export default function FaktenFilterBar({
   onToggleGroup,
   onToggleMyth,
   onReset,
-  totalCount,
   allFlipped,
   onSetAllFlipped,
 }: Props) {
@@ -143,25 +141,39 @@ export default function FaktenFilterBar({
   }, [categoryGroups, myths]);
 
   // Two separate lists for the search panel:
-  //   stuckMatches — myths that are ticked but DON'T match the current query.
-  //                  Always shown at the top so users can always untick them.
-  //   textMatches  — myths whose title matches the query (or all 42 when empty).
-  // Keeping them split lets the hint show the real text-match count and lets
-  // the panel render a visual "Bereits ausgewählt" divider.
+  //   stuckMatches — ticked myths that fall outside the current query/category
+  //                  scope. Always shown so the user can always untick them.
+  //   textMatches  — myths in the active category scope that match the query
+  //                  (or all in-scope myths when the query is empty).
   const { stuckMatches, textMatches } = useMemo(() => {
     const q = normalize(searchQuery.trim());
-    const sorted = [...myths].sort((a, b) => a.mythNumber - b.mythNumber);
-    if (q.length === 0) return { stuckMatches: [], textMatches: sorted };
+    const allSorted = [...myths].sort((a, b) => a.mythNumber - b.mythNumber);
+
+    // Respect the category filter: panel only shows myths from selected categories.
+    const inCategory = (m: MythLike) =>
+      selectedGroups.size === 0 || selectedGroups.has(m.categoryGroup);
+    const categoryFiltered = allSorted.filter(inCategory);
+
+    if (q.length === 0) {
+      // Stuck = ticked myths that are outside the selected categories.
+      const stuck =
+        selectedGroups.size > 0
+          ? allSorted.filter((m) => selectedMyths.has(m.mythNumber) && !inCategory(m))
+          : [];
+      return { stuckMatches: stuck, textMatches: categoryFiltered };
+    }
+
     const matchingNums = new Set(
-      sorted.filter((m) => normalize(m.title).includes(q)).map((m) => m.mythNumber)
+      categoryFiltered.filter((m) => normalize(m.title).includes(q)).map((m) => m.mythNumber)
     );
+    // Stuck = ticked myths not in matchingNums (outside category OR no text match).
     return {
-      stuckMatches: sorted.filter(
+      stuckMatches: allSorted.filter(
         (m) => selectedMyths.has(m.mythNumber) && !matchingNums.has(m.mythNumber)
       ),
-      textMatches: sorted.filter((m) => matchingNums.has(m.mythNumber)),
+      textMatches: categoryFiltered.filter((m) => matchingNums.has(m.mythNumber)),
     };
-  }, [myths, searchQuery, selectedMyths]);
+  }, [myths, searchQuery, selectedMyths, selectedGroups]);
 
   // Click-outside + Escape close each open dropdown.
   useEffect(() => {
@@ -211,8 +223,8 @@ export default function FaktenFilterBar({
 
   const hitsHint =
     searchQuery.trim().length > 0
-      ? `${textMatches.length} Treffer · Auswahl per Klick`
-      : `${totalCount} Mythen`;
+      ? `${textMatches.length} Treffer`
+      : `${textMatches.length} Mythen`;
 
   return (
     <div className="fakten-filter-section">
@@ -259,6 +271,20 @@ export default function FaktenFilterBar({
             role="menu"
             aria-label="Kategorien filtern"
           >
+            {hasActiveFilter && (
+              <div className="fakten-filter-dropdown__footer">
+                <button
+                  type="button"
+                  className="fakten-filter-dropdown__reset"
+                  onClick={() => {
+                    onReset();
+                    setCatDropdownOpen(false);
+                  }}
+                >
+                  Filter zurücksetzen
+                </button>
+              </div>
+            )}
             <ul className="fakten-filter-dropdown__list" role="none">
               {categoryGroups.map((group) => {
                 const checked = selectedGroups.has(group);
@@ -287,20 +313,6 @@ export default function FaktenFilterBar({
                 );
               })}
             </ul>
-            {hasActiveFilter && (
-              <div className="fakten-filter-dropdown__footer">
-                <button
-                  type="button"
-                  className="fakten-filter-dropdown__reset"
-                  onClick={() => {
-                    onReset();
-                    setCatDropdownOpen(false);
-                  }}
-                >
-                  Filter zurücksetzen
-                </button>
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -378,6 +390,20 @@ export default function FaktenFilterBar({
             role="listbox"
             aria-label="Mythen auswählen"
           >
+            {hasActiveFilter && (
+              <div className="fakten-search__footer">
+                <button
+                  type="button"
+                  className="fakten-search__reset"
+                  onClick={() => {
+                    onReset();
+                    setSearchOpen(false);
+                  }}
+                >
+                  Filter zurücksetzen
+                </button>
+              </div>
+            )}
             <p className="fakten-search__hint">{hitsHint}</p>
             {stuckMatches.length === 0 && textMatches.length === 0 ? (
               <p className="fakten-search__empty">Keine Treffer</p>
@@ -410,20 +436,6 @@ export default function FaktenFilterBar({
                   />
                 ))}
               </ul>
-            )}
-            {hasActiveFilter && (
-              <div className="fakten-search__footer">
-                <button
-                  type="button"
-                  className="fakten-search__reset"
-                  onClick={() => {
-                    onReset();
-                    setSearchOpen(false);
-                  }}
-                >
-                  Filter zurücksetzen
-                </button>
-              </div>
             )}
           </div>
         )}
