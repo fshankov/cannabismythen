@@ -177,6 +177,10 @@ interface QuizCardProps {
   statementText?: string;
   /** Explanation text from Keystatic content (overrides i18n key) */
   explanationText?: string;
+  /** Daten-Explorer short label (text_short_de). When present, it replaces
+   *  the full statement as the back-face (reveal) title so the reveal card
+   *  matches the Fakten-Karten card back. Falls back to the statement. */
+  shortLabel?: string;
   /** How many phantom cards are stacked behind this one (0–2). */
   deckBehind?: number;
   /** When ≥ 2, render a 🔥 streak chip pinned to the front face top-right. */
@@ -198,6 +202,7 @@ export default function QuizCard({
   isLastQuestion,
   statementText,
   explanationText,
+  shortLabel,
   deckBehind = 0,
   streakCount = 0,
 }: QuizCardProps) {
@@ -484,7 +489,7 @@ export default function QuizCard({
                 <p
                   className={`quiz-card__statement quiz-card__statement--back statement--${myth.correctClassification}`}
                 >
-                  {displayStatement(statement)}
+                  {shortLabel || displayStatement(statement)}
                 </p>
 
                 <div className="quiz-card__back-pill">

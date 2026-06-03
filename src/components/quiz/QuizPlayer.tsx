@@ -139,6 +139,11 @@ interface QuizPlayerProps {
    *  Powers the wrong-myths `FaktenCard` grid on the result page
    *  (Stage E commit 4). */
   faktenContent?: string;
+  /** JSON-serialized Record<mythId, string> of Daten-Explorer short labels
+   *  (text_short_de). Drives the reveal-card (back-face) title so it shows
+   *  the short label instead of the long statement — matching the
+   *  Fakten-Karten cards. Covers all 42 myths so dynamic decks work too. */
+  shortLabels?: string;
   /** Optional Keystatic summary used in the intro card */
   quizSummary?: string;
 }
@@ -405,6 +410,7 @@ function QuizPlayerInner({
   intros,
   shareCopy,
   faktenContent,
+  shortLabels,
 }: QuizPlayerInnerProps) {
   const totalQuestions = theme.myths.length;
   const accent = QUIZ_ACCENT[quizSlug] ?? "var(--color-accent)";
@@ -574,6 +580,17 @@ function QuizPlayerInner({
       return {};
     }
   }, [faktenContent]);
+
+  // mythId → Daten-Explorer short label (text_short_de), for the reveal-card
+  // (QuizCard back-face) title. Covers all 42 myths so dynamic decks resolve.
+  const shortLabelMap: Record<string, string> = useMemo(() => {
+    if (!shortLabels) return {};
+    try {
+      return JSON.parse(shortLabels) as Record<string, string>;
+    } catch {
+      return {};
+    }
+  }, [shortLabels]);
 
   // ── Track quiz start once per mount.
   useEffect(() => {
@@ -921,6 +938,7 @@ function QuizPlayerInner({
             isLastQuestion={safeIndex === totalQuestions - 1}
             statementText={quizTextMap[currentMyth.id]?.statement}
             explanationText={quizTextMap[currentMyth.id]?.explanation}
+            shortLabel={shortLabelMap[currentMyth.id]}
             deckBehind={cardsRemainingBehind}
             streakCount={streakCount}
           />
