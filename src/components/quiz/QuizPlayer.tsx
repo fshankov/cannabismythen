@@ -874,27 +874,16 @@ function QuizPlayerInner({
     portalTarget.classList.toggle("quiz-progress-slot--active", !showResults);
   }, [portalTarget, showResults]);
 
-  const showAnswerStrip = !showResults && currentMyth !== undefined;
-
   // Pinned header (during the quiz): module title + thin progress fill +
-  // "Mythos N von Y" counter, plus the per-question feedback strip.
+  // "Mythos N von Y" counter only. FeedbackStrip moved into the quiz
+  // flow (below the card) so the fixed header stays compact.
   const pinnedHeader = (
-    <>
-      <ProgressBar
-        quizTitle={t(theme.titleKey)}
-        current={safeIndex + 1}
-        answered={answeredCount}
-        total={totalQuestions}
-      />
-      {showAnswerStrip && currentMyth && (
-        <FeedbackStrip
-          variant="answer"
-          myth={currentMyth}
-          answer={currentAnswer}
-          statementText={quizTextMap[currentMyth.id]?.statement}
-        />
-      )}
-    </>
+    <ProgressBar
+      quizTitle={t(theme.titleKey)}
+      current={safeIndex + 1}
+      answered={answeredCount}
+      total={totalQuestions}
+    />
   );
 
   // 2026-05-30 (Fedor) — the result page no longer renders a top quiz bar
@@ -935,6 +924,15 @@ function QuizPlayerInner({
             deckBehind={cardsRemainingBehind}
             streakCount={streakCount}
           />
+
+          {currentAnswer && (
+            <FeedbackStrip
+              variant="answer"
+              myth={currentMyth}
+              answer={currentAnswer}
+              statementText={quizTextMap[currentMyth.id]?.statement}
+            />
+          )}
 
           {/* Stage 4: bottom Zurück / dots / Nächste row removed. The
               Schritte pill row in the header now doubles as nav (click a

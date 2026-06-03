@@ -80,6 +80,8 @@
 
 /* ── The four nav cards (icon + title + body; white space below) ── */
 .path-card {
+  position: relative;
+  overflow: hidden; /* clips preview content that bleeds past the bottom edge */
   display: flex;
   flex-direction: column;
   align-self: stretch;
@@ -190,6 +192,73 @@
 }
 .quiz-preview__btn--falsch {
   background: #ffe9ed;
+}
+
+/* ── Fakten-Karten preview — four mini fakten-cards (real per-verdict gradient
+      + short statement + faint directional arrow), verdict spectrum falsch →
+      richtig. Compacted/overlapping, anchored to the bottom and clipped by the
+      card edge ("laid on the bottom"). Hover raises the right (richtig) card. ── */
+.fakten-preview {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  bottom: -52px; /* sink below the card edge so the cards' bottoms are cut */
+  display: flex;
+  align-items: flex-end;
+  pointer-events: none; /* decorative — keep the card link clickable */
+}
+.fk-mini {
+  position: relative;
+  flex: 0 0 auto;
+  width: 148px;
+  height: 178px;
+  margin-right: -44px; /* overlap → compacted */
+  padding: 16px 14px;
+  border-radius: 14px 14px 0 0; /* rounded top only; bottom is clipped */
+  overflow: hidden;
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.28s var(--ease-card, cubic-bezier(0.22, 1, 0.36, 1));
+}
+.fk-mini:last-child {
+  margin-right: 0;
+}
+.fk-mini:nth-child(1) { z-index: 1; }
+.fk-mini:nth-child(2) { z-index: 2; }
+.fk-mini:nth-child(3) { z-index: 3; }
+.fk-mini:nth-child(4) { z-index: 4; }
+
+.fk-mini__statement {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-style: italic;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #ffffff;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.fk-mini__arrow {
+  margin-top: 16px; /* arrow sits 16px under the statement */
+  width: 60px;
+  height: 44px;
+  overflow: visible; /* show the full arrow — the source SVG draws past its viewBox */
+  opacity: 0.22; /* faint, like the live card's background arrow */
+}
+/* richtig/falsch use a squarer viewBox (181×186) than the diagonals (×280), so
+   meet-fitting renders them larger/thicker — scale them down to match. */
+.fk-mini--richtig .fk-mini__arrow,
+.fk-mini--falsch .fk-mini__arrow {
+  transform: scale(0.66);
+}
+
+/* Hover the Fakten card → the right (richtig) mini-card rises */
+.path-card--fakten:hover .fk-mini:last-child {
+  transform: translateY(-44px);
 }
 
 /* ── Mobile: single column, cards stack ── */
