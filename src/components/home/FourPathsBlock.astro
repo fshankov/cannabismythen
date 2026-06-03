@@ -52,6 +52,28 @@ const ICONS: Record<string, string> = {
   meine: `<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>`,
 };
 
+// The four quiz answer-buttons (verdict card + arrow) replicated pixel-for-pixel
+// from the quiz play state (QuizCard ANSWER_OPTIONS) — no text labels. Order
+// follows the Figma/screenshot: richtig · eher_falsch · eher_richtig · falsch.
+const QUIZ_OPTIONS = [
+  {
+    value: "richtig",
+    svg: `<svg width="30" height="22" viewBox="0 0 30 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28.2041 1.39285L1.3916 1.39286" stroke="#A7D3C5" stroke-width="2.78333" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.7979 20.1604L14.7978 1.39168" stroke="#047857" stroke-width="2.78333" stroke-linecap="round" stroke-linejoin="round"/><path d="M24.1826 10.7776L14.7982 1.39324L5.41386 10.7776" stroke="#047857" stroke-width="2.78333" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  },
+  {
+    value: "eher_falsch",
+    svg: `<svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M32.2303 13.271L13.271 32.2303" stroke="#E0B58D" stroke-width="2.78333" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.47932 9.47998L22.7508 22.7515" stroke="#B45309" stroke-width="2.78333" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.7508 9.47803V22.7495H9.47929" stroke="#B45309" stroke-width="2.78333" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  },
+  {
+    value: "eher_richtig",
+    svg: `<svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M32.2303 20.351L13.271 1.39168" stroke="#C2D3A3" stroke-width="2.78333" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.47932 24.142L22.7508 10.8705" stroke="#4D7C0F" stroke-width="2.78333" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.7508 24.144V10.8724H9.47929" stroke="#4D7C0F" stroke-width="2.78333" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  },
+  {
+    value: "falsch",
+    svg: `<svg width="26" height="22" viewBox="0 0 26 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.2666 18.8793C0.567207 18.8798 0 19.4464 0 20.1459C0 20.8454 0.567207 21.4121 1.2666 21.4125L24.2705 21.4125C24.9703 21.4125 25.5371 20.8457 25.5371 20.1459C25.5371 19.4462 24.9703 18.8793 24.2705 18.8793L1.2666 18.8793Z" fill="#E9A8B9"/><path d="M12.771 1.26703L12.771 19.3997" stroke="#BE123C" stroke-width="2.53404" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.8223 10.3315L12.771 19.3978L4.71974 10.3315" stroke="#BE123C" stroke-width="2.53404" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  },
+];
+
 const cards = [
   { mod: "quiz", icon: ICONS.quiz, ...quizTile },
   { mod: "fakten", icon: ICONS.fakten, ...faktenKartenTile },
@@ -91,6 +113,14 @@ const cards = [
           </span>
           <h3 class="path-card__title">{c.title}</h3>
           <p class="path-card__body">{c.description}</p>
+
+          {c.mod === "quiz" && (
+            <div class="quiz-preview" aria-hidden="true">
+              {QUIZ_OPTIONS.map((o) => (
+                <span class={`quiz-preview__btn quiz-preview__btn--${o.value}`} set:html={o.svg}></span>
+              ))}
+            </div>
+          )}
         </a>
       ))}
     </div>

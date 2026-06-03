@@ -9,7 +9,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .four-paths {
-  margin-top: 64px; /* gap from block 3 (Numbers-Strip) */
+  margin-top: 32px; /* gap from block 3 (Numbers-Strip) */
 }
 
 .four-paths__inner {
@@ -155,6 +155,41 @@
   font-size: 16px;
   line-height: 20px;
   color: rgba(64, 73, 67, 0.8);
+}
+
+/* ── Quiz card preview — the four verdict answer-buttons from the quiz play
+      state (QuizCard), no labels: square, r12, 3px transparent border, pastel
+      fill. 48px below the body; fill the card width with 16px gaps, capped at
+      100px (shrink on narrow cards). ── */
+.quiz-preview {
+  margin-top: 48px;
+  display: flex;
+  gap: 16px;
+}
+.quiz-preview__btn {
+  flex: 1 1 0;
+  max-width: 100px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid transparent;
+  border-radius: 12px;
+}
+.quiz-preview__btn svg {
+  display: block;
+}
+.quiz-preview__btn--richtig {
+  background: #d1e8d1;
+}
+.quiz-preview__btn--eher_falsch {
+  background: #ffefbc;
+}
+.quiz-preview__btn--eher_richtig {
+  background: #e1ebe2;
+}
+.quiz-preview__btn--falsch {
+  background: #ffe9ed;
 }
 
 /* ── Mobile: single column, cards stack ── */
