@@ -497,6 +497,7 @@
    blocks the buttons. */
 .quiz-card__feedback {
   margin-top: auto;
+  margin-bottom: 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -621,9 +622,9 @@
 .quiz-card__feedback-phrase {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 24px;
+  font-size: 16px;
   font-style: normal;
-  line-height: 30px;
+  line-height: 22px;
   text-align: center;
 }
 /* (Points badge removed from the card 2026-05-29 — points now show in the
@@ -707,7 +708,7 @@
 
 /* Fixed-size card: keep the verified feedback typography on mobile too. */
 @media (max-width: 640px) {
-  .quiz-card__feedback-phrase { font-size: 24px; }
+  .quiz-card__feedback-phrase { font-size: 16px; }
 }
 
 /* Chip pair: "Deine Antwort: [chip] · Wissenschaftlich: [chip]" on one

@@ -86,7 +86,7 @@
   flex-direction: column;
   align-self: stretch;
   justify-self: stretch;
-  min-height: 400px; /* placeholder height — keeps white space below the body */
+  height: 400px; /* fixed — previews are absolute, so a fixed box keeps them off the body at every width */
   padding: 24px 32px; /* 24 top/bottom · 32 left/right */
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.89);
@@ -137,13 +137,13 @@
   color: #ffffff;
 }
 
-/* title — 24px below the icon */
+/* title — 16px below the icon */
 .path-card__title {
-  margin: 24px 0 0 0;
+  margin: 16px 0 0 0;
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 32px;
-  line-height: 57.194px;
+  line-height: 1.1; /* was 57.194px (Figma) — that tall line-box inflated the icon→title / title→body gaps */
   letter-spacing: -1.3px;
   color: #1a1c1a;
 }
@@ -164,7 +164,7 @@
       fill. 48px below the body; fill the card width with 16px gaps, capped at
       100px (shrink on narrow cards). ── */
 .quiz-preview {
-  margin-top: 48px;
+  margin-top: auto; /* push the answer buttons to the bottom of the card */
   display: flex;
   gap: 16px;
 }
@@ -219,7 +219,7 @@
   box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.22);
   display: flex;
   flex-direction: column;
-  transition: transform 0.28s var(--ease-card, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .fk-mini:last-child {
   margin-right: 0;
@@ -261,6 +261,202 @@
   transform: translateY(-44px);
 }
 
+/* ── Daten-Explorer preview — laconic Balken chart (mirrors the dashboard's
+      BalkenBar: dotted axis + translucent verdict wash + value circle).
+      Anchored to the bottom of the card; values animate on hover (see script). ── */
+.daten-preview {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.daten-chart {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 32px 24px;
+}
+.daten-chart__axis {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  top: 0;
+  bottom: 24px;
+  pointer-events: none;
+}
+.daten-chart__tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dotted rgba(0, 0, 0, 0.08);
+}
+.daten-chart__tick[data-pos="0"] { left: 0; }
+.daten-chart__tick[data-pos="25"] { left: 25%; }
+.daten-chart__tick[data-pos="50"] { left: 50%; border-left-color: rgba(0, 0, 0, 0.13); }
+.daten-chart__tick[data-pos="75"] { left: 75%; }
+.daten-chart__tick[data-pos="100"] { left: 100%; }
+
+.daten-bar {
+  position: relative;
+  height: 22px;
+  border-radius: 3px;
+  background: rgba(120, 128, 124, 0.05); /* faint row band */
+}
+.daten-bar__wash {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 22px;
+  border-radius: 3px;
+  opacity: 0.32; /* translucent fill, like the dashboard wash */
+}
+.daten-bar__circle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font: 600 0.6875rem/1 ui-monospace, "SF Mono", Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Meine-Interessen preview — the 5 audiences as one row of circles
+      (block-2 cluster style: Stein fill + dotted connector), each with its
+      audience icon. Circles cap at 69px and shrink to fit narrower cards. ── */
+.meine-preview {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  bottom: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+.meine-preview::before {
+  /* dotted connector behind the circles (matches the block-2 cluster) */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2.4px;
+  transform: translateY(-50%);
+  background-image: radial-gradient(circle, #979da4 0 1.2px, transparent 1.4px);
+  background-size: 8px 2.4px;
+  background-repeat: repeat-x;
+  background-position: left center;
+  z-index: 0;
+}
+.audience-dot {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  max-width: 69px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e8e8e0; /* Stein — same as the block-2 cluster circles */
+  color: #2c333d; /* Tinte icon */
+}
+.audience-dot svg {
+  width: 44%;
+  height: 44%;
+}
+
+/* ── Card hover animations (motion-safe) ───────────────────────────
+   Quiz: the 4 buttons jump in one after another, then the verdict
+   feedback strokes appear (richtig = correct dashed green, eher_falsch
+   = "1-away" dashed yellow — as in the real quiz). Meine: the connector
+   dots flow left→right and the circles pop in a left→right wave. ── */
+@keyframes meine-dot-march {
+  to {
+    background-position-x: 8px;
+  }
+}
+@keyframes audience-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.12);
+  }
+}
+@keyframes quiz-jump {
+  0% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-12px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Quiz — buttons jump in one after another, then the feedback strokes
+     fade in once the wave lands */
+  .quiz-preview__btn {
+    transition: border-color 0.18s ease;
+  }
+  .path-card--quiz:hover .quiz-preview__btn {
+    animation: quiz-jump 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .path-card--quiz:hover .quiz-preview__btn:nth-child(2) {
+    animation-delay: 0.05s;
+  }
+  .path-card--quiz:hover .quiz-preview__btn:nth-child(3) {
+    animation-delay: 0.1s;
+  }
+  .path-card--quiz:hover .quiz-preview__btn:nth-child(4) {
+    animation-delay: 0.15s;
+  }
+  .path-card--quiz:hover .quiz-preview__btn--richtig,
+  .path-card--quiz:hover .quiz-preview__btn--eher_falsch {
+    border-style: dashed;
+    transition-delay: 0.3s; /* both strokes appear together once the buttons land */
+  }
+  .path-card--quiz:hover .quiz-preview__btn--richtig {
+    border-color: var(--quiz-btn-corr-ans); /* #047857 — the quiz's "correct answer" stroke */
+  }
+  .path-card--quiz:hover .quiz-preview__btn--eher_falsch {
+    border-color: var(--quiz-btn-near); /* #fbd035 — yellow, "1 point away" */
+  }
+
+  /* Meine — dotted connector flows + circles pop in a wave */
+  .path-card--meine:hover .meine-preview::before {
+    animation: meine-dot-march 0.7s linear infinite;
+  }
+  .path-card--meine:hover .audience-dot {
+    animation: audience-pop 0.5s ease both;
+  }
+  .path-card--meine:hover .audience-dot:nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  .path-card--meine:hover .audience-dot:nth-child(3) {
+    animation-delay: 0.16s;
+  }
+  .path-card--meine:hover .audience-dot:nth-child(4) {
+    animation-delay: 0.24s;
+  }
+  .path-card--meine:hover .audience-dot:nth-child(5) {
+    animation-delay: 0.32s;
+  }
+}
+
 /* ── Mobile: single column, cards stack ── */
 @media (max-width: 859px) {
   .four-paths__card {
@@ -280,8 +476,5 @@
   }
   .four-paths__quote {
     max-width: 100%;
-  }
-  .path-card {
-    min-height: 280px;
   }
 }

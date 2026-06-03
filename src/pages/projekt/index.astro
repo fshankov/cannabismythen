@@ -24,6 +24,7 @@ const { internalNotes, ...publicContent } = content;
 <BaseLayout
   title={publicContent.pageTitle}
   description={publicContent.pageDescription}
+  hideFooter={true}
 >
   <ScrollytellingViewer client:load content={publicContent} />
 </BaseLayout>

@@ -8,7 +8,6 @@ import type { HeroMyth } from "@components/home/HeroBlock";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
 import ProjektTeaserBlock from "@components/home/ProjektTeaserBlock.astro";
-import SiteFooter from "@components/home/SiteFooter.astro";
 import type { PreviewMyth } from "@components/home/previews/FaktenKartenPreviewTile.astro";
 import type { AudienceChip } from "@components/home/previews/MeineInteressenPreviewTile.astro";
 import { getAllAudiences } from "@lib/faq";
@@ -84,10 +83,6 @@ const ueberProjektData = await reader.singletons.ueberProjektTeaser.read();
 const numbersStripData = await reader.singletons.numbersStrip.read();
 const headlineFinding = await reader.singletons.headlineFinding.read();
 const fourPathsData = await reader.singletons.fourPaths.read();
-const projectStripData = await reader.singletons.projectStrip.read();
-// Rich "about" footer content lives in the Über-das-Projekt singleton.
-const projektFooter = await reader.singletons.ueberUnsScrolly.read();
-
 // The five FAQ audiences, as colour-coded rows for the Meine-Interessen tile.
 const audienceMetaList = await getAllAudiences();
 const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
@@ -96,7 +91,7 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
 }));
 ---
 
-<BaseLayout title="Startseite" heroMode={true} hideFooter={true}>
+<BaseLayout title="Startseite" heroMode={true}>
   <HeroBlock
     myths={heroMyths}
     headline1={heroHeadline1}
@@ -138,15 +133,6 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
     />
   )}
   </div>
-
-  <SiteFooter
-    kontakt={projektFooter?.footerKontakt}
-    foerderung={projektFooter?.footerFoerderung}
-    zitierweise={projektFooter?.footerZitierweise}
-    abschlussbericht={projektFooter?.footerAbschlussbericht}
-    credit={projectStripData?.credit}
-    links={projectStripData?.links ?? []}
-  />
 </BaseLayout>
 
 <style>

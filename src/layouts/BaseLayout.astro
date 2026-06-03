@@ -4,6 +4,8 @@ import "@fontsource-variable/inter";
 import "@fontsource/dm-serif-display";
 import "@fontsource/source-serif-4/700.css";
 import "@fontsource/source-serif-4/700-italic.css";
+import SiteFooter from "@components/home/SiteFooter.astro";
+import { reader } from "@lib/content";
 
 interface Props {
   title: string;
@@ -20,8 +22,7 @@ interface Props {
    *  set, emits og:image + twitter:card meta. og:title/description
    *  derive from `title`/`description`; og:url from the current request. */
   ogImage?: string;
-  /** When true, suppress the default minimal copyright footer — the page
-   *  provides its own footer (e.g. the homepage's rich SiteFooter). */
+  /** When true, hide the rich SiteFooter (e.g. /projekt/ provides its own). */
   hideFooter?: boolean;
 }
 
@@ -34,6 +35,11 @@ const {
   ogImage,
   hideFooter = false,
 } = Astro.props;
+
+const [footerContent, projectStripData] = await Promise.all([
+  reader.singletons.ueberUnsScrolly.read(),
+  reader.singletons.projectStrip.read(),
+]);
 
 // PREVIEW BANNER — flip to false before public launch
 const SHOW_PREVIEW_BANNER = true;
@@ -347,14 +353,23 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
     <main>
       <slot />
     </main>
-    <footer id="main-content" style={hideFooter ? "display:none" : undefined}>
-      {/* Feedbucket re-enabled 2026-06-01. To disable: replace this <p>
-          with the plain `<p>&copy; … CaRM-Projekt</p>` line and wrap this
-          block back in FEEDBUCKET-DISABLED-START / FEEDBUCKET-DISABLED-END
-          markers (along with the head script and trigger script). */}
+
+    {!hideFooter && (
+      <SiteFooter
+        kontakt={footerContent?.footerKontakt}
+        foerderung={footerContent?.footerFoerderung}
+        zitierweise={footerContent?.footerZitierweise}
+        abschlussbericht={footerContent?.footerAbschlussbericht}
+        links={projectStripData?.links ?? []}
+      />
+    )}
+
+    {/* Feedbucket trigger — independent of the rich footer, always present.
+        Re-enabled 2026-06-01. To disable: wrap this block back in
+        FEEDBUCKET-DISABLED-START / FEEDBUCKET-DISABLED-END comment markers
+        and remove the head script + trigger script below. */}
+    <footer id="main-content" class="feedbucket-footer">
       <p>
-        &copy; {new Date().getFullYear()} CaRM-Projekt
-        <span class="footer-sep" aria-hidden="true">·</span>
         <a
           id="footer-feedback-trigger"
           class="footer-feedback-link"

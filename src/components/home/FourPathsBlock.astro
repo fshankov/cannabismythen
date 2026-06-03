@@ -2,6 +2,8 @@
 import "../../styles/home-four-paths.css";
 import { getVerdictVisual } from "../../lib/fakten-karten/verdict-colors";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
+import { AUDIENCE_ICONS_BY_FAQ_ID } from "../../lib/icons/lookups";
+import type { FaqAudienceId } from "../../lib/icons/lookups";
 
 export interface HookQuote {
   eyebrow: string;
@@ -38,8 +40,8 @@ export interface Props {
     categoryGroup?: string;
     summary?: string;
   }>;
-  /* audienceChips kept optional; Meine-Interessen white space still pending. */
-  audienceChips?: unknown;
+  /** The five FAQ audiences (id + label) — feeds the Meine-Interessen card. */
+  audienceChips?: ReadonlyArray<{ id: FaqAudienceId; label: string }>;
 }
 
 const {
@@ -49,6 +51,7 @@ const {
   datenExplorerTile,
   meineInteressenTile,
   previewMyths = [],
+  audienceChips = [],
 } = Astro.props;
 
 // Pre-oriented direction arrows (verbatim from the card-bg-arrow SVGs). Inlined
@@ -89,6 +92,16 @@ const faktenCards = FAKTEN_SPECTRUM.map((v) => {
     arrow: { viewBox: string; inner: string };
   } => x !== null,
 );
+
+// Daten-Explorer card preview: a laconic Balken chart (matches the dashboard's
+// BalkenBar — dotted axis + translucent verdict wash + value circle). Each bar
+// animates from `idle` to `hover` on card hover. Values are placeholders.
+const DATEN_BARS = [
+  { accent: "#047857", idle: 57, hover: 42 }, // richtig (green)
+  { accent: "#b45309", idle: 28, hover: 28 }, // eher_falsch (orange) — unchanged
+  { accent: "#047857", idle: 14, hover: 31 }, // richtig (green)
+  { accent: "#4d7c0f", idle: 64, hover: 49 }, // eher_richtig (olive)
+];
 
 // Per-topic icons lifted from the mobile tab bar (BaseLayout) — Lucide 24×24,
 // drawn in currentColor so the badge can paint them white.
@@ -185,8 +198,95 @@ const cards = [
               ))}
             </div>
           )}
+
+          {c.mod === "daten" && (
+            <div class="daten-preview" aria-hidden="true">
+              <div class="daten-chart">
+                <div class="daten-chart__axis">
+                  <span class="daten-chart__tick" data-pos="0"></span>
+                  <span class="daten-chart__tick" data-pos="25"></span>
+                  <span class="daten-chart__tick" data-pos="50"></span>
+                  <span class="daten-chart__tick" data-pos="75"></span>
+                  <span class="daten-chart__tick" data-pos="100"></span>
+                </div>
+                {DATEN_BARS.map((b) => (
+                  <div class="daten-bar" data-idle={b.idle} data-hover={b.hover}>
+                    <span class="daten-bar__wash" style={`width:${b.idle}%;background:${b.accent}`}></span>
+                    <span class="daten-bar__circle" style={`left:${b.idle}%;background:${b.accent}`}>{b.idle}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {c.mod === "meine" && (
+            <div class="meine-preview" aria-hidden="true">
+              {audienceChips.map((a) => {
+                const Icon = AUDIENCE_ICONS_BY_FAQ_ID[a.id];
+                return (
+                  <span class="audience-dot">
+                    {Icon && <Icon />}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </a>
       ))}
     </div>
   </div>
 </section>
+
+<script>
+  // Daten-Explorer card: tween the Balken bars from their idle to their hover
+  // values (width + circle position + number) while the card is hovered.
+  interface DBar {
+    wash: HTMLElement | null;
+    circle: HTMLElement | null;
+    idle: number;
+    hover: number;
+    cur: number;
+  }
+  const dLerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  const dEase = (t: number) => 1 - Math.pow(1 - t, 3);
+  document.querySelectorAll<HTMLElement>(".daten-preview").forEach((preview) => {
+    const card = preview.closest<HTMLElement>(".path-card") ?? preview;
+    const bars: DBar[] = Array.from(
+      preview.querySelectorAll<HTMLElement>(".daten-bar"),
+    ).map((bar) => ({
+      wash: bar.querySelector<HTMLElement>(".daten-bar__wash"),
+      circle: bar.querySelector<HTMLElement>(".daten-bar__circle"),
+      idle: Number(bar.dataset.idle),
+      hover: Number(bar.dataset.hover),
+      cur: Number(bar.dataset.idle),
+    }));
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+    const apply = (b: DBar, v: number) => {
+      if (b.wash) b.wash.style.width = v + "%";
+      if (b.circle) {
+        b.circle.style.left = v + "%";
+        b.circle.textContent = String(Math.round(v));
+      }
+    };
+    const tween = (toHover: boolean) => {
+      cancelAnimationFrame(raf);
+      const starts = bars.map((b) => b.cur);
+      const targets = bars.map((b) => (toHover ? b.hover : b.idle));
+      if (reduce) {
+        bars.forEach((b, i) => { b.cur = targets[i]; apply(b, b.cur); });
+        return;
+      }
+      const t0 = performance.now();
+      const dur = 480;
+      const step = (now: number) => {
+        const e = dEase(Math.min((now - t0) / dur, 1));
+        bars.forEach((b, i) => { b.cur = dLerp(starts[i], targets[i], e); apply(b, b.cur); });
+        if (e < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    };
+    card.addEventListener("mouseenter", () => tween(true));
+    card.addEventListener("mouseleave", () => tween(false));
+  });
+</script>

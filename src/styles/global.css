@@ -700,6 +700,13 @@ main {
   min-height: 60vh;
 }
 
+/* Hero page (homepage): the only spot the body background peeks through is the
+   footer's top margin. Match it to the #FAF9F5 canvas (blocks 2–4) so the gap
+   blends seamlessly into the page instead of reading as a separate block. */
+body.has-hero {
+  background: #faf9f5;
+}
+
 /* ── Hero page: main is full-bleed (hero handles its own sizing) */
 body.has-hero main {
   max-width: none;

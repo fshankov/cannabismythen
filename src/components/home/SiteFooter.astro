@@ -14,59 +14,110 @@ export interface Props {
   foerderung?: FooterBlock | null;
   zitierweise?: FooterBlock | null;
   abschlussbericht?: FooterBlock | null;
-  credit?: string;
   links?: ReadonlyArray<ProjectLink>;
 }
 
-const { kontakt, foerderung, zitierweise, abschlussbericht, credit, links = [] } = Astro.props;
+const { kontakt, foerderung, zitierweise, abschlussbericht, links = [] } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer" aria-label="Über das Projekt">
+<footer class="site-footer" aria-label="Seitenbereich: Über das Projekt">
   <div class="site-footer__inner">
-    <div class="site-footer__cols">
-      {kontakt && (
-        <div class="site-footer__col">
-          <h2 class="site-footer__h">{kontakt.label}</h2>
-          {(kontakt.lines ?? []).map((l) => <p class="site-footer__line">{l}</p>)}
-          {kontakt.email && (
-            <p class="site-footer__line">
-              <a href={`mailto:${kontakt.email}`}>{kontakt.email}</a>
-            </p>
+    <div class="site-footer__grid">
+
+      <!-- Brand + Kontakt column -->
+      <div class="site-footer__brand-col">
+        <div class="site-footer__brand">
+          <a href="/" class="nav__brand site-footer__logo-link" aria-label="Cannabis Mythen – Startseite">
+            <span class="cm-logo" aria-hidden="true">
+              <span class="cm-lens" aria-hidden="true"></span>
+              <svg class="cm-art" viewBox="0 0 64 64" aria-hidden="true">
+                <defs>
+                  <clipPath id="sfLens"><circle cx="30" cy="30" r="14.6"/></clipPath>
+                  <radialGradient id="sfSpec" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                  </radialGradient>
+                  <radialGradient id="sfDepth" cx="0.5" cy="0.62" r="0.62">
+                    <stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0a140f" stop-opacity=".2"/>
+                  </radialGradient>
+                  <linearGradient id="sfRim" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+                  </linearGradient>
+                  <filter id="sfBB" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.15"/></filter>
+                  <filter id="sfSB" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.5"/></filter>
+                  <filter id="sfHZ" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation=".26"/></filter>
+                </defs>
+                <g clip-path="url(#sfLens)">
+                  <g filter="url(#sfBB)" opacity=".42" transform="translate(30 26.5) scale(1.18) translate(-12 -9)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 16h20" stroke="var(--cm-mark-soft)"/><path d="M12 2v14" stroke="var(--cm-mark)"/><path d="m5 9 7 7 7-7" stroke="var(--cm-mark)"/>
+                  </g>
+                  <g filter="url(#sfHZ)" transform="translate(30 26.5) scale(.86) translate(-12 -9)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 16h20" stroke="var(--cm-mark-soft)"/><path d="M12 2v14" stroke="var(--cm-mark)"/><path d="m5 9 7 7 7-7" stroke="var(--cm-mark)"/>
+                  </g>
+                  <circle cx="30" cy="30" r="14.6" fill="#fff" fill-opacity=".08"/>
+                  <circle cx="30" cy="30" r="14.6" fill="url(#sfDepth)"/>
+                  <g filter="url(#sfSB)"><ellipse cx="24.5" cy="23" rx="9.5" ry="6" transform="rotate(-32 24.5 23)" fill="url(#sfSpec)"/></g>
+                  <path d="M19.5 24 A14.6 14.6 0 0 1 40 19" fill="none" stroke="url(#sfRim)" stroke-width="1.4" stroke-linecap="round"/>
+                </g>
+                <g fill="none" stroke="var(--cm-ring)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="30" cy="30" r="16"/><path d="M50 50 41.3 41.3"/>
+                </g>
+              </svg>
+            </span>
+            <span class="nav__brand-text">Cannabis<span class="nav__brand-myth">Mythen</span></span>
+          </a>
+          <p class="site-footer__tagline">Cannabis: Mythen &amp; Evidenz — Ein interaktives Informationstool des ISD Hamburg.</p>
+        </div>
+        {kontakt && (
+          <div class="site-footer__block">
+            <h2 class="site-footer__h">{kontakt.label}</h2>
+            {(kontakt.lines ?? []).map((l) => <p class="site-footer__line">{l}</p>)}
+            {kontakt.email && (
+              <a class="site-footer__email" href={`mailto:${kontakt.email}`}>{kontakt.email}</a>
+            )}
+          </div>
+        )}
+      </div>
+
+      <!-- Info columns: Förderung + Zitierweise / Abschlussbericht -->
+      <div class="site-footer__info-cols">
+        <div class="site-footer__info-col">
+          {foerderung && (
+            <div class="site-footer__block">
+              <h2 class="site-footer__h">{foerderung.label}</h2>
+              <p class="site-footer__line">{foerderung.body}</p>
+            </div>
+          )}
+          {zitierweise && (
+            <div class="site-footer__block">
+              <h2 class="site-footer__h">{zitierweise.label}</h2>
+              <p class="site-footer__line">{zitierweise.body}</p>
+            </div>
           )}
         </div>
-      )}
-      {foerderung && (
-        <div class="site-footer__col">
-          <h2 class="site-footer__h">{foerderung.label}</h2>
-          <p class="site-footer__line">{foerderung.body}</p>
+        <div class="site-footer__info-col">
+          {abschlussbericht && (
+            <div class="site-footer__block">
+              <h2 class="site-footer__h">{abschlussbericht.label}</h2>
+              <p class="site-footer__line site-footer__line--italic">{abschlussbericht.body}</p>
+            </div>
+          )}
         </div>
-      )}
-      {zitierweise && (
-        <div class="site-footer__col">
-          <h2 class="site-footer__h">{zitierweise.label}</h2>
-          <p class="site-footer__line">{zitierweise.body}</p>
-        </div>
-      )}
-      {abschlussbericht && (
-        <div class="site-footer__col">
-          <h2 class="site-footer__h">{abschlussbericht.label}</h2>
-          <p class="site-footer__line">{abschlussbericht.body}</p>
-        </div>
-      )}
+      </div>
+
     </div>
 
+    <!-- Bottom bar -->
     <div class="site-footer__bar">
-      {credit && <p class="site-footer__credit">{credit}</p>}
+      <p class="site-footer__copy">© {year} ISD Hamburg · CaRM-Projekt</p>
       {links.length > 0 && (
-        <ul class="site-footer__links">
+        <ul class="site-footer__links" role="list">
           {links.map((l) => (
-            <li><a href={l.url}>{l.label} <span aria-hidden="true">→</span></a></li>
+            <li><a href={l.url}>{l.label}</a></li>
           ))}
         </ul>
       )}
     </div>
 
-    <p class="site-footer__copy">© {year} ISD Hamburg · CaRM-Projekt</p>
   </div>
 </footer>
