@@ -228,6 +228,11 @@ export default function ShareCard({
           )}
         </button>
 
+        {/* BugHerd 3.2 (2026-06-03, ISD) — brand wordmark at the very top so a
+            shared card is immediately identifiable as the project. Captured in
+            the exported share image too (lives inside .share-card__visual). */}
+        <p className="share-card__brandmark">Cannabismythen entdecken</p>
+
         {/* 2026-05-30 (Fedor) — module name woven into the verdict card.
             The old top "Dein Ergebnis — [Modul]" heading + quiz bar were
             removed; this eyebrow keeps "which quiz" visible AND, because

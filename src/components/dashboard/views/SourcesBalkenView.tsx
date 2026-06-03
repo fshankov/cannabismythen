@@ -25,7 +25,7 @@ import {
 } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type {
-  AppState, InformationSource, InformationSourcesData,
+  AppState, DashboardDefinitions, InformationSource, InformationSourcesData,
   SourceGroupId, SourceMetricType,
 } from '../../../lib/dashboard/types';
 import {
@@ -42,10 +42,10 @@ import { getCategoryColor } from '../../../lib/dashboard/colors';
 interface Props {
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
-  /** Definitions singleton — kept for prop-shape parity with the other
-   *  source views even though we don't read it here yet (metric labels
-   *  come from translations). */
-  definitions?: unknown;
+  /** Definitions singleton — supplies the ℹ️ metric tooltip on the data
+   *  column header (BugHerd 4.13, 2026-06-03). Source-metric defs live in
+   *  src/content/dashboard-definitionen.json (sourcesIndicators). */
+  definitions?: DashboardDefinitions | null;
 }
 
 export interface SourcesBalkenViewHandle {
@@ -83,7 +83,7 @@ const GROUP_LABELS: Record<SourceGroupId, string> = {
 //  2026-05-29 — the picker UI now lives in the panel-level toolbar.)
 
 const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
-  function SourcesBalkenView({ state, update }, ref) {
+  function SourcesBalkenView({ state, update, definitions }, ref) {
     const selectedMetric: SourceMetricType = state.sourceMetric;
     const selectedGroup: SourceGroupId = state.sourceGroup;
 
@@ -302,6 +302,9 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
                 Icon={MetricIcon}
                 label={metricLabel}
                 fullLabel={fullLabel}
+                defTitle={definitions?.sourcesIndicators?.[selectedMetric]?.label}
+                defText={definitions?.sourcesIndicators?.[selectedMetric]?.definition}
+                defScale={definitions?.sourcesIndicators?.[selectedMetric]?.scale}
                 hideLabel=""
                 onHide={() => undefined}
                 isSortActive={isSortCol}

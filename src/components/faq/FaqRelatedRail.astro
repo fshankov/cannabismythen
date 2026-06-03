@@ -1,6 +1,7 @@
 ---
 import {
   dashboardLinkLabel,
+  dashboardLinkUrl,
   loadMythPopupData,
   normalizeMythId,
   type FaqMythPopupIndexEntry,
@@ -41,10 +42,23 @@ const related: RailMyth[] = question.relatedMyths
   .map((m) => lookupMyth(m))
   .filter((m): m is RailMyth => m !== null);
 
-const dashboard = question.relatedDashboard.map((url) => ({
-  url,
-  label: dashboardLinkLabel(url),
-}));
+// BugHerd 4.7 (2026-06-03, ISD): the generic Daten-Explorer start-page link
+// is redundant when a specific dashboard view is already linked. Drop the bare
+// "/daten-explorer/" (and its legacy "/zahlen-und-fakten/" form) in that case;
+// questions that ONLY link the generic root keep it.
+const GENERIC_DASHBOARD_URLS = new Set(["/daten-explorer/", "/zahlen-und-fakten/"]);
+const hasSpecificDashboard = question.relatedDashboard.some(
+  (url) => !GENERIC_DASHBOARD_URLS.has(url),
+);
+const dashboard = question.relatedDashboard
+  .filter((url) => !(hasSpecificDashboard && GENERIC_DASHBOARD_URLS.has(url)))
+  .map((url) => ({
+    // BugHerd 4.8 (2026-06-03): resolve named-view links (informationswege,
+    // minderjaehrige, …) to working ?view/?indicator/?group deep-links. The
+    // label is still derived from the ORIGINAL url so the caption is unchanged.
+    url: dashboardLinkUrl(url),
+    label: dashboardLinkLabel(url),
+  }));
 
 const hasRail = primary || related.length > 0 || dashboard.length > 0;
 ---

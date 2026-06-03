@@ -27,7 +27,7 @@ import {
 } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type {
-  AppState, InformationSource, InformationSourcesData,
+  AppState, DashboardDefinitions, InformationSource, InformationSourcesData,
   SourceGroupId, SourceMetricType, SourcesStripsMode,
 } from '../../../lib/dashboard/types';
 import {
@@ -69,7 +69,7 @@ interface Props {
   /** Prop-shape parity with SourcesBalkenView / SourcesStripsView. Not
    *  consumed in this view yet. */
   sharedActions?: unknown;
-  definitions?: unknown;
+  definitions?: DashboardDefinitions | null;
 }
 
 export interface SourcesTableViewHandle {
@@ -124,7 +124,7 @@ const METRIC_FULL_LABELS_DE: Record<SourceMetricType, string> = {
 };
 
 const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
-  function SourcesTableView({ state, update }, ref) {
+  function SourcesTableView({ state, update, definitions }, ref) {
     // 2026-05-29: expandable parent/child source rows, reusing the shared
     // `sourcesSpannweiteExpanded` state (consistent across all Quellen tabs).
     const expanded = state.sourcesSpannweiteExpanded;
@@ -387,6 +387,14 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                 const isAsc = isSortCol && sortDir === 'asc';
                 const isDesc = isSortCol && sortDir === 'desc';
                 const fullLabel = `${col.label} — ${offAxisLabel}`;
+                // BugHerd 4.13 (2026-06-03, ISD): wire the ℹ️ definition tooltip
+                // onto Quellen-Tabelle headers, mirroring the Mythen Tabelle.
+                // Metric columns pull from sourcesIndicators, group columns from
+                // groups (src/content/dashboard-definitionen.json).
+                const colDef =
+                  col.flavor === 'metric'
+                    ? definitions?.sourcesIndicators?.[colKey]
+                    : definitions?.groups?.[colKey];
                 return (
                   <th key={colKey} className="data-table__th">
                     <div
@@ -397,6 +405,9 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                         Icon={Icon}
                         label={col.short ?? col.label}
                         fullLabel={fullLabel}
+                        defTitle={colDef?.label}
+                        defText={colDef?.definition}
+                        defScale={colDef?.scale}
                         hideLabel={`${t('column.hide', lang)} — ${col.label}`}
                         onHide={() => hide(colKey)}
                         isSortActive={isSortCol}

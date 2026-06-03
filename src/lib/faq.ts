@@ -620,3 +620,33 @@ export function dashboardLinkLabel(url: string): string {
   };
   return map[url] ?? "Dashboard";
 }
+
+/**
+ * Resolve a (possibly legacy/named) dashboard link to a WORKING Daten-Explorer
+ * deep-link. The named-view paths (`/daten-explorer/informationswege/` etc.)
+ * were never real routes and 404'd (BugHerd 4.8, 2026-06-03, ISD). They now map
+ * to the query-param state the dashboard reads on load (see
+ * src/lib/dashboard/url-state.ts: ?view / ?indicator / ?group). Unmapped URLs
+ * pass through unchanged (e.g. the generic /daten-explorer/ or /daten-explorer/?mythos=N).
+ */
+export function dashboardLinkUrl(url: string): string {
+  const map: Record<string, string> = {
+    // informationswege → Quellen-Übersicht, by Gruppe (ISD-specified target).
+    "/daten-explorer/informationswege/": "/daten-explorer/?view=quellen",
+    "/daten-explorer/minderjaehrige/": "/daten-explorer/?group=minderjaehrige",
+    "/daten-explorer/praeventionsbedeutung/": "/daten-explorer/?indicator=praevention",
+    // praeventionspotential has no dedicated indicator — closest is Präventionsbedeutung.
+    "/daten-explorer/praeventionspotential/": "/daten-explorer/?indicator=praevention",
+    "/daten-explorer/bevoelkerungsrelevanz/": "/daten-explorer/?indicator=bevoelkerungsrelevanz",
+    // zielgruppen ("Zielgruppenvergleich") → the Mythen-Tabelle group comparison.
+    "/daten-explorer/zielgruppen/": "/daten-explorer/?view=tabelle",
+    // Legacy /zahlen-und-fakten/ equivalents (pre-Stage-5 editor content).
+    "/zahlen-und-fakten/informationswege/": "/daten-explorer/?view=quellen",
+    "/zahlen-und-fakten/minderjaehrige/": "/daten-explorer/?group=minderjaehrige",
+    "/zahlen-und-fakten/praeventionsbedeutung/": "/daten-explorer/?indicator=praevention",
+    "/zahlen-und-fakten/praeventionspotential/": "/daten-explorer/?indicator=praevention",
+    "/zahlen-und-fakten/bevoelkerungsrelevanz/": "/daten-explorer/?indicator=bevoelkerungsrelevanz",
+    "/zahlen-und-fakten/zielgruppen/": "/daten-explorer/?view=tabelle",
+  };
+  return map[url] ?? url;
+}

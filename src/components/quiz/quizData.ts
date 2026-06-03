@@ -102,13 +102,13 @@ export function pointsForSchritte(s: Schritte): 1 | 0.66 | 0.33 | 0 {
 }
 
 /** Display string for one answer's points on the 0–1 per-card scale
- *  (QuizCard redesign, 2026-05-29). German comma; "+" prefix for any
- *  positive value; the 3-Schritte case shows a bare "0" (rendered in
- *  rose on the card). Drives the on-card points badge. */
+ *  (QuizCard redesign, 2026-05-29). German comma; the 3-Schritte case
+ *  shows a bare "0" (rendered in rose on the card). Drives the on-card
+ *  points badge. Backlog 6.1 (2026-06-03): dropped the "+" prefix per ISD. */
 export function pointsDisplay(s: Schritte): string {
   const p = pointsForSchritte(s);
   if (p === 0) return "0";
-  return "+" + String(p).replace(".", ",");
+  return String(p).replace(".", ",");
 }
 
 /** Module score as an integer percentage. Sum of per-question points

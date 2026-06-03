@@ -37,6 +37,11 @@ const factsheetLink: Schema = {
   attributes: {
     id: { type: String, required: true },
     label: { type: String, required: false },
+    // BugHerd 4.5 (2026-06-03, ISD) — optional Lesart marker for the
+    // Konsumierende-vs-Minderjährige comparison tables. "shared" → green dot
+    // (myth appears in both Top-10 rankings); "diff" → red dot (>15-point
+    // Richtigkeit difference between the two groups). Default: no marker.
+    mark: { type: String, required: false },
   },
   selfClosing: true,
   transform(node) {
@@ -48,6 +53,13 @@ const factsheetLink: Schema = {
     const visibleText = node.attributes.label
       ? String(node.attributes.label)
       : MYTH_TITLE_PLACEHOLDER(id);
+    const mark = String(node.attributes.mark ?? "").trim();
+    const markClass =
+      mark === "shared"
+        ? " faq-myth-link--shared"
+        : mark === "diff"
+        ? " faq-myth-link--diff"
+        : "";
     // <button> not <a>: the popup host (MythPopupHost.tsx) listens for
     // clicks on [data-faq-myth-id] and opens the shared FactsheetPanel
     // (same slide-in popup used in Daten-Explorer / Quiz / Fakten-Karten).
@@ -55,7 +67,7 @@ const factsheetLink: Schema = {
       "button",
       {
         type: "button",
-        class: "faq-myth-link",
+        class: `faq-myth-link${markClass}`,
         "data-faq-myth-id": id,
         "aria-haspopup": "dialog",
       },

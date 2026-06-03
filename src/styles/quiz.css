@@ -2801,6 +2801,19 @@ button.quiz-result__cta {
    verdict card now that the top "Dein Ergebnis — [Modul]" heading is
    gone. Subtle uppercase label on the gradient; matches the
    .share-card__branding treatment. Captured in the exported share image. */
+/* Brand wordmark at the top of the share card (BugHerd 3.2, 2026-06-03, ISD).
+   Sits above the module eyebrow; full-white + display font so a shared card
+   reads as the project, while the big band title stays the focal point. */
+.share-card__brandmark {
+  margin: 0 auto var(--space-sm);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: #fff;
+}
+
 .share-card__module {
   margin: 0 auto var(--space-sm);
   max-width: 32ch;
@@ -3070,6 +3083,30 @@ button.quiz-result__cta {
   font-weight: 700;
   color: var(--color-text);
   margin: 0 0 var(--space-sm) 0;
+}
+
+/* Caption below the "Ergebnisse der CaRM-Befragungen" data table
+   (BugHerd 4.4, 2026-06-03, ISD). Small/caption size, sits between the
+   table and any link below it. */
+.factsheet-panel__data-note {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: var(--space-sm) 0 0 0;
+}
+
+/* Link to this myth's full Daten-Explorer page, below the data table +
+   caption (BugHerd 1.3, 2026-06-03, ISD). */
+.factsheet-panel__data-link {
+  display: inline-block;
+  margin-top: var(--space-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent, #2d6a4f);
+  text-decoration: none;
+}
+.factsheet-panel__data-link:hover {
+  text-decoration: underline;
 }
 
 .factsheet-panel__section-content {

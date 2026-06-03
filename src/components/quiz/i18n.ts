@@ -58,7 +58,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "quiz.gefaehrlichkeit.title": "Allgemeine Gefährlichkeit",
     // EN: "How do you assess the general risks of cannabis — and where does research stand?"
     "quiz.gefaehrlichkeit.subtitle":
-      "Wie schätzt du die Gefährlichkeit von Cannabis ein — und was zeigt die Forschung?",
+      "Wie schätzt du die allgemeine Gefährlichkeit von Cannabis ein — und was zeigt die Forschung?",
     "quiz.gefaehrlichkeit.description":
       "Alkohol-Vergleich, Harmlosigkeit, Heranwachsende, Dosierung und Mischkonsum.",
     // Stage 6 — Schnellcheck (dynamic 7-myth deck across all themes)

@@ -39,24 +39,24 @@ const translations = {
 
   // Indicator descriptions
   'indicator.awareness.description': {
-    de: 'Anteil der Befragten, die den Mythos kennen. Höher = bekannter.',
-    en: 'Share of respondents who know the myth. Higher = better known.',
+    de: 'Anteil der Befragten, die den Mythos kennen (Skala: 0–100 %). Höher = bekannter.',
+    en: 'Share of respondents who know the myth (scale: 0–100%). Higher = better known.',
   },
   'indicator.significance.description': {
-    de: 'Subjektive Wichtigkeit des Mythos für den eigenen Umgang mit Cannabis (0–100). Nur bei Personen erhoben, die den Mythos kennen.',
-    en: 'Subjective importance of the myth for one\'s own use of cannabis (0–100). Only measured among respondents who know the myth.',
+    de: 'Subjektive Wichtigkeit des Mythos für den eigenen Umgang mit Cannabis (0–100 Punkte). Nur bei Personen erhoben, die den Mythos kennen.',
+    en: 'Subjective importance of the myth for one\'s own use of cannabis (0–100 points). Only measured among respondents who know the myth.',
   },
   'indicator.correctness.description': {
-    de: 'Übereinstimmung der Einschätzung mit der wissenschaftlichen Klassifikation (0–100). Höher = treffender.',
-    en: 'Agreement of respondents\' assessment with the scientific classification (0–100). Higher = more accurate.',
+    de: 'Übereinstimmung der Einschätzung mit der wissenschaftlichen Klassifikation (0–100 Punkte). Höher = treffender.',
+    en: 'Agreement of respondents\' assessment with the scientific classification (0–100 points). Higher = more accurate.',
   },
   'indicator.prevention_significance.description': {
-    de: 'Kombination aus Bedeutung und Fehleinschätzung (0–100). Höher = größerer Präventionsbedarf.',
-    en: 'Combination of significance and misassessment (0–100). Higher = greater prevention need.',
+    de: 'Kombination aus Bedeutung und Fehleinschätzung (0–100 Punkte). Höher = größerer Präventionsbedarf.',
+    en: 'Combination of significance and misassessment (0–100 points). Higher = greater prevention need.',
   },
   'indicator.population_relevance.description': {
-    de: 'Bevölkerungsbezogene Risikobedeutung — kombiniert die individuelle Präventionsbedeutung mit dem Verbreitungsgrad des Mythos. Nur für Volljährige (18–70) und Minderjährige (16–17) erhoben.',
-    en: 'Population-related risk significance — combines individual prevention significance with the spread of the myth. Measured only for adults (18–70) and minors (16–17).',
+    de: 'Bevölkerungsbezogene Risikobedeutung (0–100 Punkte) — kombiniert die individuelle Präventionsbedeutung mit dem Verbreitungsgrad des Mythos. Nur für Volljährige (18–70) und Minderjährige (16–17) erhoben.',
+    en: 'Population-related risk significance (0–100 points) — combines individual prevention significance with the spread of the myth. Measured only for adults (18–70) and minors (16–17).',
   },
 
   // Source metric descriptions

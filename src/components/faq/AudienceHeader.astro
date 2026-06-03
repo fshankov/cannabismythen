@@ -34,8 +34,11 @@ const accent = audience.accentColor;
 
   <h1 class="faq-audience-header__title">
     <span class="faq-audience-header__emoji" aria-hidden="true">{audience.emoji}</span>
-    {audience.title}
+    Deine Perspektive. Deine Fragen.
   </h1>
+  <p class="faq-audience-header__subtitle">
+    Cannabis betrifft uns unterschiedlich. Gezielte Antworten auf Mythen — je nach Lebenssituation.
+  </p>
 
   {introNoteHtml && (
     <aside class="faq-audience-header__note" set:html={introNoteHtml} />

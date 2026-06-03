@@ -194,7 +194,7 @@ export default function FactsheetPanel({
   // the popup is now the source of truth for myth content. Stage 5 plans
   // to repurpose this slug as a ?myth=<id> URL param; the prop stays on
   // the interface so callers don't need to change.
-  factsheetSlug: _factsheetSlug,
+  factsheetSlug,
   onClose,
   fallbackExplanation,
   groupMetrics,
@@ -213,7 +213,6 @@ export default function FactsheetPanel({
   void _classificationLabel;
   void _verdictLabel;
   void _verdictAccessory;
-  void _factsheetSlug;
   const panelRef = useRef<HTMLDivElement>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
@@ -393,12 +392,34 @@ export default function FactsheetPanel({
               {/* Interactive replacement for the "Daten nach Zielgruppen"
                   markdown table. Rendered last so it sits in the same
                   visual position the table used to occupy, just above
-                  the link to the full factsheet page. */}
+                  the link to the full factsheet page.
+                  BugHerd 4.1 + 4.4 (2026-06-03, ISD): table now carries a
+                  section heading + a caption explaining the Zielgruppen rows. */}
               {hasInteractiveBars && (
-                <FactsheetGroupBars
-                  metrics={groupMetrics!}
-                  verdict={classificationKey as CorrectnessClass}
-                />
+                <>
+                  <h3 className="factsheet-panel__section-heading">
+                    Ergebnisse der CaRM-Befragungen
+                  </h3>
+                  <FactsheetGroupBars
+                    metrics={groupMetrics!}
+                    verdict={classificationKey as CorrectnessClass}
+                  />
+                  <p className="factsheet-panel__data-note">
+                    Die Tabelle zeigt die zentralen empirischen Erkenntnisse zu
+                    diesem Mythos. Zeilenweise sind die Ergebnisse für die
+                    untersuchten Zielgruppen genannt (Erwachsene 18–70 Jahre,
+                    Junge Erwachsene 18–26 Jahre, Minderjährige 16–17 Jahre,
+                    Konsumierende, Eltern minderjähriger Kinder).
+                  </p>
+                  {factsheetSlug && (
+                    <a
+                      className="factsheet-panel__data-link"
+                      href={`/daten-explorer/${factsheetSlug}/`}
+                    >
+                      Im Daten-Explorer ansehen →
+                    </a>
+                  )}
+                </>
               )}
 
               {/* Travel pipeline 4B + 4C (2026-05-23): collapsed
@@ -478,12 +499,33 @@ export default function FactsheetPanel({
               )}
 
               {/* Bars work even without prerendered HTML, so render them
-                  in the fallback branch too. */}
+                  in the fallback branch too — with the same heading + caption
+                  (BugHerd 4.1 + 4.4) as the main branch. */}
               {hasInteractiveBars && (
-                <FactsheetGroupBars
-                  metrics={groupMetrics!}
-                  verdict={classificationKey as CorrectnessClass}
-                />
+                <>
+                  <h3 className="factsheet-panel__section-heading">
+                    Ergebnisse der CaRM-Befragungen
+                  </h3>
+                  <FactsheetGroupBars
+                    metrics={groupMetrics!}
+                    verdict={classificationKey as CorrectnessClass}
+                  />
+                  <p className="factsheet-panel__data-note">
+                    Die Tabelle zeigt die zentralen empirischen Erkenntnisse zu
+                    diesem Mythos. Zeilenweise sind die Ergebnisse für die
+                    untersuchten Zielgruppen genannt (Erwachsene 18–70 Jahre,
+                    Junge Erwachsene 18–26 Jahre, Minderjährige 16–17 Jahre,
+                    Konsumierende, Eltern minderjähriger Kinder).
+                  </p>
+                  {factsheetSlug && (
+                    <a
+                      className="factsheet-panel__data-link"
+                      href={`/daten-explorer/${factsheetSlug}/`}
+                    >
+                      Im Daten-Explorer ansehen →
+                    </a>
+                  )}
+                </>
               )}
 
             </>

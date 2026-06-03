@@ -140,18 +140,23 @@ const GROUP_SHORT_LABELS: Record<GroupId, string> = {
   parents: 'Eltern',
 };
 
-/** Short definition surfaced in the row-header tooltip body. */
+/** Short definition surfaced in the row-header tooltip body. Mirrors the
+ *  Daten-Explorer group definitions (src/content/dashboard-definitionen.json)
+ *  so the factsheet popup and the dashboard read identically — BugHerd 4.3
+ *  (2026-06-03, ISD): the prior wording diverged (Konsumierende said "im
+ *  letzten Jahr" vs. the correct "letzten 30 Tagen"). The full group label is
+ *  the tooltip title (GROUP_FULL_LABELS), so the body carries n + definition. */
 const GROUP_DESCRIPTIONS: Record<GroupId, string> = {
   adults:
-    'Erwachsene Bevölkerung 18–70 Jahre (n = 2.097) — die volljährige Bevölkerungsbefragung.',
+    'n = 2.097 — Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund.',
   minors:
-    'Minderjährige 16–17 Jahre (n = 555) — eigene Befragung, jüngste in CaRM erfasste Gruppe.',
+    'n = 555 — Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel.',
   consumers:
-    'Konsumierende (n = 358) — Personen, die im letzten Jahr Cannabis konsumiert haben.',
+    'n = 358 — Personen mit Cannabis-Konsum in den letzten 30 Tagen (30-Tage-Prävalenz).',
   young_adults:
-    'Junge Erwachsene 18–26 Jahre (n = 333) — Übergangsalter zwischen Minderjährig und Erwachsen.',
+    'n = 333 — Teilgruppe der Volljährigen im Alter von 18–26 Jahren.',
   parents:
-    'Eltern (n = 539) — Personen mit eigenen Kindern; konsumbezogene Sorge-Perspektive.',
+    'n = 539 — Volljährige mit mindestens einem Kind unter 18 Jahren.',
 };
 
 type SortDir = 'desc' | 'asc';
