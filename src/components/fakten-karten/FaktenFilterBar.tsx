@@ -207,12 +207,12 @@ export default function FaktenFilterBar({
   const hasActiveFilter =
     selectedGroupCount > 0 ||
     selectedMyths.size > 0 ||
-    normalize(searchQuery).length > 0;
+    searchQuery.trim().length > 0;
 
   const hitsHint =
     searchQuery.trim().length > 0
       ? `${textMatches.length} Treffer · Auswahl per Klick`
-      : `${totalCount} Mythen · zum Filtern anklicken`;
+      : `${totalCount} Mythen`;
 
   return (
     <div className="fakten-filter-section">
@@ -385,7 +385,7 @@ export default function FaktenFilterBar({
               <ul className="fakten-search__list" role="presentation">
                 {stuckMatches.length > 0 && (
                   <>
-                    <li className="fakten-search__section-label" aria-hidden="true">
+                    <li key="section-label" className="fakten-search__section-label" aria-hidden="true">
                       Bereits ausgewählt
                     </li>
                     {stuckMatches.map((m) => (
@@ -397,7 +397,7 @@ export default function FaktenFilterBar({
                       />
                     ))}
                     {textMatches.length > 0 && (
-                      <li className="fakten-search__divider" role="separator" aria-hidden="true" />
+                      <li key="divider" className="fakten-search__divider" role="separator" aria-hidden="true" />
                     )}
                   </>
                 )}
