@@ -52,6 +52,7 @@ const GLYPH = 58; // icon box, centred on each satellite circle
         const q = POS[(i + 1) % POS.length];
         return (
           <line
+            class="icon-cluster__link"
             x1={p.x}
             y1={p.y}
             x2={q.x}
@@ -65,7 +66,7 @@ const GLYPH = 58; // icon box, centred on each satellite circle
       })}
       {/* satellite circles + facet icons */}
       {POS.map((p, i) => (
-        <g>
+        <g class="icon-cluster__node" style={`--i:${i}`}>
           <circle cx={p.x} cy={p.y} r={RO} fill="#e8e8e0" />
           <svg
             x={p.x - GLYPH / 2}
@@ -90,7 +91,6 @@ const GLYPH = 58; // icon box, centred on each satellite circle
   .icon-cluster {
     max-width: 100%;
     perspective: 1300px;
-    animation: icon-cluster-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
   .icon-cluster__tilt {
     transform-style: preserve-3d;
@@ -102,19 +102,36 @@ const GLYPH = 58; // icon box, centred on each satellite circle
     height: auto;
     overflow: visible;
   }
-  @keyframes icon-cluster-in {
-    from {
+
+  /* Entrance (motion-safe, JS-gated): each circle pops in one-by-one (≈0.08s
+     apart — the Block-4 Meine card's speed), then the dotted connectors fade in
+     to "connect" them. Keyed off the surrounding [data-reveal] block's `.is-in`
+     so it stays perfectly in sync with the block's own fade (no premature pop).
+     `html.js-reveal` is set before paint only when motion is allowed, so no-JS /
+     reduced-motion / non-homepage usage render the full ring statically. After
+     it lands, the cursor-tilt + idle float (below) take over. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js-reveal) .icon-cluster__node {
       opacity: 0;
-      transform: scale(0.93) translateY(8px);
+      transform: scale(0.3);
+      transform-box: fill-box;
+      transform-origin: center;
+      transition:
+        opacity 0.4s ease,
+        transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition-delay: calc(0.1s + var(--i) * 0.08s);
     }
-    to {
+    :global(html.js-reveal) .icon-cluster__link {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      transition-delay: 0.72s;
+    }
+    :global(html.js-reveal) :global([data-reveal].is-in) .icon-cluster__node {
       opacity: 1;
       transform: none;
     }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .icon-cluster {
-      animation: none;
+    :global(html.js-reveal) :global([data-reveal].is-in) .icon-cluster__link {
+      opacity: 1;
     }
   }
 </style>

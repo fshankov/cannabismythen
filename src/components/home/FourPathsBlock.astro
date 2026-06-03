@@ -97,10 +97,10 @@ const faktenCards = FAKTEN_SPECTRUM.map((v) => {
 // BalkenBar — dotted axis + translucent verdict wash + value circle). Each bar
 // animates from `idle` to `hover` on card hover. Values are placeholders.
 const DATEN_BARS = [
-  { accent: "#047857", idle: 57, hover: 42 }, // richtig (green)
+  { accent: "#047857", idle: 42, hover: 57 }, // richtig (green)
   { accent: "#b45309", idle: 28, hover: 28 }, // eher_falsch (orange) — unchanged
-  { accent: "#047857", idle: 14, hover: 31 }, // richtig (green)
-  { accent: "#4d7c0f", idle: 64, hover: 49 }, // eher_richtig (olive)
+  { accent: "#047857", idle: 31, hover: 14 }, // richtig (green)
+  { accent: "#4d7c0f", idle: 49, hover: 64 }, // eher_richtig (olive)
 ];
 
 // Per-topic icons lifted from the mobile tab bar (BaseLayout) — Lucide 24×24,
@@ -142,7 +142,7 @@ const cards = [
 ];
 ---
 
-<section class="four-paths" aria-labelledby="four-paths-quote">
+<section class="four-paths" aria-labelledby="four-paths-quote" data-reveal>
   <div class="four-paths__inner">
     <div class="four-paths__card">
       <blockquote class="four-paths__quote" id="four-paths-quote">
@@ -158,6 +158,20 @@ const cards = [
 
       {cards.map((c) => (
         <a class={`path-card path-card--${c.mod}`} href={c.targetUrl}>
+          <span class="path-card__go" aria-hidden="true">
+            <span class="path-card__go-label">Anzeigen</span>
+            <svg
+              class="path-card__go-chevron"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ><path d="m9 18 6-6-6-6"></path></svg>
+          </span>
           <span class="path-card__icon" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"

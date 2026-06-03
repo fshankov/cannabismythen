@@ -97,14 +97,54 @@
   color: inherit;
   transition:
     transform var(--transition-fast),
-    box-shadow var(--transition-fast);
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
 }
 
+/* Hover/focus → lift a touch more, lift the surface to solid white, and add a
+   crisp brand-green ring so the card unmistakably reads as a clickable link. */
 .path-card:hover,
 .path-card:focus-visible {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  background: #ffffff;
+  box-shadow:
+    0 14px 32px -6px rgba(15, 82, 56, 0.16),
+    0 0 0 3px rgba(15, 82, 56, 0.22);
   outline: none;
+}
+
+/* "Öffnen ›" affordance — top-right, fades/slides in on hover so the whole card
+   reads as a link to its page. Decorative (aria-hidden); the link is already
+   labelled by its title + body. Phrase sits 8px left of the mini chevron, both
+   in the brand green, aligned to the icon-badge band so the corners match. */
+.path-card__go {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.path-card:hover .path-card__go,
+.path-card:focus-visible .path-card__go {
+  opacity: 1;
+}
+.path-card__go-label {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: #0f5238;
+}
+.path-card__go-chevron {
+  display: block;
+  color: #0f5238;
 }
 
 .path-card--quiz {
@@ -407,6 +447,55 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* Meine card — on reveal the audience circles pop in one-by-one, then the
+     dashed connector fades in to "connect" them. Afterwards the row rests
+     exactly as before (hover dot-march + pop still apply). Gated by .js-reveal
+     so no-JS / reduced-motion show it statically. Timed to land just after the
+     Meine card itself has cascaded in. The hover audience-pop is a CSS
+     animation, so it overrides this transition's transform whenever it fires. */
+  html.js-reveal .four-paths .meine-preview .audience-dot {
+    opacity: 0;
+    transform: scale(0.4);
+    transition:
+      opacity 0.38s ease,
+      transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot {
+    opacity: 1;
+    transform: none;
+  }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(1) { transition-delay: 0.55s; }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(2) { transition-delay: 0.62s; }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(3) { transition-delay: 0.69s; }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(4) { transition-delay: 0.76s; }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(5) { transition-delay: 0.83s; }
+  html.js-reveal .four-paths .meine-preview::before {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  html.js-reveal .four-paths.is-in .meine-preview::before {
+    opacity: 1;
+    transition-delay: 0.95s;
+  }
+
+  /* "Anzeigen ›" cue slides in from the right; the chevron nudges a touch
+     further so the affordance feels like it's pointing toward the page */
+  .path-card__go {
+    transform: translateX(8px);
+    transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .path-card:hover .path-card__go,
+  .path-card:focus-visible .path-card__go {
+    transform: translateX(0);
+  }
+  .path-card__go-chevron {
+    transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .path-card:hover .path-card__go-chevron,
+  .path-card:focus-visible .path-card__go-chevron {
+    transform: translateX(3px);
+  }
+
   /* Quiz — buttons jump in one after another, then the feedback strokes
      fade in once the wave lands */
   .quiz-preview__btn {
