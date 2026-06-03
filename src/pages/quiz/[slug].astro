@@ -17,15 +17,17 @@ import "../../styles/quiz.css";
 
 const groupMetricsByMythId = buildGroupMetricsByMythId(carmRawJson.metrics);
 
-// mythNumber → text_short_de (ultra-short Daten-Explorer label, e.g.
-// "Allheilmittel"). Mirrors fakten-karten/index.astro so the wrong-myths
-// FaktenCard on the result page shows the short label on its back-face
-// headline instead of falling back to the long statement — keeping the
-// quiz cards format-identical to the /fakten-karten/ page.
-const shortLabelByMythNumber = new Map<number, string>();
+// mythId ("m01") → text_short_de (Daten-Explorer short label, e.g.
+// "Allheilmittel"). Same source as fakten-karten/index.astro. Used twice:
+// (1) the wrong-myths FaktenCard back on the result page, and (2) the
+// in-quiz reveal-card title — so both show the short label instead of the
+// long statement, matching the /fakten-karten/ page. Keyed by the quiz
+// string id (covers dynamic decks like Schnellcheck, whose deck is picked
+// at hydration and never reaches the SSR quizFaktenContentMap).
+const shortLabelByMythId: Record<string, string> = {};
 for (const m of carmRawJson.myths as Array<{ id: number; text_short_de: string }>) {
   if (typeof m.text_short_de === "string" && m.text_short_de.length > 0) {
-    shortLabelByMythNumber.set(m.id, m.text_short_de);
+    shortLabelByMythId[`m${String(m.id).padStart(2, "0")}`] = m.text_short_de;
   }
 }
 
@@ -200,7 +202,7 @@ if (theme) {
           // Back-face headline: short Daten-Explorer label, same source the
           // /fakten-karten/ page uses. Falls back to the cleaned full title
           // (matches index.astro:72) if a myth has no text_short_de.
-          shortLabel: shortLabelByMythNumber.get(mythNumber) ?? cleanMythTitle,
+          shortLabel: shortLabelByMythId[myth.id] ?? cleanMythTitle,
           classification: mythEntry.classification as string,
           classificationLabel: mythEntry.classificationLabel as string,
           cardSummary: mythEntryAny.cardSummary ?? "",
@@ -233,6 +235,7 @@ if (theme) {
       intros={JSON.stringify(introsPayload)}
       shareCopy={JSON.stringify(sharePayload)}
       faktenContent={JSON.stringify(quizFaktenContentMap)}
+      shortLabels={JSON.stringify(shortLabelByMythId)}
       quizSummary={(entry as any).summary || undefined}
     />
 
