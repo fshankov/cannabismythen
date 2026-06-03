@@ -102,6 +102,10 @@ export interface QuizShareCopyEntry {
 export interface QuizFaktenContentEntry {
   mythNumber: number;
   title: string;
+  /** Short Daten-Explorer label (text_short_de), forwarded to FaktenCard's
+   *  back-face headline so the result-page cards match the /fakten-karten/
+   *  page. Optional to mirror FaktenCardMyth.shortLabel. */
+  shortLabel?: string;
   classification: string;
   classificationLabel: string;
   cardSummary: string;
