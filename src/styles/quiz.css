@@ -4251,6 +4251,13 @@ body.fakten-karten-page main {
   min-width: 0;
 }
 
+/* Search slot needs explicit positioning so the absolutely-positioned
+   autocomplete panel anchors directly below the input instead of
+   escaping to a distant ancestor. */
+.fakten-filter-bar__search {
+  position: relative;
+}
+
 .fakten-filter-bar__flip {
   display: flex;
   align-items: center;
@@ -4261,6 +4268,18 @@ body.fakten-karten-page main {
 .fakten-filter-bar__flip .carm-pivot-switch__track[data-active="right"] {
   background: #ffffff;
   border-color: #ffffff;
+}
+
+/* Selected-myth count badge — shown inside the glass search row when
+   myths are ticked but no text is typed, so the active filter state
+   is always visible even after the autocomplete panel is closed. */
+.fakten-search-count {
+  flex: 0 0 auto;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent, #116c4a);
+  margin-right: 16px;
+  pointer-events: none;
 }
 
 /* ── Search autocomplete (2026-05-15 redesign) ──────────────────
@@ -4303,6 +4322,24 @@ body.fakten-karten-page main {
   border-bottom: 1px solid var(--color-bg-subtle, #eeeee8);
   font-size: 0.75rem;
   color: var(--color-text-muted);
+}
+
+.fakten-search__section-label {
+  list-style: none;
+  padding: 4px 10px 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent, #116c4a);
+  opacity: 0.7;
+}
+
+.fakten-search__divider {
+  list-style: none;
+  height: 1px;
+  background: var(--color-border, #e5e5e0);
+  margin: 4px 10px;
 }
 
 .fakten-search__empty {

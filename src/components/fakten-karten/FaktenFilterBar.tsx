@@ -47,11 +47,13 @@ interface Props {
   selectedMyths: Set<number>;
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  /** Clears both the search text and all myth checkboxes. Used by the X
+   *  button so the grid always fully resets when the user clears the input. */
+  onClearSearch: () => void;
   onToggleGroup: (group: string) => void;
   onToggleMyth: (mythNumber: number) => void;
   onReset: () => void;
   totalCount: number;
-  filteredCount: number;
   allFlipped: boolean;
   onSetAllFlipped: (v: boolean) => void;
 }
@@ -70,6 +72,44 @@ function toVerdict(raw: string): CorrectnessClass {
     : "keine_aussage_moeglich";
 }
 
+function MythRow({
+  m,
+  checked,
+  onToggle,
+}: {
+  m: MythLike;
+  checked: boolean;
+  onToggle: (n: number) => void;
+}) {
+  const meta = getCategoryMeta(m.categoryGroup);
+  const Icon = meta.icon;
+  return (
+    <li className="fakten-search__row" role="option" aria-selected={checked}>
+      <label className="fakten-search__label">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={() => onToggle(m.mythNumber)}
+        />
+        <VerdictStatement
+          statement={m.title}
+          verdict={toVerdict(m.classification)}
+          as="span"
+          className="fakten-search__statement"
+        />
+        <span
+          className="fakten-search__cat-icon"
+          style={{ color: meta.label }}
+          aria-label={`Kategorie: ${m.categoryGroup}`}
+          title={m.categoryGroup}
+        >
+          <Icon size={14} strokeWidth={2} aria-hidden="true" />
+        </span>
+      </label>
+    </li>
+  );
+}
+
 export default function FaktenFilterBar({
   categoryGroups,
   myths,
@@ -77,11 +117,11 @@ export default function FaktenFilterBar({
   selectedMyths,
   searchQuery,
   onSearchChange,
+  onClearSearch,
   onToggleGroup,
   onToggleMyth,
   onReset,
   totalCount,
-  filteredCount,
   allFlipped,
   onSetAllFlipped,
 }: Props) {
@@ -102,14 +142,26 @@ export default function FaktenFilterBar({
     return map;
   }, [categoryGroups, myths]);
 
-  // Matches for the search autocomplete panel. Empty query → all
-  // myths so the panel doubles as a browseable multi-pick list.
-  const searchMatches = useMemo(() => {
+  // Two separate lists for the search panel:
+  //   stuckMatches — myths that are ticked but DON'T match the current query.
+  //                  Always shown at the top so users can always untick them.
+  //   textMatches  — myths whose title matches the query (or all 42 when empty).
+  // Keeping them split lets the hint show the real text-match count and lets
+  // the panel render a visual "Bereits ausgewählt" divider.
+  const { stuckMatches, textMatches } = useMemo(() => {
     const q = normalize(searchQuery.trim());
     const sorted = [...myths].sort((a, b) => a.mythNumber - b.mythNumber);
-    if (q.length === 0) return sorted;
-    return sorted.filter((m) => normalize(m.title).includes(q));
-  }, [myths, searchQuery]);
+    if (q.length === 0) return { stuckMatches: [], textMatches: sorted };
+    const matchingNums = new Set(
+      sorted.filter((m) => normalize(m.title).includes(q)).map((m) => m.mythNumber)
+    );
+    return {
+      stuckMatches: sorted.filter(
+        (m) => selectedMyths.has(m.mythNumber) && !matchingNums.has(m.mythNumber)
+      ),
+      textMatches: sorted.filter((m) => matchingNums.has(m.mythNumber)),
+    };
+  }, [myths, searchQuery, selectedMyths]);
 
   // Click-outside + Escape close each open dropdown.
   useEffect(() => {
@@ -159,7 +211,7 @@ export default function FaktenFilterBar({
 
   const hitsHint =
     searchQuery.trim().length > 0
-      ? `${searchMatches.length} ${searchMatches.length === 1 ? "Treffer" : "Treffer"} · Auswahl per Klick`
+      ? `${textMatches.length} Treffer · Auswahl per Klick`
       : `${totalCount} Mythen · zum Filtern anklicken`;
 
   return (
@@ -257,7 +309,7 @@ export default function FaktenFilterBar({
         <div className="carm-filter-search-row fakten-search">
           <input
             ref={searchInputRef}
-            type="search"
+            type="text"
             className="carm-filter-search-row__input"
             placeholder="Mythen suchen …"
             aria-label="Mythen suchen"
@@ -266,14 +318,21 @@ export default function FaktenFilterBar({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             onFocus={() => setSearchOpen(true)}
-            onClick={() => setSearchOpen(true)}
           />
-          {searchQuery.length > 0 && (
+          {selectedMyths.size > 0 && (
+            <span
+              className="fakten-search-count"
+              aria-label={`${selectedMyths.size} Mythen ausgewählt`}
+            >
+              ({selectedMyths.size})
+            </span>
+          )}
+          {(searchQuery.length > 0 || selectedMyths.size > 0) && (
             <button
               type="button"
               className="carm-filter-search-row__clear"
-              aria-label="Suche zurücksetzen"
-              onClick={() => onSearchChange("")}
+              aria-label="Suche und Auswahl zurücksetzen"
+              onClick={() => onClearSearch()}
             >
               <svg
                 width="14"
@@ -320,53 +379,36 @@ export default function FaktenFilterBar({
             aria-label="Mythen auswählen"
           >
             <p className="fakten-search__hint">{hitsHint}</p>
-            {searchMatches.length === 0 ? (
+            {stuckMatches.length === 0 && textMatches.length === 0 ? (
               <p className="fakten-search__empty">Keine Treffer</p>
             ) : (
               <ul className="fakten-search__list" role="presentation">
-                {searchMatches.map((m) => {
-                  const checked = selectedMyths.has(m.mythNumber);
-                  const meta = getCategoryMeta(m.categoryGroup);
-                  const Icon = meta.icon;
-                  return (
-                    <li
-                      key={m.mythNumber}
-                      className="fakten-search__row"
-                      role="option"
-                      aria-selected={checked}
-                    >
-                      <label className="fakten-search__label">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => onToggleMyth(m.mythNumber)}
-                        />
-                        <VerdictStatement
-                          statement={m.title}
-                          verdict={toVerdict(m.classification)}
-                          as="span"
-                          className="fakten-search__statement"
-                        />
-                        {/* Category icon only — no text. Sits to the
-                            right of the verdict statement so the row
-                            stays compact. Uses CATEGORY_META.label
-                            color so it ties back to the card footer. */}
-                        <span
-                          className="fakten-search__cat-icon"
-                          style={{ color: meta.label }}
-                          aria-label={`Kategorie: ${m.categoryGroup}`}
-                          title={m.categoryGroup}
-                        >
-                          <Icon
-                            size={14}
-                            strokeWidth={2}
-                            aria-hidden="true"
-                          />
-                        </span>
-                      </label>
+                {stuckMatches.length > 0 && (
+                  <>
+                    <li className="fakten-search__section-label" aria-hidden="true">
+                      Bereits ausgewählt
                     </li>
-                  );
-                })}
+                    {stuckMatches.map((m) => (
+                      <MythRow
+                        key={m.mythNumber}
+                        m={m}
+                        checked={true}
+                        onToggle={onToggleMyth}
+                      />
+                    ))}
+                    {textMatches.length > 0 && (
+                      <li className="fakten-search__divider" role="separator" aria-hidden="true" />
+                    )}
+                  </>
+                )}
+                {textMatches.map((m) => (
+                  <MythRow
+                    key={m.mythNumber}
+                    m={m}
+                    checked={selectedMyths.has(m.mythNumber)}
+                    onToggle={onToggleMyth}
+                  />
+                ))}
               </ul>
             )}
             {hasActiveFilter && (

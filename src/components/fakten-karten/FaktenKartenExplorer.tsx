@@ -131,17 +131,24 @@ export default function FaktenKartenExplorer({
     setSearchQuery("");
   }, []);
 
-  /** AND-logic between search ticks and category ticks.
+  /** Clear search text + myth ticks together.
+   *  Called by the X button in FaktenFilterBar so that clearing the
+   *  input always resets the grid fully (no invisible lingering ticks).
+   *  Category group ticks are left untouched. */
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+    setSelectedMyths(new Set());
+  }, []);
+
+  /** Filter logic:
    *
-   *  - No ticks anywhere → all 42 visible.
-   *  - Only myth ticks  → grid shows ticked myths only.
-   *  - Only category ticks → grid shows myths in those categories.
-   *  - Both → intersection (myth must be in selected categories AND in
-   *    selected myths).
-   *
-   *  The bare search query (when no ticks are present) still live-filters
-   *  the grid as a fallback so the user can preview the search before
-   *  committing via checkbox.
+   *  - No ticks, no text  → all 42 visible.
+   *  - Text only          → live text filter on all 42 (preview before ticking).
+   *  - Category ticks     → myths in those categories; text further narrows.
+   *  - Myth ticks         → only those myths shown; text ignored for grid
+   *                         (text is for discovering/adding more in the panel,
+   *                         not for filtering out explicitly chosen myths).
+   *  - Both tick types    → intersection (AND); see empty-state msg below.
    */
   const filteredMyths = useMemo(() => {
     const q = normalize(searchQuery.trim());
@@ -150,10 +157,10 @@ export default function FaktenKartenExplorer({
     const list = allMyths.filter((m) => {
       if (hasMythTicks && !selectedMyths.has(m.mythNumber)) return false;
       if (hasGroupTicks && !selectedGroups.has(m.categoryGroup)) return false;
-      // If no ticks yet, fall back to the live search preview.
-      if (!hasMythTicks && !hasGroupTicks && q.length > 0) {
-        return normalize(m.title).includes(q);
-      }
+      // Text narrows the grid only when no myth-ticks are active.
+      // With myth-ticks the grid is an explicit selection; text is for
+      // the autocomplete panel (adding more), not for removing chosen myths.
+      if (!hasMythTicks && q.length > 0 && !normalize(m.title).includes(q)) return false;
       return true;
     });
     return list.sort((a, b) => a.mythNumber - b.mythNumber);
@@ -185,18 +192,21 @@ export default function FaktenKartenExplorer({
         selectedMyths={selectedMyths}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onClearSearch={clearSearch}
         onToggleGroup={toggleGroup}
         onToggleMyth={toggleMyth}
         onReset={resetFilters}
         totalCount={allMyths.length}
-        filteredCount={filteredMyths.length}
         allFlipped={allFlipped}
         onSetAllFlipped={setAllFlipped}
       />
 
       {filteredMyths.length === 0 ? (
         <p className="fakten-empty">
-          Keine Treffer für die aktuelle Auswahl.{" "}
+          {selectedGroups.size > 0 && selectedMyths.size > 0
+            ? /* "No overlap — the selected myths are not in the selected categories." */
+              "Keine Übereinstimmung — die gewählten Mythen gehören nicht zu den gewählten Kategorien."
+            : "Keine Treffer für die aktuelle Auswahl."}{" "}
           <button
             type="button"
             className="fakten-empty__reset"
