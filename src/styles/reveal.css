@@ -1,0 +1,38 @@
+/* ═══════════════════════════════════════════════════════════════
+   Site-wide scroll-reveal engine.
+
+   Loaded by BaseLayout, so every page can use it. An inline <head> script sets
+   `html.js-reveal` ONLY when motion is allowed; a body IntersectionObserver
+   adds `.is-in` to each marked element as it scrolls into view (once). Pages
+   opt IN by marking elements:
+     • [data-reveal]      — fade + gentle rise (stacked content blocks)
+     • [data-reveal-fade] — fade only, no transform (big interactive tools:
+                            dashboard / quiz player / fakten-karten — opacity
+                            only keeps chart measurement, sticky bars and the
+                            quiz progress portal stable)
+   No JS / reduced-motion → flag never set + rules @media-gated → full content,
+   no hidden elements, no FOUC. The homepage's bespoke inner cascades live in
+   home-reveal.css; the two circle entrances live in their components.
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: no-preference) {
+  html.js-reveal [data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.65s ease,
+      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  html.js-reveal [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  html.js-reveal [data-reveal-fade] {
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+  html.js-reveal [data-reveal-fade].is-in {
+    opacity: 1;
+  }
+}

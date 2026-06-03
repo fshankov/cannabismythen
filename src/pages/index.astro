@@ -101,15 +101,6 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
     client:load
   />
 
-  <script is:inline>
-    // Reveal flag — set synchronously BEFORE the canvas below paints, so the
-    // blocks only start hidden when we will actually animate them in. No-JS and
-    // prefers-reduced-motion users never get the flag → full content, no FOUC.
-    if (window.matchMedia("(prefers-reduced-motion: no-preference)").matches) {
-      document.documentElement.classList.add("js-reveal");
-    }
-  </script>
-
   <div class="home-canvas">
   {ueberProjektData && (
     <ProjektTeaserBlock
@@ -144,28 +135,6 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
   )}
   </div>
 </BaseLayout>
-
-<script>
-  // Reveal each [data-reveal] block once as it scrolls into view. Pairs with the
-  // `html.js-reveal` flag + the @media-gated rules in home-reveal.css, so this is
-  // a no-op (harmless) under reduced motion. Inner cascades + the circle-cluster
-  // entrances key off the same `.is-in` / `.is-revealed` state.
-  const revealTargets = document.querySelectorAll<HTMLElement>("[data-reveal]");
-  if (revealTargets.length > 0 && "IntersectionObserver" in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-in");
-            io.unobserve(entry.target);
-          }
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
-    );
-    revealTargets.forEach((el) => io.observe(el));
-  }
-</script>
 
 <style>
   /* Home canvas — the warm off-white field blocks 2–4 sit on. The dark hero

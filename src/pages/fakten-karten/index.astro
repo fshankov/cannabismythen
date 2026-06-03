@@ -90,7 +90,7 @@ const mythContentMap = await buildMythContentMap();
 ---
 
 <BaseLayout title="Fakten-Karten" description="42 Cannabis-Mythen — sofort erkennbar wahr oder falsch, mit wissenschaftlicher Einordnung." bgTexture extraBodyClass="fakten-karten-page">
-  <header class="fakten-page-header">
+  <header class="fakten-page-header" data-reveal>
     <p class="fakten-page-header__eyebrow">
       <span class="fakten-page-header__eyebrow-divider" aria-hidden="true"></span>
       <span class="fakten-page-header__eyebrow-text">42 Mythen</span>
@@ -98,10 +98,12 @@ const mythContentMap = await buildMythContentMap();
     <h1 class="fakten-page-header__h1">Fakten-Karten</h1>
     <p class="fakten-page-header__sub">Stimmt das? 42 verbreitete Cannabis-Mythen, sofort eingeordnet — tippen Sie auf eine Karte für die Erklärung.</p>
   </header>
-  <FaktenKartenExplorer
-    client:load
-    myths={JSON.stringify(myths)}
-    mythContent={JSON.stringify(mythContentMap)}
-    groupMetrics={JSON.stringify(groupMetricsByMyth)}
-  />
+  <div data-reveal-fade>
+    <FaktenKartenExplorer
+      client:load
+      myths={JSON.stringify(myths)}
+      mythContent={JSON.stringify(mythContentMap)}
+      groupMetrics={JSON.stringify(groupMetricsByMyth)}
+    />
+  </div>
 </BaseLayout>

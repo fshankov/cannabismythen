@@ -1,30 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════
-   Homepage scroll-reveal (blocks 2–4).
+   Homepage-only reveal cascades (blocks 3 & 4).
 
-   A small IntersectionObserver in index.astro adds `.is-in` to each
-   [data-reveal] block as it scrolls into view (once). The `html.js-reveal`
-   flag is set by an inline head script ONLY when motion is allowed, so:
-     • no JS         → flag never set → everything visible (no hidden content)
-     • reduced-motion → flag never set + rules are @media-gated → visible
-   Blocks fade + rise as a unit; inner elements (block-4 nav cards, the
-   Numbers-Strip numerals) cascade in once their block is revealed.
+   The site-wide reveal engine — the `html.js-reveal` flag, the observer that
+   adds `.is-in`, and the generic [data-reveal] fade+rise — now lives in
+   reveal.css + BaseLayout. This file only adds the homepage's bespoke INNER
+   cascades that fire once a block is revealed: the Block-4 nav cards and the
+   Numbers-Strip numerals stagger in. (The two circle entrances live in their
+   own components.) Imported by index.astro.
    ═══════════════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: no-preference) {
-  /* ── Block level: fade + gentle rise ── */
-  html.js-reveal [data-reveal] {
-    opacity: 0;
-    transform: translateY(28px);
-    transition:
-      opacity 0.65s ease,
-      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: opacity, transform;
-  }
-  html.js-reveal [data-reveal].is-in {
-    opacity: 1;
-    transform: none;
-  }
-
   /* ── Inner cascade ──
      Items rise + fade one after another once the block is in. Driven by
      `animation` with `backwards` fill (NOT a persistent transition) so it

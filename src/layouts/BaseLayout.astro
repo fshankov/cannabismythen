@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import "../styles/reveal.css";
 import "@fontsource-variable/inter";
 import "@fontsource/dm-serif-display";
 import "@fontsource/source-serif-4/700.css";
@@ -76,6 +77,16 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{fullTitle}</title>
+
+    {/* Scroll-reveal flag — set before <body> paints so [data-reveal] /
+        [data-reveal-fade] elements start hidden only when we will animate them
+        in. No-JS / reduced-motion never get the flag (rules are @media-gated in
+        reveal.css) → all content visible, no FOUC. */}
+    <script is:inline>
+      if (window.matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+        document.documentElement.classList.add("js-reveal");
+      }
+    </script>
 
     {/* Stage 8 — OG / Twitter card meta */}
     <meta property="og:title" content={fullTitle} />
@@ -527,7 +538,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         if (!header) return;
         function publishHeight() {
           var rect = header.getBoundingClientRect();
-          var h = Math.max(140, rect.bottom + 16);
+          var h = Math.max(140, rect.bottom + 0);
           document.documentElement.style.setProperty('--header-height', h + 'px');
         }
         publishHeight();
@@ -535,6 +546,27 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         if (typeof ResizeObserver === 'function') {
           new ResizeObserver(publishHeight).observe(header);
         }
+      })();
+    </script>
+
+    {/* Scroll-reveal observer — reveals each [data-reveal] (fade+rise) and
+        [data-reveal-fade] (opacity-only) element once as it enters the viewport.
+        No-op under reduced motion (flag unset + rules @media-gated). threshold:0
+        + bottom rootMargin so tall above-the-fold tools reveal on load while
+        shorter blocks reveal a touch after their top edge enters. */}
+    <script is:inline>
+      (function () {
+        var targets = document.querySelectorAll('[data-reveal], [data-reveal-fade]');
+        if (!targets.length || !('IntersectionObserver' in window)) return;
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0, rootMargin: '0px 0px -12% 0px' });
+        targets.forEach(function (el) { io.observe(el); });
       })();
     </script>
 

@@ -258,7 +258,7 @@
      the dot strip and the persistence notice but stop sprawling on desktop. */
   max-width: 520px;
   margin: 0 auto;
-  padding: var(--space-lg) 0 var(--space-2xl);
+  padding: 0 0 var(--space-2xl);
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);

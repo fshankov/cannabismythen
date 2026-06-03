@@ -58,14 +58,14 @@ const isFachkraefte = activeAudience === "fachkraefte";
 <div class="mi-layout">
 
   <!-- Page header -->
-  <header class="mi-header">
+  <header class="mi-header" data-reveal>
     <h1 class="mi-header__title">{pageTitle}</h1>
     <p class="mi-header__subtitle">{pageIntro}</p>
   </header>
 
   <!-- Category selector caption — mirrors the quiz index "Wählen Sie eine
        Kategorie aus" label, placed directly above the tabs. -->
-  <p class="mi-category-label">Wählen Sie eine Kategorie aus</p>
+  <p class="mi-category-label" data-reveal>Wählen Sie eine Kategorie aus</p>
 
   <!-- Audience tab bar — scrollable, same Chrome-tab style as Daten-Explorer -->
   <div class="mi-tab-bar">
@@ -93,7 +93,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
          first accordion. (The per-group title was removed per request — only
          the body description remains.) -->
     {audienceData?.description && (
-      <div class="mi-panel-intro">
+      <div class="mi-panel-intro" data-reveal>
         <p class="mi-panel-intro__desc">{audienceData.description}</p>
       </div>
     )}

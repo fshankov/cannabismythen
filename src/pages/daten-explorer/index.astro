@@ -48,11 +48,13 @@ const mythContentMap = await buildMythContentMap();
 ---
 
 <BaseLayout title="Daten-Explorer" description="Interaktive Datenvisualisierung zu 42 Cannabis-Mythen — Erkunden Sie wissenschaftliche Einordnungen, Bevölkerungsdaten und Indikatoren." bgTexture>
-  <MythenExplorer
-    client:load
-    mythSlugs={mythSlugs}
-    mythContent={JSON.stringify(mythContentMap)}
-    definitions={JSON.stringify(definitionsData)}
-    mythThemes={JSON.stringify(mythIdToTheme)}
-  />
+  <div data-reveal-fade>
+    <MythenExplorer
+      client:load
+      mythSlugs={mythSlugs}
+      mythContent={JSON.stringify(mythContentMap)}
+      definitions={JSON.stringify(definitionsData)}
+      mythThemes={JSON.stringify(mythIdToTheme)}
+    />
+  </div>
 </BaseLayout>

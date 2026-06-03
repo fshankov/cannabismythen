@@ -50,9 +50,9 @@ const tiles = quizzes.map(([slug, entry]) => {
   bgTexture
   extraBodyClass="quiz-index-page"
 >
-  <h1 class="quiz-index__title">Quiz: Was weißt du über Cannabis?</h1>
+  <h1 class="quiz-index__title" data-reveal>Quiz: Was weißt du über Cannabis?</h1>
 
-  <div class="quiz-index__intro">
+  <div class="quiz-index__intro" data-reveal>
     <p>
       Teste dein Wissen in fünf thematischen Quiz-Modulen oder im
       Schnellcheck mit zufällig ausgewählten Mythen aus allen Themenbereichen. Zu jedem Mythos
@@ -62,9 +62,9 @@ const tiles = quizzes.map(([slug, entry]) => {
     </p>
   </div>
 
-  <p class="quiz-index__category-label">Wählen Sie eine Kategorie aus</p>
+  <p class="quiz-index__category-label" data-reveal>Wählen Sie eine Kategorie aus</p>
 
-  <section class="quiz-selection">
+  <section class="quiz-selection" data-reveal>
     {tiles.map((tile) => (
       <a
         href={`/quiz/${tile.slug}/`}
