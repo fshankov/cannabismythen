@@ -1,5 +1,7 @@
 ---
 import "../../styles/home-four-paths.css";
+import { getVerdictVisual } from "../../lib/fakten-karten/verdict-colors";
+import type { CorrectnessClass } from "../../lib/dashboard/types";
 
 export interface HookQuote {
   eyebrow: string;
@@ -29,9 +31,14 @@ export interface Props {
   faktenKartenTile: TileBase;
   datenExplorerTile: TileBase;
   meineInteressenTile: TileBase;
-  /* No longer rendered in the simplified cards — kept optional so index.astro
-   * needs no change while the per-card "white space" content is pending. */
-  previewMyths?: unknown;
+  /** Shortest myth per verdict (built in index.astro) — feeds the Fakten card. */
+  previewMyths?: ReadonlyArray<{
+    text: string;
+    classification: string;
+    categoryGroup?: string;
+    summary?: string;
+  }>;
+  /* audienceChips kept optional; Meine-Interessen white space still pending. */
   audienceChips?: unknown;
 }
 
@@ -41,7 +48,47 @@ const {
   faktenKartenTile,
   datenExplorerTile,
   meineInteressenTile,
+  previewMyths = [],
 } = Astro.props;
+
+// Pre-oriented direction arrows (verbatim from the card-bg-arrow SVGs). Inlined
+// rather than <img> so `overflow: visible` can show the full arrow — the source
+// SVGs draw strokes beyond their own viewBox, which an <img> crops away.
+const FAKTEN_ARROWS: Record<string, { viewBox: string; inner: string }> = {
+  richtig: {
+    viewBox: "0 0 181 186",
+    inner: `<path d="M164.999 15.531L-55 15.531" stroke="currentColor" stroke-opacity="0.44" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M54.9953 169.529L54.9953 15.5297" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M131.999 92.529L54.9996 15.5293L-22.0001 92.529" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/>`,
+  },
+  eher_falsch: {
+    viewBox: "0 0 188 280",
+    inner: `<path d="M15.9356 264.456L171.498 108.893" stroke="currentColor" stroke-opacity="0.44" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M-15.1731 77.7784L93.7209 186.672" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M-15.1759 186.676H93.7181V77.7816" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/>`,
+  },
+  eher_richtig: {
+    viewBox: "0 0 190 280",
+    inner: `<path d="M17.9356 15.5294L173.498 171.092" stroke="currentColor" stroke-opacity="0.44" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M-13.1731 202.207L95.7209 93.3129" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M-13.1759 93.3096H95.7181V202.204" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/>`,
+  },
+  falsch: {
+    viewBox: "0 0 181 186",
+    inner: `<path d="M164.999 169.527L-55 169.527" stroke="currentColor" stroke-opacity="0.44" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M54.9953 15.5293L54.9953 169.529" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M131.999 92.5293L54.9996 169.529L-22.0001 92.5293" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/>`,
+  },
+};
+
+// Fakten card preview: 4 mini cards in the verdict spectrum falsch → richtig
+// (left → right). Pair the shortest myth per verdict with the real per-verdict
+// card gradient + the (inlined) direction arrow.
+const FAKTEN_SPECTRUM: CorrectnessClass[] = ["falsch", "eher_falsch", "eher_richtig", "richtig"];
+const faktenCards = FAKTEN_SPECTRUM.map((v) => {
+  const myth = previewMyths.find((m) => m.classification === v);
+  if (!myth) return null;
+  return { verdict: v, text: myth.text, gradient: getVerdictVisual(v).gradient, arrow: FAKTEN_ARROWS[v] };
+}).filter(
+  (x): x is {
+    verdict: CorrectnessClass;
+    text: string;
+    gradient: string;
+    arrow: { viewBox: string; inner: string };
+  } => x !== null,
+);
 
 // Per-topic icons lifted from the mobile tab bar (BaseLayout) — Lucide 24×24,
 // drawn in currentColor so the badge can paint them white.
@@ -118,6 +165,23 @@ const cards = [
             <div class="quiz-preview" aria-hidden="true">
               {QUIZ_OPTIONS.map((o) => (
                 <span class={`quiz-preview__btn quiz-preview__btn--${o.value}`} set:html={o.svg}></span>
+              ))}
+            </div>
+          )}
+
+          {c.mod === "fakten" && (
+            <div class="fakten-preview" aria-hidden="true">
+              {faktenCards.map((fc) => (
+                <span class={`fk-mini fk-mini--${fc.verdict}`} style={`background-image:${fc.gradient}`}>
+                  <span class="fk-mini__statement">{fc.text}</span>
+                  <svg
+                    class="fk-mini__arrow"
+                    viewBox={fc.arrow.viewBox}
+                    fill="none"
+                    preserveAspectRatio="xMidYMid meet"
+                    set:html={fc.arrow.inner}
+                  ></svg>
+                </span>
               ))}
             </div>
           )}

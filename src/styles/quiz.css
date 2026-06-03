@@ -108,24 +108,25 @@
    ══════════════════════════════════════════════════════════════════ */
 
 .quiz-feedback-strip {
-  /* Aligns with the `.quiz-header-bar` above (same max-width + `--space-lg`
-     padding). 2026-05-29 (polish round 2) — a FIXED height (identical for
-     the filled strip and the `--empty` placeholder) keeps the slot from
-     resizing between unanswered ↔ answered, so the page never jumps. Content
-     is a centered column (row 1 + population line). */
+  /* 2026-06-03 — moved from the fixed header portal into the quiz flow
+     below the card. Natural height replaces the old fixed 5.5rem; no
+     height reservation needed since layout shifts are not possible in flow. */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: var(--space-sm) var(--space-lg);
-  height: 5.5rem; /* 2026-05-29 — 3 rows (answers · verdict+points · population) */
+  padding: var(--space-md) var(--space-lg);
   font-size: 0.9rem;
   line-height: 1.4;
   text-align: center;
   color: var(--color-text);
+  animation: quiz-strip-in 0.3s ease;
+}
+
+@keyframes quiz-strip-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Stage G — empty variant. Same DOM container, same min-height; just
@@ -134,12 +135,6 @@
   /* (inherits everything from `.quiz-feedback-strip` above) */
 }
 
-/* Subtle divider between the progress bar above and the strip below.
-   Reading the strip's visual treatment as a continuation of the
-   sticky header rhythm, not a separate floating element. */
-#quiz-progress-slot .quiz-feedback-strip {
-  border-top: 1px solid rgba(226, 232, 240, 0.40);
-}
 
 /* Stage F commit 2 (2026-05-23) — the tinted pill background was too
    aggressive on `Erwischt`/`Da liegst du daneben.` (red wash reads
@@ -235,9 +230,6 @@
    without crowding. */
 @media (max-width: 640px) {
   .quiz-feedback-strip {
-    /* Taller fixed height so the (possibly wrapped) 3 rows fit identically
-       whether answered or not (no jump on mobile either). */
-    height: 7.5rem;
     gap: 0.25rem;
     padding: var(--space-sm) var(--space-md);
   }
@@ -2935,6 +2927,7 @@ button.quiz-result__cta {
   box-shadow: var(--shadow-lg);
   overflow-y: auto;
   outline: none;
+
   animation: factsheetSlideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -2951,7 +2944,7 @@ button.quiz-result__cta {
   top: 0;
   z-index: 2;
   background: var(--color-surface);
-  padding: 14px 52px 12px var(--space-lg);
+  padding: 24px 52px 12px 48px;
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
@@ -2959,7 +2952,7 @@ button.quiz-result__cta {
 .factsheet-panel__header-content {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 16px;
 }
 
 .factsheet-panel__close {
@@ -2984,16 +2977,21 @@ button.quiz-result__cta {
 }
 
 .factsheet-panel__body {
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--space-xl) 48px;
   flex: 1;
 }
 
 .factsheet-panel__statement {
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
   line-height: 1.4;
   color: var(--color-text);
   margin: 0; /* gap on __header-content handles vertical spacing */
+}
+
+.factsheet-panel__header .stmt {
+  font-weight: 800;
 }
 
 /* "Wissenschaftlich: <VerdictPill>" row, added 2026-05-14 per Fedor's
@@ -3196,6 +3194,16 @@ button.quiz-result__cta {
     max-height: 85vh;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     animation: factsheetSlideInBottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .factsheet-panel__header {
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
+  }
+
+  .factsheet-panel__body {
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
   }
 
   @keyframes factsheetSlideInBottom {
@@ -4005,6 +4013,14 @@ body.fakten-karten-page main {
    Specificity 0,4,0 intentionally beats the card-level rule above (0,3,0)
    so the bright shift overrides the darkening when the cursor lands on the button. */
 .fakten-card:hover .fakten-card__cta:hover {
+  background: color-mix(in srgb, var(--color-accent) 68%, white);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.20);
+}
+
+/* In Nur-Fakten-Seite mode the card is already on face 2 — card hover
+   should feel like button hover: skip the darkening and go straight to
+   the light-green + glow treatment. */
+.fakten-card--active:hover .fakten-card__cta {
   background: color-mix(in srgb, var(--color-accent) 68%, white);
   box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.20);
 }

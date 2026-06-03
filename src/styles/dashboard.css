@@ -1267,6 +1267,7 @@ body:has(.carm-explorer) .nav {
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
   outline: none;
+
   animation: factsheetSlideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
@@ -1282,7 +1283,7 @@ body:has(.carm-explorer) .nav {
   top: 0;
   z-index: 2;
   background: white;
-  padding: 14px 52px 12px 20px; /* right-pad reserves space for the X */
+  padding: 24px 52px 12px 48px;
   border-bottom: 1px solid var(--color-border, #e2e8f0);
   flex-shrink: 0;
 }
@@ -1290,7 +1291,7 @@ body:has(.carm-explorer) .nav {
 .factsheet-panel__header-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
 .factsheet-panel__close {
@@ -1315,16 +1316,21 @@ body:has(.carm-explorer) .nav {
 }
 
 .factsheet-panel__body {
-  padding: 24px 20px;
+  padding: 24px 48px;
   flex: 1;
 }
 
 .factsheet-panel__statement {
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
   line-height: 1.4;
   color: #1e293b;
   margin: 0; /* gap on __header-content handles vertical spacing */
+}
+
+.factsheet-panel__header .stmt {
+  font-weight: 800;
 }
 
 /* "Wissenschaftlich: <pill>" line + "Deine Antwort: <pill>" — same
@@ -1551,6 +1557,17 @@ body:has(.carm-explorer) .nav {
   @keyframes factsheetSlideInBottom {
     from { transform: translateY(100%); }
     to   { transform: translateY(0); }
+  }
+
+  .factsheet-panel__header {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 14px;
+  }
+
+  .factsheet-panel__body {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
 
