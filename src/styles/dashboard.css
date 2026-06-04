@@ -1418,6 +1418,31 @@ body:has(.carm-explorer) .nav {
   margin: 0 0 8px 0;
 }
 
+/* Caption + Daten-Explorer link below the "Ergebnisse der CaRM-Befragungen"
+   table (BugHerd 4.4 / 1.3, 2026-06-03). Mirrored from quiz.css so the popup
+   styles identically on the Daten-Explorer, which loads dashboard.css (not
+   quiz.css) — without this the caption fell back to the 16px body default.
+   Size matches .factsheet-panel__section-content per Fedor's review. */
+/* Descendant selector (not just .factsheet-panel__data-note) so the colour
+   wins over `.carm-explorer p { color: inherit }`, matching the section body. */
+.factsheet-panel__body .factsheet-panel__data-note {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #475569;
+  margin: 8px 0 0 0;
+}
+.factsheet-panel__data-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2d6a4f;
+  text-decoration: none;
+}
+.factsheet-panel__data-link:hover {
+  text-decoration: underline;
+}
+
 .factsheet-panel__section-content {
   font-size: 0.9rem;
   line-height: 1.65;
@@ -7153,18 +7178,29 @@ body.carm-modal-open {
 }
 
 /* Inline "i" InfoTooltip — sits immediately after the label text
-   inside `.header-inner`. Slightly muted to defer to the label. */
+   inside `.header-inner`. Slightly muted to defer to the label.
+   IMPORTANT: the muting lives on the trigger GLYPH (.info-tooltip-trigger),
+   NOT on this wrapper. The wrapper also contains the position:fixed tooltip
+   card, and an `opacity < 1` ancestor creates a stacking context that trapped
+   the card behind the sticky header (z:2) — the card's z-index:9999 was
+   confined to the header layer instead of rising to the root. Dimming only the
+   glyph keeps the exact visual while letting the card escape (BugHerd 4.13
+   follow-up, 2026-06-04: ℹ️ tooltip rendered behind the Quellen-Tabelle header
+   in Chrome; same latent trap existed on the Mythen Tabelle). */
 .carm-spannweite__info-inline {
   display: inline-flex;
   align-items: center;
   margin-left: 1px;
+}
+
+.carm-spannweite__info-inline .info-tooltip-trigger {
   opacity: 0.6;
   transition: opacity 120ms ease;
 }
 
-.carm-spannweite__header-inner:hover .carm-spannweite__info-inline,
-.carm-spannweite__info-inline:hover,
-.carm-spannweite__info-inline:focus-within {
+.carm-spannweite__header-inner:hover .carm-spannweite__info-inline .info-tooltip-trigger,
+.carm-spannweite__info-inline:hover .info-tooltip-trigger,
+.carm-spannweite__info-inline:focus-within .info-tooltip-trigger {
   opacity: 1;
 }
 

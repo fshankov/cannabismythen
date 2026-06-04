@@ -113,22 +113,21 @@ export default function FeedbackStrip({
   // Guard: render nothing when the parent didn't pass a myth.
   if (!myth) return null;
 
-  // Stage G (2026-05-23): when the current myth hasn't been answered
-  // yet, render an empty strip that reserves the same slot height. The
-  // `--empty` modifier + CSS `min-height` keep the QuizCard below
-  // anchored at the same y-position whether or not the user has
-  // answered. aria-hidden so screen readers don't announce a blank
-  // region.
-  if (!answer) {
-    return (
-      <div
-        className="quiz-feedback-strip quiz-feedback-strip--empty"
-        aria-hidden="true"
-      />
-    );
-  }
+  // 2026-06-04 (Fedor) — the strip now ALWAYS renders so it reserves the same
+  // height in the quiz flow whether or not the user has answered. When
+  // unanswered it renders a structurally-identical but INVISIBLE "ghost"
+  // (same three rows + the same, answer-independent, population line), so its
+  // height matches the filled strip at every viewport width and the
+  // persistence notice below the card never jumps when the real feedback
+  // appears on answer. The ghost uses the correct classification as a neutral
+  // placeholder for the answer rows; it is visibility:hidden + aria-hidden,
+  // so it reveals nothing and screen readers skip it.
+  const isGhost = !answer;
+  const chosen = answer
+    ? answer.chosenClassification
+    : myth.correctClassification;
 
-  const s: Schritte = schritte(answer.chosenClassification, myth.correctClassification);
+  const s: Schritte = schritte(chosen, myth.correctClassification);
   const verdictText = t(SCHRITTE_LABEL_KEY[s]);
   const verdictModifier = SCHRITTE_MODIFIER[s];
   const VerdictIcon = SCHRITTE_ICON[s];
@@ -143,21 +142,22 @@ export default function FeedbackStrip({
     points: formatGermanDecimal(myth.populationCorrectPct / 100),
   });
 
-  // 2026-05-29 (polish round 2) — two centered rows, fixed height (no jump).
-  // Row 1: verdict + points + Deine Antwort + Wissenschaftlich. Row 2: the
-  // Erwachsene population line. The myth statement (shown on the card) is no
-  // longer repeated here.
-  // 2026-05-29 (Stage 1) — logical order: answers first (your pick vs the
-  // science), then the verdict + points, then the population line. Three
-  // centered rows; the strip's fixed height keeps empty == filled (no jump).
+  // Three centered rows: answers (your pick vs the science), verdict + points,
+  // population line. Same markup for the filled + ghost states; the ghost only
+  // adds the `--ghost` modifier (visibility:hidden) + aria-hidden.
   return (
-    <div className="quiz-feedback-strip" role="status" aria-live="polite">
+    <div
+      className={`quiz-feedback-strip${isGhost ? " quiz-feedback-strip--ghost" : ""}`}
+      role={isGhost ? undefined : "status"}
+      aria-live={isGhost ? undefined : "polite"}
+      aria-hidden={isGhost ? "true" : undefined}
+    >
       <div className="quiz-feedback-strip__row quiz-feedback-strip__row--answers">
         <span className="quiz-feedback-strip__answer">
           <span className="quiz-feedback-strip__answer-label">
             {t("ui.yourAnswerLabel")}:
           </span>{" "}
-          <VerdictPill verdict={answer.chosenClassification} size="sm" />
+          <VerdictPill verdict={chosen} size="sm" />
         </span>
         <span className="quiz-feedback-strip__sep" aria-hidden="true">·</span>
         <span className="quiz-feedback-strip__scientific">

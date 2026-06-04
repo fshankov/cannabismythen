@@ -925,14 +925,16 @@ function QuizPlayerInner({
             streakCount={streakCount}
           />
 
-          {currentAnswer && (
-            <FeedbackStrip
-              variant="answer"
-              myth={currentMyth}
-              answer={currentAnswer}
-              statementText={quizTextMap[currentMyth.id]?.statement}
-            />
-          )}
+          {/* 2026-06-04 (Fedor) — always rendered so it reserves its height.
+              When unanswered, FeedbackStrip draws an invisible ghost of the
+              same height, so the persistence notice below never jumps when
+              the real feedback appears. */}
+          <FeedbackStrip
+            variant="answer"
+            myth={currentMyth}
+            answer={currentAnswer}
+            statementText={quizTextMap[currentMyth.id]?.statement}
+          />
 
           {/* Stage 4: bottom Zurück / dots / Nächste row removed. The
               Schritte pill row in the header now doubles as nav (click a

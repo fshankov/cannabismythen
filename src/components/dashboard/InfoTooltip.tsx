@@ -1,5 +1,6 @@
 import { Info } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useFlipPosition } from './hooks/useFlipPosition';
 
 interface InfoTooltipProps {
@@ -12,6 +13,23 @@ interface InfoTooltipProps {
 export default function InfoTooltip({ title, definition, scale, sampleSize }: InfoTooltipProps) {
   const { triggerRef, cardRef, pos, open, setOpen, updatePosition } =
     useFlipPosition<HTMLButtonElement, HTMLDivElement>();
+
+  // Portal the card up to the dashboard root so it escapes the sticky table
+  // header's stacking context. A `position: sticky` <th> with `z-index: 2`
+  // creates a stacking context, which traps the card's `z-index: 9999` at the
+  // header's level — so a neighbouring sticky cell (e.g. the Prävention column)
+  // painted over the card's edge (BugHerd 4.13, 2026-06-04). No CSS escapes an
+  // ancestor stacking context; the card must leave the <th> in the DOM. We
+  // portal to `.carm-explorer` (NOT document.body) because that root is not a
+  // stacking context AND keeps the scoped `.carm-explorer .info-tooltip-card`
+  // styles applied. Falls back to inline render outside the dashboard
+  // (scrolly / quiz), where the trap doesn't exist and the styles are global.
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setPortalTarget(
+      (triggerRef.current?.closest('.carm-explorer') as HTMLElement | null) ?? null,
+    );
+  }, [triggerRef]);
 
   const handleOpen = () => {
     updatePosition();
@@ -46,6 +64,31 @@ export default function InfoTooltip({ title, definition, scale, sampleSize }: In
 
   const tooltipId = `tooltip-${title.replace(/\s+/g, '-').toLowerCase()}`;
 
+  const card = (
+    <div
+      ref={cardRef}
+      id={tooltipId}
+      role="tooltip"
+      tabIndex={-1}
+      className={`info-tooltip-card info-tooltip-card--fixed${open ? ' info-tooltip-card--open' : ''}`}
+      style={pos ? {
+        position: 'fixed',
+        top: pos.top,
+        left: pos.left,
+        width: pos.width,
+        maxWidth: pos.width,
+        transform: 'none',
+      } : undefined}
+      onMouseEnter={handleOpen}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <p className="info-tooltip-title">{title}</p>
+      {sampleSize && <span className="info-tooltip-sample">{sampleSize}</span>}
+      <p className="info-tooltip-desc">{definition}</p>
+      {scale && <p className="info-tooltip-scale">Skala: {scale}</p>}
+    </div>
+  );
+
   return (
     <span className="info-tooltip-wrap">
       <button
@@ -68,28 +111,9 @@ export default function InfoTooltip({ title, definition, scale, sampleSize }: In
         <Info size={13} aria-hidden="true" />
       </button>
 
-      <div
-        ref={cardRef}
-        id={tooltipId}
-        role="tooltip"
-        tabIndex={-1}
-        className={`info-tooltip-card info-tooltip-card--fixed${open ? ' info-tooltip-card--open' : ''}`}
-        style={pos ? {
-          position: 'fixed',
-          top: pos.top,
-          left: pos.left,
-          width: pos.width,
-          maxWidth: pos.width,
-          transform: 'none',
-        } : undefined}
-        onMouseEnter={handleOpen}
-        onMouseLeave={() => setOpen(false)}
-      >
-        <p className="info-tooltip-title">{title}</p>
-        {sampleSize && <span className="info-tooltip-sample">{sampleSize}</span>}
-        <p className="info-tooltip-desc">{definition}</p>
-        {scale && <p className="info-tooltip-scale">Skala: {scale}</p>}
-      </div>
+      {/* Portal the card out of the sticky <th> so it can't be covered by a
+          neighbouring sticky cell (see portalTarget note above). */}
+      {portalTarget ? createPortal(card, portalTarget) : card}
     </span>
   );
 }

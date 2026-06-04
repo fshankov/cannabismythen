@@ -109,8 +109,9 @@
 
 .quiz-feedback-strip {
   /* 2026-06-03 — moved from the fixed header portal into the quiz flow
-     below the card. Natural height replaces the old fixed 5.5rem; no
-     height reservation needed since layout shifts are not possible in flow. */
+     below the card. 2026-06-04 — the strip now renders on every card
+     (an invisible "ghost" before answering, see `--ghost`), so it reserves
+     its own height in flow and the persistence notice below never jumps. */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -121,6 +122,12 @@
   line-height: 1.4;
   text-align: center;
   color: var(--color-text);
+}
+
+/* The fade-in plays only for the real (filled) strip — applying it via
+   :not(--ghost) means it (re)runs when the ghost becomes the real strip on
+   answer, so the feedback still animates in over the reserved space. */
+.quiz-feedback-strip:not(.quiz-feedback-strip--ghost) {
   animation: quiz-strip-in 0.3s ease;
 }
 
@@ -129,10 +136,12 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Stage G — empty variant. Same DOM container, same min-height; just
-   no inner content while the user is reading the unanswered card. */
-.quiz-feedback-strip--empty {
-  /* (inherits everything from `.quiz-feedback-strip` above) */
+/* 2026-06-04 (Fedor) — ghost variant. Renders the strip's full structure
+   (so its height matches the filled strip at every viewport width) but
+   invisible, reserving the space before the user answers so the persistence
+   notice below the card never jumps when the real feedback appears. */
+.quiz-feedback-strip--ghost {
+  visibility: hidden;
 }
 
 
@@ -3089,8 +3098,10 @@ button.quiz-result__cta {
    (BugHerd 4.4, 2026-06-03, ISD). Small/caption size, sits between the
    table and any link below it. */
 .factsheet-panel__data-note {
-  font-size: 0.8rem;
-  line-height: 1.55;
+  /* Matches .factsheet-panel__section-content so the caption reads as part of
+     the factsheet body, not an oversized note (Fedor review 2026-06-03). */
+  font-size: 0.9rem;
+  line-height: 1.65;
   color: var(--color-text-secondary);
   margin: var(--space-sm) 0 0 0;
 }

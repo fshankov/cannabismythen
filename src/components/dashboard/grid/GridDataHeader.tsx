@@ -80,7 +80,13 @@ export default function GridDataHeader({
       </button>
       <span
         className="carm-spannweite__header-inner"
-        title={defText ? `${fullLabel} — ${defText}` : fullLabel}
+        /* No native `title` when the custom ℹ️ InfoTooltip is present: the
+           browser's OS tooltip duplicated the card's text as a dark box that
+           popped on header-hover and overlapped neighbouring cells (BugHerd
+           4.13 follow-up, 2026-06-04). The InfoTooltip already conveys
+           `fullLabel` + definition. Keep `title={fullLabel}` only as a hover
+           hint for columns that have no InfoTooltip (no definition). */
+        title={defTitle && defText ? undefined : fullLabel}
       >
         <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
         <span className="carm-spannweite__header-text">{label}</span>
