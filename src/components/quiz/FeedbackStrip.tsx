@@ -1,48 +1,27 @@
 /**
- * FeedbackStrip — Per-question feedback shown above the QuizCard.
- * Stage E commit 5 (2026-05-23).
+ * FeedbackStrip — Per-question feedback shown below the QuizCard.
  *
- * Renders inside the `quiz-progress-slot` portal (alongside the
- * existing `ProgressBar`), shown only AFTER the user has answered
- * the current myth. Carries the feedback that used to live on the
- * QuizCard back face:
+ * Two centered rows, shown after the user answers the current myth:
  *
- *   • Schritte verdict line (gamified relabel, CAR-8 2026-05-28 —
- *     Volltreffer! / Ganz nah dran! / Leicht verschätzt! / Ganz
- *     schön knifflig! — see i18n.ts `schritte.{exact,near,off,far}`).
- *   • Myth statement + `Wissenschaftlich: <pill>` (small inline pair).
- *   • Population sentence (CAR-10 rewrite, 2026-05-28):
- *     "Erwachsene (18–70) erreichen hier im Durchschnitt {X} von 100
- *     Punkten." (i18n key `result.row.populationMean`). Replaces the
- *     misleading "Du gehörst zu N% der Erwachsenen…" framing — the
- *     value is the per-myth mean Richtigkeit (0–100), NOT a binary
- *     "% who got it exactly right". See CaRM §4.3.3 and the SCORING
- *     METHODOLOGY block in quizData.ts.
+ *   • Row 1 — `Deine Antwort: <pill>` · `Wissenschaftlich: <pill>`
+ *     (the user's pick next to the scientific classification).
+ *   • Row 2 — Schritte verdict (Volltreffer! / Ganz nah dran! /
+ *     Leicht verschätzt! / Ganz schön knifflig! — i18n
+ *     `schritte.{exact,near,off,far}`) + the integer points badge
+ *     ("+3 / +2 / +1 / 0", see quizData.pointsDisplay).
  *
- * The QuizCard back face is now stripped to just the statement
- * summary + `Mehr auf der Fakten-Karte →` button + `Nächste Frage →`
- * (or `Ergebnis ansehen →` on the last card). All the detail content
- * (explanation paragraph, population bar) lives inside the
- * FactsheetPanel popup if the user wants depth.
- *
- * The strip clears whenever the user advances to an unanswered
- * question — QuizPlayer's render condition gates on `currentAnswer`.
+ * 2026-06-04 (Fedor) — the per-card POPULATION line was removed; that
+ * comparison now lives only on the result card (ShareCard). The strip
+ * ALWAYS renders so it reserves its height: before the user answers it
+ * draws an invisible "ghost" of the same two rows (see `--ghost`), so the
+ * persistence notice below the card never jumps when the real feedback
+ * appears on answer.
  */
 
 import type { CardAnswer, QuizMyth, Schritte } from "./types";
 import { schritte, pointsDisplay } from "./quizData";
 import { t } from "./i18n";
 
-/** Format a number the German way for body copy: integers stay bare
- *  (no trailing ",0"), non-integers use a comma decimal separator and
- *  one fractional digit. Mirrors the local helper in ShareCard.tsx. */
-function formatGermanDecimal(n: number): string {
-  const rounded = Math.round(n * 10) / 10;
-  if (rounded === Math.trunc(rounded)) {
-    return String(Math.trunc(rounded));
-  }
-  return rounded.toFixed(1).replace(".", ",");
-}
 import VerdictPill from "../shared/VerdictPill";
 import {
   CircleCheckBig,
@@ -131,20 +110,14 @@ export default function FeedbackStrip({
   const verdictText = t(SCHRITTE_LABEL_KEY[s]);
   const verdictModifier = SCHRITTE_MODIFIER[s];
   const VerdictIcon = SCHRITTE_ICON[s];
-  // 2026-05-29 — "+1 aus 1" form (points earned out of 1 possible per card).
-  const pointsText = `${pointsDisplay(s)} aus 1`;
+  // 2026-06-04 (Fedor) — integer points badge: "+3 / +2 / +1 / 0" (no "aus N").
+  const pointsText = pointsDisplay(s);
 
-  // 2026-05-29 (QuizCard redesign) — per-question population reveal on the
-  // 0–1 per-card points scale (no percentages on cards). populationCorrectPct
-  // is the mean Richtigkeit per myth (0–100); /100 puts it on the same 0–1
-  // scale as the user's on-card points badge. One decimal → e.g. "0,8".
-  const populationSentence = t("result.row.populationMean", {
-    points: formatGermanDecimal(myth.populationCorrectPct / 100),
-  });
-
-  // Three centered rows: answers (your pick vs the science), verdict + points,
-  // population line. Same markup for the filled + ghost states; the ghost only
-  // adds the `--ghost` modifier (visibility:hidden) + aria-hidden.
+  // Two centered rows: answers (your pick vs the science) and verdict + points.
+  // 2026-06-04 (Fedor) — the per-card population line was removed; that
+  // comparison now lives only on the result card. Same markup for the filled +
+  // ghost states; the ghost only adds the `--ghost` modifier
+  // (visibility:hidden) + aria-hidden.
   return (
     <div
       className={`quiz-feedback-strip${isGhost ? " quiz-feedback-strip--ghost" : ""}`}
@@ -185,7 +158,6 @@ export default function FeedbackStrip({
           {pointsText}
         </span>
       </div>
-      <p className="quiz-feedback-strip__population">{populationSentence}</p>
     </div>
   );
 }

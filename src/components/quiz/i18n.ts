@@ -401,19 +401,15 @@ const translations: Record<Lang, Record<string, string>> = {
     // 2026-06-02 (ISD/HL review) — the result-page comparison now stays in
     // POINTS (same 0–N scale as the user line), not percentage points. Per
     // Fedor's explicit ruling this line drops the "(18–70)" qualifier
-    // (sanctioned exception, like the homepage credibility lede); the
-    // qualifier still appears on the per-question strip (result.row.populationMean).
-    // {points} = population's expected points = populationExpectedExactCount(deck).
+    // (sanctioned exception, like the homepage credibility lede). {points} =
+    // population's expected points = populationExpectedPunkte(deck), one decimal;
+    // {total} = 3 · N (the deck max on the integer 3/2/1/0 ladder).
     // EN gloss: "For comparison: in the CaRM study, adults scored {X,X} out of {N} points on average."
     "result.scoreLine.populationPoints":
       "Zum Vergleich: In der CaRM-Studie haben Erwachsene im Durchschnitt {points} von {total} Punkten erreicht.",
-    // 2026-05-29 (QuizCard redesign) — per-question population reveal on
-    // the 0–1 per-card points scale (no percentages on cards). {points} =
-    // populationCorrectPct / 100, one decimal. Apples-to-apples with the
-    // user's on-card points badge (+1 / +0,66 / +0,33 / 0).
-    // EN gloss: "Adults (18–70) score on average {0,8} out of 1 point here."
-    "result.row.populationMean":
-      "Erwachsene (18–70) in der CaRM-Studie erreichen hier im Durchschnitt {points} von 1 Punkt.",
+    // 2026-06-04 (Fedor) — the per-card population line (`result.row.populationMean`)
+    // was removed; the population comparison now lives only on the result card
+    // (result.scoreLine.populationPoints above).
 
     // ── Stage D PR3 (2026-05-22) — "Lohnt sich besonders" flag chip on
     //    the top weakest review rows. Removed from rendering in Stage E

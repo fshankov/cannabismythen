@@ -30,7 +30,7 @@
 import { useCallback, useRef, useState } from "react";
 import type { QuizResult, ScoreBand } from "./types";
 import {
-  populationExpectedExactCount,
+  populationExpectedPunkte,
   scoreBand,
   userExpectedPunkte,
 } from "./quizData";
@@ -68,17 +68,18 @@ export default function ShareCard({
   const visualRef = useRef<HTMLDivElement>(null);
   const band: ScoreBand = result.band ?? scoreBand(result.moduleScore);
 
-  // 2026-06-02 (ISD/HL review) — result page now compares in POINTS, not
-  // percentage points. The user's points and the population's average points
-  // are on the same 0–N scale (both Σ of the per-question Richtigkeit ladder),
-  // so the comparison is honest. populationPunkte = Σ populationCorrectPct/100.
+  // 2026-06-04 (Fedor) — points on the integer 3/2/1/0 ladder. The deck max
+  // is 3 · N (e.g. 21 for a 7-myth deck). The user's total is a whole number;
+  // the population's average (populationExpectedPunkte) is shown with one
+  // decimal. Both on the same 0–3N scale, so the comparison stays honest.
+  const maxPoints = result.totalQuestions * 3;
   const userPunkte = userExpectedPunkte(deckMyths, result.answers);
-  const populationPunkte = populationExpectedExactCount(deckMyths);
+  const populationPunkte = populationExpectedPunkte(deckMyths);
 
   // Share text — band title + points (Newton-Youth voice). The shared URL is
   // the quiz module page, which unfurls to that module's OG preview image.
   const shareTitle = `Mein Ergebnis: ${moduleTitle}`;
-  const shareText = `Ich bin „${t(`result.bandTitle.${band}`)}" im Quiz „${moduleTitle}" auf cannabismythen.de — ${formatGermanDecimal(userPunkte)} von ${result.totalQuestions} Punkten.`;
+  const shareText = `Ich bin „${t(`result.bandTitle.${band}`)}" im Quiz „${moduleTitle}" auf cannabismythen.de — ${formatGermanDecimal(userPunkte)} von ${maxPoints} Punkten.`;
   // Statement + link kept together (newline-separated). Best-practice fallback:
   // some platforms drop the dedicated `url` field when a file is attached to a
   // Web Share, so the link must also live in the shared text body.
@@ -253,14 +254,14 @@ export default function ShareCard({
         <p className="share-card__score">
           {t("result.scoreLine.user", {
             points: formatGermanDecimal(userPunkte),
-            total: result.totalQuestions,
+            total: maxPoints,
           })}
         </p>
 
         <p className="share-card__population">
           {t("result.scoreLine.populationPoints", {
             points: formatGermanDecimal(populationPunkte),
-            total: result.totalQuestions,
+            total: maxPoints,
           })}
         </p>
 

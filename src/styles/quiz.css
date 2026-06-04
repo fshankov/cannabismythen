@@ -222,13 +222,9 @@
   color: var(--color-text-muted);
 }
 
-/* Row 2: population mean line, centered under row 1. */
-.quiz-feedback-strip__population {
-  margin: 0;
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-  line-height: 1.4;
-}
+/* 2026-06-04 (Fedor) — the per-card population line was removed; that
+   comparison now lives only on the result card. (`.quiz-feedback-strip__population`
+   rule dropped.) */
 
 /* 2026-05-30 (Fedor) — the result-mode strip + inline result bar were
    removed. The result page leads straight into the verdict card; the

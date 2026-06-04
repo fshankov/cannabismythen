@@ -8,13 +8,13 @@
  *      (Falsch / Eher Falsch / Eher Richtig / Richtig, each an arrow SVG
  *      + label). Replaces the old VerdictScale spectrum.
  *   2. Front — post-answer feedback: statement dims, the answer label
- *      fades, the card border tints by Schritte tier, the chosen button
- *      gets a result border (correct button shown dashed), and a feedback
- *      cluster appears (tier icon + phrase + points badge: +1 / +0,66 /
- *      +0,33 / 0). Holds ~1.8 s.
+ *      fades, the chosen button gets a result border (correct button shown
+ *      dashed), and a feedback cluster appears (tier icon + verdict phrase
+ *      only — the points badge +3 / +2 / +1 / 0 lives in the FeedbackStrip
+ *      below the card, not on the card). Holds ~1.8 s. (The card itself is
+ *      borderless in every state — 2026-05-30.)
  *   3. Back (3D flip): statement tinted by the scientific verdict + a
  *      VerdictPill + the summary explanation + Details / Nächste buttons.
- *      No card border on the back.
  *
  * Already-answered cards (navigating back, or restored progress) skip the
  * feedback animation and render the back immediately. prefers-reduced-motion

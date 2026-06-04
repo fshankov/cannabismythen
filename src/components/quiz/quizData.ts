@@ -43,25 +43,25 @@ import type {
 //   Schritte map to Punkte per CaRM's standardisation (Abschlussbericht
 //   §4.3.3 + Tabelle "Indikatoren der quantitativen Analyse", p. 51):
 //
-//     0 Schritte → 100 Punkte    (= pointsForSchritte 1.00)
-//     1 Schritt  →  66.67 Punkte (= pointsForSchritte 0.66)
-//     2 Schritte →  33.33 Punkte (= pointsForSchritte 0.33)
-//     3 Schritte →   0 Punkte    (= pointsForSchritte 0.00)
+//     0 Schritte → 3 Punkte
+//     1 Schritt  → 2 Punkte
+//     2 Schritte → 1 Punkt
+//     3 Schritte → 0 Punkte
 //
-//   These are the linear interpolation of the report's "0 Punkte = niedrigste
-//   Ausprägung, 100 Punkte = höchste Ausprägung" across 4 equidistant
-//   Schritte. Same ladder ISD applies to the survey responses.
+//   (2026-06-04 integer ladder = `3 − Schritte`, replaces the old fractional
+//   1 / 0,66 / 0,33 / 0 scale.) It is the report's 0–100 standardisation
+//   (§4.3.3, p. 51: 100 / 66.67 / 33.33 / 0) rescaled to 0–3 (× 3 / 100).
+//   Same ladder ISD applies to the survey responses.
 //
 // USER DECK TOTAL vs POPULATION DECK TOTAL (apples-to-apples)
-//   User's Punkte for a deck of N myths = Σ pointsForSchritte (0..N).
-//   Population's Punkte for the same deck = Σ (populationCorrectPct / 100)
-//   per `populationExpectedExactCount(myths)` — also 0..N.
+//   User's Punkte for a deck of N myths = Σ pointsForSchritte (0..3N, integer).
+//   Population's Punkte for the same deck = Σ (populationCorrectPct × 3 / 100)
+//   per `populationExpectedPunkte(myths)` — also 0..3N (a mean, one decimal).
 //
-//   Both sides use the SAME per-question Schritte → Punkte ladder. The
-//   user's score for a question of Schritte=1 contributes 0.66 Punkte to
-//   their deck total; the population's mean for that same myth (e.g.
-//   78.32 Richtigkeit) contributes 0.7832 Punkte. Apples-to-apples —
-//   directly comparable, no rescaling needed.
+//   Both sides use the SAME per-question 3/2/1/0 ladder. A Schritte=1 answer
+//   contributes 2 Punkte; the population's mean for that same myth (e.g.
+//   78.32 Richtigkeit) contributes 78.32 × 3 / 100 = 2.35 Punkte.
+//   Apples-to-apples — directly comparable, no rescaling needed.
 //
 // BAND THRESHOLDS (scoreBand → profi / guterweg / gehtnoch / erwischt)
 //   Absolute thresholds on the percentage form (moduleScore returns a
@@ -93,27 +93,29 @@ export function schritte(
   return d as Schritte;
 }
 
-/** CaRM "Richtigkeit" point value for a single answer's Schritte. */
-export function pointsForSchritte(s: Schritte): 1 | 0.66 | 0.33 | 0 {
-  if (s === 0) return 1;
-  if (s === 1) return 0.66;
-  if (s === 2) return 0.33;
-  return 0;
+/** Points for a single answer on the integer ladder (2026-06-04, Fedor):
+ *  exact = 3, one step off = 2, two steps off = 1, opposite poles = 0.
+ *  i.e. `3 − schritte`. Replaces the old fractional 1 / 0,66 / 0,33 / 0
+ *  "Richtigkeit" scale. A deck of N myths now scores 0 … 3·N. */
+export function pointsForSchritte(s: Schritte): 3 | 2 | 1 | 0 {
+  return (3 - s) as 3 | 2 | 1 | 0;
 }
 
-/** Display string for one answer's points on the 0–1 per-card scale
- *  (QuizCard redesign, 2026-05-29). German comma; the 3-Schritte case
- *  shows a bare "0" (rendered in rose on the card). Drives the on-card
- *  points badge. Backlog 6.1 (2026-06-03): dropped the "+" prefix per ISD. */
+/** Display string for one answer's points (per-card badge). "+3 / +2 / +1"
+ *  for a scoring answer, bare "0" for the opposite-pole answer (rendered in
+ *  rose; the verdict phrase next to it carries the comment). 2026-06-04
+ *  (Fedor): the "+" is back and the scale is the integer 3/2/1/0 ladder. */
 export function pointsDisplay(s: Schritte): string {
   const p = pointsForSchritte(s);
   if (p === 0) return "0";
-  return String(p).replace(".", ",");
+  return `+${p}`;
 }
 
-/** Module score as an integer percentage. Sum of per-question points
- *  divided by question count, scaled to 0–100. Only includes questions
- *  the user actually answered — partial runs return a partial score. */
+/** Module score as an integer percentage (0–100). Sum of per-question
+ *  points (now 0–3 each) over the max possible (3 · question count), scaled
+ *  to 0–100, so `scoreBand()` thresholds stay unchanged. Only includes
+ *  questions the user actually answered — partial runs return a partial
+ *  score. */
 export function moduleScore(
   answers: CardAnswer[],
   myths: QuizMyth[]
@@ -127,7 +129,7 @@ export function moduleScore(
       schritte(a.chosenClassification, myth.correctClassification)
     );
   }
-  return Math.round((sumPoints / myths.length) * 100);
+  return Math.round((sumPoints / (myths.length * 3)) * 100);
 }
 
 /** Per-band counts derived from the user's Schritte per question. The
@@ -191,10 +193,9 @@ export function scoreBand(pct: number): ScoreBand {
  * "Du gehörst zu N % der Erwachsenen, die diese Aussage genau richtig
  * eingeordnet haben." — but `populationCorrectPct` is the mean Richtigkeit
  * score (0–100), NOT the share of fully-correct respondents (see types.ts
- * JSDoc + the SCORING METHODOLOGY block above). The reveal now says
- * "Erwachsene (18–70) erreichen hier im Durchschnitt {X} von 100 Punkten."
- * via the i18n key `result.row.populationMean` — sourced directly from
- * `myth.populationCorrectPct` rounded to one decimal in FeedbackStrip.
+ * JSDoc + the SCORING METHODOLOGY block above). The per-card population
+ * reveal (`result.row.populationMean`) was removed 2026-06-04 — that
+ * comparison now lives only on the result card (ShareCard).
  *
  * Function kept inert for one release cycle in case an out-of-tree
  * branch still calls it. Retire alongside the `populationCorrectPct`
@@ -211,10 +212,10 @@ export function userJoinedPercent(
   return Math.round(raw);
 }
 
-/** User's deck total in Punkte (0–N scale, N = number of myths).
- *  Sum of pointsForSchritte across all answers. Rounded to one decimal.
- *  Apples-to-apples with `populationExpectedExactCount()` — both use the
- *  same per-question 0/0.33/0.66/1 Punkt ladder per CaRM §4.3.3. */
+/** User's deck total in Punkte (0–3·N scale, N = number of myths).
+ *  Sum of pointsForSchritte (3 / 2 / 1 / 0) across all answers — an integer.
+ *  Apples-to-apples with `populationExpectedPunkte()` (the population's mean
+ *  on the same 3/2/1/0 ladder). */
 export function userExpectedPunkte(
   myths: QuizMyth[],
   answers: CardAnswer[]
@@ -231,14 +232,17 @@ export function userExpectedPunkte(
   return Math.round(sum * 10) / 10;
 }
 
-/** Expected number of genau-richtig answers a random Erwachsene (18–70)
- *  scores across a deck. Σ (myth.populationCorrectPct / 100). One decimal.
- *  Poisson-binomial expectation — exact under the per-myth marginals,
- *  agnostic to between-myth correlation. */
-export function populationExpectedExactCount(myths: QuizMyth[]): number {
+/** Population's expected deck total in Punkte on the 3/2/1/0 ladder
+ *  (0–3·N scale), shown on the result card with one decimal. Each myth
+ *  contributes the mean Richtigkeit converted to the new scale:
+ *  `populationCorrectPct × 3 / 100` (populationCorrectPct is the CaRM mean
+ *  Richtigkeit, 0–100; ×3/100 maps it onto 0–3). Apples-to-apples with
+ *  `userExpectedPunkte()`. The populationCorrectPct values are unchanged —
+ *  only the conversion factor. */
+export function populationExpectedPunkte(myths: QuizMyth[]): number {
   if (myths.length === 0) return 0;
   const sum = myths.reduce(
-    (acc, m) => acc + m.populationCorrectPct / 100,
+    (acc, m) => acc + (m.populationCorrectPct * 3) / 100,
     0
   );
   return Math.round(sum * 10) / 10;
@@ -255,13 +259,13 @@ export function populationModuleScore(myths: QuizMyth[]): number {
   return Math.round(sum / myths.length);
 }
 
-/** Signed delta `userExactCount − populationExpectedExactCount`, one
- *  decimal. Positive → user above the population average. */
+/** Signed delta `userExactCount − populationExpectedPunkte`, one decimal.
+ *  Positive → user above the population average. (Currently unused.) */
 export function exactCountDelta(
   userExactCount: number,
   myths: QuizMyth[]
 ): number {
-  const expected = populationExpectedExactCount(myths);
+  const expected = populationExpectedPunkte(myths);
   return Math.round((userExactCount - expected) * 10) / 10;
 }
 
