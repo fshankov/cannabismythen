@@ -10,13 +10,12 @@
  * even while it slowly turns.
  *
  * Composition:
- *   • ~68 readable chips — horizontal iMessage-style bubbles (group-
- *     tinted, integrated rounded tail growing from a corner: left =
- *     incoming, right = outgoing, top = variety) + clean media/social
- *     source tags (icon + Quelle-tag + text, right-edge clip-path
- *     arrow, no left rail).
- *   • ~45 tiny speck fragments + one gold easter-egg speck, forming the
- *     iceberg of thousands behind the readable layer.
+ *   • 58 readable chips — horizontal iMessage-style bubbles (group-
+ *     tinted pills). NOTE (Fedor 2026-06-08): the media/social source
+ *     tags and the easter-egg speck were removed so the cloud shows
+ *     ONLY the authentic CaRM statements.
+ *   • 45 tiny speck fragments forming the iceberg of thousands behind
+ *     the readable layer.
  *   • Gentle auto-rotation (paused on hover + when off-screen); reduced
  *     motion → a single static frame.
  *   • Live group-fit-scale keeps the whole sphere inside the canvas at
@@ -27,10 +26,15 @@
  * (several per cell), holds, then dissolves — leaving the grid that
  * Step 3's real myth matrix takes over. Specks fade immediately.
  *
- * Statements are authentic first-person assumptions + questions tied to
- * the myth themes (funny + serious), NOT copies of the theses. Sources
- * are media/social only (no institutions named). AI-drafted, ISD review
- * pending per the German-content rule.
+ * Voice + speck statements are sourced VERBATIM from the CaRM qualitative-
+ * stage myth list ("Auswahl Mythen Originalton" — _local/research/
+ * "! Mythen From Qualitative stage.xlsx") per Asana task 1215409887535304:
+ * the authentic original-tone statements ISD collected, not AI copy. Each
+ * chip's group tag (adults/minors/consumers/young_adults/parents/
+ * professional) is an editorial/aesthetic choice — it drives the bubble
+ * colour + icon only and is NOT a CaRM data attribute. The cloud now
+ * holds ONLY these Excel statements — the earlier AI media/social source
+ * tags and the easter-egg speck were removed (Fedor 2026-06-08).
  *
  * Perf: ~113 nodes, transform/opacity writes per frame (compositor-
  * friendly), blur throttled to >0.2px deltas. React renders the chip
@@ -75,94 +79,94 @@ const VOICE_ICONS: Record<VoiceGroup, IconComponent> = {
   professional: IconFachkraefte,
 };
 
-/* ── Statement pool — 58 voice messages + 10 media/social sources. ── */
+/* ── Statement pool — 64 authentic CaRM survey statements, verbatim from the
+ *    ISD Excel (refreshed + expanded per Fedor 2026-06-08). Interleaved across
+ *    the six voice groups so the sphere shows a mix of colours, not blocks. ── */
 const VOICE_POOL: ReadonlyArray<[VoiceGroup, string]> = [
-  ['adults', 'harmloser als mein Bier'],
-  ['parents', 'seit er kifft, nur noch faul'],
-  ['consumers', 'ohne schlaf ich nicht ein'],
-  ['minors', 'machen bei uns eh alle'],
-  ['young_adults', 'besser als sich zu betrinken'],
-  ['parents', 'macht das Teenie-Hirn kaputt?'],
-  ['consumers', 'gegen Migräne unschlagbar'],
-  ['adults', 'Einstiegsdroge? Quatsch'],
-  ['minors', 'ist doch ne Pflanze'],
-  ['professional', 'kann Psychosen auslösen'],
-  ['consumers', 'Streckmittel sind das Problem'],
-  ['parents', 'bekifft fahren ist gefährlich'],
-  ['young_adults', 'macht mich kreativ'],
-  ['adults', 'kenn keinen Süchtigen'],
-  ['minors', 'ist doch jetzt legal'],
-  ['professional', 'je früher, desto riskanter'],
-  ['consumers', 'macht ruhig, nicht aggro'],
-  ['parents', 'meine Tochter wurde antriebslos'],
-  ['young_adults', 'hilft beim Runterkommen'],
-  ['adults', 'Überdosis? gibts nicht'],
-  ['minors', 'riecht eklig'],
-  ['consumers', 'besser als Schmerztabletten'],
-  ['adults', 'macht doch nur dumm'],
-  ['young_adults', 'entspannt nach der Schicht'],
-  ['parents', 'und die Lunge?'],
+  ['adults', 'ist doch wie Alkohol'],
+  ['minors', 'Es kiffen doch eh alle'],
   ['consumers', 'hilft beim Einschlafen'],
-  ['minors', 'voll harmlos'],
-  ['professional', 'Abhängigkeit ist real'],
-  ['adults', 'natürlich, also gesund?'],
-  ['parents', 'macht aggressiv, oder?'],
-  ['consumers', 'gegen Übelkeit top'],
-  ['young_adults', 'billiger als Bier'],
-  ['adults', 'mein Bruder kifft täglich'],
-  ['minors', 'alle reden drüber'],
-  ['consumers', 'macht den Kopf frei'],
-  ['parents', 'er isst nur noch Chips'],
-  ['adults', 'schlimmer als Zigaretten?'],
-  ['minors', 'meine Eltern wissen nichts'],
-  ['young_adults', 'gegen Prüfungsstress'],
-  ['consumers', 'endlich keine Rückenschmerzen'],
-  ['professional', 'das Lungenkrebs-Risiko bleibt'],
-  ['adults', 'alle tun so schockiert'],
-  ['parents', 'und wenn er nicht aufhört?'],
-  ['minors', 'ein Zug schadet nicht'],
-  ['consumers', 'besser drauf als nüchtern'],
-  ['young_adults', 'macht Musik schöner'],
-  ['adults', 'früher war das Teufelszeug'],
-  ['parents', 'die Augen werden so rot'],
-  ['consumers', 'gegen Appetitlosigkeit'],
-  ['professional', 'verstärkt Angststörungen'],
-  ['minors', 'schmeckt nach nichts'],
-  ['adults', 'Hauptsache nicht am Steuer'],
-  ['young_adults', 'lieber das als Tabletten'],
-  ['parents', 'wo kauft der das?'],
-  ['consumers', 'schlafe endlich durch'],
-  ['adults', 'macht antriebslos, klar'],
-  ['minors', 'voll der Hype'],
-  ['professional', 'Wechselwirkung mit Psychopharmaka'],
+  ['young_adults', 'Lieber Kiffen als Saufen!'],
+  ['parents', 'Schädlich für Kinder und Jugendliche'],
+  ['professional', 'Erhöht Demenzrisiko'],
+  ['adults', 'ist weniger schädlich als Alkohol'],
+  ['minors', 'Wer kifft, ist cool'],
+  ['consumers', 'Lindert Migräne'],
+  ['young_adults', 'Spaß haben'],
+  ['parents', 'Einstiegsdroge'],
+  ['professional', 'Erhöhtes Risiko für Psychosen'],
+  ['adults', 'ist ungefährlich'],
+  ['minors', 'Peer pressure'],
+  ['consumers', 'Lindert Übelkeit'],
+  ['young_adults', 'Freiheitsgefühl'],
+  ['parents', 'Zerstört Familien'],
+  ['professional', 'Risikofaktor für Schizophrenie'],
+  ['adults', 'ist nun legal'],
+  ['minors', 'Coole Peergroup'],
+  ['consumers', 'Wirkt entspannend'],
+  ['young_adults', 'macht gute Laune'],
+  ['parents', 'Schulabbruch'],
+  ['professional', 'Mentale und körperliche Abhängigkeit'],
+  ['adults', 'macht faul'],
+  ['minors', 'Ansehen in der Peergroup steigt'],
+  ['consumers', 'macht kreativer'],
+  ['young_adults', 'high sein, Heiterkeit, Euphorie'],
+  ['parents', 'Gefahr für Jugendliche'],
+  ['professional', 'Suchtpotenzial'],
+  ['adults', 'Motivationsverlust'],
+  ['minors', 'Jetzt wo es legal ist, kiffen alle'],
+  ['consumers', 'Kein Kater am nächsten Tag'],
+  ['young_adults', 'gesünder als Alkohol'],
+  ['parents', 'Schlechte Noten in der Schule'],
+  ['professional', 'Lungenkrebsrisiko'],
+  ['adults', 'Es macht müde'],
+  ['minors', 'macht high'],
+  ['consumers', 'Besser schlafen'],
+  ['young_adults', 'Steigert Kreativität'],
+  ['parents', 'Ärger zu Hause'],
+  ['professional', 'Herzrhythmusstörungen'],
+  ['adults', 'Ab und zu Kiffen ist völlig unbedenklich'],
+  ['minors', 'Konsum aus Gruppenzwang'],
+  ['consumers', 'Wirkt schmerzlindernd'],
+  ['young_adults', 'Lässt einen abschalten'],
+  ['parents', 'Gruppenzwang unter Jugendlichen'],
+  ['professional', 'mindert den IQ'],
+  ['adults', 'Von Cannabis ist noch nie jemand gestorben'],
+  ['minors', 'Dichtsein'],
+  ['consumers', 'hilft bei Schlafproblemen'],
+  ['young_adults', 'Zur Ruhe kommen, Abschalten'],
+  ['parents', 'Sozialer Abstieg'],
+  ['professional', 'Beeinträchtigung der Motorik'],
+  ['adults', 'ist ein Allheilmittel'],
+  ['minors', 'Zur Gruppe dazu gehören - "Gruppenzwang"'],
+  ['consumers', 'Hilft bei chronischen Schmerzen'],
+  ['young_adults', 'Ausgelassenheit'],
+  ['parents', 'Schädigt das Hirn in der Entwicklung bei Kindern und Jugendlichen'],
+  ['professional', 'Entwicklungsverzögerungen des Gehirns bei Jugendlichen'],
+  ['consumers', 'innere Ruhe'],
+  ['young_adults', 'Lachflash'],
+  ['parents', 'Ausbildungsabbruch'],
+  ['professional', 'Kardiovaskuläre Effekte'],
 ];
 
-/** Media + social sources ONLY — no institutions / government bodies. */
-const SOURCE_POOL: ReadonlyArray<[SourceCategoryId, string, string]> = [
-  ['traditional_media', 'ARD', 'Ein Jahr Legalisierung'],
-  ['traditional_media', 'ZDF', 'Forscher warnen vor Folgen'],
-  ['social_media', 'TikTok', 'Homegrow geht viral'],
-  ['internet', 'Reddit', 'CBD half mir sofort'],
-  ['social_media', 'Insta', 'CBD gegen alles'],
-  ['internet', 'YouTube', 'mein Entzug-Tagebuch'],
-  ['internet', 'Forum', 'Aufhören dauert Wochen'],
-  ['traditional_media', 'Bild', 'Reform gescheitert?'],
-  ['print_physical', 'Plakat', '„Kiffen ist nicht harmlos"'],
-  ['social_media', 'X', 'Reform spaltet das Land'],
-];
+/** Iter-24 (Fedor 2026-06-08): the cloud must show ONLY the authentic
+ *  CaRM statements, so the earlier AI-drafted media/social headlines were
+ *  removed — this pool is intentionally empty. The 'source' branch in
+ *  buildReadable + the render fork stay inert so the structure (and any
+ *  future re-add) remain intact. */
+const SOURCE_POOL: ReadonlyArray<[SourceCategoryId, string, string]> = [];
 
 const SPECK_POOL: ReadonlyArray<string> = [
-  'Naturprodukt', 'macht dumm', 'harmlos', 'süchtig?', 'Einstiegsdroge?', 'gegen Schmerzen',
-  'macht müde', 'Psychose', 'wie Alkohol?', 'gegen Angst', 'macht kreativ', 'Schwarzmarkt',
-  'Verkehrsrisiko', 'Lungenschaden', 'gegen Übelkeit', 'macht faul', 'beruhigt', 'gegen Stress',
-  'Schulnoten', 'billiger', 'cool', 'nö', 'übertrieben', 'medizinisch', 'gegen Migräne',
-  'kein Kater', 'Herzrhythmus', 'Sucht?', 'wirklich?', 'legal jetzt', 'hilft mir', 'und mein Kind?',
-  'reine Kopfsache', 'entkrampft', 'probier mal', 'macht locker', 'besorgt', 'seit Jahren clean',
-  'gegen Tinnitus', 'was solls', 'Pflanze halt', 'gegen Krämpfe', 'frühe Pubertät', 'alle machens',
-  'rote Augen',
+  'Paranoia', 'Lethargie', 'Faulheit', 'Krebsrisiko', 'rote Augen', 'Schmerzfrei',
+  'Trägheit', 'Verdummung', 'Tödlich', 'Droge', 'Lachflash', 'Fressflash',
+  'innere Ruhe', 'Reizbar', 'Zittern', 'Halluzinationen', 'Schmerzlinderung', 'Krebsheilend',
+  'Krebsvorbeugend', 'Auflockernd', 'Stimulierend', 'Kontrollverlust', 'Gewichtsverlust', 'Lungenschäden',
+  'Schmerzhemmend', 'macht wach', 'macht labil', 'macht langsam', 'Trockener Mund', 'Verpeiltheit',
+  'Verwirrtheit', 'Wahnvorstellungen', 'Stigmatisierung', 'Soziale Isolation', 'Sozialer Abstieg', 'Geldprobleme',
+  'Jobverlust', 'Schulprobleme', 'Runterkommen', 'Zugedröhnt sein', 'gerötete Augen', 'Redeflash',
+  'Dichtsein', 'Potenz nimmt ab', 'Schlafstörungen',
 ];
 
-const EGG_TEXT = 'Ich glaub, nur ZIS und ISD wissen das wirklich';
 const SPECK_GROUPS: VoiceGroup[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents', 'professional'];
 const TAIL_SIDES: Array<'l' | 'r' | 't'> = ['l', 'r', 'l', 'r', 't'];
 
@@ -187,12 +191,8 @@ function buildReadable(): ReadableDef[] {
 
 const READABLE = buildReadable();
 
-/** Speck list with the easter egg injected at ~40 % through. */
-const SPECK_ITEMS: string[] = (() => {
-  const arr = SPECK_POOL.slice();
-  arr.splice(Math.floor(arr.length * 0.4), 0, '__EGG__');
-  return arr;
-})();
+/** Speck list — no easter egg; only the authentic CaRM speck fragments. */
+const SPECK_ITEMS: string[] = SPECK_POOL.slice();
 
 interface SphereNode {
   base: { x: number; y: number; z: number };
@@ -506,13 +506,6 @@ export function VizPeopleVoices(_props: Props) {
           );
         })}
         {SPECK_ITEMS.map((s, i) => {
-          if (s === '__EGG__') {
-            return (
-              <span key={'s' + i} ref={setRef} className="viz-chip viz-egg" title={EGG_TEXT}>
-                {EGG_TEXT}
-              </span>
-            );
-          }
           const grp = SPECK_GROUPS[i % SPECK_GROUPS.length];
           return (
             <span key={'s' + i} ref={setRef} className="viz-chip viz-speck" data-group={grp} title={s}>

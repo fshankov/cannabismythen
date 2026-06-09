@@ -152,7 +152,7 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
   return (
     <div className="viz viz-spannweite-sources" ref={containerRef}>
       <header className="viz-spannweite-sources__header">
-        <span className="viz-spannweite-sources__header-eyebrow">Beispiel-Quellen</span>
+        <span className="viz-spannweite-sources__header-eyebrow">Beispiel-Informationswege</span>
         <p className="viz-spannweite-sources__header-list">
           Apotheke · Angehörige · Foren · Plakat · Kurzbeitrag TV/Radio
         </p>
@@ -195,7 +195,7 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
             className="viz-spannweite-sources__cell viz-spannweite-sources__cell--label viz-spannweite-sources__cell--header"
             role="columnheader"
           >
-            <span className="viz-spannweite-sources__col-eyebrow">Quellen</span>
+            <span className="viz-spannweite-sources__col-eyebrow">Informationswege</span>
           </div>
           {COLUMNS.map((metric, i) => {
             const isRevealed = i < revealedColumns;
@@ -340,7 +340,7 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
           row labels) instead of a bare colour dot; the Daten-Explorer
           link trails on the right of the same row (after Persönliches
           Umfeld, the last category). */}
-      <div className="viz-spannweite-sources__legend" aria-label="Quellen-Kategorien">
+      <div className="viz-spannweite-sources__legend" aria-label="Informationswege-Kategorien">
         {visibleCategories.map((c) => {
           const LegIcon = SOURCE_CATEGORY_ICONS[c.id as SourceCategoryId];
           return (

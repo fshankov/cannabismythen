@@ -55,7 +55,7 @@ steps:
       Bekannt, bedeutsam —
       und falsch eingeschätzt.
     bodyText: |-
-      Beispiel-These: „Cannabiskonsum verursacht einen generellen Motivationsverlust." [↓ falsch]
+      Beispiel-Mythos: „Cannabiskonsum verursacht einen generellen Motivationsverlust." [↓ falsch]
 
       {icon:awareness} **Kenntnis.** 26 % der Erwachsenen kennen diesen Mythos — ein niedriger mittlerer Wert.
 
@@ -72,9 +72,9 @@ steps:
 
       {icon:prevention_significance} **Präventionsbedeutung.** Aus individueller Bedeutung und Beurteilung ergibt sich ein mittleres Niveau von 60 Punkten — einer der höchsten Werte unter allen 42 Thesen.
 
-      {icon:population_relevance} **Bevölkerungsrisiko.** Doch über die gesamte volljährige Bevölkerung gerechnet — nicht nur über jene, die den Mythos schon kennen — fällt die Präventionsbedeutung niedrig aus (Bevölkerungsrelevanz: 17 Punkte).
+      {icon:population_relevance} **Bevölkerungsrelevanz.** Doch über die gesamte volljährige Bevölkerung gerechnet — nicht nur über jene, die den Mythos schon kennen — fällt die Präventionsbedeutung niedrig aus (Bevölkerungsrelevanz: 17 Punkte).
 
-      Bevölkerungsrisiko ist nur für Voll- und Minderjährige belastbar; die anderen Gruppen sind zu klein für eine Hochrechnung.
+      Bevölkerungsrelevanz ist nur für Voll- und Minderjährige belastbar; die anderen Gruppen sind zu klein für eine Hochrechnung.
     hint: ""
   - heading: |-
       Wo wir suchen.

@@ -72,13 +72,13 @@ export function VizTeamRow({
           className="viz-team__institution"
           aria-label="Institut für interdisziplinäre Sucht- und Drogenforschung (ISD) Hamburg — Webseite öffnen"
         >
+          {/* Full ISD logo (mark + name baked in) — no text label below,
+              it would duplicate the wordmark (Fedor 2026-06-09). */}
           <img
-            src={withBase('logos/isd-hamburg.svg')}
-            alt=""
+            src={withBase('logos/isd-hamburg-neg.svg')}
+            alt="ISD Hamburg"
             className="viz-team__logo"
-            aria-hidden="true"
           />
-          <span className="viz-team__institution-label">ISD Hamburg</span>
         </a>
         <a
           href="https://www.bioeg.de/"
@@ -87,13 +87,12 @@ export function VizTeamRow({
           className="viz-team__institution"
           aria-label="Bundesinstitut für Öffentliche Gesundheit (BIÖG) — Webseite öffnen"
         >
+          {/* Full BIÖG logo (mark + name baked in) — no text label below. */}
           <img
-            src={withBase('logos/bioeg.svg')}
-            alt=""
+            src={withBase('logos/bioeg-neg.svg')}
+            alt="Bundesinstitut für Öffentliche Gesundheit (BIÖG)"
             className="viz-team__logo"
-            aria-hidden="true"
           />
-          <span className="viz-team__institution-label">Gefördert vom BIÖG</span>
         </a>
       </div>
 

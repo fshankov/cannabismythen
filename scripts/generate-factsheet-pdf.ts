@@ -35,6 +35,7 @@ const OUT_PDF = join(OUT_DIR, "cannabismythen-mythen-faktenblaetter.pdf");
 const OUT_HTML = join(OUT_DIR, "cannabismythen-mythen-faktenblaetter.html");
 
 const SITE = "https://cannabismythen.de";
+const REPORT_URL = "https://www.isd-hamburg.de/wp-content/uploads/2026/03/Abschlussbericht_CaRM_final.pdf";
 const SAMPLE = !!process.env.SAMPLE;
 const SAMPLE_IDS = ["m01", "m13", "m25"]; // falsch · richtig · eher_falsch
 
@@ -106,14 +107,26 @@ function bandColor(v: number): string {
   while (i < BAND_THRESHOLDS.length && v >= BAND_THRESHOLDS[i]) i++;
   return BAND_COLORS[i];
 }
-// indicator icon + short label per value column, in .mdoc column order
+// indicator icon + short label + unit per value column, in .mdoc column order
 const INDICATORS = [
-  { icon: "myth-kenntnis", label: "Kenntnis" },
-  { icon: "myth-bedeutung", label: "Bedeutung" },
-  { icon: "myth-richtigkeit", label: "Richtigkeit" },
-  { icon: "myth-praevention", label: "Prävention" },
-  { icon: "myth-bevoelkerungsbezug", label: "Bev. Relevanz" },
+  { icon: "myth-kenntnis", label: "Kenntnis", unit: "%" },
+  { icon: "myth-bedeutung", label: "Bedeutung", unit: "Punkte" },
+  { icon: "myth-richtigkeit", label: "Richtigkeit", unit: "Punkte" },
+  { icon: "myth-praevention", label: "Prävention", unit: "Punkte" },
+  { icon: "myth-bevoelkerungsbezug", label: "Bev. Relevanz", unit: "Punkte" },
 ];
+
+// Canonical indicator descriptions — VERBATIM from the live tool's pop-ups
+// (src/lib/dashboard/translations.ts `indicator.*.description`). Rendered as a
+// compact key under each table.
+const INDICATOR_DEFS: { icon: string; label: string; def: string }[] = [
+  { icon: "myth-kenntnis", label: "Kenntnis", def: "Anteil der Befragten, die den Mythos kennen (0–100 %). Höher = bekannter." },
+  { icon: "myth-bedeutung", label: "Bedeutung", def: "Subjektive Wichtigkeit des Mythos für den eigenen Umgang mit Cannabis (0–100 Punkte). Nur bei Personen erhoben, die den Mythos kennen." },
+  { icon: "myth-richtigkeit", label: "Richtigkeit", def: "Übereinstimmung der Einschätzung mit der wissenschaftlichen Klassifikation (0–100 Punkte). Höher = treffender." },
+  { icon: "myth-praevention", label: "Prävention", def: "Kombination aus Bedeutung und Fehleinschätzung (0–100 Punkte). Höher = größerer Präventionsbedarf." },
+  { icon: "myth-bevoelkerungsbezug", label: "Bevölkerungsrelevanz", def: "Bevölkerungsbezogene Risikobedeutung (0–100 Punkte) — kombiniert die individuelle Präventionsbedeutung mit dem Verbreitungsgrad des Mythos. Nur für Volljährige (18–70) und Minderjährige (16–17) erhoben." },
+];
+
 
 // ---------------------------------------------------------------------------
 // Asset loaders
@@ -139,14 +152,6 @@ function logoSvg(file: string): string {
     return "";
   }
   return readFileSync(p, "utf8").replace(/<\?xml[\s\S]*?\?>/, "").replace(/<!DOCTYPE[\s\S]*?>/, "").trim();
-}
-function logoPng(file: string, alt: string): string {
-  const p = join(LOGOS_DIR, file);
-  if (!existsSync(p)) {
-    console.warn(`  ! missing logo ${file}`);
-    return "";
-  }
-  return `<img class="brand-img" src="data:image/png;base64,${readFileSync(p).toString("base64")}" alt="${alt}"/>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -269,28 +274,38 @@ function renderDataTable(lines: string[]): string {
   const thead = `<thead><tr>
     <th class="col-aud">Zielgruppe</th>
     ${INDICATORS.map(
-      (ind) => `<th><span class="ind-ic">${svg(ind.icon)}</span><span class="ind-lb">${esc(ind.label)}</span></th>`,
+      (ind) => `<th><span class="ind-ic">${svg(ind.icon)}</span><span class="ind-lb">${esc(ind.label)}</span><span class="ind-unit">${esc(ind.unit)}</span></th>`,
     ).join("")}
   </tr></thead>`;
 
   const tbody = `<tbody>${body
     .map((r) => {
       const aud = audience(r[0]);
-      const audCell = `<td class="aud"><span class="aud-ic" style="color:${aud.color}">${svg(aud.icon)}</span>${esc(r[0])}</td>`;
+      const audCell = `<td class="aud"><span class="aud-ic">${svg(aud.icon)}</span>${esc(r[0])}</td>`;
       const valCells = r
         .slice(1, 6)
-        .map((c, ci) => {
+        .map((c) => {
           const num = parseFloat(c.replace(",", "."));
-          if (Number.isNaN(num)) return `<td class="na">${esc(c)}</td>`;
-          // Kenntnis (first value column) is a percentage; the rest are points
-          const txt = ci === 0 ? `${esc(c)}<span class="pct">%</span>` : esc(c);
-          return `<td class="val" style="background:${bandColor(num)}">${txt}</td>`;
+          // missing values render as the popup's "k. A." (keine Angabe), not "—"
+          if (Number.isNaN(num)) return `<td class="na">k. A.</td>`;
+          // rounded integers, no decimals (units live in the column headers)
+          const rounded = Math.round(num);
+          return `<td class="val" style="background:${bandColor(rounded)}">${rounded}</td>`;
         })
         .join("");
       return `<tr>${audCell}${valCells}</tr>`;
     })
     .join("")}</tbody>`;
   return `<table class="data-table">${thead}${tbody}</table>`;
+}
+
+// Compact indicator key shown under each data table — canonical definitions.
+function renderIndicatorKey(): string {
+  const items = INDICATOR_DEFS.map(
+    (d) =>
+      `<div class="ind-def"><span class="ind-def-ic">${svg(d.icon)}</span><span><strong>${esc(d.label)}</strong> — ${esc(d.def)}</span></div>`,
+  ).join("");
+  return `<div class="ind-defs">${items}</div>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -319,7 +334,7 @@ function renderMyth(myth: Myth, cat: { label: string; icon: string; color: strin
   ${ein ? `<div class="sec"><div class="sec-h">Einordnung</div>${renderParagraphs(ein.lines)}</div>` : ""}
   ${syn ? `<div class="sec sec-synthese" style="border-color:${v.color}"><div class="sec-h">Synthese</div>${renderParagraphs(syn.lines)}</div>` : ""}
   ${erk ? `<div class="sec"><div class="sec-h">Zentrale Erkenntnisse</div>${renderBullets(erk.lines)}</div>` : ""}
-  ${dat ? `<div class="sec sec-data"><div class="sec-h">Daten nach Zielgruppen</div>${renderDataTable(dat.lines)}<p class="data-cap">Mittelwerte (0–100) aus der CaRM-Bevölkerungsbefragung in Deutschland (Erwachsene 18–70 und weitere Zielgruppen). <strong>Richtigkeit</strong> = durchschnittliche Übereinstimmung mit der wissenschaftlichen Einordnung. „—“ = für diese Gruppe nicht erhoben.</p></div>` : ""}
+  ${dat ? `<div class="sec sec-data"><div class="sec-h">Daten nach Zielgruppen</div>${renderDataTable(dat.lines)}${renderIndicatorKey()}</div>` : ""}
   ${ref ? `<div class="sec sec-ref"><div class="sec-h">Referenzen</div>${renderReferences(ref.lines)}</div>` : ""}
 </section>`;
 }
@@ -350,35 +365,44 @@ function renderCategoryDivider(
 }
 
 function renderIntro(): string {
-  const desc: Record<string, string> = {
-    Richtig: "Trifft nach aktueller wissenschaftlicher Evidenz zu.",
-    "Eher richtig": "Trifft überwiegend zu, mit Einschränkungen.",
-    "Eher falsch": "Trifft überwiegend nicht zu.",
-    Falsch: "Trifft nach aktueller Evidenz nicht zu.",
-    "Keine Aussage möglich": "Die Studienlage erlaubt (noch) kein wissenschaftliches Urteil.",
-  };
-  const rows = Object.entries(VERDICTS)
+  // Cover/Deckblatt — team text verbatim (_local/research/sammlung fact-sheets
+  // einleitung.docx). Q&A headings are styled divs (not <h2>) so they stay out
+  // of the PDF outline. The Abschlussbericht link sits on the word „hier".
+  const arrowKey = [
+    ["richtig", "Richtig"],
+    ["eher_richtig", "Eher richtig"],
+    ["eher_falsch", "Eher falsch"],
+    ["falsch", "Falsch"],
+    ["keine_aussage", "Keine Aussage möglich"],
+  ]
     .map(
-      ([key, v]) => `<li>
-        <span class="vbadge" style="background:${v.bg};color:${v.color};border-color:${v.color}40"><span class="vbadge-icon">${verdictGlyph(key)}</span><span class="vbadge-label">${v.label}</span></span>
-        <span class="legend-desc">${desc[v.label] ?? ""}</span>
-      </li>`,
+      ([k, label]) =>
+        `<span class="akey-item"><span class="akey-glyph">${verdictGlyph(k)}</span>${label}</span>`,
     )
     .join("");
   return `
 <section class="intro">
   <div class="intro-head">
     <div class="wordmark">Cannabis: <em>Mythen</em> &amp; Evidenz</div>
-    <div class="intro-sub">42 Mythen im wissenschaftlichen Faktencheck</div>
-    <p class="intro-lede">Die wissenschaftliche Einordnung von 42 verbreiteten Annahmen über Cannabis — aufbereitet für Lehr- und Fachkräfte. Auf Grundlage des Forschungsprojekts <strong>CaRM (Cannabiskonsum&nbsp;– Risiken und Mythen)</strong>.</p>
+    <div class="intro-sub">42 Fact-Sheets zu den in Deutschland relevanten Cannabismythen</div>
   </div>
   <div class="intro-body">
-    <div class="legend-h">So lesen Sie dieses Dokument</div>
-    <p class="intro-note">Jeder Mythos erhält eine von fünf wissenschaftlichen Einordnungen. Die Pfeil-Symbole zeigen die Richtung auch unabhängig von der Farbe an.</p>
-    <ul class="legend-list">${rows}</ul>
-    <p class="intro-note"><strong>Daten nach Zielgruppen:</strong> Je Mythos zeigt eine Tabelle Mittelwerte (0–100) aus der CaRM-Bevölkerungsbefragung in Deutschland (Erwachsene 18–70 sowie weitere Zielgruppen). Die Spalte <strong>Richtigkeit</strong> zeigt, wie stark eine Gruppe im Mittel mit der wissenschaftlichen Einordnung übereinstimmt; die Zellenfarbe geht von hell (niedrig) zu warm (hoch). „—“ = für diese Gruppe nicht erhoben. Verweise <span class="cite-demo">[1, 2]</span> beziehen sich auf die Quellen am Ende jedes Mythos.</p>
+    <div class="qa-h">Was kann man erfahren?</div>
+    <p class="qa-p">Der wissenschaftliche Faktencheck zu jedem einzelnen Mythos: Sein Hintergrund wird eingeordnet, die wichtigsten Fakten aus der Forschung werden zusammengestellt und in eine stark verdichtete Synthese der Fakten zusammengeführt (Stand: Sommer 2025). Zu jedem Mythos wird eine vierstufige Kurzklassifikation vorgenommen: richtig, eher richtig, eher falsch, falsch. Sie berücksichtigt auch die Qualität der wissenschaftlichen Datenlage. In zwei Fällen konnte keine Kurzklassifikationen vorgenommen werden. Die einbezogenen wissenschaftlichen Quellen, die diese Urteile tragen und die präsentierten Fakten liefern, werden angegeben.</p>
+    <p class="qa-p">Aber wie weit verbreitet sind die Mythen in Deutschland? Wie wichtig sind sie für spezifische Gruppen? Wie richtig (oder falsch) werden sie in diesen beurteilt? Wie hoch ist der Präventionsbedarf für die Mythen in diesen Gruppen oder sogar in der erwachsenen bzw. minderjährigen Bevölkerung insgesamt? – Darüber gibt die jeweils ergänzte Kurztabelle zu den empirischen Ergebnissen der durchgeführten Befragungen Auskunft (Stand: Sommer 2025).</p>
+
+    <div class="qa-h">Wie sind die Ergebnisse zu Stande gekommen?</div>
+    <p class="qa-p">Genauere Hinweise zum methodischen Vorgehen des Forschungsprojektes CaRM finden sich im Projekt-Abschlussbericht, der zum Download auf der Internetseite des Instituts für interdisziplinäre Sucht- und Drogenforschung zur Verfügung steht. Er kann <a class="doclink" href="${REPORT_URL}">hier</a> heruntergeladen werden.</p>
+
+    <div class="qa-h">An wen richten sich die Fact-Sheets?</div>
+    <p class="qa-p">Die Fact-Sheets sind für alle gedacht, die ihr eigenes Hintergrundwissen erweitern oder prüfen wollen. Oder aktuelle Anknüpfungspunkte in die Literatur zur Evidenz suchen (Forschende). Aber auch für diejenigen, die das Wissen weitergeben wollen, z. B. Lehr- und Fachkräfte oder auch Journalist:innen.</p>
+    <p class="qa-p">Für den schnellen Überblick sind die Kurzklassifikationen (von grün nach rot, richtig bis falsch) und die Werte in den Tabellen (von blau nach rot, niedrig bis hoch) farblich markiert.</p>
+    <p class="qa-p">Verweise <span class="cite-demo">[1, 2]</span> in den Texten beziehen sich auf die Referenzen am Ende jedes Mythos.</p>
   </div>
-  <div class="intro-foot">Inhaltsverzeichnis auf der nächsten Seite · alle Mythen interaktiv unter <a href="${SITE}">cannabismythen.de</a></div>
+  <div class="intro-foot">
+    <div class="akey-label">Wissenschaftliche Einordnung</div>
+    <div class="arrow-key">${arrowKey}</div>
+  </div>
 </section>`;
 }
 
@@ -408,24 +432,21 @@ function renderCredits(): string {
   return `
 <section class="credits page-break">
   <div class="page-title">Über dieses Dokument</div>
-  <p>Die Faktenblätter fassen die Ergebnisse des Forschungsprojekts <strong>„Cannabiskonsum&nbsp;– Risiken und Mythen" (CaRM)</strong> zusammen. Grundlage sind die wissenschaftliche Auseinandersetzung mit den Prüfthesen sowie eine Bevölkerungsbefragung in Deutschland.</p>
+  <p>Die Faktenblätter fassen Ergebnisse des Forschungsprojekts <strong>„Cannabiskonsum&nbsp;– Risiken und Mythen" (CaRM)</strong> zusammen. Grundlage sind die wissenschaftliche Auseinandersetzung mit den Prüfthesen sowie Bevölkerungsbefragungen in Deutschland.</p>
 
   <div class="credits-block">
     <div class="credits-h">Herausgeber</div>
-    <p><strong>Institut für interdisziplinäre Sucht- und Drogenforschung (ISD)</strong><br/>Lokstedter Weg 24, 20251 Hamburg</p>
-    <div class="credits-h">Autorinnen und Autoren</div>
-    <p>Christian Schütze, Dr. Bernd Schulte, Dr. Sven Buth, Dr. Peter Degkwitz, Moritz Rosenkranz, Harald Lahusen</p>
+    <p><strong>Institut für interdisziplinäre Sucht- und Drogenforschung (ISD)</strong><br/>Kleine Brunnenstraße 13, 22765 Hamburg</p>
+    <div class="credits-h">Autoren</div>
+    <p>Christian Schütze, Dr. Bernd Schulte, Dr. Sven Buth, Dr. Peter Degkwitz, Dr. Moritz Rosenkranz, Harald Lahusen</p>
     <div class="credits-h">Förderung</div>
-    <p>Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIÖG).</p>
+    <p>Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIÖG) im Auftrag des Bundesministeriums für Gesundheit.</p>
   </div>
 
   <div class="credits-logos">
-    <span class="brand brand-isd">${logoPng("ISD_white.png", "ISD Hamburg")}</span>
-    <span class="brand brand-bioeg">${logoSvg("BIOEG_white.svg")}</span>
+    <span class="brand brand-isd">${logoSvg("! ISD_Logo_RZ_neu.svg")}</span>
+    <span class="brand brand-bioeg">${logoSvg("BIOEG_Logo_DE_RGB_pos.svg")}</span>
   </div>
-
-  <p class="credits-url">Alle Mythen interaktiv unter <a href="${SITE}">${SITE.replace("https://", "")}</a></p>
-  <p class="credits-fine">Quelle der Texte: CaRM-Abschlussbericht, Anhang III „Fact-Sheets Cannabismythen". Stand: ${new Date().getFullYear()}. Die wissenschaftliche Einordnung kann sich mit neuer Evidenz ändern.</p>
 </section>`;
 }
 
@@ -458,25 +479,25 @@ sup.cite{font-size:0.62em;color:var(--accent);font-weight:600;vertical-align:sup
 section{break-inside:auto;}
 .page-break,.myth,.cat-divider{break-before:page;}
 
-/* ---- INTRO (cover + Lesehilfe combined on one page) ---- */
+/* ---- COVER / Deckblatt (team prose + arrow key) ---- */
 .intro{min-height:242mm;display:flex;flex-direction:column;padding-top:10mm;}
 .wordmark{font-family:'SourceSerif',Georgia,serif;font-weight:700;font-size:30pt;line-height:1.08;color:var(--text);}
 .wordmark em{font-style:italic;color:var(--accent);}
-.intro-sub{font-size:13.5pt;color:var(--text-2);margin-top:8px;font-weight:500;}
-.intro-lede{font-size:11pt;line-height:1.6;color:var(--text-2);margin-top:14px;max-width:165mm;}
-.intro-body{margin-top:14mm;}
-.intro-note{font-size:9.6pt;line-height:1.5;color:var(--text-2);margin:7px 0;}
-.intro-foot{margin-top:auto;border-top:2px solid var(--border);padding-top:12px;font-size:9.5pt;color:var(--muted);}
-.intro-foot a{color:var(--accent);font-weight:600;}
+.intro-sub{font-size:12.5pt;color:var(--text-2);margin-top:8px;font-weight:500;}
+.intro-body{margin-top:8mm;}
+.qa-h{font-family:'InterVar',sans-serif;font-weight:700;font-size:13pt;letter-spacing:-0.01em;color:var(--accent);margin:15px 0 5px;}
+.qa-p{font-size:10pt;line-height:1.55;color:var(--text-2);margin:5px 0;}
+.doclink{color:var(--text);text-decoration:underline;font-weight:600;}
+.intro-foot{margin-top:auto;border-top:2px solid var(--border);padding-top:12px;}
+.akey-label{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:8px;}
+.arrow-key{display:flex;flex-wrap:wrap;gap:5px 16px;align-items:center;font-size:9pt;font-weight:600;color:var(--text-2);}
+.akey-item{display:inline-flex;align-items:center;gap:5px;}
+.akey-glyph{display:inline-flex;}.akey-glyph svg{width:14px;height:14px;}
 
 /* generic front pages */
 .page-title{font-family:'InterVar';font-weight:700;font-size:21pt;letter-spacing:-0.02em;margin-bottom:10px;}
 .credits p{margin:7px 0;color:var(--text-2);}
-.sec-h,.legend-h,.credits-h{font-family:'InterVar',sans-serif;font-weight:700;letter-spacing:-0.01em;line-height:1.2;}
-.legend-h{font-size:13pt;margin:0 0 6px;}
-.legend-list{list-style:none;display:flex;flex-direction:column;gap:7px;margin:8px 0 4px;}
-.legend-list li{display:grid;grid-template-columns:52mm 1fr;align-items:center;gap:10px;}
-.legend-desc{color:var(--text-2);font-size:9.6pt;}
+.sec-h,.credits-h{font-family:'InterVar',sans-serif;font-weight:700;letter-spacing:-0.01em;line-height:1.2;}
 .cite-demo{color:var(--accent);font-weight:600;}
 
 /* badges */
@@ -530,14 +551,20 @@ ul.erkenntnisse li::before{content:"";position:absolute;left:2px;top:7px;width:5
 .data-table th{vertical-align:bottom;padding:3px 4px 6px;font-weight:600;font-size:8pt;color:var(--text-2);text-align:center;}
 .data-table th.col-aud{text-align:left;vertical-align:bottom;}
 .data-table th .ind-ic{display:flex;justify-content:center;color:var(--text-2);margin-bottom:3px;}
-.data-table th .ind-lb{display:block;}
+.data-table th .ind-lb{display:block;color:var(--text);font-weight:650;}
+.data-table th .ind-unit{display:block;font-size:7pt;font-weight:500;color:var(--muted);margin-top:1px;}
 .data-table td{padding:5px 6px;text-align:center;border-radius:5px;}
 .data-table td.aud{text-align:left;font-weight:600;color:var(--text);white-space:nowrap;font-size:8.6pt;}
-.data-table td.aud .aud-ic{display:inline-flex;vertical-align:middle;margin-right:6px;}
+.data-table td.aud .aud-ic{display:inline-flex;vertical-align:middle;margin-right:6px;color:var(--text-2);}
 .data-table td.val{font-weight:650;color:#1f2937;}
-.data-table .pct{font-size:0.78em;font-weight:600;opacity:0.65;margin-left:1px;}
-.data-table td.na{color:var(--muted);}
+.data-table td.na{color:var(--muted);font-size:8.4pt;}
 .data-cap{font-size:8pt;color:var(--muted);margin-top:7px;line-height:1.45;}
+/* indicator key under each table (canonical definitions) */
+.ind-defs{margin-top:9px;display:flex;flex-direction:column;gap:3px;}
+.ind-def{display:grid;grid-template-columns:13px 1fr;gap:6px;font-size:7.6pt;line-height:1.4;color:var(--text-2);break-inside:avoid;}
+.ind-def-ic{color:var(--text-2);margin-top:1.5px;}
+.ind-def-ic svg{width:12px;height:12px;display:block;}
+.ind-def strong{color:var(--text);font-weight:650;}
 
 /* references */
 .sec-ref .sec-h{margin-bottom:7px;}
@@ -548,9 +575,9 @@ ol.references li{display:grid;grid-template-columns:20px 1fr;gap:6px;font-size:7
 /* ---- CREDITS ---- */
 .credits-block{margin:14px 0;}
 .credits-block .credits-h{font-size:11pt;margin:13px 0 3px;color:var(--accent);}
-.credits-logos{display:flex;align-items:center;gap:36px;margin:22px 0;padding:18px 2px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
-.credits-logos .brand-img{height:46px;width:auto;display:block;}
-.credits-logos .brand-bioeg svg{height:46px;width:auto;display:block;}
+.credits-logos{display:flex;align-items:center;gap:44px;margin:22px 0;padding:22px 2px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.credits-logos .brand-isd svg{height:56px;width:auto;display:block;}
+.credits-logos .brand-bioeg svg{height:74px;width:auto;display:block;}
 .credits-url{font-size:11pt;font-weight:600;}
 .credits-url a{color:var(--accent);}
 .credits-fine{font-size:8.5pt;color:var(--muted);margin-top:14px;}
@@ -643,7 +670,7 @@ async function main() {
   // positionally. Falls back silently to Chromium's outline if it can't run.
   const outline = {
     front: [
-      { title: "Start & Lesehilfe", page: 0 },
+      { title: "Einführung", page: 0 },
       { title: "Inhalt", page: 1 },
     ],
     items: byCat.flatMap(({ cat, myths: cm }) => [

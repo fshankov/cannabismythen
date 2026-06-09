@@ -5,6 +5,9 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { reader } from "@lib/content";
 import { ScrollytellingViewer } from "@components/scrollytelling/ScrollytellingViewer";
 import "../../styles/scrollytelling.css";
+// #4 (2026-06-08): shared card chrome for Step 10's PathCards (same stylesheet
+// the homepage FourPaths uses, so the two stay in sync).
+import "../../styles/home-four-paths.css";
 
 // Editorial German content lives in the Keystatic singleton; structural
 // definitions (vizName, gridMode, …) live in stepDefinitions.ts. Heavy

@@ -67,7 +67,7 @@ const INDICATORS: readonly IndicatorMeta[] = [
   { name: 'Bedeutung',            unit: 'Punkte',        desc: 'Wie stark prägt die Aussage den eigenen Umgang mit Cannabis?',                  mini: 'Wie stark prägt die Aussage den eigenen Umgang?',                               key: 'significance',            phase: 'significance' },
   { name: 'Richtigkeit',          unit: 'Punkte 0–100',  desc: 'Wie nahe liegt die Einschätzung an der wissenschaftlichen Klassifikation?',     mini: 'Wie nahe liegt die Einschätzung an der Wissenschaft?',                          key: 'correctness',             phase: 'correctness' },
   { name: 'Präventionsbedeutung', unit: 'Punkte',        desc: 'Bedeutung × Wissenslücke — wo Aufklärung am meisten Wirkung zeigt.',            mini: 'Bedeutung × Wissenslücke — wo Aufklärung wirkt.',                               key: 'prevention_significance', phase: 'prevention_significance' },
-  { name: 'Bevölkerungsrisiko',   unit: 'Punkte',        desc: 'Präventionsbedeutung × Kenntnisanteil — nur für Voll- und Minderjährige.',      mini: 'Präventionsbedeutung × Bekanntheit — nur Voll- + Minderjährige.',               key: 'population_relevance',    phase: 'population_relevance' },
+  { name: 'Bevölkerungsrelevanz',   unit: 'Punkte',        desc: 'Präventionsbedeutung × Kenntnisanteil — nur für Voll- und Minderjährige.',      mini: 'Präventionsbedeutung × Bekanntheit — nur Voll- + Minderjährige.',               key: 'population_relevance',    phase: 'population_relevance' },
 ];
 
 /** Verdict glyphs are drawn inline inside the parent <svg> via

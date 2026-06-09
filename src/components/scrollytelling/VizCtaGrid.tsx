@@ -1,63 +1,19 @@
-import { BarChart3, Brain, ListChecks, ScrollText } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { withBase } from '../../lib/withBase';
+import type { CarmData } from './types';
+import { PathCards } from '../shared/PathCards';
 
-interface Cta {
-  title: string;
-  desc: string;
-  href: string;
-  icon: LucideIcon;
-}
-
-const CTAS: Cta[] = [
-  {
-    title: '42 Faktenkarten',
-    desc: 'Wissenschaftliche Klassifikation, Quellen und Erklärungen je Mythos.',
-    href: withBase('fakten-karten/'),
-    icon: ScrollText,
-  },
-  {
-    title: 'Quiz',
-    desc: 'Wie steht dein Wissen im Vergleich zur Bevölkerungsbefragung?',
-    href: withBase('quiz/'),
-    icon: Brain,
-  },
-  {
-    title: 'Daten-Explorer',
-    desc: 'Vier Sichten: allg. Publikum · Eltern · Fachkräfte · Forschung.',
-    href: withBase('daten-explorer/'),
-    icon: BarChart3,
-  },
-  {
-    title: 'Meine Interessen',
-    desc: 'FAQ, sortiert nach Themen und Zielgruppen.',
-    href: withBase('meine-interessen/'),
-    icon: ListChecks,
-  },
-];
-
-export function VizCtaGrid() {
+/**
+ * Step 10 viz — the four "next step" cards (Quiz · Fakten-Karten ·
+ * Daten-Explorer · Meine Interessen). Now rendered via the shared
+ * <PathCards> component (ported from the homepage FourPaths) so the
+ * scrollytelling and the homepage share one card implementation + the same
+ * stylesheet (home-four-paths.css, imported by the /projekt/ page). The
+ * homepage's Astro markup migrates onto <PathCards> in a separate reviewed
+ * pass. (Fedor review 2026-06-08 #4.)
+ */
+export function VizCtaGrid({ data }: { data: CarmData }) {
   return (
     <div className="viz">
-      <div className="viz-cta">
-        {CTAS.map((c, i) => {
-          const Icon = c.icon;
-          return (
-            <a
-              key={c.href}
-              className="viz-cta__card"
-              href={c.href}
-              style={{ animationDelay: `${i * 80}ms` }}
-            >
-              <span className="viz-cta__card-icon" aria-hidden="true">
-                <Icon size={56} strokeWidth={1.5} />
-              </span>
-              <span className="viz-cta__card-title">{c.title}</span>
-              <span className="viz-cta__card-desc">{c.desc}</span>
-            </a>
-          );
-        })}
-      </div>
+      <PathCards myths={data.myths} />
     </div>
   );
 }

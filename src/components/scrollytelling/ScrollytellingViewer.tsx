@@ -24,7 +24,7 @@ import {
   loadCarmData,
   loadInformationSources,
   orderedCategoriesFromData,
-  themeColorFor,
+  scrollyCategoryAccent,
   verdictCountsFromData,
   VERDICT_ORDER,
   VERDICT_LABEL_DE,
@@ -261,7 +261,7 @@ function StepVisualization({
         />
       );
     case 'ctaGrid':
-      return <VizCtaGrid />;
+      return <VizCtaGrid data={data} />;
     case 'teamRow':
       return (
         <VizTeamRow
@@ -429,28 +429,20 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                       aria-label="Themenfelder"
                     >
                       {orderedCategoriesFromData(data).map((c) => {
-                        // Iter-22: category icon (Fakten-Karten set) instead of
-                        // a plain colored square — tinted with the existing
-                        // themeColorFor() colour. Falls back to the swatch if a
-                        // category has no CATEGORY_META entry.
+                        // #3 (2026-06-08): category shown as a colored SQUARE
+                        // (palette B, scrollyCategoryAccent) with a WHITE icon,
+                        // then the name. The previous tinted-icon-on-dark was
+                        // invisible on the forest backdrop.
                         const CatIcon = CATEGORY_META[c.name]?.icon ?? null;
                         return (
                           <span key={c.id} className="scrolly__theme-chip">
-                            {CatIcon ? (
-                              <span
-                                className="scrolly__theme-icon"
-                                style={{ color: themeColorFor(c.id) }}
-                                aria-hidden="true"
-                              >
-                                <CatIcon size={15} />
-                              </span>
-                            ) : (
-                              <span
-                                className="scrolly__theme-swatch"
-                                style={{ background: themeColorFor(c.id) }}
-                                aria-hidden="true"
-                              />
-                            )}
+                            <span
+                              className="scrolly__theme-tile"
+                              style={{ background: scrollyCategoryAccent(c.name) }}
+                              aria-hidden="true"
+                            >
+                              {CatIcon && <CatIcon size={13} color="#ffffff" />}
+                            </span>
                             <span className="scrolly__theme-name">{c.name}</span>
                           </span>
                         );

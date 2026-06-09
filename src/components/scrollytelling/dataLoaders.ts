@@ -95,7 +95,7 @@ export const INDICATOR_LABEL_DE: Record<Indicator, string> = {
   significance: 'Bedeutung',
   correctness: 'Richtigkeit',
   prevention_significance: 'Präventionsbedeutung',
-  population_relevance: 'Bevölkerungsrisiko',
+  population_relevance: 'Bevölkerungsrelevanz',
 };
 
 /** Per-source-metric short label + body, used by the InfoDot popovers
@@ -195,6 +195,27 @@ export function themeColorFor(catId: number | null): string {
   return `var(--theme-${idx})`;
 }
 
+/** Palette B — calmer, desaturated category accents tuned for the forest
+ *  scrolly backdrop (white icons sit on these). Keyed by German category
+ *  name. Scoped to the scrollytelling; the site-wide category palette
+ *  (CATEGORY_META / --cmi-fk-*) is unchanged. (Fedor review 2026-06-08 #3.) */
+export const SCROLLY_CATEGORY_ACCENT: Record<string, string> = {
+  'Medizinischer und therapeutischer Nutzen': '#3f6fa3',
+  'Risiken für den Körper und die Entwicklung': '#2f8a8f',
+  'Risiken für die psychische Gesundheit': '#6f5aa6',
+  'Einfluss auf Stimmung und Wahrnehmung': '#b08a3e',
+  'Soziale Auswirkungen und Leistungsfähigkeit': '#a85a86',
+  'Risiken durch Dosierung und Qualität': '#5b6b78',
+  'Verbreitung in der Bevölkerung und Gesetzgebung': '#5660a8',
+  'Allgemeine Einschätzung der Gefährlichkeit': '#b06a3e',
+};
+
+/** Palette-B accent for a category name (legend square fill). Falls back
+ *  to a neutral slate for unrecognised names. */
+export function scrollyCategoryAccent(name: string): string {
+  return SCROLLY_CATEGORY_ACCENT[name] ?? '#5b6b78';
+}
+
 /** Ordered, deduplicated list of categories that appear in the first
  *  42 myths (sorted-by-category-then-id). Same logic the grid uses to
  *  render the cells, so the legend matches what's on screen. */
@@ -253,7 +274,7 @@ export const INDICATOR_DEFS_DE: Record<
     scale: '0–100 Punkte',
   },
   population_relevance: {
-    label: 'Bevölkerungsrisiko',
+    label: 'Bevölkerungsrelevanz',
     body:
       'Präventionsbedeutung × Kenntnisanteil. Berücksichtigt die ' +
       'Reichweite — ein weit bekannter Halbmythos erreicht mehr Menschen ' +
