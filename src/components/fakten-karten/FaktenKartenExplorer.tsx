@@ -15,6 +15,7 @@ import { useState, useMemo, useCallback } from "react";
 import FaktenCard from "./FaktenCard";
 import type { FaktenCardMyth } from "./FaktenCard";
 import FaktenFilterBar from "./FaktenFilterBar";
+import FaktenListView from "./FaktenListView";
 import SharedFactsheetPanel from "../shared/FactsheetPanel";
 import type { MythContentEntry } from "../shared/FactsheetPanel";
 import type {
@@ -80,7 +81,7 @@ export default function FaktenKartenExplorer({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [factsheetMyth, setFactsheetMyth] = useState<string | null>(null);
-  const [allFlipped, setAllFlipped] = useState(false);
+  const [view, setView] = useState<"karten" | "liste">("karten");
 
   const allMyths: MythEntry[] = useMemo(() => {
     try {
@@ -196,8 +197,8 @@ export default function FaktenKartenExplorer({
         onToggleGroup={toggleGroup}
         onToggleMyth={toggleMyth}
         onReset={resetFilters}
-        allFlipped={allFlipped}
-        onSetAllFlipped={setAllFlipped}
+        view={view}
+        onSetView={setView}
       />
 
       {filteredMyths.length === 0 ? (
@@ -214,6 +215,8 @@ export default function FaktenKartenExplorer({
             Filter zurücksetzen
           </button>
         </p>
+      ) : view === "liste" ? (
+        <FaktenListView myths={filteredMyths} />
       ) : (
         <div className="fakten-grid">
           {filteredMyths.map((myth) => (
@@ -222,7 +225,7 @@ export default function FaktenKartenExplorer({
               myth={myth}
               categoryGroup={myth.categoryGroup}
               onShowFactsheet={handleShowFactsheet}
-              isActive={allFlipped || factsheetMyth === myth.slug}
+              isActive={factsheetMyth === myth.slug}
             />
           ))}
         </div>

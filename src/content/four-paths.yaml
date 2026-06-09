@@ -21,7 +21,7 @@ quizTile:
   sampleMythText: 'Cannabiskonsum beeinträchtigt kognitive Fähigkeiten.'
   sampleMythClassification: 'richtig'
 faktenKartenTile:
-  title: 'Fakten-Karten'
+  title: '42 Mythen'
   description: 'Alle 42 Mythen auf Karten zum Umdrehen: vorn der Mythos, hinten die wissenschaftliche Einordnung.'
   ctaLabel: 'Karten durchstöbern'
   targetUrl: '/fakten-karten/'

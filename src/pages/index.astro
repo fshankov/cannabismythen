@@ -102,21 +102,6 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
   />
 
   <div class="home-canvas">
-  {ueberProjektData && (
-    <ProjektTeaserBlock
-      lead={ueberProjektData.lead}
-      body={ueberProjektData.body}
-      funder={ueberProjektData.funder}
-    />
-  )}
-
-  {numbersStripData && (
-    <NumbersStripBlock
-      eyebrow={numbersStripData.eyebrow}
-      numerals={numbersStripData.numerals}
-    />
-  )}
-
   {headlineFinding && fourPathsData && (
     <FourPathsBlock
       hookQuote={{
@@ -133,17 +118,35 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
       audienceChips={audienceChips}
     />
   )}
+
+  {numbersStripData && (
+    <NumbersStripBlock
+      eyebrow={numbersStripData.eyebrow}
+      numerals={numbersStripData.numerals}
+    />
+  )}
+
+  {ueberProjektData && (
+    <ProjektTeaserBlock
+      body={ueberProjektData.body}
+    />
+  )}
   </div>
 </BaseLayout>
 
 <style>
-  /* Home canvas — the warm off-white field blocks 2–4 sit on. The dark hero
+  /* Home canvas — the warm off-white field blocks sit on. The dark hero
      above and the footer below own their own backgrounds. Full-bleed inside
      the hero page's edge-to-edge <main>; each block's __inner owns the
-     homepage-local ~1200px container width via --home-container. */
+     homepage-local ~1200px container width via --home-container.
+     padding-bottom provides clearance before the footer for the teaser
+     block (open canvas text, no card) which is now the last block. */
   .home-canvas {
     --home-container: 1200px;
     background: #faf9f5;
-    padding-top: 96px; /* 64 + 32 — gap below the dark hero */
+    padding-top: 48px;
+    padding-bottom: 80px;
   }
+
+
 </style>

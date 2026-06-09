@@ -9,7 +9,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .four-paths {
-  margin-top: 32px; /* gap from block 3 (Numbers-Strip) */
+  margin-top: 32px; /* gap from teaser card */
 }
 
 .four-paths__inner {
@@ -95,6 +95,8 @@
   backdrop-filter: blur(10.35px);
   text-decoration: none;
   color: inherit;
+  cursor: pointer;
+  user-select: none;
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast),
@@ -164,6 +166,13 @@
   grid-row: 3;
 }
 
+/* icon + audience label — flex row, icon badge left, label right */
+.path-card__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 /* icon badge — 32px key-green circle, white 17.5px icon */
 .path-card__icon {
   display: flex;
@@ -175,6 +184,16 @@
   border-radius: 9999px;
   background: #0f5238;
   color: #ffffff;
+}
+
+/* audience label — muted, sits to the right of the icon */
+.path-card__audience {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  color: rgba(15, 82, 56, 0.50);
 }
 
 /* title — 16px below the icon */

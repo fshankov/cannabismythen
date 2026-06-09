@@ -15,6 +15,7 @@ import { buildMythContentMap } from "@lib/myth-content";
 // so the relative walk-up resolved to a non-existent path.
 import carmRawJson from "../../../public/data/carm-data.json";
 import "../../styles/quiz.css";
+import "../../styles/fakten-karten.css";
 // Brings in the .carm-filter-search-row* rules so the autocomplete
 // search input on this page is the visually identical sibling of the
 // Daten-Explorer filter drawer's search element. Lifted back in
@@ -89,13 +90,9 @@ myths.sort((a, b) => a.mythNumber - b.mythNumber);
 const mythContentMap = await buildMythContentMap();
 ---
 
-<BaseLayout title="Fakten-Karten" description="42 Cannabis-Mythen — sofort erkennbar wahr oder falsch, mit wissenschaftlicher Einordnung." bgTexture extraBodyClass="fakten-karten-page">
+<BaseLayout title="42 Mythen" description="42 Cannabis-Mythen — sofort erkennbar wahr oder falsch, mit wissenschaftlicher Einordnung." bgTexture extraBodyClass="fakten-karten-page">
   <header class="fakten-page-header" data-reveal>
-    <p class="fakten-page-header__eyebrow">
-      <span class="fakten-page-header__eyebrow-divider" aria-hidden="true"></span>
-      <span class="fakten-page-header__eyebrow-text">42 Mythen</span>
-    </p>
-    <h1 class="fakten-page-header__h1">Fakten-Karten</h1>
+    <h1 class="fakten-page-header__h1">42 Mythen</h1>
     <p class="fakten-page-header__sub">Stimmt das? 42 verbreitete Cannabis-Mythen, sofort eingeordnet — tippe auf eine Karte für die Erklärung.</p>
   </header>
   <div data-reveal-fade>

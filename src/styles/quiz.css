@@ -3513,7 +3513,7 @@ body.fakten-karten-page main {
   text-decoration: none;
   background: var(--card-bg, #047857);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
 }
 
@@ -3522,15 +3522,20 @@ body.fakten-karten-page main {
   box-shadow: 0 30px 60px -14px rgba(0, 0, 0, 0.3);
 }
 
-.quiz-select-card:hover::after {
+.quiz-select-card::after {
   /* state-overlay/hover from Figma — 8 % white wash on top of the fill. */
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0);
   border-radius: inherit;
   pointer-events: none;
   z-index: 1;
+  transition: background 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.quiz-select-card:hover::after {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .quiz-select-card:focus-visible {
@@ -3592,6 +3597,17 @@ body.fakten-karten-page main {
   display: block;
 }
 
+.quiz-select-card:hover .quiz-select-card__icon {
+  animation: card-icon-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes card-icon-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.05); }
+  70%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+
 .quiz-select-card__title {
   margin: 0;
   font-weight: 900;
@@ -3649,8 +3665,8 @@ body.fakten-karten-page main {
     max-height: 0;
     overflow: hidden;
     transition:
-      opacity 180ms ease,
-      max-height 180ms ease;
+      opacity 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      max-height 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   .quiz-select-card:hover .quiz-select-card__framing,
   .quiz-select-card:focus-within .quiz-select-card__framing {
@@ -3677,6 +3693,7 @@ body.fakten-karten-page main {
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -4px rgba(0, 0, 0, 0.1);
   color: var(--cta-text, #116c4a);
+  overflow: hidden;
 }
 
 .quiz-select-card__cta-text {
@@ -3696,6 +3713,22 @@ body.fakten-karten-page main {
 
 .quiz-select-card__cta-icon svg {
   display: block;
+  /* resting = already "flown away" to upper-right so hover-out flies there */
+  opacity: 0;
+  transform: translate(55%, -55%) scale(0.25) rotate(-10deg);
+  /* hover-out: quick accelerating fly-away */
+  transition:
+    opacity 0.28s cubic-bezier(0.4, 0, 1, 1),
+    transform 0.28s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.quiz-select-card:hover .quiz-select-card__cta-icon svg {
+  opacity: 1;
+  transform: none;
+  /* hover-in: spring that overshoots = "bounces in" */
+  transition:
+    opacity 0.48s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.52s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Per-theme fill + CTA text color. The fill is set via --card-bg so
@@ -4209,7 +4242,7 @@ body.fakten-karten-page main {
   margin: 0 0 16px;
   font-size: 10px;
   font-weight: 900;
-  color: rgba(64, 73, 67, 0.6);
+  color: rgba(64, 73, 67, 0.75);
   letter-spacing: 4px;
   line-height: 15px;
   text-transform: uppercase;
@@ -4227,14 +4260,24 @@ body.fakten-karten-page main {
   gap: var(--space-sm);
   margin: 0;
   border-bottom: none;
-  /* Glass chrome */
-  padding: 17px 25px;
+  /* Glass chrome — explicit height so browser input UA styles can't inflate it */
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0 25px;
   background: rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   -webkit-backdrop-filter: blur(6px);
           backdrop-filter: blur(6px);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.fakten-filter-bar .carm-filter-search-row:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(17, 108, 74, 0.4);
 }
 
 /* Magnifier: absolutely centred on the right edge of the glass row
@@ -4270,6 +4313,7 @@ body.fakten-karten-page main {
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
+  line-height: 1;
   color: #1a1c1a;
   background: transparent;
   border: none;
@@ -4305,7 +4349,7 @@ body.fakten-karten-page main {
 .fakten-filter-bar__category,
 .fakten-filter-bar__search {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   min-width: 0;
 }
 
@@ -4316,14 +4360,14 @@ body.fakten-karten-page main {
   position: relative;
 }
 
-.fakten-filter-bar__flip {
+.fakten-filter-bar__view-toggle {
   display: flex;
   align-items: center;
   white-space: nowrap;
   margin-left: 48px; /* 48 + 16px grid gap = 64px from search bar */
 }
 
-.fakten-filter-bar__flip .carm-pivot-switch__track[data-active="right"] {
+.fakten-filter-bar__view-toggle .carm-pivot-switch__track[data-active="right"] {
   background: #ffffff;
   border-color: #ffffff;
 }
@@ -4356,7 +4400,7 @@ body.fakten-karten-page main {
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  z-index: 25;
+  z-index: 30; /* Above category dropdown (z:20) */
   /* Glass chrome matches the trigger row above so the search + panel
      read as one continuous element rather than two separate surfaces. */
   background: rgba(255, 255, 255, 0.88);
@@ -4501,11 +4545,16 @@ body.fakten-karten-page main {
 .fakten-filter-dropdown__trigger {
   /* Glassmorphism chrome matching the search row beside it. Type spec
      mirrors Figma 434:205: Inter Bold 14 px / #1a1c1a. */
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--space-sm);
   width: 100%;
-  padding: 17px 25px;
+  /* Explicit height locks the pill to exactly 48 px regardless of line-height
+     or font rendering differences between browsers. */
+  box-sizing: border-box;
+  height: 48px;
+  line-height: 1;
+  padding: 0 25px;
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.6);
@@ -4728,6 +4777,12 @@ body.fakten-karten-page main {
     grid-template-columns: 1fr;
     row-gap: var(--space-sm);
     max-width: none;
+  }
+  /* B2 — toggle floated right with 48px margin; reset to left-align
+     so it stacks cleanly below the full-width controls */
+  .fakten-filter-bar__view-toggle {
+    margin-left: 0;
+    justify-content: flex-start;
   }
 }
 

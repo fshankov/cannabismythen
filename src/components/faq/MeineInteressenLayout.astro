@@ -233,6 +233,8 @@ const isFachkraefte = activeAudience === "fachkraefte";
   background: var(--color-bg-subtle, #eeeee9);
   text-decoration: none;
   border-radius: 16px 16px 0 0;
+  position: relative;
+  overflow: hidden;
 }
 
 :global(.mi-layout .mi-tab-bar .tab-btn.active) {
@@ -298,10 +300,15 @@ const isFachkraefte = activeAudience === "fachkraefte";
   border: 1px solid rgba(191, 201, 193, 0.38);
   border-radius: 24px;
   box-shadow: none;
+  transition: background 180ms ease, border-color 180ms ease;
 }
 
 :global(.mi-layout .faq-question:hover) {
   border-color: rgba(191, 201, 193, 0.95);
+}
+
+:global(.mi-layout .faq-question:has(.faq-question__details:not([open])):hover) {
+  background: rgba(45, 106, 79, 0.04);
 }
 
 :global(.mi-layout .faq-question__summary) {
@@ -467,6 +474,32 @@ const isFachkraefte = activeAudience === "fachkraefte";
   align-items: center;
   flex: none;
   opacity: 0.65;
+  transition: opacity 150ms ease, color 150ms ease;
+}
+
+:global(.mi-layout .mi-tab-bar .tab-btn:not(.active):hover) {
+  color: #404943;
+}
+
+/* Green pill — ::before inside :global() so Astro never appends a scope hash */
+:global(.mi-layout .mi-tab-bar .tab-btn:not(.active):hover::before) {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: 4px 6px;
+  border-radius: 99px;
+  background: rgba(45, 106, 79, 0.08);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* suppress the dark state-layer ::after so only the green pill shows */
+:global(.mi-layout .mi-tab-bar .tab-btn:not(.active):hover::after) {
+  opacity: 0 !important;
+}
+
+:global(.mi-layout .mi-tab-bar .tab-btn:not(.active):hover) .mi-tab-icon {
+  opacity: 0.85;
 }
 
 :global(.mi-layout .mi-tab-bar .tab-btn.active) .mi-tab-icon {

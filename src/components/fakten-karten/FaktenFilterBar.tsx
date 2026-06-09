@@ -25,7 +25,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, LayoutGrid, LayoutList } from "lucide-react";
 import VerdictStatement from "../shared/VerdictStatement";
 import CategoryFooter from "./CategoryFooter";
 import PivotToggle from "../dashboard/controls/PivotToggle";
@@ -53,8 +53,8 @@ interface Props {
   onToggleGroup: (group: string) => void;
   onToggleMyth: (mythNumber: number) => void;
   onReset: () => void;
-  allFlipped: boolean;
-  onSetAllFlipped: (v: boolean) => void;
+  view: "karten" | "liste";
+  onSetView: (v: "karten" | "liste") => void;
 }
 
 const VALID_VERDICTS: ReadonlySet<CorrectnessClass> = new Set([
@@ -120,8 +120,8 @@ export default function FaktenFilterBar({
   onToggleGroup,
   onToggleMyth,
   onReset,
-  allFlipped,
-  onSetAllFlipped,
+  view,
+  onSetView,
 }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [catDropdownOpen, setCatDropdownOpen] = useState(false);
@@ -441,15 +441,31 @@ export default function FaktenFilterBar({
         )}
       </div>
 
-      <div className="fakten-filter-bar__flip">
+      <div className="fakten-filter-bar__view-toggle">
         <PivotToggle
           options={[
-            { value: "front", label: "Mythen" },
-            { value: "back", label: "Fakten" },
+            {
+              value: "karten",
+              label: (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <LayoutGrid size={13} aria-hidden="true" />
+                  Karten
+                </span>
+              ),
+            },
+            {
+              value: "liste",
+              label: (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <LayoutList size={13} aria-hidden="true" />
+                  Liste
+                </span>
+              ),
+            },
           ]}
-          value={allFlipped ? "back" : "front"}
-          onChange={(v) => onSetAllFlipped(v === "back")}
-          aria-label="Kartenansicht umschalten"
+          value={view}
+          onChange={onSetView}
+          aria-label="Ansicht wechseln"
         />
       </div>
 
