@@ -358,6 +358,9 @@ export function VizPeopleVoices(_props: Props) {
 
         el.style.transform =
           'translate(calc(-50% + ' + fx.toFixed(1) + 'px), calc(-50% + ' + fy.toFixed(1) + 'px)) scale(' + fscale.toFixed(3) + ')';
+        // Store the true spinning scale so the hover magnify can cap relative
+        // to it (and never compound). (Fedor 2026-06-09.)
+        el.dataset.s = fscale.toFixed(3);
         el.style.zIndex = String(funneling ? Math.round(500 + a * 200) : Math.round(a * 1000));
         el.style.opacity = fop.toFixed(2);
         if (lastBlur[i] === undefined || Math.abs(lastBlur[i] - bl) > 0.2) { el.style.filter = 'blur(' + bl.toFixed(2) + 'px)'; lastBlur[i] = bl; }
@@ -380,8 +383,8 @@ export function VizPeopleVoices(_props: Props) {
       // hovering / reduced-motion.
       if (inView && !paused) {
         if (!reduced && sortProgress < 0.02) {
-          angleY += 0.0015;
-          angleX += 0.0001;
+          angleY += 0.0009;
+          angleX += 0.00006;
         }
         project();
       }
@@ -395,19 +398,29 @@ export function VizPeopleVoices(_props: Props) {
     function onOver(ev: Event) {
       const t = (ev.target as HTMLElement).closest('.viz-msg, .viz-src') as HTMLElement | null;
       if (!t) return;
+      // `mouseover` re-fires for every child element entered; without this
+      // guard the magnify would compound on each event and balloon the chip.
+      if (t.classList.contains('is-hover')) return;
       paused = true;
       t.classList.add('is-hover');
       const cur = t.style.transform;
-      const mScale = cur.match(/scale\(([\d.]+)\)/);
-      const baseScale = mScale ? parseFloat(mScale[1]) : 1;
+      // Base the magnify off the chip's TRUE spinning scale (stored each frame),
+      // not the current transform — so it can't stack — and cap at 2× the
+      // spinning size so even a large front chip never balloons (Fedor 2026-06-09).
+      const spinScale = parseFloat(t.dataset.s || '1');
+      const target = Math.min(spinScale * 1.5, spinScale * 2);
       t.style.transition = 'transform 180ms cubic-bezier(0.22,1,0.36,1)';
-      t.style.transform = cur.replace(/scale\([\d.]+\)/, 'scale(' + (baseScale * 1.5).toFixed(3) + ')');
+      t.style.transform = cur.replace(/scale\([\d.]+\)/, 'scale(' + target.toFixed(3) + ')');
       t.style.filter = 'none';
       t.style.opacity = '1';
     }
     function onOut(ev: Event) {
       const t = (ev.target as HTMLElement).closest('.viz-msg, .viz-src') as HTMLElement | null;
       if (!t) return;
+      // Ignore moves to another element still inside the same chip, else
+      // mouseout→mouseover would flicker the magnify on/off.
+      const to = (ev as MouseEvent).relatedTarget as Node | null;
+      if (to && t.contains(to)) return;
       t.classList.remove('is-hover');
       t.style.transition = '';
       paused = false; // loop resumes and rewrites transform/opacity/filter

@@ -139,7 +139,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_") ||
     pathname.startsWith("/data/") ||
-    pathname.match(/\.(ico|png|svg|jpg|jpeg|gif|webp|css|js|mjs|woff2?|json|txt|xml)$/)
+    pathname.match(/\.(ico|png|svg|jpg|jpeg|gif|webp|css|js|mjs|woff2?|json|txt|xml|pdf)$/)
   ) {
     return next();
   }

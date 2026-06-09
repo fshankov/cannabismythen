@@ -282,7 +282,9 @@ body:has(.scrolly) main {
   gap: 0;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 var(--space-md);
+  /* Left/right indent so content isn't flush to the edges; scales with the
+     viewport, caps on desktop, stays modest on mobile (Fedor 2026-06-09). */
+  padding: 0 clamp(1.5rem, 5vw, 4rem);
 }
 
 /* Left text column — flows naturally, each step is a tall card */

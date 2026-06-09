@@ -20,6 +20,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
+import { Download } from 'lucide-react';
 import FactsheetGroupBars from './FactsheetGroupBars';
 import VerdictStatement from './VerdictStatement';
 import VerdictArrow from './VerdictArrow';
@@ -422,6 +423,25 @@ export default function FactsheetPanel({
                 </>
               )}
 
+              {/* Full-collection PDF download (Fedor 2026-06-09). The
+                  PDF is myth-agnostic — same file for every popup —
+                  so the button always renders, between the table and
+                  the Verwandte Mythen collapsible. Static asset
+                  served from public/, middleware exemption added so
+                  external direct-links work even without auth. */}
+              <a
+                href="/cannabismythen-mythen-faktenblaetter.pdf"
+                download="cannabismythen-mythen-faktenblaetter.pdf"
+                className="factsheet-panel__download"
+                aria-label="Alle Mythen-Faktenblätter als PDF herunterladen (3,6 MB)"
+              >
+                <Download size={16} strokeWidth={2} aria-hidden="true" />
+                <span className="factsheet-panel__download-text">
+                  Alle Mythen-Faktenblätter herunterladen
+                </span>
+                <span className="factsheet-panel__download-meta">PDF · 3,6 MB</span>
+              </a>
+
               {/* Travel pipeline 4B + 4C (2026-05-23): collapsed
                   Related Myths + FAQ-backlinks blocks at popup bottom.
                   Both <details> closed by default — match the existing
@@ -527,6 +547,21 @@ export default function FactsheetPanel({
                   )}
                 </>
               )}
+
+              {/* Same full-collection PDF button as the primary
+                  branch — PDF is myth-agnostic, no .mdoc needed. */}
+              <a
+                href="/cannabismythen-mythen-faktenblaetter.pdf"
+                download="cannabismythen-mythen-faktenblaetter.pdf"
+                className="factsheet-panel__download"
+                aria-label="Alle Mythen-Faktenblätter als PDF herunterladen (3,6 MB)"
+              >
+                <Download size={16} strokeWidth={2} aria-hidden="true" />
+                <span className="factsheet-panel__download-text">
+                  Alle Mythen-Faktenblätter herunterladen
+                </span>
+                <span className="factsheet-panel__download-meta">PDF · 3,6 MB</span>
+              </a>
 
             </>
           )}

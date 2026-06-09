@@ -5729,6 +5729,63 @@ body.fakten-karten-page main {
   margin-top: 10px;
 }
 
+/* Download button (mirror of dashboard.css — see comment there for
+   rationale). Card-style action button under the popup table. */
+.factsheet-panel__download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: var(--space-md) 0 var(--space-xs);
+  padding: 10px 14px;
+  background: var(--color-bg-subtle, #eeeee8);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast, 150ms ease),
+    border-color var(--transition-fast, 150ms ease),
+    color var(--transition-fast, 150ms ease);
+}
+
+.factsheet-panel__download:hover,
+.factsheet-panel__download:focus-visible {
+  background: var(--color-surface-raised, #f8fafc);
+  border-color: var(--color-text-secondary);
+  color: var(--color-text);
+  outline: none;
+}
+
+.factsheet-panel__download-text {
+  flex: 0 1 auto;
+}
+
+.factsheet-panel__download-meta {
+  flex: 0 0 auto;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 480px) {
+  .factsheet-panel__download {
+    padding: 9px 12px;
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .factsheet-panel__download-meta {
+    width: 100%;
+    text-align: center;
+    margin-top: -2px;
+  }
+}
+
 .factsheet-panel__extras-list {
   list-style: none;
   margin: 8px 0 0;
