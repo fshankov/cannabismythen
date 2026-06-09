@@ -488,6 +488,7 @@ export default function QuizCard({
                 </p>
 
                 <div className="quiz-card__back-pill">
+                  <span className="quiz-card__verdict-label">Wissenschaftlich:</span>
                   <VerdictPill verdict={myth.correctClassification} size="sm" />
                 </div>
 

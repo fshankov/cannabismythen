@@ -5105,44 +5105,19 @@ body.carm-modal-open {
   justify-content: center;
 }
 
-/* ── Dataset segmented pill (Mythen / Informationswege) ───────────── */
-.carm-dataset-pill {
-  display: inline-flex;
-  align-items: center;
-  background: #e7e7e0;
-  border-radius: 10px;
-  padding: 3px;
-  gap: 2px;
-  align-self: flex-end;
-  margin-bottom: 8px;
+/* ── Dataset toggle (Mythen / Informationswege) — same PivotToggle as
+   Karten/Liste on the 42-Mythen page. Wrapper aligns it to the bottom
+   of the tab bar row so it sits flush with the tabs above the panel. */
+.carm-dataset-toggle {
+  align-self: center;
+  margin-left: 8px;
   flex-shrink: 0;
 }
-
-.carm-dataset-pill__btn {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 14px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgba(26, 26, 46, 0.55);
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
-  white-space: nowrap;
+.carm-dataset-toggle .carm-pivot-switch__label {
+  font-size: 0.875rem; /* match tabs */
 }
-
-.carm-dataset-pill__btn:hover:not(.active) {
-  color: rgba(26, 26, 46, 0.80);
-}
-
-.carm-dataset-pill__btn.active {
-  background: #ffffff;
+.carm-dataset-toggle .carm-pivot-switch__label--active {
   color: var(--color-accent, #2d6a4f);
-  font-weight: 700;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.10);
 }
 
 /* Vertical divider between the pill and the view tabs */
@@ -6104,6 +6079,9 @@ body.carm-modal-open {
 
 .carm-toolbar-row__pivot {
   flex: 0 0 auto;
+}
+.carm-toolbar-row__pivot .carm-pivot-switch__label {
+  font-size: 0.875rem; /* match tabs */
 }
 
 .carm-toolbar-row__pickers {

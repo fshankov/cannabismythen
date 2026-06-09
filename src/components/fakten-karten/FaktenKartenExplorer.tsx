@@ -216,7 +216,7 @@ export default function FaktenKartenExplorer({
           </button>
         </p>
       ) : view === "liste" ? (
-        <FaktenListView myths={filteredMyths} />
+        <FaktenListView myths={filteredMyths} onShowFactsheet={handleShowFactsheet} />
       ) : (
         <div className="fakten-grid">
           {filteredMyths.map((myth) => (

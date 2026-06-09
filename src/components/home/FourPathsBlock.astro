@@ -158,15 +158,19 @@ const cards = [
   <div class="four-paths__inner">
     <div class="four-paths__card">
       <blockquote class="four-paths__quote" id="four-paths-quote">
-        <span class="four-paths__quote-eyebrow">{hookQuote.eyebrow}</span>
-        <span class="four-paths__quote-lead">{hookQuote.leadClause}</span>{" "}
-        <span
-          class="four-paths__quote-counter"
-          data-classification={hookQuote.counterClassification}
-        >
-          {hookQuote.counterClause}
-        </span>
+        <div class="four-paths__quote-head">
+          <span class="four-paths__quote-lead">{hookQuote.leadClause}</span>{" "}
+          <span
+            class="four-paths__quote-counter"
+            data-classification={hookQuote.counterClassification}
+          >
+            {hookQuote.counterClause}
+          </span>
+        </div>
+        <p class="four-paths__subtext">Zwischen April 2024 und Dezember 2025 hat das ISD Hamburg die verbreitetsten Annahmen über Cannabis gesammelt und wissenschaftlich eingeordnet. Diese Website übersetzt die Ergebnisse in etwas, das jede:r erkunden kann — von Jugendlichen bis zu Fachkräften.</p>
       </blockquote>
+
+      <span class="four-paths__cards-eyebrow">{hookQuote.eyebrow}</span>
 
       {cards.map((c) => (
         <a class={`path-card path-card--${c.mod}`} href={c.targetUrl}>

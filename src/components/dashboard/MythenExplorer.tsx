@@ -27,6 +27,7 @@ import { t, type TranslationKey } from '../../lib/dashboard/translations';
 import { urlToState, getDefaultState, pushState } from '../../lib/dashboard/url-state';
 import { buildWalkthrough } from './rundgang/walkthrough';
 import RundgangBookmark from './RundgangBookmark';
+import PivotToggle from './controls/PivotToggle';
 import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
 import VerdictTags from './VerdictTags';
@@ -520,22 +521,17 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             The "EXPLORE" eyebrow that the brief originally placed
             above the bar was removed 2026-05-28 PM per Fedor. */}
         <div className="carm-explorer__tab-bar">
-          {/* Dataset segmented pill */}
-          <div className="carm-dataset-pill">
-            <button
-              type="button"
-              className={`carm-dataset-pill__btn${!isSourcesDataset ? ' active' : ''}`}
-              onClick={() => handleDatasetSwitch('mythen')}
-            >
-              Mythen
-            </button>
-            <button
-              type="button"
-              className={`carm-dataset-pill__btn${isSourcesDataset ? ' active' : ''}`}
-              onClick={() => handleDatasetSwitch('informationswege')}
-            >
-              Informationswege
-            </button>
+          {/* Dataset toggle — same PivotToggle as Karten/Liste on 42-Mythen page */}
+          <div className="carm-dataset-toggle">
+            <PivotToggle
+              options={[
+                { value: 'mythen', label: 'Mythen' },
+                { value: 'informationswege', label: 'Informationswege' },
+              ]}
+              value={isSourcesDataset ? 'informationswege' : 'mythen'}
+              onChange={(ds) => handleDatasetSwitch(ds as 'mythen' | 'informationswege')}
+              aria-label="Datensatz wechseln"
+            />
           </div>
           {/* Single unified view tabs */}
           <div className="carm-explorer__tabs--left is-group-active">
