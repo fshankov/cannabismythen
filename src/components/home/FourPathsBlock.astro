@@ -134,6 +134,18 @@ const QUIZ_OPTIONS = [
   },
 ];
 
+// AI draft — pending ISD review. English glosses:
+//   quiz   → "For young people & consumers"
+//   fakten → "For parents & teachers"
+//   daten  → "For professionals & teachers"
+//   meine  → "For all target groups"
+const CARD_AUDIENCE: Record<string, string> = {
+  quiz:   "Für Jugendliche & Konsumierende",
+  fakten: "Für Eltern & Lehrkräfte",
+  daten:  "Für Fachkräfte & Lehrkräfte",
+  meine:  "Für alle Zielgruppen",
+};
+
 const cards = [
   { mod: "quiz", icon: ICONS.quiz, ...quizTile },
   { mod: "fakten", icon: ICONS.fakten, ...faktenKartenTile },
@@ -172,19 +184,22 @@ const cards = [
               stroke-linejoin="round"
             ><path d="m9 18 6-6-6-6"></path></svg>
           </span>
-          <span class="path-card__icon" aria-hidden="true">
-            <svg
-              viewBox="0 0 24 24"
-              width="17.5"
-              height="17.5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              set:html={c.icon}
-            ></svg>
-          </span>
+          <div class="path-card__top">
+            <span class="path-card__icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                width="17.5"
+                height="17.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                set:html={c.icon}
+              ></svg>
+            </span>
+            <span class="path-card__audience">{CARD_AUDIENCE[c.mod]}</span>
+          </div>
           <h3 class="path-card__title">{c.title}</h3>
           <p class="path-card__body">{c.description}</p>
 

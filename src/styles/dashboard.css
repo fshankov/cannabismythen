@@ -1,27 +1,9 @@
 /* ==================== CaRM DASHBOARD STYLES ==================== */
 /* Scoped where possible to avoid conflicts with cannabismythen global styles */
 
-/*
- * Dashboard uses the same 1100px max-width as all other pages (2026-05-30).
- * The white chart panel reads as elevated through contrast against the
- * site-wide #f4f4f0 background — no tonal seam between the column and gutters.
- * `<main>` stays transparent so the body-level `.dot-texture` shows through uniformly.
- */
-main:has(.carm-explorer) {
-  max-width: 1350px;
-}
-
-/* Widen the fixed nav pill to track the dashboard's 1350 px content
-   column. Match nav-wrapper padding to main's --space-lg (24 px) so
-   the pill's left edge aligns with the content left edge exactly.
-   Pill max-width = 1350 - 2×24 = 1302 px. */
-body:has(.carm-explorer) .nav-wrapper {
-  max-width: 1350px;
-  padding-left: 24px;
-  padding-right: 24px;
-}
-body:has(.carm-explorer) .nav {
-  max-width: 1302px;
+/* Match the 1136px content width used by the quiz index and fakten-karten pages. */
+body:has(.carm-explorer) main {
+  max-width: 1136px;
 }
 
 .carm-explorer {
@@ -848,8 +830,8 @@ body:has(.carm-explorer) .nav {
    padding, gap, border, radius, shadow. The icon sits inline at the
    left; the bare input fills the middle; the clear × sits at the right. */
 .carm-myth-search-row {
-  height: 44px;
-  padding: 0 16px;
+  height: 38px;
+  padding: 0 8px;
   gap: 8px;
   border-radius: 8px;
   border: 1px solid var(--color-border, #e2e8f0);
@@ -872,7 +854,7 @@ body:has(.carm-explorer) .nav {
   background: transparent;
   outline: none;
   font: inherit;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-text, #1a1a2e);
   padding: 0;
@@ -4940,14 +4922,14 @@ body.carm-modal-open {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 44px;
-  padding: 0 16px;
+  height: 38px;
+  padding: 0 8px;
   border-radius: 8px;
   border: 1px solid var(--color-border, #e2e8f0);
   background: var(--color-surface, #ffffff);
   color: var(--color-text, #1a1a2e);
   font: inherit;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
@@ -5066,6 +5048,7 @@ body.carm-modal-open {
   flex-shrink: 0;
 }
 
+
 @media (min-width: 1011px) {
   .carm-explorer__tabs--left {
     margin-left: 64px;
@@ -5104,9 +5087,6 @@ body.carm-modal-open {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  /* Compact: each tab now carries just a short label + icon under a
-     permanent "Mythen"/"Quellen" group label, so it doesn't need the
-     default 24 px side padding. */
   padding: 9px 16px;
 }
 .carm-explorer__tabs--left .tab-btn > svg,
@@ -5123,6 +5103,56 @@ body.carm-modal-open {
 .carm-explorer__tab-btn--fixed {
   width: 163px;
   justify-content: center;
+}
+
+/* ── Dataset segmented pill (Mythen / Informationswege) ───────────── */
+.carm-dataset-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #e7e7e0;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+  align-self: flex-end;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.carm-dataset-pill__btn {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(26, 26, 46, 0.55);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+.carm-dataset-pill__btn:hover:not(.active) {
+  color: rgba(26, 26, 46, 0.80);
+}
+
+.carm-dataset-pill__btn.active {
+  background: #ffffff;
+  color: var(--color-accent, #2d6a4f);
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.10);
+}
+
+/* Vertical divider between the pill and the view tabs */
+.carm-tab-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.10);
+  margin: 0 12px 4px;
+  align-self: center;
+  flex-shrink: 0;
 }
 
 /* Outer white panel — holds the toolbar + chart canvas. BOTH top corners
@@ -5180,12 +5210,12 @@ body.carm-modal-open {
    default 8 px). The chips remain interactive; the modifier only
    overrides width + radius. */
 .carm-explorer__filter {
-  width: 102px;
+  width: 84px;
   border-radius: 12px;
   justify-content: center;
 }
 .carm-explorer__export {
-  width: 148px;
+  width: 120px;
   border-radius: 12px;
   justify-content: center;
 }

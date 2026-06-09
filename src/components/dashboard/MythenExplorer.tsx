@@ -178,6 +178,31 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     return n;
   }, [data, state.categoryIds, state.mythIds, state.verdictFilter]);
 
+  // ── Dataset pill helpers ─────────────────────────────────────────
+  const SOURCES_VIEWS = new Set<ViewTab>(['sources', 'sources2', 'sources_table']);
+  const isSourcesDataset = SOURCES_VIEWS.has(state.view);
+
+  // Maps any ViewTab → its visual type (the key used by the left ViewTabs group)
+  const VIEW_TYPE: Partial<Record<ViewTab, ViewTab>> = {
+    balken: 'balken', spannweite: 'spannweite', table: 'table',
+    sources: 'balken', sources2: 'spannweite', sources_table: 'table',
+  };
+  const currentViewType: ViewTab = VIEW_TYPE[state.view] ?? 'balken';
+
+  const DATASET_VIEW: Record<string, Record<string, ViewTab>> = {
+    mythen: { balken: 'balken', spannweite: 'spannweite', table: 'table' },
+    informationswege: { balken: 'sources', spannweite: 'sources2', table: 'sources_table' },
+  };
+
+  const handleDatasetSwitch = (ds: 'mythen' | 'informationswege') => {
+    update('view', DATASET_VIEW[ds][currentViewType]);
+  };
+
+  const handleViewTypeChange = (vt: ViewTab) => {
+    const ds = isSourcesDataset ? 'informationswege' : 'mythen';
+    update('view', DATASET_VIEW[ds][vt]);
+  };
+
   const disabledGroups = useMemo(
     () => getDisabledGroupsForIndicator(state.indicator),
     [state.indicator],
@@ -495,32 +520,33 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             The "EXPLORE" eyebrow that the brief originally placed
             above the bar was removed 2026-05-28 PM per Fedor. */}
         <div className="carm-explorer__tab-bar">
-          <div className={`carm-explorer__tabs--left${['balken','spannweite','table'].includes(state.view) ? ' is-group-active' : ''}`}>
-            <span className="carm-explorer__group-label carm-explorer__group-label--mythen" aria-hidden="true">Mythen</span>
+          {/* Dataset segmented pill */}
+          <div className="carm-dataset-pill">
+            <button
+              type="button"
+              className={`carm-dataset-pill__btn${!isSourcesDataset ? ' active' : ''}`}
+              onClick={() => handleDatasetSwitch('mythen')}
+            >
+              Mythen
+            </button>
+            <button
+              type="button"
+              className={`carm-dataset-pill__btn${isSourcesDataset ? ' active' : ''}`}
+              onClick={() => handleDatasetSwitch('informationswege')}
+            >
+              Informationswege
+            </button>
+          </div>
+          {/* Single unified view tabs */}
+          <div className="carm-explorer__tabs--left is-group-active">
             <ViewTabs
-              view={state.view}
+              view={currentViewType}
               lang={'de'}
               group="left"
-              onChange={(v: ViewTab) => update('view', v)}
-            />
-          </div>
-          {/* Fixed gap between the Mythen group and the Quellen group —
-              keeps each group tight while clearly separating the two. */}
-          <div className="carm-explorer__tab-gap" aria-hidden="true" />
-          <div className={`carm-explorer__tabs--right${['sources','sources2','sources_table'].includes(state.view) ? ' is-group-active' : ''}`}>
-            <span className="carm-explorer__group-label carm-explorer__group-label--quellen" aria-hidden="true">Informationswege</span>
-            <ViewTabs
-              view={state.view}
-              lang={'de'}
-              group="right"
-              onChange={(v: ViewTab) => update('view', v)}
+              onChange={handleViewTypeChange}
             />
           </div>
           <div className="carm-explorer__tab-spacer" aria-hidden="true" />
-          {/* Rundgang affordance — a yellow "?" bookmark fused to the
-              panel's (flat) top-right corner, at the far upper-right.
-              Clicking it starts the walkthrough; a first-visit nudge
-              draws the eye until it's been opened once. */}
           <button
             type="button"
             className={`carm-explorer__rundgang-help${rundgangSeen ? '' : ' is-nudge'}`}

@@ -15,11 +15,11 @@
  * and the same `onChange(value)` signature. No consumer-side edits.
  */
 
-import { useRef, type KeyboardEvent } from 'react';
+import { useRef, type KeyboardEvent, type ReactNode } from 'react';
 
 interface PivotOption<T extends string> {
   value: T;
-  label: string;
+  label: ReactNode;
 }
 
 interface PivotToggleProps<T extends string> {

@@ -1,0 +1,160 @@
+/* ── Fakten-Karten page — list view + view-toggle additions ── */
+
+/* View-toggle labels: compact to match the filter bar's smaller type scale,
+   and flex so the Lucide icon sits inline with the text. */
+.fakten-filter-bar__view-toggle .carm-pivot-switch__label {
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── List view panel ── */
+.fakten-list-panel {
+  background: var(--color-surface, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--color-bg-subtle, #eeeee8);
+  overflow: hidden;
+}
+
+.fakten-list-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* A2 — header legibility: increased size, tightened letter-spacing */
+.fakten-list-table thead th {
+  padding: 9px 16px;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: #fafaf8;
+  border-bottom: 1px solid var(--color-bg-subtle, #eeeee8);
+  white-space: nowrap;
+}
+
+.fakten-list-table thead th.col-num {
+  width: 44px;
+  text-align: center;
+}
+
+.fakten-list-table thead th.col-verdict {
+  width: 190px;
+  text-align: right;
+}
+
+/* ── Row ── */
+/* A1 — was hardcoded #f0efea */
+.fakten-list-row {
+  border-bottom: 1px solid var(--color-border);
+  transition: background 200ms ease;
+}
+
+.fakten-list-row:last-child {
+  border-bottom: none;
+}
+
+.fakten-list-row:hover {
+  background: color-mix(in srgb, var(--rv, #047857) 10%, transparent);
+}
+
+.fakten-list-table td {
+  padding: 10px 16px;
+  vertical-align: middle;
+}
+
+.fakten-list-table td.col-num {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary); /* A1 — removed wrong #6b6b63 fallback */
+  text-align: center;
+  width: 44px;
+}
+
+.fakten-list-table td.col-verdict {
+  text-align: right;
+  white-space: nowrap;
+  width: 190px;
+}
+
+/* ── Verdict color tokens — cascaded down to statement + hover ── */
+.fakten-list-row[data-classification="richtig"]                { --rv: var(--classification-richtig, #047857); }
+.fakten-list-row[data-classification="eher_richtig"]           { --rv: var(--classification-eher-richtig, #4d7c0f); }
+.fakten-list-row[data-classification="eher_falsch"]            { --rv: var(--classification-eher-falsch, #b45309); }
+.fakten-list-row[data-classification="falsch"]                 { --rv: var(--classification-falsch, #be123c); }
+.fakten-list-row[data-classification="keine_aussage_moeglich"] { --rv: #6b7280; }
+
+/* ── Statement cell ── */
+.fakten-list-statement {
+  font-size: 1rem;
+  font-weight: 400;
+  font-variation-settings: 'wght' 400;
+  line-height: 1.45;
+  color: var(--color-text, #1a1a18);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  display: block;
+  transition:
+    font-variation-settings 200ms ease,
+    color 200ms ease,
+    text-decoration-color 200ms ease;
+}
+
+.fakten-list-row:hover .fakten-list-statement {
+  font-weight: 600;
+  font-variation-settings: 'wght' 600;
+  color: var(--rv, var(--color-accent, #2d6a4f));
+  text-decoration-color: var(--rv, var(--color-accent, #2d6a4f));
+}
+
+/* Trailing arrow in verdict color */
+.fakten-list-statement::after {
+  content: ' →';
+  opacity: 0;
+  transition: opacity 100ms;
+  color: var(--rv, var(--color-accent, #2d6a4f));
+}
+
+.fakten-list-row:hover .fakten-list-statement::after {
+  opacity: 1;
+}
+
+/* Portal tooltip — cursor-following, rendered into document.body */
+.fakten-list-tooltip-portal {
+  max-width: min(340px, calc(100vw - 40px));
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--color-text, #1a1a18);
+  font-size: 1rem;
+  line-height: 1.6;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 20px 40px -8px rgba(0, 0, 0, 0.14);
+}
+
+/* ── Mobile: collapse # column, smaller padding ── */
+@media (max-width: 540px) {
+  .fakten-list-table thead th.col-num,
+  .fakten-list-table td.col-num {
+    display: none;
+  }
+
+  .fakten-list-table td {
+    padding: 9px 12px;
+  }
+
+  .fakten-list-statement {
+    font-size: 0.9375rem;
+  }
+
+  .fakten-list-table thead th.col-verdict,
+  .fakten-list-table td.col-verdict {
+    width: 130px;
+  }
+}
