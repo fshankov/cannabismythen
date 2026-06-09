@@ -132,11 +132,17 @@ const GROUP_FULL_LABELS: Record<GroupId, string> = {
   parents: 'Eltern',
 };
 
+/** Visible label per Zielgruppe in the row header. Full natural
+ *  German names (Fedor 2026-06-09) — no abbreviation periods. The
+ *  parenthetical age ranges (e.g. "(18–70)") still live only in the
+ *  hover tooltip via GROUP_FULL_LABELS. The popup widens to 620 px
+ *  on desktop to accommodate "Junge Erwachsene" (the longest label)
+ *  without horizontal scroll. */
 const GROUP_SHORT_LABELS: Record<GroupId, string> = {
-  adults: 'Erw.',
-  minors: 'Min.',
-  consumers: 'Kons.',
-  young_adults: 'Junge E.',
+  adults: 'Erwachsene',
+  minors: 'Minderjährige',
+  consumers: 'Konsumierende',
+  young_adults: 'Junge Erwachsene',
   parents: 'Eltern',
 };
 

@@ -63,7 +63,7 @@ export function buildWalkthrough(): Driver {
         popover: {
           title: '1 / 4 · Zwei Datensätze aus der CaRM-Studie',
           description:
-            'Oben wechselst du die Sicht: links die <strong>Mythen</strong> (Balken, Spannweite, Tabelle), rechts die <strong>Informationsquellen</strong> – zwei Datensätze aus derselben Studie.<br><br><strong>Mythen:</strong> wie bekannt und wichtig die 42 Aussagen sind und wie richtig die Zielgruppen sie beurteilen.<br><strong>Informationsquellen:</strong> welche Wege die Zielgruppen nutzen, welchen sie vertrauen und worüber sie Gesundheitsinfos wahrnehmen.<br><br>Alle Werte stammen aus der CaRM-Befragung.',
+            'Oben wechselst du die <strong>Ansicht</strong>: links die <strong>Mythen</strong>, rechts die <strong>Informationswege</strong> — zwei Datensätze aus derselben Studie, mit jeweils 3 Darstellungsarten: als Balken, Übersicht oder Tabelle.<br><br><strong>Mythen:</strong> Zu welchen Anteilen gekannt? In welchem Ausmaß individuell bedeutsam? In welchem Grad richtig beurteilt? Wie weit präventiv bedeutsam? Mit welchem Bevölkerungsrisiko? Nach Zielgruppe zu betrachten.<br><br><strong>Informationswege:</strong> Wo wird aktiv nach gesundheitsbezogenen Informationen gesucht? Wo werden solche Infos nebenbei wahrgenommen? In welchem Ausmaß wird diesen Wegen vertraut? Für welche ergeben sich wie große Präventionspotenziale? Nach Zielgruppe zu betrachten.<br><br>Alle Werte stammen aus der CaRM-Befragung.',
         },
       },
       {
@@ -71,7 +71,7 @@ export function buildWalkthrough(): Driver {
         popover: {
           title: '2 / 4 · Zielgruppe, Indikator & Filter',
           description:
-            `Hier stellst du die Sicht ein: mit dem <strong>Umschalter</strong> ${ICONS.toggle} wechselst du zwischen Indikatoren und Gruppen, und unter <strong>Wert für</strong> ${ICONS.chevronDown} wählst du den konkreten Wert. Über <strong>Filter</strong> ${ICONS.filter} und die Suche grenzt du auf bestimmte Mythen ein.`,
+            `Hier stellst du die Ansicht ein: mit dem <strong>Umschalter</strong> ${ICONS.toggle} wechselst du zwischen Indikatoren und Gruppen, und unter <strong>Wert für</strong> ${ICONS.chevronDown} wählst du je nach Ansicht die konkrete Gruppe oder den Indikator. Über <strong>Filter</strong> ${ICONS.filter} und die Suche grenzt du auf bestimmte Mythen ein.<br><br><strong>Anwendungsbeispiel 1: Welche Mythen beurteilen Erwachsene und Minderjährige häufig falsch?</strong><br>Du willst wissen, welche Mythen unter den Erwachsenen und Minderjährigen besonders oft falsch beurteilt werden? Tippe auf den Reiter „Übersicht". Schiebe den Schalter „Indikatoren" nach links. Wähle im Dropdown „Wert für" Richtigkeit. Blende die Spalten für Konsument:innen, Junge Erwachsene und Eltern jeweils aus. Nun kannst du sortieren: bei den Erwachsenen oder auch bei den Minderjährigen. Auf- oder absteigend, je nachdem, was dich interessiert. Du willst nur bestimmte Mythen vergleichen? Wähle sie über den Filter-Button aus.<br><br><strong>Anwendungsbeispiel 2: Welche Mythen sind unter Konsumierenden besonders bekannt?</strong><br>Du willst wissen, welche Mythen Konsumierende besonders oft kennen? Tippe auf den Reiter „Balken". Wähle im ersten Dropdown „Kenntnis". Wähle im zweiten Dropdown „Konsumierende". Sortiere die Balken.<br><br><strong>Anwendungsbeispiel 3: Für welche Mythen besteht besonderer Präventionsbedarf bei Minderjährigen?</strong><br>Tippe auf den Reiter „Übersicht". Schiebe den Schalter „Indikatoren" nach links. Wähle im Dropdown „Wert für" Prävention. Blende die Spalten für Erwachsene, Junge Erwachsene und Eltern aus. Sortiere die Werte bei den Minderjährigen oder Konsumierenden.`,
         },
       },
       {
@@ -87,7 +87,7 @@ export function buildWalkthrough(): Driver {
         popover: {
           title: '4 / 4 · Mythos öffnen',
           description:
-            '<strong>Klick auf einen Mythos</strong> öffnet sein vollständiges <strong>Fact-Sheet</strong>.<br>Dieselbe Steuerung gilt rechts für die Informationsquellen.<br><br>Das war’s – jetzt bist du dran! Erkunde die Daten.',
+            '<strong>Klick auf einen Mythos</strong> öffnet sein vollständiges <strong>Fact-Sheet</strong>.<br>Dieselbe Steuerung gilt rechts für die Informationswege.<br><br>Das war’s – jetzt bist du dran! Erkunde die Daten.',
         },
       },
     ],
