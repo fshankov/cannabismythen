@@ -20,7 +20,7 @@ steps:
       Online, am Küchentisch, im Wartezimmer — Cannabis ist ein Thema. Das ISD trug unterschiedliche Aussagen zu Cannabis systematisch zusammen: 7.408 frei formulierte Aussagen — aus einer Online-Befragung von 1.041 Personen, Gesprächen mit 60 Präventionsfachkräften und einer Analyse einschlägiger (Online-)Medien.
 
 
-      Manches klingt plausibel, manches widersprüchlich. Was davon stimmt eigentlich? Genau das wollten wir herausfinden.
+      Manches klingt plausibel, manches widersprüchlich. Was davon stimmt eigentlich? Genau das wollte das ISD herausfinden.
     legend: "7.408 Aussagen · 53 Themenfelder · 42 prüfbare Thesen"
     hint: ""
   - heading: |-
@@ -38,7 +38,7 @@ steps:
       548 wissenschaftliche Quellen — systematische Literaturrecherche in PubMed, PsychInfo, SocIndex, Google Scholar (Stand 09/2025).
     hint: ""
   - heading: |-
-      Dann haben wir 2.795 Menschen befragt,
+      Dann hat das ISD 2.795 Menschen befragt,
       was sie für richtig halten.
     bodyText: |-
       Bevölkerungsbefragung in Deutschland: 2.097 Erwachsene (18–70 Jahre), 555 Minderjährige (16–17 Jahre), 143 Mitglieder von Cannabis-Anbauvereinigungen.
@@ -59,7 +59,7 @@ steps:
 
       {icon:awareness} **Kenntnis.** 26 % der Erwachsenen kennen diesen Mythos — ein niedriger mittlerer Wert.
 
-      {icon:significance} **Bedeutung.** Für die Erwachsenen, die ihn kennen, ist er durchaus wichtig: 67 von 100 Punkten für den eigenen Umgang mit Cannabis.
+      {icon:significance} **Bedeutung.** Für die Erwachsenen, die ihn kennen, ist der Mythos durchaus wichtig: Im Durchschnitt erreicht die Wichtigkeit für den eigenen Umgang mit Cannabis 67 Punkte auf einer Skala von 0 (geringste Wichtigkeit) bis 100 Punkte (höchste Wichtigkeit).
 
       {icon:correctness} **Richtigkeit.** Die Einordnung im Sinne der wissenschaftlichen Klassifikation erreicht nur 25 von 100 Punkten — die meisten liegen also daneben. Dabei ist der Befund eindeutig: Aktuelle Studien können einen Zusammenhang zwischen Cannabis und einem generellen Motivationsverlust nicht bestätigen.
     legend: "Stichprobe: 2.097 Volljährige, 18–70 Jahre."
@@ -70,7 +70,7 @@ steps:
     bodyText: |-
       Aus diesen drei Werten leiten sich zwei weitere ab.
 
-      {icon:prevention_significance} **Präventionsbedeutung.** Aus individueller Bedeutung und Beurteilung ergibt sich ein mittleres Niveau von 60 Punkten — einer der höchsten Werte unter allen 42 Thesen.
+      {icon:prevention_significance} **Präventionsbedeutung.** Aus individueller Bedeutung und Beurteilung ergibt sich für die Präventionsbedeutung ein mittleres Niveau von 60 Punkten — einer der höchsten Werte unter allen 42 Mythen.
 
       {icon:population_relevance} **Bevölkerungsrelevanz.** Doch über die gesamte volljährige Bevölkerung gerechnet — nicht nur über jene, die den Mythos schon kennen — fällt die Präventionsbedeutung niedrig aus (Bevölkerungsrelevanz: 17 Punkte).
 
@@ -80,27 +80,27 @@ steps:
       Wo wir suchen.
       Wem wir vertrauen.
     bodyText: |-
-      In einem eigenen Studienteil haben wir gefragt: Wo suchen Menschen aktiv nach Informationen zu Cannabis — und wem vertrauen sie dabei?
+      In einem eigenen Studienteil hat das ISD gefragt: Wo suchen Menschen aktiv nach Informationen zu Cannabis — und wem vertrauen sie dabei?
 
       Erwachsene gehen am häufigsten in die Apotheke oder Arztpraxis (60 %). Minderjährige nur zu 37 % — sie fragen lieber Angehörige (53 %). Foren und Influencer:innen spielen vor allem in jüngeren Zielgruppen eine Rolle.
 
-      Beim Vertrauen liegen Apotheken über alle Gruppen vorn (92 von 100). Doch wer ihnen vertraut, sucht dort nicht zwangsläufig — die Lücke zwischen Vertrauen und tatsächlicher Informationssuche ist der eigentliche Befund.
+      Beim Vertrauen liegen Apotheken über alle Gruppen vorn (92 von 100). Doch wer ihnen vertraut, sucht dort nicht zwangsläufig — die Lücke zwischen Vertrauen und tatsächlicher Informationssuche ist hier ein wichtiger Befund.
     hint: ""
   - heading: |-
       Was uns nebenbei erreicht.
       Wo Aufklärung am meisten bewegt.
     bodyText: |-
-      Andere Quellen erreichen uns ohne aktive Suche: Radio, Fernsehen, Plakate, Infoscreens. Diesen Quellen vertrauen Menschen weniger als der Apotheke — sie erreichen uns trotzdem.
+      Andere Informationsmedien erreichen uns ohne aktive Suche: Radio, Fernsehen, Plakate, Infoscreens. Diesen Quellen vertrauen Menschen weniger als der Apotheke — sie erreichen uns trotzdem.
 
       Wahrnehmung × Vertrauen ergibt das Präventionspotenzial: der größte Hebel liegt dort, wo Reichweite und Glaubwürdigkeit zusammenfallen, nicht dort, wo Information am häufigsten landet.
     hint: ""
-  - heading: Was wir daraus gemacht haben.
+  - heading: Was das ISD daraus gemacht hat.
     bodyText: |-
       Diese Website verwertet die Befunde der CaRM-Studie — für unterschiedliche Bedürfnisse:
 
-      {icon:faktenkarten} 42 Faktenkarten mit wissenschaftlicher Klassifikation, Quellen und Erklärungen je Mythos.
-      {icon:quiz} Ein Quiz, das dein Wissen mit den Ergebnissen der Bevölkerungsbefragung vergleicht.
-      {icon:daten-explorer} Den Daten-Explorer mit Sichten für allgemeines Publikum, Eltern, Fachkräfte und Forschung.
+      {icon:faktenkarten} Eine Übersicht über die 42 Mythen mit wissenschaftlicher Klassifikation, Quellen und Erklärungen je Mythos.
+      {icon:quiz} Wie steht es um dein Wissen zu Cannabismythen? Mach das Quiz und finde es heraus.
+      {icon:daten-explorer} Einschätzungen von 5 Zielgruppen zu 42 Mythen und zu Informationswegen erkunden.
       {icon:meine-interessen} Meine Interessen — die FAQ, sortiert nach Themen und Zielgruppen.
     hint: ""
   - heading: Wer hinter der Studie steht.
@@ -193,6 +193,19 @@ footerAbschlussbericht:
   body: >-
     Schütze, C., Schulte, B., Buth, S., Degkwitz, P., Rosenkranz, M., & Lahusen, H. (2025). Cannabiskonsum — Risiken und Mythen (CaRM): Abschlussbericht. ISD Hamburg.
 internalNotes: >-
+  Iter-24 (2026-06-09) — Harald Lahusen Feedbucket-Batch auf /projekt/.
+  Texteingriffe in Steps 2/5/6/7/8/9/10: erste/dritte Person „wir" → „das
+  ISD"; „Thesen" → „Mythen"; Bedeutung-Zeile mit Skala-Erklärung (0–100);
+  Faktenkarten-Zeile → „Eine Übersicht über die 42 Mythen …"; Quiz-Zeile neu;
+  Daten-Explorer-Zeile → „Einschätzungen von 5 Zielgruppen zu 42 Mythen und zu
+  Informationswegen erkunden"; Step-9 erstes „Quellen" → „Informationsmedien"
+  (zweites „Diesen Quellen" bleibt, Fedor-Entscheid 2026-06-09). Texte von HL
+  (ISD), kein AI-Entwurf. ISD-Logo-Tausch und Hintergrundfarbe von Fedor
+  zurückgestellt. English gloss: applied HL's Feedbucket copy edits
+  (first-/third-person ISD shift, Thesen→Mythen, offer-list rewrites, first
+  Quellen→Informationsmedien); logo swap + bg color deferred by Fedor.
+
+
   Iter-23 (2026-06-02) — Harald Lahusen Feedbucket-Runde auf /projekt/
   (https://dashboard.feedbucket.app/projects/23874, Tasks #797504/#797518/
   #797521/#797522/#797538/#797540 + sitebreitenes #796936). Vier Texteingriffe:

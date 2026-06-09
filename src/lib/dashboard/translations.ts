@@ -120,7 +120,7 @@ const translations = {
   'lollipop.title': { de: 'Gruppenvergleich', en: 'Group Comparison' },
 
   // Sources tab — single Streifen view replacing legacy V1 + V2 source tabs.
-  'view.sources': { de: 'Informationsquellen', en: 'Information Sources' },
+  'view.sources': { de: 'Informationswege', en: 'Information Sources' },
   'sources.metric.search': { de: 'Suche', en: 'Search' },
   'sources.metric.perception': { de: 'Wahrnehmung', en: 'Perception' },
   'sources.metric.trust': { de: 'Vertrauen', en: 'Trust' },
@@ -415,7 +415,7 @@ const translations = {
     de: 'Jede Zeile eine Informationsquelle, jede Spalte ein Wert oder eine Bevölkerungsgruppe. Wählen Sie oben den Bezug. Der Punkt markiert den Wert je Quelle, der getönte Balken zeigt die Skala 0–100 %. Klick auf das Pfeilsymbol blendet Unterquellen ein.',
     en: 'Each row is an information source, each column a value or population group. Pick the reference at the top. The dot marks each source’s value, the tinted bar shows the 0–100 % scale. Click the chevron to reveal sub-sources.',
   },
-  'sources2.title': { de: 'Informationsquellen-Spannweite', en: 'Information-sources range' },
+  'sources2.title': { de: 'Informationswege-Spannweite', en: 'Information-sources range' },
   'sources.sort.alpha.tooltip': {
     de: 'Informationswege alphabetisch sortieren (A → Z)',
     en: 'Sort sources alphabetically (A → Z)',

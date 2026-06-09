@@ -34,7 +34,7 @@ interface Tile {
 const TILES: Tile[] = [
   { mod: 'quiz', title: 'Quiz', description: '6 Quiz, thematisch sortiert — teste dein Wissen in wenigen Minuten.', url: withBase('quiz/') },
   { mod: 'fakten', title: 'Fakten-Karten', description: 'Alle 42 Mythen auf Karten zum Umdrehen: vorn der Mythos, hinten die wissenschaftliche Einordnung.', url: withBase('fakten-karten/') },
-  { mod: 'daten', title: 'Daten-Explorer', description: 'Wer glaubt was? Welche Informationsquellen werden genutzt? — bis zu 5 Indikatoren für 5 Zielgruppen im Vergleich.', url: withBase('daten-explorer/') },
+  { mod: 'daten', title: 'Daten-Explorer', description: 'Wer glaubt was? Welche Informationswege werden genutzt? — bis zu 5 Indikatoren für 5 Zielgruppen im Vergleich.', url: withBase('daten-explorer/') },
   { mod: 'meine', title: 'Meine Interessen', description: 'Fragen und Fakten, aufbereitet für 5 Zielgruppen: Eltern, Jugendliche, Konsumierende, Lehrkräfte und Fachkräfte.', url: withBase('meine-interessen/') },
 ];
 

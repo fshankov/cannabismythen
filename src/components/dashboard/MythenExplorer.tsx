@@ -930,7 +930,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             return {
               title: state.view === 'sources2'
                 ? t('sources2.title', 'de')
-                : 'Informationsquellen',
+                : 'Informationswege',
               subtitle,
             };
           }

@@ -27,7 +27,7 @@ faktenKartenTile:
   targetUrl: '/fakten-karten/'
 datenExplorerTile:
   title: 'Daten-Explorer'
-  description: 'Wer glaubt was? Welche Informationsquellen werden genutzt? — bis zu 5 Indikatoren für 5 Zielgruppen im Vergleich.'
+  description: 'Wer glaubt was? Welche Informationswege werden genutzt? — bis zu 5 Indikatoren für 5 Zielgruppen im Vergleich.'
   ctaLabel: 'Daten erkunden'
   targetUrl: '/daten-explorer/'
 meineInteressenTile:
