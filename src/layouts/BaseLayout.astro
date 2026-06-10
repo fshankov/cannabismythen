@@ -4,8 +4,8 @@ import "../styles/reveal.css";
 import "@fontsource-variable/inter";
 import "@fontsource/dm-serif-display";
 import "@fontsource/dm-serif-display/400-italic.css";
-import "@fontsource/source-serif-4/700.css";
-import "@fontsource/source-serif-4/700-italic.css";
+import "@fontsource-variable/source-serif-4/opsz.css";
+import "@fontsource-variable/source-serif-4/opsz-italic.css";
 import SiteFooter from "@components/home/SiteFooter.astro";
 import { reader } from "@lib/content";
 
@@ -330,7 +330,12 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         </ul>
       </div>
     </div>
-    <main>
+    {/* Skip-to-content link — first focusable element on every page so
+        keyboard users can bypass the nav pill on every load (WCAG 2.4.1
+        Bypass Blocks). Visually hidden until focused. */}
+    <a href="#main-content" class="skip-to-content">Zum Inhalt springen</a>
+
+    <main id="main-content" tabindex="-1">
       <slot />
     </main>
 
@@ -348,7 +353,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         Re-enabled 2026-06-01. To disable: wrap this block back in
         FEEDBUCKET-DISABLED-START / FEEDBUCKET-DISABLED-END comment markers
         and remove the head script + trigger script below. */}
-    <footer id="main-content" class="feedbucket-footer">
+    <footer class="feedbucket-footer">
       <p>
         <a
           id="footer-feedback-trigger"
@@ -389,15 +394,13 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
     <script is:inline>
       (function () {
         var path = window.location.pathname;
-        document.querySelectorAll('.nav__link, .nav__drawer-link').forEach(function (a) {
+        document.querySelectorAll('.nav__link, .nav__drawer-link, .mobile-tab-bar__item').forEach(function (a) {
           var href = a.getAttribute('href');
           var active = href === path || (href !== '/' && path.startsWith(href));
-          if (active) {
-            a.classList.add(
-              a.classList.contains('nav__link') ? 'nav__link--active' : 'nav__drawer-link--active'
-            );
-            a.setAttribute('aria-current', 'page');
-          }
+          if (!active) return;
+          if (a.classList.contains('nav__link')) a.classList.add('nav__link--active');
+          else if (a.classList.contains('nav__drawer-link')) a.classList.add('nav__drawer-link--active');
+          a.setAttribute('aria-current', 'page');
         });
       })();
     </script>
@@ -424,17 +427,40 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         var btn     = document.getElementById('hamburgerBtn');
         var overlay = document.getElementById('navDrawer');
         if (!btn || !overlay) return;
+        // Focus trap while open (WCAG 2.1.2): Tab cycles through the drawer
+        // links so keyboard focus can't walk into the page behind the
+        // aria-modal overlay; focus returns to the hamburger on close.
+        function trapKey(e) {
+          if (e.key !== 'Tab') return;
+          var els = overlay.querySelectorAll('.nav__drawer-link');
+          if (!els.length) return;
+          var first = els[0], last = els[els.length - 1];
+          if (e.shiftKey) {
+            if (document.activeElement === first || !overlay.contains(document.activeElement)) {
+              e.preventDefault();
+              last.focus();
+            }
+          } else if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
         function open() {
           overlay.classList.add('nav__drawer-overlay--open');
           btn.setAttribute('aria-expanded', 'true');
           btn.setAttribute('aria-label', 'Menü schließen');
           document.body.style.overflow = 'hidden';
+          overlay.addEventListener('keydown', trapKey);
+          var firstLink = overlay.querySelector('.nav__drawer-link');
+          if (firstLink) firstLink.focus();
         }
         function close() {
           overlay.classList.remove('nav__drawer-overlay--open');
           btn.setAttribute('aria-expanded', 'false');
           btn.setAttribute('aria-label', 'Menü öffnen');
           document.body.style.overflow = '';
+          overlay.removeEventListener('keydown', trapKey);
+          btn.focus();
         }
         btn.addEventListener('click', function () {
           overlay.classList.contains('nav__drawer-overlay--open') ? close() : open();
@@ -448,7 +474,6 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' && overlay.classList.contains('nav__drawer-overlay--open')) {
             close();
-            btn.focus();
           }
         });
       })();

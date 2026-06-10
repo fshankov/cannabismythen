@@ -111,6 +111,11 @@ interface Props {
 
 export default function MythenExplorer({ mythSlugs, mythContent, definitions, mythThemes }: Props) {
   const [data, setData] = useState<CarmData | null>(null);
+  /** loadData() failure flag (a11y audit 2026-06-10). Without this the
+   *  "Daten werden geladen…" placeholder would render forever on network
+   *  failure — an infinite loading lie. With it set, the placeholder swaps
+   *  to a friendly error + retry button so the user can recover. */
+  const [loadError, setLoadError] = useState(false);
   const [state, setState] = useState<AppState>(() => {
     const defaults = getDefaultState();
     defaults.lang = 'de';
@@ -256,7 +261,11 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   }, [mythSlugs]);
 
   useEffect(() => {
-    loadData().then(setData);
+    let cancelled = false;
+    loadData()
+      .then((d) => { if (!cancelled) setData(d); })
+      .catch(() => { if (!cancelled) setLoadError(true); });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -390,6 +399,35 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   }, [update, markRundgangSeen]);
 
   if (!data) {
+    if (loadError) {
+      return (
+        <div className="carm-loading" role="alert">
+          <p style={{ marginBottom: 12 }}>
+            Daten konnten nicht geladen werden. Bitte prüfe deine
+            Internetverbindung.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoadError(false);
+              loadData().then(setData).catch(() => setLoadError(true));
+            }}
+            style={{
+              padding: '8px 16px',
+              background: 'var(--color-accent, #2d6a4f)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 6,
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Erneut versuchen
+          </button>
+        </div>
+      );
+    }
     return <div className="carm-loading">Daten werden geladen…</div>;
   }
 
@@ -496,23 +534,6 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           Stage 1 of the Daten-Explorer refactor — the global nav already
           labels the page, and the tab bar communicates view state. */}
       <div className="app-layout">
-        {/* 2026-05-28: Fakten-Karten-style page header — large H1 +
-            subtitle paragraph. Same visual language as
-            `.fakten-page-header*` on /fakten-karten/. The Newton-voice
-            intro that lived in `.carm-explorer__intro` previously
-            becomes the subtitle. AI-drafted German (flagged for ISD
-            review). */}
-        <header className="carm-explorer__page-header">
-          <h1 className="carm-explorer__page-header__h1">Daten-Explorer</h1>
-          <p className="carm-explorer__page-header__sub">
-            Hier erkundest du die Daten der CaRM-Studie, 2025 in Deutschland
-            erhoben.<br /><strong>Neu hier?</strong> Der <strong>Rundgang</strong>{' '}
-            <RundgangBookmark className="carm-rundgang-bookmark-inline" /> führt
-            dich in etwa einer Minute durch den Explorer.<br />Wie die Daten
-            entstanden, erklärt <a href="/projekt/">„Über das Projekt"</a>.
-          </p>
-        </header>
-
         {/* Two-group tab bar with flex spacers (2026-05-28 designer
             brief). ViewTabs renders twice — once for LEFT myth views,
             once for RIGHT source views. The flex spacers keep the

@@ -8,6 +8,7 @@
 
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { trapFocus } from "../../lib/dashboard/focus-trap";
 import { t } from "./i18n";
 
 interface ShortcutHelpProps {
@@ -27,9 +28,17 @@ const ROWS = [
 export default function ShortcutHelp({ onClose }: ShortcutHelpProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // Shared focus trap (same helper as Drawer): keeps Tab inside the dialog,
+  // locks body scroll, and restores focus to the opener (the `?` key user /
+  // trigger) on close (WCAG 2.1.2 / 2.4.3). Initial focus stays on the panel
+  // itself so the dialog title is announced first.
   useEffect(() => {
-    if (panelRef.current) panelRef.current.focus();
-  }, []);
+    if (!panelRef.current) return;
+    return trapFocus(panelRef.current, {
+      onEscape: onClose,
+      initialFocus: panelRef.current,
+    });
+  }, [onClose]);
 
   if (typeof document === "undefined") return null;
 

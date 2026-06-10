@@ -9,7 +9,7 @@
  * as JSON props at build time so the popup never round-trips to the network.
  */
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import SharedFactsheetPanel from "../shared/FactsheetPanel";
 import type { MythContentEntry } from "../shared/FactsheetPanel";
 import type {
@@ -55,6 +55,8 @@ export default function MythPopupHost({
   groupMetrics: groupMetricsJson,
 }: MythPopupHostProps) {
   const [openMythId, setOpenMythId] = useState<string | null>(null);
+  /** True while we own a pushed history entry for the open popup. */
+  const pushedHistoryRef = useRef(false);
 
   const mythIndex: Record<string, MythPopupIndexEntry> = useMemo(() => {
     try {
@@ -80,6 +82,35 @@ export default function MythPopupHost({
       return {};
     }
   }, [groupMetricsJson]);
+
+  // Browser Back button support: when the popup is open and the user presses
+  // Back, close the popup instead of leaving the page.
+  useEffect(() => {
+    const onPop = () => {
+      if (pushedHistoryRef.current) {
+        pushedHistoryRef.current = false;
+        setOpenMythId(null);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // Push a history entry when a myth opens so Back can close it.
+  useEffect(() => {
+    if (!openMythId) return;
+    try {
+      if (pushedHistoryRef.current) {
+        // Myth swap while panel is open — replace instead of stacking entries.
+        window.history.replaceState({ mythPopup: openMythId }, "");
+      } else {
+        window.history.pushState({ mythPopup: openMythId }, "");
+        pushedHistoryRef.current = true;
+      }
+    } catch {
+      /* history API unavailable — popup still works, just no Back support */
+    }
+  }, [openMythId]);
 
   // Document-level delegation: catch clicks on any factsheet-link trigger
   // ([data-faq-myth-id]), no matter where in the tree it lives.
@@ -114,7 +145,14 @@ export default function MythPopupHost({
     return () => document.removeEventListener("click", onClick);
   }, []);
 
-  const handleClose = useCallback(() => setOpenMythId(null), []);
+  const handleClose = useCallback(() => {
+    if (pushedHistoryRef.current && window.history.state?.mythPopup) {
+      // history.back() fires popstate → onPop → setOpenMythId(null).
+      window.history.back();
+    } else {
+      setOpenMythId(null);
+    }
+  }, []);
 
   if (!openMythId) return null;
   const meta = mythIndex[openMythId];

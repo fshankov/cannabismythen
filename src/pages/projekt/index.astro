@@ -30,4 +30,10 @@ const { internalNotes, ...publicContent } = content;
   hideFooter={true}
 >
   <ScrollytellingViewer client:load content={publicContent} />
+  <noscript>
+    <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+      Diese Scrollytelling-Ansicht benötigt JavaScript. Bitte aktiviere
+      JavaScript, um die Projektgeschichte zu lesen.
+    </p>
+  </noscript>
 </BaseLayout>

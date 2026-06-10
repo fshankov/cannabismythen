@@ -808,11 +808,15 @@ function QuizPlayerInner({
         return;
       }
 
-      // ←/→: navigate.
+      // ←/→: navigate. ArrowRight only advances if the current question
+      // has been answered (same guard as Enter), so it can't skip questions.
+      // ArrowLeft is always allowed — it revisits already-answered questions.
       if (e.key === "ArrowRight") {
-        handleNext();
-        trackKeyboardShortcutUsed("next");
-        e.preventDefault();
+        if (currentAnswer) {
+          handleNext();
+          trackKeyboardShortcutUsed("next");
+          e.preventDefault();
+        }
         return;
       }
       if (e.key === "ArrowLeft") {

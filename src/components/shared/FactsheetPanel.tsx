@@ -261,30 +261,26 @@ export default function FactsheetPanel({
     document.addEventListener('keydown', handleKeyDown);
 
     // Dashboard and fakten-karten contexts lock body scroll; quiz manages its
-    // own. Use a position:fixed lock (not just overflow:hidden) so iOS Safari
-    // actually stops the background scrolling behind the modal; the scroll
-    // position is captured here and restored on close (Audit B-12).
+    // own. Use overflow:hidden on <html> so the scroll position is naturally
+    // preserved on close — no scrollTo restoration needed, no visible page
+    // jump (scroll-lock-jump fix 2026-06-10; replaces Audit B-12 position:fixed
+    // approach which caused a 1-frame flash at scrollTop=0 on close).
     const lockScroll = context === 'dashboard' || context === 'fakten-karten';
-    const scrollY = lockScroll ? window.scrollY : 0;
     if (lockScroll) {
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      // Compensate for scrollbar width disappearing to prevent layout shift.
+      const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+      document.documentElement.style.overflow = 'hidden';
+      if (scrollbarW > 0) {
+        document.documentElement.style.paddingRight = `${scrollbarW}px`;
+      }
     }
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       if (lockScroll) {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
-        window.scrollTo(0, scrollY);
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.paddingRight = '';
+        // Scroll position is preserved naturally — no scrollTo needed.
       }
       // Restore focus to the trigger element (Audit B-01).
       triggerRef.current?.focus?.();

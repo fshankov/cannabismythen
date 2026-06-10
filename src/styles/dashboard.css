@@ -706,19 +706,24 @@ body:has(.carm-explorer) main {
    The base `.sort-arrow` stays `inline-block` so the JSX (which
    ALWAYS renders the span, see TableView.tsx renderSortArrow) keeps
    its layout box; we just zero its opacity. */
+/* a11y audit 2026-06-10: previously opacity:0 by default so sortability
+   was hover-only — invisible to keyboard users and below the 3:1
+   non-text contrast bar. Now persistent at #767676 (≥3:1 on white) so
+   sort affordance is always discoverable. */
 .carm-explorer .data-table th .sort-arrow {
   display: inline-block;
   margin-left: 4px;
-  opacity: 0;
+  opacity: 1;
+  color: #767676;
   font-size: 0.7rem;
-  transition: opacity 0.15s ease;
+  transition: color 0.15s ease, opacity 0.15s ease;
 }
 
-.carm-explorer .data-table th:hover .sort-arrow {
-  /* Sortable affordance: hovering the column header reveals the
-     would-be sort arrow at a faded opacity. Active stays at 1
-     (rule below has higher specificity via `.active`). */
-  opacity: 0.45;
+.carm-explorer .data-table th:hover .sort-arrow,
+.carm-explorer .data-table th:focus-within .sort-arrow {
+  /* Sortable affordance: hover/focus darkens the inactive arrow so the
+     column reads as clickable / focused. */
+  color: #4a4a4a;
 }
 
 .carm-explorer .data-table th .sort-arrow.active {
@@ -901,25 +906,29 @@ body:has(.carm-explorer) main {
   white-space: nowrap;
 }
 
+/* Chip colors come from the canonical classification tokens (global.css)
+   so the chips agree with the charts (lib/dashboard/colors.ts), the
+   fakten cards and the quiz. Previously hardcoded with diverging hues
+   for eher_richtig (amber) / eher_falsch (orange) — a11y audit 2026-06-10. */
 .carm-explorer .class-chip.richtig {
-  background: #ecfdf5;
-  color: #047857;
+  background: var(--classification-richtig-bg, #ecfdf5);
+  color: var(--classification-richtig, #047857);
 }
 .carm-explorer .class-chip.eher_richtig {
-  background: #fefce8;
-  color: #a16207;
+  background: var(--classification-eher-richtig-bg, #f7fee7);
+  color: var(--classification-eher-richtig, #4d7c0f);
 }
 .carm-explorer .class-chip.eher_falsch {
-  background: #fff7ed;
-  color: #c2410c;
+  background: var(--classification-eher-falsch-bg, #fffbeb);
+  color: var(--classification-eher-falsch, #b45309);
 }
 .carm-explorer .class-chip.falsch {
-  background: #fff1f2;
-  color: #be123c;
+  background: var(--classification-falsch-bg, #fff1f2);
+  color: var(--classification-falsch, #be123c);
 }
 .carm-explorer .class-chip.keine_aussage_moeglich {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--classification-keine-aussage-bg, #f3f4f6);
+  color: var(--classification-keine-aussage, #6b7280);
 }
 
 .carm-explorer .cat-chip {
@@ -1076,6 +1085,12 @@ body:has(.carm-explorer) main {
 
 .detail-close-btn:hover {
   background: #f8fafc;
+}
+
+/* Keyboard focus ring (a11y audit 2026-06-10 / WCAG 2.4.7). */
+.detail-close-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #2d6a4f);
+  outline-offset: 2px;
 }
 
 /* ==================== NO RESULTS / LOADING ==================== */
@@ -5319,13 +5334,13 @@ body.carm-modal-open {
    retired in this pass; the subtitle now picks up the same clamp-based
    sizing the Fakten-Karten page uses, so the dashboard reads as part
    of the same site rhythm. */
-.carm-explorer .carm-explorer__page-header {
+.carm-explorer__page-header {
   display: flex;
   flex-direction: column;
   gap: 15px;
   margin: 0 0 32px;
 }
-.carm-explorer .carm-explorer__page-header__h1 {
+.carm-explorer__page-header__h1 {
   font-size: 48px;
   font-weight: 900;
   color: var(--color-accent, #2d6a4f);
@@ -5334,7 +5349,7 @@ body.carm-modal-open {
   max-width: 746px;
   margin: 0;
 }
-.carm-explorer .carm-explorer__page-header__sub {
+.carm-explorer__page-header__sub {
   font-size: 1.05rem;
   font-weight: 400;
   color: var(--color-text-secondary);
@@ -5376,17 +5391,17 @@ body.carm-modal-open {
   height: 0.5em;
   transform: rotate(45deg);
 }
-.carm-explorer .carm-explorer__page-header__sub a {
+.carm-explorer__page-header__sub a {
   color: var(--color-accent, #2d6a4f);
   text-decoration: underline;
   text-underline-offset: 3px;
   transition: color 0.15s ease;
 }
-.carm-explorer .carm-explorer__page-header__sub a:hover {
+.carm-explorer__page-header__sub a:hover {
   color: var(--color-accent-hover, #1f4f3a);
 }
 @media (max-width: 640px) {
-  .carm-explorer .carm-explorer__page-header { margin-bottom: 20px; gap: 10px; }
+  .carm-explorer__page-header { margin-bottom: 20px; gap: 10px; }
 }
 
 /* 2026-05-27 refresh — drop the chip + tab scale on tablet/phone so the
@@ -6067,7 +6082,13 @@ body.carm-modal-open {
 .carm-toolbar-row__pivot {
   flex: 0 0 auto;
 }
-.carm-toolbar-row__pivot .carm-pivot-switch__label {
+.carm-toolbar-row .carm-pivot-switch__label {
+  font-size: 0.875rem; /* match tabs */
+}
+.carm-toolbar-row .carm-pivot-switch__label--active {
+  font-weight: 500; /* same as "Wert für:" — color alone signals selection */
+}
+.carm-toolbar-row .carm-picker__caption {
   font-size: 0.875rem; /* match tabs */
 }
 

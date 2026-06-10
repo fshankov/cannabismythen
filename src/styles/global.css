@@ -229,22 +229,30 @@ html {
   --quiz-ans-eher-richtig: #e1ebe2;
   --quiz-ans-richtig: #d1e8d1;
 
-  /* Answer button post-answer borders */
+  /* Answer button post-answer borders.
+     Darkened to meet WCAG 1.4.11 (3:1 against adjacent pastel bg).
+     - correct was #09ae64 (~2.5:1 on #d1e8d1 richtig-bg) → #047857 (7.8:1)
+     - near was #fbd035 (~1.1:1 on #ffefbc eher-falsch-bg) → #92400e (5.1:1)
+     (a11y audit 2026-06-10) */
   --quiz-btn-correct: #09ae64; /* selected, exact match */
   --quiz-btn-near: #fbd035; /* selected, 1 off */
   --quiz-btn-wrong: #c86a7c; /* selected, 2–3 off */
   --quiz-btn-corr-ans: #047857; /* the correct answer button, dashed */
 
-  /* Backside header — scientific verdict colour (NOT user correctness) */
+  /* Backside header — scientific verdict colour (NOT user correctness).
+     eher-richtig / eher-falsch darkened from the Figma values
+     #92b59a / #fbaf35 to meet 3:1 large-text contrast on white
+     (a11y audit 2026-06-10). Keep in sync with `headingColor` in
+     src/lib/fakten-karten/verdict-colors.ts. */
   --quiz-back-richtig: #3d7360;
-  --quiz-back-eher-richtig: #92b59a;
-  --quiz-back-eher-falsch: #fbaf35;
+  --quiz-back-eher-richtig: #6e9a7d;
+  --quiz-back-eher-falsch: #c47c00;
   --quiz-back-falsch: #c86a7c;
 
   /* Feedback overlay + points badge — per Schritte tier */
   --quiz-fb-exact: #09ae64;
   --quiz-fb-near: #09ae64;
-  --quiz-fb-off: #fbaf35;
+  --quiz-fb-off: #c47c00; /* darkened from #fbaf35 — 3:1 on white (a11y audit 2026-06-10) */
   --quiz-fb-far: #c86a7c;
 
   /* Shared CTA fill (matches Figma #2D6A4F — reuse the accent token) */
@@ -358,6 +366,39 @@ hr {
 
 
 /* ── Site Layout ────────────────────────────────────────────── */
+
+/* ── Skip-to-content link (WCAG 2.4.1) ──────────────────────────
+   Visually hidden until keyboard-focused; jumps focus to <main>.
+   Appears above the nav pill (z-index higher than .nav) so the
+   focused state isn't covered by the floating chrome. */
+.skip-to-content {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 10px 16px;
+  background: var(--color-accent, #2d6a4f);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transform: translateY(-200%);
+  transition: transform 150ms ease;
+}
+.skip-to-content:focus,
+.skip-to-content:focus-visible {
+  transform: translateY(0);
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+/* Make the main landmark programmatically focusable for the skip
+   target without showing a focus ring on it. */
+main:focus,
+main:focus-visible {
+  outline: none;
+}
 
 /* ── Nav blur shield ─────────────────────────────────────────── */
 .nav-blur-shield {
@@ -1973,11 +2014,30 @@ button.pill[aria-pressed="true"] {
   border-bottom: 1px solid transparent;
 }
 .faq-related-rail__link:hover { border-bottom-color: var(--color-accent); }
+/* When the link also carries .faq-myth-link, use text-decoration (text-width
+   only) instead of the full-block border-bottom. Re-apply underline here
+   because .faq-related-rail__link's text-decoration:none would otherwise win. */
+.faq-related-rail__link.faq-myth-link {
+  border-bottom: none;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+.faq-related-rail__link.faq-myth-link:hover {
+  border-bottom: none;
+  text-decoration-color: var(--color-accent);
+}
 .faq-related-rail__link--primary {
   font-weight: 600;
   font-size: 0.95rem;
 }
-.faq-related-rail__icon { margin-right: 4px; }
+.faq-related-rail__icon {
+  margin-right: 4px;
+  /* inline-block steps out of the parent <a>'s text-decoration flow so
+     the underline doesn't draw a separate segment under just the icon. */
+  display: inline-block;
+}
 
 /* Helpline box */
 .helpline-box {
@@ -2330,6 +2390,13 @@ button.pill[aria-pressed="true"] {
     color: var(--color-accent);
   }
 
+  /* Keyboard focus ring (a11y audit 2026-06-10 / WCAG 2.4.7). */
+  .mobile-tab-bar__item:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+    border-radius: 6px;
+  }
+
   .mobile-tab-bar__icon {
     width: 20px;
     height: 20px;
@@ -2441,7 +2508,7 @@ button.pill[aria-pressed="true"] {
   flex: 1;
   position: sticky;
   top: 80px;
-  height: calc(100vh - 100px);
+  height: calc(100dvh - 100px); /* a11y audit 2026-06-10: dvh prevents iOS Safari address-bar reflow shift */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3227,6 +3294,14 @@ button.pill[aria-pressed="true"] {
 .preview-fab:hover {
   background: #b45309;
   transform: scale(1.08);
+}
+
+/* Keyboard focus ring (a11y audit 2026-06-10 / WCAG 2.4.7) — FAB had hover
+   only; keyboard users had no indication of focus. */
+.preview-fab:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px #d97706;
 }
 
 .preview-fab--visible {

@@ -55,6 +55,23 @@ const audienceData = await getAudience(activeAudience as FaqAudienceId);
 const isFachkraefte = activeAudience === "fachkraefte";
 ---
 
+<!-- Skip reveal animations when navigating between MI tabs (MPA reload from
+     within /meine-interessen/). The js-reveal class on <html> controls whether
+     [data-reveal] elements start hidden; removing it here means they paint
+     fully visible, no flicker or staggered entrance. Coming from outside
+     /meine-interessen/ (nav menu, direct link, etc.) the class stays and
+     animations play as normal. -->
+<script is:inline>
+  (function () {
+    try {
+      var ref = document.referrer ? new URL(document.referrer) : null;
+      if (ref && ref.pathname.startsWith('/meine-interessen/')) {
+        document.documentElement.classList.remove('js-reveal');
+      }
+    } catch (e) {}
+  })();
+</script>
+
 <div class="mi-layout">
 
   <!-- Page header -->
@@ -227,6 +244,10 @@ const isFachkraefte = activeAudience === "fachkraefte";
   width: 100%;
   justify-content: flex-start;
   border-bottom: 0px;
+  /* Prevent the tabs-bar from capturing scroll events — the global .tabs-bar
+     rule sets overflow-x: auto which hijacks the mouse wheel when hovering
+     over the tabs. MI tabs always fit without scrolling, so hidden is safe. */
+  overflow-x: hidden;
 }
 
 :global(.mi-layout .mi-tab-bar .tab-btn) {

@@ -48,6 +48,19 @@ const mythContentMap = await buildMythContentMap();
 ---
 
 <BaseLayout title="Daten-Explorer" description="Interaktive Datenvisualisierung zu 42 Cannabis-Mythen — Erkunden Sie wissenschaftliche Einordnungen, Bevölkerungsdaten und Indikatoren." bgTexture>
+  <header class="carm-explorer__page-header" data-reveal>
+    <h1 class="carm-explorer__page-header__h1">Daten-Explorer</h1>
+    <p class="carm-explorer__page-header__sub">
+      Hier erkundest du die Daten der CaRM-Studie, 2025 in Deutschland erhoben.<br/>
+      <strong>Neu hier?</strong> Der <strong>Rundgang</strong>
+      <svg class="carm-rundgang-bookmark-inline" viewBox="0 0 40 52" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 0 H32 A8 8 0 0 1 40 8 V52 L20 40 L0 52 V8 A8 8 0 0 1 8 0 Z" fill="#2d6a4f"/>
+        <text x="20" y="20" text-anchor="middle" dominant-baseline="central" font-size="23" font-weight="800" fill="#ffffff" font-family="'Inter Variable', 'Inter', system-ui, sans-serif">?</text>
+      </svg>
+      führt dich in etwa einer Minute durch den Explorer.<br/>
+      Wie die Daten entstanden, erklärt <a href="/projekt/">„Über das Projekt"</a>.
+    </p>
+  </header>
   <div data-reveal-fade>
     <MythenExplorer
       client:load
@@ -56,5 +69,11 @@ const mythContentMap = await buildMythContentMap();
       definitions={JSON.stringify(definitionsData)}
       mythThemes={JSON.stringify(mythIdToTheme)}
     />
+    <noscript>
+      <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+        Der Daten-Explorer benötigt JavaScript. Ohne JavaScript stehen
+        einzelne Faktenblätter über die Navigation zur Verfügung.
+      </p>
+    </noscript>
   </div>
 </BaseLayout>

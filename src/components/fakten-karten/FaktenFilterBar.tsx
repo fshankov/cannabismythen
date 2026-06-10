@@ -100,8 +100,14 @@ function MythRow({
       aria-selected={checked}
     >
       <label className="fakten-search__label">
+        {/* tabIndex=-1 + aria-hidden: the listbox option itself carries
+            aria-selected (the source of truth for SR users), so the inner
+            checkbox shouldn't compete for focus inside the combobox flow
+            (a11y audit 2026-06-10). */}
         <input
           type="checkbox"
+          tabIndex={-1}
+          aria-hidden="true"
           checked={checked}
           onChange={() => onToggle(m.mythNumber)}
         />
@@ -221,8 +227,10 @@ export default function FaktenFilterBar({
         return;
       }
       if (searchOpen) {
+        // Close the autocomplete panel but KEEP focus in the input — combobox
+        // pattern (a11y audit 2026-06-10). Removing the previous blur() so
+        // keyboard users don't get dropped to <body> on every Esc.
         setSearchOpen(false);
-        searchInputRef.current?.blur();
       }
     };
     window.addEventListener("mousedown", handlePointer);
@@ -302,10 +310,17 @@ export default function FaktenFilterBar({
 
   return (
     <div className="fakten-filter-section">
-      <p className="fakten-filter-section__label" aria-hidden="true">
+      {/* Section label is a real heading-like label for the toolbar; was
+          aria-hidden, restored so SR users hear the group's purpose
+          (a11y audit 2026-06-10). */}
+      <p className="fakten-filter-section__label" id="fakten-filter-section-label">
         Kategorien &amp; Suche
       </p>
-      <div className="fakten-filter-bar" role="search">
+      <div
+        className="fakten-filter-bar"
+        role="search"
+        aria-labelledby="fakten-filter-section-label"
+      >
       <div
         className="fakten-filter-bar__category fakten-filter-dropdown"
         ref={catContainerRef}
@@ -327,22 +342,29 @@ export default function FaktenFilterBar({
             className="fakten-filter-dropdown__chevron"
           />
           <span className="fakten-filter-dropdown__label">
-            Alle Kategorien
+            {/* "Alle Kategorien" only when nothing is selected. With selection
+                the label flips to "Kategorien (n)" so the chip never says
+                "Alle Kategorien (2)" (a11y audit 2026-06-10). */}
+            {selectedGroupCount > 0 ? 'Kategorien' : 'Alle Kategorien'}
             {selectedGroupCount > 0 && (
               <span
                 className="fakten-filter-dropdown__count"
                 aria-label={`${selectedGroupCount} ausgewählt`}
               >
-                ({selectedGroupCount})
+                {' '}({selectedGroupCount})
               </span>
             )}
           </span>
         </button>
 
         {catDropdownOpen && (
+          // Plain disclosure pattern, not an ARIA menu — the contents are
+          // checkboxes + a reset button, not menuitems. The previous
+          // role="menu" + role="none" stack misled screen readers into
+          // expecting menuitemcheckboxes and arrow-key navigation
+          // (a11y audit 2026-06-10).
           <div
             className="fakten-filter-dropdown__panel"
-            role="menu"
             aria-label="Kategorien filtern"
           >
             {hasActiveFilter && (
@@ -359,7 +381,7 @@ export default function FaktenFilterBar({
                 </button>
               </div>
             )}
-            <ul className="fakten-filter-dropdown__list" role="none">
+            <ul className="fakten-filter-dropdown__list">
               {categoryGroups.map((group) => {
                 const checked = selectedGroups.has(group);
                 const count = groupCounts.get(group) ?? 0;
@@ -367,7 +389,6 @@ export default function FaktenFilterBar({
                   <li
                     key={group}
                     className="fakten-filter-dropdown__item"
-                    role="none"
                   >
                     <label className="fakten-filter-checkbox">
                       <input
@@ -402,7 +423,9 @@ export default function FaktenFilterBar({
             role="combobox"
             aria-autocomplete="list"
             aria-expanded={searchOpen}
-            aria-controls="fakten-search-panel"
+            // aria-controls only points at a mounted element — when the panel
+            // is closed the listbox doesn't exist (a11y audit 2026-06-10).
+            aria-controls={searchOpen ? "fakten-search-panel" : undefined}
             aria-activedescendant={activeOptionId}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -462,11 +485,13 @@ export default function FaktenFilterBar({
         </div>
 
         {searchOpen && (
+          // Combobox panel restructured (a11y audit 2026-06-10): the
+          // listbox must only contain options, so the reset button + hits
+          // hint live OUTSIDE the listbox. The empty-state lives inside
+          // (with role="option" disabled) so the combobox association still
+          // resolves when there are zero matches.
           <div
-            id="fakten-search-panel"
             className="fakten-search__panel"
-            role="listbox"
-            aria-label="Mythen auswählen"
           >
             {hasActiveFilter && (
               <div className="fakten-search__footer">
@@ -484,12 +509,30 @@ export default function FaktenFilterBar({
             )}
             <p className="fakten-search__hint">{hitsHint}</p>
             {stuckMatches.length === 0 && textMatches.length === 0 ? (
-              <p className="fakten-search__empty">Keine Treffer</p>
+              <ul
+                id="fakten-search-panel"
+                className="fakten-search__list"
+                role="listbox"
+                aria-multiselectable="true"
+                aria-label="Mythen auswählen"
+              >
+                <li className="fakten-search__empty" role="option" aria-disabled="true">
+                  Keine Treffer
+                </li>
+              </ul>
             ) : (
-              <ul className="fakten-search__list" role="presentation">
+              <ul
+                id="fakten-search-panel"
+                className="fakten-search__list"
+                role="listbox"
+                aria-multiselectable="true"
+                aria-label="Mythen auswählen"
+              >
                 {stuckMatches.length > 0 && (
                   <>
-                    <li key="section-label" className="fakten-search__section-label" aria-hidden="true">
+                    {/* Visible section label — restored from aria-hidden so
+                        SR users hear the grouping (a11y audit 2026-06-10). */}
+                    <li key="section-label" className="fakten-search__section-label" role="presentation">
                       Bereits ausgewählt
                     </li>
                     {stuckMatches.map((m, i) => (
@@ -503,7 +546,7 @@ export default function FaktenFilterBar({
                       />
                     ))}
                     {textMatches.length > 0 && (
-                      <li key="divider" className="fakten-search__divider" role="separator" aria-hidden="true" />
+                      <li key="divider" className="fakten-search__divider" role="presentation" aria-hidden="true" />
                     )}
                   </>
                 )}

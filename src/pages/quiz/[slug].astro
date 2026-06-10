@@ -224,7 +224,7 @@ if (theme) {
 >
   <article class="quiz-page" data-reveal-fade>
     <QuizPlayer
-      client:load
+      client:only="react"
       quizSlug={slug!}
       mythContent={JSON.stringify(mythContentMap)}
       groupMetrics={JSON.stringify(quizGroupMetricsMap)}
@@ -235,6 +235,12 @@ if (theme) {
       faktenContent={JSON.stringify(quizFaktenContentMap)}
       quizSummary={(entry as any).summary || undefined}
     />
+    <noscript>
+      <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+        Das Quiz benötigt JavaScript. Bitte aktiviere JavaScript, um zu
+        starten.
+      </p>
+    </noscript>
 
     {/* Page footer "Alle Quiz-Module" link removed; the ResultScreen
         already shows it in its actions row, and the quiz flow itself

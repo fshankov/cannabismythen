@@ -1,7 +1,8 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import type { Myth, Metric, Group, AppState, Indicator } from '../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, getMythText, getCategoryName, formatValue } from '../../lib/dashboard/data';
 import { t } from '../../lib/dashboard/translations';
+import { trapFocus } from '../../lib/dashboard/focus-trap';
 
 interface Props {
   myth: Myth;
@@ -16,6 +17,10 @@ interface Props {
 const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance'];
 
 export default function DetailPanel({ myth, metrics, groups, state, onClose, mythSlugMap }: Props) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Document-level Escape stays: the trap below only hears keys while focus
+  // is inside the panel, but a click on panel text can move focus to <body>.
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); },
     [onClose]
@@ -23,12 +28,16 @@ export default function DetailPanel({ myth, metrics, groups, state, onClose, myt
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  // Shared focus trap (same helper as Drawer): moves focus into the panel,
+  // cycles Tab inside it, locks body scroll, and restores focus to the
+  // trigger row on close (WCAG 2.1.2 / 2.4.3).
+  useEffect(() => {
+    if (!panelRef.current) return;
+    return trapFocus(panelRef.current, { onEscape: onClose });
+  }, [onClose]);
 
   const primaryGroup = state.groupIds[0] || 'adults';
   const factsheetSlug = mythSlugMap?.get(myth.id);
@@ -41,7 +50,7 @@ export default function DetailPanel({ myth, metrics, groups, state, onClose, myt
       aria-modal="true"
       aria-label={t('detail.title', state.lang)}
     >
-      <div className="detail-panel">
+      <div className="detail-panel" ref={panelRef}>
         <button className="detail-close-btn" onClick={onClose} aria-label={t('detail.close', state.lang)}>
           ✕
         </button>
@@ -80,9 +89,9 @@ export default function DetailPanel({ myth, metrics, groups, state, onClose, myt
           <table className="data-table" style={{ fontSize: '0.82rem' }}>
             <thead>
               <tr>
-                <th style={{ position: 'static' }}>{t('sidebar.groups', state.lang)}</th>
+                <th scope="col" style={{ position: 'static' }}>{t('sidebar.groups', state.lang)}</th>
                 {INDICATORS.map((ind) => (
-                  <th key={ind} style={{ textAlign: 'right', position: 'static' }}>
+                  <th key={ind} scope="col" style={{ textAlign: 'right', position: 'static' }}>
                     {t(`indicator.${ind}.short` as any, state.lang)}
                   </th>
                 ))}
@@ -93,9 +102,9 @@ export default function DetailPanel({ myth, metrics, groups, state, onClose, myt
                 const metric = getMythMetric(metrics, myth.id, group.id);
                 return (
                   <tr key={group.id} style={{ cursor: 'default' }}>
-                    <td style={{ fontWeight: group.id === primaryGroup ? 700 : 400 }}>
+                    <th scope="row" style={{ fontWeight: group.id === primaryGroup ? 700 : 400, textAlign: 'left' }}>
                       {state.lang === 'de' ? group.name_de : group.name_en}
-                    </td>
+                    </th>
                     {INDICATORS.map((ind) => {
                       const val = getIndicatorValue(metric, ind);
                       return (

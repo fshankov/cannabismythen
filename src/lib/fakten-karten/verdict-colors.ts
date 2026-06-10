@@ -48,7 +48,9 @@ const VERDICT_VISUALS: Record<CorrectnessClass, VerdictVisual> = {
   eher_richtig: {
     gradient:
       "linear-gradient(-16.47deg, #92B59A 67.2%, #FFFFFF 117.94%, #FFFFFF 136.28%)",
-    headingColor: "#92B59A",
+    // Darkened from Figma #92B59A — 3:1 contrast on white (a11y audit
+    // 2026-06-10). Keep in sync with --quiz-back-eher-richtig in global.css.
+    headingColor: "#6E9A7D",
     arrowSrc: "/icons/fakten-karten/verdict-arrow-eher-richtig.svg",
     arrowFrame: { top: "40%", left: "0%", width: "59.375%", height: "56%" },
   },
@@ -56,7 +58,9 @@ const VERDICT_VISUALS: Record<CorrectnessClass, VerdictVisual> = {
   eher_falsch: {
     gradient:
       "linear-gradient(-17.93deg, #FAAF35 24.93%, #EEA0AF 101.32%, #FFFFFF 125.67%)",
-    headingColor: "#FBAF35",
+    // Darkened from Figma #FBAF35 — 3:1 contrast on white (a11y audit
+    // 2026-06-10). Keep in sync with --quiz-back-eher-falsch in global.css.
+    headingColor: "#C47C00",
     arrowSrc: "/icons/fakten-karten/verdict-arrow-eher-falsch.svg",
     arrowFrame: { top: "31.54%", left: "0%", width: "58.75%", height: "56%" },
   },

@@ -115,13 +115,21 @@ const id = `faq-${question.slug}`;
         for (const other of all) {
           if (other !== d && other.open) other.open = false;
         }
-        // Scroll after the sibling-close reflow has been applied so we land on
-        // the final position. block:"start" respects the card's
-        // scroll-margin-top, so the title sits just below the sticky header/tabs.
+        // Scroll after the sibling-close reflow so positions are final.
+        // Manual scrollTo is more reliable than scrollIntoView + scroll-padding
+        // across browsers: put the card title just below the sticky nav.
         const article = d.closest(".faq-question");
         if (article) {
           requestAnimationFrame(() => {
-            article.scrollIntoView({ behavior: "smooth", block: "start" });
+            const rect = (article as HTMLElement).getBoundingClientRect();
+            const headerHeight =
+              parseFloat(
+                getComputedStyle(document.documentElement)
+                  .getPropertyValue("--header-height")
+              ) || 80;
+            const gap = 16;
+            const targetY = window.scrollY + rect.top - headerHeight - gap;
+            window.scrollTo({ top: targetY, behavior: "smooth" });
           });
         }
       });

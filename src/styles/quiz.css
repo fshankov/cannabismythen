@@ -362,9 +362,11 @@
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  /* Match the active card's shape and surface exactly so the phantom
+     cards behind look like real cards, not rectangular shadows. */
+  border-radius: var(--quiz-card-radius);
+  background: var(--quiz-card-bg);
+  border: none;
   z-index: -1;
   pointer-events: none;
   transition:
@@ -589,27 +591,26 @@
 .quiz-answer-btn.is-sel-wrong   { border-color: var(--quiz-btn-wrong); }
 .quiz-answer-btn.is-correct-answer { border: 3px dashed var(--quiz-btn-corr-ans); }
 
-/* Answer labels (grid row 2). 2026-05-29 — enlarged from the Figma-exact
-   ~6px (too small to read under the ~74px buttons) to 8px (Fedor: "8
-   instead of 6"); the two-word labels go slightly smaller so they still
-   fit the column. */
+/* Answer labels (grid row 2). Minimum 9px so text is actually readable
+   under the ~74px buttons. Two-word labels stay at 8.5px to fit the
+   column without clipping. (Was 7.4–8px — WCAG a11y fix 2026-06-10.) */
 .quiz-answer-grid__label {
   font-family: var(--font-display);
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 700;
   color: #6b7280;
   text-align: center;
-  line-height: 12px;
+  line-height: 13px;
 }
 
 .quiz-answer-grid > .quiz-answer-grid__label:nth-of-type(2),
 .quiz-answer-grid > .quiz-answer-grid__label:nth-of-type(3) {
-  font-size: 7.4px;
-  line-height: 11px;
+  font-size: 8.5px;
+  line-height: 12px;
 }
 
 .quiz-answer-grid > .quiz-answer-grid__label:nth-of-type(4) {
-  line-height: 12px;
+  line-height: 13px;
 }
 
 /* ── Post-answer feedback cluster — the card's emotional peak ─────────
@@ -1624,7 +1625,11 @@
 
 .quiz-card--flow {
   /* --card-tilt is set inline per-question (deterministic from myth.id).
-     --swipe-x and --swipe-rot are written by the swipe hook. */
+     --swipe-x and --swipe-rot are written by the swipe hook.
+     touch-action: pan-y — tell the browser not to intercept horizontal
+     pointer events so the swipe hook's pointerdown/move/up handlers fire
+     instead of the browser cancelling the gesture with pointercancel. */
+  touch-action: pan-y;
   transform:
     rotate(var(--card-tilt, 0deg))
     translateX(var(--swipe-x, 0))
@@ -3410,6 +3415,13 @@ button.quiz-result__cta {
 
   .quiz-header-bar__title {
     font-size: 0.78rem;
+    /* Allow shrinking on narrow phones so long module titles don't push the
+       progress bar and counter off-screen. Clips with ellipsis so the layout
+       stays on one row at all times (verified at 375 px). */
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .quiz-progress__label {
@@ -3802,7 +3814,9 @@ body.fakten-karten-page main {
 }
 .quiz-select-card--yellow {
   --card-bg: #f5b02f;
-  --cta-text: #fac800;
+  /* Dark amber (#78350f) on the white CTA pill = 7.4:1 contrast.
+     Was #fac800 (bright yellow on white = 1.6:1 — WCAG fail). */
+  --cta-text: #78350f;
 }
 .quiz-select-card--gradient {
   --card-bg: linear-gradient(
@@ -3852,6 +3866,16 @@ body.fakten-karten-page main {
     width: 100%;
     height: auto;
     aspect-ratio: 346.675 / 500;
+  }
+
+  /* Clamp framing question to 3 lines so it never pushes into the meta /
+     CTA area below it. The text is always-visible on mobile (no hover
+     reveal), so clipping long sentences is acceptable. */
+  .quiz-select-card__framing {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 
