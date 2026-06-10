@@ -22,7 +22,7 @@
   border-collapse: collapse;
 }
 
-/* A2 — header legibility: increased size, tightened letter-spacing */
+/* ── Header ── */
 .fakten-list-table thead th {
   padding: 9px 16px;
   text-align: left;
@@ -46,30 +46,106 @@
   text-align: right;
 }
 
+.fakten-list-table thead th.col-expand {
+  width: 48px;
+}
+
+/* Sortable header buttons (A2-5) — strip native chrome, inherit the th's
+   uppercase/tracked type, add a small direction indicator. */
+.fakten-list-sort {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 160ms ease;
+}
+
+.fakten-list-sort:hover {
+  color: var(--color-text);
+}
+
+.fakten-list-sort:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Two arrows side by side: an unsorted column shows the neutral dim pair;
+   the active sort key + direction highlights the matching arrow. */
+.fakten-list-sort__ind {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 0.62em;
+  line-height: 1;
+}
+
+.fakten-list-sort__arrow {
+  color: var(--color-text-muted, #9a9a90);
+  opacity: 0.45;
+  transition: color 140ms ease, opacity 140ms ease;
+}
+
+.fakten-list-sort__arrow.is-active {
+  color: var(--color-accent, #2d6a4f);
+  opacity: 1;
+}
+
 /* ── Row ── */
-/* A1 — was hardcoded #f0efea */
 .fakten-list-row {
   border-bottom: 1px solid var(--color-border);
   transition: background 200ms ease;
+  /* The whole row toggles the inline summary. Pointer cursor + no text
+     selection so the row reads purely as a clickable / select surface. */
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .fakten-list-row:last-child {
   border-bottom: none;
 }
 
+/* Drop the divider between an expanded row and its detail row so the pair
+   reads as one unit, and keep the open row tinted in its verdict colour so
+   it stays visibly "active" even when not hovered. */
+.fakten-list-row.is-expanded {
+  border-bottom: none;
+  background: color-mix(in srgb, var(--rv, #047857) 8%, transparent);
+}
+
 .fakten-list-row:hover {
-  background: color-mix(in srgb, var(--rv, #047857) 10%, transparent);
+  background: color-mix(in srgb, var(--rv, #047857) 8%, transparent);
+}
+
+/* Hovering an already-open row LIGHTENS the tint (8% → 3%) so it's clear you
+   can click to close it, without going darker. */
+.fakten-list-row.is-expanded:hover {
+  background: color-mix(in srgb, var(--rv, #047857) 3%, transparent);
 }
 
 .fakten-list-table td {
-  padding: 10px 16px;
+  padding: 11px 16px;
   vertical-align: middle;
 }
 
+/* "#" — tabular figures so numbers align cleanly (A2-3). */
 .fakten-list-table td.col-num {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  color: var(--color-text-secondary); /* A1 — removed wrong #6b6b63 fallback */
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
   text-align: center;
   width: 44px;
 }
@@ -80,62 +156,147 @@
   width: 190px;
 }
 
-/* ── Verdict color tokens — cascaded down to statement + hover ── */
-.fakten-list-row[data-classification="richtig"]                { --rv: var(--classification-richtig, #047857); }
-.fakten-list-row[data-classification="eher_richtig"]           { --rv: var(--classification-eher-richtig, #4d7c0f); }
-.fakten-list-row[data-classification="eher_falsch"]            { --rv: var(--classification-eher-falsch, #b45309); }
-.fakten-list-row[data-classification="falsch"]                 { --rv: var(--classification-falsch, #be123c); }
-.fakten-list-row[data-classification="keine_aussage_moeglich"] { --rv: #6b7280; }
+.fakten-list-table td.col-expand {
+  width: 48px;
+  text-align: center;
+}
+
+/* ── Verdict color tokens — cascaded to row hover, statement arrow,
+   chevron + detail accent (shared by the main + detail rows). ── */
+.fakten-list-row[data-classification="richtig"],
+.fakten-list-detail-row[data-classification="richtig"]                { --rv: var(--classification-richtig, #047857); }
+.fakten-list-row[data-classification="eher_richtig"],
+.fakten-list-detail-row[data-classification="eher_richtig"]           { --rv: var(--classification-eher-richtig, #4d7c0f); }
+.fakten-list-row[data-classification="eher_falsch"],
+.fakten-list-detail-row[data-classification="eher_falsch"]            { --rv: var(--classification-eher-falsch, #b45309); }
+.fakten-list-row[data-classification="falsch"],
+.fakten-list-detail-row[data-classification="falsch"]                 { --rv: var(--classification-falsch, #be123c); }
+.fakten-list-row[data-classification="keine_aussage_moeglich"],
+.fakten-list-detail-row[data-classification="keine_aussage_moeglich"] { --rv: #6b7280; }
 
 /* ── Statement cell ── */
+/* A2-4: calm hover — the row tint + a trailing arrow are the only two
+   signals (the former weight-morph + recolor + underline trio was noisy). */
 .fakten-list-statement {
   font-size: 1rem;
-  font-weight: 400;
-  font-variation-settings: 'wght' 400;
   line-height: 1.45;
   color: var(--color-text, #1a1a18);
-  text-decoration: underline;
-  text-decoration-color: transparent;
+  text-decoration: none;
   display: block;
-  transition:
-    font-variation-settings 200ms ease,
-    color 200ms ease,
-    text-decoration-color 200ms ease;
+  cursor: pointer;
 }
 
-.fakten-list-row:hover .fakten-list-statement {
-  font-weight: 600;
-  font-variation-settings: 'wght' 600;
-  color: var(--rv, var(--color-accent, #2d6a4f));
-  text-decoration-color: var(--rv, var(--color-accent, #2d6a4f));
-}
-
-/* Trailing arrow in verdict color */
 .fakten-list-statement::after {
-  content: ' →';
+  content: " →";
   opacity: 0;
-  transition: opacity 100ms;
+  transition: opacity 120ms ease;
   color: var(--rv, var(--color-accent, #2d6a4f));
 }
 
-.fakten-list-row:hover .fakten-list-statement::after {
+.fakten-list-row:hover .fakten-list-statement::after,
+.fakten-list-statement:focus-visible::after {
   opacity: 1;
 }
 
-/* Portal tooltip — cursor-following, rendered into document.body */
-.fakten-list-tooltip-portal {
-  max-width: min(340px, calc(100vw - 40px));
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  color: var(--color-text, #1a1a18);
-  font-size: 1rem;
+/* Keyboard focus ring on the row link (Audit A4). */
+.fakten-list-statement:focus-visible {
+  outline: 2px solid var(--rv, var(--color-accent, #2d6a4f));
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ── Expand chevron (A2-2) ── */
+.fakten-list-expand {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+  border: none;
+  background: none;
+  color: var(--color-text-muted, #6b6b63);
+  cursor: pointer;
+  border-radius: 999px;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.fakten-list-expand:hover {
+  background: color-mix(in srgb, var(--rv, var(--color-accent, #2d6a4f)) 14%, transparent);
+  color: var(--rv, var(--color-text));
+}
+
+.fakten-list-expand:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.fakten-list-expand svg {
+  transition: transform 200ms ease;
+}
+
+.fakten-list-expand.is-open svg {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fakten-list-expand svg {
+    transition: none;
+  }
+}
+
+/* ── Inline detail row — short summary + a "Tippen für mehr →" CTA that
+   opens the popup, mirroring the Karten card's face-2 flow. ── */
+.fakten-list-detail-row {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.fakten-list-detail-row:last-child {
+  border-bottom: none;
+}
+
+.fakten-list-detail {
+  padding: 2px 16px 16px;
+}
+
+.fakten-list-detail__text {
+  margin: 0;
+  font-size: 0.9rem;
   line-height: 1.6;
-  padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.04),
-    0 4px 8px rgba(0, 0, 0, 0.06),
-    0 20px 40px -8px rgba(0, 0, 0, 0.14);
+  color: var(--color-text-secondary);
+}
+
+/* CTA styled after the Karten back-face button (.fakten-card__cta). */
+.fakten-list-detail__cta {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 9px 18px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--color-accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.18);
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+
+.fakten-list-detail__cta:hover {
+  background: color-mix(in srgb, var(--color-accent) 86%, black);
+  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.2);
+}
+
+.fakten-list-detail__cta:active {
+  background: var(--color-accent-hover);
+  box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.14);
+}
+
+.fakten-list-detail__cta:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* ── Mobile: collapse # column, smaller padding ── */
@@ -146,7 +307,7 @@
   }
 
   .fakten-list-table td {
-    padding: 9px 12px;
+    padding: 10px 12px;
   }
 
   .fakten-list-statement {
@@ -155,6 +316,10 @@
 
   .fakten-list-table thead th.col-verdict,
   .fakten-list-table td.col-verdict {
-    width: 130px;
+    width: 120px;
+  }
+
+  .fakten-list-detail {
+    padding-left: 12px;
   }
 }

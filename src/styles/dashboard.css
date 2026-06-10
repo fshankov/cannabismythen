@@ -1741,7 +1741,7 @@ body:has(.carm-explorer) main {
   }
 
   .detail-panel {
-    width: 100vw;
+    width: 100%;
   }
 
   .carm-explorer .scatter-controls {
@@ -2290,6 +2290,15 @@ body:has(.carm-explorer) main {
   border: 1px solid var(--color-border, #e2e8f0);
   border-radius: var(--radius, 8px);
   box-shadow: 0 -2px 12px rgba(15, 23, 42, 0.08);
+}
+
+/* On phones the fixed mobile tab bar (56px + safe area, z-index 200) overlays
+   the viewport bottom; lift the sticky readout above it so its controls stay
+   reachable. */
+@media (max-width: 767px) {
+  .strips-readout {
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .strips-readout-head {
@@ -4432,7 +4441,12 @@ body.carm-modal-open {
   background: transparent;
   border: none;
   border-radius: var(--radius-md, 8px);
-  padding: 6px;
+  /* 44px minimum touch target (WCAG 2.5.5) — icon stays visually centered. */
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-text-secondary, #4a5568);
   cursor: pointer;
   transition: background var(--transition-fast, 0.15s ease);

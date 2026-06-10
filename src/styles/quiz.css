@@ -3008,19 +3008,35 @@ button.quiz-result__cta {
   position: absolute;
   top: 8px;
   right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* ≥44×44 hit target (Audit B-14 / WCAG 2.5.5) — the glyph + small padding
+     left it around 28px before, easy to miss on touch. */
+  min-width: 44px;
+  min-height: 44px;
   background: none;
   border: none;
   font-size: 1.6rem;
   line-height: 1;
   color: var(--color-text-muted);
   cursor: pointer;
-  padding: var(--space-xs) var(--space-sm);
+  padding: 0;
   border-radius: var(--radius-sm);
   transition: background var(--transition-fast), color var(--transition-fast);
   z-index: 1;
 }
 
 .factsheet-panel__close:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Keyboard focus ring (Audit A4 / WCAG 2.4.7) — the close button previously
+   only styled :hover, leaving keyboard users with no visible focus. */
+.factsheet-panel__close:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
   background: var(--color-bg);
   color: var(--color-text);
 }
@@ -3224,8 +3240,8 @@ button.quiz-result__cta {
 .factsheet-panel__section--collapsible .factsheet-panel__section-content {
   padding: var(--space-md);
   border-top: 1px solid var(--color-border);
-  max-height: 400px;
-  overflow-y: auto;
+  /* No inner max-height / overflow (Audit B-15): the panel itself scrolls,
+     so a nested scroller here created a double-scrollbar trap. */
 }
 
 .factsheet-panel__link {
@@ -3257,8 +3273,10 @@ button.quiz-result__cta {
   to   { transform: translateX(0); }
 }
 
-/* Mobile: bottom sheet style */
-@media (max-width: 640px) {
+/* Mobile / small-tablet: bottom sheet style. Breakpoint raised 640→700px
+   (Audit B-17) so the awkward 641–700px band — where the 620px side panel
+   left only a ~20px backdrop sliver — gets the full-width sheet instead. */
+@media (max-width: 700px) {
   .factsheet-panel {
     top: auto;
     bottom: 0;
@@ -3284,6 +3302,16 @@ button.quiz-result__cta {
   @keyframes factsheetSlideInBottom {
     from { transform: translateY(100%); }
     to   { transform: translateY(0); }
+  }
+}
+
+/* Reduced-motion (Audit B-10 / WCAG 2.3.3): the card faces already honour
+   this; the panel's slide-in + backdrop fade did not. Disable both so the
+   popup appears instantly for motion-sensitive users. */
+@media (prefers-reduced-motion: reduce) {
+  .factsheet-panel__backdrop,
+  .factsheet-panel {
+    animation: none;
   }
 }
 
@@ -3839,11 +3867,10 @@ body.fakten-karten-page main {
 
 /* ═══════════════════════════════════════════════════════════════
    Page header (Figma 427-2113, 2026-05-28).
-   Replaces the prior generic <h1>+<p> chrome with an eyebrow line
-   ("42 Mythen" small caps with a short tint divider), an oversized
-   bold H1, and a wider subhead paragraph. Sizing uses clamp() with
-   vw so the 72-px Figma desktop H1 collapses cleanly to ~40 px on
-   narrow viewports.
+   An oversized bold H1 over a wider subhead paragraph. The H1 uses
+   clamp() with vw so it scales fluidly down on narrow viewports
+   (Audit B-13). The eyebrow line from the original Figma was never
+   rendered in the markup, so its CSS was removed in the same pass.
    ═══════════════════════════════════════════════════════════════ */
 
 .fakten-page-header {
@@ -3855,37 +3882,16 @@ body.fakten-karten-page main {
      this header only adds the vertical rhythm. */
 }
 
-.fakten-page-header__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-}
-
-.fakten-page-header__eyebrow-divider {
-  display: inline-block;
-  width: 48px;
-  height: 2px;
-  background: rgba(17, 108, 74, 0.2);
-}
-
-.fakten-page-header__eyebrow-text {
-  font-size: 12px;
-  font-weight: 900;
-  color: #116c4a;
-  letter-spacing: 3.6px;
-  line-height: 18px;
-  text-transform: uppercase;
-}
-
 .fakten-page-header__h1 {
   margin: 0;
   max-width: 746px;
-  font-size: 48px;
+  /* Fluid: ~3rem (≈48px Figma desktop) down to 2.25rem on narrow
+     viewports (Audit B-13) — replaces the prior fixed 48px/52px. */
+  font-size: clamp(2.25rem, 6vw, 3rem);
   font-weight: 900;
   color: var(--color-accent, #2d6a4f);
   letter-spacing: -1.8px;
-  line-height: 52px;
+  line-height: 1.08;
 }
 
 .fakten-page-header__sub {
@@ -3954,8 +3960,15 @@ body.fakten-karten-page main {
      the face, not the outer button. */
   box-shadow: var(--shadow-md);
   transition: opacity 500ms ease-in-out;
-  will-change: opacity;
   padding: var(--space-lg);
+}
+
+/* will-change only while the card is engaged (Audit B-06) — applying it to
+   all 84 faces permanently forced that many compositor layers at idle. */
+.fakten-card:hover .fakten-card__face,
+.fakten-card:focus-visible .fakten-card__face,
+.fakten-card--active .fakten-card__face {
+  will-change: opacity;
 }
 
 .fakten-card__face--back {
@@ -4256,9 +4269,11 @@ body.fakten-karten-page main {
 
 .fakten-filter-section__label {
   margin: 0 0 16px;
-  font-size: 10px;
+  /* Bumped 10→11px and 0.75→0.9 opacity for legibility (Audit B-16) — a
+     10px, heavily-tracked label at 0.75 was borderline over the texture. */
+  font-size: 11px;
   font-weight: 900;
-  color: rgba(64, 73, 67, 0.75);
+  color: rgba(64, 73, 67, 0.9);
   letter-spacing: 4px;
   line-height: 15px;
   text-transform: uppercase;
@@ -4294,6 +4309,15 @@ body.fakten-karten-page main {
 .fakten-filter-bar .carm-filter-search-row:hover {
   background: rgba(255, 255, 255, 0.85);
   border-color: rgba(17, 108, 74, 0.4);
+}
+
+/* Keyboard focus ring on the whole glass field (Audit A4 / WCAG 2.4.7).
+   The input itself suppresses its UA outline below, so the visible focus
+   indicator lives on the container via :focus-within. */
+.fakten-filter-bar .carm-filter-search-row:focus-within {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--color-accent, #116c4a);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent, #116c4a) 25%, transparent);
 }
 
 /* Magnifier: absolutely centred on the right edge of the glass row
@@ -4348,7 +4372,8 @@ body.fakten-karten-page main {
 }
 
 .fakten-filter-bar .carm-filter-search-row__input::placeholder {
-  color: rgba(64, 73, 67, 0.4);
+  /* 0.4→0.6 for a readable placeholder over the glass field (Audit B-16). */
+  color: rgba(64, 73, 67, 0.6);
   font-weight: 500;
 }
 

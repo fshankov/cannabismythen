@@ -202,42 +202,92 @@ export default function FactsheetPanel({
   userAnswer,
   onSelectRelatedMyth,
   // v3 (2026-05-13): verdict is now carried by the colored statement +
-  // trailing arrow inside <VerdictStatement>. These three props from the
-  // legacy "separate verdict block" pattern are kept in the type so the
-  // 3 wrapper FactsheetPanels (quiz/, dashboard/, fakten-karten/) don't
-  // need to change, but they're no longer rendered. Remove the props +
-  // wrapper plumbing in a follow-up cleanup.
-  classificationLabel: _classificationLabel,
-  verdictLabel: _verdictLabel,
-  verdictAccessory: _verdictAccessory,
+  // trailing arrow inside <VerdictStatement>. The legacy
+  // classificationLabel / verdictLabel / verdictAccessory props remain on
+  // the interface (still passed by the quiz + dashboard wrappers) but are
+  // no longer destructured, read, or rendered here (Audit B-18). Drop them
+  // from the interface + callsites in a dedicated follow-up.
 }: FactsheetPanelProps) {
-  void _classificationLabel;
-  void _verdictLabel;
-  void _verdictAccessory;
   const panelRef = useRef<HTMLDivElement>(null);
+  /** Element that had focus when the panel opened — focus is restored to
+   *  it on close so keyboard / screen-reader users land back on the card
+   *  (or other trigger) they came from, not at the top of the document.
+   *  (Audit B-01 / WCAG 2.4.3.) */
+  const triggerRef = useRef<HTMLElement | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    triggerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     if (panelRef.current) {
       panelRef.current.focus();
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      // Focus trap (Audit B-01 / WCAG 2.1.2): keep Tab inside the dialog so
+      // focus can't walk out to the page behind the modal.
+      if (e.key === 'Tab' && panelRef.current) {
+        const focusables = Array.from(
+          panelRef.current.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
+          ),
+        ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+        if (focusables.length === 0) {
+          e.preventDefault();
+          panelRef.current.focus();
+          return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+        if (e.shiftKey) {
+          if (active === first || active === panelRef.current) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else if (active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
 
-    // Dashboard and fakten-karten contexts lock body scroll; quiz manages its own
-    if (context === 'dashboard' || context === 'fakten-karten') {
+    // Dashboard and fakten-karten contexts lock body scroll; quiz manages its
+    // own. Use a position:fixed lock (not just overflow:hidden) so iOS Safari
+    // actually stops the background scrolling behind the modal; the scroll
+    // position is captured here and restored on close (Audit B-12).
+    const lockScroll = context === 'dashboard' || context === 'fakten-karten';
+    const scrollY = lockScroll ? window.scrollY : 0;
+    if (lockScroll) {
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      if (context === 'dashboard' || context === 'fakten-karten') {
+      if (lockScroll) {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
         document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
       }
+      // Restore focus to the trigger element (Audit B-01).
+      triggerRef.current?.focus?.();
     };
   }, [onClose, context]);
 

@@ -25,7 +25,7 @@ import VerdictArrow from './VerdictArrow';
 /** Canonical German labels — mirrors `verdict.*` in
  *  `src/lib/dashboard/translations.ts` and `classification.*` in
  *  `src/components/quiz/i18n.ts`. */
-const DEFAULT_LABEL: Record<CorrectnessClass, string> = {
+export const DEFAULT_LABEL: Record<CorrectnessClass, string> = {
   richtig: 'Richtig',
   eher_richtig: 'Eher richtig',
   eher_falsch: 'Eher falsch',

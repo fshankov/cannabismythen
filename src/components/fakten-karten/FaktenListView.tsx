@@ -1,15 +1,22 @@
 /**
- * FaktenListView — table/list view for the 42 Mythen page.
+ * FaktenListView — sortable, expandable table view for the 42 Mythen page.
  *
- * Flat list of all myths: #, full statement text, verdict pill.
- * Row hover shows a cursor-following tooltip with cardShortSummary (same as card back).
- * Tooltip is portal-rendered (position: fixed) so it escapes the
- * panel's overflow:hidden and always follows the mouse.
- * Clicking a row navigates to the myth factsheet at /daten-explorer/[slug]/.
+ * A2 overhaul (2026-06-10):
+ *  - Clicking the row (or the chevron) expands the short summary inline
+ *    beneath it, replacing the former cursor-following tooltip. The
+ *    expanded panel carries a "Tippen für mehr →" button that opens the
+ *    full factsheet popup — mirroring the Karten card's face-2 flow.
+ *  - A2-3/4: tabular figures in the "#" column + a calm hover treatment
+ *    (row tint + trailing arrow).
+ *  - A2-5: the "#" and "Wissenschaftlich" headers sort the list.
+ *
+ * The statement stays an <a href> to the factsheet page so middle-click /
+ * right-click still open it in a new tab; a plain left-click is prevented
+ * and the row toggle handles expansion.
  */
 
-import { useState, useCallback } from "react";
-import { createPortal } from "react-dom";
+import { useState, useMemo, useCallback, Fragment } from "react";
+import { ChevronDown } from "lucide-react";
 import type { FaktenCardMyth } from "./FaktenCard";
 import VerdictPill from "../shared/VerdictPill";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
@@ -28,117 +35,198 @@ function toVerdict(raw: string): CorrectnessClass {
     : "keine_aussage_moeglich";
 }
 
-const TOOLTIP_MAX_W = 340;
-const VIEWPORT_MARGIN = 20;
-const CURSOR_OFFSET = 18;   /* px gap between cursor and tooltip edge */
-const TOOLTIP_EST_H = 180;  /* conservative multi-line estimate for flip/clamp */
-const HEADER_H = 80;        /* nav header clearance — tooltip never goes above this */
+/** Sort order for the verdict column: richtig → … → falsch → keine Aussage. */
+const VERDICT_RANK: Record<CorrectnessClass, number> = {
+  richtig: 0,
+  eher_richtig: 1,
+  eher_falsch: 2,
+  falsch: 3,
+  keine_aussage_moeglich: 4,
+};
+
+type SortKey = "num" | "verdict";
+interface SortState {
+  key: SortKey;
+  dir: "asc" | "desc";
+}
 
 interface Props {
   myths: FaktenCardMyth[];
   onShowFactsheet?: (slug: string) => void;
 }
 
-interface TooltipState {
-  summary: string;
-  x: number;
-  y: number;
-  place: "top" | "bottom";
-}
-
 export default function FaktenListView({ myths, onShowFactsheet }: Props) {
-  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  // Accordion: at most one row's summary is open at a time.
+  const [expandedNum, setExpandedNum] = useState<number | null>(null);
+  // null = no active sort → "mix" (the default order the parent passes).
+  const [sort, setSort] = useState<SortState | null>(null);
 
-  const updateTooltip = useCallback(
-    (e: React.MouseEvent, summary: string) => {
-      const cx = e.clientX;
-      const cy = e.clientY;
-      // Flip to "bottom" if placing above would push the tooltip into/above the header
-      const place = cy - CURSOR_OFFSET - TOOLTIP_EST_H > HEADER_H ? "top" : "bottom";
-      const x = Math.max(
-        TOOLTIP_MAX_W / 2 + VIEWPORT_MARGIN,
-        Math.min(window.innerWidth - TOOLTIP_MAX_W / 2 - VIEWPORT_MARGIN, cx)
-      );
-      let y = place === "top" ? cy - CURSOR_OFFSET : cy + CURSOR_OFFSET;
-      // Hard clamp: in "top" mode the tooltip's estimated top edge must clear the header
-      if (place === "top") y = Math.max(y, HEADER_H + TOOLTIP_EST_H);
-      setTooltip({ summary, x, y, place });
+  const sorted = useMemo(() => {
+    if (!sort) return myths; // "mix" — keep the order the parent passes
+    const arr = [...myths];
+    arr.sort((a, b) => {
+      let cmp: number;
+      if (sort.key === "verdict") {
+        cmp =
+          VERDICT_RANK[toVerdict(a.classification)] -
+          VERDICT_RANK[toVerdict(b.classification)];
+        if (cmp === 0) cmp = a.mythNumber - b.mythNumber; // stable tiebreak
+      } else {
+        cmp = a.mythNumber - b.mythNumber;
+      }
+      return sort.dir === "asc" ? cmp : -cmp;
+    });
+    return arr;
+  }, [myths, sort]);
+
+  // 3-state cycle per column: asc → desc → off ("mix").
+  const toggleSort = useCallback((key: SortKey) => {
+    setSort((prev) => {
+      if (!prev || prev.key !== key) return { key, dir: "asc" };
+      if (prev.dir === "asc") return { key, dir: "desc" };
+      return null; // desc → back to mix
+    });
+  }, []);
+
+  const toggleExpand = useCallback((n: number) => {
+    setExpandedNum((prev) => (prev === n ? null : n));
+  }, []);
+
+  const openFactsheet = useCallback(
+    (slug: string) => {
+      if (onShowFactsheet) onShowFactsheet(slug);
     },
-    []
+    [onShowFactsheet],
   );
 
-  const clearTooltip = useCallback(() => setTooltip(null), []);
+  const ariaSortFor = (key: SortKey): "ascending" | "descending" | "none" =>
+    sort?.key === key
+      ? sort.dir === "asc"
+        ? "ascending"
+        : "descending"
+      : "none";
+
+  // Both arrows always render so an unsorted column still shows a neutral
+  // ▲▼ pair (signalling "sortable"); the active key + direction highlights
+  // the matching arrow.
+  const renderSortInd = (key: SortKey) => {
+    const active = sort?.key === key;
+    return (
+      <span className="fakten-list-sort__ind" aria-hidden="true">
+        <span
+          className={`fakten-list-sort__arrow${active && sort?.dir === "asc" ? " is-active" : ""}`}
+        >
+          ▲
+        </span>
+        <span
+          className={`fakten-list-sort__arrow${active && sort?.dir === "desc" ? " is-active" : ""}`}
+        >
+          ▼
+        </span>
+      </span>
+    );
+  };
 
   return (
-    <>
-      <div className="fakten-list-panel">
-        <table className="fakten-list-table">
-          <thead>
-            <tr>
-              <th className="col-num">#</th>
-              <th>Mythos</th>
-              <th className="col-verdict">Wissenschaftlich</th>
-            </tr>
-          </thead>
-          <tbody>
-            {myths.map((myth) => (
-              <tr
-                key={myth.mythNumber}
-                className="fakten-list-row"
-                data-classification={toVerdict(myth.classification)}
-                onMouseMove={
-                  (myth.cardShortSummary || myth.cardSummary)
-                    ? (e) => updateTooltip(e, myth.cardShortSummary || myth.cardSummary)
-                    : undefined
-                }
-                onMouseLeave={(myth.cardShortSummary || myth.cardSummary) ? clearTooltip : undefined}
+    <div className="fakten-list-panel">
+      <table className="fakten-list-table">
+        <thead>
+          <tr>
+            <th className="col-num" aria-sort={ariaSortFor("num")}>
+              <button
+                type="button"
+                className="fakten-list-sort"
+                onClick={() => toggleSort("num")}
               >
-                <td className="col-num">{myth.mythNumber}</td>
-                <td className="col-statement">
-                  <a
-                    href={`/daten-explorer/${myth.slug}/`}
-                    className="fakten-list-statement"
-                    onClick={(e) => {
-                      if (onShowFactsheet) {
-                        e.preventDefault();
-                        onShowFactsheet(myth.slug);
-                      }
-                    }}
+                #
+                {renderSortInd("num")}
+              </button>
+            </th>
+            <th>Mythos</th>
+            <th className="col-verdict" aria-sort={ariaSortFor("verdict")}>
+              <button
+                type="button"
+                className="fakten-list-sort"
+                onClick={() => toggleSort("verdict")}
+              >
+                Wissenschaftlich
+                {renderSortInd("verdict")}
+              </button>
+            </th>
+            <th className="col-expand" />
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((myth) => {
+            const verdict = toVerdict(myth.classification);
+            const summary = myth.cardShortSummary || myth.cardSummary;
+            const isOpen = expandedNum === myth.mythNumber;
+            return (
+              <Fragment key={myth.mythNumber}>
+                <tr
+                  className={`fakten-list-row${isOpen ? " is-expanded" : ""}`}
+                  data-classification={verdict}
+                  onClick={() => toggleExpand(myth.mythNumber)}
+                >
+                  <td className="col-num">{myth.mythNumber}</td>
+                  <td className="col-statement">
+                    <a
+                      href={`/daten-explorer/${myth.slug}/`}
+                      className="fakten-list-statement"
+                      onClick={(e) => {
+                        if (onShowFactsheet) e.preventDefault();
+                      }}
+                    >
+                      {myth.title}
+                    </a>
+                  </td>
+                  <td className="col-verdict">
+                    <VerdictPill verdict={verdict} size="sm" />
+                  </td>
+                  <td className="col-expand">
+                    {summary && (
+                      <button
+                        type="button"
+                        className={`fakten-list-expand${isOpen ? " is-open" : ""}`}
+                        aria-expanded={isOpen}
+                        aria-label={
+                          isOpen
+                            ? "Zusammenfassung ausblenden"
+                            : "Zusammenfassung anzeigen"
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleExpand(myth.mythNumber);
+                        }}
+                      >
+                        <ChevronDown size={16} strokeWidth={2} aria-hidden="true" />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+                {isOpen && summary && (
+                  <tr
+                    className="fakten-list-detail-row"
+                    data-classification={verdict}
                   >
-                    {myth.title}
-                  </a>
-                </td>
-                <td className="col-verdict">
-                  <VerdictPill verdict={toVerdict(myth.classification)} size="sm" />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {tooltip !== null && typeof document !== "undefined"
-        ? createPortal(
-            <div
-              role="tooltip"
-              className="fakten-list-tooltip-portal"
-              style={{
-                position: "fixed",
-                left: tooltip.x,
-                top: tooltip.y,
-                transform:
-                  tooltip.place === "top"
-                    ? "translate(-50%, -100%)"
-                    : "translate(-50%, 0)",
-                zIndex: 10000,
-                pointerEvents: "none",
-              }}
-            >
-              {tooltip.summary}
-            </div>,
-            document.body
-          )
-        : null}
-    </>
+                    <td className="col-num" aria-hidden="true" />
+                    <td colSpan={3} className="fakten-list-detail">
+                      <p className="fakten-list-detail__text">{summary}</p>
+                      <button
+                        type="button"
+                        className="fakten-list-detail__cta"
+                        onClick={() => openFactsheet(myth.slug)}
+                      >
+                        Tippen für mehr →
+                      </button>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }

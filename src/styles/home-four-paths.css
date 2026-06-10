@@ -9,6 +9,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .four-paths {
+  --key-green: #0f5238; /* single token for the darker key green used in badges, rings, fills */
   margin-top: 32px; /* gap from teaser card */
 }
 
@@ -25,12 +26,10 @@
   padding: 48px;
   border-radius: 24px;
   background: #f0f0eb;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
   overflow: hidden;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(4, fit-content(100%));
-  column-gap: 51px;
+  column-gap: 48px;
   row-gap: 0;
 }
 
@@ -38,13 +37,16 @@
 .four-paths__quote {
   grid-column: 1 / -1;
   grid-row: 1;
-  margin: 0 0 32px;
+  margin: 0 0 64px;
+  margin-inline-start: 0;
+  padding: 0;
+  padding-inline-start: 0;
   text-align: left;
 }
 
 /* Heading text stays narrow (left half) */
 .four-paths__quote-head {
-  max-width: 528px;
+  max-width: 660px;
 }
 
 /* ── "ERKUNDEN" label — sits 16px above the first card row ── */
@@ -61,21 +63,11 @@
   color: var(--color-accent);
 }
 
-.four-paths__quote-eyebrow {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 2.6px;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin: 0;
-}
 
 .four-paths__quote-lead {
   font-family: "DM Serif Display", Georgia, serif;
   font-style: italic;
-  font-weight: 400;
+  font-weight: 400; /* DM Serif Display has no true bold — 400 is the only designed weight */
   font-size: clamp(22px, 3.4vw, 32px);
   line-height: 1.3;
   color: var(--color-accent);
@@ -83,22 +75,17 @@
 
 .four-paths__quote-counter {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 900;
   font-size: clamp(22px, 3.4vw, 32px);
   line-height: 1.3;
   color: var(--color-text);
-  margin-left: 0.25em;
 }
 
-.four-paths__quote-counter[data-classification="falsch"]      { box-shadow: inset 0 -0.25em 0 var(--classification-falsch-bg); }
-.four-paths__quote-counter[data-classification="eher_falsch"] { box-shadow: inset 0 -0.25em 0 var(--classification-eher-falsch-bg); }
-.four-paths__quote-counter[data-classification="eher_richtig"]{ box-shadow: inset 0 -0.25em 0 var(--classification-eher-richtig-bg); }
-.four-paths__quote-counter[data-classification="richtig"]     { box-shadow: inset 0 -0.25em 0 var(--classification-richtig-bg); }
-.four-paths__quote-counter[data-classification="keine_aussage_moeglich"] { box-shadow: inset 0 -0.25em 0 var(--classification-keine-aussage-bg); }
 
 
 .four-paths__subtext {
   margin: 16px 0 0;
+  max-width: 660px; /* matches heading width — subtext should never exceed its headline */
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 400;
@@ -119,8 +106,6 @@
   border-radius: 24px;
   background: #faf9f5;
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-  -webkit-backdrop-filter: blur(10.35px);
-  backdrop-filter: blur(10.35px);
   text-decoration: none;
   color: inherit;
   cursor: pointer;
@@ -137,9 +122,7 @@
 .path-card:focus-visible {
   transform: translateY(-4px);
   background: #ffffff;
-  box-shadow:
-    0 14px 32px -6px rgba(15, 82, 56, 0.16),
-    0 0 0 3px rgba(15, 82, 56, 0.22);
+  box-shadow: 0 14px 32px -6px color-mix(in srgb, var(--key-green) 16%, transparent);
   outline: none;
 }
 
@@ -170,11 +153,11 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1;
-  color: #0f5238;
+  color: var(--key-green);
 }
 .path-card__go-chevron {
   display: block;
-  color: #0f5238;
+  color: var(--key-green);
 }
 
 .path-card--quiz {
@@ -212,7 +195,7 @@
   width: 32px;
   height: 32px;
   border-radius: 9999px;
-  background: #0f5238;
+  background: var(--key-green);
   color: #ffffff;
 }
 
@@ -223,7 +206,7 @@
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.3;
-  color: rgba(15, 82, 56, 0.50);
+  color: color-mix(in srgb, var(--key-green) 50%, transparent);
 }
 
 /* title — 16px below the icon */
@@ -244,7 +227,7 @@
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 16px;
-  line-height: 20px;
+  line-height: 1.25;
   color: rgba(64, 73, 67, 0.8);
 }
 
