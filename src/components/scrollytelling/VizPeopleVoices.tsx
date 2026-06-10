@@ -279,6 +279,7 @@ export function VizPeopleVoices(_props: Props) {
      *  handler; consumed by the projection loop. */
     let sortProgress = 0;
     let inView = true;
+    let hovered: HTMLElement | null = null;
 
     function measure() {
       const rect = container.getBoundingClientRect();
@@ -363,7 +364,7 @@ export function VizPeopleVoices(_props: Props) {
         el.dataset.s = fscale.toFixed(3);
         el.style.zIndex = String(funneling ? Math.round(500 + a * 200) : Math.round(a * 1000));
         el.style.opacity = fop.toFixed(2);
-        if (lastBlur[i] === undefined || Math.abs(lastBlur[i] - bl) > 0.2) { el.style.filter = 'blur(' + bl.toFixed(2) + 'px)'; lastBlur[i] = bl; }
+        if (el.style.filter === 'none' || lastBlur[i] === undefined || Math.abs(lastBlur[i] - bl) > 0.2) { el.style.filter = 'blur(' + bl.toFixed(2) + 'px)'; lastBlur[i] = bl; }
 
         if (!funneling) {
           const hw = halfW[i] * fscale, hh = halfH[i] * fscale;
@@ -391,46 +392,47 @@ export function VizPeopleVoices(_props: Props) {
       raf = requestAnimationFrame(loop);
     }
 
-    // ── Hover: pause rotation + magnify the hovered message. The hovered
-    //    chip is always displayed at exactly 2× its natural (unscaled) size,
-    //    regardless of where in the sphere it sits — computed as 2/--fit so
-    //    the sphere wrapper's scale(--fit) is accounted for. On mouse-leave,
-    //    the chip transitions smoothly back to its sphere-projected size
-    //    before the RAF loop resumes. ──
+    // ── Hover: pause rotation + magnify the hovered chip to exactly 2×
+    //    its natural size. `hovered` tracks the active chip so rapid
+    //    chip-to-chip moves never fire a premature paused=false. ──
     function onOver(ev: Event) {
       const t = (ev.target as HTMLElement).closest('.viz-msg, .viz-src') as HTMLElement | null;
-      if (!t) return;
-      if (t.classList.contains('is-hover')) return;
+      if (!t || t === hovered) return;
+      // Cancel the previous chip without resuming rotation yet.
+      if (hovered) {
+        const prev = hovered;
+        prev.classList.remove('is-hover');
+        const ps = parseFloat(prev.dataset.s || '1');
+        prev.style.transition = 'transform 150ms ease-out, opacity 150ms ease-out, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease';
+        prev.style.transform = prev.style.transform.replace(/scale\([\d.]+\)/, 'scale(' + ps.toFixed(3) + ')');
+        prev.style.opacity = prev.dataset.prevOpacity || '1';
+        setTimeout(() => { prev.style.transition = ''; }, 150);
+      }
+      hovered = t;
       paused = true;
-      // Snapshot pre-hover state so onOut can restore it exactly.
-      t.dataset.prevOpacity = t.style.opacity;
-      t.dataset.prevFilter = t.style.filter;
+      t.dataset.prevOpacity = t.style.opacity || '1';
       t.classList.add('is-hover');
-      const cur = t.style.transform;
-      const fit = parseFloat(sphere.style.getPropertyValue('--fit') || '1') || 1;
-      const targetScale = 2 / fit;
-      // Include bg/border/shadow so they animate together with scale — no snap.
-      t.style.transition = 'transform 200ms cubic-bezier(0.22,1,0.36,1), background 200ms ease, border-color 200ms ease, box-shadow 200ms ease';
-      t.style.transform = cur.replace(/scale\([\d.]+\)/, 'scale(' + targetScale.toFixed(3) + ')');
-      t.style.filter = 'none';
+      const currentScale = parseFloat(t.dataset.s || '1');
+      const targetScale = currentScale + 0.4;
+      t.style.transition = 'transform 200ms cubic-bezier(0.22,1,0.36,1), opacity 200ms ease, background 200ms ease, border-color 200ms ease, box-shadow 200ms ease';
+      t.style.transform = t.style.transform.replace(/scale\([\d.]+\)/, 'scale(' + targetScale.toFixed(3) + ')');
       t.style.opacity = '1';
+      t.style.filter = 'none';
     }
     function onOut(ev: Event) {
       const t = (ev.target as HTMLElement).closest('.viz-msg, .viz-src') as HTMLElement | null;
-      if (!t) return;
+      if (!t || t !== hovered) return;
       const to = (ev as MouseEvent).relatedTarget as Node | null;
       if (to && t.contains(to)) return;
+      hovered = null;
       t.classList.remove('is-hover');
       const spinScale = parseFloat(t.dataset.s || '1');
-      const curTransform = t.style.transform;
-      // 150ms smooth return; include bg/border/shadow so nothing snaps.
-      t.style.transition = 'transform 150ms ease-out, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease';
-      t.style.transform = curTransform.replace(/scale\([\d.]+\)/, 'scale(' + spinScale.toFixed(3) + ')');
-      if (t.dataset.prevOpacity !== undefined) t.style.opacity = t.dataset.prevOpacity;
-      if (t.dataset.prevFilter !== undefined) t.style.filter = t.dataset.prevFilter;
+      t.style.transition = 'transform 150ms ease-out, opacity 150ms ease-out, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease';
+      t.style.transform = t.style.transform.replace(/scale\([\d.]+\)/, 'scale(' + spinScale.toFixed(3) + ')');
+      t.style.opacity = t.dataset.prevOpacity || '1';
       setTimeout(() => {
         t.style.transition = '';
-        paused = false;
+        if (!hovered) paused = false;
       }, 150);
     }
     sphere.addEventListener('mouseover', onOver);

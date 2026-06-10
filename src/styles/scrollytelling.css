@@ -1053,6 +1053,9 @@ body:has(.scrolly) main {
   gap: 5px;
   line-height: 1.25;
   color: var(--fg);
+  /* Start invisible so chips never flash at the stacked origin position
+     before project() has run — project() always writes the inline opacity. */
+  opacity: 0;
   will-change: transform, opacity;
   /* Only the hover look-changes transition; position is written each
      frame by the RAF loop (no transition on transform during spin). */
@@ -2134,9 +2137,97 @@ body:has(.scrolly) main {
   zoom: 0.56;
 }
 /* The homepage places the 4 cards in grid rows 2–3 (row 1 is its quote).
-   The scrolly has no quote, so flow them into rows 1–2 (keep the 1/2 columns). */
+   The scrolly has no quote, so flow them into rows 1–2 (keep the 1/2 columns).
+   Dark-mode overrides: cards sit on the scrolly dark-green canvas, so the
+   light-mode cream surfaces are replaced with frosted-glass dark panels. */
 .path-cards .path-card {
   grid-row: auto;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
+}
+.path-cards .path-card:hover,
+.path-cards .path-card:focus-visible {
+  background: rgba(255, 255, 255, 0.13);
+  box-shadow: 0 8px 28px -4px rgba(0, 0, 0, 0.45);
+}
+.path-cards .path-card__title {
+  color: #faf9f5;
+}
+.path-cards .path-card__body {
+  color: rgba(250, 249, 245, 0.58);
+}
+.path-cards .path-card__go-label,
+.path-cards .path-card__go-chevron {
+  color: rgba(250, 249, 245, 0.82);
+}
+/* Icon badge: frosted-white circle instead of the dark key-green */
+.path-cards .path-card__icon {
+  background: rgba(250, 249, 245, 0.18);
+  color: #faf9f5;
+}
+/* Daten chart — invert tick and bar-track colours for the dark surface */
+.path-cards .daten-chart__tick {
+  border-left-color: rgba(255, 255, 255, 0.07);
+}
+.path-cards .daten-chart__tick[data-pos="50"] {
+  border-left-color: rgba(255, 255, 255, 0.13);
+}
+.path-cards .daten-bar {
+  background: rgba(255, 255, 255, 0.05);
+}
+/* Meine preview — frosted circles; connector line hidden (icons only) */
+.path-cards .audience-dot {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(250, 249, 245, 0.82);
+}
+.path-cards .meine-preview::before {
+  display: none;
+}
+
+/* ── Animation overrides for the scrollytelling Step 10 cards ── */
+@media (prefers-reduced-motion: no-preference) {
+  /* Daten: bars grow from left on hover (CSS-only; homepage relies on a
+     JS tween that PathCards doesn't include). Circle fades in alongside. */
+  .path-cards .daten-bar__wash {
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .path-cards .daten-bar__circle {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .path-cards .path-card--daten:hover .daten-bar__wash {
+    transform: scaleX(1);
+  }
+  .path-cards .path-card--daten:hover .daten-bar__circle {
+    opacity: 1;
+  }
+  /* Stagger bars 2–4 via adjacent-sibling selectors (avoids nth-child
+     counting the axis element as child 1). */
+  .path-cards .path-card--daten:hover .daten-bar + .daten-bar .daten-bar__wash,
+  .path-cards .path-card--daten:hover .daten-bar + .daten-bar .daten-bar__circle {
+    transition-delay: 0.07s;
+  }
+  .path-cards .path-card--daten:hover .daten-bar + .daten-bar + .daten-bar .daten-bar__wash,
+  .path-cards .path-card--daten:hover .daten-bar + .daten-bar + .daten-bar .daten-bar__circle {
+    transition-delay: 0.14s;
+  }
+  .path-cards .path-card--daten:hover .daten-bar + .daten-bar + .daten-bar + .daten-bar .daten-bar__wash,
+  .path-cards .path-card--daten:hover .daten-bar + .daten-bar + .daten-bar + .daten-bar .daten-bar__circle {
+    transition-delay: 0.21s;
+  }
+
+  /* Quiz: keep the button-jump wave; drop the delayed stroke reveal. */
+  .path-cards .path-card--quiz:hover .quiz-preview__btn--richtig,
+  .path-cards .path-card--quiz:hover .quiz-preview__btn--eher_falsch {
+    border-style: solid;
+    border-color: transparent;
+    transition-delay: 0s;
+  }
+
+  /* Meine: connector line already hidden above; keep the audience-dot pop. */
 }
 
 /* #D (2026-06-08): hover tooltips adopt the light/beige site style (like the
