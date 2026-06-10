@@ -323,39 +323,41 @@ const translations = {
   },
   'export.button': { de: 'Exportieren', en: 'Export' },
   'export.title': { de: 'Daten exportieren', en: 'Export data' },
-  'export.csv.title': { de: 'CSV (Tabelle)', en: 'CSV (table)' },
-  'export.csv.desc': {
-    de: 'Komplette Daten als Tabelle, Excel-kompatibel.',
-    en: 'Full dataset as a table, Excel-compatible.',
+  // One-line guidance under the dialog title — the dialog shows all four
+  // formats at once (no tabs). AI-drafted — ISD review pending.
+  'export.intro': {
+    de: 'Wähle ein Format. Bilder zeigen die aktuelle Ansicht, Excel enthält alle Daten.',
+    en: 'Choose a format. Images show the current view, Excel contains all the data.',
   },
   'export.png.title': { de: 'PNG (Bild)', en: 'PNG (image)' },
   'export.png.desc': {
-    de: 'Für Präsentationen, hochauflösend (2×).',
-    en: 'For presentations, high resolution (2×).',
+    de: 'Aktuelle Ansicht, hochauflösend (2×).',
+    en: 'Current view, high resolution (2×).',
   },
   'export.svg.title': { de: 'SVG (Vektor)', en: 'SVG (vector)' },
   'export.svg.desc': {
-    de: 'Druckqualität, vektorbasiert.',
-    en: 'Print quality, vector-based.',
+    de: 'Aktuelle Ansicht, skalierbar für Druck.',
+    en: 'Current view, scalable for print.',
   },
-  'export.json.title': { de: 'JSON (Rohdaten)', en: 'JSON (raw data)' },
-  'export.json.desc': {
-    de: 'Strukturierte Daten für Forschung & Programme.',
-    en: 'Structured data for research and integrations.',
+  // Excel = the complete CaRM workbook (static file served from public/),
+  // independent of the active filters. AI-drafted — ISD review pending.
+  'export.excel.title': { de: 'Excel (alle Daten)', en: 'Excel (all data)' },
+  'export.excel.desc': {
+    de: 'Kompletter Datensatz, alle Zielgruppen.',
+    en: 'Complete dataset, all audience groups.',
   },
-  'export.link.title': { de: 'Link kopieren', en: 'Copy link' },
-  'export.link.desc': {
-    de: 'Aktuelle Filter & Ansicht als URL teilen.',
-    en: 'Share the current filters & view as a URL.',
+  // CSV = the current filtered selection as a table (complement to Excel).
+  // AI-drafted — ISD review pending.
+  'export.csv.title': { de: 'CSV (Auswahl)', en: 'CSV (selection)' },
+  'export.csv.desc': {
+    de: 'Aktuelle Auswahl als Tabelle.',
+    en: 'Current selection as a table.',
   },
-  'export.link.copied': { de: 'Kopiert!', en: 'Copied!' },
-  // Tabs in the OWID-style export dialog (Stage 3 of the Daten-Explorer refactor).
-  'export.tab.visualization': { de: 'Visualisierung', en: 'Visualization' },
-  'export.tab.data': { de: 'Daten', en: 'Data' },
-  // Disabled-row copy when the active tab has no chart (Tabelle).
-  'export.unavailable.table': {
-    de: 'Tabellenansicht hat keine Visualisierung — wechsle zu Balken, Streifen oder Informationsquellen, um Bilder zu exportieren.',
-    en: 'The table view has no visualization — switch to Bars, Strips, or Information Sources to export images.',
+  // Shown under the grid when PNG/SVG are unavailable (Tabelle has no chart).
+  // AI-drafted — ISD review pending.
+  'export.images.note': {
+    de: 'PNG und SVG stehen nur in den Diagramm-Ansichten zur Verfügung.',
+    en: 'PNG and SVG are only available in the chart views.',
   },
   'export.preview.label': {
     de: 'Vorschau der aktuellen Visualisierung',
