@@ -8139,16 +8139,24 @@ body.carm-modal-open {
 
 /* Stable popover sizing (Rundgang). Wider (mobile-safe via min()) so the
    content needs far fewer lines — the popover is short. */
-.carm-tour-popover.driver-popover { max-width: min(480px, calc(100vw - 32px)); }
-/* Compact + viewport-safe: a short max-height keeps the popover small enough
-   to sit BELOW the anchor (steps 1 & 2 force side:'bottom'), so expanding an
-   accordion grows the popover DOWNWARD and then scrolls WITHIN it — it never
-   climbs up over the element it's pointing at. Collapsed steps stay compact
-   (content is under the cap). The reserved scrollbar gutter keeps the text
-   from reflowing when the scrollbar appears. */
-.carm-tour-popover .driver-popover-description {
-  max-height: min(42vh, 340px);
-  scrollbar-gutter: stable;
+.carm-tour-popover.driver-popover {
+  max-width: min(480px, calc(100vw - 32px));
+  padding: 16px 18px;
+}
+/* Driver's default footer ships with 32px top+bottom padding (≈96px tall
+   for a 31px button row!). Compact it so the popover is much shorter and
+   clears the (Driver-centred) anchor on short/retina viewports. */
+.carm-tour-popover .driver-popover-footer { margin-top: 10px; padding: 0; }
+.carm-tour-popover .driver-popover-description { scrollbar-gutter: stable; }
+/* The accordion steps (1 & 2) use a FIXED, short scroll area, so the popover
+   is a CONSTANT size — unfolding an accordion scrolls DOWN within it instead
+   of the popover growing and climbing up over the element it points at
+   (Driver re-fits a growing popover by pinning its bottom and pushing the top
+   up; a constant size avoids that). `side:'bottom'` keeps it below the anchor;
+   the wider width + compact chrome keep it short. Non-accordion steps (3 & 4)
+   keep their natural compact height. */
+.carm-tour-popover .driver-popover-description:has(details) {
+  height: min(32vh, 210px);
 }
 
 /* ---- Responsive: keep the tab row ABOVE the panel (never spilling to
