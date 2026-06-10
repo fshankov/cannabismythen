@@ -5613,57 +5613,80 @@ body.carm-modal-open {
 }
 
 /* ===========================================================================
-   ExportDrawer rows
+   ExportDrawer — 2×2 format grid (PNG · SVG · Excel · CSV)
    =========================================================================== */
 
-.carm-export-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
+/* One-line guidance under the dialog title. */
+.carm-export-intro {
+  margin: 0 0 var(--space-md, 16px);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary, #4a5568);
+}
+
+.carm-export-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-sm, 8px);
 }
 
-.carm-export-row {
+/* The modal becomes a full-width bottom-sheet on mobile; stack to one
+   column so the cards don't get cramped. */
+@media (max-width: 520px) {
+  .carm-export-grid { grid-template-columns: 1fr; }
+}
+
+.carm-export-card {
   display: flex;
-  align-items: center;
-  gap: var(--space-md, 16px);
+  flex-direction: column;
   width: 100%;
   padding: var(--space-md, 16px);
   border: 1px solid var(--color-border, #e2e8f0);
   border-radius: var(--radius-md, 8px);
   background: var(--color-surface, #ffffff);
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
   transition: background var(--transition-fast, 0.15s ease), border-color var(--transition-fast, 0.15s ease);
 }
 
-.carm-export-row:hover:not(:disabled) {
+.carm-export-card:hover:not(:disabled) {
   background: var(--color-bg-subtle, #eeeee8);
   border-color: var(--color-border-strong, #cbd5e1);
 }
 
-.carm-export-row:disabled { opacity: 0.5; cursor: not-allowed; }
+.carm-export-card:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.carm-export-row:focus-visible {
+.carm-export-card:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
   outline-offset: 2px;
 }
 
-.carm-export-row__icon {
-  flex: 0 0 auto;
-  display: inline-flex;
+/* Media block — chart thumbnail (PNG/SVG) or a centered format icon
+   (Excel/CSV). Fixed height keeps all four cards aligned. */
+.carm-export-card__media {
+  width: 100%;
+  height: 92px;
+  margin-bottom: var(--space-sm, 8px);
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-bg-subtle, #eeeee8);
+  overflow: hidden;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-md, 8px);
-  background: var(--color-bg-subtle, #eeeee8);
-  color: var(--color-accent, #2d6a4f);
 }
 
-.carm-export-row__text {
+.carm-export-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.carm-export-card__media--icon { color: var(--color-accent, #2d6a4f); }
+
+.carm-export-card__text {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -5671,91 +5694,33 @@ body.carm-modal-open {
   min-width: 0;
 }
 
-.carm-export-row__title {
+.carm-export-card__title {
   font-weight: 600;
   color: var(--color-text, #1a1a2e);
 }
 
-.carm-export-row__desc {
+.carm-export-card__desc {
   font-size: 0.85rem;
+  line-height: 1.4;
   color: var(--color-text-muted, #718096);
 }
 
-.carm-export-row__cta { color: var(--color-text-muted, #718096); }
-
-/* OWID-style tab strip at the top of the export dialog
-   (Stage 3 of the Daten-Explorer refactor). */
-.carm-export-tabs {
-  display: flex;
-  align-items: stretch;
-  gap: var(--space-md, 16px);
-  border-bottom: 1px solid var(--color-border, #e2e8f0);
-  margin-bottom: var(--space-md, 16px);
+/* Download chevron — bottom-right, below the text. */
+.carm-export-card__cta {
+  align-self: flex-end;
+  margin-top: var(--space-xs, 4px);
+  color: var(--color-text-muted, #718096);
 }
 
-.carm-export-tabs__tab {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  padding: 10px 4px;
-  font: inherit;
-  font-weight: 600;
-  font-size: 0.92rem;
-  color: var(--color-text-secondary, #4a5568);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  transition: color var(--transition-fast, 0.15s ease),
-              border-color var(--transition-fast, 0.15s ease);
-}
-
-.carm-export-tabs__tab:hover {
-  color: var(--color-text, #1a1a2e);
-}
-
-.carm-export-tabs__tab.active {
-  color: var(--color-accent, #2d6a4f);
-  border-bottom-color: var(--color-accent, #2d6a4f);
-}
-
-.carm-export-tabs__tab:focus-visible {
-  outline: 2px solid var(--color-accent, #2d6a4f);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm, 4px);
-}
-
-/* Thumbnail preview cell on PNG / SVG rows — replaces the icon when
-   the live chart can produce a snapshot. */
-.carm-export-row__thumb {
-  flex: 0 0 auto;
-  width: 120px;
-  height: 80px;
-  border-radius: var(--radius-md, 8px);
-  border: 1px solid var(--color-border, #e2e8f0);
-  background: var(--color-bg-subtle, #eeeee8);
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.carm-export-row__thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-/* "No chart available" notice on the Visualisierung tab when Tabelle
-   is the active view. */
-.carm-export-empty {
-  list-style: none;
-  padding: var(--space-md, 16px);
+/* Note under the grid when PNG/SVG are unavailable (Tabelle view). */
+.carm-export-note {
+  margin: var(--space-md, 16px) 0 0;
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
   border: 1px dashed var(--color-border, #e2e8f0);
   border-radius: var(--radius-md, 8px);
-  color: var(--color-text-secondary, #4a5568);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   line-height: 1.5;
+  color: var(--color-text-secondary, #4a5568);
   background: var(--color-bg-subtle, #eeeee8);
 }
 
@@ -8129,6 +8094,35 @@ body.carm-modal-open {
   display: inline-block;
   vertical-align: -0.15em;
   margin: 0 2px;
+}
+
+/* Rundgang popover accordions — reuse the Factsheet collapsible design
+   (`.factsheet-panel__section*`) inside the tour popover, using native
+   <details>: hide the default disclosure marker, rotate the chevron on
+   open, and drop the inner max-height so only the popover description
+   scrolls. Keeps each step short (collapsed) with detail one click away. */
+.carm-tour-popover summary.factsheet-panel__section-toggle { list-style: none; }
+.carm-tour-popover summary.factsheet-panel__section-toggle::-webkit-details-marker { display: none; }
+.carm-tour-popover details[open] .factsheet-panel__chevron { transform: rotate(180deg); }
+.carm-tour-popover .factsheet-panel__section--collapsible { margin: 8px 0 0; }
+.carm-tour-popover .factsheet-panel__section-content { max-height: none; }
+.carm-tour-popover .factsheet-panel__section-title .carm-tour-icon { margin-right: 6px; }
+.carm-tour-popover .factsheet-panel__section-content ul,
+.carm-tour-popover .factsheet-panel__section-content ol { margin: 4px 0; padding-left: 18px; line-height: 1.5; }
+.carm-tour-popover .factsheet-panel__section-content li { margin: 2px 0; }
+.carm-tour-popover .carm-tour-note { margin-top: 10px; font-size: 0.8rem; color: #718096; }
+
+/* Stable popover sizing (Rundgang). A touch wider for the accordion content
+   + long example titles (mobile-safe via min()), and a reserved scrollbar
+   gutter so the text never reflows when the scrollbar appears. */
+.carm-tour-popover.driver-popover { max-width: min(384px, calc(100vw - 24px)); }
+.carm-tour-popover .driver-popover-description { scrollbar-gutter: stable; }
+/* The accordion steps (1 & 2) get a FIXED-height scroll area, so expanding an
+   accordion scrolls WITHIN the popover instead of resizing it — the popover
+   is measured + positioned once at this constant size and never jumps. Steps
+   without a <details> (3 & 4) keep their natural compact height. */
+.carm-tour-popover .driver-popover-description:has(details) {
+  height: min(52vh, 360px);
 }
 
 /* ---- Responsive: keep the tab row ABOVE the panel (never spilling to
