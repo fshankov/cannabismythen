@@ -8117,6 +8117,35 @@ body.carm-modal-open {
   margin: 0 2px;
 }
 
+/* Rundgang popover accordions — reuse the Factsheet collapsible design
+   (`.factsheet-panel__section*`) inside the tour popover, using native
+   <details>: hide the default disclosure marker, rotate the chevron on
+   open, and drop the inner max-height so only the popover description
+   scrolls. Keeps each step short (collapsed) with detail one click away. */
+.carm-tour-popover summary.factsheet-panel__section-toggle { list-style: none; }
+.carm-tour-popover summary.factsheet-panel__section-toggle::-webkit-details-marker { display: none; }
+.carm-tour-popover details[open] .factsheet-panel__chevron { transform: rotate(180deg); }
+.carm-tour-popover .factsheet-panel__section--collapsible { margin: 8px 0 0; }
+.carm-tour-popover .factsheet-panel__section-content { max-height: none; }
+.carm-tour-popover .factsheet-panel__section-title .carm-tour-icon { margin-right: 6px; }
+.carm-tour-popover .factsheet-panel__section-content ul,
+.carm-tour-popover .factsheet-panel__section-content ol { margin: 4px 0; padding-left: 18px; line-height: 1.5; }
+.carm-tour-popover .factsheet-panel__section-content li { margin: 2px 0; }
+.carm-tour-popover .carm-tour-note { margin-top: 10px; font-size: 0.8rem; color: #718096; }
+
+/* Stable popover sizing (Rundgang). A touch wider for the accordion content
+   + long example titles (mobile-safe via min()), and a reserved scrollbar
+   gutter so the text never reflows when the scrollbar appears. */
+.carm-tour-popover.driver-popover { max-width: min(384px, calc(100vw - 24px)); }
+.carm-tour-popover .driver-popover-description { scrollbar-gutter: stable; }
+/* The accordion steps (1 & 2) get a FIXED-height scroll area, so expanding an
+   accordion scrolls WITHIN the popover instead of resizing it — the popover
+   is measured + positioned once at this constant size and never jumps. Steps
+   without a <details> (3 & 4) keep their natural compact height. */
+.carm-tour-popover .driver-popover-description:has(details) {
+  height: min(52vh, 360px);
+}
+
 /* ---- Responsive: keep the tab row ABOVE the panel (never spilling to
    the right). Below the breakpoint, drop only the per-tab short label so
    each tab is just its view-type icon; the "Mythen"/"Quellen" group
