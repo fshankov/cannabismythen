@@ -77,9 +77,13 @@ interface Props {
   /** carm-data myths — used to derive one short representative myth per
    *  verdict for the Fakten-Karten preview spectrum. */
   myths: CarmData['myths'];
+  /** How many cards (0–4) are currently visible. Drives scroll-driven
+   *  staggered reveal on the /projekt/ scrollytelling (Step 10). Default
+   *  4 = all cards shown (homepage usage). */
+  revealedCards?: number;
 }
 
-export function PathCards({ myths }: Props) {
+export function PathCards({ myths, revealedCards = 4 }: Props) {
   const faktenCards = FAKTEN_SPECTRUM.map((v) => {
     const pool = myths.filter((m) => m.correctness_class === v);
     if (pool.length === 0) return null;
@@ -98,8 +102,18 @@ export function PathCards({ myths }: Props) {
 
   return (
     <div className="path-cards">
-      {TILES.map((c) => (
-        <a key={c.mod} className={`path-card path-card--${c.mod}`} href={c.url}>
+      {TILES.map((c, i) => (
+        <a
+          key={c.mod}
+          className={`path-card path-card--${c.mod}`}
+          href={c.url}
+          style={{
+            opacity: i < revealedCards ? 1 : 0,
+            transform: i < revealedCards ? 'translateY(0)' : 'translateY(14px)',
+            transition: `opacity 480ms ease ${i * 110}ms, transform 480ms cubic-bezier(0.22,1,0.36,1) ${i * 110}ms`,
+            pointerEvents: i < revealedCards ? undefined : 'none',
+          }}
+        >
           <span className="path-card__go" aria-hidden="true">
             <span className="path-card__go-label">Anzeigen</span>
             <svg className="path-card__go-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>

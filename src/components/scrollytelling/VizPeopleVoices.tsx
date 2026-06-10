@@ -279,6 +279,7 @@ export function VizPeopleVoices(_props: Props) {
      *  handler; consumed by the projection loop. */
     let sortProgress = 0;
     let inView = true;
+    let hovered: HTMLElement | null = null;
 
     function measure() {
       const rect = container.getBoundingClientRect();
@@ -363,7 +364,7 @@ export function VizPeopleVoices(_props: Props) {
         el.dataset.s = fscale.toFixed(3);
         el.style.zIndex = String(funneling ? Math.round(500 + a * 200) : Math.round(a * 1000));
         el.style.opacity = fop.toFixed(2);
-        if (lastBlur[i] === undefined || Math.abs(lastBlur[i] - bl) > 0.2) { el.style.filter = 'blur(' + bl.toFixed(2) + 'px)'; lastBlur[i] = bl; }
+        if (el.style.filter === 'none' || lastBlur[i] === undefined || Math.abs(lastBlur[i] - bl) > 0.2) { el.style.filter = 'blur(' + bl.toFixed(2) + 'px)'; lastBlur[i] = bl; }
 
         if (!funneling) {
           const hw = halfW[i] * fscale, hh = halfH[i] * fscale;
@@ -391,39 +392,48 @@ export function VizPeopleVoices(_props: Props) {
       raf = requestAnimationFrame(loop);
     }
 
-    // ── Hover: pause rotation + magnify the hovered message. Because
-    //    the loop is paused while hovering, the frozen inline transform
-    //    won't be overwritten, so we can safely bump its scale in place
-    //    (×1.5) for the magnify, then let the loop restore it on leave. ──
+    // ── Hover: pause rotation + magnify the hovered chip to exactly 2×
+    //    its natural size. `hovered` tracks the active chip so rapid
+    //    chip-to-chip moves never fire a premature paused=false. ──
     function onOver(ev: Event) {
       const t = (ev.target as HTMLElement).closest('.viz-msg, .viz-src') as HTMLElement | null;
-      if (!t) return;
-      // `mouseover` re-fires for every child element entered; without this
-      // guard the magnify would compound on each event and balloon the chip.
-      if (t.classList.contains('is-hover')) return;
+      if (!t || t === hovered) return;
+      // Cancel the previous chip without resuming rotation yet.
+      if (hovered) {
+        const prev = hovered;
+        prev.classList.remove('is-hover');
+        const ps = parseFloat(prev.dataset.s || '1');
+        prev.style.transition = 'transform 150ms ease-out, opacity 150ms ease-out, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease';
+        prev.style.transform = prev.style.transform.replace(/scale\([\d.]+\)/, 'scale(' + ps.toFixed(3) + ')');
+        prev.style.opacity = prev.dataset.prevOpacity || '1';
+        setTimeout(() => { prev.style.transition = ''; }, 150);
+      }
+      hovered = t;
       paused = true;
+      t.dataset.prevOpacity = t.style.opacity || '1';
       t.classList.add('is-hover');
-      const cur = t.style.transform;
-      // Base the magnify off the chip's TRUE spinning scale (stored each frame),
-      // not the current transform — so it can't stack — and cap at 2× the
-      // spinning size so even a large front chip never balloons (Fedor 2026-06-09).
-      const spinScale = parseFloat(t.dataset.s || '1');
-      const target = Math.min(spinScale * 1.5, spinScale * 2);
-      t.style.transition = 'transform 180ms cubic-bezier(0.22,1,0.36,1)';
-      t.style.transform = cur.replace(/scale\([\d.]+\)/, 'scale(' + target.toFixed(3) + ')');
-      t.style.filter = 'none';
+      const currentScale = parseFloat(t.dataset.s || '1');
+      const targetScale = currentScale + 0.4;
+      t.style.transition = 'transform 200ms cubic-bezier(0.22,1,0.36,1), opacity 200ms ease, background 200ms ease, border-color 200ms ease, box-shadow 200ms ease';
+      t.style.transform = t.style.transform.replace(/scale\([\d.]+\)/, 'scale(' + targetScale.toFixed(3) + ')');
       t.style.opacity = '1';
+      t.style.filter = 'none';
     }
     function onOut(ev: Event) {
       const t = (ev.target as HTMLElement).closest('.viz-msg, .viz-src') as HTMLElement | null;
-      if (!t) return;
-      // Ignore moves to another element still inside the same chip, else
-      // mouseout→mouseover would flicker the magnify on/off.
+      if (!t || t !== hovered) return;
       const to = (ev as MouseEvent).relatedTarget as Node | null;
       if (to && t.contains(to)) return;
+      hovered = null;
       t.classList.remove('is-hover');
-      t.style.transition = '';
-      paused = false; // loop resumes and rewrites transform/opacity/filter
+      const spinScale = parseFloat(t.dataset.s || '1');
+      t.style.transition = 'transform 150ms ease-out, opacity 150ms ease-out, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease';
+      t.style.transform = t.style.transform.replace(/scale\([\d.]+\)/, 'scale(' + spinScale.toFixed(3) + ')');
+      t.style.opacity = t.dataset.prevOpacity || '1';
+      setTimeout(() => {
+        t.style.transition = '';
+        if (!hovered) paused = false;
+      }, 150);
     }
     sphere.addEventListener('mouseover', onOver);
     sphere.addEventListener('mouseout', onOut);
