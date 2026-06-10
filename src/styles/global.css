@@ -491,7 +491,7 @@ body.has-hero .nav:not(.nav--scrolled) .nav__hamburger-line { background-color: 
 .nav__brand-myth {
   color: #45a177;                      /* 15% brighter than key green */
   font-style: italic;
-  font-weight: 300;
+  font-weight: 700;
 }
 
 /* ── Brand logo (Lupe magnifying-glass mark) ─────────────────── */

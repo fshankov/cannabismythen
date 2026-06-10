@@ -176,9 +176,9 @@ body:has(.scrolly) {
 html, body {
   margin: 0;
   padding: 0;
-  /* Forest backdrop — a stretched radial echoing the homepage hero vignette
-     (lighter at the top, settling into deep forest as you scroll the story). */
-  background: radial-gradient(125% 90% at 50% -8%, #1f4e3a 0%, #163d2d 46%, #0f2c20 100%);
+  /* Forest backdrop — matches the homepage hero gradient exactly
+     (#265a43 top → #143b2c bottom), so both pages share the same tone. */
+  background: radial-gradient(120% 90% at 50% -8%, #265a43 0%, #1d4a37 46%, #143b2c 100%);
   background-color: #143b2c;
   color: var(--fg);
   font-family: var(--font-body);
@@ -570,17 +570,11 @@ body:has(.scrolly) main {
   height: 100vh;
   height: 100dvh;
   display: flex;
-  /* Top-aligned to match the text column. The 8rem top offset =
-     text-col padding (4rem) + step-1 padding (4rem), so the viz lines up
-     with the "01 / 11" heading at the top of the page, and stays aligned
-     with each active step's top-anchored text as you scroll. Tune this
-     one value to nudge the whole viz up/down. (Fedor review 2026-06-08.) */
-  align-items: flex-start;
+  /* Vertically centered so the viz is always in the middle of the viewport
+     at any window height (Fix 2: "centered whatsoever" on short windows). */
+  align-items: center;
   justify-content: center;
-  /* 9.5rem ≈ text-col 4rem + step-1 4rem + the "01/11" label block, so the
-     first viz element lines up with the heading "Hand aufs Herz:" line.
-     Tune this single value to nudge the whole viz up/down. */
-  padding: 10.25rem var(--space-md) var(--space-md);
+  padding: min(3rem, 6dvh) var(--space-md);
   /* Iter-14: removed `contain: layout`. It established a containing
      block for position:fixed descendants, so the hover tooltips
      (positioned via `useFlipPosition` with viewport coords) ended up
@@ -594,10 +588,9 @@ body:has(.scrolly) main {
   width: 100%;
   height: 100%;
   display: flex;
-  /* Top-align the canvas (was centred). The canvas is capped at 620px but the
-     sticky column is taller, so centring pushed the viz ~60px down — that's
-     what kept the timeline's first node below the heading (Fedor 2026-06-08). */
-  align-items: flex-start;
+  /* Center canvas within the stage (both axes) so it sits in the middle
+     of the sticky col at any window height. */
+  align-items: center;
   justify-content: center;
   animation: scrolly-stage-in var(--anim-step-fade-dur, 500ms) ease both;
 }
@@ -636,10 +629,7 @@ body:has(.scrolly) main {
   overflow: hidden;
   position: relative;
   display: flex;
-  /* Top-align the viz within the (column-tall) canvas so it lines up with
-     the heading at the column's 8rem offset, instead of floating at the
-     vertical centre (Fedor review 2026-06-08). */
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding: 0;
   container-type: size;
@@ -719,10 +709,7 @@ body:has(.scrolly) main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Top-align viz content (was centred) so the viz lines up with the
-     top-anchored step text + heading instead of floating mid-column
-     (Fedor review 2026-06-08). */
-  justify-content: flex-start;
+  justify-content: center;
   gap: var(--space-md);
   max-width: 720px;
   margin: 0 auto;
@@ -1135,17 +1122,17 @@ body:has(.scrolly) main {
   text-shadow: 0 0 8px rgba(252, 211, 77, 0.35);
 }
 
-/* Hover magnify — glass-morphism plate so the enlarged message stays
-   readable over its neighbours. The RAF loop pauses while hovering, so
-   the transform set here is the chip's last projected transform + 1.4×;
-   we approximate via a CSS scale on top of the inline transform by
-   letting the inline transform remain and adding a box-shadow/plate. */
+/* Hover magnify — creamy plate so the enlarged message pops off the dark
+   background without the jarring black overlay. Scale is capped at 2× the
+   chip's natural size by the JS (independent of sphere position). Smooth
+   return to natural size is also handled by JS. */
 .viz-chip.is-hover {
-  background: rgba(22, 27, 34, 0.97) !important;
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border-color: rgba(255, 255, 255, 0.30) !important;
-  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.10) inset;
+  background: rgba(250, 249, 245, 0.97) !important;
+  color: #1a3528 !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: rgba(250, 249, 245, 0.6) !important;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(250, 249, 245, 0.3) inset;
   z-index: 1500 !important;
 }
 
@@ -3012,7 +2999,10 @@ body:has(.scrolly) main {
   flex-wrap: nowrap;
   gap: 5px;
   align-items: center;
-  justify-content: center;
+  /* flex-start prevents left-side clipping when pills overflow in a
+     centered layout — leftmost pill is always visible, scroll right
+     to see more (Fix 4). */
+  justify-content: flex-start;
   min-height: 28px;
   flex-shrink: 0;
   overflow-x: auto;
@@ -3189,7 +3179,8 @@ body:has(.scrolly) main {
   flex-wrap: nowrap;
   gap: 5px;
   align-items: center;
-  justify-content: center;
+  /* flex-start prevents left-side clipping (same as viz-balken-myth__picker Fix 4). */
+  justify-content: flex-start;
   min-height: 28px;
   flex-shrink: 0;
   overflow-x: auto;

@@ -391,39 +391,47 @@ export function VizPeopleVoices(_props: Props) {
       raf = requestAnimationFrame(loop);
     }
 
-    // ── Hover: pause rotation + magnify the hovered message. Because
-    //    the loop is paused while hovering, the frozen inline transform
-    //    won't be overwritten, so we can safely bump its scale in place
-    //    (×1.5) for the magnify, then let the loop restore it on leave. ──
+    // ── Hover: pause rotation + magnify the hovered message. The hovered
+    //    chip is always displayed at exactly 2× its natural (unscaled) size,
+    //    regardless of where in the sphere it sits — computed as 2/--fit so
+    //    the sphere wrapper's scale(--fit) is accounted for. On mouse-leave,
+    //    the chip transitions smoothly back to its sphere-projected size
+    //    before the RAF loop resumes. ──
     function onOver(ev: Event) {
       const t = (ev.target as HTMLElement).closest('.viz-msg, .viz-src') as HTMLElement | null;
       if (!t) return;
-      // `mouseover` re-fires for every child element entered; without this
-      // guard the magnify would compound on each event and balloon the chip.
       if (t.classList.contains('is-hover')) return;
       paused = true;
+      // Snapshot pre-hover state so onOut can restore it exactly.
+      t.dataset.prevOpacity = t.style.opacity;
+      t.dataset.prevFilter = t.style.filter;
       t.classList.add('is-hover');
       const cur = t.style.transform;
-      // Base the magnify off the chip's TRUE spinning scale (stored each frame),
-      // not the current transform — so it can't stack — and cap at 2× the
-      // spinning size so even a large front chip never balloons (Fedor 2026-06-09).
-      const spinScale = parseFloat(t.dataset.s || '1');
-      const target = Math.min(spinScale * 1.5, spinScale * 2);
-      t.style.transition = 'transform 180ms cubic-bezier(0.22,1,0.36,1)';
-      t.style.transform = cur.replace(/scale\([\d.]+\)/, 'scale(' + target.toFixed(3) + ')');
+      const fit = parseFloat(sphere.style.getPropertyValue('--fit') || '1') || 1;
+      const targetScale = 2 / fit;
+      // Include bg/border/shadow so they animate together with scale — no snap.
+      t.style.transition = 'transform 200ms cubic-bezier(0.22,1,0.36,1), background 200ms ease, border-color 200ms ease, box-shadow 200ms ease';
+      t.style.transform = cur.replace(/scale\([\d.]+\)/, 'scale(' + targetScale.toFixed(3) + ')');
       t.style.filter = 'none';
       t.style.opacity = '1';
     }
     function onOut(ev: Event) {
       const t = (ev.target as HTMLElement).closest('.viz-msg, .viz-src') as HTMLElement | null;
       if (!t) return;
-      // Ignore moves to another element still inside the same chip, else
-      // mouseout→mouseover would flicker the magnify on/off.
       const to = (ev as MouseEvent).relatedTarget as Node | null;
       if (to && t.contains(to)) return;
       t.classList.remove('is-hover');
-      t.style.transition = '';
-      paused = false; // loop resumes and rewrites transform/opacity/filter
+      const spinScale = parseFloat(t.dataset.s || '1');
+      const curTransform = t.style.transform;
+      // 150ms smooth return; include bg/border/shadow so nothing snaps.
+      t.style.transition = 'transform 150ms ease-out, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease';
+      t.style.transform = curTransform.replace(/scale\([\d.]+\)/, 'scale(' + spinScale.toFixed(3) + ')');
+      if (t.dataset.prevOpacity !== undefined) t.style.opacity = t.dataset.prevOpacity;
+      if (t.dataset.prevFilter !== undefined) t.style.filter = t.dataset.prevFilter;
+      setTimeout(() => {
+        t.style.transition = '';
+        paused = false;
+      }, 150);
     }
     sphere.addEventListener('mouseover', onOver);
     sphere.addEventListener('mouseout', onOut);
