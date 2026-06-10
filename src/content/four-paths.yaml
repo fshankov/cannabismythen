@@ -34,4 +34,4 @@ meineInteressenTile:
   title: 'Meine Interessen'
   description: 'Fragen und Fakten, aufbereitet für 5 Zielgruppen: Eltern, Jugendliche, Konsumierende, Lehrkräfte und Fachkräfte.'
   ctaLabel: 'Themen auswählen'
-  targetUrl: '/meine-interessen/'
+  targetUrl: '/meine-interessen/eltern/'
