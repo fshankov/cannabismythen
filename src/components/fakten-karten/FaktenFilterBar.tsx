@@ -24,7 +24,13 @@
  * to all 42 (so the user can browse + pick without typing).
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import { ChevronDown, LayoutGrid, LayoutList } from "lucide-react";
 import VerdictStatement from "../shared/VerdictStatement";
 import CategoryFooter from "./CategoryFooter";
@@ -74,16 +80,25 @@ function toVerdict(raw: string): CorrectnessClass {
 function MythRow({
   m,
   checked,
+  active,
+  id,
   onToggle,
 }: {
   m: MythLike;
   checked: boolean;
+  active: boolean;
+  id: string;
   onToggle: (n: number) => void;
 }) {
   const meta = getCategoryMeta(m.categoryGroup);
   const Icon = meta.icon;
   return (
-    <li className="fakten-search__row" role="option" aria-selected={checked}>
+    <li
+      id={id}
+      className={`fakten-search__row${active ? " is-active" : ""}`}
+      role="option"
+      aria-selected={checked}
+    >
       <label className="fakten-search__label">
         <input
           type="checkbox"
@@ -125,6 +140,9 @@ export default function FaktenFilterBar({
 }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [catDropdownOpen, setCatDropdownOpen] = useState(false);
+  /** Keyboard-active option in the search autocomplete (index into the flat
+   *  [...stuckMatches, ...textMatches] list; -1 = none). Heuristic #7. */
+  const [activeIndex, setActiveIndex] = useState(-1);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
   const catContainerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -214,6 +232,62 @@ export default function FaktenFilterBar({
       window.removeEventListener("keydown", handleKey);
     };
   }, [searchOpen, catDropdownOpen]);
+
+  // Reset the keyboard-active option when the visible list changes or the
+  // panel toggles (Heuristic #7). selectedMyths is intentionally NOT a dep:
+  // toggling a myth via Enter keeps the cursor where it is.
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [searchQuery, selectedGroups, searchOpen]);
+
+  // Keep the active option scrolled into the panel viewport while arrowing.
+  useEffect(() => {
+    if (activeIndex < 0) return;
+    const opt = [...stuckMatches, ...textMatches][activeIndex];
+    if (!opt) return;
+    document
+      .getElementById(`fakten-search-opt-${opt.mythNumber}`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [activeIndex, stuckMatches, textMatches]);
+
+  const handleSearchKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
+    const count = stuckMatches.length + textMatches.length;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (!searchOpen) setSearchOpen(true);
+      setActiveIndex((i) => (count === 0 ? -1 : (i + 1) % count));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!searchOpen) setSearchOpen(true);
+      setActiveIndex((i) => (count === 0 ? -1 : i <= 0 ? count - 1 : i - 1));
+    } else if (e.key === "Enter") {
+      if (activeIndex >= 0 && activeIndex < count) {
+        e.preventDefault();
+        const opt =
+          activeIndex < stuckMatches.length
+            ? stuckMatches[activeIndex]
+            : textMatches[activeIndex - stuckMatches.length];
+        onToggleMyth(opt.mythNumber);
+      }
+    } else if (e.key === "Home") {
+      if (searchOpen && count > 0) {
+        e.preventDefault();
+        setActiveIndex(0);
+      }
+    } else if (e.key === "End") {
+      if (searchOpen && count > 0) {
+        e.preventDefault();
+        setActiveIndex(count - 1);
+      }
+    }
+  };
+
+  // id of the active option, for the input's aria-activedescendant.
+  const activeOpt = [...stuckMatches, ...textMatches][activeIndex];
+  const activeOptionId =
+    activeIndex >= 0 && activeOpt
+      ? `fakten-search-opt-${activeOpt.mythNumber}`
+      : undefined;
 
   const selectedGroupCount = selectedGroups.size;
   const hasActiveFilter =
@@ -325,11 +399,15 @@ export default function FaktenFilterBar({
             className="carm-filter-search-row__input"
             placeholder="Mythen suchen …"
             aria-label="Mythen suchen"
+            role="combobox"
+            aria-autocomplete="list"
             aria-expanded={searchOpen}
             aria-controls="fakten-search-panel"
+            aria-activedescendant={activeOptionId}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             onFocus={() => setSearchOpen(true)}
+            onKeyDown={handleSearchKeyDown}
           />
           {selectedMyths.size > 0 && (
             <span
@@ -414,11 +492,13 @@ export default function FaktenFilterBar({
                     <li key="section-label" className="fakten-search__section-label" aria-hidden="true">
                       Bereits ausgewählt
                     </li>
-                    {stuckMatches.map((m) => (
+                    {stuckMatches.map((m, i) => (
                       <MythRow
                         key={m.mythNumber}
                         m={m}
                         checked={true}
+                        active={activeIndex === i}
+                        id={`fakten-search-opt-${m.mythNumber}`}
                         onToggle={onToggleMyth}
                       />
                     ))}
@@ -427,11 +507,13 @@ export default function FaktenFilterBar({
                     )}
                   </>
                 )}
-                {textMatches.map((m) => (
+                {textMatches.map((m, i) => (
                   <MythRow
                     key={m.mythNumber}
                     m={m}
                     checked={selectedMyths.has(m.mythNumber)}
+                    active={activeIndex === stuckMatches.length + i}
+                    id={`fakten-search-opt-${m.mythNumber}`}
                     onToggle={onToggleMyth}
                   />
                 ))}

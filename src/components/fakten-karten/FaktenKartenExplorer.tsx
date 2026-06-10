@@ -79,6 +79,9 @@ export default function FaktenKartenExplorer({
   const [searchQuery, setSearchQuery] = useState("");
   const [factsheetMyth, setFactsheetMyth] = useState<string | null>(null);
   const [view, setView] = useState<"karten" | "liste">("karten");
+  /** Becomes true once the initial URL parse (Audit B-09) has run, so the
+   *  URL-write effect below doesn't clobber params before they're restored. */
+  const [urlReady, setUrlReady] = useState(false);
   /** Lazily-fetched factsheet content, keyed by mythNumber (Audit B-05).
    *  Populated on first popup open from the prerendered per-myth JSON
    *  endpoints; cached so reopening a myth never refetches. */
@@ -223,12 +226,15 @@ export default function FaktenKartenExplorer({
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // Deep-link: open the popup if the page loads with ?myth=<slug>. Uses
-  // replaceState (not push) so the first Back leaves the page as expected
-  // rather than dropping into a phantom popup entry.
+  // Mount: restore state from the URL once (Audit B-02 popup + B-09 filters).
+  // The popup deep-link uses replaceState (not push) so the first Back leaves
+  // the page rather than dropping into a phantom popup entry.
   useEffect(() => {
     try {
-      const slug = new URL(window.location.href).searchParams.get("myth");
+      const params = new URL(window.location.href).searchParams;
+
+      // Popup deep-link (?myth=<slug>).
+      const slug = params.get("myth");
       if (slug && allMyths.some((m) => m.slug === slug)) {
         setFactsheetMyth(slug);
         window.history.replaceState(
@@ -238,10 +244,73 @@ export default function FaktenKartenExplorer({
         );
         pushedHistoryRef.current = false;
       }
+
+      // View (?view=liste).
+      if (params.get("view") === "liste") setView("liste");
+
+      // Category groups (?kat=<indices into CATEGORY_GROUPS>).
+      const kat = params.get("kat");
+      if (kat) {
+        const groups = kat
+          .split(",")
+          .map((t) => CATEGORY_GROUPS[Number(t)])
+          .filter((g): g is (typeof CATEGORY_GROUPS)[number] => Boolean(g));
+        if (groups.length) setSelectedGroups(new Set(groups));
+      }
+
+      // Ticked myths (?myths=<numbers>).
+      const myths = params.get("myths");
+      if (myths) {
+        const valid = new Set(allMyths.map((m) => m.mythNumber));
+        const nums = myths.split(",").map(Number).filter((n) => valid.has(n));
+        if (nums.length) setSelectedMyths(new Set(nums));
+      }
+
+      // Search query (?q=...).
+      const q = params.get("q");
+      if (q) setSearchQuery(q);
     } catch {
       /* ignore */
     }
+    // Initial parse done — the URL-write effect may now begin syncing.
+    setUrlReady(true);
   }, [allMyths]);
+
+  // Sync filter + view state back to the URL (Audit B-09), debounced like the
+  // Daten-Explorer (src/lib/dashboard/url-state.ts). replaceState keeps the
+  // history stack clean; the popup's own ?myth entry + history.state are
+  // preserved so B-02 keeps working.
+  useEffect(() => {
+    if (!urlReady) return;
+    const timer = setTimeout(() => {
+      try {
+        const url = new URL(window.location.href);
+        const p = url.searchParams;
+
+        if (view === "liste") p.set("view", "liste");
+        else p.delete("view");
+
+        const cats = [...selectedGroups]
+          .map((g) => (CATEGORY_GROUPS as readonly string[]).indexOf(g))
+          .filter((i) => i >= 0)
+          .sort((a, b) => a - b);
+        if (cats.length) p.set("kat", cats.join(","));
+        else p.delete("kat");
+
+        const ms = [...selectedMyths].sort((a, b) => a - b);
+        if (ms.length) p.set("myths", ms.join(","));
+        else p.delete("myths");
+
+        if (searchQuery.trim()) p.set("q", searchQuery);
+        else p.delete("q");
+
+        window.history.replaceState(window.history.state, "", url);
+      } catch {
+        /* ignore */
+      }
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [selectedGroups, selectedMyths, searchQuery, view, urlReady]);
 
   // Find the myth for the open factsheet panel
   const openMyth = factsheetMyth

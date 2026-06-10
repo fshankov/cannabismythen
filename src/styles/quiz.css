@@ -2993,7 +2993,10 @@ button.quiz-result__cta {
   top: 0;
   z-index: 2;
   background: var(--color-surface);
-  padding: 24px 52px 12px 48px;
+  /* Left 48px matches the body's left rail; right 56px is a principled
+     reservation for the 44px close button at right:12 (not an ad-hoc nudge).
+     Audit A3. */
+  padding: 24px 56px 16px 48px;
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
@@ -3110,14 +3113,17 @@ button.quiz-result__cta {
   margin: 0;
 }
 
-/* Sections */
+/* Sections — more air between them so the type scale reads (Audit A3). */
 .factsheet-panel__section {
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-xl);
 }
 
+/* Section headings sit a clear step above body text now (1.1rem/700 vs the
+   0.95rem body) — previously 0.95 vs 0.9 barely registered (Audit A3). */
 .factsheet-panel__section-heading {
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 700;
+  line-height: 1.3;
   color: var(--color-text);
   margin: 0 0 var(--space-sm) 0;
 }
@@ -3127,9 +3133,10 @@ button.quiz-result__cta {
    table and any link below it. */
 .factsheet-panel__data-note {
   /* Matches .factsheet-panel__section-content so the caption reads as part of
-     the factsheet body, not an oversized note (Fedor review 2026-06-03). */
-  font-size: 0.9rem;
-  line-height: 1.65;
+     the factsheet body, not an oversized note (Fedor review 2026-06-03;
+     kept in sync with the A3 body bump). */
+  font-size: 0.95rem;
+  line-height: 1.7;
   color: var(--color-text-secondary);
   margin: var(--space-sm) 0 0 0;
 }
@@ -3149,8 +3156,8 @@ button.quiz-result__cta {
 }
 
 .factsheet-panel__section-content {
-  font-size: 0.9rem;
-  line-height: 1.65;
+  font-size: 0.95rem;
+  line-height: 1.7;
   color: var(--color-text-secondary);
 }
 
@@ -3166,8 +3173,8 @@ button.quiz-result__cta {
 
 .factsheet-panel__section-content li {
   margin-bottom: var(--space-xs);
-  font-size: 0.85rem;
-  line-height: 1.55;
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .factsheet-panel__section-content table {
@@ -4517,6 +4524,13 @@ body.fakten-karten-page main {
 
 .fakten-search__label:hover {
   background: var(--color-accent-light);
+}
+
+/* Keyboard-active option (arrow navigation, Heuristic #7) — stronger than
+   hover so the active row is unambiguous while typing + arrowing. */
+.fakten-search__row.is-active .fakten-search__label {
+  background: var(--color-accent-light);
+  box-shadow: inset 0 0 0 2px var(--color-accent, #116c4a);
 }
 
 .fakten-search__label input[type="checkbox"] {
