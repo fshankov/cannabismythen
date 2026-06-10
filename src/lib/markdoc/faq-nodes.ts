@@ -33,6 +33,14 @@ import Markdoc, {
  */
 const MYTH_TITLE_PLACEHOLDER = (id: string) => `__FAQ_MYTH_TITLE:${id}__`;
 
+/**
+ * Sentinel for the factsheet-link href. The slug isn't known at Markdoc-
+ * transform time (we only have the myth id), so emit a sentinel that the
+ * page-level resolver (resolveTitlesInHtml in src/lib/faq.ts) swaps for the
+ * real /daten-explorer/<slug>/ URL. Format: __FAQ_MYTH_HREF:mNN__
+ */
+const MYTH_HREF_PLACEHOLDER = (id: string) => `__FAQ_MYTH_HREF:${id}__`;
+
 const factsheetLink: Schema = {
   attributes: {
     id: { type: String, required: true },
@@ -60,14 +68,19 @@ const factsheetLink: Schema = {
         : mark === "diff"
         ? " faq-myth-link--diff"
         : "";
-    // <button> not <a>: the popup host (MythPopupHost.tsx) listens for
-    // clicks on [data-faq-myth-id] and opens the shared FactsheetPanel
-    // (same slide-in popup used in Daten-Explorer / Quiz / Fakten-Karten).
+    // Real <a href> (not <button>) for progressive enhancement: without JS
+    // — or before the MythPopupHost island hydrates — the link navigates to
+    // the myth's page at /daten-explorer/<slug>/ (a production redirect to the
+    // ?mythos=N deep-link; see middleware.ts + netlify.toml). With JS,
+    // MythPopupHost intercepts a plain left-click (preventDefault) and opens
+    // the shared slide-in FactsheetPanel instead, while Cmd/Ctrl/middle-click
+    // still open the page in a new tab. The href slug is resolved at page
+    // build time by resolveTitlesInHtml in src/lib/faq.ts.
     return new Markdoc.Tag(
-      "button",
+      "a",
       {
-        type: "button",
         class: `faq-myth-link${markClass}`,
+        href: MYTH_HREF_PLACEHOLDER(id),
         "data-faq-myth-id": id,
         "aria-haspopup": "dialog",
       },

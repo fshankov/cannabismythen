@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { Myth, Metric, AppState, Indicator } from '../../../lib/dashboard/types';
 import { getMythMetric, getIndicatorValue, buildTooltipHtml, formatValue } from '../../../lib/dashboard/data';
@@ -17,6 +17,17 @@ const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'pr
 
 export default function ScatterView({ myths, metrics, state, update, onSelectMyth }: Props) {
   const groupId = state.groupIds[0] || 'adults';
+
+  // Responsive chart: tighten margins/height below 480px so the rotated axis
+  // names don't crowd the plot. SSR-safe (starts false → matches the server
+  // render under client:load, no hydration mismatch) and resize-reactive.
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const check = () => setNarrow(window.innerWidth < 480);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const groupName = useMemo(() => {
     const groups = [
@@ -60,12 +71,12 @@ export default function ScatterView({ myths, metrics, state, update, onSelectMyt
         });
       },
     },
-    grid: { left: 80, right: 30, top: 20, bottom: 65 },
+    grid: { left: narrow ? 52 : 80, right: narrow ? 16 : 30, top: 20, bottom: narrow ? 52 : 65 },
     xAxis: {
       type: 'value' as const,
       name: t(`indicator.${state.scatterX}` as any, state.lang),
       nameLocation: 'middle' as const,
-      nameGap: 40,
+      nameGap: narrow ? 26 : 40,
       max: state.scatterX === 'awareness' ? 100 : undefined,
       min: 0,
       splitLine: {
@@ -77,7 +88,7 @@ export default function ScatterView({ myths, metrics, state, update, onSelectMyt
       type: 'value' as const,
       name: t(`indicator.${state.scatterY}` as any, state.lang),
       nameLocation: 'middle' as const,
-      nameGap: 55,
+      nameGap: narrow ? 34 : 55,
       max: state.scatterY === 'awareness' ? 100 : undefined,
       min: 0,
       splitLine: {
@@ -94,7 +105,7 @@ export default function ScatterView({ myths, metrics, state, update, onSelectMyt
       symbolSize: 14,
       emphasis: { scale: 1.6 },
     }],
-  }), [chartData, state.lang, state.scatterX, state.scatterY, groupName]);
+  }), [chartData, state.lang, state.scatterX, state.scatterY, groupName, narrow]);
 
   const handleClick = (params: any) => {
     const idx = params.dataIndex;
@@ -123,7 +134,7 @@ export default function ScatterView({ myths, metrics, state, update, onSelectMyt
           </select>
         </div>
       </div>
-      <ReactECharts option={option} style={{ height: 500 }} onEvents={{ click: handleClick }} opts={{ renderer: 'svg' }} />
+      <ReactECharts option={option} style={{ height: narrow ? 380 : 500 }} onEvents={{ click: handleClick }} opts={{ renderer: 'svg' }} />
     </div>
   );
 }

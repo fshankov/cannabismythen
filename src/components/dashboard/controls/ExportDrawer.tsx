@@ -1,33 +1,34 @@
 /**
- * ExportDrawer — OWID-style tabbed dialog (Stage 3 of the
- * Daten-Explorer refactor).
+ * ExportDrawer — the Daten-Explorer download dialog.
  *
- * Two tabs at the top:
- *   - Visualisierung: PNG (Bild) + SVG (Vektor) rows. Each row carries
- *     a thumbnail preview of the live chart so the user knows exactly
- *     what they're about to download. Tabelle disables both rows with
- *     a German fallback message — only Daten downloads work there.
- *   - Daten: CSV + JSON rows.
+ * A single view (no tabs) presenting four formats as a 2×2 grid:
+ *   - PNG (Bild)   — the live chart at 2× (image export)
+ *   - SVG (Vektor) — the live chart as vector (image export)
+ *   - Excel        — the complete CaRM workbook, a static file in public/
+ *   - CSV          — the current filtered selection as a table
+ *
+ * PNG/SVG carry a thumbnail of the live chart so the user sees exactly
+ * what they'll download; in Tabelle view (no chart) both are disabled and
+ * a note points the user to a chart view. Excel and CSV are always
+ * available. Excel is a native `<a download>` to a static asset (mirrors
+ * the PDF download in FactsheetPanel); the other three run through the
+ * exporters in `lib/dashboard/export.ts`.
  *
  * Drawer variant is `'modal'` (centered on desktop ≥1024px, max-width
  * 720px; bottom-sheet on mobile <1024px).
  *
  * Filenames:
  *   - cannabismythen-{view}-{indicator}-{group}.{png|svg}
- *   - cannabismythen-carm-daten.{csv|json}
- *
- * The chart handle returned by `getChart()` may be either an ECharts
- * instance (Balken) or a raw SVGElement (Streifen, Sources). Tabelle
- * returns null and the Visualisierung tab disables.
+ *   - cannabismythen-{…}.csv
+ *   - cannabismythen-daten.xlsx (static)
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { Check, Download, FileText, FileImage, FileJson, Link as LinkIcon } from 'lucide-react';
+import { Download, FileImage, FileSpreadsheet, Table } from 'lucide-react';
 import type { CarmData, GroupId, Indicator, Myth } from '../../../lib/dashboard/types';
 import Drawer from '../../shared/Drawer';
 import {
   downloadFullCSV,
-  downloadFullJSON,
   downloadChartPng,
   downloadChartSvg,
   chartPreviewDataUrl,
@@ -37,14 +38,18 @@ import {
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
 import { t } from '../../../lib/dashboard/translations';
 
+/** Static CaRM workbook served from public/ (the file is maintained by hand). */
+const EXCEL_HREF = '/cannabismythen-daten.xlsx';
+const EXCEL_FILENAME = 'cannabismythen-daten.xlsx';
+
 interface Props {
   open: boolean;
   onClose: () => void;
-  /** Full myth list (filtered for the current view) — used by the data exports. */
+  /** Full myth list (filtered for the current view) — used by the CSV export. */
   myths: Myth[];
   /** Full metric list. */
   metrics: CarmData['metrics'];
-  /** Current group selection — first id is used for image export filenames. */
+  /** Current group selection — first id is used for image / CSV filenames. */
   groupIds: GroupId[];
   indicator: Indicator;
   /** Slug used in PNG / SVG filenames (e.g. 'balken', 'strips', 'sources'). */
@@ -66,8 +71,6 @@ const VERDICT_LEGEND = [
   { verdict: 'falsch' as const, color: getCorrectnessColor('falsch'), key: 'verdict.falsch' as const },
 ];
 
-type DialogTab = 'visual' | 'data';
-
 export default function ExportDrawer({
   open,
   onClose,
@@ -88,7 +91,6 @@ export default function ExportDrawer({
     })),
     [],
   );
-  const [tab, setTab] = useState<DialogTab>('visual');
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
 
   // Whenever the dialog opens or the active chart changes, regenerate
@@ -109,64 +111,7 @@ export default function ExportDrawer({
     };
   }, [open, getChart]);
 
-  // Tabelle has no chart → Visualisierung tab disables. Default tab
-  // resets to Daten so users don't see an empty visual tab on open.
-  useEffect(() => {
-    if (!open) return;
-    const chart = getChart();
-    setTab(chart ? 'visual' : 'data');
-  }, [open, getChart]);
-
   const hasChart = !!getChart();
-
-  const handleCsv = () => {
-    downloadFullCSV(
-      myths, metrics, groupIds,
-      buildExportFilename({
-        kind: 'data', ext: 'csv', view, group: groupIds[0] ?? 'adults',
-        myths, totalMyths,
-      }),
-    );
-    onClose();
-  };
-
-  const handleJson = () => {
-    downloadFullJSON(
-      myths, metrics, groupIds,
-      buildExportFilename({
-        kind: 'data', ext: 'json', view, group: groupIds[0] ?? 'adults',
-        myths, totalMyths,
-      }),
-    );
-    onClose();
-  };
-
-  // Link kopieren — copies the current URL (with filters + view state
-  // baked into the query string) to the clipboard. Brief "Kopiert!"
-  // feedback on the row, then auto-closes the dialog.
-  const [linkCopied, setLinkCopied] = useState(false);
-  useEffect(() => {
-    if (!linkCopied) return;
-    const id = window.setTimeout(() => setLinkCopied(false), 1800);
-    return () => window.clearTimeout(id);
-  }, [linkCopied]);
-
-  const handleCopyLink = () => {
-    if (typeof navigator === 'undefined') return;
-    navigator.clipboard
-      .writeText(window.location.href)
-      .then(() => {
-        setLinkCopied(true);
-        // Close on a short delay so the user sees the "Kopiert!" state
-        // before the dialog dismisses.
-        window.setTimeout(() => onClose(), 700);
-      })
-      .catch(() => {
-        // If the clipboard API rejects (HTTP / permission), do nothing —
-        // the user can copy from the URL bar manually. Don't surface
-        // an error to the dialog; it adds noise without recourse.
-      });
-  };
 
   const handlePng = () => {
     const chart = getChart();
@@ -204,6 +149,17 @@ export default function ExportDrawer({
     onClose();
   };
 
+  const handleCsv = () => {
+    downloadFullCSV(
+      myths, metrics, groupIds,
+      buildExportFilename({
+        kind: 'data', ext: 'csv', view, group: groupIds[0] ?? 'adults',
+        myths, totalMyths,
+      }),
+    );
+    onClose();
+  };
+
   return (
     <Drawer
       open={open}
@@ -211,157 +167,138 @@ export default function ExportDrawer({
       variant="modal"
       title={t('export.title', 'de')}
     >
-      {/* Tab strip — Visualisierung | Daten. The OWID dialog uses
-          plain underlined tabs at the top of the dialog body. */}
-      <div
-        className="carm-export-tabs"
-        role="tablist"
-        aria-label={t('export.title', 'de')}
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'visual'}
-          className={`carm-export-tabs__tab ${tab === 'visual' ? 'active' : ''}`}
-          onClick={() => setTab('visual')}
-        >
-          {t('export.tab.visualization', 'de')}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'data'}
-          className={`carm-export-tabs__tab ${tab === 'data' ? 'active' : ''}`}
-          onClick={() => setTab('data')}
-        >
-          {t('export.tab.data', 'de')}
-        </button>
+      <p className="carm-export-intro">{t('export.intro', 'de')}</p>
+
+      <div className="carm-export-grid">
+        {/* Image exports — capture the live chart. Disabled in Tabelle. */}
+        <ExportCard
+          disabled={!hasChart}
+          previewDataUrl={previewDataUrl}
+          previewAlt={t('export.preview.label', 'de')}
+          fallbackIcon={<FileImage size={28} strokeWidth={1.75} />}
+          title={t('export.png.title', 'de')}
+          desc={t('export.png.desc', 'de')}
+          onClick={handlePng}
+        />
+        <ExportCard
+          disabled={!hasChart}
+          previewDataUrl={previewDataUrl}
+          previewAlt={t('export.preview.label', 'de')}
+          fallbackIcon={<FileImage size={28} strokeWidth={1.75} />}
+          title={t('export.svg.title', 'de')}
+          desc={t('export.svg.desc', 'de')}
+          onClick={handleSvg}
+        />
+        {/* Data exports — Excel is the full static workbook, CSV the
+            current filtered selection. */}
+        <ExportCard
+          icon={<FileSpreadsheet size={28} strokeWidth={1.75} />}
+          title={t('export.excel.title', 'de')}
+          desc={t('export.excel.desc', 'de')}
+          href={EXCEL_HREF}
+          downloadName={EXCEL_FILENAME}
+          onClick={onClose}
+        />
+        <ExportCard
+          icon={<Table size={28} strokeWidth={1.75} />}
+          title={t('export.csv.title', 'de')}
+          desc={t('export.csv.desc', 'de')}
+          onClick={handleCsv}
+        />
       </div>
 
-      {tab === 'visual' && (
-        <ul className="carm-export-list" role="list">
-          {!hasChart && (
-            <li
-              className="carm-export-empty"
-              aria-live="polite"
-            >
-              {t('export.unavailable.table', 'de')}
-            </li>
-          )}
-          <ExportRow
-            disabled={!hasChart}
-            previewDataUrl={previewDataUrl}
-            previewAlt={t('export.preview.label', 'de')}
-            icon={<FileImage size={20} strokeWidth={2} />}
-            title={t('export.png.title', 'de')}
-            desc={t('export.png.desc', 'de')}
-            onClick={handlePng}
-          />
-          <ExportRow
-            disabled={!hasChart}
-            previewDataUrl={previewDataUrl}
-            previewAlt={t('export.preview.label', 'de')}
-            icon={<FileImage size={20} strokeWidth={2} />}
-            title={t('export.svg.title', 'de')}
-            desc={t('export.svg.desc', 'de')}
-            onClick={handleSvg}
-          />
-        </ul>
-      )}
-
-      {tab === 'data' && (
-        <ul className="carm-export-list" role="list">
-          <ExportRow
-            icon={<LinkIcon size={20} strokeWidth={2} />}
-            title={
-              linkCopied
-                ? t('export.link.copied', 'de')
-                : t('export.link.title', 'de')
-            }
-            desc={t('export.link.desc', 'de')}
-            onClick={handleCopyLink}
-            cta={
-              linkCopied ? (
-                <Check size={18} strokeWidth={2.5} aria-hidden="true" />
-              ) : undefined
-            }
-          />
-          <ExportRow
-            icon={<FileText size={20} strokeWidth={2} />}
-            title={t('export.csv.title', 'de')}
-            desc={t('export.csv.desc', 'de')}
-            onClick={handleCsv}
-          />
-          <ExportRow
-            icon={<FileJson size={20} strokeWidth={2} />}
-            title={t('export.json.title', 'de')}
-            desc={t('export.json.desc', 'de')}
-            onClick={handleJson}
-          />
-        </ul>
+      {!hasChart && (
+        <p className="carm-export-note" aria-live="polite">
+          {t('export.images.note', 'de')}
+        </p>
       )}
     </Drawer>
   );
 }
 
-interface ExportRowProps {
-  icon: React.ReactNode;
+interface ExportCardProps {
   title: string;
   desc: string;
-  onClick: () => void;
-  disabled?: boolean;
+  /** Format icon for the data cards (Excel/CSV). */
+  icon?: React.ReactNode;
+  /** Fallback icon for the image cards when there's no preview (disabled). */
+  fallbackIcon?: React.ReactNode;
   previewDataUrl?: string | null;
   previewAlt?: string;
-  /** Override the right-side icon. Defaults to a Download chevron;
-   *  the Link kopieren row swaps in a Check after a successful copy. */
-  cta?: React.ReactNode;
+  disabled?: boolean;
+  /** When set, the card renders as a download `<a>` (Excel static file). */
+  href?: string;
+  downloadName?: string;
+  onClick?: () => void;
 }
 
 /**
- * One row inside either the Visualisierung or Daten tab.
+ * One card in the 2×2 export grid.
  *
- * Layout: [thumbnail? | icon] · title + 1-line desc · download chevron.
- * Matches the Our World in Data download dialog's row geometry.
+ * Layout: a media block on top (live chart thumbnail for PNG/SVG, or a
+ * centered format icon for Excel/CSV) with the title + 1-line description
+ * below. Renders as an `<a download>` when `href` is set (Excel),
+ * otherwise a `<button>`. Equal media height keeps the cards aligned.
  */
-function ExportRow({
-  icon,
+function ExportCard({
   title,
   desc,
-  onClick,
-  disabled,
+  icon,
+  fallbackIcon,
   previewDataUrl,
   previewAlt,
-  cta,
-}: ExportRowProps) {
-  return (
-    <li>
-      <button
-        type="button"
-        className="carm-export-row"
+  disabled,
+  href,
+  downloadName,
+  onClick,
+}: ExportCardProps) {
+  const media = previewDataUrl ? (
+    <span className="carm-export-card__media" aria-hidden="true">
+      <img src={previewDataUrl} alt={previewAlt ?? ''} loading="lazy" />
+    </span>
+  ) : (
+    <span
+      className="carm-export-card__media carm-export-card__media--icon"
+      aria-hidden="true"
+    >
+      {icon ?? fallbackIcon}
+    </span>
+  );
+
+  const body = (
+    <>
+      {media}
+      <span className="carm-export-card__text">
+        <span className="carm-export-card__title">{title}</span>
+        <span className="carm-export-card__desc">{desc}</span>
+      </span>
+      <span className="carm-export-card__cta" aria-hidden="true">
+        <Download size={16} strokeWidth={2} />
+      </span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <a
+        className="carm-export-card"
+        href={href}
+        download={downloadName}
         onClick={onClick}
-        disabled={disabled}
       >
-        {previewDataUrl ? (
-          <span className="carm-export-row__thumb" aria-hidden="true">
-            <img
-              src={previewDataUrl}
-              alt={previewAlt ?? ''}
-              loading="lazy"
-            />
-          </span>
-        ) : (
-          <span className="carm-export-row__icon" aria-hidden="true">
-            {icon}
-          </span>
-        )}
-        <span className="carm-export-row__text">
-          <span className="carm-export-row__title">{title}</span>
-          <span className="carm-export-row__desc">{desc}</span>
-        </span>
-        <span className="carm-export-row__cta" aria-hidden="true">
-          {cta ?? <Download size={18} strokeWidth={2} />}
-        </span>
-      </button>
-    </li>
+        {body}
+      </a>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className="carm-export-card"
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {body}
+    </button>
   );
 }

@@ -19,7 +19,7 @@
 
 import { useCallback, type CSSProperties } from "react";
 import CategoryFooter from "./CategoryFooter";
-import VerdictPill from "../shared/VerdictPill";
+import VerdictPill, { DEFAULT_LABEL } from "../shared/VerdictPill";
 import { getVerdictVisual } from "../../lib/fakten-karten/verdict-colors";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
 
@@ -106,9 +106,12 @@ export default function FaktenCard({
         type="button"
         className={`fakten-card${isActive ? " fakten-card--active" : ""}`}
         onClick={handleClick}
-        aria-label={`${myth.title} — Factsheet öffnen`}
+        aria-label={`${myth.title} — ${DEFAULT_LABEL[verdict]}. Factsheet öffnen`}
       >
-        <div className="fakten-card__inner">
+        {/* Both faces are decorative for assistive tech: the button's
+            aria-label already carries the statement + verdict, so exposing
+            front + back face text would just duplicate it (Audit B-11). */}
+        <div className="fakten-card__inner" aria-hidden="true">
           <div
             className="fakten-card__face fakten-card__face--front"
             style={frontFaceStyle}

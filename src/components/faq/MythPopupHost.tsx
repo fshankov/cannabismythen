@@ -1,7 +1,8 @@
 /**
  * MythPopupHost — Mount once per FAQ page. Listens for clicks on any
- * `<button data-faq-myth-id="mNN">` (rendered by the `factsheet-link`
- * Markdoc tag inside FAQ answers) and opens the shared FactsheetPanel —
+ * `<a data-faq-myth-id="mNN" href="/daten-explorer/…">` (rendered by the
+ * `factsheet-link` Markdoc tag inside FAQ answers) and opens the shared
+ * FactsheetPanel —
  * the same slide-in popup used in Daten-Explorer, Quiz, and Fakten-Karten.
  *
  * Pre-rendered factsheet HTML, group metrics, and myth metadata are passed
@@ -80,19 +81,32 @@ export default function MythPopupHost({
     }
   }, [groupMetricsJson]);
 
-  // Document-level delegation: catch clicks on any button rendered by the
-  // factsheet-link Markdoc tag, no matter where in the tree it lives.
+  // Document-level delegation: catch clicks on any factsheet-link trigger
+  // ([data-faq-myth-id]), no matter where in the tree it lives.
   useEffect(() => {
     function onClick(e: MouseEvent) {
+      // Triggers are real <a href="/daten-explorer/…"> links now (progressive
+      // enhancement — see faq-nodes.ts / FaqRelatedRail). Let the browser
+      // handle modified clicks so Cmd/Ctrl/Shift/Alt-click (and middle-click,
+      // which fires auxclick, not click) still open the factsheet page in a
+      // new tab/window; only intercept a plain left-click to open the popup
+      // in place.
+      if (
+        e.defaultPrevented ||
+        e.button !== 0 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      ) {
+        return;
+      }
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      const btn = target.closest<HTMLElement>("[data-faq-myth-id]");
-      if (!btn) return;
-      const id = btn.getAttribute("data-faq-myth-id");
+      const trigger = target.closest<HTMLElement>("[data-faq-myth-id]");
+      if (!trigger) return;
+      const id = trigger.getAttribute("data-faq-myth-id");
       if (!id) return;
-      // Skip if the button is disabled or inside a regular <a> the user
-      // expects to follow (defensive — we render <button>, not <a>).
-      if (btn.closest("a")) return;
       e.preventDefault();
       setOpenMythId(id);
     }

@@ -343,8 +343,9 @@ export interface FaqMythPopupData {
   /** Keyed by mythNumber (22). Matches the shape FactsheetPanel expects. */
   mythContentMap: Record<number, FaqMythContentEntry>;
   /**
-   * Replace `__FAQ_MYTH_TITLE:mNN__` placeholders left by the
-   * {% factsheet-link %} Markdoc tag with each myth's cleaned statement.
+   * Replace the `__FAQ_MYTH_TITLE:mNN__` and `__FAQ_MYTH_HREF:mNN__`
+   * sentinels left by the {% factsheet-link %} Markdoc tag with each myth's
+   * cleaned statement and its `/daten-explorer/<slug>/` URL.
    */
   resolveTitlesInHtml(html: string): string;
 }
@@ -483,13 +484,24 @@ export async function loadMythPopupData(): Promise<FaqMythPopupData> {
   }
 
   function resolveTitlesInHtml(html: string): string {
-    return html.replace(/__FAQ_MYTH_TITLE:(m\d+)__/g, (_full, rawId: string) => {
-      const norm = normalizeMythId(rawId);
-      const title = titleById.get(norm) ?? titleById.get(rawId);
-      // Fallback: show the raw id if no title (e.g. m99 reference to a
-      // myth that doesn't exist) so an editor catches it during review.
-      return title ?? rawId;
-    });
+    return html
+      .replace(/__FAQ_MYTH_TITLE:(m\d+)__/g, (_full, rawId: string) => {
+        const norm = normalizeMythId(rawId);
+        const title = titleById.get(norm) ?? titleById.get(rawId);
+        // Fallback: show the raw id if no title (e.g. m99 reference to a
+        // myth that doesn't exist) so an editor catches it during review.
+        return title ?? rawId;
+      })
+      // Resolve the factsheet-link href sentinel to the myth's Daten-Explorer
+      // URL — the no-JS fallback target (see faq-nodes.ts). The slug→?mythos
+      // 301 is wired in middleware.ts + netlify.toml. Falls back to the
+      // explorer root if the myth id is unknown, so a stale ref never leaks a
+      // raw placeholder into an href.
+      .replace(/__FAQ_MYTH_HREF:(m\d+)__/g, (_full, rawId: string) => {
+        const norm = normalizeMythId(rawId);
+        const meta = mythIndex[norm] ?? mythIndex[rawId];
+        return meta ? `/daten-explorer/${meta.slug}/` : "/daten-explorer/";
+      });
   }
 
   cachedPopupData = { mythIndex, mythContentMap, resolveTitlesInHtml };

@@ -18,7 +18,6 @@ import {
 } from "@lib/faq";
 import { buildGroupMetricsByMythId } from "@lib/dashboard/metrics";
 import carmRawJson from "../../../public/data/carm-data.json";
-import AudienceHeader from "@components/faq/AudienceHeader.astro";
 import FaqQuestionComponent from "@components/faq/FaqQuestion.astro";
 import WeiterfuehrendList from "@components/faq/WeiterfuehrendList.astro";
 import MythPopupHost from "@components/faq/MythPopupHost";
@@ -48,8 +47,6 @@ const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
 {audience && (
   <MeineInteressenLayout activeAudience={slug}>
     <article class="faq-audience-page" data-audience={audience.id}>
-      <AudienceHeader audience={audience} questionCount={questions.length} />
-
       {questions.length > 1 && (
         <nav class="faq-toc" aria-label="Inhaltsübersicht">
           <p class="faq-toc__label">Auf dieser Seite ({questions.length}):</p>

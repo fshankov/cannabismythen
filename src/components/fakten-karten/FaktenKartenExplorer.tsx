@@ -11,7 +11,7 @@
  * valuable than the visual restraint of a drawer for this surface.
  */
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import FaktenCard from "./FaktenCard";
 import type { FaktenCardMyth } from "./FaktenCard";
 import FaktenFilterBar from "./FaktenFilterBar";
@@ -58,8 +58,6 @@ interface MythEntry extends FaktenCardMyth {
 interface FaktenKartenExplorerProps {
   /** JSON-serialized MythEntry[] */
   myths: string;
-  /** JSON-serialized Record<number, MythContentEntry> */
-  mythContent: string;
   /** JSON-serialized Record<number, MythGroupMetrics>. Built at build
    *  time from `public/data/carm-data.json`. Powers the interactive
    *  bar chart inside the FactsheetPanel popup. */
@@ -68,7 +66,6 @@ interface FaktenKartenExplorerProps {
 
 export default function FaktenKartenExplorer({
   myths: mythsJson,
-  mythContent: mythContentJson,
   groupMetrics: groupMetricsJson,
 }: FaktenKartenExplorerProps) {
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(
@@ -82,6 +79,12 @@ export default function FaktenKartenExplorer({
   const [searchQuery, setSearchQuery] = useState("");
   const [factsheetMyth, setFactsheetMyth] = useState<string | null>(null);
   const [view, setView] = useState<"karten" | "liste">("karten");
+  /** Lazily-fetched factsheet content, keyed by mythNumber (Audit B-05).
+   *  Populated on first popup open from the prerendered per-myth JSON
+   *  endpoints; cached so reopening a myth never refetches. */
+  const [contentCache, setContentCache] = useState<
+    Record<number, MythContentEntry>
+  >({});
 
   const allMyths: MythEntry[] = useMemo(() => {
     try {
@@ -90,14 +93,6 @@ export default function FaktenKartenExplorer({
       return [];
     }
   }, [mythsJson]);
-
-  const mythContentMap: Record<number, MythContentEntry> = useMemo(() => {
-    try {
-      return JSON.parse(mythContentJson);
-    } catch {
-      return {};
-    }
-  }, [mythContentJson]);
 
   const groupMetricsMap: Record<number, MythGroupMetrics> = useMemo(() => {
     if (!groupMetricsJson) return {};
@@ -167,21 +162,118 @@ export default function FaktenKartenExplorer({
     return list.sort((a, b) => a.mythNumber - b.mythNumber);
   }, [allMyths, selectedGroups, selectedMyths, searchQuery]);
 
+  /** True while WE own a pushed history entry for the open popup, so close
+   *  knows whether to step back (consistent URL + stack) or just clear
+   *  inline (deep-link landing, where Back should leave the page). */
+  const pushedHistoryRef = useRef(false);
+
   const handleShowFactsheet = useCallback((slug: string) => {
     setFactsheetMyth(slug);
+    // Push a history entry so mobile Back closes the popup and the open myth
+    // is deep-linkable via ?myth=<slug> (Audit B-02 / Nielsen #3).
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("myth", slug);
+      window.history.pushState({ factsheetMyth: slug }, "", url);
+      pushedHistoryRef.current = true;
+    } catch {
+      /* history API unavailable — popup still works, just no URL sync */
+    }
   }, []);
 
   const handleCloseFactsheet = useCallback(() => {
+    // If we own a pushed entry, step back so the URL + history stack stay
+    // consistent (the popstate handler clears the panel). Otherwise (e.g. a
+    // deep-link landing) clear inline and strip the ?myth param.
+    if (pushedHistoryRef.current && window.history.state?.factsheetMyth) {
+      window.history.back();
+      return;
+    }
     setFactsheetMyth(null);
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("myth")) {
+        url.searchParams.delete("myth");
+        window.history.replaceState(null, "", url);
+      }
+    } catch {
+      /* ignore */
+    }
   }, []);
+
+  /** Swap the open popup to a related myth (Audit B-08). Reuses
+   *  handleShowFactsheet so the swap pushes a history entry — Back then
+   *  steps back through the chain of myths the user followed. */
+  const handleSelectRelatedMyth = useCallback(
+    (mythNumber: number) => {
+      const target = allMyths.find((m) => m.mythNumber === mythNumber);
+      if (target) handleShowFactsheet(target.slug);
+    },
+    [allMyths, handleShowFactsheet],
+  );
+
+  // Sync popup state to Back / Forward navigation (Audit B-02).
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const slug = (e.state && e.state.factsheetMyth) || null;
+      setFactsheetMyth(slug);
+      pushedHistoryRef.current = !!slug;
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // Deep-link: open the popup if the page loads with ?myth=<slug>. Uses
+  // replaceState (not push) so the first Back leaves the page as expected
+  // rather than dropping into a phantom popup entry.
+  useEffect(() => {
+    try {
+      const slug = new URL(window.location.href).searchParams.get("myth");
+      if (slug && allMyths.some((m) => m.slug === slug)) {
+        setFactsheetMyth(slug);
+        window.history.replaceState(
+          { factsheetMyth: slug },
+          "",
+          window.location.href,
+        );
+        pushedHistoryRef.current = false;
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [allMyths]);
 
   // Find the myth for the open factsheet panel
   const openMyth = factsheetMyth
     ? allMyths.find((m) => m.slug === factsheetMyth)
     : null;
 
+  // Lazily fetch the open myth's factsheet HTML (Audit B-05). Until it
+  // arrives, the panel renders its fallback (statement + verdict + data
+  // bars + PDF) — the heavy prose sections fill in once the tiny static
+  // JSON resolves. Cached per mythNumber so reopening never refetches.
+  useEffect(() => {
+    if (!openMyth) return;
+    const n = openMyth.mythNumber;
+    if (contentCache[n]) return;
+    let cancelled = false;
+    fetch(`/fakten-karten/factsheets/${n}.json`)
+      .then((r) => (r.ok ? (r.json() as Promise<MythContentEntry>) : null))
+      .then((entry) => {
+        if (!cancelled && entry) {
+          setContentCache((prev) => (prev[n] ? prev : { ...prev, [n]: entry }));
+        }
+      })
+      .catch(() => {
+        /* network/parse error — panel keeps its fallback rendering */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [openMyth, contentCache]);
+
   const openMythContent = openMyth
-    ? mythContentMap[openMyth.mythNumber]
+    ? contentCache[openMyth.mythNumber]
     : undefined;
 
   return (
@@ -248,6 +340,7 @@ export default function FaktenKartenExplorer({
             factsheetSlug={openMyth.slug}
             groupMetrics={groupMetricsMap[openMyth.mythNumber]}
             onClose={handleCloseFactsheet}
+            onSelectRelatedMyth={handleSelectRelatedMyth}
           />
         );
       })()}

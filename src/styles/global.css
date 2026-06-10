@@ -161,8 +161,12 @@ html {
 
   /* Typography — Decision C: Inter Variable for display elements */
   --font-display: 'Inter Variable', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-body: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
-               'Helvetica Neue', Arial, sans-serif;
+  /* Body now uses the self-hosted brand font (Inter Variable) so copy renders
+     identically across Windows/macOS/iOS/Android instead of falling to each
+     OS's system font (Segoe UI on Win, San Francisco on Mac). System fonts
+     stay only as last-resort fallbacks if the woff2 ever fails to load. */
+  --font-body: 'Inter Variable', 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+               'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, 'Cascadia Code',
                'Fira Code', Menlo, Monaco, Consolas, monospace;
 
@@ -267,9 +271,7 @@ html {
 /* ── Typography ─────────────────────────────────────────────── */
 
 body {
-  font-family:
-    "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.65;
   color: var(--color-text);

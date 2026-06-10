@@ -26,13 +26,13 @@ const { question, mythIndex: mythIndexProp } = Astro.props;
 // callsite that doesn't yet pass it.
 const mythIndex = mythIndexProp ?? (await loadMythPopupData()).mythIndex;
 
-type RailMyth = { id: string; title: string };
+type RailMyth = { id: string; title: string; slug: string };
 function lookupMyth(rawId: string): RailMyth | null {
   const norm = normalizeMythId(rawId);
   if (!norm) return null;
   const meta = mythIndex[norm] ?? mythIndex[rawId];
   if (!meta) return null;
-  return { id: norm, title: meta.title };
+  return { id: norm, title: meta.title, slug: meta.slug };
 }
 
 const primary: RailMyth | null = question.primaryMyth
@@ -68,15 +68,15 @@ const hasRail = primary || related.length > 0 || dashboard.length > 0;
     {primary && (
       <div class="faq-related-rail__group faq-related-rail__group--primary">
         <span class="faq-related-rail__heading">Mythos</span>
-        <button
-          type="button"
+        <a
+          href={`/daten-explorer/${primary.slug}/`}
           class="faq-related-rail__link faq-related-rail__link--primary faq-myth-link"
           data-faq-myth-id={primary.id}
           aria-haspopup="dialog"
         >
           <span class="faq-related-rail__icon" aria-hidden="true">▸</span>
           {primary.title}
-        </button>
+        </a>
       </div>
     )}
 
@@ -86,14 +86,14 @@ const hasRail = primary || related.length > 0 || dashboard.length > 0;
         <ul class="faq-related-rail__list">
           {related.map((m) => (
             <li>
-              <button
-                type="button"
+              <a
+                href={`/daten-explorer/${m.slug}/`}
                 class="faq-related-rail__link faq-myth-link"
                 data-faq-myth-id={m.id}
                 aria-haspopup="dialog"
               >
                 {m.title}
-              </button>
+              </a>
             </li>
           ))}
         </ul>

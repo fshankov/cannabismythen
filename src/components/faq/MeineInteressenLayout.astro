@@ -67,16 +67,20 @@ const isFachkraefte = activeAudience === "fachkraefte";
        Kategorie aus" label, placed directly above the tabs. -->
   <p class="mi-category-label" data-reveal>Wähle eine Kategorie aus</p>
 
-  <!-- Audience tab bar — scrollable, same Chrome-tab style as Daten-Explorer -->
-  <div class="mi-tab-bar">
-    <div class="tabs-bar" role="tablist" aria-label="Zielgruppe wählen">
+  <!-- Audience navigation — these are page links (MPA), NOT ARIA tabs.
+       Previously role="tablist"/role="tab"/aria-selected with no role="tabpanel"
+       and no arrow-key handling: a broken WAI-ARIA APG Tabs contract (screen
+       readers announced "tab, N of 5" but activation navigated to a new
+       document and arrow keys did nothing). Now a labelled <nav> landmark with
+       aria-current="page" on the active link, matching what it actually is.
+       Visual is unchanged — styling is class-based (.tab-btn / .active). -->
+  <nav class="mi-tab-bar" aria-label="Zielgruppe wählen">
+    <div class="tabs-bar">
       {resolved.map((item) => (
         <a
           href={`/meine-interessen/${item.id}/`}
           class:list={["tab-btn", { "active": item.isActive }]}
-          role="tab"
           aria-current={item.isActive ? "page" : undefined}
-          aria-selected={item.isActive ? "true" : "false"}
         >
           <span class="mi-tab-icon" aria-hidden="true">
             <item.Icon size={15} />
@@ -85,7 +89,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
         </a>
       ))}
     </div>
-  </div>
+  </nav>
 
   <!-- White panel — border-top omitted so active tab merges flush into it -->
   <div class="mi-panel">
