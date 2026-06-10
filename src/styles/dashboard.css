@@ -5652,6 +5652,10 @@ body.carm-modal-open {
 }
 
 .carm-export-card {
+  /* `font: inherit` so the <button> cards match the <a> (Excel) card —
+     buttons otherwise fall back to the UA font, which made the titles
+     render at different sizes. */
+  font: inherit;
   display: flex;
   flex-direction: column;
   width: 100%;
