@@ -84,6 +84,10 @@ export function buildWalkthrough(): Driver {
         element: '.carm-explorer__tab-bar',
         popover: {
           title: '1 / 4 · Zwei Datensätze aus der CaRM-Studie',
+          // Keep the popover BELOW the tab bar so it never climbs up over the
+          // element it's pointing at; it grows downward / scrolls instead.
+          side: 'bottom',
+          align: 'center',
           description:
             `Oben <strong>wechselst du die Ansicht</strong> ${ICONS.toggle} zwischen <strong>Mythen</strong> und <strong>Informationswege</strong> — zwei Datensätze aus derselben Studie, je als Balken, Übersicht oder Tabelle.` +
             accordion(
@@ -103,6 +107,9 @@ export function buildWalkthrough(): Driver {
         element: '.carm-toolbar-row',
         popover: {
           title: '2 / 4 · Zielgruppe, Indikator & Filter',
+          // Keep the popover BELOW the toolbar (grows down / scrolls).
+          side: 'bottom',
+          align: 'center',
           description:
             `Hier stellst du die Ansicht ein: mit dem <strong>Umschalter</strong> ${ICONS.toggle} wechselst du zwischen Indikatoren und Gruppen, unter <strong>Wert für</strong> ${ICONS.chevronDown} wählst du je nach Ansicht die konkrete Gruppe oder den Indikator, und über <strong>Filter</strong> ${ICONS.filter} und die Suche grenzt du auf bestimmte Mythen ein.` +
             accordion(

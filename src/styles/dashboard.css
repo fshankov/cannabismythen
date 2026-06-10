@@ -8137,17 +8137,18 @@ body.carm-modal-open {
 .carm-tour-popover .factsheet-panel__section-content li { margin: 2px 0; }
 .carm-tour-popover .carm-tour-note { margin-top: 10px; font-size: 0.8rem; color: #718096; }
 
-/* Stable popover sizing (Rundgang). A touch wider for the accordion content
-   + long example titles (mobile-safe via min()), and a reserved scrollbar
-   gutter so the text never reflows when the scrollbar appears. */
-.carm-tour-popover.driver-popover { max-width: min(384px, calc(100vw - 24px)); }
-.carm-tour-popover .driver-popover-description { scrollbar-gutter: stable; }
-/* The accordion steps (1 & 2) get a FIXED-height scroll area, so expanding an
-   accordion scrolls WITHIN the popover instead of resizing it — the popover
-   is measured + positioned once at this constant size and never jumps. Steps
-   without a <details> (3 & 4) keep their natural compact height. */
-.carm-tour-popover .driver-popover-description:has(details) {
-  height: min(52vh, 360px);
+/* Stable popover sizing (Rundgang). Wider (mobile-safe via min()) so the
+   content needs far fewer lines — the popover is short. */
+.carm-tour-popover.driver-popover { max-width: min(480px, calc(100vw - 32px)); }
+/* Compact + viewport-safe: a short max-height keeps the popover small enough
+   to sit BELOW the anchor (steps 1 & 2 force side:'bottom'), so expanding an
+   accordion grows the popover DOWNWARD and then scrolls WITHIN it — it never
+   climbs up over the element it's pointing at. Collapsed steps stay compact
+   (content is under the cap). The reserved scrollbar gutter keeps the text
+   from reflowing when the scrollbar appears. */
+.carm-tour-popover .driver-popover-description {
+  max-height: min(42vh, 340px);
+  scrollbar-gutter: stable;
 }
 
 /* ---- Responsive: keep the tab row ABOVE the panel (never spilling to
