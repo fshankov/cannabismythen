@@ -363,6 +363,26 @@ const translations = {
     de: 'Vorschau der aktuellen Visualisierung',
     en: 'Preview of the current visualization',
   },
+  // Informationswege (sources) mode — the Excel/CSV downloads switch to the
+  // channels dataset. AI-drafted — ISD review pending.
+  'export.intro.sources': {
+    de: 'Wähle ein Format. Excel und CSV enthalten alle Informationswege.',
+    en: 'Choose a format. Excel and CSV contain all information channels.',
+  },
+  'export.excel.title.sources': { de: 'Excel (Informationswege)', en: 'Excel (information channels)' },
+  'export.excel.desc.sources': {
+    de: 'Alle Kanäle & Zielgruppen, 2 Tabellen.',
+    en: 'All channels & audience groups, 2 sheets.',
+  },
+  'export.csv.title.sources': { de: 'CSV (Informationswege)', en: 'CSV (information channels)' },
+  'export.csv.desc.sources': {
+    de: 'Alle Kanäle als Tabelle.',
+    en: 'All channels as a table.',
+  },
+  'export.images.note.sources': {
+    de: 'Bild-Export (PNG/SVG) ist für die Informationswege derzeit nicht verfügbar.',
+    en: 'Image export (PNG/SVG) is not available for the information channels yet.',
+  },
   'rundgang.label': { de: 'Rundgang', en: 'Tour' },
   'verdict.legend.title': { de: 'Wissenschaftliches Urteil', en: 'Scientific verdict' },
   'verdict.legend.info.richtig': {
