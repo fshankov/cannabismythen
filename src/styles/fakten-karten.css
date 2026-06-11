@@ -421,73 +421,83 @@
     color: #333;
   }
 
-  /* ── #3 Karten (front + back, one card per A4 page) · Entwurf ── */
+  /* ── #3 Karten · Entwurf — 3 front+back pairs per A4 page ──
+     Each card is a row: portrait front (left) beside portrait back
+     (right), matching the website's card proportions (320×500). Three
+     rows fill one A4 page; break-inside:avoid keeps a pair whole. */
   .fk-print-card {
     position: relative;
-    min-height: 250mm;
     display: flex;
-    flex-direction: column;
-    gap: 7mm;
-    break-after: page;
-    page-break-after: always;
-  }
-  .fk-print-card:last-child {
-    break-after: auto;
-    page-break-after: auto;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 5mm;
+    height: 80mm;
+    margin-bottom: 6mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
   .fk-print-card__draft {
     position: absolute;
-    top: -6mm;
-    right: 0;
-    font-size: 7pt;
+    top: 1mm;
+    right: 1mm;
+    font-size: 6.5pt;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: #b45309;
   }
+  .fk-print-card__front,
+  .fk-print-card__back {
+    aspect-ratio: 320 / 500; /* website card proportion (portrait) */
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: 4mm;
+    padding: 5mm;
+    overflow: hidden;
+  }
   .fk-print-card__front {
-    flex: 1 1 0;
-    border-radius: 6mm;
-    padding: 12mm;
     color: #ffffff;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 8mm;
+    gap: 3mm;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
+  .fk-print-card__front .fakten-card-cat {
+    font-size: 6.5pt;
+    gap: 1.5mm;
+    line-height: 1.15;
+  }
   .fk-print-card__num {
-    font-size: 10pt;
+    font-size: 8pt;
     opacity: 0.85;
   }
   .fk-print-card__statement {
     margin: 0;
-    font-size: 21pt;
+    font-size: 10.5pt;
     font-weight: 700;
     font-style: italic;
     line-height: 1.2;
   }
   .fk-print-card__back {
-    flex: 1 1 0;
     border: 0.5pt solid #e2e8f0;
-    border-radius: 6mm;
-    padding: 12mm;
     display: flex;
     flex-direction: column;
-    gap: 5mm;
+    gap: 1.5mm;
   }
   .fk-print-card__back-title {
     margin: 0;
-    font-size: 18pt;
+    font-size: 10pt;
     font-weight: 700;
+    line-height: 1.2;
   }
   .fk-print-card__back-badge {
     display: inline-flex;
   }
   .fk-print-card__summary {
     margin: 0;
-    font-size: 11pt;
-    line-height: 1.5;
+    font-size: 7.5pt;
+    line-height: 1.32;
   }
 
   /* Verdict pills + card fronts must actually print their colours. */

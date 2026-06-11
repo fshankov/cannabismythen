@@ -338,7 +338,11 @@ function PrintKarten({ myths }: { myths: ExportMyth[] }) {
             >
               <span className="fk-print-card__num">Mythos {m.mythNumber}</span>
               <p className="fk-print-card__statement">{m.title}</p>
-              <CategoryFooter categoryGroup={m.categoryGroup} tone="on-color" />
+              <CategoryFooter
+                categoryGroup={m.categoryGroup}
+                tone="on-color"
+                iconSize={11}
+              />
             </div>
             <div className="fk-print-card__back">
               <p
