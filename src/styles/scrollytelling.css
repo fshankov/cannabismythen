@@ -301,7 +301,7 @@ body:has(.scrolly) main {
 
 /* Left text column — flows naturally, each step is a tall card */
 .scrolly__text-col {
-  padding: 4rem 2rem 4rem 0;
+  padding: calc(4rem + 32px) 2rem 4rem 0;
 }
 
 .scrolly__step {

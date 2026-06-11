@@ -286,7 +286,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
 
     <!-- Floating pill nav -->
     <div class="nav-wrapper">
-      <nav class="nav" id="mainNav" aria-label="Hauptnavigation">
+      <nav class="nav" id="mainNav" aria-label="Hauptnavigation" style="border-radius:24px">
 
         <a href="/" class="nav__brand" aria-label="Cannabis Mythen – Startseite">
           <span class="cm-logo" aria-hidden="true">
@@ -410,7 +410,7 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       (function () {
         var nav = document.getElementById('mainNav');
         if (!nav) return;
-        var isHero = document.body.classList.contains('has-hero');
+        var isHero = document.body.classList.contains('has-hero') || document.body.classList.contains('scrolly-page');
         var threshold = isHero ? window.innerHeight * 0.85 : 8;
         if (!isHero) nav.classList.add('nav--scrolled');
         function onScroll() {

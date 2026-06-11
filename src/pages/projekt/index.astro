@@ -28,6 +28,7 @@ const { internalNotes, ...publicContent } = content;
   title={publicContent.pageTitle}
   description={publicContent.pageDescription}
   hideFooter={true}
+  extraBodyClass="scrolly-page"
 >
   <ScrollytellingViewer client:load content={publicContent} />
   <noscript>
