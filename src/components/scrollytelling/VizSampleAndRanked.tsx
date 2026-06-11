@@ -40,8 +40,8 @@ interface SampleGroup {
 }
 
 const SAMPLE_GROUPS: readonly SampleGroup[] = [
-  { id: 'adults', label: 'Erwachsene 18–70',           n: 2097, iconCount: 210, color: 'var(--group-adults)',    Icon: IconVolljaehrige },
-  { id: 'minors', label: 'Minderjährige 16–17',         n: 555,  iconCount: 56,  color: 'var(--group-minors)',    Icon: IconMinderjaehrige },
+  { id: 'adults', label: 'Erwachsene 18–70 Jahre',     n: 2097, iconCount: 210, color: 'var(--group-adults)',    Icon: IconVolljaehrige },
+  { id: 'minors', label: 'Minderjährige 16–17 Jahre',   n: 555,  iconCount: 56,  color: 'var(--group-minors)',    Icon: IconMinderjaehrige },
   { id: 'clubs',  label: 'Anbauvereinigungs-Mitglieder', n: 143,  iconCount: 14,  color: 'var(--group-consumers)', Icon: IconKonsumierende },
 ];
 
@@ -162,8 +162,6 @@ export function VizSampleAndRanked({ data, mode }: Props) {
       {/* SAMPLE PANEL — visible only in sample mode */}
       <div className="viz-sr__sample" aria-hidden={!isSample} data-active={isSample}>
         <div className="viz-sr__panel">
-          <h3 className="viz-sr__title">Stichprobe</h3>
-          <p className="viz-sr__subtitle">Eine Person-Symbol = 10 Befragte</p>
           <div className="viz-sr__groups">
             {SAMPLE_GROUPS.map((g, gi) => (
               <div
