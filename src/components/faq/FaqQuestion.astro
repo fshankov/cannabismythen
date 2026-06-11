@@ -66,9 +66,9 @@ const id = `faq-${question.slug}`;
         <HelplineBox helpline={question.helpline} variant="inline" />
       )}
 
-      <a href={`#${id}`} class="faq-question__permalink" aria-label="Direktlink zu dieser Frage">
-        Permalink
-      </a>
+      {/* Permalink removed per ISD request (Asana 1215623512246223) — the
+          per-question deep link wasn't needed. The article still carries
+          id={id} so existing #faq-<slug> anchors keep working. */}
 
       <button type="button" class="faq-collapse" aria-label="Frage einklappen">
         <span class="faq-collapse__arrow" aria-hidden="true">▴</span>
