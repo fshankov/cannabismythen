@@ -323,3 +323,177 @@
     padding-left: 12px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Export (FaktenExport.tsx)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* #1 Liste (PNG): an off-screen replica of <FaktenListView> at a fixed
+   desktop width is the html-to-image capture target, so the snapshot looks
+   like the on-screen list regardless of which view is active. Positioned
+   far off-screen (not display:none) so it still has layout to capture. */
+.fakten-export-offscreen {
+  position: fixed;
+  left: -100000px;
+  top: 0;
+  width: 920px;
+  pointer-events: none;
+  z-index: -1;
+}
+.fakten-export-listshot {
+  width: 880px;
+  padding: 20px 24px;
+  background: #ffffff;
+}
+
+/* #2 / #3 print documents are portalled to <body> as `.fakten-print-root`.
+   Hidden on screen; revealed only while printing (see @media print). */
+.fakten-print-root {
+  display: none;
+}
+
+@media print {
+  /* While a document is being printed (body.cm-printing), hide every other
+     body child and show only the portalled document. */
+  body.cm-printing > *:not(.fakten-print-root) {
+    display: none !important;
+  }
+  body.cm-printing .fakten-print-root {
+    display: block !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+
+  .fk-print {
+    font-family: var(--font-body);
+    color: #1a1a2e;
+  }
+  .fk-print__head {
+    margin: 0 0 8mm;
+  }
+  .fk-print__title {
+    font-size: 19pt;
+    margin: 0 0 2mm;
+  }
+  .fk-print__source {
+    font-size: 8pt;
+    color: #555;
+    margin: 0;
+  }
+
+  /* ── #2 Liste mit Erklärungen ── */
+  .fk-print-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .fk-print-list__item {
+    padding: 3mm 0;
+    border-bottom: 0.3pt solid #e2e8f0;
+    break-inside: avoid;
+  }
+  .fk-print-list__row {
+    display: flex;
+    align-items: baseline;
+    gap: 3mm;
+  }
+  .fk-print-list__num {
+    flex: 0 0 auto;
+    min-width: 7mm;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: #555;
+  }
+  .fk-print-list__statement {
+    flex: 1 1 auto;
+    font-weight: 600;
+  }
+  .fk-print-list__verdict {
+    flex: 0 0 auto;
+  }
+  .fk-print-list__summary {
+    margin: 1.5mm 0 0 10mm;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    color: #333;
+  }
+
+  /* ── #3 Karten (front + back, one card per A4 page) · Entwurf ── */
+  .fk-print-card {
+    position: relative;
+    min-height: 250mm;
+    display: flex;
+    flex-direction: column;
+    gap: 7mm;
+    break-after: page;
+    page-break-after: always;
+  }
+  .fk-print-card:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .fk-print-card__draft {
+    position: absolute;
+    top: -6mm;
+    right: 0;
+    font-size: 7pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #b45309;
+  }
+  .fk-print-card__front {
+    flex: 1 1 0;
+    border-radius: 6mm;
+    padding: 12mm;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8mm;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .fk-print-card__num {
+    font-size: 10pt;
+    opacity: 0.85;
+  }
+  .fk-print-card__statement {
+    margin: 0;
+    font-size: 21pt;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.2;
+  }
+  .fk-print-card__back {
+    flex: 1 1 0;
+    border: 0.5pt solid #e2e8f0;
+    border-radius: 6mm;
+    padding: 12mm;
+    display: flex;
+    flex-direction: column;
+    gap: 5mm;
+  }
+  .fk-print-card__back-title {
+    margin: 0;
+    font-size: 18pt;
+    font-weight: 700;
+  }
+  .fk-print-card__back-badge {
+    display: inline-flex;
+  }
+  .fk-print-card__summary {
+    margin: 0;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  /* Verdict pills + card fronts must actually print their colours. */
+  .fakten-print-root .pill,
+  .fakten-print-root .pill__icon {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

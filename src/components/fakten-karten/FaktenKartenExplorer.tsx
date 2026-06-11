@@ -16,6 +16,7 @@ import FaktenCard from "./FaktenCard";
 import type { FaktenCardMyth } from "./FaktenCard";
 import FaktenFilterBar from "./FaktenFilterBar";
 import FaktenListView from "./FaktenListView";
+import FaktenExport from "./FaktenExport";
 import SharedFactsheetPanel from "../shared/FactsheetPanel";
 import type { MythContentEntry } from "../shared/FactsheetPanel";
 import type {
@@ -79,6 +80,8 @@ export default function FaktenKartenExplorer({
   const [searchQuery, setSearchQuery] = useState("");
   const [factsheetMyth, setFactsheetMyth] = useState<string | null>(null);
   const [view, setView] = useState<"karten" | "liste">("karten");
+  /** Export drawer (button lives in the FaktenFilterBar toolbar). */
+  const [exportOpen, setExportOpen] = useState(false);
   /** Becomes true once the initial URL parse (Audit B-09) has run, so the
    *  URL-write effect below doesn't clobber params before they're restored. */
   const [urlReady, setUrlReady] = useState(false);
@@ -360,6 +363,13 @@ export default function FaktenKartenExplorer({
         onReset={resetFilters}
         view={view}
         onSetView={setView}
+        onOpenExport={() => setExportOpen(true)}
+      />
+
+      <FaktenExport
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        myths={filteredMyths}
       />
 
       {filteredMyths.length === 0 ? (

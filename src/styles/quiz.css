@@ -4410,10 +4410,10 @@ body.fakten-karten-page main {
    wide viewports. Mobile collapses to a stack below. */
 .fakten-filter-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 16px;
-  max-width: 912px;
+  max-width: 1040px;
 }
 
 .fakten-filter-bar__category,
@@ -4430,11 +4430,21 @@ body.fakten-karten-page main {
   position: relative;
 }
 
+/* Export button sits between the search and the view toggle (Fedor's
+   placement). The 32px left margin separates the right-hand cluster
+   (export + toggle) from the search column. */
+.fakten-filter-bar__export {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  margin-left: 32px;
+}
+
 .fakten-filter-bar__view-toggle {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  margin-left: 48px; /* 48 + 16px grid gap = 64px from search bar */
+  margin-left: 16px; /* sits next to the export button in the right cluster */
 }
 
 .fakten-filter-bar__view-toggle .carm-pivot-switch__track[data-active="right"] {
@@ -4858,6 +4868,11 @@ body.fakten-karten-page main {
   /* B2 — toggle floated right with 48px margin; reset to left-align
      so it stacks cleanly below the full-width controls */
   .fakten-filter-bar__view-toggle {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+  /* Export button stacks as its own full-width row too. */
+  .fakten-filter-bar__export {
     margin-left: 0;
     justify-content: flex-start;
   }
