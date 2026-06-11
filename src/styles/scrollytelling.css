@@ -176,15 +176,18 @@ body:has(.scrolly) {
 html, body {
   margin: 0;
   padding: 0;
-  /* Forest backdrop — matches the homepage hero gradient exactly
-     (#265a43 top → #143b2c bottom), so both pages share the same tone. */
-  background: radial-gradient(120% 90% at 50% -8%, #265a43 0%, #1d4a37 46%, #143b2c 100%);
-  background-color: #143b2c;
+  background: linear-gradient(168deg, #1b3827 0%, #0e1e14 40%, #183a26 100%);
   color: var(--fg);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: .055; mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 160px;
 }
 #root { min-height: 100vh; }
 
@@ -203,6 +206,14 @@ html, body {
 body:has(.scrolly) .nav-wrapper {
   position: absolute;
 }
+body:has(.scrolly) .feedbucket-footer {
+  border-top: none;
+  padding: 0 0 1.5rem;
+  margin-top: -1.5rem;   /* pull into footer bottom-padding so button sits on dark bg */
+  position: relative;
+  z-index: 1;
+}
+body:has(.scrolly) .feedbucket-footer > p { margin: 0; }
 /* Iter-21b: hide the global `.nav-blur-shield` — a fixed light-white
    gradient strip (rgba(248,249,255,…)) that reads as a white fade over
    the dark page. */
@@ -1041,8 +1052,14 @@ body:has(.scrolly) main {
   top: 50%;
   width: 0;
   height: 0;
-  transform: scale(var(--fit, 1));
+  transform: scale(calc(var(--fit, 1) * 0.72));
   transform-origin: center;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.viz-voice-cloud__sphere.is-visible { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .viz-voice-cloud__sphere { transition: none; opacity: 1; }
 }
 .viz-chip {
   position: absolute;
@@ -2142,6 +2159,7 @@ body:has(.scrolly) main {
    light-mode cream surfaces are replaced with frosted-glass dark panels. */
 .path-cards .path-card {
   grid-row: auto;
+  margin-top: 0; /* cancel the homepage's 48px bottom-row margin */
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.11);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
@@ -2187,38 +2205,6 @@ body:has(.scrolly) main {
 
 /* ── Animation overrides for the scrollytelling Step 10 cards ── */
 @media (prefers-reduced-motion: no-preference) {
-  /* Daten: bars grow from left on hover (CSS-only; homepage relies on a
-     JS tween that PathCards doesn't include). Circle fades in alongside. */
-  .path-cards .daten-bar__wash {
-    transform-origin: left center;
-    transform: scaleX(0);
-    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .path-cards .daten-bar__circle {
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-  .path-cards .path-card--daten:hover .daten-bar__wash {
-    transform: scaleX(1);
-  }
-  .path-cards .path-card--daten:hover .daten-bar__circle {
-    opacity: 1;
-  }
-  /* Stagger bars 2–4 via adjacent-sibling selectors (avoids nth-child
-     counting the axis element as child 1). */
-  .path-cards .path-card--daten:hover .daten-bar + .daten-bar .daten-bar__wash,
-  .path-cards .path-card--daten:hover .daten-bar + .daten-bar .daten-bar__circle {
-    transition-delay: 0.07s;
-  }
-  .path-cards .path-card--daten:hover .daten-bar + .daten-bar + .daten-bar .daten-bar__wash,
-  .path-cards .path-card--daten:hover .daten-bar + .daten-bar + .daten-bar .daten-bar__circle {
-    transition-delay: 0.14s;
-  }
-  .path-cards .path-card--daten:hover .daten-bar + .daten-bar + .daten-bar + .daten-bar .daten-bar__wash,
-  .path-cards .path-card--daten:hover .daten-bar + .daten-bar + .daten-bar + .daten-bar .daten-bar__circle {
-    transition-delay: 0.21s;
-  }
-
   /* Quiz: keep the button-jump wave; drop the delayed stroke reveal. */
   .path-cards .path-card--quiz:hover .quiz-preview__btn--richtig,
   .path-cards .path-card--quiz:hover .quiz-preview__btn--eher_falsch {
@@ -2713,7 +2699,7 @@ body:has(.scrolly) main {
   gap: 0.75rem;
 }
 .viz-team__avatar {
-  cursor: pointer;
+  cursor: default;
   appearance: none;
   border: none;
   padding: 0;
@@ -2765,7 +2751,7 @@ body:has(.scrolly) main {
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  cursor: pointer;
+  cursor: default;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2816,10 +2802,26 @@ body:has(.scrolly) main {
    below the scrollytelling section, not inside Step 10's viz. Full-width
    band, same dark backdrop, subtle top divider. */
 .scrolly-page-footer {
+  position: relative;
+  isolation: isolate;
   margin-top: clamp(2rem, 5vw, 4rem);
-  border-top: 1px solid #305f49;
+  border-top: none;
+  background: none;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1.25rem, 5vw, 4rem) 1.5rem;
+}
+/* Full-viewport background without changing element width.
+   The element stays at its natural ~1100px (global footer max-width) so the
+   inner grid keeps its 3+1 row wrap. The ::before paints the gradient and
+   border-top across 100vw using the left: 50%−50vw trick. */
+.scrolly-page-footer::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: calc(50% - 50vw);
+  width: 100vw;
   background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.18) 100%);
-  padding: clamp(1.5rem, 4vw, 3rem) clamp(1.25rem, 5vw, 4rem) clamp(2rem, 5vw, 4rem);
+  border-top: 1px solid #305f49;
+  z-index: -1;
 }
 .scrolly-page-footer__inner {
   max-width: 1080px;
@@ -3050,7 +3052,7 @@ body:has(.scrolly) main {
    ════════════════════════════════════════════════════════════════ */
 .viz-balken-myth {
   width: 100%;
-  height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -3236,7 +3238,7 @@ body:has(.scrolly) main {
    ════════════════════════════════════════════════════════════════ */
 .viz-spannweite-sources {
   width: 100%;
-  height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
   align-items: stretch;

@@ -469,7 +469,10 @@ export function VizPeopleVoices(_props: Props) {
     requestAnimationFrame(() => requestAnimationFrame(() => { measure(); project(); }));
     const ro = new ResizeObserver(() => { measure(); project(); });
     ro.observe(container);
-    const io = new IntersectionObserver((es) => { inView = es[0].isIntersecting; }, { threshold: 0.04 });
+    const io = new IntersectionObserver((es) => {
+      inView = es[0].isIntersecting;
+      if (inView) sphere.classList.add('is-visible');
+    }, { threshold: 0.04 });
     io.observe(container);
     onScroll();
     raf = requestAnimationFrame(loop);

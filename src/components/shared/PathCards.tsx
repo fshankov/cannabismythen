@@ -11,11 +11,10 @@
  * migrate onto this component in a separate, reviewed pass (Fedor 2026-06-08).
  *
  * Differences vs the homepage Astro version (intentional, low-risk):
- *  - the Daten-Explorer bars are static (no hover tween) — the scrolly is a
- *    scroll story, not a hover surface;
  *  - the Fakten preview myths are derived client-side from the carm-data the
  *    scrollytelling already loads, instead of being threaded as props.
  */
+import { useEffect, useRef } from 'react';
 import type { CarmData, CorrectnessClass } from '../scrollytelling/types';
 import { getVerdictVisual } from '../../lib/fakten-karten/verdict-colors';
 import { AUDIENCE_ICONS_BY_FAQ_ID } from '../../lib/icons/lookups';
@@ -63,12 +62,12 @@ const FAKTEN_ARROWS: Record<string, { viewBox: string; inner: string }> = {
   falsch: { viewBox: '0 0 181 186', inner: `<path d="M164.999 169.527L-55 169.527" stroke="currentColor" stroke-opacity="0.44" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M54.9953 15.5293L54.9953 169.529" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/><path d="M131.999 92.5293L54.9996 169.529L-22.0001 92.5293" stroke="currentColor" stroke-width="31.0587" stroke-linecap="round" stroke-linejoin="round"/>` },
 };
 
-// Daten preview: static Balken bars (idle values only — no hover tween here).
+// Daten preview: Balken bars with idle + hover values — matches FourPathsBlock.astro.
 const DATEN_BARS = [
-  { accent: '#047857', value: 42 },
-  { accent: '#b45309', value: 28 },
-  { accent: '#047857', value: 31 },
-  { accent: '#4d7c0f', value: 49 },
+  { accent: '#047857', idle: 42, hover: 57 },
+  { accent: '#b45309', idle: 28, hover: 28 },
+  { accent: '#047857', idle: 31, hover: 14 },
+  { accent: '#4d7c0f', idle: 49, hover: 64 },
 ];
 
 const FAKTEN_SPECTRUM: CorrectnessClass[] = ['falsch', 'eher_falsch', 'eher_richtig', 'richtig'];
@@ -84,6 +83,51 @@ interface Props {
 }
 
 export function PathCards({ myths, revealedCards = 4 }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Daten-Explorer bar tween — mirrors FourPathsBlock.astro's inline script.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const preview = container.querySelector<HTMLElement>('.daten-preview');
+    if (!preview) return;
+    const card = preview.closest<HTMLElement>('.path-card') ?? preview;
+    interface DBar { wash: HTMLElement | null; circle: HTMLElement | null; idle: number; hover: number; cur: number; }
+    const bars: DBar[] = Array.from(preview.querySelectorAll<HTMLElement>('.daten-bar')).map(bar => ({
+      wash: bar.querySelector<HTMLElement>('.daten-bar__wash'),
+      circle: bar.querySelector<HTMLElement>('.daten-bar__circle'),
+      idle: Number(bar.dataset.idle),
+      hover: Number(bar.dataset.hover),
+      cur: Number(bar.dataset.idle),
+    }));
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let raf = 0;
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+    const apply = (b: DBar, v: number) => {
+      if (b.wash) b.wash.style.width = v + '%';
+      if (b.circle) { b.circle.style.left = v + '%'; b.circle.textContent = String(Math.round(v)); }
+    };
+    const tween = (toHover: boolean) => {
+      cancelAnimationFrame(raf);
+      const starts = bars.map(b => b.cur);
+      const targets = bars.map(b => toHover ? b.hover : b.idle);
+      if (reduce) { bars.forEach((b, i) => { b.cur = targets[i]; apply(b, b.cur); }); return; }
+      const t0 = performance.now();
+      const step = (now: number) => {
+        const e = ease(Math.min((now - t0) / 480, 1));
+        bars.forEach((b, i) => { b.cur = lerp(starts[i], targets[i], e); apply(b, b.cur); });
+        if (e < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    };
+    const onEnter = () => tween(true);
+    const onLeave = () => tween(false);
+    card.addEventListener('mouseenter', onEnter);
+    card.addEventListener('mouseleave', onLeave);
+    return () => { cancelAnimationFrame(raf); card.removeEventListener('mouseenter', onEnter); card.removeEventListener('mouseleave', onLeave); };
+  }, []);
+
   const faktenCards = FAKTEN_SPECTRUM.map((v) => {
     const pool = myths.filter((m) => m.correctness_class === v);
     if (pool.length === 0) return null;
@@ -101,7 +145,7 @@ export function PathCards({ myths, revealedCards = 4 }: Props) {
   const audiences = Object.keys(AUDIENCE_ICONS_BY_FAQ_ID) as FaqAudienceId[];
 
   return (
-    <div className="path-cards">
+    <div className="path-cards" ref={containerRef}>
       {TILES.map((c, i) => (
         <a
           key={c.mod}
@@ -154,9 +198,9 @@ export function PathCards({ myths, revealedCards = 4 }: Props) {
                   <span className="daten-chart__tick" data-pos="100"></span>
                 </div>
                 {DATEN_BARS.map((b, i) => (
-                  <div key={i} className="daten-bar">
-                    <span className="daten-bar__wash" style={{ width: `${b.value}%`, background: b.accent }} />
-                    <span className="daten-bar__circle" style={{ left: `${b.value}%`, background: b.accent }}>{b.value}</span>
+                  <div key={i} className="daten-bar" data-idle={b.idle} data-hover={b.hover}>
+                    <span className="daten-bar__wash" style={{ width: `${b.idle}%`, background: b.accent }} />
+                    <span className="daten-bar__circle" style={{ left: `${b.idle}%`, background: b.accent }}>{b.idle}</span>
                   </div>
                 ))}
               </div>
