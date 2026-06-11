@@ -185,6 +185,13 @@ const SECTION_ORDER = [
  *  and print readers — only the popup swaps it out. */
 const GROUP_METRICS_SECTION = 'Daten nach Zielgruppen';
 
+// Verwandte Mythen hidden site-wide pending ISD review of how related myths are
+// generated (Asana 1215623256112132 / 1215623511864902). The relatedMyths data
+// is kept on the entry; only the rendering is gated. Typed `boolean` (not the
+// literal `false`) so TypeScript keeps narrowing the relatedMyths access in the
+// gated JSX below. Flip to re-enable once ISD approves the curation.
+const SHOW_VERWANDTE_MYTHEN: boolean = false;
+
 export default function FactsheetPanel({
   context,
   mythText,
@@ -495,7 +502,9 @@ export default function FactsheetPanel({
                   Data pre-resolved at build-time via buildMythContentMap
                   in src/lib/myth-content.ts. Sections only render when
                   the entry has non-empty arrays. */}
-              {mythContentEntry.relatedMyths && mythContentEntry.relatedMyths.length > 0 && (
+              {/* Hidden site-wide via SHOW_VERWANDTE_MYTHEN (declared near the
+                  top of this file with the rationale + Asana refs). */}
+              {SHOW_VERWANDTE_MYTHEN && mythContentEntry.relatedMyths && mythContentEntry.relatedMyths.length > 0 && (
                 <details className="factsheet-panel__section factsheet-panel__section--collapsible factsheet-panel__extras factsheet-panel__related">
                   <summary className="factsheet-panel__section-toggle">
                     <span className="factsheet-panel__section-title">
