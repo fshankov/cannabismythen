@@ -21,7 +21,15 @@
  *
  * Tokens that DIFFER from global.css are kept and explained inline. */
 
+html:has(.scrolly) {
+  background: #0e1e14;
+}
+
 body:has(.scrolly) {
+  /* Dark canvas — wins over the global `body { background: var(--color-bg) }` rule
+     via higher specificity (0,1,1 vs 0,0,1), preventing cream flash on scroll. */
+  background: linear-gradient(168deg, #1b3827 0%, #0e1e14 40%, #183a26 100%);
+
   /* Faded backgrounds for cells in resting state — saturated tints (vs the
      pastel tints in global.css); intentional for this page's dark backdrop. */
   --classification-richtig-bg: #d1fae5;

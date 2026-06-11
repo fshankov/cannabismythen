@@ -228,7 +228,7 @@ export function VizTimeline({ active, tooltips }: Props) {
         bottom: 'auto' as const,
       }
     : { top: 0, height: 0, bottom: 'auto' as const };
-  const showLocator = lineGeom !== null && drawn > 0.005 && drawn < 0.985;
+  const showLocator = lineGeom !== null && drawn > 0.005 && drawn < 0.999;
   const locatorStyle = lineGeom
     ? { top: lineGeom.top + drawn * lineGeom.height }
     : { top: 0 };

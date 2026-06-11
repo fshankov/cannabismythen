@@ -8,6 +8,7 @@ import "../../styles/scrollytelling.css";
 // #4 (2026-06-08): shared card chrome for Step 10's PathCards (same stylesheet
 // the homepage FourPaths uses, so the two stay in sync).
 import "../../styles/home-four-paths.css";
+import IconClusterIllustration from "@components/home/IconClusterIllustration.astro";
 
 // Editorial German content lives in the Keystatic singleton; structural
 // definitions (vizName, gridMode, …) live in stepDefinitions.ts. Heavy
@@ -30,11 +31,101 @@ const { internalNotes, ...publicContent } = content;
   hideFooter={true}
   extraBodyClass="scrolly-page"
 >
-  <ScrollytellingViewer client:load content={publicContent} />
-  <noscript>
-    <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
-      Diese Scrollytelling-Ansicht benötigt JavaScript. Bitte aktiviere
-      JavaScript, um die Projektgeschichte zu lesen.
-    </p>
-  </noscript>
+  <script is:inline>
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    try { window.scrollTo(0, 0); } catch (_) {}
+  </script>
+  <div class="proj-loader-wrap">
+    <div class="proj-loader" aria-hidden="true">
+      <IconClusterIllustration size={180} loaderMode />
+    </div>
+    <ScrollytellingViewer client:load content={publicContent} />
+    <noscript>
+      <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+        Diese Scrollytelling-Ansicht benötigt JavaScript. Bitte aktiviere
+        JavaScript, um die Projektgeschichte zu lesen.
+      </p>
+    </noscript>
+  </div>
+
+  <button id="scrolly-top-btn" aria-label="Nach oben scrollen">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M10 15V5M10 5L5 10M10 5l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <style>
+    .proj-loader-wrap {
+      position: relative;
+    }
+    .proj-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(168deg, #1b3827 0%, #0e1e14 40%, #183a26 100%);
+      animation: proj-loader-exit 0.8s ease forwards;
+      animation-delay: 1.75s;
+      pointer-events: none;
+    }
+    @keyframes proj-loader-exit {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+    /* Keep nav above the loader */
+    :global(.nav-wrapper) { z-index: 9999; }
+    /* Hide feedbucket footer until loader is gone */
+    :global(.feedbucket-footer) {
+      visibility: hidden;
+      animation: proj-fb-show 0s 2.6s linear forwards;
+    }
+    @keyframes proj-fb-show { to { visibility: visible; } }
+    #scrolly-top-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 200;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(48, 95, 73, 0.55);
+      background: var(--bg-elev, #1a4836);
+      color: var(--fg, #e8f0ec);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+    #scrolly-top-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    #scrolly-top-btn:hover {
+      background: #225c44;
+    }
+  </style>
+
+  <script is:inline>
+    (function () {
+      var btn = document.getElementById('scrolly-top-btn');
+      if (!btn) return;
+      window.addEventListener('scroll', function () {
+        btn.classList.toggle('visible', window.scrollY > 1200);
+      }, { passive: true });
+      btn.addEventListener('click', function () {
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+        document.body.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+  </script>
 </BaseLayout>

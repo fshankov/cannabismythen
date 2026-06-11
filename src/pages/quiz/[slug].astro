@@ -222,28 +222,110 @@ if (theme) {
   ogImage={`/og/quiz/${slug}.png`}
   bgTexture
 >
-  <article class="quiz-page" data-reveal-fade>
-    <QuizPlayer
-      client:only="react"
-      quizSlug={slug!}
-      mythContent={JSON.stringify(mythContentMap)}
-      groupMetrics={JSON.stringify(quizGroupMetricsMap)}
-      quizText={JSON.stringify(quizTextMap)}
-      verdicts={JSON.stringify(verdictsPayload)}
-      intros={JSON.stringify(introsPayload)}
-      shareCopy={JSON.stringify(sharePayload)}
-      faktenContent={JSON.stringify(quizFaktenContentMap)}
-      quizSummary={(entry as any).summary || undefined}
-    />
-    <noscript>
-      <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
-        Das Quiz benötigt JavaScript. Bitte aktiviere JavaScript, um zu
-        starten.
-      </p>
-    </noscript>
-
-    {/* Page footer "Alle Quiz-Module" link removed; the ResultScreen
-        already shows it in its actions row, and the quiz flow itself
-        doesn't need a redundant escape hatch in the page chrome. */}
-  </article>
+  <div class="quiz-loader-wrap">
+    <div class="quiz-loader" aria-hidden="true">
+      <div class="quiz-loader__grid">
+        <span class="quiz-loader__btn quiz-loader__btn--richtig">
+          <svg width="30" height="22" viewBox="0 0 30 22" fill="none"><path d="M28.2041 1.39285L1.3916 1.39286" stroke="#A7D3C5" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.7979 20.1604L14.7978 1.39168" stroke="#047857" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M24.1826 10.7776L14.7982 1.39324L5.41386 10.7776" stroke="#047857" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="quiz-loader__btn quiz-loader__btn--eher_falsch">
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><path d="M32.2303 13.271L13.271 32.2303" stroke="#E0B58D" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.47932 9.47998L22.7508 22.7515" stroke="#B45309" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.7508 9.47803V22.7495H9.47929" stroke="#B45309" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="quiz-loader__btn quiz-loader__btn--eher_richtig">
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><path d="M32.2303 20.351L13.271 1.39168" stroke="#C2D3A3" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.47932 24.142L22.7508 10.8705" stroke="#4D7C0F" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.7508 24.144V10.8724H9.47929" stroke="#4D7C0F" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="quiz-loader__btn quiz-loader__btn--falsch">
+          <svg width="26" height="22" viewBox="0 0 26 22" fill="none"><path d="M1.2666 18.8793C0.567207 18.8798 0 19.4464 0 20.1459C0 20.8454 0.567207 21.4121 1.2666 21.4125L24.2705 21.4125C24.9703 21.4125 25.5371 20.8457 25.5371 20.1459C25.5371 19.4462 24.9703 18.8793 24.2705 18.8793L1.2666 18.8793Z" fill="#E9A8B9"/><path d="M12.771 1.26703L12.771 19.3997" stroke="#BE123C" stroke-width="2.53" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.8223 10.3315L12.771 19.3978L4.71974 10.3315" stroke="#BE123C" stroke-width="2.53" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </div>
+    <article class="quiz-page" data-reveal-fade>
+      <QuizPlayer
+        client:only="react"
+        quizSlug={slug!}
+        mythContent={JSON.stringify(mythContentMap)}
+        groupMetrics={JSON.stringify(quizGroupMetricsMap)}
+        quizText={JSON.stringify(quizTextMap)}
+        verdicts={JSON.stringify(verdictsPayload)}
+        intros={JSON.stringify(introsPayload)}
+        shareCopy={JSON.stringify(sharePayload)}
+        faktenContent={JSON.stringify(quizFaktenContentMap)}
+        quizSummary={(entry as any).summary || undefined}
+      />
+      <noscript>
+        <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+          Das Quiz benötigt JavaScript. Bitte aktiviere JavaScript, um zu
+          starten.
+        </p>
+      </noscript>
+    </article>
+  </div>
 </BaseLayout>
+
+<style>
+  .quiz-loader-wrap {
+    position: relative;
+  }
+  .quiz-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 98;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg, #faf9f5);
+    animation: quiz-loader-exit 0.7s ease forwards;
+    animation-delay: 1.55s;
+  }
+  .quiz-loader__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .quiz-loader__btn {
+    width: 88px;
+    height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    border: 3px solid transparent;
+    /* pop-in then jump */
+    opacity: 0;
+    transform: scale(0.25);
+    animation:
+      quiz-btn-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+      quiz-btn-jump 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
+  }
+  .quiz-loader__btn svg { display: block; }
+
+  .quiz-loader__btn--richtig    { background: #d1e8d1; animation-delay: 0.08s, 0.85s; }
+  .quiz-loader__btn--eher_falsch { background: #ffefbc; animation-delay: 0.16s, 0.93s; }
+  .quiz-loader__btn--eher_richtig{ background: #e1ebe2; animation-delay: 0.24s, 1.01s; }
+  .quiz-loader__btn--falsch      { background: #ffe9ed; animation-delay: 0.32s, 1.09s; }
+
+
+  @keyframes quiz-btn-pop {
+    from { opacity: 0; transform: scale(0.25); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes quiz-btn-jump {
+    0%  { transform: translateY(0); }
+    45% { transform: translateY(-14px); }
+    100%{ transform: translateY(0); }
+  }
+  @keyframes quiz-loader-exit {
+    to { opacity: 0; visibility: hidden; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quiz-loader__btn {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+    .quiz-loader {
+      animation-delay: 0.6s;
+    }
+  }
+</style>

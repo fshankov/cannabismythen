@@ -10,6 +10,7 @@ import { buildMythContentMap } from "@lib/myth-content";
 // content/ branch → Netlify rebuilds → tooltips show updated text.
 import definitionsData from "../../content/dashboard-definitionen.json";
 import "../../styles/dashboard.css";
+import IconClusterIllustration from "@components/home/IconClusterIllustration.astro";
 
 // Build mythId → Quiz theme slug map. Each quiz module mdoc lists
 // the myth IDs it covers via questions[].mythId (format "m04"). We map the
@@ -48,6 +49,10 @@ const mythContentMap = await buildMythContentMap();
 ---
 
 <BaseLayout title="Daten-Explorer" description="Interaktive Datenvisualisierung zu 42 Cannabis-Mythen — Erkunden Sie wissenschaftliche Einordnungen, Bevölkerungsdaten und Indikatoren." bgTexture>
+  <script is:inline>
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    try { window.scrollTo(0, 0); } catch (_) {}
+  </script>
   <header class="carm-explorer__page-header" data-reveal>
     <h1 class="carm-explorer__page-header__h1">Daten-Explorer</h1>
     <p class="carm-explorer__page-header__sub">
@@ -61,19 +66,56 @@ const mythContentMap = await buildMythContentMap();
       Wie die Daten entstanden, erklärt <a href="/projekt/">„Über das Projekt"</a>.
     </p>
   </header>
-  <div data-reveal-fade>
-    <MythenExplorer
-      client:load
-      mythSlugs={mythSlugs}
-      mythContent={JSON.stringify(mythContentMap)}
-      definitions={JSON.stringify(definitionsData)}
-      mythThemes={JSON.stringify(mythIdToTheme)}
-    />
-    <noscript>
-      <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
-        Der Daten-Explorer benötigt JavaScript. Ohne JavaScript stehen
-        einzelne Faktenblätter über die Navigation zur Verfügung.
-      </p>
-    </noscript>
+  <div class="de-loader-wrap">
+    <div class="de-loader" aria-hidden="true">
+      <IconClusterIllustration size={180} loaderMode />
+    </div>
+    <div data-reveal-fade>
+      <MythenExplorer
+        client:load
+        mythSlugs={mythSlugs}
+        mythContent={JSON.stringify(mythContentMap)}
+        definitions={JSON.stringify(definitionsData)}
+        mythThemes={JSON.stringify(mythIdToTheme)}
+      />
+      <noscript>
+        <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+          Der Daten-Explorer benötigt JavaScript. Ohne JavaScript stehen
+          einzelne Faktenblätter über die Navigation zur Verfügung.
+        </p>
+      </noscript>
+    </div>
   </div>
 </BaseLayout>
+
+<style>
+  .de-loader-wrap {
+    position: relative;
+  }
+  .de-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg, #faf9f5);
+    animation: de-loader-exit 0.8s ease forwards;
+    animation-delay: 1.75s;
+    pointer-events: none;
+  }
+  @keyframes de-loader-exit {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+  /* Keep nav above the loader */
+  :global(.nav-wrapper) { z-index: 9999; }
+  /* Hide feedbucket footer until loader is gone */
+  :global(.feedbucket-footer) {
+    visibility: hidden;
+    animation: de-fb-show 0s 2.6s linear forwards;
+  }
+  @keyframes de-fb-show { to { visibility: visible; } }
+</style>
