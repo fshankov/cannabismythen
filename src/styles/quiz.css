@@ -1607,16 +1607,14 @@
   height: 100%;
   cursor: pointer;
   outline: none;
-  /* Propagate 3D context so backface-visibility works on children */
-  transform-style: preserve-3d;
-  /* Override global .quiz-card styles that cause double border + break 3D flip */
+  /* Override global .quiz-card styles that cause double border */
   border: none !important;
   background: transparent !important;
   padding: 0 !important;
   box-shadow: none !important;
 }
 
-/* Prevent global hover transform from breaking the 3D flip context */
+/* Prevent global hover transform from lifting the card unexpectedly */
 .quiz-card__cell .quiz-card:hover {
   transform: none !important;
 }

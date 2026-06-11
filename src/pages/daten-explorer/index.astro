@@ -69,6 +69,7 @@ const mythContentMap = await buildMythContentMap();
   <div class="de-loader-wrap">
     <div class="de-loader" aria-hidden="true">
       <IconClusterIllustration size={180} loaderMode />
+      <p class="de-loader__text">Daten laden …</p>
     </div>
     <div data-reveal-fade>
       <MythenExplorer
@@ -97,12 +98,19 @@ const mythContentMap = await buildMythContentMap();
     inset: 0;
     z-index: 9998;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background: var(--color-bg, #faf9f5);
     animation: de-loader-exit 0.8s ease forwards;
     animation-delay: 1.75s;
     pointer-events: none;
+  }
+  .de-loader__text {
+    margin-top: 32px;
+    margin-bottom: 0;
+    font-size: 16px;
+    color: var(--color-text-secondary, #64748b);
   }
   @keyframes de-loader-exit {
     to {

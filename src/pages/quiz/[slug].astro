@@ -238,6 +238,7 @@ if (theme) {
           <svg width="26" height="22" viewBox="0 0 26 22" fill="none"><path d="M1.2666 18.8793C0.567207 18.8798 0 19.4464 0 20.1459C0 20.8454 0.567207 21.4121 1.2666 21.4125L24.2705 21.4125C24.9703 21.4125 25.5371 20.8457 25.5371 20.1459C25.5371 19.4462 24.9703 18.8793 24.2705 18.8793L1.2666 18.8793Z" fill="#E9A8B9"/><path d="M12.771 1.26703L12.771 19.3997" stroke="#BE123C" stroke-width="2.53" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.8223 10.3315L12.771 19.3978L4.71974 10.3315" stroke="#BE123C" stroke-width="2.53" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
       </div>
+      <p class="quiz-loader__text">Daten laden …</p>
     </div>
     <article class="quiz-page" data-reveal-fade>
       <QuizPlayer
@@ -271,11 +272,23 @@ if (theme) {
     inset: 0;
     z-index: 98;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background: var(--color-bg, #faf9f5);
     animation: quiz-loader-exit 0.7s ease forwards;
     animation-delay: 1.55s;
+  }
+  .quiz-loader__text {
+    margin-top: 32px;
+    margin-bottom: 0;
+    font-size: 16px;
+    color: var(--color-text-secondary, #64748b);
+    opacity: 0;
+    animation: quiz-loader-text-in 0.35s ease 0.5s forwards;
+  }
+  @keyframes quiz-loader-text-in {
+    to { opacity: 1; }
   }
   .quiz-loader__grid {
     display: grid;

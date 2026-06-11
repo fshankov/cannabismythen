@@ -101,6 +101,8 @@ export function VizTimeline({ active, tooltips }: Props) {
   const [drawn, setDrawn] = useState(0);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const rafRef = useRef<number | null>(null);
+  // Delay the first draw until the page loader has finished (1750ms + 800ms = 2550ms from nav start).
+  const hasActivatedRef = useRef(false);
 
   // Iter-18: measure first/last dot positions so the green line spans
   // exactly first-dot-center → last-dot-center regardless of how tall
@@ -179,18 +181,29 @@ export function VizTimeline({ active, tooltips }: Props) {
       setDrawn(1);
       return;
     }
-    const start = performance.now();
+    // First activation only: wait for the page loader to finish before drawing.
+    // Loader exits at 2550ms from navigation start (1750ms delay + 800ms fade).
+    const delay = hasActivatedRef.current ? 0 : Math.max(0, 2550 - performance.now());
+    hasActivatedRef.current = true;
+    let cancelled = false;
     // Iter-18: slower, calmer sweep (1.4s → 3.5s) so the yellow locator
     // visibly glides stage-by-stage from top to bottom.
     const dur = 3500;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / dur);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDrawn(eased);
-      if (t < 1) rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
+    const timer = window.setTimeout(() => {
+      if (cancelled) return;
+      const start = performance.now();
+      const tick = (now: number) => {
+        if (cancelled) return;
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        setDrawn(eased);
+        if (t < 1) rafRef.current = requestAnimationFrame(tick);
+      };
+      rafRef.current = requestAnimationFrame(tick);
+    }, delay);
     return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [active]);
