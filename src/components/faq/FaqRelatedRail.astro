@@ -42,6 +42,14 @@ const related: RailMyth[] = question.relatedMyths
   .map((m) => lookupMyth(m))
   .filter((m): m is RailMyth => m !== null);
 
+// Feature flag: the "Verwandte Mythen" rail group is deactivated at ISD's
+// request (Feedbucket → Asana 1215623256112132) while they vet the myth
+// pairings before integrating the category. The related data is still resolved
+// above; flip to `true` to re-enable the group. The "Mythos" + "Daten" groups
+// are unaffected.
+const SHOW_RELATED_MYTHS = false;
+const showRelated = SHOW_RELATED_MYTHS && related.length > 0;
+
 // BugHerd 4.7 (2026-06-03, ISD): the generic Daten-Explorer start-page link
 // is redundant when a specific dashboard view is already linked. Drop the bare
 // "/daten-explorer/" (and its legacy "/zahlen-und-fakten/" form) in that case;
@@ -60,7 +68,7 @@ const dashboard = question.relatedDashboard
     label: dashboardLinkLabel(url),
   }));
 
-const hasRail = primary || related.length > 0 || dashboard.length > 0;
+const hasRail = primary || showRelated || dashboard.length > 0;
 ---
 
 {hasRail && (
@@ -80,7 +88,7 @@ const hasRail = primary || related.length > 0 || dashboard.length > 0;
       </div>
     )}
 
-    {related.length > 0 && (
+    {showRelated && (
       <div class="faq-related-rail__group">
         <span class="faq-related-rail__heading">Verwandte Mythen</span>
         <ul class="faq-related-rail__list">

@@ -29,6 +29,14 @@ import type {
   CorrectnessClass,
   MythGroupMetrics,
 } from '../../lib/dashboard/types';
+
+/** Feature flag: the "Verwandte Mythen" (related myths) section in the popup is
+ *  deactivated at ISD's request (Feedbucket → Asana 1215623256112132) while they
+ *  vet the myth pairings before integrating the category. The data is still
+ *  resolved at build-time and carried on `mythContentEntry.relatedMyths`; flip
+ *  this to `true` to re-enable rendering once the pairings are approved. */
+const SHOW_RELATED_MYTHS = false;
+
 /** Reference to a related myth — surfaced inside the popup as a click
  *  target that swaps the panel to the related myth. Pre-resolved at
  *  build-time so the popup never round-trips for title/verdict lookups.
@@ -495,7 +503,7 @@ export default function FactsheetPanel({
                   Data pre-resolved at build-time via buildMythContentMap
                   in src/lib/myth-content.ts. Sections only render when
                   the entry has non-empty arrays. */}
-              {mythContentEntry.relatedMyths && mythContentEntry.relatedMyths.length > 0 && (
+              {SHOW_RELATED_MYTHS && mythContentEntry.relatedMyths && mythContentEntry.relatedMyths.length > 0 && (
                 <details className="factsheet-panel__section factsheet-panel__section--collapsible factsheet-panel__extras factsheet-panel__related">
                   <summary className="factsheet-panel__section-toggle">
                     <span className="factsheet-panel__section-title">
