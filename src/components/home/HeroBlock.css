@@ -37,7 +37,7 @@
 
 .cmhero__center { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center;
-  padding: 76px 16px 52px; /* top = nav bottom (16px offset + 60px height); 52px bottom clears scroll cue */
+  padding: 120px 16px 52px; /* top = nav (76px) + breathing room; 52px bottom clears scroll cue */
   pointer-events: none; }
 
 /* ── Exhibit section ─────────────────────────────────────────────────────── */
