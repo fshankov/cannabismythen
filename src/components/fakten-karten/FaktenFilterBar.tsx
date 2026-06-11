@@ -31,7 +31,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import { ChevronDown, LayoutGrid, LayoutList } from "lucide-react";
+import { ChevronDown, Download, LayoutGrid, LayoutList } from "lucide-react";
 import VerdictStatement from "../shared/VerdictStatement";
 import CategoryFooter from "./CategoryFooter";
 import PivotToggle from "../dashboard/controls/PivotToggle";
@@ -61,6 +61,8 @@ interface Props {
   onReset: () => void;
   view: "karten" | "liste";
   onSetView: (v: "karten" | "liste") => void;
+  /** Opens the export drawer (Liste/Karten PDF + PNG + Faktenblätter). */
+  onOpenExport: () => void;
 }
 
 const VALID_VERDICTS: ReadonlySet<CorrectnessClass> = new Set([
@@ -143,6 +145,7 @@ export default function FaktenFilterBar({
   onReset,
   view,
   onSetView,
+  onOpenExport,
 }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [catDropdownOpen, setCatDropdownOpen] = useState(false);
@@ -564,6 +567,18 @@ export default function FaktenFilterBar({
             )}
           </div>
         )}
+      </div>
+
+      <div className="fakten-filter-bar__export">
+        <button
+          type="button"
+          className="carm-btn carm-explorer__export"
+          onClick={onOpenExport}
+          aria-label="Mythen exportieren"
+        >
+          <Download size={14} strokeWidth={2} aria-hidden="true" />
+          Exportieren
+        </button>
       </div>
 
       <div className="fakten-filter-bar__view-toggle">
