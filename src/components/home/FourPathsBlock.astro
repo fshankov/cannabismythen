@@ -134,23 +134,28 @@ const QUIZ_OPTIONS = [
   },
 ];
 
-// AI draft — pending ISD review. English glosses:
-//   quiz   → "For young people & consumers"
-//   fakten → "For parents & teachers"
+// Card audience eyebrows. ISD review (HL, Feedbucket): the Quiz, 42 Mythen
+// and Meine Interessen tools are for everyone → "Für alle"; the Daten-Explorer
+// keeps its specialist audience. English glosses:
+//   quiz   → "For everyone"
+//   fakten → "For everyone"
 //   daten  → "For professionals & teachers"
-//   meine  → "For all target groups"
+//   meine  → "For everyone"
 const CARD_AUDIENCE: Record<string, string> = {
-  quiz:   "Für Jugendliche & Konsumierende",
-  fakten: "Für Eltern & Lehrkräfte",
+  quiz:   "Für alle",
+  fakten: "Für alle",
   daten:  "Für Fachkräfte & Lehrkräfte",
-  meine:  "Für alle Zielgruppen",
+  meine:  "Für alle",
 };
 
+// Card order matches the landing-page nav: 42 Mythen · Quiz · Meine
+// Interessen · Daten-Explorer (ISD/HL Feedbucket, Asana 1215622639786409 /
+// 1215622544383748 / 1215622639564532).
 const cards = [
-  { mod: "quiz", icon: ICONS.quiz, ...quizTile },
   { mod: "fakten", icon: ICONS.fakten, ...faktenKartenTile },
-  { mod: "daten", icon: ICONS.daten, ...datenExplorerTile },
+  { mod: "quiz", icon: ICONS.quiz, ...quizTile },
   { mod: "meine", icon: ICONS.meine, ...meineInteressenTile },
+  { mod: "daten", icon: ICONS.daten, ...datenExplorerTile },
 ];
 ---
 

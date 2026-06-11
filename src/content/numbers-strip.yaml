@@ -10,11 +10,11 @@ numerals:
   - value: 3836
     suffix: ''
     label: 'Befragte'
-    description: 'aus qualitativer und quantitativer Befragung.'
+    description: 'aus explorativer und quantitativer Befragung.'
   - value: 7408
     suffix: ''
     label: 'Aussagen'
-    description: 'aus Umfragen, Fachgesprächen und Medienanalysen.'
+    description: 'aus Umfragen und Medienanalysen.'
   - value: 42
     suffix: ''
     label: 'prüfbare Mythen'

@@ -29,7 +29,8 @@
   backdrop-filter: blur(6px);
 }
 
-/* ── Header — lowercase Inter Black, 40px ── */
+/* ── Header — Inter Black, 40px. Proper-case per ISD request
+   (Asana 1215623015557901 / 1215362661064608): "Forschung in Zahlen". ── */
 .numbers-strip__heading {
   margin: 0;
   text-align: center;
@@ -38,7 +39,7 @@
   font-size: 1.5rem; /* 24px */
   line-height: 1.21;
   letter-spacing: -0.03em;
-  text-transform: lowercase;
+  text-transform: none;
   color: #0f5238; /* key green, same as the numerals */
 }
 

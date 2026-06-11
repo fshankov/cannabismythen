@@ -45,7 +45,7 @@ const ROTATIONS: Record<string, number> = {
 const VERDICT_LABEL: Record<string, string> = {
   richtig: "Richtig", eher_richtig: "Eher richtig",
   eher_falsch: "Eher falsch", falsch: "Falsch",
-  keine_aussage: "Keine Aussage", keine_aussage_moeglich: "Keine Aussage",
+  keine_aussage: "Keine Aussage möglich", keine_aussage_moeglich: "Keine Aussage möglich",
 };
 /** Arrow SVG as inline HTML string — flat line only for keine_aussage (no shaft/chevron). */
 function arrowSvgStr(cls: string, sz: number, mc: string, sc: string, sw: number): string {
