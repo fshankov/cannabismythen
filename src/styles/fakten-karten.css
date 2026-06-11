@@ -328,25 +328,58 @@
    Export (FaktenExport.tsx)
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* #1 Liste (PNG): an off-screen replica of <FaktenListView> at a fixed
-   desktop width is the html-to-image capture target, so the snapshot looks
-   like the on-screen list regardless of which view is active. Positioned
-   far off-screen (not display:none) so it still has layout to capture. */
-.fakten-export-offscreen {
+/* Karten front-face capture: off-screen, flip-free copies of the website
+   front face at the Figma 320×500 frame are the html-to-image targets. Each
+   front is rasterised to a PNG and embedded in the Karten PDF as a foreground
+   <img>, so the verdict gradient + arrow + white text always print — even
+   when the print dialog's "Background graphics" box is off. Positioned far
+   off-screen (not display:none) so the nodes still have layout to capture. */
+.fakten-export-shots {
   position: fixed;
   left: -100000px;
   top: 0;
-  width: 920px;
   pointer-events: none;
   z-index: -1;
 }
-.fakten-export-listshot {
-  width: 880px;
-  padding: 20px 24px;
-  background: #ffffff;
+.fk-shot-cell {
+  width: 320px;
+  height: 500px;
+}
+/* The live face carries a lifted shadow; drop it for the flat print image so
+   the rasterised corners stay clean (transparent) on the white page. */
+.fk-shot-front {
+  box-shadow: none !important;
 }
 
-/* #2 / #3 print documents are portalled to <body> as `.fakten-print-root`.
+/* Export-dialog help callouts (FaktenExport): a lightbulb note on what gets
+   exported + an info tip on saving as PDF. Shares the carm-export token
+   palette so it sits naturally in the export Drawer. */
+.carm-export-callouts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 8px);
+  margin: 0 0 var(--space-md, 16px);
+}
+.carm-export-callout {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-bg-subtle, #eeeee8);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--color-text-secondary, #4a5568);
+}
+.carm-export-callout svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--color-accent, #2f6f4f);
+}
+
+/* #1–#3 print documents are portalled to <body> as `.fakten-print-root`.
    Hidden on screen; revealed only while printing (see @media print). */
 .fakten-print-root {
   display: none;
@@ -422,72 +455,68 @@
   }
 
   /* ── #3 Karten · Entwurf — 3 front+back pairs per A4 page ──
-     Each card is a row: portrait front (left) beside portrait back
-     (right), matching the website's card proportions (320×500). Three
-     rows fill one A4 page; break-inside:avoid keeps a pair whole. */
+     One `.fk-print-page` per A4 sheet: a centred "Entwurf" header, then
+     three card pairs. Each pair centres a rasterised front image beside a
+     portrait back tile, with breathing space between them. Page sizes are
+     tuned so head + 3 pairs always fit one sheet (≈ 254mm of 265mm). */
+  .fk-print-page {
+    break-after: page;
+    page-break-after: always;
+  }
+  .fk-print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .fk-print-page__head {
+    margin: 0 0 5mm;
+    text-align: center;
+    font-size: 7pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #b45309;
+  }
   .fk-print-card {
-    position: relative;
     display: flex;
     flex-direction: row;
+    justify-content: center; /* centre the pair on the page */
     align-items: stretch;
-    gap: 5mm;
-    height: 80mm;
+    gap: 12mm; /* breathing space between front and back */
+    height: 76mm;
     margin-bottom: 6mm;
     break-inside: avoid;
     page-break-inside: avoid;
   }
-  .fk-print-card__draft {
-    position: absolute;
-    top: 1mm;
-    right: 1mm;
-    font-size: 6.5pt;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #b45309;
+  /* The captured PNG already carries the website card's proportions and
+     rounded corners; width follows from the 320:500 image at this height. */
+  .fk-print-card__front-img {
+    height: 100%;
+    width: auto;
+    aspect-ratio: 320 / 500;
+    display: block;
+    object-fit: contain;
   }
-  .fk-print-card__front,
   .fk-print-card__back {
-    aspect-ratio: 320 / 500; /* website card proportion (portrait) */
+    aspect-ratio: 320 / 500; /* match the front's portrait footprint */
     height: 100%;
     box-sizing: border-box;
+    border: 0.5pt solid #e2e8f0;
     border-radius: 4mm;
     padding: 5mm;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5mm;
     overflow: hidden;
   }
-  .fk-print-card__front {
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 3mm;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-  .fk-print-card__front .fakten-card-cat {
-    font-size: 6.5pt;
-    gap: 1.5mm;
-    line-height: 1.15;
-  }
-  .fk-print-card__num {
-    font-size: 8pt;
-    opacity: 0.85;
-  }
-  .fk-print-card__statement {
-    margin: 0;
-    font-size: 10.5pt;
+  .fk-print-card__back-num {
+    font-size: 7pt;
     font-weight: 700;
-    font-style: italic;
-    line-height: 1.2;
-  }
-  .fk-print-card__back {
-    border: 0.5pt solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5mm;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #64748b;
   }
   .fk-print-card__back-title {
     margin: 0;
-    font-size: 10pt;
+    font-size: 11pt;
     font-weight: 700;
     line-height: 1.2;
   }
@@ -497,10 +526,11 @@
   .fk-print-card__summary {
     margin: 0;
     font-size: 7.5pt;
-    line-height: 1.32;
+    line-height: 1.34;
   }
 
-  /* Verdict pills + card fronts must actually print their colours. */
+  /* Verdict pills must actually print their colours (the card fronts are
+     now rasterised images, so they print regardless of this). */
   .fakten-print-root .pill,
   .fakten-print-root .pill__icon {
     print-color-adjust: exact;

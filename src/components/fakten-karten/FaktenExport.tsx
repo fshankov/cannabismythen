@@ -4,29 +4,34 @@
  * Mirrors the Daten-Explorer ExportDrawer (button → modal Drawer with a grid
  * of format cards), reusing the same `.carm-export-*` chrome. Offers four
  * documents:
- *   1. Liste (PNG)             — html-to-image snapshot of the Liste view.
+ *   1. Liste (PDF)             — browser print → "Als PDF sichern"
+ *                                (number + statement + verdict, no texts).
  *   2. Liste mit Erklärungen   — browser print → "Als PDF sichern"
  *                                (list + each myth's cardShortSummary).
  *   3. Karten (PDF · Entwurf)  — browser print → "Als PDF sichern",
- *                                front + back, one card per A4 page (DRAFT).
+ *                                front (image) + back, 3 pairs per A4 page.
  *   4. Faktenblätter (PDF)     — the complete static PDF already in /public.
  *
  * #1–#3 reflect the CURRENT selection: the `myths` prop is the parent's
  * `filteredMyths` (category + search filter applied), in myth-number order.
- * #2/#3 render into a `.fakten-print-root` that is portalled to <body> so the
+ * All three render into a `.fakten-print-root` portalled to <body> so the
  * `@media print` block in fakten-karten.css can hide every other body child
- * and leave only the document. #1 captures a fixed-width, off-screen replica
- * of <FaktenListView> so the snapshot matches the on-screen list exactly and
- * works from either the Karten or Liste view.
+ * and leave only the document.
+ *
+ * Card FRONTS are rasterised before printing (#3): each website front face is
+ * captured to a PNG via html-to-image and embedded as an <img>. Foreground
+ * images always print, so the verdict gradient + arrow + white text survive
+ * even when the print dialog's "Hintergrundgrafiken / Background graphics" box
+ * is off (its default) — which otherwise strips the CSS gradient and leaves a
+ * black-on-white front.
  *
  * German UI copy in this file is an AI draft — pending ISD review.
  */
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Download, FileImage, FileText, Layers } from "lucide-react";
+import { Download, FileText, Info, Layers, Lightbulb, List } from "lucide-react";
 import Drawer from "../shared/Drawer";
-import FaktenListView from "./FaktenListView";
 import VerdictPill from "../shared/VerdictPill";
 import CategoryFooter from "./CategoryFooter";
 import { getVerdictVisual } from "../../lib/fakten-karten/verdict-colors";
@@ -56,6 +61,9 @@ function toVerdict(raw: string): CorrectnessClass {
  *  category group (needed for the card-front footer in the print deck). */
 export type ExportMyth = FaktenCardMyth & { categoryGroup: string };
 
+/** Which print document is queued for the browser print dialog. */
+type PrintDoc = "liste-plain" | "liste" | "karten";
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -67,57 +75,94 @@ function todayStamp(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Split into rows of three — one A4 page of card pairs each. */
+function chunk3<T>(arr: T[]): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += 3) out.push(arr.slice(i, i + 3));
+  return out;
+}
+
 export default function FaktenExport({ open, onClose, myths }: Props) {
-  // Off-screen <FaktenListView> replica — the html-to-image capture target.
-  const listShotRef = useRef<HTMLDivElement>(null);
   // Which print document is currently being sent to the browser print dialog.
-  const [printDoc, setPrintDoc] = useState<null | "liste" | "karten">(null);
-  // PNG capture in flight — disables the card so it can't be double-fired.
+  const [printDoc, setPrintDoc] = useState<PrintDoc | null>(null);
+  // Card-front capture in flight — disables the Karten card meanwhile.
   const [busy, setBusy] = useState(false);
+  // Off-screen front faces to rasterise (mounted only during a capture).
+  const [shotMyths, setShotMyths] = useState<ExportMyth[]>([]);
+  // Captured front-face PNGs (data URLs), index-aligned with `myths`.
+  const [fronts, setFronts] = useState<string[]>([]);
+  const shotRef = useRef<HTMLDivElement>(null);
 
   const empty = myths.length === 0;
 
-  // #1 — PNG snapshot of the Liste view (current selection).
-  const handleListPng = async () => {
-    const node = listShotRef.current;
-    if (!node) return;
-    setBusy(true);
-    try {
-      const { toPng } = await import("html-to-image");
-      const dataUrl = await toPng(node, {
-        pixelRatio: 2,
-        cacheBust: true,
-        backgroundColor: "#ffffff",
-      });
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `cannabismythen-42-mythen-liste_${todayStamp()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch {
-      /* capture failed — nothing actionable to surface in the dialog */
-    } finally {
-      setBusy(false);
-      onClose();
+  // Mount the off-screen front faces, wait for them to paint + their arrow
+  // images to decode, then rasterise each front to a PNG data URL.
+  const captureFronts = async (): Promise<string[]> => {
+    setShotMyths(myths);
+    let root: HTMLDivElement | null = null;
+    for (let i = 0; i < 60; i++) {
+      await new Promise<void>((r) => requestAnimationFrame(() => r()));
+      const el = shotRef.current;
+      if (el && el.querySelectorAll(".fk-shot-front").length >= myths.length) {
+        root = el;
+        break;
+      }
     }
+    if (!root) {
+      setShotMyths([]);
+      return myths.map(() => "");
+    }
+    await Promise.all(
+      Array.from(root.querySelectorAll("img")).map((img) =>
+        (img as HTMLImageElement).decode().catch(() => undefined),
+      ),
+    );
+    const { toPng } = await import("html-to-image");
+    const nodes = Array.from(root.querySelectorAll<HTMLElement>(".fk-shot-front"));
+    const urls: string[] = [];
+    for (const node of nodes) {
+      try {
+        urls.push(await toPng(node, { pixelRatio: 2, cacheBust: true }));
+      } catch {
+        urls.push("");
+      }
+    }
+    setShotMyths([]);
+    return urls;
   };
 
-  // #2 / #3 — close the drawer, then mount the print document and open the
-  // browser print dialog (effect below). The user picks "Als PDF sichern".
-  const startPrint = (doc: "liste" | "karten") => {
+  // Close the drawer, then mount the print document + open the print dialog
+  // (effect below). The user picks "Als PDF sichern".
+  const startPrint = (doc: "liste-plain" | "liste") => {
     onClose();
     setPrintDoc(doc);
+  };
+
+  // Karten: rasterise the fronts first (so colours always print), then print.
+  const startKarten = async () => {
+    if (empty || busy) return;
+    setBusy(true);
+    try {
+      const urls = await captureFronts();
+      setFronts(urls);
+      onClose();
+      setPrintDoc("karten");
+    } finally {
+      setBusy(false);
+    }
   };
 
   useEffect(() => {
     if (!printDoc) return;
     const prevTitle = document.title;
     // Browsers seed the "Save as PDF" filename from document.title.
+    const stamp = todayStamp();
     document.title =
-      printDoc === "liste"
-        ? `cannabismythen-42-mythen-liste-erklaerungen_${todayStamp()}`
-        : `cannabismythen-42-mythen-karten_${todayStamp()}`;
+      printDoc === "karten"
+        ? `cannabismythen-42-mythen-karten_${stamp}`
+        : printDoc === "liste"
+          ? `cannabismythen-42-mythen-liste-erklaerungen_${stamp}`
+          : `cannabismythen-42-mythen-liste_${stamp}`;
     document.body.classList.add("cm-printing");
 
     const cleanup = () => {
@@ -146,33 +191,51 @@ export default function FaktenExport({ open, onClose, myths }: Props) {
         variant="modal"
         title="Mythen exportieren"
       >
-        <p className="carm-export-intro">
-          Wähle ein Format. Die ersten drei zeigen deine aktuelle Auswahl
-          {empty ? "" : ` (${myths.length})`}; die Faktenblätter enthalten alle
-          42 Mythen ausführlich.
-        </p>
+        <div className="carm-export-callouts">
+          <p className="carm-export-callout">
+            <Lightbulb size={17} strokeWidth={1.9} aria-hidden="true" />
+            <span>
+              Du exportierst deine aktuelle Auswahl
+              {empty ? "" : ` (${myths.length})`} — die Mythen aus der Karten-
+              oder Listenansicht. Die „Faktenblätter“ enthalten dagegen immer
+              alle 42 Mythen.
+            </span>
+          </p>
+          <p className="carm-export-callout">
+            <Info size={17} strokeWidth={1.9} aria-hidden="true" />
+            <span>
+              Tipp: „Liste“ und „Karten“ öffnen den Druckdialog. Wähle dort als
+              Ziel „Als PDF speichern“ — so wird die Auswahl als Datei
+              gespeichert statt gedruckt.
+            </span>
+          </p>
+        </div>
 
         <div className="carm-export-grid">
           <ExportCard
-            icon={<FileImage size={28} strokeWidth={1.75} />}
-            title="Liste (PNG)"
-            desc="Die Mythen-Liste als Bild — wie in der Listenansicht."
-            onClick={handleListPng}
-            disabled={busy || empty}
+            icon={<List size={28} strokeWidth={1.75} />}
+            title="Liste (PDF)"
+            desc="Kompakte Mythen-Liste — Nummer, Aussage und Einordnung. Öffnet den Druckdialog → „Als PDF speichern“."
+            onClick={() => startPrint("liste-plain")}
+            disabled={empty}
           />
           <ExportCard
             icon={<FileText size={28} strokeWidth={1.75} />}
             title="Liste mit Erklärungen (PDF)"
-            desc="Liste mit den Kurztexten der Karten. Öffnet den Druckdialog → „Als PDF sichern“."
+            desc="Liste mit den Kurztexten der Karten. Öffnet den Druckdialog → „Als PDF speichern“."
             onClick={() => startPrint("liste")}
             disabled={empty}
           />
           <ExportCard
             icon={<Layers size={28} strokeWidth={1.75} />}
             title="Karten (PDF · Entwurf)"
-            desc="Alle Karten mit Vorder- und Rückseite, eine pro Seite — zur Vorbereitung von Präventionsstunden. Öffnet den Druckdialog."
-            onClick={() => startPrint("karten")}
-            disabled={empty}
+            desc={
+              busy
+                ? "Karten werden vorbereitet …"
+                : "Alle Karten mit Vorder- und Rückseite, drei pro Seite — zur Vorbereitung von Präventionsstunden. Öffnet den Druckdialog."
+            }
+            onClick={startKarten}
+            disabled={empty || busy}
           />
           <ExportCard
             icon={<FileText size={28} strokeWidth={1.75} />}
@@ -183,32 +246,27 @@ export default function FaktenExport({ open, onClose, myths }: Props) {
             onClick={onClose}
           />
         </div>
-
-        <p className="carm-export-note">
-          Tipp: „Liste mit Erklärungen“ und „Karten“ öffnen den Druckdialog —
-          dort als Ziel „Als PDF speichern“ wählen.
-        </p>
       </Drawer>
 
-      {/* #1 capture source — off-screen replica of the Liste view. Mounted
-          only while the drawer is open (when a PNG might be requested). */}
-      {open && (
-        <div className="fakten-export-offscreen" aria-hidden="true">
-          <div ref={listShotRef} className="fakten-export-listshot">
-            <FaktenListView myths={myths} />
-          </div>
+      {/* Off-screen front faces — rasterised to PNGs for the Karten deck so
+          the verdict colours always print. Mounted only during a capture. */}
+      {shotMyths.length > 0 && (
+        <div className="fakten-export-shots" aria-hidden="true" ref={shotRef}>
+          {shotMyths.map((m) => (
+            <ShotFront key={m.mythNumber} myth={m} />
+          ))}
         </div>
       )}
 
-      {/* #2 / #3 print document — portalled to <body> so the @media print
+      {/* #1–#3 print document — portalled to <body> so the @media print
           block can hide every other body child and leave only this. */}
       {printDoc &&
         createPortal(
           <div className="fakten-print-root">
-            {printDoc === "liste" ? (
-              <PrintListe myths={myths} />
+            {printDoc === "karten" ? (
+              <PrintKarten myths={myths} fronts={fronts} />
             ) : (
-              <PrintKarten myths={myths} />
+              <PrintListe myths={myths} withSummaries={printDoc === "liste"} />
             )}
           </div>,
           document.body,
@@ -282,13 +340,56 @@ function ExportCard({
   );
 }
 
-/* ── Print document #2: Liste mit Erklärungen ─────────────────────────── */
+/* ── Off-screen capture: a faithful, flip-free copy of the website front
+   face, sized to the Figma 320×500 frame so cqi/% chrome resolves exactly
+   as on the live card. html-to-image rasterises `.fk-shot-front`. ─────── */
 
-function PrintListe({ myths }: { myths: ExportMyth[] }) {
+function ShotFront({ myth }: { myth: ExportMyth }) {
+  const verdict = toVerdict(myth.classification);
+  const visual = getVerdictVisual(verdict);
+  const arrowStyle: CSSProperties = {
+    top: visual.arrowFrame.top,
+    left: visual.arrowFrame.left,
+    width: visual.arrowFrame.width,
+    height: visual.arrowFrame.height,
+  };
+  return (
+    <div className="fk-shot-cell">
+      <div className="fakten-card">
+        <div className="fakten-card__inner">
+          <div
+            className="fakten-card__face fakten-card__face--front fk-shot-front"
+            style={{ backgroundImage: visual.gradient }}
+          >
+            <span className="fakten-card__bg-arrow" style={arrowStyle} aria-hidden="true">
+              <img src={visual.arrowSrc} alt="" />
+            </span>
+            <div className="fakten-card__face-body">
+              <p className="fakten-card__statement">{myth.title}</p>
+              <CategoryFooter categoryGroup={myth.categoryGroup} tone="on-color" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Print document #1 / #2: Liste (optionally with explanations) ──────── */
+
+function PrintListe({
+  myths,
+  withSummaries,
+}: {
+  myths: ExportMyth[];
+  withSummaries: boolean;
+}) {
   return (
     <div className="fk-print fk-print--liste">
       <header className="fk-print__head">
-        <h1 className="fk-print__title">42 Mythen — Liste mit Erklärungen</h1>
+        <h1 className="fk-print__title">
+          42 Mythen — Liste{withSummaries ? " mit Erklärungen" : ""}
+        </h1>
         <p className="fk-print__source">
           Cannabis: Mythen &amp; Evidenz · cannabismythen.de · Datenbasis:
           CaRM-Studie, ISD Hamburg
@@ -310,9 +411,11 @@ function PrintListe({ myths }: { myths: ExportMyth[] }) {
                   <VerdictPill verdict={verdict} size="sm" />
                 </span>
               </div>
-              <p className="fk-print-list__summary">
-                {m.cardShortSummary || m.cardSummary}
-              </p>
+              {withSummaries && (
+                <p className="fk-print-list__summary">
+                  {m.cardShortSummary || m.cardSummary}
+                </p>
+              )}
             </li>
           );
         })}
@@ -321,46 +424,53 @@ function PrintListe({ myths }: { myths: ExportMyth[] }) {
   );
 }
 
-/* ── Print document #3: Karten (front + back per page) · DRAFT ─────────── */
+/* ── Print document #3: Karten — 3 front+back pairs per A4 page · DRAFT ── */
 
-function PrintKarten({ myths }: { myths: ExportMyth[] }) {
+function PrintKarten({
+  myths,
+  fronts,
+}: {
+  myths: ExportMyth[];
+  fronts: string[];
+}) {
+  const pages = chunk3(myths.map((m, i) => ({ m, front: fronts[i] ?? "" })));
   return (
     <div className="fk-print fk-print--karten">
-      {myths.map((m) => {
-        const verdict = toVerdict(m.classification);
-        const visual = getVerdictVisual(verdict);
-        return (
-          <section key={m.mythNumber} className="fk-print-card">
-            <span className="fk-print-card__draft">Entwurf · Layout-Vorschlag</span>
-            <div
-              className="fk-print-card__front"
-              style={{ backgroundImage: visual.gradient }}
-            >
-              <span className="fk-print-card__num">Mythos {m.mythNumber}</span>
-              <p className="fk-print-card__statement">{m.title}</p>
-              <CategoryFooter
-                categoryGroup={m.categoryGroup}
-                tone="on-color"
-                iconSize={11}
-              />
-            </div>
-            <div className="fk-print-card__back">
-              <p
-                className="fk-print-card__back-title"
-                style={{ color: visual.headingColor }}
-              >
-                {m.shortLabel || m.title}
-              </p>
-              <span className="fk-print-card__back-badge">
-                <VerdictPill verdict={verdict} size="sm" />
-              </span>
-              <p className="fk-print-card__summary">
-                {m.cardShortSummary || m.cardSummary}
-              </p>
-            </div>
-          </section>
-        );
-      })}
+      {pages.map((page, pi) => (
+        <div className="fk-print-page" key={pi}>
+          <div className="fk-print-page__head">Entwurf · Layout-Vorschlag</div>
+          {page.map(({ m, front }) => {
+            const verdict = toVerdict(m.classification);
+            const visual = getVerdictVisual(verdict);
+            return (
+              <section key={m.mythNumber} className="fk-print-card">
+                {front ? (
+                  <img className="fk-print-card__front-img" src={front} alt="" />
+                ) : (
+                  <div className="fk-print-card__front-img" />
+                )}
+                <div className="fk-print-card__back">
+                  <span className="fk-print-card__back-num">
+                    Mythos {m.mythNumber}
+                  </span>
+                  <p
+                    className="fk-print-card__back-title"
+                    style={{ color: visual.headingColor }}
+                  >
+                    {m.shortLabel || m.title}
+                  </p>
+                  <span className="fk-print-card__back-badge">
+                    <VerdictPill verdict={verdict} size="sm" />
+                  </span>
+                  <p className="fk-print-card__summary">
+                    {m.cardShortSummary || m.cardSummary}
+                  </p>
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
