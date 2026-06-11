@@ -273,6 +273,7 @@ body:has(.scrolly) .mobile-tab-bar__item.active { color: var(--fg); }
    first step clears the (now non-pinned) nav. */
 body:has(.scrolly) main {
   max-width: none;
+  padding-top: 0;
   padding-left: 0;
   padding-right: 0;
 }
@@ -942,6 +943,7 @@ body:has(.scrolly) main {
   padding: 0;
   cursor: pointer;
   border-radius: 50%;
+  z-index: 3; /* sit above .viz-timeline-v__dot (z-index:2) so it catches events */
 }
 .viz-timeline-v__dot-hit:focus-visible {
   outline: 2px solid var(--fg);

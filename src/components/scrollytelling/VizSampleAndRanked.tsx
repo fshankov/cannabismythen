@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   AUDIENCE_ICONS_BY_GROUP,
   IconVolljaehrige,
@@ -747,6 +748,7 @@ function ExampleMythStrips({
                 <circle
                   r={ARROW_SIZE / 2 + ARROW_HIT_PAD}
                   fill="transparent"
+                  pointerEvents="all"
                   onMouseEnter={(e) => openMythTooltip(myth.id, e.currentTarget)}
                   onMouseLeave={closeMythTooltip}
                   onFocus={(e) => openMythTooltip(myth.id, e.currentTarget)}
@@ -780,35 +782,37 @@ function ExampleMythStrips({
         )}
       </svg>
 
-      {/* Iter-10 hover tooltip — anchored to the hovered hit-rect via
-          `useFlipPosition`, clamps to the viewport edges so it never
-          clips off-screen when an arrow sits near the right border. */}
-      <div
-        ref={tooltipCardRef}
-        role="tooltip"
-        className={`scrolly-hover-tooltip ${tooltipOpen && hoveredMyth && hoveredVerdict ? 'is-open' : ''}`}
-        style={
-          tooltipPos
-            ? {
-                position: 'fixed',
-                top: tooltipPos.top,
-                left: tooltipPos.left,
-                width: tooltipPos.width,
-              }
-            : undefined
-        }
-      >
-        {hoveredMyth && hoveredVerdict && (
-          <>
-            <p className="scrolly-hover-tooltip__title">
-              „{hoveredMyth.text_de}"
-            </p>
-            <p>
-              <VerdictPill verdict={hoveredVerdict} size="sm" />
-            </p>
-          </>
-        )}
-      </div>
+      {/* Iter-10 hover tooltip — portalled to body so Safari's
+          contain:layout on .scrolly__viz-canvas doesn't trap position:fixed. */}
+      {createPortal(
+        <div
+          ref={tooltipCardRef}
+          role="tooltip"
+          className={`scrolly-hover-tooltip ${tooltipOpen && hoveredMyth && hoveredVerdict ? 'is-open' : ''}`}
+          style={
+            tooltipPos
+              ? {
+                  position: 'fixed',
+                  top: tooltipPos.top,
+                  left: tooltipPos.left,
+                  width: tooltipPos.width,
+                }
+              : undefined
+          }
+        >
+          {hoveredMyth && hoveredVerdict && (
+            <>
+              <p className="scrolly-hover-tooltip__title">
+                „{hoveredMyth.text_de}"
+              </p>
+              <p>
+                <VerdictPill verdict={hoveredVerdict} size="sm" />
+              </p>
+            </>
+          )}
+        </div>,
+        document.body,
+      )}
       </div>
     </div>
   );

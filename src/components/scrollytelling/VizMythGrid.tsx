@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { CarmData, CorrectnessClass } from './types';
 import {
   ON_VERDICT_BG_GLYPH,
@@ -198,7 +199,7 @@ export function VizMythGrid({ data, mode }: Props) {
               style={{
                 backgroundColor: bg,
                 ['--rt' as string]: rt.toFixed(3),
-                cursor: 'default',
+                cursor: 'pointer',
               }}
               // CAR-?? (2026-05-30): no click affordance on either mode.
               // The grid is purely visual — full myth detail lives in
@@ -253,20 +254,25 @@ export function VizMythGrid({ data, mode }: Props) {
 
         {/* Iter-14: tooltip card is always rendered (so `useFlipPosition`
             can measure `cardRef.current?.offsetHeight`) and positioned
-            via inline `position: fixed; top/left/width` from `pos`. */}
-        <MythHoverCard
-          ref={cardRef}
-          myth={hoveredMyth}
-          mode={mode}
-          summary={hoveredSummary}
-          pos={pos}
-          open={tooltipOpen && hoveredMyth !== null}
-          categoryName={
-            hoveredMyth
-              ? data.categories.find((c) => c.id === hoveredMyth.category_id)?.name_de ?? null
-              : null
-          }
-        />
+            via inline `position: fixed; top/left/width` from `pos`.
+            Portal to document.body so Safari's contain:layout on
+            .scrolly__viz-canvas doesn't trap the fixed element. */}
+        {createPortal(
+          <MythHoverCard
+            ref={cardRef}
+            myth={hoveredMyth}
+            mode={mode}
+            summary={hoveredSummary}
+            pos={pos}
+            open={tooltipOpen && hoveredMyth !== null}
+            categoryName={
+              hoveredMyth
+                ? data.categories.find((c) => c.id === hoveredMyth.category_id)?.name_de ?? null
+                : null
+            }
+          />,
+          document.body,
+        )}
       </div>
 
       {/* Iter-11: theme + verdict legends moved to the LEFT text

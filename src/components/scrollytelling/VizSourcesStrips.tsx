@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import * as d3 from 'd3';
 import { AUDIENCE_ICONS_BY_GROUP } from '../../lib/icons';
 import type {
@@ -438,7 +439,8 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
           chart. Anchored to the hovered dot via useFlipPosition so it
           flips above/below the dot depending on viewport room and
           clamps horizontally. */}
-      <div
+      {/* Portalled to body so Safari's contain:layout doesn't trap position:fixed. */}
+      {createPortal(<div
         ref={tooltipCardRef}
         role="tooltip"
         className={`scrolly-hover-tooltip ${tooltipOpen && hoveredSource ? 'is-open' : ''}`}
@@ -477,7 +479,7 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
             </p>
           </>
         )}
-      </div>
+      </div>, document.body)}
 
       {/* Category legend — only the categories present in the 5 visible
           sources, so the reader never sees a chip for a category that has
@@ -530,7 +532,7 @@ function Dot({ d, dim, enabled, onEnter, onLeave }: DotProps) {
       tabIndex={enabled ? 0 : -1}
       aria-label={`${d.name}: ${Math.round(d.yTarget)}`}
     >
-      <circle r={11} fill="transparent" />
+      <circle r={11} fill="transparent" pointerEvents="all" />
       <circle
         r={6}
         fill={categoryColor(d.category)}

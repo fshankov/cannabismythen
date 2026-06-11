@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { TimelineTooltip } from './types';
 import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
 
@@ -156,7 +157,7 @@ export function VizTimeline({ active, tooltips }: Props) {
     open,
     setOpen,
     updatePosition,
-  } = useFlipPosition<HTMLButtonElement, HTMLDivElement>({
+  } = useFlipPosition<HTMLElement, HTMLDivElement>({
     maxWidth: 320,
     gap: 12,
     // Iter-14: clamp the tooltip inside the timeline column so the
@@ -196,8 +197,8 @@ export function VizTimeline({ active, tooltips }: Props) {
 
   const hoveredAnchor = hoveredIdx !== null ? ANCHORS[hoveredIdx] : null;
 
-  function handleEnter(idx: number, el: HTMLButtonElement) {
-    (triggerRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
+  function handleEnter(idx: number, el: HTMLElement) {
+    (triggerRef as React.MutableRefObject<HTMLElement | null>).current = el;
     setHoveredIdx(idx);
     setOpen(true);
     updatePosition();
@@ -281,7 +282,12 @@ export function VizTimeline({ active, tooltips }: Props) {
             data-reached={reached}
             style={{ opacity: visible ? 1 : 0 }}
           >
-            <div className="viz-timeline-v__row-cell viz-timeline-v__row-cell--left">
+            <div
+              className="viz-timeline-v__row-cell viz-timeline-v__row-cell--left"
+              onMouseEnter={(e) => { if (!labelOnRight) handleEnter(i, e.currentTarget); }}
+              onMouseLeave={handleLeave}
+              style={!labelOnRight ? { cursor: 'default' } : undefined}
+            >
               {!labelOnRight && <AnchorLabel anchor={a} />}
             </div>
 
@@ -303,50 +309,57 @@ export function VizTimeline({ active, tooltips }: Props) {
                 className="viz-timeline-v__dot-hit"
                 aria-label={`${a.labelDate}: ${a.title}`}
                 tabIndex={visible ? 0 : -1}
-                onMouseEnter={(e) => handleEnter(i, e.currentTarget)}
-                onMouseLeave={handleLeave}
                 onFocus={(e) => handleEnter(i, e.currentTarget)}
                 onBlur={handleLeave}
               />
             </div>
 
-            <div className="viz-timeline-v__row-cell viz-timeline-v__row-cell--right">
+            <div
+              className="viz-timeline-v__row-cell viz-timeline-v__row-cell--right"
+              onMouseEnter={(e) => { if (labelOnRight) handleEnter(i, e.currentTarget); }}
+              onMouseLeave={handleLeave}
+              style={labelOnRight ? { cursor: 'default' } : undefined}
+            >
               {labelOnRight && <AnchorLabel anchor={a} />}
             </div>
           </div>
         );
       })}
 
-      {/* Tooltip — flip-positioned over the viewport */}
-      <div
-        ref={cardRef}
-        role="tooltip"
-        className={`scrolly-hover-tooltip ${open && hoveredAnchor ? 'is-open' : ''}`}
-        style={
-          pos
-            ? {
-                position: 'fixed',
-                top: pos.top,
-                left: pos.left,
-                width: pos.width,
-              }
-            : undefined
-        }
-      >
-        {hoveredAnchor && (
-          <>
-            <p className="scrolly-hover-tooltip__date">
-              {hoveredAnchor.labelDate}
-            </p>
-            <p className="scrolly-hover-tooltip__title">{hoveredAnchor.title}</p>
-            {tooltipMap[hoveredAnchor.date] && (
-              <p className="scrolly-hover-tooltip__body">
-                {tooltipMap[hoveredAnchor.date]}
+      {/* Tooltip — portalled to body so Safari's contain:layout on
+          .scrolly__viz-canvas doesn't trap position:fixed. */}
+      {createPortal(
+        <div
+          ref={cardRef}
+          role="tooltip"
+          className={`scrolly-hover-tooltip ${open && hoveredAnchor ? 'is-open' : ''}`}
+          style={
+            pos
+              ? {
+                  position: 'fixed',
+                  top: pos.top,
+                  left: pos.left,
+                  width: pos.width,
+                }
+              : undefined
+          }
+        >
+          {hoveredAnchor && (
+            <>
+              <p className="scrolly-hover-tooltip__date">
+                {hoveredAnchor.labelDate}
               </p>
-            )}
-          </>
-        )}
-      </div>
+              <p className="scrolly-hover-tooltip__title">{hoveredAnchor.title}</p>
+              {tooltipMap[hoveredAnchor.date] && (
+                <p className="scrolly-hover-tooltip__body">
+                  {tooltipMap[hoveredAnchor.date]}
+                </p>
+              )}
+            </>
+          )}
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }

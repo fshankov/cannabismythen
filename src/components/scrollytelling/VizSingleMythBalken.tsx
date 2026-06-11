@@ -24,6 +24,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AUDIENCE_ICONS_BY_GROUP, INDICATOR_ICONS } from '../../lib/icons';
 import type { CarmData, GroupId, Indicator } from './types';
 import {
@@ -303,39 +304,39 @@ export function VizSingleMythBalken({
         })}
       </div>
 
-      {/* Hover tooltip — single instance reused across rows. */}
-      <div
-        ref={tooltipCardRef}
-        role="tooltip"
-        className={`scrolly-hover-tooltip viz-balken-myth__tooltip${
-          tooltipOpen && hoveredSentence ? ' is-open' : ''
-        }`}
-        style={
-          tooltipPos
-            ? {
-                position: 'fixed',
-                top: tooltipPos.top,
-                left: tooltipPos.left,
-                width: tooltipPos.width,
-              }
-            : undefined
-        }
-      >
-        {hoveredIndicator && hoveredSentence && (
-          <>
-            <p className="scrolly-hover-tooltip__eyebrow">
-              {INDICATOR_LABEL_DE[hoveredIndicator]} · {GROUP_LABEL_DE[activeGroup]}
-            </p>
-            <p
-              className="scrolly-hover-tooltip__body"
-              // The sentence is a static string from a locked template; safe
-              // to render as text.
-            >
-              {hoveredSentence}
-            </p>
-          </>
-        )}
-      </div>
+      {/* Hover tooltip — portalled to body so Safari's contain:layout
+          on .scrolly__viz-canvas doesn't trap position:fixed. */}
+      {createPortal(
+        <div
+          ref={tooltipCardRef}
+          role="tooltip"
+          className={`scrolly-hover-tooltip viz-balken-myth__tooltip${
+            tooltipOpen && hoveredSentence ? ' is-open' : ''
+          }`}
+          style={
+            tooltipPos
+              ? {
+                  position: 'fixed',
+                  top: tooltipPos.top,
+                  left: tooltipPos.left,
+                  width: tooltipPos.width,
+                }
+              : undefined
+          }
+        >
+          {hoveredIndicator && hoveredSentence && (
+            <>
+              <p className="scrolly-hover-tooltip__eyebrow">
+                {INDICATOR_LABEL_DE[hoveredIndicator]} · {GROUP_LABEL_DE[activeGroup]}
+              </p>
+              <p className="scrolly-hover-tooltip__body">
+                {hoveredSentence}
+              </p>
+            </>
+          )}
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
