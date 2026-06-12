@@ -4859,6 +4859,8 @@ body.carm-modal-open {
   margin: 0;
   width: 18px;
   height: 18px;
+  flex-shrink: 0; /* keep the 18×18 box from shrinking when the label wraps
+                     to two lines (Asana 1215624298369931 — uneven sizes) */
   accent-color: var(--color-accent, #2d6a4f);
 }
 
@@ -8135,6 +8137,15 @@ body.carm-modal-open {
 .carm-tour-popover .factsheet-panel__section--collapsible { margin: 8px 0 0; }
 .carm-tour-popover .factsheet-panel__section-content { max-height: none; }
 .carm-tour-popover .factsheet-panel__section-title .carm-tour-icon { margin-right: 6px; }
+/* Long accordion titles (e.g. "Anwendungsbeispiel 3: Für welche Mythen …")
+   must wrap fully inside the narrow tour popover instead of being clipped at
+   the right edge. Top-align the summary row so the fixed-size chevron sits
+   beside a multi-line title, give the title the remaining width (min-width:0)
+   and let it break (Asana 1215624306460941). Scoped to the tour popover so
+   the Fakten-Karten factsheet headings are untouched. */
+.carm-tour-popover .factsheet-panel__section-toggle { align-items: flex-start; gap: 8px; }
+.carm-tour-popover .factsheet-panel__section-title { min-width: 0; overflow-wrap: anywhere; }
+.carm-tour-popover .factsheet-panel__chevron { flex: 0 0 auto; margin-top: 3px; }
 .carm-tour-popover .factsheet-panel__section-content ul,
 .carm-tour-popover .factsheet-panel__section-content ol { margin: 4px 0; padding-left: 18px; line-height: 1.5; }
 .carm-tour-popover .factsheet-panel__section-content li { margin: 2px 0; }

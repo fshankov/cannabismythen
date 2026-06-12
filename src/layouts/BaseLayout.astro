@@ -297,9 +297,9 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
 
         <ul class="nav__links" role="list">
           <li><a href="/fakten-karten/"    class="nav__link">42 Mythen</a></li>
-          <li><a href="/daten-explorer/"   class="nav__link">Daten-Explorer</a></li>
-          <li><a href="/meine-interessen/eltern/" class="nav__link">Meine Interessen</a></li>
           <li><a href="/quiz/"             class="nav__link">Quiz</a></li>
+          <li><a href="/meine-interessen/eltern/" class="nav__link">Meine Interessen</a></li>
+          <li><a href="/daten-explorer/"   class="nav__link">Daten-Explorer</a></li>
           <li><a href="/projekt/"          class="nav__link">Über das Projekt</a></li>
         </ul>
 
@@ -323,9 +323,9 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       <div class="nav__drawer">
         <ul class="nav__drawer-list" role="list">
           <li class="nav__drawer-item"><a href="/fakten-karten/"    class="nav__drawer-link">42 Mythen</a></li>
-          <li class="nav__drawer-item"><a href="/daten-explorer/"   class="nav__drawer-link">Daten-Explorer</a></li>
-          <li class="nav__drawer-item"><a href="/meine-interessen/eltern/" class="nav__drawer-link">Meine Interessen</a></li>
           <li class="nav__drawer-item"><a href="/quiz/"             class="nav__drawer-link">Quiz</a></li>
+          <li class="nav__drawer-item"><a href="/meine-interessen/eltern/" class="nav__drawer-link">Meine Interessen</a></li>
+          <li class="nav__drawer-item"><a href="/daten-explorer/"   class="nav__drawer-link">Daten-Explorer</a></li>
           <li class="nav__drawer-item"><a href="/projekt/"          class="nav__drawer-link">Über das Projekt</a></li>
         </ul>
       </div>
@@ -349,46 +349,11 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       />
     )}
 
-    {/* Feedbucket trigger — independent of the rich footer, always present.
-        Re-enabled 2026-06-01. To disable: wrap this block back in
-        FEEDBUCKET-DISABLED-START / FEEDBUCKET-DISABLED-END comment markers
-        and remove the head script + trigger script below. */}
-    <footer class="feedbucket-footer">
-      <p>
-        <a
-          id="footer-feedback-trigger"
-          class="footer-feedback-link"
-          href="?feedbucketKey=cm-feedback-2026"
-          rel="nofollow"
-        >Feedback geben</a>
-      </p>
-    </footer>
-
-    {/* Reviewer-only feedback trigger (re-enabled 2026-06-01).
-        Clicking the footer link reloads the current page with
-        ?feedbucketKey=<secret> appended; Feedbucket's Query Trigger
-        (configured in the project's Widget settings) then activates the
-        widget for this visitor and sets a persistence cookie for 1 hour, so
-        the widget stays available on subsequent pages without the key.
-
-        The href is rewritten on load so existing query params are preserved
-        (e.g. /quiz/?theme=… stays intact, just gains feedbucketKey). The
-        secret value here MUST match what's configured in the Feedbucket
-        project dashboard. If you rotate the secret, update both places. */}
-    <script is:inline>
-      (function () {
-        var a = document.getElementById('footer-feedback-trigger');
-        if (!a) return;
-        try {
-          var u = new URL(window.location.href);
-          u.searchParams.set('feedbucketKey', 'cm-feedback-2026');
-          a.href = u.toString();
-        } catch (e) {
-          // URL ctor failed (very old browser) — leave the static href; the
-          // default href is still valid, it just discards prior query params.
-        }
-      })();
-    </script>
+    {/* "Feedback geben" button removed per ISD request (Asana 1215622811809429).
+        Feedbucket still loads via the head install script above, so reviewers
+        can pin feedback without an explicit footer trigger. To restore the
+        button, re-add a <footer class="feedbucket-footer"> link to
+        ?feedbucketKey=cm-feedback-2026 plus the query-param rewrite script. */}
 
     {/* Active nav link: sets aria-current + active class from URL */}
     <script is:inline>
@@ -570,10 +535,6 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
         <svg class="mobile-tab-bar__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
         <span>42 Mythen</span>
       </a>
-      <a href="/daten-explorer/" class="mobile-tab-bar__item">
-        <svg class="mobile-tab-bar__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
-        <span>Daten</span>
-      </a>
       <a href="/quiz/" class="mobile-tab-bar__item">
         <svg class="mobile-tab-bar__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>
         <span>Quiz</span>
@@ -581,6 +542,10 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
       <a href="/meine-interessen/eltern/" class="mobile-tab-bar__item">
         <svg class="mobile-tab-bar__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
         <span>Interessen</span>
+      </a>
+      <a href="/daten-explorer/" class="mobile-tab-bar__item">
+        <svg class="mobile-tab-bar__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
+        <span>Daten</span>
       </a>
       <a href="/projekt/" class="mobile-tab-bar__item">
         <svg class="mobile-tab-bar__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>

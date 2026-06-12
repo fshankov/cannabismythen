@@ -101,14 +101,13 @@ export function pointsForSchritte(s: Schritte): 3 | 2 | 1 | 0 {
   return (3 - s) as 3 | 2 | 1 | 0;
 }
 
-/** Display string for one answer's points (per-card badge). "+3 / +2 / +1"
- *  for a scoring answer, bare "0" for the opposite-pole answer (rendered in
- *  rose; the verdict phrase next to it carries the comment). 2026-06-04
- *  (Fedor): the "+" is back and the scale is the integer 3/2/1/0 ladder. */
+/** Display string for one answer's points (per-card badge): bare "3 / 2 / 1"
+ *  for a scoring answer, "0" for the opposite-pole answer (rendered in rose;
+ *  the verdict phrase next to it carries the comment). The leading "+" was
+ *  dropped per ISD request (Asana 1215366221348214) — integer 3/2/1/0 ladder. */
 export function pointsDisplay(s: Schritte): string {
   const p = pointsForSchritte(s);
-  if (p === 0) return "0";
-  return `+${p}`;
+  return `${p}`;
 }
 
 /** Module score as an integer percentage (0–100). Sum of per-question

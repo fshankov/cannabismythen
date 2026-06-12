@@ -96,7 +96,9 @@ export function VizTeamRow({
         </a>
       </div>
 
-      <p className="viz-team__landesstellen">{landesstellenCredit}</p>
+      {landesstellenCredit && (
+        <p className="viz-team__landesstellen">{landesstellenCredit}</p>
+      )}
     </div>
   );
 }
