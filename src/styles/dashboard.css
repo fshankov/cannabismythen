@@ -4318,7 +4318,9 @@ body.carm-modal-open {
 .carm-drawer-root {
   position: fixed;
   inset: 0;
-  z-index: 2100;
+  /* 10000 keeps the drawer above the nav pill (100), the mobile tab bar (200),
+     and any other page-level chrome so the backdrop fully covers everything. */
+  z-index: 10000;
   display: flex;
 }
 
@@ -4412,19 +4414,20 @@ body.carm-modal-open {
   to   { transform: translateY(0);    opacity: 1; }
 }
 
+/* Header mirrors FactsheetPanel: position:relative so the close button can
+   be absolutely positioned top-right (same pattern). Padding-right 56px
+   reserves space for the 44px close button at right:12. */
 .carm-drawer__header {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-md, 16px);
-  padding: var(--space-md, 16px) var(--space-lg, 24px);
+  padding: 24px 56px 20px 32px;
   border-bottom: 1px solid var(--color-border, #e2e8f0);
   flex-shrink: 0;
+  background: var(--color-surface, #ffffff);
 }
 
-/* Title block grows to fill the row so the close button stays
-   right-aligned. The optional `headerEnd` slot sits between the
-   titles and the close button — used by FilterDrawer to show the
-   "X Mythen ausgewählt" badge without disrupting the body layout. */
 .carm-drawer__header-titles {
   flex: 1 1 auto;
   min-width: 0;
@@ -4439,9 +4442,10 @@ body.carm-modal-open {
 .carm-drawer__title {
   margin: 0;
   font-family: var(--font-display, inherit);
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
   color: var(--color-text, #1a1a2e);
 }
 
@@ -4451,32 +4455,49 @@ body.carm-modal-open {
   color: var(--color-text-muted, #718096);
 }
 
+/* Absolutely positioned close button — same layout contract as
+   .factsheet-panel__close: top:8px right:12px, 44×44 touch target,
+   muted color → text-color on hover. */
 .carm-drawer__close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
   appearance: none;
-  background: transparent;
+  background: none;
   border: none;
-  border-radius: var(--radius-md, 8px);
-  /* 44px minimum touch target (WCAG 2.5.5) — icon stays visually centered. */
+  min-width: 44px;
+  min-height: 44px;
   width: 44px;
   height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary, #4a5568);
+  color: var(--color-text-muted, #718096);
   cursor: pointer;
-  transition: background var(--transition-fast, 0.15s ease);
+  padding: 0;
+  border-radius: var(--radius-sm, 4px);
+  transition: background var(--transition-fast, 0.15s ease), color var(--transition-fast, 0.15s ease);
 }
 
-.carm-drawer__close:hover { background: var(--color-bg-subtle, #eeeee8); }
+.carm-drawer__close:hover {
+  background: var(--color-bg, #f4f4f0);
+  color: var(--color-text, #1a1a2e);
+}
+
 .carm-drawer__close:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
   outline-offset: 2px;
+  background: var(--color-bg, #f4f4f0);
+  color: var(--color-text, #1a1a2e);
 }
 
+/* Body — white surface matching FactsheetPanel; generous 32px sides so
+   the content rail aligns with the header's left padding. */
 .carm-drawer__body {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: var(--space-md, 16px) var(--space-lg, 24px);
+  padding: 32px 32px 24px;
+  background: var(--color-surface, #ffffff);
 }
 
 .carm-drawer__footer {
@@ -4484,7 +4505,7 @@ body.carm-modal-open {
   display: flex;
   gap: var(--space-sm, 8px);
   justify-content: flex-end;
-  padding: var(--space-md, 16px) var(--space-lg, 24px);
+  padding: 16px 32px;
   border-top: 1px solid var(--color-border, #e2e8f0);
   background: var(--color-surface, #ffffff);
 }
@@ -4821,13 +4842,16 @@ body.carm-modal-open {
   margin-bottom: var(--space-lg, 24px);
 }
 
+/* Section heading — plain bold label matching FactsheetPanel's
+   .factsheet-panel__section-heading: no colored border, no extra indent. */
 .carm-filter-section__title {
-  margin: 0 0 var(--space-sm, 8px);
-  font-size: 0.78rem;
+  margin: 0;
+  padding-bottom: 16px;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--color-text-secondary, #4a5568);
+  color: var(--color-text-muted, #718096);
 }
 
 .carm-filter-section__list {
@@ -4836,32 +4860,38 @@ body.carm-modal-open {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .carm-checkbox,
 .carm-radio {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 4px;
-  font-size: 0.92rem;
+  gap: var(--space-sm, 8px);
+  padding: 8px 10px;
+  font-size: 0.9rem;
   color: var(--color-text, #1a1a2e);
   cursor: pointer;
   border-radius: var(--radius-sm, 4px);
+  transition: background var(--transition-fast, 0.15s ease);
 }
 
+/* Hover tints the whole row a soft accent green — parity with the Fakten-Karten
+   42-Mythen popup (.fakten-filter-checkbox / .fakten-search__label). The box
+   itself stays native (accent-color only); the old green outline-on-row-hover
+   read as a false selection (2026-06-12). */
 .carm-checkbox:hover,
-.carm-radio:hover { background: var(--color-bg-subtle, #eeeee8); }
+.carm-radio:hover { background: var(--color-accent-light, #e8f5ef); }
 
 .carm-checkbox input,
 .carm-radio input {
   margin: 0;
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0; /* keep the 18×18 box from shrinking when the label wraps
-                     to two lines (Asana 1215624298369931 — uneven sizes) */
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0; /* keep the box from shrinking when the label wraps to two
+                     lines (Asana 1215624298369931 — uneven sizes) */
   accent-color: var(--color-accent, #2d6a4f);
+  cursor: pointer;
 }
 
 .carm-mythos-search {
@@ -6234,18 +6264,52 @@ body.carm-modal-open {
    Sits between the search row and the accordion section. Each chip
    carries a verdict arrow, truncated title, and an X to remove. */
 .carm-filter-selected {
-  margin: 0 0 12px;
-  padding: 8px 4px 4px;
+  margin: 0 0 16px;
+  padding: 12px 4px 12px;
   border-bottom: 1px solid var(--color-border, #e2e8f0);
 }
 
+/* Header row of the selected-myths block: the "X Mythen ausgewählt" label on
+   the left, a "remove all" button on the right. 32px below it before the chips
+   (Fedor 2026-06-12). */
+.carm-filter-selected__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
 .carm-filter-selected__label {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 0.74rem;
   font-weight: 600;
   color: var(--color-text-muted, #718096);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+/* Clears every individually-selected myth at once (the chips). Mirrors the
+   reference reset link (.fakten-filter-dropdown__reset). */
+.carm-filter-selected__clear-all {
+  appearance: none;
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-accent, #2d6a4f);
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm, 4px);
+  transition: background var(--transition-fast, 0.15s ease);
+}
+
+.carm-filter-selected__clear-all:hover,
+.carm-filter-selected__clear-all:focus-visible {
+  background: var(--color-accent-light, #e8f5ef);
+  outline: none;
 }
 
 .carm-filter-selected__chips {
@@ -6254,7 +6318,7 @@ body.carm-modal-open {
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 8px;
 }
 
 .carm-filter-selected__chip {
@@ -6313,10 +6377,24 @@ body.carm-modal-open {
   display: flex;
   align-items: center;
   gap: 0;
-  padding: 12px 4px 14px;
-  margin: 0 0 12px;
-  background: var(--color-bg, #f4f4f0);
+  padding: 12px 0;
+  margin: 0 0 14px;
+  background: var(--color-surface, #ffffff);
   border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+/* The drawer body has 32px top padding, so a `top:0` sticky search sticks
+   32px down and myth rows showed through that band while scrolling. This
+   opaque cap fills the band — done WITHOUT a negative margin, which had
+   pulled the "Einzelne Mythen" heading up underneath the pill (2026-06-12). */
+.carm-filter-search-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 33px;
+  background: var(--color-surface, #ffffff);
 }
 
 .carm-filter-search-row__icon {
@@ -6456,14 +6534,14 @@ body.carm-modal-open {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .carm-filter-accordion__item {
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: var(--radius-md, 8px);
-  background: var(--color-surface, #ffffff);
-  overflow: hidden;
+  /* Flattened (2026-06-12) to match the 42-Mythen popup — no card border,
+     radius, fill, or shadow. Categories read as a clean borderless list. */
+  border: 0;
+  background: transparent;
 }
 
 /* Stage 6 v3: heading row = small checkbox (left) + a wide button that
@@ -6471,15 +6549,23 @@ body.carm-modal-open {
    click the box to select OR click the row text/chevron to expand. */
 .carm-filter-accordion__heading {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: 4px;
-  padding: 2px 6px 2px 6px;
+  border-radius: var(--radius-sm, 4px);
+  transition: background var(--transition-fast, 0.15s ease);
+}
+
+/* Whole-row soft tint on hover — matches the myth rows and the 42-Mythen
+   popup. The box + toggle children stay transparent so the tint isn't
+   doubled where they overlap (2026-06-12). */
+.carm-filter-accordion__heading:hover {
+  background: var(--color-accent-light, #e8f5ef);
 }
 
 .carm-filter-accordion__heading .carm-checkbox--category {
   flex: 0 0 auto;
   margin: 0;
-  padding: 6px;
+  padding: 8px;
   border-radius: var(--radius-sm, 4px);
   cursor: pointer;
   display: inline-flex;
@@ -6487,11 +6573,11 @@ body.carm-modal-open {
 }
 
 .carm-filter-accordion__heading .carm-checkbox--category:hover {
-  background: var(--color-bg-subtle, #eeeee8);
+  background: transparent;
 }
 
 .carm-filter-accordion__heading .carm-checkbox__count {
-  margin-left: 6px;
+  margin-left: 8px;
   color: var(--color-text-muted, #718096);
   font-size: 0.78rem;
   font-weight: 500;
@@ -6506,12 +6592,12 @@ body.carm-modal-open {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 10px 8px;
   border-radius: var(--radius-sm, 4px);
   color: var(--color-text, #1a1a2e);
   font: inherit;
-  font-size: 0.92rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   text-align: left;
   cursor: pointer;
   transition: background var(--duration-fast, 150ms) var(--ease-out, ease),
@@ -6519,7 +6605,7 @@ body.carm-modal-open {
 }
 
 .carm-filter-accordion__toggle:hover {
-  background: var(--color-bg-subtle, #eeeee8);
+  background: transparent;
 }
 
 .carm-filter-accordion__toggle:focus-visible {
@@ -6534,7 +6620,7 @@ body.carm-modal-open {
 
 .carm-filter-accordion__chevron {
   flex: 0 0 auto;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--color-text-secondary, #4a5568);
   transition: transform var(--duration-fast, 150ms) var(--ease-out, ease);
 }
 
@@ -6571,9 +6657,10 @@ body.carm-modal-open {
 }
 
 .carm-filter-accordion__panel {
-  padding: 4px 10px 10px;
-  border-top: 1px solid var(--color-border, #e2e8f0);
-  background: var(--color-bg-subtle, #fbfbf7);
+  /* No fill, no divider — flattened. The left indent nests the myths under
+     the category name; myth rows carry their own row padding + hover. */
+  padding: 2px 0 8px 28px;
+  background: transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6585,19 +6672,11 @@ body.carm-modal-open {
 
 .carm-filter-myth-list {
   margin: 0;
-  padding: 0;
 }
 
-.carm-checkbox--myth {
-  align-items: flex-start;
-  gap: 8px;
-  padding: 6px 4px;
-  border-radius: 6px;
-}
-
-.carm-checkbox--myth:hover {
-  background: var(--color-bg-subtle, #eeeee8);
-}
+/* .carm-checkbox--myth inherits everything it needs from the base
+   .carm-checkbox (centered box, 8px gap, 8px/10px padding, radius-sm, soft
+   accent-light hover) so it matches the 42-Mythen popup rows (2026-06-12). */
 
 .carm-checkbox__count {
   margin-left: 6px;

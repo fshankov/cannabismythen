@@ -312,10 +312,24 @@ export default function FilterDrawer({
               selectedMyths.length === 1 ? 'Mythos' : 'Mythen'
             } ausgewählt`}
           >
-            <p className="carm-filter-selected__label">
-              {selectedMyths.length}{' '}
-              {selectedMyths.length === 1 ? 'Mythos' : 'Mythen'} ausgewählt
-            </p>
+            <div className="carm-filter-selected__head">
+              <p className="carm-filter-selected__label">
+                {selectedMyths.length}{' '}
+                {selectedMyths.length === 1 ? 'Mythos' : 'Mythen'} ausgewählt
+              </p>
+              {/* Clears every individually-selected myth at once so the user
+                  doesn't have to dismiss each chip. German "Alle entfernen"
+                  = "Remove all" (standard on German filter UIs). The footer
+                  keeps the broader "Alle Filter zurücksetzen". */}
+              <button
+                type="button"
+                className="carm-filter-selected__clear-all"
+                onClick={() => update('mythIds', [])}
+                aria-label="Alle ausgewählten Mythen entfernen"
+              >
+                Alle entfernen
+              </button>
+            </div>
             <ul className="carm-filter-selected__chips" role="list">
               {selectedMyths.map((m) => {
                 const txt = getMythShortText(m, 'de');

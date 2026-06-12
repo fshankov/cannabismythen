@@ -214,6 +214,12 @@ body::after {
 body:has(.scrolly) .nav-wrapper {
   position: absolute;
 }
+/* Site-footer sits below the dark scrolly canvas; reset inherited body
+   color (#ecf4ef) so all footer text shows dark as on every other page. */
+body:has(.scrolly) .site-footer {
+  color: #404943;
+}
+
 body:has(.scrolly) .feedbucket-footer {
   border-top: none;
   padding: 0 0 1.5rem;
@@ -238,7 +244,7 @@ body:has(.scrolly) .nav.nav--scrolled {
   border-color: rgba(48, 95, 73, 0.55);
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
 }
-body:has(.scrolly) .nav__brand { color: var(--fg); }
+body:has(.scrolly) .nav .nav__brand { color: var(--fg); }
 body:has(.scrolly) .nav__link { color: var(--fg-muted); }
 body:has(.scrolly) .nav__link:not(.nav__link--active):hover { color: var(--fg); }
 body:has(.scrolly) .nav__link--active { color: var(--fg); }
