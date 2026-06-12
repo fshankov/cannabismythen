@@ -4310,6 +4310,13 @@ body.fakten-karten-page main {
 /* Reset the lifted-in `.carm-filter-search-row` chrome (from
    dashboard.css) and reapply the glassmorphism look for the inline
    Fakten-Karten use. */
+
+/* dashboard.css adds a ::before cap to fill the sticky-scroll gap in the
+   Daten-Explorer drawer; suppress it here where the row is not sticky. */
+.fakten-filter-bar .carm-filter-search-row::before {
+  content: none;
+}
+
 .fakten-filter-bar .carm-filter-search-row {
   /* `relative` so the absolutely-positioned magnifier anchors to this
      glass row and centres vertically against it. */
