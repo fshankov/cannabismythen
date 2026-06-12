@@ -10,14 +10,14 @@ steps:
       Im April 2024 wurde Cannabis in Deutschland teil-legalisiert. Aber immer noch stehen viele Fragen rund um Cannabis im Raum — und fast jede:r hat eine Meinung dazu.
 
 
-      Das Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD) wollte es genau wissen: Was glaubt die Bevölkerung wirklich über Cannabis — und wie viel davon stimmt?
+      Das Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD) wollte es genau wissen: Was glaubt die Bevölkerung über Cannabis zu wissen — und wie viel davon stimmt?
     legend: "★ Projektzeitraum CaRM-Studie · April 2024 bis Dezember 2025"
     hint: ""
   - heading: |-
       Jede:r in Deutschland
       hat eine Meinung über Cannabis.
     bodyText: >-
-      Online, am Küchentisch, im Wartezimmer — Cannabis ist ein Thema. Das ISD trug unterschiedliche Aussagen zu Cannabis systematisch zusammen: 7.408 frei formulierte Aussagen — aus einer Online-Befragung von 1.041 Personen, Gesprächen mit 60 Präventionsfachkräften und einer Analyse einschlägiger (Online-)Medien.
+      Online, am Küchentisch, im Wartezimmer — Cannabis ist ein Thema. Das ISD trug unterschiedliche Aussagen über Cannabis systematisch zusammen: 7.408 frei formulierte Aussagen — aus einer Online-Befragung von 1.041 Personen, einer Befragung von 60 Präventionsfachkräften und einer Analyse einschlägiger (Online-)Medien.
 
 
       Manches klingt plausibel, manches widersprüchlich. Was davon stimmt eigentlich? Genau das wollte das ISD herausfinden.
@@ -173,8 +173,7 @@ namedExperts: []  # Iter-14 (CAR-21): three expert entries deleted from
                   # ships in the separate Footer prompt. Kept as `[]`
                   # rather than removing the key so the YAML still
                   # matches `ScrollyContent.namedExperts` typing.
-landesstellenCredit: >-
-  Mit Unterstützung der Landesstellen Schleswig-Holstein, Mecklenburg-Vorpommern, Berlin und regionaler Koordinationsstellen.
+landesstellenCredit: ''
 footerKontakt:
   label: Kontakt
   lines:
