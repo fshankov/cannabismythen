@@ -68,12 +68,7 @@ const dashboard = question.relatedDashboard
     label: dashboardLinkLabel(url),
   }));
 
-// Verwandte Mythen hidden site-wide pending ISD review of how related myths
-// are generated (Asana 1215623256112132 / 1215623511864902). The relatedMyths
-// data is kept; only this rail's "Verwandte Mythen" group is gated off. Flip
-// SHOW_RELATED_MYTHS to true to re-enable.
-const SHOW_RELATED_MYTHS = false;
-const hasRail = primary || (SHOW_RELATED_MYTHS && related.length > 0) || dashboard.length > 0;
+const hasRail = primary || showRelated || dashboard.length > 0;
 ---
 
 {hasRail && (
@@ -93,7 +88,7 @@ const hasRail = primary || (SHOW_RELATED_MYTHS && related.length > 0) || dashboa
       </div>
     )}
 
-    {SHOW_RELATED_MYTHS && related.length > 0 && (
+    {showRelated && (
       <div class="faq-related-rail__group">
         <span class="faq-related-rail__heading">Verwandte Mythen</span>
         <ul class="faq-related-rail__list">
