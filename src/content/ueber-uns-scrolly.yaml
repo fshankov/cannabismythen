@@ -7,7 +7,7 @@ steps:
       Hand aufs Herz:
       Wie viel von dem, was du über Cannabis weißt, stimmt eigentlich?
     bodyText: >-
-      Im April 2024 wurde Cannabis in Deutschland teil-legalisiert. Das Konsumcannabisgesetz beendete eine jahrzehntelange Verbotskultur. Aber immer noch stehen viele Fragen rund um Cannabis im Raum — und fast jede:r hat eine Meinung dazu.
+      Im April 2024 wurde Cannabis in Deutschland teil-legalisiert. Aber immer noch stehen viele Fragen rund um Cannabis im Raum — und fast jede:r hat eine Meinung dazu.
 
 
       Das Institut für interdisziplinäre Sucht- und Drogenforschung Hamburg (ISD) wollte es genau wissen: Was glaubt die Bevölkerung wirklich über Cannabis — und wie viel davon stimmt?
@@ -45,10 +45,10 @@ steps:
 
       Für jede der 42 Thesen wurden fünf Indikatoren erhoben — über fünf Zielgruppen hinweg:
 
-      {icon:adults} Volljährige (18–70)
-      {icon:minors} Minderjährige (16–17)
+      {icon:adults} Volljährige (18–70 Jahre)
+      {icon:minors} Minderjährige (16–17 Jahre)
       {icon:consumers} Konsument:innen
-      {icon:young_adults} Junge Erwachsene (18–26)
+      {icon:young_adults} Junge Erwachsene (18–26 Jahre)
       {icon:parents} Eltern
     hint: ""
   - heading: |-
@@ -100,8 +100,8 @@ steps:
 
       {icon:faktenkarten} Eine Übersicht über die 42 Mythen mit wissenschaftlicher Klassifikation, Quellen und Erklärungen je Mythos.
       {icon:quiz} Wie steht es um dein Wissen zu Cannabismythen? Mach das Quiz und finde es heraus.
-      {icon:daten-explorer} Einschätzungen von 5 Zielgruppen zu 42 Mythen und zu Informationswegen erkunden.
       {icon:meine-interessen} Meine Interessen — die FAQ, sortiert nach Themen und Zielgruppen.
+      {icon:daten-explorer} Einschätzungen von 5 Zielgruppen zu 42 Mythen und zu Informationswegen erkunden.
     hint: ""
   - heading: Wer hinter der Studie steht.
     bodyText: >-
@@ -184,7 +184,7 @@ footerKontakt:
 footerFoerderung:
   label: Förderung
   body: >-
-    Bundesinstitut für Öffentliche Gesundheit (BIÖG).
+    Bundesinstitut für Öffentliche Gesundheit (BIÖG) im Auftrag des Bundesministeriums für Gesundheit.
 footerZitierweise:
   label: Zitierweise
   body: "ISD Hamburg (2025). Cannabis: Mythen & Evidenz — Interaktives Informationstool."
