@@ -323,6 +323,12 @@ AskUserQuestion before writing.
   redirect changes need to consider both edge and origin behavior.
 - **`.superpowers/`, `.playwright-mcp/`, `editorial/`, `_local/`** — session
   artifacts and editorial scratch space. Don't refactor or "clean them up".
+- **Nav / menu (HARD)** — the floating pill nav is fragile. Any change to
+  `.nav-wrapper`, `.nav-blur-shield`, `.nav`, `.nav__*`, `body:not(.has-hero)`
+  nav rules, or `main { padding-top }` in `global.css`, or the `isHero` /
+  `publishHeight` scripts in `BaseLayout.astro` requires an explicit
+  AskUserQuestion confirmation before editing. Past unreviewed nav changes broke
+  page-level h1 positioning and scroll behaviour across the whole site.
 
 ## The Weird Things (will break if you don't know)
 
