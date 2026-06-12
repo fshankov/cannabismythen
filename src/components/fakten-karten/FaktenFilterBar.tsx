@@ -56,6 +56,8 @@ interface Props {
   /** Clears both the search text and all myth checkboxes. Used by the X
    *  button so the grid always fully resets when the user clears the input. */
   onClearSearch: () => void;
+  /** Clears only the category group ticks (X button on the Kategorien trigger). */
+  onClearGroups: () => void;
   onToggleGroup: (group: string) => void;
   onToggleMyth: (mythNumber: number) => void;
   onReset: () => void;
@@ -123,7 +125,6 @@ function MythRow({
           className="fakten-search__cat-icon"
           style={{ color: meta.label }}
           aria-label={`Kategorie: ${m.categoryGroup}`}
-          title={m.categoryGroup}
         >
           <Icon size={14} strokeWidth={2} aria-hidden="true" />
         </span>
@@ -140,6 +141,7 @@ export default function FaktenFilterBar({
   searchQuery,
   onSearchChange,
   onClearSearch,
+  onClearGroups,
   onToggleGroup,
   onToggleMyth,
   onReset,
@@ -328,37 +330,59 @@ export default function FaktenFilterBar({
         className="fakten-filter-bar__category fakten-filter-dropdown"
         ref={catContainerRef}
       >
-        <button
-          ref={catTriggerRef}
-          type="button"
-          className={`fakten-filter-dropdown__trigger${
-            catDropdownOpen ? " is-open" : ""
-          }`}
-          aria-haspopup="true"
-          aria-expanded={catDropdownOpen}
-          onClick={() => setCatDropdownOpen((v) => !v)}
-        >
-          <ChevronDown
-            size={14}
-            strokeWidth={2}
-            aria-hidden="true"
-            className="fakten-filter-dropdown__chevron"
-          />
-          <span className="fakten-filter-dropdown__label">
-            {/* "Alle Kategorien" only when nothing is selected. With selection
-                the label flips to "Kategorien (n)" so the chip never says
-                "Alle Kategorien (2)" (a11y audit 2026-06-10). */}
-            {selectedGroupCount > 0 ? 'Kategorien' : 'Alle Kategorien'}
+        <div className="fakten-filter-dropdown__trigger-row">
+          <button
+            ref={catTriggerRef}
+            type="button"
+            className={`fakten-filter-dropdown__trigger${
+              catDropdownOpen ? " is-open" : ""
+            }`}
+            aria-haspopup="true"
+            aria-expanded={catDropdownOpen}
+            onClick={() => setCatDropdownOpen((v) => !v)}
+          >
+            <ChevronDown
+              size={14}
+              strokeWidth={2}
+              aria-hidden="true"
+              className="fakten-filter-dropdown__chevron"
+            />
+            <span className="fakten-filter-dropdown__label">
+              {/* "Alle Kategorien" only when nothing is selected. */}
+              {selectedGroupCount > 0 ? "Kategorien" : "Alle Kategorien"}
+            </span>
             {selectedGroupCount > 0 && (
               <span
-                className="fakten-filter-dropdown__count"
+                className="fakten-search-count fakten-filter-dropdown__count-badge"
                 aria-label={`${selectedGroupCount} ausgewählt`}
               >
-                {' '}({selectedGroupCount})
+                ({selectedGroupCount})
               </span>
             )}
-          </span>
-        </button>
+          </button>
+          {selectedGroupCount > 0 && (
+            <button
+              type="button"
+              className="fakten-filter-dropdown__clear"
+              aria-label="Kategoriefilter löschen"
+              onClick={() => onClearGroups()}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {catDropdownOpen && (
           // Plain disclosure pattern, not an ARIA menu — the contents are
@@ -569,18 +593,6 @@ export default function FaktenFilterBar({
         )}
       </div>
 
-      <div className="fakten-filter-bar__export">
-        <button
-          type="button"
-          className="carm-btn carm-explorer__export"
-          onClick={onOpenExport}
-          aria-label="Mythen exportieren"
-        >
-          <Download size={14} strokeWidth={2} aria-hidden="true" />
-          Exportieren
-        </button>
-      </div>
-
       <div className="fakten-filter-bar__view-toggle">
         <PivotToggle
           options={[
@@ -607,6 +619,18 @@ export default function FaktenFilterBar({
           onChange={onSetView}
           aria-label="Ansicht wechseln"
         />
+      </div>
+
+      <div className="fakten-filter-bar__export">
+        <button
+          type="button"
+          className="carm-btn carm-explorer__export"
+          onClick={onOpenExport}
+          aria-label="Mythen exportieren"
+        >
+          <Download size={16} strokeWidth={2} aria-hidden="true" />
+          Exportieren
+        </button>
       </div>
 
       </div>

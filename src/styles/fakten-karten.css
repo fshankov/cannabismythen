@@ -129,10 +129,16 @@
   background: color-mix(in srgb, var(--rv, #047857) 8%, transparent);
 }
 
-/* Hovering an already-open row LIGHTENS the tint (8% → 3%) so it's clear you
-   can click to close it, without going darker. */
+/* On an open row, swap the trailing → for a × close hint (mouse + keyboard). */
+.fakten-list-row.is-expanded:hover .fakten-list-statement::after,
+.fakten-list-row.is-expanded .fakten-list-statement:focus-visible::after {
+  content: " ×";
+}
+
+/* Hovering an open row: keep the expanded bg unchanged (no lightening),
+   add a subtle 2px ring in the accent green at 5% opacity instead. */
 .fakten-list-row.is-expanded:hover {
-  background: color-mix(in srgb, var(--rv, #047857) 3%, transparent);
+  background: color-mix(in srgb, var(--rv, #047857) 8%, transparent);
 }
 
 .fakten-list-table td {
@@ -270,7 +276,8 @@
 /* CTA styled after the Karten back-face button (.fakten-card__cta). */
 .fakten-list-detail__cta {
   display: inline-block;
-  margin-top: 12px;
+  margin-top: 32px;
+  margin-bottom: 32px;
   padding: 9px 18px;
   font: inherit;
   font-size: 0.85rem;

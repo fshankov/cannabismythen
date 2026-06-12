@@ -92,7 +92,7 @@ myths.sort((a, b) => a.mythNumber - b.mythNumber);
 <BaseLayout title="42 Mythen" description="42 Cannabis-Mythen — sofort erkennbar wahr oder falsch, mit wissenschaftlicher Einordnung." bgTexture extraBodyClass="fakten-karten-page">
   <header class="fakten-page-header" data-reveal>
     <h1 class="fakten-page-header__h1">42 Mythen</h1>
-    <p class="fakten-page-header__sub">Stimmt das? 42 verbreitete Cannabis-Mythen, sofort eingeordnet — tippe auf eine Karte für die Erklärung. Oder lasse Dir eine <a href="/fakten-karten/?view=liste">Liste aller Mythen anzeigen</a>.</p>
+    <p class="fakten-page-header__sub">Stimmt das? 42 verbreitete Cannabis-Mythen, sofort eingeordnet — tippe auf eine Karte für die Erklärung. Oder lasse Dir eine <a href="/fakten-karten/?view=liste" data-list-toggle>Liste aller Mythen anzeigen</a>.</p>
   </header>
   <div data-reveal-fade>
     <FaktenKartenExplorer
@@ -108,3 +108,18 @@ myths.sort((a, b) => a.mythNumber - b.mythNumber);
     </noscript>
   </div>
 </BaseLayout>
+
+<script>
+  const toggleLink = document.querySelector('[data-list-toggle]');
+  if (toggleLink) {
+    toggleLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent('fakten:setView', { detail: 'liste' }));
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('view', 'liste');
+        history.replaceState(history.state, '', url);
+      } catch {}
+    });
+  }
+</script>

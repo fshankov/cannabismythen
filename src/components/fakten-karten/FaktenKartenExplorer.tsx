@@ -133,6 +133,10 @@ export default function FaktenKartenExplorer({
     setSearchQuery("");
   }, []);
 
+  const clearGroups = useCallback(() => {
+    setSelectedGroups(new Set());
+  }, []);
+
   /** Clear search text + myth ticks together.
    *  Called by the X button in FaktenFilterBar so that clearing the
    *  input always resets the grid fully (no invisible lingering ticks).
@@ -217,6 +221,17 @@ export default function FaktenKartenExplorer({
     },
     [allMyths, handleShowFactsheet],
   );
+
+  // Listen for programmatic view switches dispatched from outside the island
+  // (e.g. the "Liste aller Mythen anzeigen" link in the page header).
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const v = (e as CustomEvent<string>).detail;
+      if (v === "liste" || v === "karten") setView(v);
+    };
+    window.addEventListener("fakten:setView", handler);
+    return () => window.removeEventListener("fakten:setView", handler);
+  }, []);
 
   // Sync popup state to Back / Forward navigation (Audit B-02).
   useEffect(() => {
@@ -358,6 +373,7 @@ export default function FaktenKartenExplorer({
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onClearSearch={clearSearch}
+        onClearGroups={clearGroups}
         onToggleGroup={toggleGroup}
         onToggleMyth={toggleMyth}
         onReset={resetFilters}
@@ -365,6 +381,18 @@ export default function FaktenKartenExplorer({
         onSetView={setView}
         onOpenExport={() => setExportOpen(true)}
       />
+
+      {/* Live region — screen readers announce filtered count when filters change */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap" }}
+      >
+        {filteredMyths.length === allMyths.length
+          ? `${allMyths.length} Mythen angezeigt`
+          : `${filteredMyths.length} von ${allMyths.length} Mythen gefiltert`}
+      </div>
 
       <FaktenExport
         open={exportOpen}

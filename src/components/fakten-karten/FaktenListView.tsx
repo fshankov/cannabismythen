@@ -132,7 +132,7 @@ export default function FaktenListView({ myths, onShowFactsheet }: Props) {
       <table className="fakten-list-table">
         <thead>
           <tr>
-            <th className="col-num" aria-sort={ariaSortFor("num")}>
+            <th scope="col" className="col-num" aria-sort={ariaSortFor("num")}>
               <button
                 type="button"
                 className="fakten-list-sort"
@@ -142,8 +142,8 @@ export default function FaktenListView({ myths, onShowFactsheet }: Props) {
                 {renderSortInd("num")}
               </button>
             </th>
-            <th>Mythos</th>
-            <th className="col-verdict" aria-sort={ariaSortFor("verdict")}>
+            <th scope="col">Mythos</th>
+            <th scope="col" className="col-verdict" aria-sort={ariaSortFor("verdict")}>
               <button
                 type="button"
                 className="fakten-list-sort"
@@ -153,7 +153,7 @@ export default function FaktenListView({ myths, onShowFactsheet }: Props) {
                 {renderSortInd("verdict")}
               </button>
             </th>
-            <th className="col-expand" />
+            <th scope="col" className="col-expand" />
           </tr>
         </thead>
         <tbody>
@@ -174,7 +174,11 @@ export default function FaktenListView({ myths, onShowFactsheet }: Props) {
                       href={`/daten-explorer/${myth.slug}/`}
                       className="fakten-list-statement"
                       onClick={(e) => {
-                        if (onShowFactsheet) e.preventDefault();
+                        if (onShowFactsheet) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleExpand(myth.mythNumber);
+                        }
                       }}
                     >
                       {myth.title}

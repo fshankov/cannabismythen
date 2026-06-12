@@ -4298,11 +4298,10 @@ body.fakten-karten-page main {
 
 .fakten-filter-section__label {
   margin: 0 0 16px;
-  /* Bumped 10→11px and 0.75→0.9 opacity for legibility (Audit B-16) — a
-     10px, heavily-tracked label at 0.75 was borderline over the texture. */
-  font-size: 11px;
+  font-family: var(--font-display);
+  font-size: 10px;
   font-weight: 900;
-  color: rgba(64, 73, 67, 0.9);
+  color: rgba(64, 73, 67, 0.60);
   letter-spacing: 4px;
   line-height: 15px;
   text-transform: uppercase;
@@ -4431,20 +4430,49 @@ body.fakten-karten-page main {
 }
 
 /* Export button sits between the search and the view toggle (Fedor's
-   placement). The 32px left margin separates the right-hand cluster
-   (export + toggle) from the search column. */
+   placement). */
 .fakten-filter-bar__export {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  margin-left: 32px;
+  margin-left: 16px;
+}
+
+/* Match the export button's height, glass chrome, and hover state to the
+   Kategorien trigger and Suchen input (all 48 px glass). Font matches the
+   Liste/Karten toggle labels (0.85rem / 500). Width is overridden to auto
+   so the 120px cap from .carm-explorer__export doesn't squish the icon. */
+.fakten-filter-bar__export .carm-btn {
+  height: 48px;
+  width: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1a1c1a;
+}
+
+.fakten-filter-bar__export .carm-btn:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(17, 108, 74, 0.4);
+}
+
+/* Keep the icon from being flex-shrunk in a tight container. */
+.fakten-filter-bar__export .carm-btn svg {
+  flex-shrink: 0;
 }
 
 .fakten-filter-bar__view-toggle {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  margin-left: 16px; /* sits next to the export button in the right cluster */
+  margin-left: 32px; /* separates the right-hand cluster from the search column */
 }
 
 .fakten-filter-bar__view-toggle .carm-pivot-switch__track[data-active="right"] {
@@ -4674,15 +4702,50 @@ body.fakten-karten-page main {
 .fakten-filter-dropdown__label {
   flex: 1 1 auto;
   text-align: center;
-  /* Pull the label back to optical centre — chevron at the left already
-     takes its share of the row, so a literal text-align:center would
-     bias the label rightward. The small negative inset compensates. */
-  margin-right: 22px;
 }
 
-.fakten-filter-dropdown__count {
-  margin-left: 4px;
-  font-weight: 600;
+/* .fakten-filter-dropdown__count-badge is co-classed with .fakten-search-count
+   (accent color, bold, pointer-events:none). This extra selector only overrides
+   the margin so the badge sits flush before the X button gap. */
+.fakten-filter-dropdown__count-badge {
+  margin-right: 0;
+}
+
+/* Wrapper row: trigger button + conditional X clear button side by side. */
+.fakten-filter-dropdown__trigger-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.fakten-filter-dropdown__trigger-row .fakten-filter-dropdown__trigger {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+/* X clear button — same look as .carm-filter-search-row__clear but inline
+   (not absolutely positioned) so it sits as a flex sibling of the trigger. */
+.fakten-filter-dropdown__clear {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.fakten-filter-dropdown__clear:hover {
+  background: var(--color-bg-subtle, #eeeee8);
+  color: var(--color-text, #1a1a2e);
 }
 
 .fakten-filter-dropdown__chevron {
