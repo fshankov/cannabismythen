@@ -310,8 +310,6 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
               defText={indicatorCol.defText}
               defScale={indicatorCol.defScale}
               defSampleSize={indicatorCol.defSampleSize}
-              hideLabel={`${t('column.hide', lang)} — ${indicatorCol.fullLabel}`}
-              onHide={() => undefined}
               isSortActive={isSortCol}
               sortDir={isDesc ? 'desc' : 'asc'}
               sortTooltip={colSortTooltip}

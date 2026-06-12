@@ -305,8 +305,6 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
                 defTitle={definitions?.sourcesIndicators?.[selectedMetric]?.label}
                 defText={definitions?.sourcesIndicators?.[selectedMetric]?.definition}
                 defScale={definitions?.sourcesIndicators?.[selectedMetric]?.scale}
-                hideLabel=""
-                onHide={() => undefined}
                 isSortActive={isSortCol}
                 sortDir={isAsc ? 'asc' : 'desc'}
                 sortTooltip={

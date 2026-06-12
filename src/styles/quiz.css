@@ -5731,7 +5731,10 @@ body.fakten-karten-page main {
    2026-05-26 — replaced by the absolutely-positioned
    `.factsheet-group-bars__col-sort-btn` above.) */
 
-.factsheet-group-bars__row-header {
+/* Selector qualified with the table class to beat the generic
+   `.factsheet-group-bars__table th` center-alignment rule (Fedor
+   2026-06-09 — first-column left-align fix). */
+.factsheet-group-bars__table .factsheet-group-bars__row-header {
   font-weight: 600;
   font-size: 0.78rem;
   text-align: left;

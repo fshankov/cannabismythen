@@ -27,8 +27,11 @@ interface Props {
   defText?: string;
   defScale?: string;
   defSampleSize?: string;
-  hideLabel: string;
-  onHide: () => void;
+  /** Hide-column control. Omit both `onHide` and `hideLabel` to suppress
+   *  the EyeOff button — e.g. the single-column Balken views, where there
+   *  is only one column and nothing to hide. */
+  hideLabel?: string;
+  onHide?: () => void;
   /** True when this column is the active sort column. Drives is-active
    *  styling on the sort button and the asc/desc icon swap. */
   isSortActive: boolean;
@@ -102,19 +105,23 @@ export default function GridDataHeader({
         )}
       </span>
       {trailingExtra}
-      {/* Upper-RIGHT EyeOff hide button (2026-05-21 swap). */}
-      <button
-        type="button"
-        className="carm-spannweite__hide-btn"
-        onClick={(e) => {
-          e.stopPropagation();
-          onHide();
-        }}
-        aria-label={hideLabel}
-        title={hideLabel}
-      >
-        <EyeOff size={11} strokeWidth={2} aria-hidden="true" />
-      </button>
+      {/* Upper-RIGHT EyeOff hide button (2026-05-21 swap). Only rendered
+          when a hide handler is provided — single-column views (Balken,
+          Quellen-Balken) omit it since the lone column can't be hidden. */}
+      {onHide && (
+        <button
+          type="button"
+          className="carm-spannweite__hide-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onHide();
+          }}
+          aria-label={hideLabel}
+          title={hideLabel}
+        >
+          <EyeOff size={11} strokeWidth={2} aria-hidden="true" />
+        </button>
+      )}
     </>
   );
 }
