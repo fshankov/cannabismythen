@@ -100,8 +100,8 @@ steps:
 
       {icon:faktenkarten} Eine Übersicht über die 42 Mythen mit wissenschaftlicher Klassifikation, Quellen und Erklärungen je Mythos.
       {icon:quiz} Wie steht es um dein Wissen zu Cannabismythen? Mach das Quiz und finde es heraus.
-      {icon:meine-interessen} Meine Interessen — die FAQ, sortiert nach Themen und Zielgruppen.
       {icon:daten-explorer} Einschätzungen von 5 Zielgruppen zu 42 Mythen und zu Informationswegen erkunden.
+      {icon:meine-interessen} Meine Interessen — die FAQ, sortiert nach Themen und Zielgruppen.
     hint: ""
   - heading: Wer hinter der Studie steht.
     bodyText: >-
