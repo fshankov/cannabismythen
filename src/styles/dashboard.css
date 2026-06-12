@@ -5672,8 +5672,16 @@ body.carm-modal-open {
 }
 
 .carm-export-card:hover:not(:disabled) {
-  background: var(--color-bg-subtle, #eeeee8);
-  border-color: var(--color-border-strong, #cbd5e1);
+  /* Keep the card white so the media box stays distinct — a subtle grey bg
+     here used to match --color-bg-subtle exactly, dissolving the media box
+     into the card. Signal hover with the site's green accent + a soft lift. */
+  background: var(--color-surface, #ffffff);
+  border-color: var(--color-accent, #2d6a4f);
+  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.12);
+}
+
+.carm-export-card:hover:not(:disabled) .carm-export-card__media {
+  border-color: var(--color-accent, #2d6a4f);
 }
 
 .carm-export-card:disabled { opacity: 0.5; cursor: not-allowed; }

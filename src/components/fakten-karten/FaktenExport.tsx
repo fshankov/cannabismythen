@@ -204,9 +204,10 @@ export default function FaktenExport({ open, onClose, myths }: Props) {
           <p className="carm-export-callout">
             <Info size={17} strokeWidth={1.9} aria-hidden="true" />
             <span>
-              Tipp: „Liste“ und „Karten“ öffnen den Druckdialog. Wähle dort als
-              Ziel „Als PDF speichern“ — so wird die Auswahl als Datei
-              gespeichert statt gedruckt.
+              „Liste“ und „Karten“ öffnen den Druckdialog deines Browsers.
+              Stelle dort als Ziel (bzw. Drucker) „Als PDF speichern“ ein und
+              bestätige mit „Speichern“ — die Auswahl wird als PDF-Datei
+              gesichert statt ausgedruckt.
             </span>
           </p>
         </div>
