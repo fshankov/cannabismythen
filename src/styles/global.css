@@ -431,6 +431,15 @@ main:focus-visible {
   z-index: 100;
 }
 
+/* Pin the nav only on the homepage hero; on every other page it sits at the
+   top of the document and scrolls away with the content (Fedor 2026-06-12).
+   `absolute` floats over main's existing top padding, so the spacing is
+   unchanged — only the scroll behaviour differs from the fixed homepage nav. */
+body:not(.has-hero) .nav-wrapper,
+body:not(.has-hero) .nav-blur-shield {
+  position: absolute;
+}
+
 
 /* ── Nav pill ────────────────────────────────────────────────── */
 .nav {
