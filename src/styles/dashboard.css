@@ -1248,7 +1248,9 @@ body:has(.carm-explorer) main {
 .factsheet-panel__backdrop {
   position: fixed;
   inset: 0;
-  z-index: 2000;
+  /* 10000 keeps the panel above the nav-wrapper on daten-explorer (where the
+     page raises nav to 9999 to sit above the loader overlay). */
+  z-index: 10000;
   background: rgba(0, 0, 0, 0.4);
   animation: factsheetFadeIn 0.2s ease;
 }
