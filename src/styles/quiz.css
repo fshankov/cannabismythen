@@ -6012,6 +6012,11 @@ body.fakten-karten-page main {
   outline: none;
 }
 
+/* Two stacked download buttons (this-myth above all-myths) read as a pair. */
+.factsheet-panel__download + .factsheet-panel__download {
+  margin-top: 4px;
+}
+
 .factsheet-panel__download-text {
   flex: 0 1 auto;
 }

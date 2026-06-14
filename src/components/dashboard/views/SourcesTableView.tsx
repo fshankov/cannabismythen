@@ -88,11 +88,14 @@ type ColSpec = MetricCol | GroupCol;
 /** v3 (2026-05-26): Wahrnehmung moves to the trailing slot so the
  *  more "active" search/trust/prevention metrics lead — same column
  *  order Informationsquellen 2 (SourcesSpannweiteView) uses. */
+// Column order (Fedor 2026-05-29): Suche · Wahrnehmung · Vertrauen ·
+// Prävention — matches SourcesSpannweiteView's METRICS so Tabelle and
+// Übersicht read the same left→right.
 const METRIC_COLS: MetricCol[] = [
   { key: 'search', label: 'Suche', flavor: 'metric' },
+  { key: 'perception', label: 'Wahrnehmung', flavor: 'metric' },
   { key: 'trust', label: 'Vertrauen', flavor: 'metric' },
   { key: 'prevention', label: 'Prävention', flavor: 'metric' },
-  { key: 'perception', label: 'Wahrnehmung', flavor: 'metric' },
 ];
 
 /** v4 (2026-05-26): pivot to group columns. Same 5 Zielgruppen as
