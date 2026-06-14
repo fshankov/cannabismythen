@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Download, Filter, Search,
+  Download, Filter, Search, X,
   Eye, TrendingUp, Target, Shield, Globe,
   Baby, Cannabis, GraduationCap, UsersRound,
 } from 'lucide-react';
@@ -176,10 +176,14 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    *  intentionally NOT counted. */
   const activeFilterCount = useMemo(() => {
     if (!data) return 0;
-    let n = state.mythIds.length;
-    for (const cid of state.categoryIds) {
-      n += data.myths.filter((m) => m.category_id === cid).length;
-    }
+    const categoryMythIds = new Set(
+      data.myths
+        .filter((m) => m.category_id !== null && state.categoryIds.includes(m.category_id))
+        .map((m) => m.id),
+    );
+    // Count individual myth selections that are NOT already covered by a selected category
+    const extraMythIds = state.mythIds.filter((id) => !categoryMythIds.has(id));
+    let n = categoryMythIds.size + extraMythIds.length;
     if (state.verdictFilter !== 'all') n += 1;
     return n;
   }, [data, state.categoryIds, state.mythIds, state.verdictFilter]);
@@ -506,23 +510,45 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           Hide it on Informationsquellen / Informationsquellen 2 /
           Quellen-Tabelle per Fedor's 2026-05-28 request. */}
       {!isSourceView && (
-        <button
-          type="button"
-          className="carm-btn carm-explorer__filter"
-          onClick={() => setFilterDrawerOpen(true)}
-          aria-label={t('filter.button', 'de')}
-        >
-          <Filter size={14} strokeWidth={2} aria-hidden="true" />
-          {t('filter.button', 'de')}
+        <>
+          <button
+            type="button"
+            className="carm-btn carm-explorer__filter"
+            onClick={() => setFilterDrawerOpen(true)}
+            aria-label={t('filter.button', 'de')}
+          >
+            <Filter size={14} strokeWidth={2} aria-hidden="true" />
+            {t('filter.button', 'de')}
+            {activeFilterCount > 0 && (
+              <span
+                className="carm-btn__badge"
+                aria-label={`${activeFilterCount} aktiv`}
+              >
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
           {activeFilterCount > 0 && (
-            <span
-              className="carm-btn__badge"
-              aria-label={`${activeFilterCount} aktiv`}
+            <button
+              type="button"
+              className="carm-explorer__filter-clear"
+              aria-label="Alle Filter zurücksetzen"
+              title="Alle Filter zurücksetzen"
+              onClick={() =>
+                setState((prev) => ({
+                  ...prev,
+                  categoryIds: [],
+                  mythIds: [],
+                  verdictFilter: 'all',
+                  balkenSort: 'a-z',
+                  searchQuery: '',
+                }))
+              }
             >
-              {activeFilterCount}
-            </span>
+              <X size={13} strokeWidth={2.5} aria-hidden="true" />
+            </button>
           )}
-        </button>
+        </>
       )}
       {exportOnlyAction}
     </>
@@ -786,6 +812,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                         mythIds: [],
                         verdictFilter: 'all',
                         balkenSort: 'a-z',
+                        searchQuery: '',
                       }));
                     }}
                   />

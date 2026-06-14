@@ -24,7 +24,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, Search, X } from 'lucide-react';
+import { ChevronRight, Layers, Search, X } from 'lucide-react';
 import type { AppState, Category, Myth } from '../../../lib/dashboard/types';
 import Drawer from '../../shared/Drawer';
 import { t } from '../../../lib/dashboard/translations';
@@ -218,12 +218,16 @@ export default function FilterDrawer({
   };
 
   const totalSelected = useMemo(() => {
-    let n = state.mythIds.length;
-    for (const id of state.categoryIds) {
-      n += mythsByCategory.get(id)?.length ?? 0;
-    }
+    const categoryMythIds = new Set(
+      Array.from(mythsByCategory.entries())
+        .filter(([id]) => state.categoryIds.includes(id))
+        .flatMap(([, ms]) => ms.map((m) => m.id)),
+    );
+    const extraMythIds = state.mythIds.filter((id) => !categoryMythIds.has(id));
+    let n = categoryMythIds.size + extraMythIds.length;
+    if (state.verdictFilter !== 'all') n += 1;
     return n;
-  }, [state.categoryIds, state.mythIds, mythsByCategory]);
+  }, [state.categoryIds, state.mythIds, state.verdictFilter, mythsByCategory]);
 
   return (
     <Drawer
@@ -254,6 +258,7 @@ export default function FilterDrawer({
             className="carm-btn"
             onClick={reset}
           >
+            <X size={13} strokeWidth={2.5} aria-hidden="true" />
             {t('filter.reset', 'de')}
           </button>
           <button
@@ -294,43 +299,71 @@ export default function FilterDrawer({
         )}
       </div>
 
-      {/* Stage 6: chip strip showing every individual myth currently
-          in `state.mythIds`. Categories don't appear here — the
-          accordion already shows category state via its checkbox.
-          Each chip carries a verdict arrow, truncated title, and an
-          ✕ to remove. The strip stays visible through search-query
-          changes so you don't lose track of what you've selected. */}
+      {/* Chip strip: one chip per selected category + one per individually
+          selected myth. Categories show their name + count; individual myths
+          show a verdict arrow + truncated label. Both can be dismissed with ✕. */}
       {(() => {
+        const selectedCats = categories.filter((c) =>
+          state.categoryIds.includes(c.id),
+        );
         const selectedMyths = myths.filter((m) =>
           state.mythIds.includes(m.id),
         );
-        if (selectedMyths.length === 0) return null;
+        if (selectedCats.length === 0 && selectedMyths.length === 0) return null;
         return (
           <div
             className="carm-filter-selected"
-            aria-label={`${selectedMyths.length} ${
-              selectedMyths.length === 1 ? 'Mythos' : 'Mythen'
-            } ausgewählt`}
+            aria-label="Ausgewählte Filter"
           >
             <div className="carm-filter-selected__head">
-              <p className="carm-filter-selected__label">
-                {selectedMyths.length}{' '}
-                {selectedMyths.length === 1 ? 'Mythos' : 'Mythen'} ausgewählt
-              </p>
-              {/* Clears every individually-selected myth at once so the user
-                  doesn't have to dismiss each chip. German "Alle entfernen"
-                  = "Remove all" (standard on German filter UIs). The footer
-                  keeps the broader "Alle Filter zurücksetzen". */}
+              <p className="carm-filter-selected__label">Ausgewählt</p>
               <button
                 type="button"
                 className="carm-filter-selected__clear-all"
-                onClick={() => update('mythIds', [])}
-                aria-label="Alle ausgewählten Mythen entfernen"
+                onClick={() => updateMany({ categoryIds: [], mythIds: [] })}
+                aria-label="Alle Auswahlen entfernen"
               >
                 Alle entfernen
+                <X size={13} strokeWidth={2.5} aria-hidden="true" />
               </button>
             </div>
             <ul className="carm-filter-selected__chips" role="list">
+              {selectedCats.map((c) => {
+                const count = mythsByCategory.get(c.id)?.length ?? 0;
+                const label = `${c.name_de} (${count})`;
+                return (
+                  <li key={`cat-${c.id}`}>
+                    <span
+                      className="carm-filter-selected__chip"
+                      title={label}
+                    >
+                      <Layers
+                        size={13}
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                        className="carm-filter-selected__chip-icon"
+                      />
+                      <span className="carm-filter-selected__chip-text">
+                        {label}
+                      </span>
+                      <button
+                        type="button"
+                        className="carm-filter-selected__chip-remove"
+                        onClick={() =>
+                          update(
+                            'categoryIds',
+                            state.categoryIds.filter((id) => id !== c.id),
+                          )
+                        }
+                        aria-label={`Kategorie entfernen: ${label}`}
+                        title={`Kategorie entfernen: ${label}`}
+                      >
+                        <X size={11} strokeWidth={2.5} aria-hidden="true" />
+                      </button>
+                    </span>
+                  </li>
+                );
+              })}
               {selectedMyths.map((m) => {
                 const txt = getMythShortText(m, 'de');
                 const truncated = txt.length > 32 ? txt.slice(0, 30) + '…' : txt;

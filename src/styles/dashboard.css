@@ -5267,6 +5267,24 @@ body.carm-modal-open {
   border-radius: 12px;
   justify-content: center;
 }
+.carm-explorer__filter-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin-left: -12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.carm-explorer__filter-clear:hover {
+  color: var(--color-text, #1a1a2e);
+}
 .carm-explorer__export {
   width: 120px;
   border-radius: 12px;
@@ -6321,19 +6339,16 @@ body.carm-modal-open {
    carries a verdict arrow, truncated title, and an X to remove. */
 .carm-filter-selected {
   margin: 0 0 16px;
-  padding: 12px 4px 12px;
+  padding: 10px 0 14px;
   border-bottom: 1px solid var(--color-border, #e2e8f0);
 }
 
-/* Header row of the selected-myths block: the "X Mythen ausgewählt" label on
-   the left, a "remove all" button on the right. 32px below it before the chips
-   (Fedor 2026-06-12). */
 .carm-filter-selected__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 32px;
+  margin-bottom: 10px;
 }
 
 .carm-filter-selected__label {
@@ -6345,10 +6360,11 @@ body.carm-modal-open {
   letter-spacing: 0.04em;
 }
 
-/* Clears every individually-selected myth at once (the chips). Mirrors the
-   reference reset link (.fakten-filter-dropdown__reset). */
 .carm-filter-selected__clear-all {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: transparent;
   border: none;
   font: inherit;
@@ -6368,41 +6384,72 @@ body.carm-modal-open {
   outline: none;
 }
 
+.carm-filter-selected__head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.carm-filter-selected__clear-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+}
+.carm-filter-selected__clear-x:hover {
+  color: var(--color-text, #1a1a2e);
+}
+
+/* Full-width column — each chip is one row, text truncates cleanly */
 .carm-filter-selected__chips {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .carm-filter-selected__chip {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 4px 3px 8px;
+  gap: 6px;
+  padding: 7px 8px 7px 12px;
   background: var(--color-bg-subtle, #eeeee8);
   border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 999px;
-  font-size: 0.78rem;
-  /* The inner <VerdictStatement class="carm-filter-selected__chip-text">
-     supplies the verdict color, bold weight, and trailing arrow. */
-  max-width: 100%;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  min-height: 36px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.carm-filter-selected__chip-icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted, #94a3b8);
 }
 
 .carm-filter-selected__chip-text {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 24ch;
 }
 
 .carm-filter-selected__chip-remove {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -6410,13 +6457,12 @@ body.carm-modal-open {
   color: var(--color-text-muted, #94a3b8);
   cursor: pointer;
   flex-shrink: 0;
-  margin-left: 2px;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .carm-filter-selected__chip-remove:hover,
 .carm-filter-selected__chip-remove:focus-visible {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.07);
   color: var(--color-text, #1a1a2e);
   outline: none;
 }
@@ -7531,6 +7577,7 @@ body.carm-modal-open {
 .carm-spannweite__hide-btn[title] {
   position: absolute;  /* already set above, but explicit for tooltip anchor */
 }
+
 .carm-spannweite__col-sort-btn[title]:hover::after,
 .carm-spannweite__col-sort-btn[title]:focus-visible::after,
 .carm-spannweite__hide-btn[title]:hover::after,
@@ -7545,13 +7592,29 @@ body.carm-modal-open {
   font: 500 11px/1.4 system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 5px 9px;
   border-radius: 4px;
-  white-space: nowrap;
-  max-width: 280px;
+  white-space: normal;
+  width: max-content;
+  max-width: 220px;
   pointer-events: none;
   z-index: 30;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
-  text-overflow: ellipsis;
-  overflow: hidden;
+}
+
+/* MYTHS column A-Z + verdict buttons: open to the RIGHT */
+.carm-spannweite__col-sort-btn--top-left[title]:hover::after,
+.carm-spannweite__col-sort-btn--top-left[title]:focus-visible::after,
+.carm-spannweite__col-sort-btn--top-right[title]:hover::after,
+.carm-spannweite__col-sort-btn--top-right[title]:focus-visible::after {
+  left: 0;
+  transform: none;
+}
+
+/* Hide button: open to the LEFT */
+.carm-spannweite__hide-btn[title]:hover::after,
+.carm-spannweite__hide-btn[title]:focus-visible::after {
+  left: auto;
+  right: 0;
+  transform: none;
 }
 
 /* Hidden column: collapsed 28-px placeholder. Layout updated
