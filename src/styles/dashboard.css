@@ -7269,8 +7269,6 @@ body.carm-modal-open {
   grid-auto-rows: var(--carm-spannweite-row-h);
   min-width: 0;
   background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 8px;
   overflow: clip;
 }
 
