@@ -67,7 +67,7 @@
 .four-paths__quote-lead {
   font-family: "DM Serif Display", Georgia, serif;
   font-style: italic;
-  font-weight: 400; /* DM Serif Display has no true bold — 400 is the only designed weight */
+  font-weight: 700;
   font-size: clamp(22px, 3.4vw, 32px);
   line-height: 1.3;
   color: var(--color-accent);

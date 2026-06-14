@@ -1,6 +1,23 @@
 /* ==================== CaRM DASHBOARD STYLES ==================== */
 /* Scoped where possible to avoid conflicts with cannabismythen global styles */
 
+/* ==================== RESPONSIVE BREAKPOINT SYSTEM ====================
+   Canonical breakpoints for the Daten-Explorer page (Fedor 2026-06-14).
+   Plain CSS can't use custom properties inside @media, so these five
+   widths are the ONLY ones any media query on this page may use — keep
+   the page on this ladder, never invent new ad-hoc widths:
+
+     xs   380px    very small phone
+     sm   480px    small phone
+     md   768px    tablet
+     lg   1024px   desktop   (max-side uses 1023px to avoid a 1px overlap)
+     xl   1280px   wide desktop
+
+   Exception: the Spannweite/lollipop header has its own documented,
+   math-tuned graduated stops (1100 / 960 / 840 + the Polish-v7 quartet)
+   that this 5-step ladder can't express without collapsing tiers — those
+   are intentionally left as-is. ==================================== */
+
 /* Match the 1136px content width used by the quiz index and fakten-karten pages. */
 body:has(.carm-explorer) main {
   max-width: 1136px;
@@ -162,7 +179,10 @@ body:has(.carm-explorer) main {
     /* Sits flush below the tabs row (~50px tall on mobile). */
     top: 50px;
     z-index: 50;
-    background: var(--color-bg, #f4f4f0);
+    /* White to match the panel — the toolbar lives INSIDE the white chart
+       panel, so its (sticky) background must be white, not the page grey
+       (Fedor 2026-06-14: "white as OG"). */
+    background: var(--color-surface, #ffffff);
     margin-left: calc(-1 * var(--space-md, 16px));
     margin-right: calc(-1 * var(--space-md, 16px));
     padding-left: var(--space-md, 16px);
@@ -891,10 +911,6 @@ body:has(.carm-explorer) main {
   background: var(--color-surface-alt, #f1f5f9);
   outline: none;
 }
-@media (max-width: 480px) {
-  .carm-myth-search-input { width: 120px; }
-}
-
 /* ==================== CHIPS ==================== */
 .carm-explorer .class-chip {
   display: inline-flex;
@@ -1238,7 +1254,7 @@ body:has(.carm-explorer) main {
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .overview-tiles {
     grid-template-columns: 1fr;
   }
@@ -1571,7 +1587,7 @@ body:has(.carm-explorer) main {
 }
 
 /* Mobile: bottom sheet style */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .factsheet-panel {
     top: auto;
     bottom: 0;
@@ -1743,14 +1759,9 @@ body:has(.carm-explorer) main {
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
-  .carm-explorer .tab-btn {
-    /* 2026-05-27 refresh — keeps the desktop chip 44px feel but drops the
-       tab back to a compact 38/40px on tablet so the tab row doesn't
-       crowd the toolbar below. */
-    min-height: 40px;
-    padding: 10px 14px;
-    font-size: 0.8rem;
-  }
+  /* Tabs keep their full laptop size at every breakpoint (Fedor
+     2026-06-14) — the old tablet down-scale of .tab-btn (40px / 0.8rem)
+     was removed so the tabs no longer jump/shrink between adaptations. */
 
   .carm-explorer .data-table .myth-cell {
     min-width: 140px;
@@ -1766,7 +1777,7 @@ body:has(.carm-explorer) main {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   /* Ensure all pill buttons meet 44px touch target */
   .carm-explorer .indicator-tag,
   .carm-explorer .filter-cat-chip {
@@ -1854,7 +1865,7 @@ body:has(.carm-explorer) main {
   font-style: italic;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .sources-v2-label {
     min-width: 100%;
   }
@@ -2000,7 +2011,7 @@ body:has(.carm-explorer) main {
   outline-offset: 2px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .population-pill {
     font-size: 0.74rem;
     padding: 7px 12px;
@@ -2312,7 +2323,7 @@ body:has(.carm-explorer) main {
 /* On phones the fixed mobile tab bar (56px + safe area, z-index 200) overlays
    the viewport bottom; lift the sticky readout above it so its controls stay
    reachable. */
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .strips-readout {
     bottom: calc(56px + env(safe-area-inset-bottom, 0px));
   }
@@ -2426,7 +2437,7 @@ body:has(.carm-explorer) main {
   outline-offset: 2px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .strips-mode-btn {
     padding: 6px 10px;
     font-size: 0.74rem;
@@ -2804,7 +2815,7 @@ body:has(.carm-explorer) main {
   min-width: 0;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .strips-svg-header--hidden__label {
     /* Mobile: shorter strip means less rotated-label room. */
     margin-top: 18px;
@@ -3113,7 +3124,7 @@ body:has(.carm-explorer) main {
   color: white;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .strips-picker__caption {
     font-size: 0.74rem;
   }
@@ -3226,7 +3237,7 @@ body:has(.carm-explorer) main {
   color: var(--color-accent, #2d6a4f);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .strips-pill-bar__label {
     font-size: 0.74rem;
   }
@@ -3283,7 +3294,7 @@ body:has(.carm-explorer) main {
   outline-offset: 2px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .strips-cat-pill {
     font-size: 0.7rem;
     padding: 4px 10px;
@@ -3431,7 +3442,7 @@ body:has(.carm-explorer) main {
 
 /* Tight viewports: drop the dropdown captions on row 2 so both triggers
    still fit on one line on mobile. */
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .strips-controls-row--dropdowns .strips-picker__caption {
     display: none;
   }
@@ -3700,7 +3711,7 @@ body:has(.carm-explorer) main {
   z-index: 50;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .strips-pivot-pill {
     width: 22px;
     min-width: 22px;
@@ -4216,7 +4227,7 @@ body.carm-modal-open {
 .carm-tour-popover.driver-popover { z-index: 100002; }
 
 /* ---------- Mobile tweaks ---------- */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .carm-onboarding-card {
     padding: 14px 14px 14px;
     /* Slightly shorter line so headlines never collide with the X. */
@@ -5126,8 +5137,14 @@ body.carm-modal-open {
   flex-shrink: 0;
 }
 
+/* ≤1023px (below desktop): keep ≥32px between the Mythen/Informationswege
+   toggle and the view tabs (Fedor 2026-06-14). Desktop bumps this to 64px
+   via the min-width:1024 rule below. */
+.carm-explorer__tabs--left {
+  margin-left: 32px;
+}
 
-@media (min-width: 1011px) {
+@media (min-width: 1024px) {
   .carm-explorer__tabs--left {
     margin-left: 64px;
   }
@@ -5459,7 +5476,7 @@ body.carm-modal-open {
 .carm-explorer__page-header__sub a:hover {
   color: var(--color-accent-hover, #1f4f3a);
 }
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .carm-explorer__page-header { margin-bottom: 20px; gap: 10px; }
 }
 
@@ -5480,6 +5497,10 @@ body.carm-modal-open {
     height: 36px;
     font-size: 0.875rem;
     padding: 0 32px 0 12px;
+    /* Wide enough that "Mythen suchen…" clears the 44px of horizontal
+       padding (icon + absolute clear button) on tablet/laptop, so the
+       placeholder is never clipped (Fedor 2026-06-14). */
+    width: 176px;
   }
   .carm-myth-search-clear {
     width: 22px;
@@ -5492,7 +5513,7 @@ body.carm-modal-open {
     height: 25px;
   }
 }
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .carm-explorer__intro {
     margin: 4px 0 12px;
     font-size: 0.9rem;
@@ -6176,7 +6197,7 @@ body.carm-modal-open {
   margin-right: 4px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .carm-picker__caption {
     font-size: 0.74rem;
   }
@@ -6241,36 +6262,68 @@ body.carm-modal-open {
   margin-right: 16px;
 }
 
-/* Below desktop (≤1024px) — strict 2-row toolbar layout.
-   Line 1: pivot + pickers flow inline, captions hidden, value text
-   truncates with ellipsis. Line 2: actions stretch to full width,
-   distributed equally so each is ≥44px tap target. Below desktop,
-   the natural flex-wrap fragmented into 3+ uneven rows; this rule
-   forces a clean 2-row grouping at every viewport width below 1024. */
-@media (max-width: 1024px) {
+/* Laptop → wide desktop (≤1280px) — keep EVERYTHING on ONE row.
+   The captions hide and the group dropdown takes its natural width
+   (ellipsis-shrinking before anything wraps) so pivot + picker + search
+   + Filter + Export all fit a single line; the actions stay inline and
+   hug the right via the base margin-left:auto. (Fedor 2026-06-14: there
+   is room for one row at this band once the dropdown stops stretching
+   full-width — so it no longer does.) */
+@media (max-width: 1280px) {
   .carm-toolbar-row {
     flex-wrap: wrap;
     gap: 8px;
   }
   .carm-toolbar-row__pivot {
-    order: 1;
     flex: 0 0 auto;
   }
   .carm-toolbar-row__pickers {
-    order: 2;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 8px;
   }
-  /* Hide the picker captions ("Indikator:", "Bevölkerungsgruppe:")
-     to keep the triggers compact on the picker row. */
-  .carm-toolbar-row__pickers .carm-picker__caption {
+  /* Hide the picker captions ("Wert für:" …) to keep the row compact —
+     EXCEPT on Balken, where "Indikator:" / "Gruppe:" stay visible until
+     tablet (Fedor 2026-06-14); Balken's captions drop in the ≤768 block. */
+  .carm-toolbar-row:not(.carm-toolbar-row--balken) .carm-toolbar-row__pickers .carm-picker__caption {
     display: none;
   }
   .carm-toolbar-row__picker {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
+  }
+  .carm-toolbar-row__picker .carm-picker__current {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  /* Actions hug the right on the same row; search keeps its natural
+     width (no shrink → "Mythen suchen" never clipped) and Filter /
+     Export keep their natural desktop width. */
+  .carm-toolbar-row__actions {
+    flex-wrap: nowrap;
+  }
+  .carm-toolbar-row__actions > .carm-myth-search-row {
+    flex: 0 0 auto;
+  }
+  .carm-toolbar-row__actions > .carm-btn {
+    flex: 0 0 auto;
+    justify-content: center;
+  }
+}
+
+/* Below laptop (≤1024px) — the single line can no longer hold both
+   groups, so switch to the clean 2-row layout: the picker stretches to
+   fill line 1, and search + Filter + Export drop to their own full-width
+   row below, right-aligned (Fedor 2026-06-14). */
+@media (max-width: 1024px) {
+  .carm-toolbar-row__pickers {
+    flex: 1 1 auto;
+  }
+  .carm-toolbar-row__picker {
+    flex: 1 1 auto;
   }
   .carm-toolbar-row__picker .carm-picker {
     width: 100%;
@@ -6279,54 +6332,74 @@ body.carm-modal-open {
     width: 100%;
     justify-content: space-between;
   }
-  .carm-toolbar-row__picker .carm-picker__current {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: 0;
-  }
-  /* Cancel the desktop search-to-Filter gap since actions are full-width
-     and evenly distributed on tablet/mobile — margin-right would collapse
-     the Filter button's flex-grow share. */
-  .carm-toolbar-row__actions > .carm-myth-search-row {
-    margin-right: 0;
-  }
-  /* Force the actions row to wrap onto its own line and stretch equally,
-     so Mythos suchen / Filter / Exportieren each occupy a third of the
-     row instead of bunching to the right. */
   .carm-toolbar-row__actions {
     order: 3;
     flex: 1 1 100%;
     margin-left: 0;
     gap: 8px;
     flex-wrap: nowrap;
+    justify-content: flex-end;
   }
-  .carm-toolbar-row__actions > .carm-btn {
-    flex: 1 1 0;
-    min-width: 0;
-    justify-content: center;
+  .carm-toolbar-row__actions > .carm-myth-search-row {
+    margin-right: 0;
   }
 }
 
-/* Phone-narrow (≤640px) — make every picker chip take its own row so
+/* Phone-narrow (≤768px) — make every picker chip take its own row so
    the 3 dropdowns stack vertically when the device is too narrow for
-   them to fit inline. Above 640 (tablet/laptop), they share a row.
-   Also lets the actions row wrap: search input claims its own line,
+   them to fit inline. Above 768 (laptop/desktop) they share a row.
+   Also lets the actions row wrap: the search input claims its own line,
    then Filter + Exportieren + the Rundgang badge share the row
    below. Prevents the badge / Exportieren label from clipping at the
-   right edge on iPhone-narrow viewports. */
-@media (max-width: 640px) {
-  .carm-toolbar-row__picker {
+   right edge on narrow viewports. */
+@media (max-width: 768px) {
+  /* 2-column "filter bars" at tablet & below (Fedor 2026-06-14): the pivot
+     toggle (where a view has one) spans the top, the pickers stack in the
+     LEFT column, and search + Filter + Export stack in the RIGHT column.
+     Applies to every view — all toolbars use ToolbarRow's pivot / pickers
+     / actions slots, and sorting lives in the column headers (not here). */
+  .carm-toolbar-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .carm-toolbar-row__pivot {
     flex: 1 1 100%;
+  }
+  .carm-toolbar-row__pickers {
+    flex: 1 1 calc(50% - 4px);
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .carm-toolbar-row__picker {
+    flex: 0 0 auto;
+    width: 100%;
   }
   .carm-toolbar-row__actions {
-    flex-wrap: wrap;
+    flex: 1 1 calc(50% - 4px);
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 8px;
+    margin-left: 0;
+    min-width: 0;
   }
   .carm-toolbar-row__actions > .carm-myth-search-row {
-    flex: 1 1 100%;
+    flex: 0 0 auto;
+    width: 100%;
   }
   .carm-toolbar-row__actions > .carm-myth-search-row .carm-myth-search-input {
     width: 100%;
+  }
+  .carm-toolbar-row__actions > .carm-btn {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+  /* Picker captions drop at tablet across every toolbar (Fedor: Balken's
+     "Indikator:" / "Gruppe:" stay above 768, drop on tablet). */
+  .carm-toolbar-row__pickers .carm-picker__caption {
+    display: none;
   }
 }
 
@@ -8226,7 +8299,7 @@ body.carm-modal-open {
 /* Mobile — shrink the label column so the bar column has room. The
    circle works at any cell width (no measurement / outside-label
    gymnastics needed in v2), so no other mobile tweaks required. */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .carm-balken-view.carm-spannweite,
   .carm-sources-balken.carm-spannweite {
     --carm-spannweite-label-col: minmax(120px, 35vw);
@@ -8363,8 +8436,12 @@ body.carm-modal-open {
 }
 /* Driver's default footer ships with 32px top+bottom padding (≈96px tall
    for a 31px button row!). Compact it so the popover is much shorter and
-   clears the (Driver-centred) anchor on short/retina viewports. */
-.carm-tour-popover .driver-popover-footer { margin-top: 10px; padding: 0; }
+   clears the (Driver-centred) anchor on short/retina viewports.
+   The grey divider above the buttons is the global `footer` border-top
+   (global.css) bleeding in — Driver renders a real <footer> element and the
+   popover lives outside .carm-explorer. 16px top padding sits the nav buttons
+   16px below that line. Shared by all 4 steps. */
+.carm-tour-popover .driver-popover-footer { margin-top: 10px; padding: 16px 0 0; }
 .carm-tour-popover .driver-popover-description { scrollbar-gutter: stable; }
 /* The accordion steps (1 & 2) use a FIXED, short scroll area, so the popover
    is a CONSTANT size — unfolding an accordion scrolls DOWN within it instead
@@ -8377,24 +8454,8 @@ body.carm-modal-open {
   height: min(32vh, 210px);
 }
 
-/* ---- Responsive: keep the tab row ABOVE the panel (never spilling to
-   the right). Below the breakpoint, drop only the per-tab short label so
-   each tab is just its view-type icon; the "Mythen"/"Quellen" group
-   labels and the "?" bookmark stay put. The short-label row needs
-   ~992 px of viewport, so we collapse just below that. ---- */
-@media (max-width: 1010px) {
-  .carm-explorer__tabs--left .tab-btn__label,
-  .carm-explorer__tabs--right .tab-btn__label {
-    display: none;
-  }
-  .carm-explorer__tabs--left .tab-btn,
-  .carm-explorer__tabs--right .tab-btn {
-    padding: 9px 12px;
-    gap: 0;
-  }
-  .carm-explorer__tabs--left .tabs-bar,
-  .carm-explorer__tabs--right .tabs-bar {
-    gap: 8px;
-  }
-  .carm-explorer__tab-bar > .carm-explorer__tab-gap { width: 20px; }
-}
+/* ---- Responsive: the tabs keep their full text labels at every width
+   (Fedor 2026-06-14 — no icon-only collapse). The 3 unified view tabs +
+   the Mythen/Informationswege toggle fit on tablet/desktop; on small
+   phones the `.tabs-bar` (overflow-x: auto) scrolls sideways instead of
+   compacting to icons. ---- */

@@ -56,8 +56,9 @@ interface Props {
 }
 
 export default function FaktenListView({ myths, onShowFactsheet }: Props) {
-  // Accordion: at most one row's summary is open at a time.
-  const [expandedNum, setExpandedNum] = useState<number | null>(null);
+  // Multiple rows may be open at the same time (Fedor 2026-06-14); default is
+  // all closed. The set holds the mythNumbers whose summary is expanded.
+  const [expanded, setExpanded] = useState<Set<number>>(() => new Set());
   // null = no active sort → "mix" (the default order the parent passes).
   const [sort, setSort] = useState<SortState | null>(null);
 
@@ -89,7 +90,12 @@ export default function FaktenListView({ myths, onShowFactsheet }: Props) {
   }, []);
 
   const toggleExpand = useCallback((n: number) => {
-    setExpandedNum((prev) => (prev === n ? null : n));
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(n)) next.delete(n);
+      else next.add(n);
+      return next;
+    });
   }, []);
 
   const openFactsheet = useCallback(
@@ -160,7 +166,7 @@ export default function FaktenListView({ myths, onShowFactsheet }: Props) {
           {sorted.map((myth) => {
             const verdict = toVerdict(myth.classification);
             const summary = myth.cardShortSummary || myth.cardSummary;
-            const isOpen = expandedNum === myth.mythNumber;
+            const isOpen = expanded.has(myth.mythNumber);
             return (
               <Fragment key={myth.mythNumber}>
                 <tr
