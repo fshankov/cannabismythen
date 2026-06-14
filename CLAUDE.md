@@ -53,6 +53,22 @@ Keep every answer short and simple. Easy language. No long text. Do not waste to
 - One short question to Fedor beats a wrong guess.
 - Stop writing huge responses. Simple, logical, easy language.
 
+## Preview / visual check (HARD — 2026-06-14)
+
+Live preview wastes time and breaks things when it is not needed. Past problem:
+Claude started a **remote Chrome preview on another laptop** whose local copy is
+completely different from the one Fedor is editing. Never do this.
+
+**Hard rules:**
+- Only ever touch the **local copy on the laptop that sent the prompt**. Never a
+  remote Chrome copy on another machine — it is not the same code.
+- **Always ASK Fedor first** if he wants Claude to do a visual check via preview.
+  Do not start a preview on your own.
+- **Do not start a new preview server.** If a local dev server is already running,
+  use that one (Fedor's own server at `http://127.0.0.1:4322/`). Starting a second
+  server causes a Vite cache collision and ruins the running copy.
+- Stop / do not run live preview when it is not needed for the task.
+
 ## Operator context
 
 Fedor works on **MacBook Pro** (Apple Silicon, zsh shell, primary path
