@@ -4377,6 +4377,12 @@ body.carm-modal-open {
     border-top-right-radius: var(--radius-lg, 12px);
     animation: carm-bottom-sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+  /* Export popups (modal variant) — 32px corners at every breakpoint. */
+  .carm-drawer--modal {
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+    overflow: hidden; /* clip header/body backgrounds to the rounded corners */
+  }
 }
 
 /* Modal variant — centered on desktop (≥1024px), bottom-sheet below.
@@ -4393,7 +4399,8 @@ body.carm-modal-open {
     max-height: calc(100vh - 96px);
     height: auto;
     margin: 0;
-    border-radius: var(--radius-lg, 12px);
+    border-radius: 32px;
+    overflow: hidden; /* clip header/body backgrounds to the rounded corners */
     box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
     animation: carm-modal-rise 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -5662,120 +5669,167 @@ body.carm-modal-open {
 }
 
 /* ===========================================================================
-   ExportDrawer — 2×2 format grid (PNG · SVG · Excel · CSV)
+   Export dialogs — download rows + (Daten-Explorer) chart-preview hero.
+   Shared by ExportDrawer (Daten-Explorer) and FaktenExport (42 Mythen):
+   a stacked list of rows (leading icon · title + description · download
+   chip). The Daten-Explorer additionally shows a live chart preview with
+   PNG/SVG buttons on top; the 42-Mythen dialog shows its two help callouts
+   on top (see .carm-export-callout in fakten-karten.css).
    =========================================================================== */
 
-/* One-line guidance under the dialog title. */
-.carm-export-intro {
+/* One-line guidance under the dialog title. Scoped under .carm-explorer so it
+   beats the dashboard's paragraph reset `.carm-explorer p { margin-bottom: 0 }`
+   (specificity 0-1-1) — a bare .carm-export-intro (0-1-0) loses to it, so its
+   bottom margin never applied. 32px below to give the hero room to breathe. */
+.carm-explorer .carm-export-intro {
   margin: 0 0 var(--space-md, 16px);
   font-size: 0.9rem;
   line-height: 1.5;
   color: var(--color-text-secondary, #4a5568);
 }
 
-.carm-export-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+/* Stacked download rows. */
+.carm-export-list {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-sm, 8px);
 }
 
-/* The modal becomes a full-width bottom-sheet on mobile; stack to one
-   column so the cards don't get cramped. */
-@media (max-width: 520px) {
-  .carm-export-grid { grid-template-columns: 1fr; }
-}
-
-.carm-export-card {
-  /* `font: inherit` so the <button> cards match the <a> (Excel) card —
-     buttons otherwise fall back to the UA font, which made the titles
-     render at different sizes. */
+.carm-export-row {
+  /* `font: inherit` so <button> rows match the <a> (download-link) rows —
+     buttons otherwise fall back to the UA font. */
   font: inherit;
-  display: flex;
-  flex-direction: column;
   width: 100%;
-  padding: var(--space-md, 16px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
   border: 1px solid var(--color-border, #e2e8f0);
   border-radius: var(--radius-md, 8px);
   background: var(--color-surface, #ffffff);
   text-align: left;
   text-decoration: none;
   cursor: pointer;
-  transition: background var(--transition-fast, 0.15s ease), border-color var(--transition-fast, 0.15s ease);
+  transition: border-color var(--transition-fast, 0.15s ease),
+    background var(--transition-fast, 0.15s ease),
+    box-shadow var(--transition-fast, 0.15s ease);
 }
 
-.carm-export-card:hover:not(:disabled) {
-  /* Keep the card white so the media box stays distinct — a subtle grey bg
-     here used to match --color-bg-subtle exactly, dissolving the media box
-     into the card. Signal hover with the site's green accent + a soft lift. */
-  background: var(--color-surface, #ffffff);
+.carm-export-row:hover:not(:disabled) {
   border-color: var(--color-accent, #2d6a4f);
-  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.12);
+  background: var(--color-accent-light, #e8f5ef);
+  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.10);
 }
 
-.carm-export-card:hover:not(:disabled) .carm-export-card__media {
-  border-color: var(--color-accent, #2d6a4f);
+.carm-export-row:hover:not(:disabled) .carm-export-row__dl {
+  background: var(--color-accent, #2d6a4f);
+  color: #fff;
 }
 
-.carm-export-card:disabled { opacity: 0.5; cursor: not-allowed; }
+.carm-export-row:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.carm-export-card:focus-visible {
+.carm-export-row:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
   outline-offset: 2px;
 }
 
-/* Media block — chart thumbnail (PNG/SVG) or a centered format icon
-   (Excel/CSV). Fixed height keeps all four cards aligned. */
-.carm-export-card__media {
-  width: 100%;
-  height: 92px;
-  margin-bottom: var(--space-sm, 8px);
-  border-radius: var(--radius-md, 8px);
-  border: 1px solid var(--color-border, #e2e8f0);
-  background: var(--color-bg-subtle, #eeeee8);
-  overflow: hidden;
-  display: flex;
+/* Leading format icon, in an accent-tinted tile. */
+.carm-export-row__icon {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--radius-md, 8px);
+  color: var(--color-accent, #2d6a4f);
+  background: var(--color-accent-light, #e8f5ef);
 }
 
-.carm-export-card__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-.carm-export-card__media--icon { color: var(--color-accent, #2d6a4f); }
-
-.carm-export-card__text {
+.carm-export-row__text {
   flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 0;
 }
 
-.carm-export-card__title {
+.carm-export-row__title {
   font-weight: 600;
+  font-size: 0.96rem;
   color: var(--color-text, #1a1a2e);
 }
 
-.carm-export-card__desc {
-  font-size: 0.85rem;
+.carm-export-row__desc {
+  font-size: 0.82rem;
   line-height: 1.4;
   color: var(--color-text-muted, #718096);
 }
 
-/* Download chevron — bottom-right, below the text. */
-.carm-export-card__cta {
-  align-self: flex-end;
-  margin-top: var(--space-xs, 4px);
+/* Trailing download chip — fills with the accent on row hover. */
+.carm-export-row__dl {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full, 9999px);
   color: var(--color-text-muted, #718096);
+  background: var(--color-bg-subtle, #eeeee8);
+  transition: background var(--transition-fast, 0.15s ease),
+    color var(--transition-fast, 0.15s ease);
 }
 
-/* Note under the grid when PNG/SVG are unavailable (Tabelle view). */
-.carm-export-note {
-  margin: var(--space-md, 16px) 0 0;
+/* Daten-Explorer only — PNG/SVG download buttons. Shown only when the active
+   view exposes a chart; otherwise .carm-export-note takes its place. */
+.carm-export-actions {
+  display: flex;
+  gap: var(--space-sm, 8px);
+  margin-bottom: var(--space-md, 16px);
+}
+
+.carm-export-btn {
+  font: inherit;
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  border: 1px solid var(--color-accent, #2d6a4f);
+  background: var(--color-accent, #2d6a4f);
+  color: #fff;
+  transition: background var(--transition-fast, 0.15s ease),
+    transform var(--transition-fast, 0.15s ease);
+}
+
+.carm-export-btn:hover {
+  background: var(--color-accent-hover, #1f4f3a);
+  transform: translateY(-1px);
+}
+
+.carm-export-btn--ghost {
+  background: var(--color-surface, #ffffff);
+  color: var(--color-accent, #2d6a4f);
+}
+
+.carm-export-btn--ghost:hover { background: var(--color-accent-light, #e8f5ef); }
+
+.carm-export-btn:focus-visible {
+  outline: 2px solid var(--color-accent, #2d6a4f);
+  outline-offset: 2px;
+}
+
+/* Note that replaces the hero when image export is unavailable
+   (Tabelle view / Informationswege). Sits above the data list. Scoped under
+   .carm-explorer for the same paragraph-reset reason as .carm-export-intro. */
+.carm-explorer .carm-export-note {
+  margin: 0 0 var(--space-md, 16px);
   padding: var(--space-sm, 8px) var(--space-md, 16px);
   border: 1px dashed var(--color-border, #e2e8f0);
   border-radius: var(--radius-md, 8px);

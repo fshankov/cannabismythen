@@ -1,8 +1,8 @@
 /**
  * FaktenExport — export control for the 42-Mythen (Fakten-Karten) page.
  *
- * Mirrors the Daten-Explorer ExportDrawer (button → modal Drawer with a grid
- * of format cards), reusing the same `.carm-export-*` chrome. Offers four
+ * Mirrors the Daten-Explorer ExportDrawer (button → modal Drawer with a
+ * list of format rows), reusing the same `.carm-export-*` chrome. Offers four
  * documents:
  *   1. Liste (PDF)             — browser print → "Als PDF sichern"
  *                                (number + statement + verdict, no texts).
@@ -192,7 +192,7 @@ export default function FaktenExport({ open, onClose, myths }: Props) {
         title="Mythen exportieren"
       >
         <div className="carm-export-callouts">
-          <p className="carm-export-callout">
+          <p className="carm-export-callout carm-export-callout--accent">
             <Lightbulb size={17} strokeWidth={1.9} aria-hidden="true" />
             <span>
               Du exportierst deine aktuelle Auswahl
@@ -212,23 +212,23 @@ export default function FaktenExport({ open, onClose, myths }: Props) {
           </p>
         </div>
 
-        <div className="carm-export-grid">
+        <div className="carm-export-list">
           <ExportCard
-            icon={<List size={28} strokeWidth={1.75} />}
+            icon={<List size={22} strokeWidth={1.75} />}
             title="Liste (PDF)"
             desc="Kompakte Mythen-Liste — Nummer, Aussage und Einordnung. Öffnet den Druckdialog → „Als PDF speichern“."
             onClick={() => startPrint("liste-plain")}
             disabled={empty}
           />
           <ExportCard
-            icon={<FileText size={28} strokeWidth={1.75} />}
+            icon={<FileText size={22} strokeWidth={1.75} />}
             title="Liste mit Erklärungen (PDF)"
             desc="Liste mit den Kurztexten der Karten. Öffnet den Druckdialog → „Als PDF speichern“."
             onClick={() => startPrint("liste")}
             disabled={empty}
           />
           <ExportCard
-            icon={<Layers size={28} strokeWidth={1.75} />}
+            icon={<Layers size={22} strokeWidth={1.75} />}
             title="Karten (PDF · Entwurf)"
             desc={
               busy
@@ -239,7 +239,7 @@ export default function FaktenExport({ open, onClose, myths }: Props) {
             disabled={empty || busy}
           />
           <ExportCard
-            icon={<FileText size={28} strokeWidth={1.75} />}
+            icon={<FileText size={22} strokeWidth={1.75} />}
             title="Faktenblätter (PDF)"
             desc="Alle 42 ausführlichen Faktenblätter (3,6 MB)."
             href={FACTSHEET_PDF_HREF}
@@ -276,7 +276,7 @@ export default function FaktenExport({ open, onClose, myths }: Props) {
   );
 }
 
-/* ── Export card (mirrors ExportDrawer's ExportCard) ──────────────────── */
+/* ── Export row (mirrors ExportDrawer's ExportRow) ──────────────────── */
 
 interface ExportCardProps {
   title: string;
@@ -300,17 +300,14 @@ function ExportCard({
 }: ExportCardProps) {
   const body = (
     <>
-      <span
-        className="carm-export-card__media carm-export-card__media--icon"
-        aria-hidden="true"
-      >
+      <span className="carm-export-row__icon" aria-hidden="true">
         {icon}
       </span>
-      <span className="carm-export-card__text">
-        <span className="carm-export-card__title">{title}</span>
-        <span className="carm-export-card__desc">{desc}</span>
+      <span className="carm-export-row__text">
+        <span className="carm-export-row__title">{title}</span>
+        <span className="carm-export-row__desc">{desc}</span>
       </span>
-      <span className="carm-export-card__cta" aria-hidden="true">
+      <span className="carm-export-row__dl" aria-hidden="true">
         <Download size={16} strokeWidth={2} />
       </span>
     </>
@@ -319,7 +316,7 @@ function ExportCard({
   if (href) {
     return (
       <a
-        className="carm-export-card"
+        className="carm-export-row"
         href={href}
         download={downloadName}
         onClick={onClick}
@@ -332,7 +329,7 @@ function ExportCard({
   return (
     <button
       type="button"
-      className="carm-export-card"
+      className="carm-export-row"
       onClick={onClick}
       disabled={disabled}
     >

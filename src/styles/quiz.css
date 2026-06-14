@@ -3895,6 +3895,78 @@ body.fakten-karten-page main {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Daten-Explorer-style shell (2026-06-14).
+   The Karten/Liste toggle floats ABOVE a white container; the
+   filter toolbar (Kategorien + Suche + Export) sits at the top of
+   that container, with the 42 cards / list below. The panel reuses
+   the Daten-Explorer `.carm-explorer__panel` surface treatment —
+   32px padding, 16px radius, soft border + shadow — but keeps all
+   four corners rounded (no tab merges into it the way the dashboard
+   tabs do, so the top edge stays a normal bordered, rounded corner).
+   ═══════════════════════════════════════════════════════════════ */
+.fakten-explorer__toggle-row {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 14px;
+}
+
+/* The toggle no longer needs the in-toolbar left separation it carried
+   when it lived inside `.fakten-filter-bar`; flush-left it with the
+   panel edge below. */
+.fakten-explorer__toggle-row .fakten-filter-bar__view-toggle {
+  margin-left: 0;
+}
+
+.fakten-explorer__panel {
+  display: flex;
+  flex-direction: column;
+  /* 48px = the Daten-Explorer panel's 24px rhythm + 24px extra breathing
+     room between the filter toolbar and the first row of cards (Fedor
+     2026-06-14). Only the toolbar + cards are in-flow children here, so
+     this gap IS the filter→cards distance. */
+  gap: 48px;
+  padding: 32px;
+  /* Frosted-glass surface matching the "Mythen suchen" search field —
+     semi-transparent white + blur, so the page texture shows through a
+     bit instead of a flat solid white (Fedor 2026-06-14). */
+  background: rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+  border: none;
+  /* Hard 16px to match the Daten-Explorer panel. NOT `var(--radius-lg)`:
+     that token is 12px globally (only overridden to 16px inside
+     `.carm-explorer`), so the var would render 12px here (Fedor 2026-06-14). */
+  border-radius: 16px;
+  box-shadow: var(--shadow-chip, 0 4px 20px -2px rgba(0, 0, 0, 0.05));
+}
+
+/* Inside the panel the toolbar relies on the panel's gap for vertical
+   rhythm, so drop its outer margin. The cards keep a 32px bottom margin
+   so there's extra breathing room after the last row before the panel's
+   own 32px bottom padding (Fedor 2026-06-14). */
+.fakten-explorer__panel .fakten-filter-section {
+  margin-bottom: 0;
+}
+.fakten-explorer__panel .fakten-grid {
+  margin-bottom: 32px;
+}
+
+/* Toolbar fills the panel width so its edges line up with the flush
+   card grid below (the standalone 1040px cap is dropped in-panel). */
+.fakten-explorer__panel .fakten-filter-bar {
+  max-width: none;
+}
+
+/* Mobile: match the Daten-Explorer panel's tighter padding. */
+@media (max-width: 768px) {
+  .fakten-explorer__panel {
+    padding: 16px;
+    gap: 16px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Page header (Figma 427-2113, 2026-05-28).
    An oversized bold H1 over a wider subhead paragraph. The H1 uses
    clamp() with vw so it scales fluidly down on narrow viewports
@@ -4331,9 +4403,12 @@ body.fakten-karten-page main {
   height: 48px;
   padding: 0 25px;
   background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  /* Stroke + shadow matched to the Daten-Explorer toolbar chips
+     (2026-06-14): #dddddd hairline + soft `--shadow-chip`. Glass fill /
+     blur / 48px height kept. */
+  border: 1px solid #dddddd;
   border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   -webkit-backdrop-filter: blur(6px);
           backdrop-filter: blur(6px);
   transition:
@@ -4412,11 +4487,14 @@ body.fakten-karten-page main {
   font-weight: 500;
 }
 
-/* Two equal columns, each capped so the chrome stays readable on
-   wide viewports. Mobile collapses to a stack below. */
+/* Kategorien + Suche are fixed at 340px each (Fedor 2026-06-14); the
+   third column is a flex 1fr so the Export button — unchanged in size —
+   is pushed to the right edge of the toolbar. `minmax(0, 340px)` lets the
+   two controls shrink below 340px only on tight viewports before the
+   ≤720px stack kicks in. Mobile collapses to a single column below. */
 .fakten-filter-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 340px) minmax(0, 340px) 1fr;
   align-items: center;
   gap: 16px;
   max-width: 1040px;
@@ -4436,13 +4514,15 @@ body.fakten-karten-page main {
   position: relative;
 }
 
-/* Export button sits between the search and the view toggle (Fedor's
-   placement). */
+/* Export sits in the flex 1fr column and is pushed to the toolbar's
+   right edge (Fedor 2026-06-14). The wrapper stretches across the column;
+   `justify-content: flex-end` right-aligns the (unchanged-size) button. */
 .fakten-filter-bar__export {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   white-space: nowrap;
-  margin-left: 16px;
+  margin-left: 0;
 }
 
 /* Match the export button's height, glass chrome, and hover state to the
@@ -4454,11 +4534,14 @@ body.fakten-karten-page main {
   width: auto;
   padding-left: 16px;
   padding-right: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  /* Stroke + shadow matched to the Daten-Explorer toolbar chips
+     (2026-06-14): #dddddd hairline + soft `--shadow-chip`. Glass fill /
+     blur / 48px height kept. */
+  border: 1px solid #dddddd;
   background: rgba(255, 255, 255, 0.6);
   -webkit-backdrop-filter: blur(6px);
           backdrop-filter: blur(6px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -4677,12 +4760,15 @@ body.fakten-karten-page main {
   height: 48px;
   line-height: 1;
   padding: 0 25px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  /* Stroke + shadow matched to the Daten-Explorer toolbar chips
+     (2026-06-14): #dddddd hairline + soft `--shadow-chip`. The glass
+     fill / blur / 48px height are intentionally kept. */
+  border: 1px solid #dddddd;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.6);
   -webkit-backdrop-filter: blur(6px);
           backdrop-filter: blur(6px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;

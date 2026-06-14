@@ -31,10 +31,9 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import { ChevronDown, Download, LayoutGrid, LayoutList } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
 import VerdictStatement from "../shared/VerdictStatement";
 import CategoryFooter from "./CategoryFooter";
-import PivotToggle from "../dashboard/controls/PivotToggle";
 import { getCategoryMeta } from "../../lib/fakten-karten/categories";
 import { normalize } from "../../lib/text-normalize";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
@@ -61,8 +60,6 @@ interface Props {
   onToggleGroup: (group: string) => void;
   onToggleMyth: (mythNumber: number) => void;
   onReset: () => void;
-  view: "karten" | "liste";
-  onSetView: (v: "karten" | "liste") => void;
   /** Opens the export drawer (Liste/Karten PDF + PNG + Faktenblätter). */
   onOpenExport: () => void;
 }
@@ -145,8 +142,6 @@ export default function FaktenFilterBar({
   onToggleGroup,
   onToggleMyth,
   onReset,
-  view,
-  onSetView,
   onOpenExport,
 }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -591,34 +586,6 @@ export default function FaktenFilterBar({
             )}
           </div>
         )}
-      </div>
-
-      <div className="fakten-filter-bar__view-toggle">
-        <PivotToggle
-          options={[
-            {
-              value: "karten",
-              label: (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-                  <LayoutGrid size={13} aria-hidden="true" />
-                  Karten
-                </span>
-              ),
-            },
-            {
-              value: "liste",
-              label: (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-                  <LayoutList size={13} aria-hidden="true" />
-                  Liste
-                </span>
-              ),
-            },
-          ]}
-          value={view}
-          onChange={onSetView}
-          aria-label="Ansicht wechseln"
-        />
       </div>
 
       <div className="fakten-filter-bar__export">
