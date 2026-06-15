@@ -214,6 +214,63 @@ body::after {
 body:has(.scrolly) .nav-wrapper {
   position: absolute;
 }
+/* /projekt/ dark-mode footer (2026-06-13). On the scrolly page the footer
+   joins the dark forest canvas instead of showing the site-wide cream
+   footer, AND is pulled up so its credits sit ~80px below step 11 —
+   closing the empty dark "runway" gap that step 11 needs.
+
+   Step 11 itself is untouched: its tall `min-height: 74vh` (below) keeps
+   the sticky, vertically-centred team illustration aligned with the
+   step-11 text. We only move + recolour the footer, never the step.
+
+   `--proj-footer-gap` below IS the literal green gap (px) between the
+   step-11 text and the footer — tune ONLY that value. `0` = footer flush
+   against the text; raise it to add space, negative would overlap. The
+   formula adds the step-11 text-block height (≈116px) and subtracts the
+   step's 74vh runway box, so the footer's top lands exactly that gap
+   below the text — viewport-height-independent. The 74vh MUST stay in sync
+   with the step-11 min-height. The OPAQUE dark-green background (matches
+   the page base `#0e1e14`) is required, not transparent: at the bottom of
+   scroll the sticky team illustration overlaps the footer band, so an
+   opaque fill cleanly covers it instead of letting it show through. The
+   faint top border reads as a subtle grounding-panel edge over the runway;
+   `position/z-index` keep the footer above the sticky viz column. */
+body:has(.scrolly) .site-footer {
+  background: #0e1e14;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--fg);
+  position: relative;
+  z-index: 1;
+  /* ── the ONE knob ── literal px of green below step 11's text (0 = flush). */
+  --proj-footer-gap: 240px;
+  margin-top: calc(var(--proj-footer-gap) + 116px - 74vh);
+}
+/* Recolour every footer sub-element light so it stays legible on the dark
+   canvas (the cream-footer colours live in home-site-footer.css). */
+body:has(.scrolly) .site-footer__tagline { color: var(--fg); }
+body:has(.scrolly) .site-footer__h { color: var(--fg-muted); }
+body:has(.scrolly) .site-footer__line { color: var(--fg); }
+/* The email link's glyph fill follows -webkit-text-fill-color (its initial
+   `currentColor` keeps the dark cream-footer value even when `color` is
+   overridden), so set both to the gold link accent. */
+body:has(.scrolly) .site-footer__email {
+  color: var(--ui-accent);
+  -webkit-text-fill-color: var(--ui-accent);
+}
+body:has(.scrolly) .site-footer__copy { color: var(--fg-muted); }
+body:has(.scrolly) .site-footer__links a { color: var(--fg-muted); }
+body:has(.scrolly) .site-footer__bar {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+/* Brand wordmark + logo: light text, and invert the black monogram SVG to
+   white so it doesn't disappear on the dark canvas. */
+body:has(.scrolly) .site-footer .nav__brand,
+body:has(.scrolly) .site-footer .nav__brand-text { color: var(--fg); }
+body:has(.scrolly) .site-footer .nav__brand-myth { color: #95c4ad; }
+body:has(.scrolly) .site-footer .cm-logo img {
+  filter: brightness(0) invert(1);
+}
+
 body:has(.scrolly) .feedbucket-footer {
   border-top: none;
   padding: 0 0 1.5rem;
@@ -238,7 +295,7 @@ body:has(.scrolly) .nav.nav--scrolled {
   border-color: rgba(48, 95, 73, 0.55);
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
 }
-body:has(.scrolly) .nav__brand { color: var(--fg); }
+body:has(.scrolly) .nav .nav__brand { color: var(--fg); }
 body:has(.scrolly) .nav__link { color: var(--fg-muted); }
 body:has(.scrolly) .nav__link:not(.nav__link--active):hover { color: var(--fg); }
 body:has(.scrolly) .nav__link--active { color: var(--fg); }
@@ -338,6 +395,10 @@ body:has(.scrolly) main {
   justify-content: flex-start;
   padding-top: 4rem;
   padding-bottom: 10rem;
+}
+
+.scrolly__step[data-step="11"] {
+  min-height: 74vh;
 }
 
 /* Step 6 is taller — three sub-phases inside, each with its own paragraph.

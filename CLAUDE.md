@@ -29,6 +29,46 @@ aren't obvious from the source.
 > `npx astro check --config astro.config.dev.mjs`. That's the canonical sandbox
 > typecheck command across S2/S3a/S3b/S3c.
 
+## How to work and answer Fedor (HARD — 2026-06-14)
+
+Keep every answer short and simple. Easy language. No long text. Do not waste tokens.
+
+**Answer shape — use this:**
+- **Problem:** what is wrong and where.
+- **Needed:** what the fix needs.
+- **Fix:** what to do.
+
+**When the task is done, answer easy:**
+- **Before:** what it was.
+- **Now:** what it is.
+
+**Hard rules:**
+- Fix only the exact part of the code in the task. Do not touch other parts of the site.
+- Never change CSS classes of other elements. Only the element in the task.
+- No generative ideas without asking. Do not invent or "improve" anything.
+- Never write or generate text unless Fedor asks for it. If text is needed and you
+  do not know what to put — ASK Fedor.
+- Do not interpret, imagine, or think how it "could be better". ASK Fedor exactly
+  what needs to be done.
+- One short question to Fedor beats a wrong guess.
+- Stop writing huge responses. Simple, logical, easy language.
+
+## Preview / visual check (HARD — 2026-06-14)
+
+Live preview wastes time and breaks things when it is not needed. Past problem:
+Claude started a **remote Chrome preview on another laptop** whose local copy is
+completely different from the one Fedor is editing. Never do this.
+
+**Hard rules:**
+- Only ever touch the **local copy on the laptop that sent the prompt**. Never a
+  remote Chrome copy on another machine — it is not the same code.
+- **Always ASK Fedor first** if he wants Claude to do a visual check via preview.
+  Do not start a preview on your own.
+- **Do not start a new preview server.** If a local dev server is already running,
+  use that one (Fedor's own server at `http://127.0.0.1:4322/`). Starting a second
+  server causes a Vite cache collision and ruins the running copy.
+- Stop / do not run live preview when it is not needed for the task.
+
 ## Operator context
 
 Fedor works on **MacBook Pro** (Apple Silicon, zsh shell, primary path
@@ -84,6 +124,16 @@ Three writers:
 - **Fedor + dev team** triage and assign tasks in Asana directly.
 - **Claude Code** (local + Cowork) reads and writes Asana via the
   Asana V2 MCP server.
+
+**Feedbucket items — how to summarize (HARD — 2026-06-14).** When you
+read a Feedbucket comment, write it short and simple. Easy language. No
+long text.
+
+- **Problem:** what is wrong and where (which page, which step).
+- **Solution / who does what:** what fix is needed, and who does it.
+
+Example: "Florian found a bug on Step 5 on the Über das Projekt page. He
+wants this and that. Needs: we add this and that. We do this."
 
 **Sections (Kanban columns) ARE the status machine.** Going-forward
 five-section design: `To do` · `In progress` · `Awaiting decision` ·
@@ -323,6 +373,12 @@ AskUserQuestion before writing.
   redirect changes need to consider both edge and origin behavior.
 - **`.superpowers/`, `.playwright-mcp/`, `editorial/`, `_local/`** — session
   artifacts and editorial scratch space. Don't refactor or "clean them up".
+- **Nav / menu (HARD)** — the floating pill nav is fragile. Any change to
+  `.nav-wrapper`, `.nav-blur-shield`, `.nav`, `.nav__*`, `body:not(.has-hero)`
+  nav rules, or `main { padding-top }` in `global.css`, or the `isHero` /
+  `publishHeight` scripts in `BaseLayout.astro` requires an explicit
+  AskUserQuestion confirmation before editing. Past unreviewed nav changes broke
+  page-level h1 positioning and scroll behaviour across the whole site.
 
 ## The Weird Things (will break if you don't know)
 

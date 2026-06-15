@@ -20,10 +20,10 @@ export function VizCtaGrid({ data }: { data: CarmData }) {
 
       if (step10) {
         const r = step10.getBoundingClientRect();
-        // Cards reveal as step 10 scrolls from bottom into the active band.
-        const HI = vh * 0.90, LO = vh * 0.05;
+        // All cards appear together once step 10 is 40% into the viewport.
+        const HI = vh * 0.90, LO = vh * 0.50;
         const p = Math.max(0, Math.min(1, (HI - r.top) / (HI - LO)));
-        setRevealed(Math.floor(p * 4.4));
+        setRevealed(p > 0 ? 4 : 0);
       }
 
       if (step11) {

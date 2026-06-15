@@ -19,6 +19,8 @@ import { ArrowDownAZ } from 'lucide-react';
 import {
   IconVerdictRankAsc,
   IconVerdictRankDesc,
+  IconCategoryRankAsc,
+  IconCategoryRankDesc,
 } from '../../../lib/icons';
 
 interface Props {
@@ -36,6 +38,16 @@ interface Props {
     tooltip: string;
     onClick: () => void;
   };
+  /** Optional source-category sort affordance — the Quellen analogue of
+   *  `verdictRank`. Renders a second button at the upper-RIGHT (stacked
+   *  category-rank glyph) that sorts sources by their category. A view
+   *  uses either `verdictRank` (Mythen) or `categoryRank` (Quellen). */
+  categoryRank?: {
+    isActive: boolean;
+    direction: 'asc' | 'desc';
+    tooltip: string;
+    onClick: () => void;
+  };
 }
 
 export default function GridLabelHeader({
@@ -44,6 +56,7 @@ export default function GridLabelHeader({
   azTooltip,
   onAzClick,
   verdictRank,
+  categoryRank,
 }: Props) {
   return (
     <>
@@ -81,6 +94,25 @@ export default function GridLabelHeader({
             <IconVerdictRankDesc size={14} aria-hidden="true" />
           ) : (
             <IconVerdictRankAsc size={14} aria-hidden="true" />
+          )}
+        </button>
+      )}
+      {categoryRank && (
+        <button
+          type="button"
+          className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-right${categoryRank.isActive ? ' is-active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            categoryRank.onClick();
+          }}
+          aria-pressed={categoryRank.isActive}
+          aria-label={categoryRank.tooltip}
+          title={categoryRank.tooltip}
+        >
+          {categoryRank.direction === 'desc' ? (
+            <IconCategoryRankDesc size={14} aria-hidden="true" />
+          ) : (
+            <IconCategoryRankAsc size={14} aria-hidden="true" />
           )}
         </button>
       )}

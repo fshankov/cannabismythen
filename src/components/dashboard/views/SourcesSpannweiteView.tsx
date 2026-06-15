@@ -53,11 +53,10 @@ import { getCategoryDescription } from '../../../lib/dashboard/source-descriptio
 import { getCategoryColor } from '../../../lib/dashboard/colors';
 import type { SourceCategoryId } from '../../../lib/icons/lookups';
 
-/** Column order for the new sources2 view (Fedor 2026-05-15): Wahrnehmung
- *  moves to the last slot so the more "active" search/trust/prevention
- *  columns lead. The legacy SourcesStripsView keeps the original
- *  ['search', 'perception', 'trust', 'prevention'] order intentionally. */
-const METRICS: SourceMetricType[] = ['search', 'trust', 'prevention', 'perception'];
+/** Column order (Fedor 2026-05-29): Suche · Wahrnehmung · Vertrauen ·
+ *  Prävention — kept identical to Quellen-Tabelle's METRIC_COLS so the
+ *  two source views read the same left→right. */
+const METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
 const GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
 
 const METRIC_LABELS: Record<SourceMetricType, string> = {

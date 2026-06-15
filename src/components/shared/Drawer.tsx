@@ -5,7 +5,7 @@ import { trapFocus } from '../../lib/dashboard/focus-trap';
 export interface DrawerProps {
   /** Whether the drawer is mounted/visible. */
   open: boolean;
-  /** Called when the user dismisses the drawer (X button, backdrop click, Escape). */
+  /** Called when the user dismisses the drawer (X button, backdrop click, Escape, or browser back). */
   onClose: () => void;
   /**
    * Layout variant.
@@ -56,7 +56,12 @@ export default function Drawer({
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descId = useId();
+  // Keep a stable ref to onClose so the popstate handler never becomes stale
+  // even if the parent recreates the callback on re-renders.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
+  // Focus trap + Escape key (handled by trapFocus's onEscape callback).
   useEffect(() => {
     if (!open) return;
     const node = panelRef.current;
@@ -67,6 +72,42 @@ export default function Drawer({
     });
     return cleanup;
   }, [open, onClose, initialFocusRef]);
+
+  // Scroll lock + browser back-button support.
+  // Mirrors FactsheetPanel: run whenever `open` changes, guard on !open so
+  // setup only executes when the drawer is visible.
+  useEffect(() => {
+    if (!open) return;
+
+    // Lock body scroll — overflow:hidden on <html> preserves scroll position
+    // so there is no layout jump on close (same approach as FactsheetPanel).
+    const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+    document.documentElement.style.overflow = 'hidden';
+    if (scrollbarW > 0) {
+      document.documentElement.style.paddingRight = `${scrollbarW}px`;
+    }
+
+    // Push a sentinel history entry so the browser back button closes the
+    // drawer instead of navigating away from the page.
+    window.history.pushState({ drawerOpen: true }, '');
+    const handlePopState = () => onCloseRef.current();
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+
+      // If the drawer was closed by the X / Escape / backdrop (not by the
+      // browser back button), the sentinel state is still in history — pop it
+      // so the user doesn't need two presses of Back to leave the page.
+      if (window.history.state?.drawerOpen) {
+        window.history.back();
+      }
+
+      // Restore scroll.
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.paddingRight = '';
+    };
+  }, [open]); // Re-runs when open changes; guard above means setup runs only while open.
 
   if (!open) return null;
 

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
-  Download, Filter, Search,
+  Download, Filter, Search, X,
   Eye, TrendingUp, Target, Shield, Globe,
-  Baby, Cannabis, GraduationCap, UsersRound,
+  Baby, Cannabis, GraduationCap, UsersRound, Signpost,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { IconVolljaehrige } from '../../lib/icons/audiences';
@@ -28,6 +28,8 @@ import { urlToState, getDefaultState, pushState } from '../../lib/dashboard/url-
 import { buildWalkthrough } from './rundgang/walkthrough';
 import RundgangBookmark from './RundgangBookmark';
 import PivotToggle from './controls/PivotToggle';
+import InfoTooltip from './InfoTooltip';
+import VerdictArrow from '../shared/VerdictArrow';
 import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
 import VerdictTags from './VerdictTags';
@@ -176,10 +178,14 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    *  intentionally NOT counted. */
   const activeFilterCount = useMemo(() => {
     if (!data) return 0;
-    let n = state.mythIds.length;
-    for (const cid of state.categoryIds) {
-      n += data.myths.filter((m) => m.category_id === cid).length;
-    }
+    const categoryMythIds = new Set(
+      data.myths
+        .filter((m) => m.category_id !== null && state.categoryIds.includes(m.category_id))
+        .map((m) => m.id),
+    );
+    // Count individual myth selections that are NOT already covered by a selected category
+    const extraMythIds = state.mythIds.filter((id) => !categoryMythIds.has(id));
+    let n = categoryMythIds.size + extraMythIds.length;
     if (state.verdictFilter !== 'all') n += 1;
     return n;
   }, [data, state.categoryIds, state.mythIds, state.verdictFilter]);
@@ -506,23 +512,45 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           Hide it on Informationsquellen / Informationsquellen 2 /
           Quellen-Tabelle per Fedor's 2026-05-28 request. */}
       {!isSourceView && (
-        <button
-          type="button"
-          className="carm-btn carm-explorer__filter"
-          onClick={() => setFilterDrawerOpen(true)}
-          aria-label={t('filter.button', 'de')}
-        >
-          <Filter size={14} strokeWidth={2} aria-hidden="true" />
-          {t('filter.button', 'de')}
+        <>
+          <button
+            type="button"
+            className="carm-btn carm-explorer__filter"
+            onClick={() => setFilterDrawerOpen(true)}
+            aria-label={t('filter.button', 'de')}
+          >
+            <Filter size={14} strokeWidth={2} aria-hidden="true" />
+            {t('filter.button', 'de')}
+            {activeFilterCount > 0 && (
+              <span
+                className="carm-btn__badge"
+                aria-label={`${activeFilterCount} aktiv`}
+              >
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
           {activeFilterCount > 0 && (
-            <span
-              className="carm-btn__badge"
-              aria-label={`${activeFilterCount} aktiv`}
+            <button
+              type="button"
+              className="carm-explorer__filter-clear"
+              aria-label="Alle Filter zurücksetzen"
+              title="Alle Filter zurücksetzen"
+              onClick={() =>
+                setState((prev) => ({
+                  ...prev,
+                  categoryIds: [],
+                  mythIds: [],
+                  verdictFilter: 'all',
+                  balkenSort: 'a-z',
+                  searchQuery: '',
+                }))
+              }
             >
-              {activeFilterCount}
-            </span>
+              <X size={13} strokeWidth={2.5} aria-hidden="true" />
+            </button>
           )}
-        </button>
+        </>
       )}
       {exportOnlyAction}
     </>
@@ -546,8 +574,60 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           <div className="carm-dataset-toggle">
             <PivotToggle
               options={[
-                { value: 'mythen', label: 'Mythen' },
-                { value: 'informationswege', label: 'Informationswege' },
+                {
+                  value: 'mythen',
+                  label: 'Mythen',
+                  info: (
+                    <InfoTooltip
+                      title="Mythen"
+                      cardClassName="info-tooltip-card--accent"
+                      titleSuffix={
+                        <span className="carm-datasetinfo-verdicts" aria-hidden="true">
+                          <VerdictArrow verdict="richtig" size={15} strokeWidth={2.25} />
+                          <VerdictArrow verdict="eher_richtig" size={15} strokeWidth={2.25} />
+                          <VerdictArrow verdict="eher_falsch" size={15} strokeWidth={2.25} />
+                          <VerdictArrow verdict="falsch" size={15} strokeWidth={2.25} />
+                          <VerdictArrow verdict="keine_aussage_moeglich" size={15} strokeWidth={2.25} />
+                        </span>
+                      }
+                      definition={
+                        <>
+                          <ul className="info-tooltip-list">
+                            <li>{t('datasetInfo.mythen.q1', 'de')}</li>
+                            <li>{t('datasetInfo.mythen.q2', 'de')}</li>
+                            <li>{t('datasetInfo.mythen.q3', 'de')}</li>
+                            <li>{t('datasetInfo.mythen.q4', 'de')}</li>
+                            <li>{t('datasetInfo.mythen.q5', 'de')}</li>
+                          </ul>
+                          <p className="info-tooltip-foot">{t('datasetInfo.mythen.foot', 'de')}</p>
+                        </>
+                      }
+                    />
+                  ),
+                },
+                {
+                  value: 'informationswege',
+                  label: 'Informationswege',
+                  info: (
+                    <InfoTooltip
+                      title="Informationswege"
+                      titlePrefix={
+                        <Signpost size={15} strokeWidth={2} className="carm-datasetinfo-signpost" aria-hidden="true" />
+                      }
+                      definition={
+                        <>
+                          <ul className="info-tooltip-list">
+                            <li>{t('datasetInfo.wege.q1', 'de')}</li>
+                            <li>{t('datasetInfo.wege.q2', 'de')}</li>
+                            <li>{t('datasetInfo.wege.q3', 'de')}</li>
+                            <li>{t('datasetInfo.wege.q4', 'de')}</li>
+                          </ul>
+                          <p className="info-tooltip-foot">{t('datasetInfo.wege.foot', 'de')}</p>
+                        </>
+                      }
+                    />
+                  ),
+                },
               ]}
               value={isSourcesDataset ? 'informationswege' : 'mythen'}
               onChange={(ds) => handleDatasetSwitch(ds as 'mythen' | 'informationswege')}
@@ -628,6 +708,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           return (
             <ToolbarRow
               aria-label={t('filter.title', 'de')}
+              className="carm-toolbar-row--balken"
               pickers={[
                 <DataPicker<Indicator>
                   key="indicator"
@@ -786,6 +867,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                         mythIds: [],
                         verdictFilter: 'all',
                         balkenSort: 'a-z',
+                        searchQuery: '',
                       }));
                     }}
                   />

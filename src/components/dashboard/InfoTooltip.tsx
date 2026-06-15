@@ -1,16 +1,31 @@
 import { Info } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useFlipPosition } from './hooks/useFlipPosition';
 
 interface InfoTooltipProps {
   title: string;
-  definition: string;
+  /** Optional decorative adornments rendered inside the title row, before /
+   *  after the title text — e.g. the five verdict arrows (Mythen) or the
+   *  signpost icon (Informationswege) on the dataset-toggle tooltips.
+   *  Decorative only; keep them aria-hidden. The `title` string is still
+   *  what drives the tooltip id + aria-label. */
+  titlePrefix?: ReactNode;
+  titleSuffix?: ReactNode;
+  /** Accepts a plain string (column headers, pickers, …) OR rich content
+   *  such as a <ul> list (the dataset-toggle tooltips). A string is a valid
+   *  ReactNode, so all existing string callers are unaffected. */
+  definition: ReactNode;
   scale?: string;
   sampleSize?: string;
+  /** Optional extra class on the tooltip CARD (the portaled popover) — e.g.
+   *  `info-tooltip-card--accent` to give just THIS tooltip the green focus
+   *  ring. Lets one instance opt into a variant without restyling every
+   *  other tooltip (which keep the default focus ring). */
+  cardClassName?: string;
 }
 
-export default function InfoTooltip({ title, definition, scale, sampleSize }: InfoTooltipProps) {
+export default function InfoTooltip({ title, titlePrefix, titleSuffix, definition, scale, sampleSize, cardClassName }: InfoTooltipProps) {
   const { triggerRef, cardRef, pos, open, setOpen, updatePosition } =
     useFlipPosition<HTMLButtonElement, HTMLDivElement>();
 
@@ -70,7 +85,7 @@ export default function InfoTooltip({ title, definition, scale, sampleSize }: In
       id={tooltipId}
       role="tooltip"
       tabIndex={-1}
-      className={`info-tooltip-card info-tooltip-card--fixed${open ? ' info-tooltip-card--open' : ''}`}
+      className={`info-tooltip-card info-tooltip-card--fixed${open ? ' info-tooltip-card--open' : ''}${cardClassName ? ` ${cardClassName}` : ''}`}
       style={pos ? {
         position: 'fixed',
         top: pos.top,
@@ -82,9 +97,12 @@ export default function InfoTooltip({ title, definition, scale, sampleSize }: In
       onMouseEnter={handleOpen}
       onMouseLeave={() => setOpen(false)}
     >
-      <p className="info-tooltip-title">{title}</p>
+      <p className={`info-tooltip-title${titlePrefix || titleSuffix ? ' info-tooltip-title--adorned' : ''}`}>
+        {titlePrefix}{title}{titleSuffix}
+      </p>
       {sampleSize && <span className="info-tooltip-sample">{sampleSize}</span>}
-      <p className="info-tooltip-desc">{definition}</p>
+      {/* <div> not <p>: `definition` may be a <ul>, which is invalid inside <p>. */}
+      <div className="info-tooltip-desc">{definition}</div>
       {scale && <p className="info-tooltip-scale">Skala: {scale}</p>}
     </div>
   );

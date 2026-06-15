@@ -177,7 +177,6 @@ const isFachkraefte = activeAudience === "fachkraefte";
   gap: 24px;
   /* 48px gap under the header part (h1 + intro) → per-category text. */
   margin-bottom: 48px;
-  padding-top: 16px;
 }
 
 /* h1 — matches .quiz-index__title (quiz index page). */
@@ -430,45 +429,185 @@ const isFachkraefte = activeAudience === "fachkraefte";
   font-weight: 700;
 }
 
-/* Data tables inside FAQ answers. They previously had NO styling, so browser
-   defaults applied: <th> centered, <td> left-aligned → numbers drifted left of
-   their headers and you couldn't tell which column they belonged to. Aligning
-   headers AND cells the same way (left) puts every value directly under its
-   heading; a header rule + row separators make the rows scannable. */
+/* Data tables inside FAQ answers — styled to match the Daten-Explorer
+   `.data-table` (src/styles/dashboard.css): token border, small header, tight
+   cell padding, right-aligned tabular numbers, and the signature row hover
+   (light-green wash + green left accent bar). Kept borderless (no card) like the
+   explorer's in-panel table. */
 :global(.mi-layout .faq-question__answer table) {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0 24px;
-  font-size: 15px;
-  line-height: 1.5;
+  margin: var(--space-lg) 0;
+  font-size: 0.83rem;
+  line-height: 1.45;
 }
 
 :global(.mi-layout .faq-question__answer th) {
   text-align: left;
   vertical-align: bottom;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 13px;
-  color: #404943;
-  padding: 0 20px 10px 0;
-  border-bottom: 2px solid rgba(191, 201, 193, 0.6);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  color: var(--color-text-secondary);
+  padding: 0 12px 9px 0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 :global(.mi-layout .faq-question__answer td) {
-  text-align: left;
-  vertical-align: top;
-  padding: 11px 20px 11px 0;
-  border-bottom: 1px solid rgba(191, 201, 193, 0.3);
-  color: #1a1c1a;
+  vertical-align: middle;
+  padding: 9px 12px 9px 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
 }
 
-/* Right-most column flush to the edge; no trailing border on the last row. */
+/* Numeric columns (markdown `---:` → align="right") right-align + tabular figures.
+   No !important: the attribute selector wins over the base rule by specificity. */
+:global(.mi-layout .faq-question__answer th[align="right"]),
+:global(.mi-layout .faq-question__answer td[align="right"]) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* First column flush to the text margin; right-most column flush to the edge;
+   no trailing border on the last row. */
+:global(.mi-layout .faq-question__answer th:first-child),
+:global(.mi-layout .faq-question__answer td:first-child) {
+  padding-left: 0;
+}
 :global(.mi-layout .faq-question__answer th:last-child),
 :global(.mi-layout .faq-question__answer td:last-child) {
   padding-right: 0;
 }
 :global(.mi-layout .faq-question__answer tbody tr:last-child td) {
   border-bottom: none;
+}
+
+/* Daten-Explorer row hover: light-green wash + green left accent bar. */
+:global(.mi-layout .faq-question__answer tbody tr) {
+  transition: background var(--duration-fast, 150ms) var(--ease-out, ease);
+}
+:global(.mi-layout .faq-question__answer tbody tr:hover) {
+  background: var(--color-accent-light);
+}
+:global(.mi-layout .faq-question__answer tbody tr:hover td:first-child) {
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+/* ── Heatmap tint for FAQ value tables (Daten-Explorer "Tabelle" look) ──────
+   Cells whose content is "NN %" are tinted by value via the shared --band ramp
+   (applied by src/lib/faq-heatmap-bands.ts). The --band-* tokens live in
+   global.css, which IS loaded on this page. */
+:global(.mi-layout .faq-question__answer .faq-hm--band-0) { background: var(--band-0); }
+:global(.mi-layout .faq-question__answer .faq-hm--band-1) { background: var(--band-1); }
+:global(.mi-layout .faq-question__answer .faq-hm--band-2) { background: var(--band-2); }
+:global(.mi-layout .faq-question__answer .faq-hm--band-3) { background: var(--band-3); }
+:global(.mi-layout .faq-question__answer .faq-hm--band-4) { background: var(--band-4); }
+:global(.mi-layout .faq-question__answer .faq-hm--band-5) { background: var(--band-5); }
+:global(.mi-layout .faq-question__answer .faq-hm--band-6) { background: var(--band-6); }
+:global(.mi-layout .faq-question__answer td.faq-hm) {
+  color: #33302c;
+  font-variant-numeric: tabular-nums;
+}
+/* Heatmap-table layout (scoped to the tinted table only): fixed layout so all
+   five number columns get the same width regardless of header text length;
+   value cells never wrap. Header cells may wrap to two lines for the longer
+   group names — only the number cells are kept on one line. The wrapper is the
+   horizontal-scroll container (overrides Phase-1's `display: block` rule that
+   would otherwise break `table-layout: fixed` on narrow viewports). */
+:global(.mi-layout .faq-question__answer .faq-hm-wrap) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+:global(.mi-layout .faq-question__answer table.faq-hm-table) {
+  table-layout: fixed;
+  /* Min width so the 7 fixed-% columns stay readable on phones; below this
+     width the wrapper scrolls horizontally. */
+  min-width: 720px;
+}
+/* Aussage = statement column (wider, wrapping). */
+:global(.mi-layout .faq-question__answer table.faq-hm-table th:nth-child(1)),
+:global(.mi-layout .faq-question__answer table.faq-hm-table td:nth-child(1)) {
+  width: 30%;
+}
+/* Korrekt = verdict-pill column (compact). */
+:global(.mi-layout .faq-question__answer table.faq-hm-table th:nth-child(2)),
+:global(.mi-layout .faq-question__answer table.faq-hm-table td:nth-child(2)) {
+  width: 11%;
+}
+/* The five Zielgruppen columns share the remaining width equally. */
+:global(.mi-layout .faq-question__answer table.faq-hm-table th:nth-child(n + 3)),
+:global(.mi-layout .faq-question__answer table.faq-hm-table td:nth-child(n + 3)) {
+  width: 11.8%;
+}
+:global(.mi-layout .faq-question__answer table.faq-hm-table th[align="right"]) {
+  white-space: normal;
+  line-height: 1.25;
+}
+:global(.mi-layout .faq-question__answer table.faq-hm-table td[align="right"]) {
+  white-space: nowrap;
+}
+:global(.mi-layout .faq-question__answer .faq-hm-legend) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 20px;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+:global(.mi-layout .faq-question__answer .faq-hm-legend__bar) {
+  display: inline-flex;
+  border-radius: 2px;
+  overflow: hidden;
+}
+:global(.mi-layout .faq-question__answer .faq-hm-legend__bar span) {
+  width: 20px;
+  height: 11px;
+}
+
+/* Lesart legend under the Konsumierende-vs-Minderjährige tables. Smaller font,
+   secondary colour for the prose. The colour words "blau" / "lila" carry an
+   inline swatch (the same 8 px dot used inside the tables) plus matching text
+   colour, so the legend reads as a self-explaining key. */
+:global(.mi-layout .faq-question__answer p.faq-lesart) {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 10px 0 0;
+}
+:global(.mi-layout .faq-question__answer p.faq-lesart strong) {
+  color: var(--color-text);
+  font-weight: 600;
+}
+:global(.mi-layout .faq-lesart-shared),
+:global(.mi-layout .faq-lesart-diff) {
+  font-weight: 600;
+  white-space: nowrap;
+}
+:global(.mi-layout .faq-lesart-shared) { color: #2b6cb0; }
+:global(.mi-layout .faq-lesart-diff)   { color: #7c3aed; }
+:global(.mi-layout .faq-lesart-shared::before),
+:global(.mi-layout .faq-lesart-diff::before) {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+:global(.mi-layout .faq-lesart-shared::before) { background: #2b6cb0; }
+:global(.mi-layout .faq-lesart-diff::before)   { background: #7c3aed; }
+
+@media (max-width: 640px) {
+  /* Override Phase-1's `display: block; overflow-x: auto` on tables for the
+     heatmap table — it must stay `display: table` for `table-layout: fixed`
+     to keep equal-width columns. The .faq-hm-wrap is the scroll container. */
+  :global(.mi-layout .faq-question__answer table.faq-hm-table) {
+    display: table;
+    overflow-x: visible;
+    font-size: 0.78rem;
+  }
 }
 
 /* Related-myths rail divider (the line above MYTHOS / VERWANDTE MYTHEN):
@@ -534,7 +673,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
   :global(.mi-layout .faq-question__answer table) {
     display: block;
     overflow-x: auto;
-    font-size: 14px;
+    font-size: 0.78rem;
     -webkit-overflow-scrolling: touch;
   }
 

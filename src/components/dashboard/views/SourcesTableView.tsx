@@ -88,11 +88,14 @@ type ColSpec = MetricCol | GroupCol;
 /** v3 (2026-05-26): Wahrnehmung moves to the trailing slot so the
  *  more "active" search/trust/prevention metrics lead — same column
  *  order Informationsquellen 2 (SourcesSpannweiteView) uses. */
+// Column order (Fedor 2026-05-29): Suche · Wahrnehmung · Vertrauen ·
+// Prävention — matches SourcesSpannweiteView's METRICS so Tabelle and
+// Übersicht read the same left→right.
 const METRIC_COLS: MetricCol[] = [
   { key: 'search', label: 'Suche', flavor: 'metric' },
+  { key: 'perception', label: 'Wahrnehmung', flavor: 'metric' },
   { key: 'trust', label: 'Vertrauen', flavor: 'metric' },
   { key: 'prevention', label: 'Prävention', flavor: 'metric' },
-  { key: 'perception', label: 'Wahrnehmung', flavor: 'metric' },
 ];
 
 /** v4 (2026-05-26): pivot to group columns. Same 5 Zielgruppen as
@@ -107,6 +110,18 @@ const GROUP_COLS: GroupCol[] = [
   { key: 'young_adults', label: 'Junge Erwachsene (18–26)', short: 'Junge Erw.', flavor: 'group' },
   { key: 'parents', label: 'Eltern', short: 'Eltern', flavor: 'group' },
 ];
+
+/** Canonical category order for the category sort — mirrors
+ *  SourcesSpannweiteView so all three Quellen tabs rank categories
+ *  identically (Fedor 2026-05-29). */
+const CATEGORY_ORDER: Record<string, number> = {
+  institutional: 1,
+  internet: 2,
+  social_media: 3,
+  traditional_media: 4,
+  print_physical: 5,
+  personal: 6,
+};
 
 const GROUP_FULL_LABELS_DE: Record<SourceGroupId, string> = {
   adults: 'Erwachsene (18–70)',
@@ -255,6 +270,11 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
         let cmp = 0;
         if (sortKey === 'source') {
           cmp = cmpAz(a, b);
+        } else if (sortKey === 'category') {
+          // 2026-05-29: category sort (same control as Quellen-Übersicht).
+          const oa = CATEGORY_ORDER[a.source.category] ?? 99;
+          const ob = CATEGORY_ORDER[b.source.category] ?? 99;
+          cmp = oa !== ob ? oa - ob : cmpAz(a, b);
         } else {
           const va = a.values[sortKey];
           const vb = b.values[sortKey];
@@ -302,6 +322,13 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
     }
 
     const isAzActive = sortKey === 'source';
+    // Category sort (2026-05-29) — same control as Quellen-Übersicht.
+    const isCatActive = sortKey === 'category';
+    const catTooltip = isCatActive
+      ? sortDir === 'asc'
+        ? t('sources.sort.category.asc.tooltip', lang)
+        : t('sources.sort.category.desc.tooltip', lang)
+      : t('sources.sort.category.activate.tooltip', lang);
     // v5: off-axis label = the picker's selection (the fixed value
     // for this view). 'metric' mode → picker = metric, so label =
     // metric. 'group' mode → picker = group, so label = group.
@@ -351,6 +378,19 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                     isAzActive={isAzActive}
                     azTooltip="Alphabetisch sortieren"
                     onAzClick={() => { setSortKey('source'); setSortDir('asc'); }}
+                    categoryRank={{
+                      isActive: isCatActive,
+                      direction: isCatActive && sortDir === 'desc' ? 'desc' : 'asc',
+                      tooltip: catTooltip,
+                      onClick: () => {
+                        if (sortKey !== 'category') {
+                          setSortKey('category');
+                          setSortDir('asc');
+                        } else {
+                          setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+                        }
+                      },
+                    }}
                   />
                 </div>
               </th>

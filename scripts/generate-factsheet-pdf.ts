@@ -30,14 +30,22 @@ const ROOT = join(__dirname, "..");
 const CONTENT_DIR = join(ROOT, "src/content/zahlen-und-fakten");
 const ICONS_DIR = join(ROOT, "src/lib/icons/_handoff/icons");
 const LOGOS_DIR = join(ROOT, "_local/design/logos");
-const OUT_DIR = join(ROOT, "_local/export");
-const OUT_PDF = join(OUT_DIR, "cannabismythen-mythen-faktenblaetter.pdf");
+const OUT_DIR = join(ROOT, "_local/export"); // debug HTML + temp outline json
+const SAMPLE = !!process.env.SAMPLE;
+// A full run publishes the hosted assets into public/ (served on the live
+// site). SAMPLE runs stay in _local/ so a 3-myth subset never overwrites the
+// public/ files.
+const PDF_DIR = SAMPLE ? OUT_DIR : join(ROOT, "public");
+const OUT_PDF = join(PDF_DIR, "cannabismythen-mythen-faktenblaetter.pdf");
 const OUT_HTML = join(OUT_DIR, "cannabismythen-mythen-faktenblaetter.html");
+const CARDS_DIR = join(PDF_DIR, "factsheets"); // one standalone PDF per myth → /factsheets/<slug>.pdf
 
 const SITE = "https://cannabismythen.de";
 const REPORT_URL = "https://www.isd-hamburg.de/wp-content/uploads/2026/03/Abschlussbericht_CaRM_final.pdf";
-const SAMPLE = !!process.env.SAMPLE;
 const SAMPLE_IDS = ["m01", "m13", "m25"]; // falsch · richtig · eher_falsch
+// Build targets: both by default; COMBINED_ONLY=1 / CARDS_ONLY=1 to limit.
+const DO_COMBINED = process.env.CARDS_ONLY !== "1";
+const DO_CARDS = process.env.COMBINED_ONLY !== "1";
 
 // ---------------------------------------------------------------------------
 // Design tokens (mirrored from src/styles/global.css)
@@ -311,17 +319,28 @@ function renderIndicatorKey(): string {
 // ---------------------------------------------------------------------------
 // Page builders
 // ---------------------------------------------------------------------------
-function renderMyth(myth: Myth, cat: { label: string; icon: string; color: string }): string {
+// Shared per-myth body — Einordnung / Synthese / Zentrale Erkenntnisse /
+// Daten nach Zielgruppen (table + indicator key) / Referenzen. Verbatim from
+// the .mdoc. Reused by the combined `renderMyth()` and the standalone card.
+function renderMythBody(myth: Myth): string {
   const v = VERDICTS[myth.classification] ?? VERDICTS.keine_aussage;
-  const statement = myth.title.replace(/^Mythos\s+\d+:\s*/i, "");
   const ein = findSection(myth, (h) => h === "Einordnung");
   const syn = findSection(myth, (h) => h === "Synthese");
   const erk = findSection(myth, (h) => /zentrale erkenntnisse/i.test(h));
   const dat = findSection(myth, (h) => /^Daten nach Zielgruppen/i.test(h));
   const ref = findSection(myth, (h) => /^Referenzen/i.test(h));
+  return `
+  ${ein ? `<div class="sec"><div class="sec-h">Einordnung</div>${renderParagraphs(ein.lines)}</div>` : ""}
+  ${syn ? `<div class="sec sec-synthese" style="border-color:${v.color}"><div class="sec-h">Synthese</div>${renderParagraphs(syn.lines)}</div>` : ""}
+  ${erk ? `<div class="sec"><div class="sec-h">Zentrale Erkenntnisse</div>${renderBullets(erk.lines)}</div>` : ""}
+  ${dat ? `<div class="sec sec-data"><div class="sec-h">Daten nach Zielgruppen</div>${renderDataTable(dat.lines)}${renderIndicatorKey()}</div>` : ""}
+  ${ref ? `<div class="sec sec-ref"><div class="sec-h">Referenzen</div>${renderReferences(ref.lines)}</div>` : ""}`;
+}
 
+function renderMyth(myth: Myth, cat: { label: string; icon: string; color: string }): string {
+  const v = VERDICTS[myth.classification] ?? VERDICTS.keine_aussage;
+  const statement = myth.title.replace(/^Mythos\s+\d+:\s*/i, "");
   const onlineUrl = `${SITE}/daten-explorer/?mythos=${myth.number}`;
-
   return `
 <section class="myth" id="${myth.id}">
   <div class="myth-kicker" style="color:${cat.color}">
@@ -330,12 +349,27 @@ function renderMyth(myth: Myth, cat: { label: string; icon: string; color: strin
   <div class="myth-head">
     <h2 class="myth-statement"><a class="myth-link" href="${onlineUrl}">${esc(statement)}</a> <span class="vbadge" style="background:${v.bg};color:${v.color};border-color:${v.color}40"><span class="vbadge-icon">${verdictGlyph(myth.classification)}</span><span class="vbadge-label">${v.label}</span></span></h2>
   </div>
+${renderMythBody(myth)}
+</section>`;
+}
 
-  ${ein ? `<div class="sec"><div class="sec-h">Einordnung</div>${renderParagraphs(ein.lines)}</div>` : ""}
-  ${syn ? `<div class="sec sec-synthese" style="border-color:${v.color}"><div class="sec-h">Synthese</div>${renderParagraphs(syn.lines)}</div>` : ""}
-  ${erk ? `<div class="sec"><div class="sec-h">Zentrale Erkenntnisse</div>${renderBullets(erk.lines)}</div>` : ""}
-  ${dat ? `<div class="sec sec-data"><div class="sec-h">Daten nach Zielgruppen</div>${renderDataTable(dat.lines)}${renderIndicatorKey()}</div>` : ""}
-  ${ref ? `<div class="sec sec-ref"><div class="sec-h">Referenzen</div>${renderReferences(ref.lines)}</div>` : ""}
+// Standalone single-myth fact-sheet (one self-contained PDF per myth).
+// Same layout as a myth page in the combined PDF: a humble category kicker,
+// the statement as the main H1 + inline verdict pill, then the shared body.
+// Brand/domain live in the running page footer — no masthead, no footer block.
+function renderCard(myth: Myth, cat: { label: string; icon: string; color: string }): string {
+  const v = VERDICTS[myth.classification] ?? VERDICTS.keine_aussage;
+  const statement = myth.title.replace(/^Mythos\s+\d+:\s*/i, "");
+  const onlineUrl = `${SITE}/daten-explorer/?mythos=${myth.number}`;
+  return `
+<section class="card">
+  <div class="card-kicker" style="color:${cat.color}">
+    <span class="kicker-icon">${svg(cat.icon)}</span><span>${esc(cat.label)}</span>
+  </div>
+  <div class="card-head">
+    <h1 class="card-statement"><a class="myth-link" href="${onlineUrl}">${esc(statement)}</a> <span class="vbadge" style="background:${v.bg};color:${v.color};border-color:${v.color}40"><span class="vbadge-icon">${verdictGlyph(myth.classification)}</span><span class="vbadge-label">${v.label}</span></span></h1>
+  </div>
+${renderMythBody(myth)}
 </section>`;
 }
 
@@ -581,6 +615,15 @@ ol.references li{display:grid;grid-template-columns:20px 1fr;gap:6px;font-size:7
 .credits-url{font-size:11pt;font-weight:600;}
 .credits-url a{color:var(--accent);}
 .credits-fine{font-size:8.5pt;color:var(--muted);margin-top:14px;}
+
+/* ---- STANDALONE CARD (one PDF per myth) — matches the combined myth page ---- */
+.card{padding-top:1mm;}
+.card-kicker{display:flex;align-items:center;gap:6px;font-weight:700;font-size:8pt;text-transform:uppercase;letter-spacing:0.05em;opacity:0.62;margin-bottom:9px;}
+.card-kicker .kicker-icon svg{width:1.1em;height:1.1em;}
+.card-head{break-inside:avoid;break-after:avoid;border-bottom:2px solid var(--border);padding-bottom:13px;margin-bottom:15px;}
+.card-statement{font-size:23pt;font-weight:700;letter-spacing:-0.015em;line-height:1.2;color:var(--text);}
+.card-statement a{color:inherit;text-decoration:none;}
+.card-statement .vbadge{position:relative;top:-3px;}
 `;
 }
 
@@ -628,72 +671,84 @@ async function main() {
     fontFace(join(ROOT, "node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-700-italic.woff2"), "SourceSerif", "italic", "700"),
   ].join("\n");
 
-  // assemble body
-  const parts: string[] = [renderIntro(), renderToc(byCat)];
-  for (const { cat, myths: cm, index } of byCat) {
-    parts.push(renderCategoryDivider(cat, cm, index));
-    for (const m of cm) parts.push(renderMyth(m, cat));
-  }
-  parts.push(renderCredits());
-
-  const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"/>
-<title>Cannabis: Mythen & Evidenz — Faktenblätter</title>
-<style>${css(fonts)}</style></head><body>${parts.join("\n")}</body></html>`;
-
   if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
-  writeFileSync(OUT_HTML, html, "utf8");
-  console.log(`   HTML → ${OUT_HTML} (${(html.length / 1024 / 1024).toFixed(1)} MB)`);
+  const { header, footer } = headerFooter();
+  const margin = { top: "13mm", bottom: "15mm", left: "14mm", right: "14mm" };
+  const htmlDoc = (inner: string) =>
+    `<!doctype html><html lang="de"><head><meta charset="utf-8"/><title>Cannabis: Mythen & Evidenz</title><style>${css(fonts)}</style></head><body>${inner}</body></html>`;
 
-  // render PDF
   console.log("   launching Chromium…");
   const browser = await chromium.launch();
   const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: "networkidle" });
   await page.emulateMedia({ media: "print" });
-  const { header, footer } = headerFooter();
-  await page.pdf({
-    path: OUT_PDF,
-    format: "A4",
-    printBackground: true,
-    displayHeaderFooter: true,
-    headerTemplate: header,
-    footerTemplate: footer,
-    margin: { top: "13mm", bottom: "15mm", left: "14mm", right: "14mm" },
-    tagged: true,
-    outline: true,
-  });
-  await browser.close();
 
-  // Rebuild the bookmark outline with clean titles (Mythos N: … nested under
-  // the 8 categories). Chromium's auto-outline has correct destinations but
-  // mangles titles at soft-wrap boundaries; the Python helper fixes them
-  // positionally. Falls back silently to Chromium's outline if it can't run.
-  const outline = {
-    front: [
-      { title: "Einführung", page: 0 },
-      { title: "Inhalt", page: 1 },
-    ],
-    items: byCat.flatMap(({ cat, myths: cm }) => [
-      { level: 1, title: cat.label },
-      ...cm.map((m) => ({ level: 2, title: m.title.replace(/^Mythos\s+\d+:\s*/i, "") })),
-    ]),
-    back: [{ title: "Über dieses Dokument", page: -1 }],
-  };
-  try {
-    const { execFileSync } = await import("node:child_process");
-    const jsonPath = join(OUT_DIR, ".outline.json");
-    writeFileSync(jsonPath, JSON.stringify(outline), "utf8");
-    const out = execFileSync(
-      "python3",
-      [join(__dirname, "fix-pdf-outline.py"), OUT_PDF, jsonPath, OUT_PDF],
-      { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
-    );
-    console.log(`   ${out.trim()}`);
-  } catch (e: any) {
-    console.warn(`   ⚠ outline polish skipped (${e.message?.split("\n")[0] ?? e}); using Chromium outline`);
+  // ---- combined document (cover + ToC + all myths + Impressum) ----
+  if (DO_COMBINED) {
+    const parts: string[] = [renderIntro(), renderToc(byCat)];
+    for (const { cat, myths: cm, index } of byCat) {
+      parts.push(renderCategoryDivider(cat, cm, index));
+      for (const m of cm) parts.push(renderMyth(m, cat));
+    }
+    parts.push(renderCredits());
+    const html = htmlDoc(parts.join("\n"));
+    writeFileSync(OUT_HTML, html, "utf8");
+    await page.setContent(html, { waitUntil: "networkidle" });
+    await page.pdf({
+      path: OUT_PDF, format: "A4", printBackground: true,
+      displayHeaderFooter: true, headerTemplate: header, footerTemplate: footer,
+      margin, tagged: true, outline: true,
+    });
+    console.log(`   ✅ combined → ${OUT_PDF}`);
   }
 
-  console.log(`   ✅ PDF → ${OUT_PDF}\n`);
+  // ---- standalone single-myth fact-sheets (one PDF per myth) ----
+  if (DO_CARDS) {
+    if (!existsSync(CARDS_DIR)) mkdirSync(CARDS_DIR, { recursive: true });
+    for (const m of myths) {
+      const cat = CATEGORIES.find((c) => c.label === m.categoryGroup) ?? CATEGORIES[0];
+      await page.setContent(htmlDoc(renderCard(m, cat)), { waitUntil: "networkidle" });
+      await page.pdf({
+        path: join(CARDS_DIR, `${m.slug}.pdf`), format: "A4", printBackground: true,
+        displayHeaderFooter: true, headerTemplate: header, footerTemplate: footer,
+        margin, tagged: true,
+      });
+    }
+    console.log(`   ✅ ${myths.length} fact-sheet${myths.length === 1 ? "" : "s"} → ${CARDS_DIR}/`);
+  }
+
+  await browser.close();
+
+  // Rebuild the combined doc's bookmark outline with clean titles (Chromium's
+  // auto-outline mangles spaces at heading soft-wraps; the Python helper fixes
+  // them positionally). Falls back silently to Chromium's outline if it can't run.
+  if (DO_COMBINED) {
+    const outline = {
+      front: [
+        { title: "Einführung", page: 0 },
+        { title: "Inhalt", page: 1 },
+      ],
+      items: byCat.flatMap(({ cat, myths: cm }) => [
+        { level: 1, title: cat.label },
+        ...cm.map((m) => ({ level: 2, title: m.title.replace(/^Mythos\s+\d+:\s*/i, "") })),
+      ]),
+      back: [{ title: "Über dieses Dokument", page: -1 }],
+    };
+    try {
+      const { execFileSync } = await import("node:child_process");
+      const jsonPath = join(OUT_DIR, ".outline.json");
+      writeFileSync(jsonPath, JSON.stringify(outline), "utf8");
+      const out = execFileSync(
+        "python3",
+        [join(__dirname, "fix-pdf-outline.py"), OUT_PDF, jsonPath, OUT_PDF],
+        { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+      );
+      console.log(`   ${out.trim()}`);
+    } catch (e: any) {
+      console.warn(`   ⚠ outline polish skipped (${e.message?.split("\n")[0] ?? e}); using Chromium outline`);
+    }
+  }
+
+  console.log(`   ✅ done\n`);
 }
 
 main().catch((e) => {

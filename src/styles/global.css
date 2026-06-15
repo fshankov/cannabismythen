@@ -384,11 +384,15 @@ hr {
   text-decoration: none;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
   transform: translateY(-200%);
-  transition: transform 150ms ease;
+  transition: transform 150ms ease, opacity 150ms ease;
 }
 .skip-to-content:focus,
 .skip-to-content:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
   transform: translateY(0);
   outline: 3px solid #ffffff;
   outline-offset: 2px;
@@ -1935,10 +1939,11 @@ button.pill[aria-pressed="true"] {
   border-radius: 2px;
 }
 
-/* BugHerd 4.5 (2026-06-03, ISD) — Lesart markers in the Konsumierende-vs-
-   Minderjährige comparison tables: a leading dot flags myths that appear in
-   both Top-10 rankings (green) or differ by >15 Richtigkeit points (red).
-   A dot, not a fill, so it doesn't read as a verdict classification. */
+/* Lesart membership dots in the Konsumierende-vs-Minderjährige comparison
+   tables: blue = myth appears in both Top-10 rankings (mark="shared"),
+   purple = >15-point Richtigkeit difference between the two groups
+   (mark="diff"). Restored 2026-06-15 with non-green palette (was originally
+   green/red; ISD asked to differentiate from the link colour). */
 .faq-myth-link--shared::before,
 .faq-myth-link--diff::before {
   content: "";
@@ -1949,8 +1954,8 @@ button.pill[aria-pressed="true"] {
   margin-right: 6px;
   vertical-align: middle;
 }
-.faq-myth-link--shared::before { background: var(--classification-richtig); }
-.faq-myth-link--diff::before { background: var(--classification-falsch); }
+.faq-myth-link--shared::before { background: #2b6cb0; }
+.faq-myth-link--diff::before { background: #7c3aed; }
 
 /* Data-callout (Markdoc data-callout tag) */
 .faq-callout {

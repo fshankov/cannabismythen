@@ -484,6 +484,24 @@ export default function FactsheetPanel({
                 </>
               )}
 
+              {/* This-myth PDF — the standalone fact-sheet for the open myth
+                  (Fedor 2026-06-05), sits above the full-collection button.
+                  Hosted at /factsheets/<slug>.pdf (slug = .mdoc stem; *.pdf is
+                  already exempt from the password gate in middleware.ts). */}
+              {factsheetSlug && (
+                <a
+                  href={`/factsheets/${factsheetSlug}.pdf`}
+                  download={`cannabismythen-faktenblatt-${factsheetSlug}.pdf`}
+                  className="factsheet-panel__download"
+                  aria-label="Dieses Faktenblatt als PDF herunterladen"
+                >
+                  <Download size={16} strokeWidth={2} aria-hidden="true" />
+                  <span className="factsheet-panel__download-text">
+                    Dieses Faktenblatt herunterladen
+                  </span>
+                </a>
+              )}
+
               {/* Full-collection PDF download (Fedor 2026-06-09). The
                   PDF is myth-agnostic — same file for every popup —
                   so the button always renders, between the table and
@@ -609,6 +627,21 @@ export default function FactsheetPanel({
                     </a>
                   )}
                 </>
+              )}
+
+              {/* This-myth PDF (same as the primary branch). */}
+              {factsheetSlug && (
+                <a
+                  href={`/factsheets/${factsheetSlug}.pdf`}
+                  download={`cannabismythen-faktenblatt-${factsheetSlug}.pdf`}
+                  className="factsheet-panel__download"
+                  aria-label="Dieses Faktenblatt als PDF herunterladen"
+                >
+                  <Download size={16} strokeWidth={2} aria-hidden="true" />
+                  <span className="factsheet-panel__download-text">
+                    Dieses Faktenblatt herunterladen
+                  </span>
+                </a>
               )}
 
               {/* Same full-collection PDF button as the primary

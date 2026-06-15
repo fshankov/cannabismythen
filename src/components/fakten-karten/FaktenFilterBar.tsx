@@ -31,10 +31,9 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import { ChevronDown, Download, LayoutGrid, LayoutList } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
 import VerdictStatement from "../shared/VerdictStatement";
 import CategoryFooter from "./CategoryFooter";
-import PivotToggle from "../dashboard/controls/PivotToggle";
 import { getCategoryMeta } from "../../lib/fakten-karten/categories";
 import { normalize } from "../../lib/text-normalize";
 import type { CorrectnessClass } from "../../lib/dashboard/types";
@@ -56,11 +55,11 @@ interface Props {
   /** Clears both the search text and all myth checkboxes. Used by the X
    *  button so the grid always fully resets when the user clears the input. */
   onClearSearch: () => void;
+  /** Clears only the category group ticks (X button on the Kategorien trigger). */
+  onClearGroups: () => void;
   onToggleGroup: (group: string) => void;
   onToggleMyth: (mythNumber: number) => void;
   onReset: () => void;
-  view: "karten" | "liste";
-  onSetView: (v: "karten" | "liste") => void;
   /** Opens the export drawer (Liste/Karten PDF + PNG + Faktenblätter). */
   onOpenExport: () => void;
 }
@@ -123,7 +122,6 @@ function MythRow({
           className="fakten-search__cat-icon"
           style={{ color: meta.label }}
           aria-label={`Kategorie: ${m.categoryGroup}`}
-          title={m.categoryGroup}
         >
           <Icon size={14} strokeWidth={2} aria-hidden="true" />
         </span>
@@ -140,11 +138,10 @@ export default function FaktenFilterBar({
   searchQuery,
   onSearchChange,
   onClearSearch,
+  onClearGroups,
   onToggleGroup,
   onToggleMyth,
   onReset,
-  view,
-  onSetView,
   onOpenExport,
 }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -328,37 +325,59 @@ export default function FaktenFilterBar({
         className="fakten-filter-bar__category fakten-filter-dropdown"
         ref={catContainerRef}
       >
-        <button
-          ref={catTriggerRef}
-          type="button"
-          className={`fakten-filter-dropdown__trigger${
-            catDropdownOpen ? " is-open" : ""
-          }`}
-          aria-haspopup="true"
-          aria-expanded={catDropdownOpen}
-          onClick={() => setCatDropdownOpen((v) => !v)}
-        >
-          <ChevronDown
-            size={14}
-            strokeWidth={2}
-            aria-hidden="true"
-            className="fakten-filter-dropdown__chevron"
-          />
-          <span className="fakten-filter-dropdown__label">
-            {/* "Alle Kategorien" only when nothing is selected. With selection
-                the label flips to "Kategorien (n)" so the chip never says
-                "Alle Kategorien (2)" (a11y audit 2026-06-10). */}
-            {selectedGroupCount > 0 ? 'Kategorien' : 'Alle Kategorien'}
+        <div className="fakten-filter-dropdown__trigger-row">
+          <button
+            ref={catTriggerRef}
+            type="button"
+            className={`fakten-filter-dropdown__trigger${
+              catDropdownOpen ? " is-open" : ""
+            }`}
+            aria-haspopup="true"
+            aria-expanded={catDropdownOpen}
+            onClick={() => setCatDropdownOpen((v) => !v)}
+          >
+            <ChevronDown
+              size={14}
+              strokeWidth={2}
+              aria-hidden="true"
+              className="fakten-filter-dropdown__chevron"
+            />
+            <span className="fakten-filter-dropdown__label">
+              {/* "Alle Kategorien" only when nothing is selected. */}
+              {selectedGroupCount > 0 ? "Kategorien" : "Alle Kategorien"}
+            </span>
             {selectedGroupCount > 0 && (
               <span
-                className="fakten-filter-dropdown__count"
+                className="fakten-search-count fakten-filter-dropdown__count-badge"
                 aria-label={`${selectedGroupCount} ausgewählt`}
               >
-                {' '}({selectedGroupCount})
+                ({selectedGroupCount})
               </span>
             )}
-          </span>
-        </button>
+          </button>
+          {selectedGroupCount > 0 && (
+            <button
+              type="button"
+              className="fakten-filter-dropdown__clear"
+              aria-label="Kategoriefilter löschen"
+              onClick={() => onClearGroups()}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {catDropdownOpen && (
           // Plain disclosure pattern, not an ARIA menu — the contents are
@@ -576,37 +595,9 @@ export default function FaktenFilterBar({
           onClick={onOpenExport}
           aria-label="Mythen exportieren"
         >
-          <Download size={14} strokeWidth={2} aria-hidden="true" />
+          <Download size={16} strokeWidth={2} aria-hidden="true" />
           Exportieren
         </button>
-      </div>
-
-      <div className="fakten-filter-bar__view-toggle">
-        <PivotToggle
-          options={[
-            {
-              value: "karten",
-              label: (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-                  <LayoutGrid size={13} aria-hidden="true" />
-                  Karten
-                </span>
-              ),
-            },
-            {
-              value: "liste",
-              label: (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-                  <LayoutList size={13} aria-hidden="true" />
-                  Liste
-                </span>
-              ),
-            },
-          ]}
-          value={view}
-          onChange={onSetView}
-          aria-label="Ansicht wechseln"
-        />
       </div>
 
       </div>

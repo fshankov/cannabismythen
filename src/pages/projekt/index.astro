@@ -28,7 +28,6 @@ const { internalNotes, ...publicContent } = content;
 <BaseLayout
   title={publicContent.pageTitle}
   description={publicContent.pageDescription}
-  hideFooter={true}
   extraBodyClass="scrolly-page"
 >
   <script is:inline>
@@ -134,6 +133,32 @@ const { internalNotes, ...publicContent } = content;
         document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
         document.body.scrollTo({ top: 0, behavior: 'smooth' });
       });
+    })();
+  </script>
+
+  <script is:inline>
+    /* Feedbucket screenshot fix: this loader hides via a CSS animation whose
+       `forwards` end-state isn't reproduced when Feedbucket clones the DOM for
+       its screenshot, so the finished loader re-appears in captures even though
+       it's invisible on the live page. After the exit animation ends, drop it
+       from rendering with an inline display:none (which the DOM clone respects).
+       The animation is untouched; the timeout is a safety net in case
+       animationend never fires (e.g. animations globally disabled). */
+    (function () {
+      var el = document.querySelector('.proj-loader');
+      if (!el) return;
+      var hidden = false;
+      function clear() {
+        if (hidden) return;
+        hidden = true;
+        el.style.display = 'none';
+      }
+      // Only the loader's OWN exit animation — child entrance animations
+      // (cluster nodes/links, the infinite breathe) bubble animationend too.
+      el.addEventListener('animationend', function (e) {
+        if (e.target === el) clear();
+      });
+      setTimeout(clear, 3500); // well after the ~2.55s exit completes
     })();
   </script>
 </BaseLayout>

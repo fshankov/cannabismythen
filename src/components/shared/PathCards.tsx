@@ -136,10 +136,10 @@ export function PathCards({ myths, revealedCards = 4 }: Props) {
     if (pool.length === 0) return null;
     const shortest = pool
       .slice()
-      .sort((a, b) => (a.text_short_de ?? a.text_de).length - (b.text_short_de ?? b.text_de).length)[0];
+      .sort((a, b) => a.text_de.length - b.text_de.length)[0];
     return {
       verdict: v,
-      text: shortest.text_short_de ?? shortest.text_de,
+      text: shortest.text_de.replace(/\.\s*$/, '').trim(),
       gradient: getVerdictVisual(v).gradient,
       arrow: FAKTEN_ARROWS[v],
     };
@@ -156,13 +156,13 @@ export function PathCards({ myths, revealedCards = 4 }: Props) {
           href={c.url}
           style={{
             opacity: i < revealedCards ? 1 : 0,
-            transform: i < revealedCards ? 'translateY(0)' : 'translateY(14px)',
-            transition: `opacity 480ms ease ${i * 110}ms, transform 480ms cubic-bezier(0.22,1,0.36,1) ${i * 110}ms`,
+            transform: i < revealedCards ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 900ms ease, transform 900ms cubic-bezier(0.22,1,0.36,1)',
             pointerEvents: i < revealedCards ? undefined : 'none',
           }}
         >
           <span className="path-card__go" aria-hidden="true">
-            <span className="path-card__go-label">Anzeigen</span>
+            <span className="path-card__go-label">Erkunden</span>
             <svg className="path-card__go-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
           </span>
           <span className="path-card__icon" aria-hidden="true">

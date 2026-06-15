@@ -12,11 +12,13 @@
  */
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { LayoutGrid, LayoutList } from "lucide-react";
 import FaktenCard from "./FaktenCard";
 import type { FaktenCardMyth } from "./FaktenCard";
 import FaktenFilterBar from "./FaktenFilterBar";
 import FaktenListView from "./FaktenListView";
 import FaktenExport from "./FaktenExport";
+import PivotToggle from "../dashboard/controls/PivotToggle";
 import SharedFactsheetPanel from "../shared/FactsheetPanel";
 import type { MythContentEntry } from "../shared/FactsheetPanel";
 import type {
@@ -133,6 +135,10 @@ export default function FaktenKartenExplorer({
     setSearchQuery("");
   }, []);
 
+  const clearGroups = useCallback(() => {
+    setSelectedGroups(new Set());
+  }, []);
+
   /** Clear search text + myth ticks together.
    *  Called by the X button in FaktenFilterBar so that clearing the
    *  input always resets the grid fully (no invisible lingering ticks).
@@ -217,6 +223,17 @@ export default function FaktenKartenExplorer({
     },
     [allMyths, handleShowFactsheet],
   );
+
+  // Listen for programmatic view switches dispatched from outside the island
+  // (e.g. the "Liste aller Mythen anzeigen" link in the page header).
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const v = (e as CustomEvent<string>).detail;
+      if (v === "liste" || v === "karten") setView(v);
+    };
+    window.addEventListener("fakten:setView", handler);
+    return () => window.removeEventListener("fakten:setView", handler);
+  }, []);
 
   // Sync popup state to Back / Forward navigation (Audit B-02).
   useEffect(() => {
@@ -350,57 +367,108 @@ export default function FaktenKartenExplorer({
 
   return (
     <div className="fakten-explorer">
-      <FaktenFilterBar
-        categoryGroups={CATEGORY_GROUPS}
-        myths={allMyths}
-        selectedGroups={selectedGroups}
-        selectedMyths={selectedMyths}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onClearSearch={clearSearch}
-        onToggleGroup={toggleGroup}
-        onToggleMyth={toggleMyth}
-        onReset={resetFilters}
-        view={view}
-        onSetView={setView}
-        onOpenExport={() => setExportOpen(true)}
-      />
+      {/* View toggle floats ABOVE the white panel — mirrors the
+          Daten-Explorer, where the Mythen/Informationswege toggle row
+          sits above `.carm-explorer__panel`. Karten/Liste behaviour is
+          unchanged; only its position moved out of the filter toolbar. */}
+      <div className="fakten-explorer__toggle-row">
+        <div className="fakten-filter-bar__view-toggle">
+          <PivotToggle
+            options={[
+              {
+                value: "karten",
+                label: (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                    <LayoutGrid size={13} aria-hidden="true" />
+                    Karten
+                  </span>
+                ),
+              },
+              {
+                value: "liste",
+                label: (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                    <LayoutList size={13} aria-hidden="true" />
+                    Liste
+                  </span>
+                ),
+              },
+            ]}
+            value={view}
+            onChange={setView}
+            aria-label="Ansicht wechseln"
+          />
+        </div>
+      </div>
+
+      {/* White container — same surface as the Daten-Explorer's
+          `.carm-explorer__panel` (32px padding, 16px radius, soft border +
+          shadow). Inside: the filter toolbar (Kategorien + Suche + Export)
+          on top, then the cards/list below. */}
+      <div className="fakten-explorer__panel">
+        <FaktenFilterBar
+          categoryGroups={CATEGORY_GROUPS}
+          myths={allMyths}
+          selectedGroups={selectedGroups}
+          selectedMyths={selectedMyths}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onClearSearch={clearSearch}
+          onClearGroups={clearGroups}
+          onToggleGroup={toggleGroup}
+          onToggleMyth={toggleMyth}
+          onReset={resetFilters}
+          onOpenExport={() => setExportOpen(true)}
+        />
+
+        {/* Live region — screen readers announce filtered count when filters change */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap" }}
+        >
+          {filteredMyths.length === allMyths.length
+            ? `${allMyths.length} Mythen angezeigt`
+            : `${filteredMyths.length} von ${allMyths.length} Mythen gefiltert`}
+        </div>
+
+        {filteredMyths.length === 0 ? (
+          <p className="fakten-empty">
+            {selectedGroups.size > 0 && selectedMyths.size > 0
+              ? /* "No overlap — the selected myths are not in the selected categories." */
+                "Keine Übereinstimmung — die gewählten Mythen gehören nicht zu den gewählten Kategorien."
+              : "Keine Treffer für die aktuelle Auswahl."}{" "}
+            <button
+              type="button"
+              className="fakten-empty__reset"
+              onClick={resetFilters}
+            >
+              Filter zurücksetzen
+            </button>
+          </p>
+        ) : view === "liste" ? (
+          <FaktenListView myths={filteredMyths} onShowFactsheet={handleShowFactsheet} />
+        ) : (
+          <div className="fakten-grid">
+            {filteredMyths.map((myth) => (
+              <FaktenCard
+                key={myth.mythNumber}
+                myth={myth}
+                categoryGroup={myth.categoryGroup}
+                onShowFactsheet={handleShowFactsheet}
+                isActive={factsheetMyth === myth.slug}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       <FaktenExport
         open={exportOpen}
         onClose={() => setExportOpen(false)}
         myths={filteredMyths}
       />
-
-      {filteredMyths.length === 0 ? (
-        <p className="fakten-empty">
-          {selectedGroups.size > 0 && selectedMyths.size > 0
-            ? /* "No overlap — the selected myths are not in the selected categories." */
-              "Keine Übereinstimmung — die gewählten Mythen gehören nicht zu den gewählten Kategorien."
-            : "Keine Treffer für die aktuelle Auswahl."}{" "}
-          <button
-            type="button"
-            className="fakten-empty__reset"
-            onClick={resetFilters}
-          >
-            Filter zurücksetzen
-          </button>
-        </p>
-      ) : view === "liste" ? (
-        <FaktenListView myths={filteredMyths} onShowFactsheet={handleShowFactsheet} />
-      ) : (
-        <div className="fakten-grid">
-          {filteredMyths.map((myth) => (
-            <FaktenCard
-              key={myth.mythNumber}
-              myth={myth}
-              categoryGroup={myth.categoryGroup}
-              onShowFactsheet={handleShowFactsheet}
-              isActive={factsheetMyth === myth.slug}
-            />
-          ))}
-        </div>
-      )}
 
       {openMyth && (() => {
         // The popup heading uses the unified VerdictStatement (statement

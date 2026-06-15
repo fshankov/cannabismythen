@@ -45,10 +45,11 @@ const factsheetLink: Schema = {
   attributes: {
     id: { type: String, required: true },
     label: { type: String, required: false },
-    // BugHerd 4.5 (2026-06-03, ISD) — optional Lesart marker for the
-    // Konsumierende-vs-Minderjährige comparison tables. "shared" → green dot
-    // (myth appears in both Top-10 rankings); "diff" → red dot (>15-point
-    // Richtigkeit difference between the two groups). Default: no marker.
+    // Optional Lesart marker for the Konsumierende-vs-Minderjährige comparison
+    // tables: "shared" → blue dot (myth in both Top-10 rankings); "diff" → purple
+    // dot (> 15-point Richtigkeit difference between the two groups). Default: no
+    // marker. Restored 2026-06-15 with new blue/purple palette (originally
+    // green/red; ISD asked for non-green to avoid blending with the link colour).
     mark: { type: String, required: false },
   },
   selfClosing: true,

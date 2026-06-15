@@ -20,6 +20,11 @@ import { useRef, type KeyboardEvent, type ReactNode } from 'react';
 interface PivotOption<T extends string> {
   value: T;
   label: ReactNode;
+  /** Optional adornment rendered as a SIBLING immediately after the label
+   *  button (e.g. an InfoTooltip `(i)`). Kept a sibling — never inside the
+   *  label — because the label is a <button> and nesting a button is invalid
+   *  HTML and would flip the toggle when the icon is clicked. */
+  info?: ReactNode;
 }
 
 interface PivotToggleProps<T extends string> {
@@ -79,6 +84,9 @@ export default function PivotToggle<T extends string>({
       >
         {left.label}
       </button>
+      {left.info ? (
+        <span className="carm-pivot-switch__info">{left.info}</span>
+      ) : null}
       <button
         ref={trackRef}
         type="button"
@@ -104,6 +112,9 @@ export default function PivotToggle<T extends string>({
       >
         {right.label}
       </button>
+      {right.info ? (
+        <span className="carm-pivot-switch__info">{right.info}</span>
+      ) : null}
     </div>
   );
 }

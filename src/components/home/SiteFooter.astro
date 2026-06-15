@@ -25,8 +25,8 @@ const year = new Date().getFullYear();
   <div class="site-footer__inner">
     <div class="site-footer__grid">
 
-      <!-- Brand + Kontakt column -->
-      <div class="site-footer__brand-col">
+      <!-- Col 1: Brand + Kontakt -->
+      <div class="site-footer__col">
         <div class="site-footer__brand">
           <a href="/" class="nav__brand site-footer__logo-link" aria-label="Cannabis Mythen – Startseite">
             <span class="cm-logo" aria-hidden="true">
@@ -47,30 +47,30 @@ const year = new Date().getFullYear();
         )}
       </div>
 
-      <!-- Info columns: Förderung + Zitierweise / Abschlussbericht -->
-      <div class="site-footer__info-cols">
-        <div class="site-footer__info-col">
-          {foerderung && (
-            <div class="site-footer__block">
-              <h2 class="site-footer__h">{foerderung.label}</h2>
-              <p class="site-footer__line">{foerderung.body}</p>
-            </div>
-          )}
-          {zitierweise && (
-            <div class="site-footer__block">
-              <h2 class="site-footer__h">{zitierweise.label}</h2>
-              <p class="site-footer__line">{zitierweise.body}</p>
-            </div>
-          )}
-        </div>
-        <div class="site-footer__info-col">
-          {abschlussbericht && (
-            <div class="site-footer__block">
-              <h2 class="site-footer__h">{abschlussbericht.label}</h2>
-              <p class="site-footer__line site-footer__line--italic">{abschlussbericht.body}</p>
-            </div>
-          )}
-        </div>
+      <!-- Col 2: Förderung + Zitierweise -->
+      <div class="site-footer__col">
+        {foerderung && (
+          <div class="site-footer__block">
+            <h2 class="site-footer__h">{foerderung.label}</h2>
+            <p class="site-footer__line">{foerderung.body}</p>
+          </div>
+        )}
+        {zitierweise && (
+          <div class="site-footer__block">
+            <h2 class="site-footer__h">{zitierweise.label}</h2>
+            <p class="site-footer__line">{zitierweise.body}</p>
+          </div>
+        )}
+      </div>
+
+      <!-- Col 3: Abschlussbericht -->
+      <div class="site-footer__col">
+        {abschlussbericht && (
+          <div class="site-footer__block">
+            <h2 class="site-footer__h">{abschlussbericht.label}</h2>
+            <p class="site-footer__line">{abschlussbericht.body}</p>
+          </div>
+        )}
       </div>
 
     </div>

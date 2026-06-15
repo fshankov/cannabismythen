@@ -511,50 +511,6 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
         </div>
       </section>
 
-      <footer className="scrolly-page-footer" aria-label="Projektinformationen">
-        <div className="scrolly-page-footer__inner">
-          <div className="scrolly-page-footer__block">
-            <p className="scrolly-page-footer__label">
-              {content.footerKontakt.label}
-            </p>
-            <p className="scrolly-page-footer__body">
-              {content.footerKontakt.lines.map((line, i) => (
-                <span key={i}>
-                  {line}
-                  <br />
-                </span>
-              ))}
-              <a href={`mailto:${content.footerKontakt.email}`}>
-                {content.footerKontakt.email}
-              </a>
-            </p>
-          </div>
-          <div className="scrolly-page-footer__block">
-            <p className="scrolly-page-footer__label">
-              {content.footerFoerderung.label}
-            </p>
-            <p className="scrolly-page-footer__body">
-              {content.footerFoerderung.body}
-            </p>
-          </div>
-          <div className="scrolly-page-footer__block">
-            <p className="scrolly-page-footer__label">
-              {content.footerZitierweise.label}
-            </p>
-            <p className="scrolly-page-footer__body">
-              {content.footerZitierweise.body}
-            </p>
-          </div>
-          <div className="scrolly-page-footer__block">
-            <p className="scrolly-page-footer__label">
-              {content.footerAbschlussbericht.label}
-            </p>
-            <p className="scrolly-page-footer__body">
-              {content.footerAbschlussbericht.body}
-            </p>
-          </div>
-        </div>
-      </footer>
     </>
   );
 }
