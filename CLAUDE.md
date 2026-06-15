@@ -53,21 +53,25 @@ Keep every answer short and simple. Easy language. No long text. Do not waste to
 - One short question to Fedor beats a wrong guess.
 - Stop writing huge responses. Simple, logical, easy language.
 
-## Preview / visual check (HARD — 2026-06-14)
+## Preview / visual check (HARD — 2026-06-14, rev. 2026-06-15)
 
-Live preview wastes time and breaks things when it is not needed. Past problem:
-Claude started a **remote Chrome preview on another laptop** whose local copy is
-completely different from the one Fedor is editing. Never do this.
+Live preview wastes time and breaks things when it isn't needed. Past problem:
+Claude started a remote Chrome preview on another laptop whose code differed
+from Fedor's. Never do that.
 
 **Hard rules:**
-- Only ever touch the **local copy on the laptop that sent the prompt**. Never a
-  remote Chrome copy on another machine — it is not the same code.
-- **Always ASK Fedor first** if he wants Claude to do a visual check via preview.
-  Do not start a preview on your own.
-- **Do not start a new preview server.** If a local dev server is already running,
-  use that one (Fedor's own server at `http://127.0.0.1:4322/`). Starting a second
-  server causes a Vite cache collision and ruins the running copy.
-- Stop / do not run live preview when it is not needed for the task.
+- Only touch the local copy on the laptop that sent the prompt. Never a remote
+  browser on another machine.
+- ASK Fedor before any visual check. Don't start one on your own.
+- NEVER start a dev/preview server yourself. Use Fedor's already-running one.
+  The port is NOT fixed — Astro picks it (render.sh logs it; usually 4321,
+  sometimes 4322+). Find it by probing:
+  `for p in 4321 4322 4323; do curl -s -o /dev/null -w "$p %{http_code}\n" http://127.0.0.1:$p/; done`
+  Starting a second server causes a Vite cache collision that ruins the running copy.
+- If NO server is running, ASK Fedor to start it (`./_local/render.sh`) — don't start it.
+- Driving a browser (Playwright) to the EXISTING server URL is fine — only the
+  server-START is forbidden.
+- Stop / don't run live preview when the task doesn't need it.
 
 ## Operator context
 

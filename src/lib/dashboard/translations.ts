@@ -488,7 +488,7 @@ const translations = {
   'datasetInfo.mythen.q2': { de: 'In welchem Ausmaß individuell bedeutsam?', en: 'How individually significant?' },
   'datasetInfo.mythen.q3': { de: 'In welchem Grad richtig beurteilt?', en: 'How correctly judged?' },
   'datasetInfo.mythen.q4': { de: 'Wie weit präventiv bedeutsam?', en: 'How relevant for prevention?' },
-  'datasetInfo.mythen.q5': { de: 'Mit welchem Bevölkerungsrisiko?', en: 'With what population risk?' },
+  'datasetInfo.mythen.q5': { de: 'Mit welcher Bevölkerungsrelevanz?', en: 'With what population relevance?' },
   'datasetInfo.mythen.foot': { de: 'Nach Zielgruppe zu betrachten.', en: 'To be viewed by target group.' },
   'datasetInfo.wege.q1': {
     de: 'Wo wird aktiv nach gesundheitsbezogenen Informationen gesucht – auch zu Cannabis?',

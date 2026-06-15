@@ -241,7 +241,7 @@ export default function FaktenExport({ open, onClose, myths }: Props) {
           <ExportCard
             icon={<FileText size={22} strokeWidth={1.75} />}
             title="Faktenblätter (PDF)"
-            desc="Alle 42 ausführlichen Faktenblätter (3,6 MB)."
+            desc="Alle 42 ausführlichen Faktenblätter (3,8 MB)."
             href={FACTSHEET_PDF_HREF}
             downloadName={FACTSHEET_PDF_NAME}
             onClick={onClose}
