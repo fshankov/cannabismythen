@@ -31,10 +31,10 @@
   html.js-reveal .four-paths.is-in .path-card {
     animation: home-rise-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
-  html.js-reveal .four-paths.is-in .path-card--quiz   { animation-delay: 0.10s; }
-  html.js-reveal .four-paths.is-in .path-card--fakten { animation-delay: 0.20s; }
-  html.js-reveal .four-paths.is-in .path-card--daten  { animation-delay: 0.30s; }
-  html.js-reveal .four-paths.is-in .path-card--meine  { animation-delay: 0.40s; }
+  html.js-reveal .four-paths.is-in .path-card--fakten { animation-delay: 0.10s; }
+  html.js-reveal .four-paths.is-in .path-card--quiz   { animation-delay: 0.20s; }
+  html.js-reveal .four-paths.is-in .path-card--meine  { animation-delay: 0.30s; }
+  html.js-reveal .four-paths.is-in .path-card--daten  { animation-delay: 0.40s; }
 
   /* Block 3 — the numerals cascade in */
   html.js-reveal .numbers-strip.is-in .numbers-strip__item {
