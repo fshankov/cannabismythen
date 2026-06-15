@@ -21,7 +21,7 @@ relatedDashboard:
 vizSpec:
   vizType: table-comparison
   vizSource: "CaRM Tabellen 'ZG Konsumierende' + 'ZG Minderjährige', Spalten Präventionsbedeutung + Richtigkeit"
-  vizDescription: 'Zwei nebeneinander stehende Top-10-Rangreihen: links Konsumierende, rechts Minderjährige. Geteilte Mythen grün markiert, große Beurteilungsdifferenzen (>15 Punkte) rot.'
+  vizDescription: 'Sortierbare Übersicht-Tabelle: Mythen × Zielgruppen (Minderjährige, Konsumierende), je Zelle eine Lollipop-Kennzahl Präventionsbedeutung (0–100). Spalten sortierbar, Standard Minderjährige absteigend. Datengetrieben aus carm-data.json.'
   vizConfig: ''
   vizPlacement: after-data
 status: published
@@ -30,8 +30,8 @@ updatedAt: '2026-05-20'
 internalNotes: |
   AI draft, awaiting ISD review.
   Source: cannabismythen_FAQ_2026 05 20.docx, Abschnitt 5.2.
-  Tabellen aus dem Doc übernommen; in Stage 3 als interaktive Vergleichstabelle visualisieren.
   Doc cited various myth #s; m34 (soziale Beziehungen), m37 (niedriges Niveau) and m42 (Gesetz erhöht) verified against Keystatic collection.
+  2026-06-15: Die zwei Tabellen ersetzt durch {% myth-priority-grid %} — sortierbare Übersicht-Tabelle (Präventionsbedeutung je Zielgruppe), datengetrieben aus carm-data.json (keine hartkodierten Werte). Hinweis: die alte Tabelle nannte m37 (Minderjährige) = 68; der korrekte CaRM-Wert ist 33, das Grid zeigt automatisch die korrekten Werte.
 tags: []
 ---
 
@@ -43,34 +43,4 @@ Ein zweiter Hinweis ergibt sich, wenn die Mythen dieser Rangreihen daraufhin ver
 
 Weitere Auswertungsmöglichkeiten bietet der Daten-Explorer.
 
-### Konsumierende — Rangreihe Präventionsbedeutung, Top 10
-
-| # | Mythos | Klassifikation | Richtigkeit Konsumierende | Richtigkeit Minderjährige |
-|---|---|---|---|---|
-| 1 | {% factsheet-link id="m26" mark="shared" /%} | falsch | 26 | 37 |
-| 2 | {% factsheet-link id="m18" /%} | eher falsch | 46 | 60 |
-| 3 | {% factsheet-link id="m23" mark="diff" /%} | falsch | 46 | 63 |
-| 4 | {% factsheet-link id="m10" mark="shared" /%} | eher falsch | 46 | 56 |
-| 5 | {% factsheet-link id="m32" mark="diff" /%} | eher falsch | 46 | 62 |
-| 6 | {% factsheet-link id="m39" /%} | falsch | 22 | 30 |
-| 7 | {% factsheet-link id="m1" mark="shared" /%} | falsch | 43 | 47 |
-| 8 | {% factsheet-link id="m2" mark="diff" /%} | falsch | 46 | 67 |
-| 9 | {% factsheet-link id="m27" /%} | eher falsch | 50 | 60 |
-| 10 | {% factsheet-link id="m40" mark="shared" /%} | falsch | 50 | 47 |
-
-### Minderjährige — Rangreihe Präventionsbedeutung, Top 10
-
-| # | Mythos | Klassifikation | Richtigkeit Konsumierende | Richtigkeit Minderjährige |
-|---|---|---|---|---|
-| 1 | {% factsheet-link id="m28" mark="diff" /%} | falsch | 48 | 32 |
-| 2 | {% factsheet-link id="m37" /%} | falsch | 63 | 68 |
-| 3 | {% factsheet-link id="m39" /%} | falsch | 22 | 30 |
-| 4 | {% factsheet-link id="m26" mark="shared" /%} | falsch | 26 | 37 |
-| 5 | {% factsheet-link id="m34" mark="diff" /%} | eher falsch | 77 | 62 |
-| 6 | {% factsheet-link id="m42" mark="diff" /%} | eher falsch | 72 | 55 |
-| 7 | {% factsheet-link id="m40" mark="shared" /%} | falsch | 50 | 47 |
-| 8 | {% factsheet-link id="m36" /%} | eher falsch | 73 | 60 |
-| 9 | {% factsheet-link id="m10" mark="shared" /%} | eher falsch | 46 | 56 |
-| 10 | {% factsheet-link id="m1" mark="shared" /%} | falsch | 43 | 47 |
-
-**Lesart:** grün = gemeinsamer Mythos in beiden Rangreihen; rot = deutliche Differenz in der Beurteilung der Richtigkeit (> 15 Punkte).
+{% myth-priority-grid myths="m26,m18,m23,m10,m32,m39,m1,m2,m27,m40,m28,m37,m34,m42,m36" groups="minors,consumers" /%}

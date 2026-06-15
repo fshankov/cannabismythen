@@ -698,6 +698,16 @@ body:has(.carm-explorer) main {
   background: var(--color-border);
 }
 
+/* Lift the hovered/focused sticky header above the body cells so the
+   sort-button hover tooltip floats ON TOP of the next row instead of
+   being painted behind it. The grid views already lift their header to
+   z-index 30 on hover (`.carm-spannweite__cell--header:hover`); the
+   table `<th>` was stuck at the base z-index 2. (Fedor 2026-06-15) */
+.carm-explorer .data-table th:hover,
+.carm-explorer .data-table th:focus-within {
+  z-index: 40;
+}
+
 /* Session 4a (BugHerd #51): inactive sort arrows are hidden, the
    active arrow reads bolder and in the primary color. Keeps headers
    visually quiet — only the column you're sorting by carries an

@@ -45,10 +45,9 @@ const factsheetLink: Schema = {
   attributes: {
     id: { type: String, required: true },
     label: { type: String, required: false },
-    // BugHerd 4.5 (2026-06-03, ISD) — optional Lesart marker for the
-    // Konsumierende-vs-Minderjährige comparison tables. "shared" → green dot
-    // (myth appears in both Top-10 rankings); "diff" → red dot (>15-point
-    // Richtigkeit difference between the two groups). Default: no marker.
+    // Deprecated no-op (2026-06-14): the "shared"/"diff" Lesart dots were
+    // removed (ISD feedback "links are all green"). The attribute is kept so any
+    // existing `mark="…"` in content stays valid; it no longer renders anything.
     mark: { type: String, required: false },
   },
   selfClosing: true,
@@ -61,13 +60,6 @@ const factsheetLink: Schema = {
     const visibleText = node.attributes.label
       ? String(node.attributes.label)
       : MYTH_TITLE_PLACEHOLDER(id);
-    const mark = String(node.attributes.mark ?? "").trim();
-    const markClass =
-      mark === "shared"
-        ? " faq-myth-link--shared"
-        : mark === "diff"
-        ? " faq-myth-link--diff"
-        : "";
     // Real <a href> (not <button>) for progressive enhancement: without JS
     // — or before the MythPopupHost island hydrates — the link navigates to
     // the myth's page at /daten-explorer/<slug>/ (a production redirect to the
@@ -79,7 +71,7 @@ const factsheetLink: Schema = {
     return new Markdoc.Tag(
       "a",
       {
-        class: `faq-myth-link${markClass}`,
+        class: "faq-myth-link",
         href: MYTH_HREF_PLACEHOLDER(id),
         "data-faq-myth-id": id,
         "aria-haspopup": "dialog",
@@ -223,6 +215,35 @@ const krMini: Schema = {
   },
 };
 
+/**
+ * {% myth-priority-grid myths="m26,m18,…" groups="minors,consumers" /%}
+ *   → a placeholder div that src/lib/faq-myth-grid.tsx renders at build time
+ *     into a static, sortable "Übersicht"-style grid (rows = myths; columns =
+ *     statement+verdict, then each group's Präventionsbedeutung lollipop),
+ *     data-driven from carm-data.json. The placeholder carries the myth-id list
+ *     + group ids as data-* attributes.
+ */
+const mythPriorityGrid: Schema = {
+  attributes: {
+    myths: { type: String, required: true },
+    groups: { type: String, required: false },
+  },
+  selfClosing: true,
+  transform(node) {
+    const myths = String(node.attributes.myths ?? "");
+    const groups = String(node.attributes.groups ?? "minors,consumers");
+    return new Markdoc.Tag(
+      "div",
+      {
+        class: "faq-myth-grid-placeholder",
+        "data-grid-myths": myths,
+        "data-grid-groups": groups,
+      },
+      [],
+    );
+  },
+};
+
 export const faqMarkdocConfig = {
   tags: {
     "factsheet-link": factsheetLink,
@@ -232,5 +253,6 @@ export const faqMarkdocConfig = {
     "top-channels-bars": topChannelsBars,
     "top-channels-compare": topChannelsCompare,
     "kr-mini": krMini,
+    "myth-priority-grid": mythPriorityGrid,
   },
 };

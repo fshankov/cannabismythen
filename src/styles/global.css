@@ -1939,22 +1939,9 @@ button.pill[aria-pressed="true"] {
   border-radius: 2px;
 }
 
-/* BugHerd 4.5 (2026-06-03, ISD) — Lesart markers in the Konsumierende-vs-
-   Minderjährige comparison tables: a leading dot flags myths that appear in
-   both Top-10 rankings (green) or differ by >15 Richtigkeit points (red).
-   A dot, not a fill, so it doesn't read as a verdict classification. */
-.faq-myth-link--shared::before,
-.faq-myth-link--diff::before {
-  content: "";
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 6px;
-  vertical-align: middle;
-}
-.faq-myth-link--shared::before { background: var(--classification-richtig); }
-.faq-myth-link--diff::before { background: var(--classification-falsch); }
+/* Lesart dots removed 2026-06-14 (ISD: "links are all green"). The scientific
+   verdict is now shown by the verdict pill in the FAQ table's Klassifikation /
+   Korrekt column instead of a coloured dot on the myth link. */
 
 /* Data-callout (Markdoc data-callout tag) */
 .faq-callout {

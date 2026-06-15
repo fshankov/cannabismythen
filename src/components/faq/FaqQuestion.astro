@@ -1,6 +1,9 @@
 ---
 import Markdoc, { type Node } from "@markdoc/markdoc";
 import { faqMarkdocConfig } from "@lib/markdoc/faq-nodes";
+import { wrapVerdictCellsWithPills } from "@lib/faq-verdict-pills";
+import { injectMythPriorityGrid } from "@lib/faq-myth-grid";
+import { applyHeatmapBands } from "@lib/faq-heatmap-bands";
 import {
   loadMythPopupData,
   type FaqMythPopupData,
@@ -38,8 +41,16 @@ const { node } = await question.answer();
 const rawHtml = Markdoc.renderers.html(
   Markdoc.transform(node as Node, faqMarkdocConfig as any),
 );
-// Resolve the {% factsheet-link %} placeholders into actual myth statements.
-const html = resolveTitlesInHtml(rawHtml);
+// Resolve the {% factsheet-link %} placeholders into actual myth statements,
+// turn plain-text verdict cells in answer tables into the canonical verdict
+// pill, render any {% myth-priority-grid %} into a sortable grid (data-driven),
+// then tint any remaining value-table "NN %" cells with the Daten-Explorer
+// heatmap band ramp.
+const html = applyHeatmapBands(
+  await injectMythPriorityGrid(
+    wrapVerdictCellsWithPills(resolveTitlesInHtml(rawHtml)),
+  ),
+);
 
 const id = `faq-${question.slug}`;
 ---

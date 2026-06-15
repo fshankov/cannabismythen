@@ -54,7 +54,20 @@ export interface SourcesBalkenViewHandle {
   getSvgElement: () => SVGSVGElement | null;
 }
 
-type SortMode = 'a-z' | 'value-asc' | 'value-desc';
+type SortMode = 'a-z' | 'value-asc' | 'value-desc' | 'category-asc' | 'category-desc';
+
+/** Canonical category order for the category sort — mirrors
+ *  SourcesSpannweiteView's CATEGORY_ORDER so Quellen-Balken /
+ *  -Übersicht / -Tabelle all rank categories the same way (Fedor
+ *  2026-05-29: add the category sort to Balken + Tabelle too). */
+const CATEGORY_ORDER: Record<string, number> = {
+  institutional: 1,
+  internet: 2,
+  social_media: 3,
+  traditional_media: 4,
+  print_physical: 5,
+  personal: 6,
+};
 
 /** Label for the active source metric — shows in the data column header. */
 const METRIC_LABELS: Record<SourceMetricType, string> = {
@@ -164,7 +177,21 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
         if (a.value !== b.value) return dir * (a.value - b.value);
         return cmpAz(a, b);
       };
-      const sorter =
+      const cmpCat = (dir: number) => (a: SrcRow, b: SrcRow) => {
+        const oa = CATEGORY_ORDER[a.source.category] ?? 99;
+        const ob = CATEGORY_ORDER[b.source.category] ?? 99;
+        if (oa !== ob) return dir * (oa - ob);
+        return cmpAz(a, b);
+      };
+      // Parents honour every sort mode; children only ever sort by value
+      // or A-Z (category grouping applies at the parent level).
+      const parentSorter =
+        sort === 'value-asc' ? cmpVal(1)
+        : sort === 'value-desc' ? cmpVal(-1)
+        : sort === 'category-asc' ? cmpCat(1)
+        : sort === 'category-desc' ? cmpCat(-1)
+        : cmpAz;
+      const childSorter =
         sort === 'value-asc' ? cmpVal(1) : sort === 'value-desc' ? cmpVal(-1) : cmpAz;
 
       const parentRows: SrcRow[] = searched.map((src) => ({
@@ -174,7 +201,7 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
         isChild: false,
         hasChildren: (childrenByParent.get(src.id)?.length ?? 0) > 0,
       }));
-      parentRows.sort(sorter);
+      parentRows.sort(parentSorter);
 
       const expandedSet = new Set(expanded);
       const out: SrcRow[] = [];
@@ -188,7 +215,7 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
             isChild: true,
             hasChildren: false,
           }));
-          kids.sort(sorter);
+          kids.sort(childSorter);
           out.push(...kids);
         }
       }
@@ -259,6 +286,14 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
     const isAzActive = sort === 'a-z';
     const isSortCol = sort === 'value-asc' || sort === 'value-desc';
     const isAsc = sort === 'value-asc';
+    // Category sort (2026-05-29) — same control as Quellen-Übersicht.
+    const isCatActive = sort === 'category-asc' || sort === 'category-desc';
+    const catTooltip =
+      sort === 'category-asc'
+        ? 'Reihenfolge umkehren (Persönlich → Institutionell)'
+        : sort === 'category-desc'
+          ? 'Reihenfolge umkehren (Institutionell → Persönlich)'
+          : 'Nach Informationswege-Kategorie sortieren (Institutionell → Persönlich)';
     const MetricIcon = SOURCE_METRIC_ICONS[selectedMetric];
     const metricLabel = METRIC_LABELS[selectedMetric];
     const groupLabel = GROUP_LABELS[selectedGroup];
@@ -290,6 +325,17 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
                 isAzActive={isAzActive}
                 azTooltip="Alphabetisch sortieren"
                 onAzClick={() => setSort('a-z')}
+                categoryRank={{
+                  isActive: isCatActive,
+                  direction: sort === 'category-desc' ? 'desc' : 'asc',
+                  tooltip: catTooltip,
+                  onClick: () =>
+                    setSort(
+                      sort === 'category-asc'
+                        ? 'category-desc'
+                        : 'category-asc',
+                    ),
+                }}
               />
             </div>
 
