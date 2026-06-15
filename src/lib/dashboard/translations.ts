@@ -478,6 +478,26 @@ const translations = {
   'column.hide': { de: 'Diese Spalte ausblenden', en: 'Hide this column' },
   'column.show': { de: 'Spalte wieder einblenden', en: 'Show this column again' },
   'column.hidden': { de: 'Ausgeblendet', en: 'Hidden' },
+
+  // Dataset-toggle (i) tooltips — Mythen / Informationswege. Verbatim German
+  // provided by Fedor (2026-06-15); the `en` field is an internal gloss only
+  // (site ships DE). Each question maps to one indicator / source-metric; the
+  // shared footer notes the per-Zielgruppe lens. Rendered as a list inside the
+  // toggle's InfoTooltip (see MythenExplorer dataset toggle).
+  'datasetInfo.mythen.q1': { de: 'Zu welchen Anteilen gekannt?', en: 'Known by what share?' },
+  'datasetInfo.mythen.q2': { de: 'In welchem Ausmaß individuell bedeutsam?', en: 'How individually significant?' },
+  'datasetInfo.mythen.q3': { de: 'In welchem Grad richtig beurteilt?', en: 'How correctly judged?' },
+  'datasetInfo.mythen.q4': { de: 'Wie weit präventiv bedeutsam?', en: 'How relevant for prevention?' },
+  'datasetInfo.mythen.q5': { de: 'Mit welchem Bevölkerungsrisiko?', en: 'With what population risk?' },
+  'datasetInfo.mythen.foot': { de: 'Nach Zielgruppe zu betrachten.', en: 'To be viewed by target group.' },
+  'datasetInfo.wege.q1': {
+    de: 'Wo wird aktiv nach gesundheitsbezogenen Informationen gesucht – auch zu Cannabis?',
+    en: 'Where are health-related information actively sought — including on cannabis?',
+  },
+  'datasetInfo.wege.q2': { de: 'Wo werden solche Infos nebenbei wahrgenommen?', en: 'Where is such info noticed incidentally?' },
+  'datasetInfo.wege.q3': { de: 'In welchem Ausmaß wird diesen Wegen vertraut?', en: 'How much are these channels trusted?' },
+  'datasetInfo.wege.q4': { de: 'Für welche ergeben sich wie große Präventionspotentiale?', en: 'Which yield how large a prevention potential?' },
+  'datasetInfo.wege.foot': { de: 'Nach Zielgruppe zu betrachten.', en: 'To be viewed by target group.' },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

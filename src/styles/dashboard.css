@@ -611,6 +611,23 @@ body:has(.carm-explorer) main {
               visibility 0s linear 0s;
 }
 
+/* The card is .focus()'d on open. The browser's default focus ring doesn't
+   render reliably on a programmatically-focused element, so we draw the ring
+   explicitly (box-shadow follows the border-radius → clean rounded ring).
+   DEFAULT = blue (the legacy focus-blue, "as it was") for every tooltip;
+   the Mythen dataset-toggle opts into a brand-green ring via `--accent`.
+   (Fedor 2026-06-15: green on Mythen only; Informationswege + all others blue.)
+   The `--accent` rule has higher specificity, so it wins for the Mythen card. */
+.carm-explorer .info-tooltip-card:focus,
+.carm-explorer .info-tooltip-card:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-lg), 0 0 0 2px #1d4ed8;
+}
+.carm-explorer .info-tooltip-card--accent:focus,
+.carm-explorer .info-tooltip-card--accent:focus-visible {
+  box-shadow: var(--shadow-lg), 0 0 0 2px var(--color-accent, #2d6a4f);
+}
+
 .carm-explorer .info-tooltip-title {
   margin: 0 0 4px;
   font-size: 0.75rem;
@@ -620,6 +637,27 @@ body:has(.carm-explorer) main {
   /* Wrap long titles instead of overflowing */
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+/* Dataset-toggle tooltip title row: title text + a decorative glyph
+   (the 5 verdict arrows for Mythen / the signpost for Informationswege)
+   on one centered line. (2026-06-15) */
+.carm-explorer .info-tooltip-title--adorned {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.carm-explorer .carm-datasetinfo-verdicts {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.carm-explorer .carm-datasetinfo-signpost {
+  /* Blue to match the Informationswege tooltip's blue focus ring
+     (Fedor 2026-06-15). Same #1d4ed8 as the default card ring. */
+  color: #1d4ed8;
+  flex-shrink: 0;
 }
 
 .carm-explorer .info-tooltip-desc,
@@ -655,6 +693,34 @@ body:has(.carm-explorer) main {
   font-size: 0.67rem;
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
+}
+
+/* Dataset-toggle (i) tooltip body: a short list of questions + a closing
+   footer line. Reuses the .info-tooltip-desc tokens so it reads identical
+   to the column-header tooltips. (2026-06-15) */
+.carm-explorer .info-tooltip-list {
+  margin: 0;
+  padding-left: 1.05rem;
+  font-size: 0.72rem;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.carm-explorer .info-tooltip-list li {
+  margin: 0 0 3px;
+}
+.carm-explorer .info-tooltip-list li:last-child {
+  margin-bottom: 0;
+}
+.carm-explorer .info-tooltip-foot {
+  margin: 6px 0 0;
+  padding-top: 5px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  line-height: 1.4;
 }
 
 /* InfoTooltip inside pill buttons — keep icon color consistent */
@@ -5948,6 +6014,15 @@ body.carm-modal-open {
 .carm-pivot-switch__label--active {
   color: #334155;
   font-weight: 600;
+}
+/* (i) info tooltip sitting tight after a pivot label (Daten-Explorer dataset
+   toggle). Cancels most of the switch's 10px flex gap so the icon hugs its
+   label; the InfoTooltip trigger adds its own ~3px, netting ≈6px. Only the
+   dataset toggle passes `info`, so other pivot toggles are unaffected. */
+.carm-pivot-switch__info {
+  display: inline-flex;
+  align-items: center;
+  margin-left: -7px;
 }
 .carm-pivot-switch__track {
   position: relative;

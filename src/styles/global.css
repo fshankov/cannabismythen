@@ -1939,9 +1939,23 @@ button.pill[aria-pressed="true"] {
   border-radius: 2px;
 }
 
-/* Lesart dots removed 2026-06-14 (ISD: "links are all green"). The scientific
-   verdict is now shown by the verdict pill in the FAQ table's Klassifikation /
-   Korrekt column instead of a coloured dot on the myth link. */
+/* Lesart membership dots in the Konsumierende-vs-Minderjährige comparison
+   tables: blue = myth appears in both Top-10 rankings (mark="shared"),
+   purple = >15-point Richtigkeit difference between the two groups
+   (mark="diff"). Restored 2026-06-15 with non-green palette (was originally
+   green/red; ISD asked to differentiate from the link colour). */
+.faq-myth-link--shared::before,
+.faq-myth-link--diff::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.faq-myth-link--shared::before { background: #2b6cb0; }
+.faq-myth-link--diff::before { background: #7c3aed; }
 
 /* Data-callout (Markdoc data-callout tag) */
 .faq-callout {

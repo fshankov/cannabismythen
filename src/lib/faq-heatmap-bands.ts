@@ -8,7 +8,7 @@
  * is appended after any table that got at least one tinted cell.
  *
  * Pure string transform (no React) — runs in the FaqQuestion.astro render chain
- * after resolveTitlesInHtml / wrapVerdictCellsWithPills / injectMythPriorityGrid.
+ * after resolveTitlesInHtml / wrapVerdictCellsWithPills.
  */
 import { bandIndex } from "./dashboard/lesebeispiel-bands";
 

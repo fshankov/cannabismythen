@@ -41,6 +41,10 @@ const ICONS = {
   scale: icon('<path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>'),
   signpost: icon('<path d="M12 13v8"/><path d="M12 3v3"/><path d="M2.354 10.354a1.207 1.207 0 0 1 0-1.708l2.06-2.06A2 2 0 0 1 5.828 6h12.344a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H5.828a2 2 0 0 1-1.414-.586z"/>'),
   lightbulb: icon('<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>'),
+  download: icon('<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>'),
+  // The site's "falsch" verdict arrow (tip-down ↓, rotation 0 so no transform),
+  // rendered uncolored via icon()'s currentColor stroke at 1em to match signpost.
+  verdictFalsch: icon('<path d="M2 16h20"/><path d="M12 2v14"/><path d="m5 9 7 7 7-7"/>'),
 } as const;
 
 /** A Factsheet-style collapsible (native <details>) so each step stays
@@ -113,19 +117,25 @@ export function buildWalkthrough(): Driver {
           description:
             `Hier stellst du die Ansicht ein: mit dem <strong>Umschalter</strong> ${ICONS.toggle} wechselst du zwischen Indikatoren und Gruppen, unter <strong>Wert für</strong> ${ICONS.chevronDown} wählst du je nach Ansicht die konkrete Gruppe oder den Indikator, und über <strong>Filter</strong> ${ICONS.filter} und die Suche grenzt du auf bestimmte Mythen ein.` +
             accordion(
-              ICONS.lightbulb,
-              'Anwendungsbeispiel 1: Welche Mythen beurteilen Erwachsene und Minderjährige häufig falsch?',
-              'Du willst wissen, welche Mythen unter Erwachsenen und Minderjährigen besonders oft falsch beurteilt werden?<ol><li>Tippe auf den Reiter „Übersicht".</li><li>Schiebe den Schalter auf „Indikatoren".</li><li>Wähle unter „Wert für" <strong>Richtigkeit</strong>.</li><li>Blende die Spalten für Konsument:innen, Junge Erwachsene und Eltern aus.</li><li>Sortiere – bei den Erwachsenen oder den Minderjährigen, auf- oder absteigend.</li></ol>Nur bestimmte Mythen vergleichen? Wähle sie über den <strong>Filter</strong>-Button.',
+              ICONS.verdictFalsch,
+              'Anwendungsbeispiele Mythen',
+              `<p><strong>Beispiel 1: Du willst wissen, welche Mythen unter den Erwachsenen und unter den Minderjährigen besonders oft falsch beurteilt werden?</strong></p>` +
+                `<p>Tippe auf den Reiter „Übersicht". Schiebe den Schalter „Indikatoren" ${ICONS.toggle} nach links. Wähle im Dropdown „Wert für" Richtigkeit ${ICONS.chevronDown}. Blende die Spalten für Konsument:innen, Junge Erwachsene und Eltern jeweils aus ${ICONS.eyeOff}. Nun kannst du sortieren ${ICONS.sort}: bei den Erwachsenen oder auch bei den Minderjährigen. Auf- oder auch absteigend, je nachdem, was dich interessiert. Und die Werte vergleichen.</p>` +
+                `<p>Du willst nur bestimmte Mythen vergleichen? Wähle sie über den Filter-Button ${ICONS.filter} aus. Entweder blockweise oder je einzeln. Diese Auswahl bleibt erhalten, auch wenn du dir andere Gruppen ein- oder ausblendest. Drücke im Filterbereich „Alle Filter zurücksetzen", wenn du wieder alle Mythen sehen willst oder eine neue Auswahl an Mythen starten willst.</p>` +
+                `<p><strong>Beispiel 2: Du willst wissen, welche Mythen Konsumierende besonders oft kennen?</strong></p>` +
+                `<p>Tippe auf den Reiter „Balken". Wähle im ersten Dropdown „Kenntnis" ${ICONS.chevronDown}. Wähle im zweiten Dropdown „Konsumierende" ${ICONS.chevronDown}. Sortiere die Balken ${ICONS.sort}. Über den Export-Knopf ${ICONS.download} kannst du dir das Bild dieser Balken ausgeben lassen.</p>` +
+                `<p><strong>Beispiel 3: Du planst eine Präventionsveranstaltung mit Minderjährigen, von denen vielleicht schon einige konsumieren. Du willst wissen, bei welchen Mythen nach der CaRM-Studie besonderer Präventionsbedarf zu vermuten ist?</strong></p>` +
+                `<p>Tippe auf den Reiter „Übersicht". Schiebe den Schalter „Indikatoren" ${ICONS.toggle} nach links. Wähle im Dropdown „Wert für" Prävention ${ICONS.chevronDown}. Blende die Spalten für Erwachsene, Junge Erwachsene und Eltern jeweils aus ${ICONS.eyeOff}. Evtl. musst du die Spalten für Minderjährige oder für Konsumierende auch wieder einblenden, weil du sie früher ausgeblendet hattest. Nun kannst du die Werte sortieren ${ICONS.sort}: bei den Minderjährigen oder auch bei den Konsumierenden. Auf- oder auch absteigend, je nachdem, was dich interessiert. Und die Werte vergleichen. Willst du in deiner Veranstaltung nur bestimmte Mythen zum Thema machen? Wähle sie über den Filter-Button ${ICONS.filter} aus. Nun kannst du diese Auswahl gut zwischen den beiden Gruppen vergleichen.</p>`,
             ) +
             accordion(
-              ICONS.lightbulb,
-              'Anwendungsbeispiel 2: Welche Mythen sind unter Konsumierenden besonders bekannt?',
-              '<ol><li>Tippe auf den Reiter „Balken".</li><li>Wähle im ersten Dropdown <strong>Kenntnis</strong>.</li><li>Wähle im zweiten Dropdown <strong>Konsumierende</strong>.</li><li>Sortiere die Balken.</li></ol>',
-            ) +
-            accordion(
-              ICONS.lightbulb,
-              'Anwendungsbeispiel 3: Für welche Mythen besteht besonderer Präventionsbedarf bei Minderjährigen?',
-              '<ol><li>Tippe auf den Reiter „Übersicht".</li><li>Schiebe den Schalter auf „Indikatoren".</li><li>Wähle unter „Wert für" <strong>Prävention</strong>.</li><li>Blende die Spalten für Erwachsene, Junge Erwachsene und Eltern aus.</li><li>Sortiere die Werte bei den Minderjährigen oder Konsumierenden.</li></ol>',
+              ICONS.signpost,
+              'Anwendungsbeispiele Informationswege',
+              `<p><strong>Beispiel 1: Du willst wissen, auf welchem Weg Minderjährige besonders nach Gesundheitsinfos, z. B. zu Cannabis, suchen?</strong></p>` +
+                `<p>Tippe auf den Reiter „Balken". Wähle im Dropdown „Indikatoren" Suche ${ICONS.chevronDown}. Wähle im Dropdown „Gruppe" Minderjährige ${ICONS.chevronDown}. Nun kannst du die Werte sortieren ${ICONS.sort}, auf- oder auch absteigend, je nachdem, was dich interessiert.</p>` +
+                `<p><strong>Beispiel 2: Du willst wissen, auf welchem Weg Minderjährige besonders nach Gesundheitsinfos, z. B. zu Cannabis, suchen? Du willst wissen, ob Influencer:innen eigentlich in Bezug auf Gesundheitsinformationen zu Cannabis vertraut wird? Und wie sieht es im Vergleich dazu mit Gesundheitsportalen im Internet aus?</strong></p>` +
+                `<p>Tippe auf den Reiter „Übersicht". Schiebe den Schalter „Indikatoren" ${ICONS.toggle} nach links. Wähle im Dropdown „Vertrauen" ${ICONS.chevronDown}. Wähle sie über den Filter-Button ${ICONS.filter} aus. Nun kannst du die Werte zwischen den Gruppen vergleichen.</p>` +
+                `<p><strong>Beispiel 3: Du willst wissen, welcher Präventionszugang in die Gruppe der Konsumierenden nach den Ergebnissen der CaRM-Studie die größten Erfolgsaussichten hat?</strong></p>` +
+                `<p>Tippe auf den Reiter „Balken". Wähle im Dropdown „Indikatoren" Prävention ${ICONS.chevronDown}. Wähle im Dropdown „Gruppe" Konsumierende ${ICONS.chevronDown}. Nun kannst du die Werte sortieren ${ICONS.sort}. Du erfährst, welcher Zugang die größten Chancen verspricht, weil er häufig genutzt und ihm vertraut wird.</p>`,
             ),
         },
       },
