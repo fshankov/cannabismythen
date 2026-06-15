@@ -654,6 +654,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
           return (
             <ToolbarRow
               aria-label={t('filter.title', 'de')}
+              className="carm-toolbar-row--balken"
               pickers={[
                 <DataPicker<Indicator>
                   key="indicator"
