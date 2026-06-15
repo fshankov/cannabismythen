@@ -430,7 +430,9 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                 // BugHerd 4.13 (2026-06-03, ISD): wire the ℹ️ definition tooltip
                 // onto Quellen-Tabelle headers, mirroring the Mythen Tabelle.
                 // Metric columns pull from sourcesIndicators, group columns from
-                // groups (src/content/dashboard-definitionen.json).
+                // groups (src/content/dashboard-definitionen.json). Group columns
+                // also surface the sample-size badge (n = …) so the (i) tooltip
+                // matches Quellen-Übersicht exactly (Fedor 2026-06-15).
                 const colDef =
                   col.flavor === 'metric'
                     ? definitions?.sourcesIndicators?.[colKey]
@@ -448,6 +450,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                         defTitle={colDef?.label}
                         defText={colDef?.definition}
                         defScale={colDef?.scale}
+                        defSampleSize={col.flavor === 'group' ? colDef?.sampleSize : undefined}
                         hideLabel={`${t('column.hide', lang)} — ${col.label}`}
                         onHide={() => hide(colKey)}
                         isSortActive={isSortCol}

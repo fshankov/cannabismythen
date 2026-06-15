@@ -38,7 +38,6 @@ const ICONS = {
   info: icon('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'),
   eyeOff: icon('<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>'),
   search: icon('<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>'),
-  scale: icon('<path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>'),
   signpost: icon('<path d="M12 13v8"/><path d="M12 3v3"/><path d="M2.354 10.354a1.207 1.207 0 0 1 0-1.708l2.06-2.06A2 2 0 0 1 5.828 6h12.344a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H5.828a2 2 0 0 1-1.414-.586z"/>'),
   lightbulb: icon('<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>'),
   download: icon('<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>'),
@@ -94,16 +93,6 @@ export function buildWalkthrough(): Driver {
           align: 'center',
           description:
             `Oben <strong>wechselst du die Ansicht</strong> ${ICONS.toggle} zwischen <strong>Mythen</strong> und <strong>Informationswege</strong> — zwei Datensätze aus derselben Studie, je als Balken, Übersicht oder Tabelle.` +
-            accordion(
-              ICONS.scale,
-              'Worum geht es bei den Mythen-Daten?',
-              '<ul><li>Zu welchen Anteilen <strong>gekannt</strong>?</li><li>In welchem Ausmaß individuell <strong>bedeutsam</strong>?</li><li>In welchem Grad <strong>richtig beurteilt</strong>?</li><li>Wie weit <strong>präventiv bedeutsam</strong>?</li><li>Mit welchem <strong>Bevölkerungsrisiko</strong>?</li></ul>Nach Zielgruppe zu betrachten.',
-            ) +
-            accordion(
-              ICONS.signpost,
-              'Was steckt hinter den Informationswegen?',
-              '<ul><li>Wo wird <strong>aktiv gesucht</strong>?</li><li>Wo werden Infos <strong>nebenbei wahrgenommen</strong>?</li><li>In welchem Ausmaß wird diesen Wegen <strong>vertraut</strong>?</li><li>Welche <strong>Präventionspotenziale</strong> ergeben sich?</li></ul>Nach Zielgruppe zu betrachten.',
-            ) +
             `<div class="carm-tour-note">Alle Werte stammen aus der CaRM-Befragung.</div>`,
         },
       },

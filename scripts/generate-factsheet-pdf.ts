@@ -19,7 +19,7 @@
  *         (+ .html alongside for inspection)
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from "node:fs";
 import { dirname, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
@@ -746,6 +746,26 @@ async function main() {
     } catch (e: any) {
       console.warn(`   ⚠ outline polish skipped (${e.message?.split("\n")[0] ?? e}); using Chromium outline`);
     }
+  }
+
+  // Size manifest for the popup download-button labels — decimal MB (bytes /
+  // 1e6) with a German comma, matching how the team reads file sizes
+  // (e.g. "3,8 MB"). Only on a full publish run (a SAMPLE/partial set would be
+  // misleading). Imported by src/components/shared/FactsheetPanel.tsx.
+  if (!SAMPLE && DO_COMBINED && DO_CARDS) {
+    const mb = (p: string) => (statSync(p).size / 1e6).toFixed(1).replace(".", ",") + " MB";
+    const sizes: Record<string, string> = {};
+    if (existsSync(OUT_PDF)) sizes.combined = mb(OUT_PDF);
+    for (const m of myths) {
+      const p = join(CARDS_DIR, `${m.slug}.pdf`);
+      if (existsSync(p)) sizes[m.slug] = mb(p);
+    }
+    writeFileSync(
+      join(ROOT, "src/components/shared/factsheet-pdf-sizes.json"),
+      JSON.stringify(sizes, null, 2) + "\n",
+      "utf8",
+    );
+    console.log(`   ✅ size manifest → src/components/shared/factsheet-pdf-sizes.json`);
   }
 
   console.log(`   ✅ done\n`);

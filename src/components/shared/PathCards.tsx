@@ -31,10 +31,10 @@ interface Tile {
 // Content mirrors src/content/four-paths.yaml (the homepage source). When the
 // homepage migrates onto this component, these become props off that singleton.
 const TILES: Tile[] = [
-  { mod: 'quiz', title: 'Quiz', description: '6 Quiz, thematisch sortiert — teste dein Wissen in wenigen Minuten.', url: withBase('quiz/') },
   { mod: 'fakten', title: '42 Mythen', description: 'Alle 42 Mythen auf Karten zum Umdrehen: vorn der Mythos, hinten die wissenschaftliche Einordnung.', url: withBase('fakten-karten/') },
-  { mod: 'daten', title: 'Daten-Explorer', description: 'Wer glaubt was? Welche Informationswege werden genutzt? — bis zu 5 Indikatoren für 5 Zielgruppen im Vergleich.', url: withBase('daten-explorer/') },
+  { mod: 'quiz', title: 'Quiz', description: '6 Quiz, thematisch sortiert — teste dein Wissen in wenigen Minuten.', url: withBase('quiz/') },
   { mod: 'meine', title: 'Meine Interessen', description: 'Fragen und Fakten, aufbereitet für 5 Zielgruppen: Eltern, Jugendliche, Konsumierende, Lehrkräfte und Fachkräfte.', url: withBase('meine-interessen/eltern/') },
+  { mod: 'daten', title: 'Daten-Explorer', description: 'Wer glaubt was? Welche Informationswege werden genutzt? — bis zu 5 Indikatoren für 5 Zielgruppen im Vergleich.', url: withBase('daten-explorer/') },
 ];
 
 // Per-topic icons (Lucide 24×24 path data, drawn in currentColor → white badge).
