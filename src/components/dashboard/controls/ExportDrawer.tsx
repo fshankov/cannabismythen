@@ -97,16 +97,23 @@ export default function ExportDrawer({
   getChart,
   chartChrome,
 }: Props) {
+  const isSources = SOURCES_VIEWS.has(view);
+  // The verdict legend (Richtig / Eher richtig / …) describes myth
+  // classifications. It's meaningless on the Informationswege exports,
+  // whose markers are coloured by source category — not verdict — so it
+  // is dropped there (Fedor 2026-06-16). The myth charts keep it.
   const legend = useMemo(
-    () => VERDICT_LEGEND.map((v) => ({
-      verdict: v.verdict,
-      color: v.color,
-      label: t(v.key, 'de'),
-    })),
-    [],
+    () =>
+      isSources
+        ? []
+        : VERDICT_LEGEND.map((v) => ({
+            verdict: v.verdict,
+            color: v.color,
+            label: t(v.key, 'de'),
+          })),
+    [isSources],
   );
   const hasChart = !!getChart();
-  const isSources = SOURCES_VIEWS.has(view);
 
   const handlePng = () => {
     const chart = getChart();
