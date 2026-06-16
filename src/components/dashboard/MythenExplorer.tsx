@@ -34,7 +34,7 @@ import VerdictArrow from '../shared/VerdictArrow';
 import FilterBar from './FilterBar';
 import ViewTabs from './ViewTabs';
 import VerdictTags from './VerdictTags';
-import TableView from './views/TableView';
+import TableView, { type TableViewHandle } from './views/TableView';
 import ScatterView from './views/ScatterView';
 import LollipopView from './views/LollipopView';
 import OverviewView from './views/OverviewView';
@@ -143,6 +143,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
   const sourcesBalkenRef = useRef<SourcesBalkenViewHandle>(null);
   const sources2Ref = useRef<SourcesSpannweiteViewHandle>(null);
   const sourcesTableRef = useRef<SourcesTableViewHandle>(null);
+  const tableRef = useRef<TableViewHandle>(null);
 
   /**
    * `getActiveChart()` — the canonical lookup the ExportDrawer uses to
@@ -150,7 +151,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    *   - balken  → ECharts instance via BalkenView's imperative handle
    *   - strips  → live `<svg>` from StripsView (D3-rendered)
    *   - sources → synthetic `<svg>` from SourcesBalkenView (numbered circles)
-   *   - table   → null (Tabelle has no visualisation)
+   *   - table / sources_table → synthetic table `<svg>` from (Sources)TableView
    */
   const getActiveChart = useCallback((): ChartHandle | null => {
     switch (state.view) {
@@ -165,6 +166,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       case 'sources2':
         return sources2Ref.current?.getSvgElement() ?? null;
       case 'table':
+        return tableRef.current?.getSvgElement() ?? null;
+      case 'sources_table':
+        return sourcesTableRef.current?.getSvgElement() ?? null;
       default:
         return null;
     }
@@ -891,6 +895,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 )}
                 {state.view === 'table' && (
                   <TableView
+                    ref={tableRef}
                     myths={filteredMyths}
                     metrics={data.metrics}
                     state={state}
@@ -996,10 +1001,8 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
         totalMyths={data.myths.length}
         getChart={getActiveChart}
         chartChrome={() => {
-          // Per-tab chart chrome. Streifen + Sources have their own
-          // titles; Balken keeps the existing label; Tabelle never
-          // calls this (no visualisation), but we return something
-          // sensible to satisfy the type.
+          // Per-tab chart chrome — title + subtitle baked into the export.
+          // Every chart-capable view (incl. both Tabelle views) hits this.
           const indicatorLabel = t(`indicator.${state.indicator}`, 'de');
           const groupLabel = t(
             `igs.group.${state.groupIds[0] ?? 'adults'}` as TranslationKey,
@@ -1020,7 +1023,16 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                   : t('strips.mode.group', 'de'),
             };
           }
-          if (state.view === 'sources' || state.view === 'sources2') {
+          if (state.view === 'table') {
+            return {
+              title: 'Mythen-Tabelle',
+              subtitle:
+                state.stripsMode === 'indicator'
+                  ? t('strips.mode.indicator', 'de')
+                  : t('strips.mode.group', 'de'),
+            };
+          }
+          if (state.view === 'sources' || state.view === 'sources2' || state.view === 'sources_table') {
             // Session 4b (BugHerd #55): subtitle now reflects the active
             // pivot + the picker selection so the exported chart is
             // self-describing. metric pivot → Indikatoren · {Gruppe};
@@ -1052,6 +1064,8 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
             return {
               title: state.view === 'sources2'
                 ? t('sources2.title', 'de')
+                : state.view === 'sources_table'
+                ? 'Quellen-Tabelle'
                 : 'Informationswege',
               subtitle,
             };

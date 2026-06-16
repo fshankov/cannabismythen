@@ -20,7 +20,7 @@
  * view reads state.sourceMetric / state.sourceGroup directly.
  */
 import {
-  forwardRef, useCallback, useEffect, useImperativeHandle, useMemo,
+  forwardRef, useCallback, useImperativeHandle, useMemo,
   useRef, useState,
 } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
@@ -270,28 +270,25 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
       setHoverPos(null);
     }, []);
 
-    // Sync the export render-data each render so PNG/SVG match the screen.
-    useEffect(() => {
-      if (!sourceData) {
-        renderDataRef.current = null;
-        return;
-      }
-      const valueMap = sourceData.metrics[selectedMetric]?.data[selectedGroup] ?? {};
-      renderDataRef.current = {
-        rows: resolvedRows.map((r) => ({
-          sourceId: r.source.id,
-          name: r.source.name,
-          categoryColor: getCategoryColor(r.categoryId),
-          isChild: r.isChild,
-        })),
-        columns: [{ id: selectedMetric, label: METRIC_LABELS[selectedMetric] }],
-        cellValue: (sourceId: number) => {
-          const raw = valueMap[String(sourceId)];
-          return typeof raw === 'number' ? raw : null;
-        },
-        lang: state.lang,
-      };
-    });
+    // Sync the export render-data DURING render (not in a useEffect) so the
+    // export handle is never stale/null when ExportDrawer reads it — the
+    // effect timing was why the Quellen-Balken PNG/SVG buttons never appeared.
+    renderDataRef.current = sourceData
+      ? {
+          rows: resolvedRows.map((r) => ({
+            sourceId: r.source.id,
+            name: r.source.name,
+            categoryColor: getCategoryColor(r.categoryId),
+            isChild: r.isChild,
+          })),
+          columns: [{ id: selectedMetric, label: METRIC_LABELS[selectedMetric] }],
+          cellValue: (sourceId: number) => {
+            const raw = sourceData.metrics[selectedMetric]?.data[selectedGroup]?.[String(sourceId)];
+            return typeof raw === 'number' ? raw : null;
+          },
+          lang: state.lang,
+        }
+      : null;
 
     if (!sourceData) {
       return (

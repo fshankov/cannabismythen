@@ -17,7 +17,7 @@
  *   - Sort state extended to support verdict-rank (asc/desc) via the
  *     stacked-circles button in the MYTHEN column header.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import type {
   Myth, Metric, AppState, Indicator, GroupId, StripsMode,
   DashboardDefinitions,
@@ -30,6 +30,7 @@ import {
   formatValue,
 } from '../../../lib/dashboard/data';
 import { getCorrectnessColor } from '../../../lib/dashboard/colors';
+import { renderTableSvg, type TableRenderOpts } from '../../../lib/dashboard/table-svg';
 import {
   INDICATOR_ICONS,
   AUDIENCE_ICONS_BY_GROUP,
@@ -138,7 +139,14 @@ const GROUP_COLS: ColSpec[] = [
   { key: 'parents', Icon: AUDIENCE_ICONS_BY_GROUP.parents },
 ];
 
-export default function TableView({ myths, metrics, state, update, onSelectMyth, definitions }: Props) {
+export interface TableViewHandle {
+  getSvgElement: () => SVGSVGElement | null;
+}
+
+const TableView = forwardRef<TableViewHandle, Props>(function TableView(
+  { myths, metrics, state, update, onSelectMyth, definitions },
+  ref,
+) {
   void update;
   const [sortKey, setSortKey] = useState<SortKey>('myth');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
@@ -289,6 +297,43 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
     visibleCount > 0
       ? `calc((${100 - MYTH_COL_PCT}% - 28px * ${hiddenCount}) / ${visibleCount})`
       : `${100 - MYTH_COL_PCT}%`;
+
+  // ── Export SVG payload (built DURING render so the handle is never
+  //    stale/null when ExportDrawer reads it) ─────────────────────────
+  const renderData = useMemo<TableRenderOpts>(() => {
+    const visCols = columnMeta.filter((c) => !isHidden(c.key));
+    return {
+      labelHeader: lang === 'de' ? 'MYTHEN' : 'MYTHS',
+      columns: visCols.map((c) => ({ label: c.label })),
+      lang,
+      rows: sortedMyths.map((myth) => {
+        const cells: string[] = [];
+        const naMask: boolean[] = [];
+        for (const c of visCols) {
+          const cellIndicator: Indicator =
+            mode === 'indicator' ? pickedIndicator : (c.key as Indicator);
+          const val = cellValueFor(myth.id, c.key);
+          naMask.push(val === null);
+          cells.push(val === null ? '' : formatValue(val, cellIndicator));
+        }
+        return {
+          label: getMythShortText(myth, lang),
+          verdict: myth.correctness_class,
+          cells,
+          naMask,
+        };
+      }),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnMeta, isHidden, sortedMyths, mode, pickedIndicator, groupId, metrics, lang]);
+  const renderDataRef = useRef<TableRenderOpts | null>(null);
+  renderDataRef.current = renderData;
+  useImperativeHandle(ref, () => ({
+    getSvgElement: () => {
+      if (!renderDataRef.current || renderDataRef.current.rows.length === 0) return null;
+      try { return renderTableSvg(renderDataRef.current); } catch { return null; }
+    },
+  }));
 
   return (
     <div className="data-table-container">
@@ -553,4 +598,6 @@ export default function TableView({ myths, metrics, state, update, onSelectMyth,
       </svg>
     </div>
   );
-}
+});
+
+export default TableView;

@@ -23,7 +23,7 @@
  * views feel like the same control set across the dashboard divider.
  */
 import {
-  forwardRef, useEffect, useImperativeHandle, useMemo, useState,
+  forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState,
 } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type {
@@ -50,6 +50,7 @@ import { t } from '../../../lib/dashboard/translations';
 import { filterSourcesBySearch } from '../../../lib/dashboard/data';
 import { getCategoryDescription } from '../../../lib/dashboard/source-descriptions';
 import { getCategoryColor } from '../../../lib/dashboard/colors';
+import { renderTableSvg, type TableRenderOpts } from '../../../lib/dashboard/table-svg';
 
 /** Whether a source metric uses the %-share band ("…Anteil") or the
  *  point-score band ("…Niveau"). Mirrors the convention in
@@ -159,7 +160,13 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
     const selectedGroup: SourceGroupId = state.sourceGroup;
     const selectedMetric: SourceMetricType = state.sourceMetric;
 
-    useImperativeHandle(ref, () => ({ getSvgElement: () => null }));
+    const renderDataRef = useRef<TableRenderOpts | null>(null);
+    useImperativeHandle(ref, () => ({
+      getSvgElement: () => {
+        if (!renderDataRef.current || renderDataRef.current.rows.length === 0) return null;
+        try { return renderTableSvg(renderDataRef.current); } catch { return null; }
+      },
+    }));
 
     const [sortKey, setSortKey] = useState<SortKey>('source');
     const [sortDir, setSortDir] = useState<SortDir>('asc');
@@ -302,6 +309,31 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
       }
       return out;
     }, [sortedRows, expanded, childrenByParent, computeValues]);
+
+    // Export SVG payload — built DURING render so the handle is never
+    // stale/null when ExportDrawer reads it.
+    const visExportCols = cols.filter((c) => !isHidden(c.key as string));
+    renderDataRef.current = {
+      labelHeader: lang === 'de' ? 'INFORMATIONSWEGE' : 'SOURCES',
+      columns: visExportCols.map((c) => ({ label: c.short ?? c.label })),
+      lang,
+      rows: displayRows.map((row) => {
+        const cells: string[] = [];
+        const naMask: boolean[] = [];
+        for (const c of visExportCols) {
+          const v = row.values[c.key as string];
+          naMask.push(v == null);
+          cells.push(v == null ? '' : String(Math.round(v)));
+        }
+        return {
+          label: row.source.name,
+          accent: getCategoryColor(row.categoryId),
+          isChild: row.isChild,
+          cells,
+          naMask,
+        };
+      }),
+    };
 
     if (!sourceData) {
       return (
