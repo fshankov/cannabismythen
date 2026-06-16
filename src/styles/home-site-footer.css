@@ -90,6 +90,14 @@
 }
 .site-footer__email:hover { text-decoration: underline; }
 
+/* Inline link on the "Abschlussbericht" word in the citation line — always
+   underlined (per request), in the footer's green link colour. */
+.site-footer__report-link {
+  color: #0f5238;
+  text-decoration: underline;
+}
+.site-footer__report-link:hover { color: #116c4a; }
+
 /* ── Bottom bar ── */
 .site-footer__bar {
   display: flex;

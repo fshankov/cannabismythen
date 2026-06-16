@@ -4,6 +4,7 @@ import { faqMarkdocConfig } from "@lib/markdoc/faq-nodes";
 import { wrapVerdictCellsWithPills } from "@lib/faq-verdict-pills";
 import { applyHeatmapBands } from "@lib/faq-heatmap-bands";
 import { applyLesartLegend } from "@lib/faq-lesart-legend";
+import { applySourceNote } from "@lib/faq-source-note";
 import {
   loadMythPopupData,
   type FaqMythPopupData,
@@ -44,10 +45,12 @@ const rawHtml = Markdoc.renderers.html(
 // Resolve the {% factsheet-link %} placeholders into actual myth statements,
 // turn plain-text verdict cells in answer tables into the canonical verdict
 // pill, tint any value-table "NN %" cells with the Daten-Explorer heatmap band
-// ramp, then polish the Lesart legend (smaller font + coloured blau/lila
-// swatches matching the table membership dots).
-const html = applyLesartLegend(
-  applyHeatmapBands(wrapVerdictCellsWithPills(resolveTitlesInHtml(rawHtml))),
+// ramp, polish the Lesart legend (smaller font + coloured blau/lila swatches),
+// then style any "Quelle:" citation line as a small footnote note.
+const html = applySourceNote(
+  applyLesartLegend(
+    applyHeatmapBands(wrapVerdictCellsWithPills(resolveTitlesInHtml(rawHtml))),
+  ),
 );
 
 const id = `faq-${question.slug}`;

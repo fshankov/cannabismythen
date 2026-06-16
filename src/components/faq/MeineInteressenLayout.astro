@@ -521,23 +521,11 @@ const isFachkraefte = activeAudience === "fachkraefte";
 :global(.mi-layout .faq-question__answer table.faq-hm-table) {
   table-layout: fixed;
   /* Min width so the 7 fixed-% columns stay readable on phones; below this
-     width the wrapper scrolls horizontally. */
+     width the wrapper scrolls horizontally. The per-column widths are defined
+     by the <colgroup> injected in src/lib/faq-heatmap-bands.ts (sum = 100 %),
+     which lets `table-layout: fixed` size columns independently of which row is
+     first — needed because the suphead row uses colspan. */
   min-width: 720px;
-}
-/* Aussage = statement column (wider, wrapping). */
-:global(.mi-layout .faq-question__answer table.faq-hm-table th:nth-child(1)),
-:global(.mi-layout .faq-question__answer table.faq-hm-table td:nth-child(1)) {
-  width: 30%;
-}
-/* Korrekt = verdict-pill column (compact). */
-:global(.mi-layout .faq-question__answer table.faq-hm-table th:nth-child(2)),
-:global(.mi-layout .faq-question__answer table.faq-hm-table td:nth-child(2)) {
-  width: 11%;
-}
-/* The five Zielgruppen columns share the remaining width equally. */
-:global(.mi-layout .faq-question__answer table.faq-hm-table th:nth-child(n + 3)),
-:global(.mi-layout .faq-question__answer table.faq-hm-table td:nth-child(n + 3)) {
-  width: 11.8%;
 }
 :global(.mi-layout .faq-question__answer table.faq-hm-table th[align="right"]) {
   white-space: normal;
@@ -545,6 +533,26 @@ const isFachkraefte = activeAudience === "fachkraefte";
 }
 :global(.mi-layout .faq-question__answer table.faq-hm-table td[align="right"]) {
   white-space: nowrap;
+}
+/* Sub-header row above the regular headers: empty cell over Aussage + Korrekte
+   Antwort, then a single label cell spanning the 5 Zielgruppen columns. Reads
+   as a category caption — smaller, secondary colour, with a thin rule under
+   the spanning cell to visually group the columns below it. */
+:global(.mi-layout .faq-question__answer table.faq-hm-table .faq-hm-suphead th) {
+  border-bottom: none;
+  background: transparent;
+}
+:global(.mi-layout .faq-question__answer table.faq-hm-table .faq-hm-suphead__spacer) {
+  padding: 0;
+}
+:global(.mi-layout .faq-question__answer table.faq-hm-table .faq-hm-suphead__group) {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 0 8px 6px;
+  border-bottom: 1px solid var(--color-border);
 }
 :global(.mi-layout .faq-question__answer .faq-hm-legend) {
   display: flex;
@@ -573,7 +581,10 @@ const isFachkraefte = activeAudience === "fachkraefte";
   font-size: 0.78rem;
   line-height: 1.55;
   color: var(--color-text-secondary);
-  margin: 10px 0 0;
+  /* Bottom margin separates the legend block (= end of one table) from the
+     next section heading (start of the second table) so the two Top-10
+     groupings read as distinct visual blocks rather than one continuous list. */
+  margin: 10px 0 var(--space-lg);
 }
 :global(.mi-layout .faq-question__answer p.faq-lesart strong) {
   color: var(--color-text);
@@ -598,6 +609,31 @@ const isFachkraefte = activeAudience === "fachkraefte";
 }
 :global(.mi-layout .faq-lesart-shared::before) { background: #2b6cb0; }
 :global(.mi-layout .faq-lesart-diff::before)   { background: #7c3aed; }
+
+/* Source-note line (rendered from "Quelle: …" paragraphs in the .mdoc).
+   Sits at the end of an answer as metadata, so it reads as a small footnote:
+   smaller font, muted colour, and the link is dark underlined inline text
+   rather than the loud green accent (it's a citation, not a CTA — the brand
+   colour shouldn't compete with the answer's content). */
+:global(.mi-layout .faq-question__answer p.faq-source-note) {
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  margin: 12px 0 0;
+}
+:global(.mi-layout .faq-question__answer p.faq-source-note a) {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: currentColor;
+  text-underline-offset: 2px;
+  font-weight: 500;
+  transition: color 120ms ease;
+}
+:global(.mi-layout .faq-question__answer p.faq-source-note a:hover) {
+  color: var(--color-accent);
+  text-decoration-color: var(--color-accent);
+}
 
 @media (max-width: 640px) {
   /* Override Phase-1's `display: block; overflow-x: auto` on tables for the

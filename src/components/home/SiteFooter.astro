@@ -18,6 +18,16 @@ export interface Props {
 }
 
 const { kontakt, foerderung, zitierweise, abschlussbericht, links = [] } = Astro.props;
+// CaRM final report PDF — linked from the "Abschlussbericht" word in the footer citation.
+const ABSCHLUSSBERICHT_URL =
+  "https://www.isd-hamburg.de/wp-content/uploads/2026/03/Abschlussbericht_CaRM_final.pdf";
+// Split the citation around the word so it can be linked without Astro inserting
+// stray whitespace around the following punctuation ("Abschlussbericht. ISD …").
+const AB_WORD = "Abschlussbericht";
+const abBody = abschlussbericht?.body ?? "";
+const abIdx = abBody.indexOf(AB_WORD);
+const abBefore = abIdx === -1 ? abBody : abBody.slice(0, abIdx);
+const abAfter = abIdx === -1 ? "" : abBody.slice(abIdx + AB_WORD.length);
 const year = new Date().getFullYear();
 ---
 
@@ -68,7 +78,9 @@ const year = new Date().getFullYear();
         {abschlussbericht && (
           <div class="site-footer__block">
             <h2 class="site-footer__h">{abschlussbericht.label}</h2>
-            <p class="site-footer__line">{abschlussbericht.body}</p>
+            {/* Link the word "Abschlussbericht" in the citation. before/after are
+                kept adjacent (no template whitespace) so the period hugs the word. */}
+            <p class="site-footer__line">{abIdx === -1 ? abschlussbericht.body : (<Fragment>{abBefore}<a class="site-footer__report-link" href={ABSCHLUSSBERICHT_URL} target="_blank" rel="noopener noreferrer">{AB_WORD}</a>{abAfter}</Fragment>)}</p>
           </div>
         )}
       </div>
