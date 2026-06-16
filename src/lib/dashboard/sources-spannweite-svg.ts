@@ -14,6 +14,7 @@
  */
 
 import type { Lang } from './types';
+import { wrapLabel, renderLabelLines } from './text-wrap';
 
 interface SourcesSpannweiteRow {
   sourceId: number;
@@ -43,6 +44,8 @@ const TOTAL_W = 1000;
 const LABEL_COL_W = 240;
 const HEADER_H = 56;
 const ROW_H = 32;
+const ROW_H_2 = 48;          // taller row when a label wraps to 2 lines
+const LABEL_MAX_CHARS = 32;  // chars that fit the 240px label column
 const AXIS_H = 26;
 const BAR_H = 6;
 const CIRCLE_R = 11; // value-circle radius (22px ⌀, matches .carm-value-circle)
@@ -56,15 +59,21 @@ function escapeXml(s: string): string {
     .replace(/'/g, '&apos;');
 }
 
-function truncate(s: string, max: number): string {
-  return s.length > max ? s.slice(0, max - 1) + '…' : s;
-}
-
 export function renderSourcesSpannweiteSvg(opts: SourcesSpannweiteRenderOpts): SVGSVGElement {
   const { rows, columns, cellValue, lang } = opts;
   const colCount = columns.length;
   const colW = colCount > 0 ? (TOTAL_W - LABEL_COL_W) / colCount : 0;
-  const bodyH = rows.length * ROW_H;
+
+  // Per-row label wrapping → variable row heights (long names wrap to a 2nd
+  // line instead of being cut / overflowing the label column).
+  const rowLayouts = rows.map((row) => {
+    const lines = wrapLabel(row.name, LABEL_MAX_CHARS, 2);
+    return { lines, height: lines.length > 1 ? ROW_H_2 : ROW_H };
+  });
+  const rowTops: number[] = [];
+  let accH = 0;
+  for (const rl of rowLayouts) { rowTops.push(accH); accH += rl.height; }
+  const bodyH = accH;
   const totalH = HEADER_H + bodyH + AXIS_H;
 
   // Per-column clip paths so a value circle at ≈0 / ≈100 is trimmed at
@@ -106,24 +115,30 @@ export function renderSourcesSpannweiteSvg(opts: SourcesSpannweiteRenderOpts): S
   for (let r = 0; r < rows.length; r++) {
     const row = rows[r];
     const color = row.categoryColor;
-    const yTop = HEADER_H + r * ROW_H;
-    const yMid = yTop + ROW_H / 2;
+    const { lines: labelLines, height: rowH } = rowLayouts[r];
+    const yTop = HEADER_H + rowTops[r];
+    const yMid = yTop + rowH / 2;
     const rowOpacity = row.isChild ? 0.62 : 1;
 
     // Alternating row background.
     if (r % 2 === 1) {
-      parts.push(`<rect x="0" y="${yTop}" width="${TOTAL_W}" height="${ROW_H}" fill="#fafbfc"/>`);
+      parts.push(`<rect x="0" y="${yTop}" width="${TOTAL_W}" height="${rowH}" fill="#fafbfc"/>`);
     }
     if (r > 0) {
       parts.push(`<line x1="0" y1="${yTop}" x2="${TOTAL_W}" y2="${yTop}" stroke="#f1f5f9"/>`);
     }
 
-    // Row label: name (children indented).
+    // Row label: name (children indented), wrapped to 1–2 lines.
     const labelX = row.isChild ? 30 : 14;
     parts.push(
-      `<text x="${labelX}" y="${yMid}" dominant-baseline="middle" font-family="system-ui,sans-serif" font-size="${row.isChild ? 11 : 12}" font-weight="${row.isChild ? 400 : 500}" fill="#0f172a" opacity="${rowOpacity}">${escapeXml(truncate(row.name, 38))}</text>`,
+      renderLabelLines(labelLines, labelX, yMid, {
+        fontSize: row.isChild ? 11 : 12,
+        fontWeight: row.isChild ? 400 : 500,
+        fill: '#0f172a',
+        opacity: rowOpacity,
+      }),
     );
-    parts.push(`<line x1="${LABEL_COL_W}" y1="${yTop}" x2="${LABEL_COL_W}" y2="${yTop + ROW_H}" stroke="#f1f5f9"/>`);
+    parts.push(`<line x1="${LABEL_COL_W}" y1="${yTop}" x2="${LABEL_COL_W}" y2="${yTop + rowH}" stroke="#f1f5f9"/>`);
 
     // Data cells.
     for (let i = 0; i < colCount; i++) {
@@ -131,7 +146,7 @@ export function renderSourcesSpannweiteSvg(opts: SourcesSpannweiteRenderOpts): S
       const value = cellValue(row.sourceId, col.id);
       const cellX = LABEL_COL_W + i * colW;
       if (i < colCount - 1) {
-        parts.push(`<line x1="${cellX + colW}" y1="${yTop}" x2="${cellX + colW}" y2="${yTop + ROW_H}" stroke="#f1f5f9"/>`);
+        parts.push(`<line x1="${cellX + colW}" y1="${yTop}" x2="${cellX + colW}" y2="${yTop + rowH}" stroke="#f1f5f9"/>`);
       }
       if (value === null) {
         parts.push(

@@ -17,6 +17,7 @@
 
 import type { Myth, Lang, CorrectnessClass } from './types';
 import { getMythShortText } from './data';
+import { wrapLabel, renderLabelLines } from './text-wrap';
 
 interface RenderOpts {
   myths: Myth[];                  // filtered + sorted
@@ -33,7 +34,7 @@ interface RenderOpts {
 }
 
 // Verdict colours mirror src/lib/dashboard/colors.ts.
-const VERDICT_FG: Record<CorrectnessClass, string> = {
+export const VERDICT_FG: Record<CorrectnessClass, string> = {
   richtig: '#047857',
   eher_richtig: '#4d7c0f',
   eher_falsch: '#b45309',
@@ -49,7 +50,7 @@ const VERDICT_SHADOW: Record<CorrectnessClass, string> = {
 };
 // Per-verdict y-shift (px) so the chevron tip lands on the bar
 // midline, matching the on-page CSS `--y-shift`.
-const VERDICT_Y_SHIFT: Record<CorrectnessClass, number> = {
+export const VERDICT_Y_SHIFT: Record<CorrectnessClass, number> = {
   richtig: 2.67,
   eher_richtig: 1.89,
   eher_falsch: -1.89,
@@ -61,9 +62,11 @@ const TOTAL_W = 1000;
 const LABEL_COL_W = 240;
 const HEADER_H = 56;
 const ROW_H = 32;
+const ROW_H_2 = 48;          // taller row when a label wraps to 2 lines
+const LABEL_MAX_CHARS = 30;  // chars that fit the 240px label column at 12px
 const AXIS_H = 26;
 const BAR_H = 8;
-const GLYPH_SIZE = 16;
+export const GLYPH_SIZE = 16;
 const CIRCLE_R = 11; // value-circle radius (22px ⌀, matches .carm-value-circle)
 
 function escapeXml(s: string): string {
@@ -77,7 +80,7 @@ function escapeXml(s: string): string {
 
 /** Inline <symbol> defs for the 5 verdict arrows, identical geometry
  *  to verdictArrowSymbols.tsx. */
-function symbolDefs(): string {
+export function symbolDefs(): string {
   const sym = (id: string, transform: string, body: string) =>
     `<symbol id="${id}" viewBox="0 0 24 24" overflow="visible"><g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"${transform ? ` transform="${transform}"` : ''}>${body}</g></symbol>`;
   const full = (fg: string, shadow: string) =>
@@ -97,7 +100,17 @@ export function renderSpannweiteSvg(opts: RenderOpts): SVGSVGElement {
   const { myths, cellValue, visibleColumns, lang } = opts;
   const colCount = visibleColumns.length;
   const colW = colCount > 0 ? (TOTAL_W - LABEL_COL_W) / colCount : 0;
-  const bodyH = myths.length * ROW_H;
+
+  // Per-row label wrapping → variable row heights, so long statements wrap
+  // to a 2nd line instead of being cut / overflowing the label column.
+  const rowLayouts = myths.map((myth) => {
+    const lines = wrapLabel(getMythShortText(myth, lang), LABEL_MAX_CHARS, 2);
+    return { lines, height: lines.length > 1 ? ROW_H_2 : ROW_H };
+  });
+  const rowTops: number[] = [];
+  let accH = 0;
+  for (const rl of rowLayouts) { rowTops.push(accH); accH += rl.height; }
+  const bodyH = accH;
   const totalH = HEADER_H + bodyH + AXIS_H;
 
   // Per-column clip paths so a value circle at ≈0 / ≈100 is trimmed at
@@ -145,27 +158,30 @@ export function renderSpannweiteSvg(opts: RenderOpts): SVGSVGElement {
     const myth = myths[r];
     const verdict = myth.correctness_class;
     const verdictColor = VERDICT_FG[verdict];
-    const yTop = HEADER_H + r * ROW_H;
-    const yMid = yTop + ROW_H / 2;
+    const { lines: labelLines, height: rowH } = rowLayouts[r];
+    const yTop = HEADER_H + rowTops[r];
+    const yMid = yTop + rowH / 2;
     // Alternating row background.
     if (r % 2 === 1) {
-      parts.push(`<rect x="0" y="${yTop}" width="${TOTAL_W}" height="${ROW_H}" fill="#fafbfc"/>`);
+      parts.push(`<rect x="0" y="${yTop}" width="${TOTAL_W}" height="${rowH}" fill="#fafbfc"/>`);
     }
     // Row separator line at top.
     if (r > 0) {
       parts.push(`<line x1="0" y1="${yTop}" x2="${TOTAL_W}" y2="${yTop}" stroke="#f1f5f9"/>`);
     }
-    // Row label: small verdict glyph + short text.
+    // Row label: small verdict glyph + wrapped short text (1–2 lines).
     const labelGlyphX = 14;
     const labelGlyphY = yMid - GLYPH_SIZE / 2 + VERDICT_Y_SHIFT[verdict];
     parts.push(
       `<g style="color:${verdictColor}"><use href="#strips-arrow-${verdict}" x="${labelGlyphX - GLYPH_SIZE / 2}" y="${labelGlyphY}" width="${GLYPH_SIZE}" height="${GLYPH_SIZE}"/></g>`,
     );
     parts.push(
-      `<text x="${labelGlyphX + GLYPH_SIZE / 2 + 8}" y="${yMid}" dominant-baseline="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="500" fill="#0f172a">${escapeXml(truncate(getMythShortText(myth, lang), 38))}</text>`,
+      renderLabelLines(labelLines, labelGlyphX + GLYPH_SIZE / 2 + 8, yMid, {
+        fontSize: 12, fontWeight: 500, fill: '#0f172a',
+      }),
     );
     // Right border of label column.
-    parts.push(`<line x1="${LABEL_COL_W}" y1="${yTop}" x2="${LABEL_COL_W}" y2="${yTop + ROW_H}" stroke="#f1f5f9"/>`);
+    parts.push(`<line x1="${LABEL_COL_W}" y1="${yTop}" x2="${LABEL_COL_W}" y2="${yTop + rowH}" stroke="#f1f5f9"/>`);
     // Data cells.
     for (let i = 0; i < colCount; i++) {
       const col = visibleColumns[i];
@@ -173,7 +189,7 @@ export function renderSpannweiteSvg(opts: RenderOpts): SVGSVGElement {
       const cellX = LABEL_COL_W + i * colW;
       // Column right border (except last).
       if (i < colCount - 1) {
-        parts.push(`<line x1="${cellX + colW}" y1="${yTop}" x2="${cellX + colW}" y2="${yTop + ROW_H}" stroke="#f1f5f9"/>`);
+        parts.push(`<line x1="${cellX + colW}" y1="${yTop}" x2="${cellX + colW}" y2="${yTop + rowH}" stroke="#f1f5f9"/>`);
       }
       if (value === null) {
         parts.push(
@@ -226,8 +242,4 @@ export function renderSpannweiteSvg(opts: RenderOpts): SVGSVGElement {
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgString, 'image/svg+xml');
   return doc.documentElement as unknown as SVGSVGElement;
-}
-
-function truncate(s: string, max: number): string {
-  return s.length > max ? s.slice(0, max - 1) + '…' : s;
 }
