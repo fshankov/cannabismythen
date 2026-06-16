@@ -101,11 +101,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
    *  matching whatever the user is currently looking at. */
   const renderDataRef = useRef<{
     myths: Myth[];
-    metrics: Metric[];
-    groups: Group[];
-    mode: StripsMode;
-    pickedGroup: GroupId;
-    pickedIndicator: Indicator;
+    cellValue: (mythId: number, colId: string) => number | null;
     visibleColumns: { id: string; label: string }[];
     lang: typeof state.lang;
   } | null>(null);
@@ -324,11 +320,7 @@ const SpannweiteView = forwardRef<SpannweiteViewHandle, Props>(function Spannwei
   useEffect(() => {
     renderDataRef.current = {
       myths: sortedMyths,
-      metrics,
-      groups,
-      mode,
-      pickedGroup,
-      pickedIndicator,
+      cellValue,
       visibleColumns: columns
         .filter((c) => !isHidden(c.id))
         .map((c) => ({ id: c.id, label: c.label })),

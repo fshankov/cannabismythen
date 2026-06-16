@@ -45,7 +45,7 @@ const HEADER_H = 56;
 const ROW_H = 32;
 const AXIS_H = 26;
 const BAR_H = 6;
-const CIRCLE_R = 8;
+const CIRCLE_R = 11; // value-circle radius (22px ⌀, matches .carm-value-circle)
 
 function escapeXml(s: string): string {
   return s
@@ -66,6 +66,15 @@ export function renderSourcesSpannweiteSvg(opts: SourcesSpannweiteRenderOpts): S
   const colW = colCount > 0 ? (TOTAL_W - LABEL_COL_W) / colCount : 0;
   const bodyH = rows.length * ROW_H;
   const totalH = HEADER_H + bodyH + AXIS_H;
+
+  // Per-column clip paths so a value circle at ≈0 / ≈100 is trimmed at
+  // the column edge, mirroring the on-screen cell's `overflow:hidden`.
+  const clipDefs = columns
+    .map((_, i) => {
+      const cx = LABEL_COL_W + i * colW;
+      return `<clipPath id="src-clip-${i}"><rect x="${cx}" y="${HEADER_H}" width="${colW}" height="${bodyH}"/></clipPath>`;
+    })
+    .join('');
 
   const parts: string[] = [];
 
@@ -138,14 +147,16 @@ export function renderSourcesSpannweiteSvg(opts: SourcesSpannweiteRenderOpts): S
       parts.push(
         `<rect x="${innerLeft}" y="${yMid - BAR_H / 2}" width="${valueX - innerLeft}" height="${BAR_H}" rx="3" fill="${color}" fill-opacity="${0.22 * rowOpacity}"/>`,
       );
-      // Circle marker at value position.
+      // Value circle (category colour) + centred white number, matching
+      // the on-screen ValueCircle; clipped to the column.
+      parts.push(`<g clip-path="url(#src-clip-${i})" opacity="${rowOpacity}">`);
       parts.push(
-        `<circle cx="${valueX}" cy="${yMid}" r="${CIRCLE_R}" fill="${color}" opacity="${rowOpacity}"/>`,
+        `<circle cx="${valueX}" cy="${yMid}" r="${CIRCLE_R}" fill="${color}"/>`,
       );
-      // Numeric label.
       parts.push(
-        `<text x="${valueX + CIRCLE_R + 4}" y="${yMid}" dominant-baseline="middle" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="11" fill="#0f172a" opacity="${rowOpacity}">${Math.round(value)}</text>`,
+        `<text x="${valueX}" y="${yMid}" text-anchor="middle" dominant-baseline="central" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="11" font-weight="600" fill="#ffffff">${Math.round(value)}</text>`,
       );
+      parts.push(`</g>`);
     }
   }
   parts.push(`</g>`);
@@ -169,7 +180,7 @@ export function renderSourcesSpannweiteSvg(opts: SourcesSpannweiteRenderOpts): S
   }
   parts.push(`</g>`);
 
-  const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${TOTAL_W}" height="${totalH}" viewBox="0 0 ${TOTAL_W} ${totalH}">${parts.join('')}</svg>`;
+  const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${TOTAL_W}" height="${totalH}" viewBox="0 0 ${TOTAL_W} ${totalH}"><defs>${clipDefs}</defs>${parts.join('')}</svg>`;
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgString, 'image/svg+xml');
   return doc.documentElement as unknown as SVGSVGElement;

@@ -15,19 +15,17 @@
  * (hide / sort / info buttons are omitted — they're not data).
  */
 
-import type {
-  Myth, Metric, Group, GroupId, Indicator, StripsMode, Lang,
-  CorrectnessClass,
-} from './types';
-import { getMythMetric, getIndicatorValue, getMythShortText } from './data';
+import type { Myth, Lang, CorrectnessClass } from './types';
+import { getMythShortText } from './data';
 
 interface RenderOpts {
   myths: Myth[];                  // filtered + sorted
-  metrics: Metric[];
-  groups: Group[];
-  mode: StripsMode;
-  pickedGroup: GroupId;
-  pickedIndicator: Indicator;
+  /** Resolve the value for (mythId, columnId). This is the SAME function
+   *  the on-screen view uses, so the export always matches the screen —
+   *  the renderer never re-derives values from mode/group/indicator (that
+   *  drifted and broke: BalkenView and SpannweiteView use opposite
+   *  mode↔column conventions). */
+  cellValue: (mythId: number, colId: string) => number | null;
   /** Visible column IDs (already in their original column order,
    *  hidden columns excluded). */
   visibleColumns: { id: string; label: string }[];
@@ -66,6 +64,7 @@ const ROW_H = 32;
 const AXIS_H = 26;
 const BAR_H = 8;
 const GLYPH_SIZE = 16;
+const CIRCLE_R = 11; // value-circle radius (22px ⌀, matches .carm-value-circle)
 
 function escapeXml(s: string): string {
   return s
@@ -95,18 +94,20 @@ function symbolDefs(): string {
 }
 
 export function renderSpannweiteSvg(opts: RenderOpts): SVGSVGElement {
-  const { myths, metrics, mode, pickedGroup, pickedIndicator, visibleColumns, lang } = opts;
+  const { myths, cellValue, visibleColumns, lang } = opts;
   const colCount = visibleColumns.length;
   const colW = colCount > 0 ? (TOTAL_W - LABEL_COL_W) / colCount : 0;
   const bodyH = myths.length * ROW_H;
   const totalH = HEADER_H + bodyH + AXIS_H;
 
-  const cellValue = (mythId: number, colId: string): number | null => {
-    if (mode === 'indicator') {
-      return getIndicatorValue(getMythMetric(metrics, mythId, pickedGroup), colId as Indicator);
-    }
-    return getIndicatorValue(getMythMetric(metrics, mythId, colId as GroupId), pickedIndicator);
-  };
+  // Per-column clip paths so a value circle at ≈0 / ≈100 is trimmed at
+  // the column edge, mirroring the on-screen cell's `overflow:hidden`.
+  const clipDefs = visibleColumns
+    .map((_, i) => {
+      const cx = LABEL_COL_W + i * colW;
+      return `<clipPath id="sp-clip-${i}"><rect x="${cx}" y="${HEADER_H}" width="${colW}" height="${bodyH}"/></clipPath>`;
+    })
+    .join('');
 
   const parts: string[] = [];
 
@@ -184,21 +185,20 @@ export function renderSpannweiteSvg(opts: RenderOpts): SVGSVGElement {
       const innerW = colW - 16; // 8px padding each side
       const innerLeft = cellX + 8;
       const valueX = innerLeft + (innerW * v) / 100;
-      const barRight = valueX; // bar's right edge = glyph centre
-      // Bar (verdict-tinted, 22% opacity).
+      // Bar (verdict-tinted, 22% opacity) from 0 → value.
       parts.push(
-        `<rect x="${innerLeft}" y="${yMid - BAR_H / 2}" width="${barRight - innerLeft}" height="${BAR_H}" rx="4" fill="${verdictColor}" fill-opacity="0.22"/>`,
+        `<rect x="${innerLeft}" y="${yMid - BAR_H / 2}" width="${valueX - innerLeft}" height="${BAR_H}" rx="4" fill="${verdictColor}" fill-opacity="0.22"/>`,
       );
-      // Verdict glyph at value position, with per-verdict y-shift.
-      const gx = valueX - GLYPH_SIZE / 2;
-      const gy = yMid - GLYPH_SIZE / 2 + VERDICT_Y_SHIFT[verdict];
+      // Value circle (solid verdict colour) + centred white number,
+      // matching the on-screen ValueCircle; clipped to the column.
+      parts.push(`<g clip-path="url(#sp-clip-${i})">`);
       parts.push(
-        `<g style="color:${verdictColor}"><use href="#strips-arrow-${verdict}" x="${gx}" y="${gy}" width="${GLYPH_SIZE}" height="${GLYPH_SIZE}"/></g>`,
+        `<circle cx="${valueX}" cy="${yMid}" r="${CIRCLE_R}" fill="${verdictColor}"/>`,
       );
-      // Numeric label.
       parts.push(
-        `<text x="${valueX + GLYPH_SIZE / 2 + 4}" y="${yMid}" dominant-baseline="middle" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="11" fill="#0f172a">${Math.round(value)}</text>`,
+        `<text x="${valueX}" y="${yMid}" text-anchor="middle" dominant-baseline="central" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="11" font-weight="600" fill="#ffffff">${Math.round(value)}</text>`,
       );
+      parts.push(`</g>`);
     }
   }
   parts.push(`</g>`);
@@ -222,7 +222,7 @@ export function renderSpannweiteSvg(opts: RenderOpts): SVGSVGElement {
   }
   parts.push(`</g>`);
 
-  const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${TOTAL_W}" height="${totalH}" viewBox="0 0 ${TOTAL_W} ${totalH}"><defs>${symbolDefs()}</defs>${parts.join('')}</svg>`;
+  const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${TOTAL_W}" height="${totalH}" viewBox="0 0 ${TOTAL_W} ${totalH}"><defs>${symbolDefs()}${clipDefs}</defs>${parts.join('')}</svg>`;
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgString, 'image/svg+xml');
   return doc.documentElement as unknown as SVGSVGElement;

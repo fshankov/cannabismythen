@@ -16,6 +16,7 @@ import type {
   GroupId,
   Indicator,
   DashboardDefinitions,
+  InformationSourcesData,
 } from '../../lib/dashboard/types';
 import {
   loadData,
@@ -148,7 +149,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
    * grab a chart handle for image export. Returns:
    *   - balken  → ECharts instance via BalkenView's imperative handle
    *   - strips  → live `<svg>` from StripsView (D3-rendered)
-   *   - sources → live `<svg>` from SourcesStripsView (D3-rendered)
+   *   - sources → synthetic `<svg>` from SourcesBalkenView (numbered circles)
    *   - table   → null (Tabelle has no visualisation)
    */
   const getActiveChart = useCallback((): ChartHandle | null => {
@@ -160,7 +161,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
       case 'spannweite':
         return spannweiteRef.current?.getSvgElement() ?? null;
       case 'sources':
-        return sourcesRef.current?.getSvgElement() ?? null;
+        return sourcesBalkenRef.current?.getSvgElement() ?? null;
       case 'sources2':
         return sources2Ref.current?.getSvgElement() ?? null;
       case 'table':
@@ -271,6 +272,19 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
     loadData()
       .then((d) => { if (!cancelled) setData(d); })
       .catch(() => { if (!cancelled) setLoadError(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Informationswege dataset (information-sources.json) — loaded once here
+  // and passed to all three sources views so their image export never races
+  // an in-view fetch (previously each view fetched lazily on mount).
+  const [sourceData, setSourceData] = useState<InformationSourcesData | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/data/information-sources.json')
+      .then((r) => r.json() as Promise<InformationSourcesData>)
+      .then((d) => { if (!cancelled) setSourceData(d); })
+      .catch(() => undefined);
     return () => { cancelled = true; };
   }, []);
 
@@ -825,6 +839,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 state={state}
                 update={update}
                 definitions={defs}
+                sourceData={sourceData}
               />
             ) : state.view === 'sources2' ? (
               <SourcesSpannweiteView
@@ -833,6 +848,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 update={update}
                 definitions={defs}
                 sharedActions={sharedActions}
+                sourceData={sourceData}
               />
             ) : state.view === 'sources_table' ? (
               <SourcesTableView
@@ -841,6 +857,7 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
                 update={update}
                 definitions={defs}
                 sharedActions={sharedActions}
+                sourceData={sourceData}
               />
             ) : filteredMyths.length === 0 ? (
               <div className="no-results">{t('misc.noResults', 'de')}</div>
@@ -1027,7 +1044,9 @@ export default function MythenExplorer({ mythSlugs, mythContent, definitions, my
               young_adults: 'Junge Erwachsene (18–26 J.)',
               parents: 'Eltern',
             };
-            const subtitle = sourcesPivot === 'metric'
+            const subtitle = state.view === 'sources'
+              ? `${SOURCES_METRIC_LABEL[state.sourceMetric] ?? state.sourceMetric} · ${SOURCES_GROUP_LABEL[state.sourceGroup] ?? state.sourceGroup}`
+              : sourcesPivot === 'metric'
               ? `Indikatoren · ${SOURCES_GROUP_LABEL[state.sourceGroup] ?? state.sourceGroup}`
               : `Gruppen · ${SOURCES_METRIC_LABEL[state.sourceMetric] ?? state.sourceMetric}`;
             return {
