@@ -379,10 +379,6 @@ const translations = {
     de: 'Alle Kanäle als Tabelle.',
     en: 'All channels as a table.',
   },
-  'export.images.note.sources': {
-    de: 'Bild-Export (PNG/SVG) ist für die Informationswege derzeit nicht verfügbar.',
-    en: 'Image export (PNG/SVG) is not available for the information channels yet.',
-  },
   'rundgang.label': { de: 'Rundgang', en: 'Tour' },
   'verdict.legend.title': { de: 'Wissenschaftliches Urteil', en: 'Scientific verdict' },
   'verdict.legend.info.richtig': {

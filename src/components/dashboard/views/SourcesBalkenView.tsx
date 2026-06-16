@@ -38,6 +38,7 @@ import {
 } from '../../../lib/icons/lookups';
 import { filterSourcesBySearch } from '../../../lib/dashboard/data';
 import { getCategoryColor } from '../../../lib/dashboard/colors';
+import { renderSourcesSpannweiteSvg } from '../../../lib/dashboard/sources-spannweite-svg';
 
 interface Props {
   state: AppState;
@@ -46,11 +47,13 @@ interface Props {
    *  column header (BugHerd 4.13, 2026-06-03). Source-metric defs live in
    *  src/content/dashboard-definitionen.json (sourcesIndicators). */
   definitions?: DashboardDefinitions | null;
+  /** Informationswege dataset, loaded once by MythenExplorer. */
+  sourceData: InformationSourcesData | null;
 }
 
 export interface SourcesBalkenViewHandle {
-  /** No SVG export for this view yet. Returns null so the export pipeline
-   *  treats sources as "image not available" rather than crashing. */
+  /** Synthetic export SVG (numbered circles) built on demand from the
+   *  current render data — mirrors SourcesSpannweiteView. */
   getSvgElement: () => SVGSVGElement | null;
 }
 
@@ -96,24 +99,28 @@ const GROUP_LABELS: Record<SourceGroupId, string> = {
 //  2026-05-29 — the picker UI now lives in the panel-level toolbar.)
 
 const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
-  function SourcesBalkenView({ state, update, definitions }, ref) {
+  function SourcesBalkenView({ state, update, definitions, sourceData }, ref) {
     const selectedMetric: SourceMetricType = state.sourceMetric;
     const selectedGroup: SourceGroupId = state.sourceGroup;
 
+    // Export SVG handle — built on demand from `renderDataRef`, which is
+    // synced to the on-screen rows every render (mirrors SourcesSpannweiteView).
+    const renderDataRef = useRef<{
+      rows: { sourceId: number; name: string; categoryColor: string; isChild: boolean }[];
+      columns: { id: string; label: string }[];
+      cellValue: (sourceId: number, colId: string) => number | null;
+      lang: typeof state.lang;
+    } | null>(null);
     useImperativeHandle(ref, () => ({
-      getSvgElement: () => null,
+      getSvgElement: () => {
+        if (!renderDataRef.current) return null;
+        try {
+          return renderSourcesSpannweiteSvg(renderDataRef.current);
+        } catch {
+          return null;
+        }
+      },
     }));
-
-    // ── Source data — same fetch pattern SourcesStripsView uses. ──────
-    const [sourceData, setSourceData] = useState<InformationSourcesData | null>(null);
-    useEffect(() => {
-      let cancelled = false;
-      fetch('/data/information-sources.json')
-        .then((r) => r.json() as Promise<InformationSourcesData>)
-        .then((d) => { if (!cancelled) setSourceData(d); })
-        .catch(() => undefined);
-      return () => { cancelled = true; };
-    }, []);
 
     // Sort lives locally in this view — no URL state hook needed for the
     // first iteration. (URL persistence can ride atop a future sub-PR.)
@@ -262,6 +269,29 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
       setHoveredSourceId(null);
       setHoverPos(null);
     }, []);
+
+    // Sync the export render-data each render so PNG/SVG match the screen.
+    useEffect(() => {
+      if (!sourceData) {
+        renderDataRef.current = null;
+        return;
+      }
+      const valueMap = sourceData.metrics[selectedMetric]?.data[selectedGroup] ?? {};
+      renderDataRef.current = {
+        rows: resolvedRows.map((r) => ({
+          sourceId: r.source.id,
+          name: r.source.name,
+          categoryColor: getCategoryColor(r.categoryId),
+          isChild: r.isChild,
+        })),
+        columns: [{ id: selectedMetric, label: METRIC_LABELS[selectedMetric] }],
+        cellValue: (sourceId: number) => {
+          const raw = valueMap[String(sourceId)];
+          return typeof raw === 'number' ? raw : null;
+        },
+        lang: state.lang,
+      };
+    });
 
     if (!sourceData) {
       return (

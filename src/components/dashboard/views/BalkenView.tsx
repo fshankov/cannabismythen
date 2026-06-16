@@ -61,7 +61,7 @@ export interface BalkenViewHandle {
 }
 
 const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
-  { myths, metrics, groups, state, update, onSelectMyth, onResetFilters, definitions },
+  { myths, metrics, state, update, onSelectMyth, onResetFilters, definitions },
   ref,
 ) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -70,11 +70,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
    *  for export, identical to SpannweiteView's renderDataRef pattern. */
   const renderDataRef = useRef<{
     myths: Myth[];
-    metrics: Metric[];
-    groups: Group[];
-    mode: 'indicator';
-    pickedGroup: GroupId;
-    pickedIndicator: Indicator;
+    cellValue: (mythId: number, colId: string) => number | null;
     visibleColumns: { id: string; label: string }[];
     lang: AppState['lang'];
   } | null>(null);
@@ -201,11 +197,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
   useEffect(() => {
     renderDataRef.current = {
       myths: sortedMyths,
-      metrics,
-      groups,
-      mode: 'indicator',
-      pickedGroup: groupId,
-      pickedIndicator: indicator,
+      cellValue,
       visibleColumns: [{ id: indicatorCol.id, label: indicatorCol.label }],
       lang,
     };

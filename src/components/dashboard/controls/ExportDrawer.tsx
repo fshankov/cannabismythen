@@ -180,9 +180,10 @@ export default function ExportDrawer({
       </p>
 
       {/* Image exports — the live chart at 2× (PNG) or as vector (SVG).
-          Shown only when the active view exposes a chart; in Tabelle (and the
-          Informationswege views, which expose no exportable chart) the buttons
-          are replaced by a note pointing at the diagram views. */}
+          Shown only when the active view exposes a chart; in the Tabelle
+          views (Mythen + Informationswege, which have no chart) the buttons
+          are replaced by a note pointing at the diagram views. The Balken
+          and Übersicht views in BOTH datasets do export images. */}
       {hasChart ? (
         <div className="carm-export-actions">
           <button type="button" className="carm-export-btn" onClick={handlePng}>
@@ -200,7 +201,7 @@ export default function ExportDrawer({
         </div>
       ) : (
         <p className="carm-export-note" aria-live="polite">
-          {t(isSources ? 'export.images.note.sources' : 'export.images.note', 'de')}
+          {t('export.images.note', 'de')}
         </p>
       )}
 

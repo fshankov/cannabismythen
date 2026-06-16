@@ -70,6 +70,8 @@ interface Props {
    *  consumed in this view yet. */
   sharedActions?: unknown;
   definitions?: DashboardDefinitions | null;
+  /** Informationswege dataset, loaded once by MythenExplorer. */
+  sourceData: InformationSourcesData | null;
 }
 
 export interface SourcesTableViewHandle {
@@ -139,7 +141,7 @@ const METRIC_FULL_LABELS_DE: Record<SourceMetricType, string> = {
 };
 
 const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
-  function SourcesTableView({ state, update, definitions }, ref) {
+  function SourcesTableView({ state, update, definitions, sourceData }, ref) {
     // 2026-05-29: expandable parent/child source rows, reusing the shared
     // `sourcesSpannweiteExpanded` state (consistent across all Quellen tabs).
     const expanded = state.sourcesSpannweiteExpanded;
@@ -158,16 +160,6 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
     const selectedMetric: SourceMetricType = state.sourceMetric;
 
     useImperativeHandle(ref, () => ({ getSvgElement: () => null }));
-
-    const [sourceData, setSourceData] = useState<InformationSourcesData | null>(null);
-    useEffect(() => {
-      let cancelled = false;
-      fetch('/data/information-sources.json')
-        .then((r) => r.json() as Promise<InformationSourcesData>)
-        .then((d) => { if (!cancelled) setSourceData(d); })
-        .catch(() => undefined);
-      return () => { cancelled = true; };
-    }, []);
 
     const [sortKey, setSortKey] = useState<SortKey>('source');
     const [sortDir, setSortDir] = useState<SortDir>('asc');

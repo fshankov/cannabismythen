@@ -96,6 +96,8 @@ interface Props {
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
   definitions?: DashboardDefinitions | null;
   sharedActions?: ReactNode;
+  /** Informationswege dataset, loaded once by MythenExplorer. */
+  sourceData: InformationSourcesData | null;
 }
 
 export interface SourcesSpannweiteViewHandle {
@@ -111,16 +113,8 @@ interface ResolvedRow {
 const FALLBACK_COLOR = '#94a3b8';
 
 const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
-  function SourcesSpannweiteView({ state, update, definitions }, ref) {
+  function SourcesSpannweiteView({ state, update, definitions, sourceData }, ref) {
     const containerRef = useRef<HTMLDivElement>(null);
-
-    // ── Data fetch (lazy, mirrors SourcesStripsView) ───────────────
-    const [sourceData, setSourceData] = useState<InformationSourcesData | null>(null);
-    useEffect(() => {
-      fetch('/data/information-sources.json')
-        .then((r) => r.json())
-        .then(setSourceData);
-    }, []);
 
     const mode: SourcesStripsMode = state.sourcesStripsMode;
     const sort: SourcesSpannweiteSort = state.sourcesSpannweiteSort ?? 'a-z';
