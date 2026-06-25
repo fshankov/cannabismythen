@@ -8,7 +8,6 @@ import HeroBlock from "@components/home/HeroBlock";
 import type { HeroMyth } from "@components/home/HeroBlock";
 import NumbersStripBlock from "@components/home/NumbersStripBlock.astro";
 import FourPathsBlock from "@components/home/FourPathsBlock.astro";
-import ProjektTeaserBlock from "@components/home/ProjektTeaserBlock.astro";
 import type { PreviewMyth } from "@components/home/previews/FaktenKartenPreviewTile.astro";
 import type { AudienceChip } from "@components/home/previews/MeineInteressenPreviewTile.astro";
 import { getAllAudiences } from "@lib/faq";
@@ -80,7 +79,6 @@ const previewMyths: PreviewMyth[] = [
   .map((r) => ({ text: r.title, classification: r.classification, categoryGroup: r.categoryGroup, summary: r.summary }));
 
 // ── Editorial section content ──────────────────────────────────────────────
-const ueberProjektData = await reader.singletons.ueberProjektTeaser.read();
 const numbersStripData = await reader.singletons.numbersStrip.read();
 const headlineFinding = await reader.singletons.headlineFinding.read();
 const fourPathsData = await reader.singletons.fourPaths.read();

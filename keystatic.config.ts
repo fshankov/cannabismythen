@@ -6,8 +6,8 @@ import { config, collection, singleton, fields } from "@keystatic/core";
 const statusField = fields.select({
   label: "Status",
   options: [
-    { label: "Draft", value: "draft" },
-    { label: "Published", value: "published" },
+    { label: "Entwurf", value: "draft" }, // Draft
+    { label: "Veröffentlicht", value: "published" }, // Published
   ],
   defaultValue: "draft",
 });
@@ -18,55 +18,36 @@ const metaFields = {
     multiline: true,
     description: "Kurzbeschreibung für Suchergebnisse und Übersichtsseiten. Nicht zu verwechseln mit der Karten-Zusammenfassung (cardSummary) der Fakten-Karten.",
   }),
-  tags: fields.array(fields.text({ label: "Tag" }), {
-    label: "Tags",
-    itemLabel: (props) => props.value,
-  }),
+  // tags / publishedAt / updatedAt are not used anywhere on the site.
+  // Hidden from the editor via fields.ignored() — the value (if any) stays
+  // in the file, the reader still returns it; editors just don't see it.
+  tags: fields.ignored(),
   status: statusField,
   internalNotes: fields.text({
-    label: "Internal Notes",
+    label: "Interne Notizen", // Internal notes
     multiline: true,
     description:
-      "Editorial notes. NEVER rendered publicly — only visible in the CMS.",
+      "Nur für die Redaktion — wird nie öffentlich angezeigt. (Editorial only, never shown publicly.)",
   }),
-  publishedAt: fields.date({ label: "Published Date" }),
-  updatedAt: fields.date({ label: "Last Updated" }),
+  publishedAt: fields.ignored(),
+  updatedAt: fields.ignored(),
 };
 
 // ─── Collections ────────────────────────────────────────────────────────────
 
 const zahlenUndFakten = collection({
-  label: "🃏 Fakten-Karten – Mythen-Faktenblätter",
+  label: "🃏 Mythen-Faktenblätter",
   slugField: "title",
   path: "src/content/zahlen-und-fakten/*",
   format: { contentField: "content" },
   schema: {
-    title: fields.slug({ name: { label: "Title" } }),
-    mythId: fields.text({
-      label: "Myth ID",
-      description: "e.g. m01, m02",
-    }),
-    mythNumber: fields.integer({
-      label: "Myth Number",
-      description: "Numeric myth identifier (1–42)",
-    }),
-    theme: fields.select({
-      label: "Theme",
-      options: [
-        { label: "Übergreifend", value: "übergreifend" },
-        { label: "Substanz", value: "substanz" },
-        { label: "Körper", value: "körper" },
-        { label: "Körper & Psyche", value: "körper_psyche" },
-        { label: "Psyche", value: "psyche" },
-        { label: "Soziales", value: "soziales" },
-        { label: "Rechtliches", value: "rechtliches" },
-      ],
-      defaultValue: "übergreifend",
-    }),
-    category: fields.text({
-      label: "Kategorie (intern)",
-      description: "Interne Feinkategorie, z. B. Medizin, Risiko, Sozial. Nur für redaktionelle Orientierung.",
-    }),
+    title: fields.slug({ name: { label: "Titel" } }), // Title
+    // mythId + mythNumber are code join-keys (src/lib/faq.ts, quiz page).
+    // Kept, but moved to a "System" block at the bottom so editors don't
+    // touch them. `theme` and `category` are not used anywhere on the
+    // site → hidden via fields.ignored() (value preserved in the file).
+    theme: fields.ignored(),
+    category: fields.ignored(),
     categoryGroup: fields.select({
       label: "Themengruppe",
       description: "Übergeordnete Themengruppe für die Fakten-Karten-Filterung.",
@@ -83,7 +64,7 @@ const zahlenUndFakten = collection({
       defaultValue: "Medizinischer und therapeutischer Nutzen",
     }),
     classification: fields.select({
-      label: "Classification",
+      label: "Klassifikation", // Classification
       options: [
         { label: "Richtig", value: "richtig" },
         { label: "Eher richtig", value: "eher_richtig" },
@@ -105,53 +86,28 @@ const zahlenUndFakten = collection({
     cardShortSummary: fields.text({
       label: "📇 Kurzzusammenfassung (Fakten-Karte / Quiz / Startseite)",
       multiline: true,
-      description: "ISD-finalisierte Kurzfassung (Quelle: _local/research/team/FAQ final/Cannabismythen_Zusammenfassung_2026 05 20.docx, Stand 2026-05-20). Wird auf der Rückseite der Fakten-Karte, im Quiz-Reveal und im Karten-Preview auf der Startseite angezeigt. ~200–450 Zeichen. Bewusst LÄNGER und anders formuliert als cardSummary (Popup-Synthese), damit Nutzer:innen beim Klick eine andere Perspektive sehen.",
+      description: "ISD-finalisierte Kurzfassung. Wird auf der Rückseite der Fakten-Karte, im Quiz-Reveal und im Karten-Preview auf der Startseite angezeigt. ~200–450 Zeichen. Bewusst länger und anders formuliert als die Karten-Zusammenfassung (Popup-Synthese), damit Nutzer:innen beim Klick eine andere Perspektive sehen.",
     }),
-    trueStatement: fields.text({
-      label: "✅ Wahre Aussage (reformuliert)",
-      description:
-        "Die evidenzbasierte Wahrheit der Aussage – ein Satz. Erscheint auf Fakten-Karten und im Dashboard. Nicht im Quiz (dort bleibt die Original-Aussage). Maximal ~120 Zeichen.",
-    }),
-    relatedMyths: fields.array(fields.text({ label: "Myth ID" }), {
-      label: "Related Myths",
+    trueStatement: fields.ignored(), // not used on the site
+    relatedMyths: fields.array(fields.text({ label: "Mythos-ID" }), {
+      label: "Verwandte Mythen", // Related myths
       itemLabel: (props) => props.value,
-      description: "IDs of related myths, e.g. m10, m12",
+      description: "IDs verwandter Mythen, z. B. m10, m12.",
     }),
-    quizIds: fields.array(fields.text({ label: "Quiz ID" }), {
-      label: "Quiz IDs",
-      itemLabel: (props) => props.value,
-    }),
+    quizIds: fields.ignored(), // not used on the site
     ...metaFields,
-    content: fields.markdoc({
-      label: "Content",
-      description: "Full factsheet body in Markdoc (German).",
+    // ── System – bitte nicht ändern (code join-keys) ────────────────────────
+    mythId: fields.text({
+      label: "Mythos-ID (System – bitte nicht ändern)", // Myth ID, e.g. m01
+      description: "Technische ID, z. B. m01. Wird vom Code verwendet.",
     }),
-  },
-});
-
-const zahlenUndFaktenDashboard = collection({
-  label: "📊 Daten-Explorer – Zielgruppen-Indikatoren",
-  slugField: "title",
-  path: "src/content/zahlen-und-fakten-dashboard/*",
-  format: { contentField: "content" },
-  schema: {
-    title: fields.slug({ name: { label: "Title" } }),
-    audienceSegment: fields.select({
-      label: "Audience Segment",
-      options: [
-        { label: "Erwachsene (18–70)", value: "erwachsene" },
-        { label: "Minderjährige (16–17)", value: "minderjaehrige" },
-        { label: "Konsumierende", value: "konsumierende" },
-        { label: "Junge Erwachsene (18–26)", value: "junge_erwachsene" },
-        { label: "Eltern", value: "eltern" },
-        { label: "Übergreifend", value: "uebergreifend" },
-      ],
-      defaultValue: "erwachsene",
+    mythNumber: fields.integer({
+      label: "Mythos-Nummer (System – bitte nicht ändern)", // Myth number 1–42
+      description: "Technische Nummer (1–42). Wird vom Code verwendet.",
     }),
-    ...metaFields,
     content: fields.markdoc({
-      label: "Content",
-      description: "Dashboard indicator data and descriptions (German).",
+      label: "Inhalt", // Content
+      description: "Vollständiger Text des Faktenblatts (Markdoc, Deutsch).",
     }),
   },
 });
@@ -183,7 +139,7 @@ const FAQ_DASHBOARD_OPTIONS = [
 ];
 
 const faqQuestions = collection({
-  label: "❓ FAQ – Einzelne Fragen",
+  label: "❓ Einzelne Fragen",
   slugField: "title",
   path: "src/content/faq/questions/*",
   format: { contentField: "answer" },
@@ -293,21 +249,20 @@ const faqQuestions = collection({
           defaultValue: "none",
         }),
         vizSource: fields.text({
-          label: "Datenquelle (CaRM-Tabelle)",
+          label: "Datenquelle",
           description:
-            'z. B. "CaRM Tabelle ZG Eltern, Spalte Präventionsbedeutung". Hinweis für Editor und Render-Stage.',
+            'Woher die Daten stammen, z. B. "Tabelle Eltern, Spalte Präventionsbedeutung".',
         }),
         vizDescription: fields.text({
           label: "Beschreibung der Visualisierung",
           multiline: true,
-          description:
-            "Aus dem Quelldokument: was die Grafik zeigen soll. Wird in Stage 3 von den Render-Komponenten gelesen.",
+          description: "Was die Grafik zeigen soll.",
         }),
         vizConfig: fields.text({
-          label: "Konfiguration (JSON, optional)",
+          label: "Konfiguration (technisch, optional)",
           multiline: true,
           description:
-            'Optionaler JSON-Blob mit vizType-spezifischen Parametern (z. B. {"topN": 5, "groups": ["parents"]}). Bleibt in Stage 1 leer; wird in Stage 3 befüllt.',
+            "Optionale technische Parameter (JSON). Im Zweifel leer lassen.",
         }),
         vizPlacement: fields.select({
           label: "Platzierung im Antworttext",
@@ -322,8 +277,7 @@ const faqQuestions = collection({
       },
       {
         label: "Visualisierung (optional)",
-        description:
-          "Pro Frage höchstens eine Visualisierung. In Stage 1 nur Spezifikation; in Stage 3 wird gerendert.",
+        description: "Pro Frage höchstens eine Visualisierung.",
       }
     ),
     ...metaFields,
@@ -336,7 +290,7 @@ const faqQuestions = collection({
 });
 
 const faqAudiences = singleton({
-  label: "❓ FAQ – Zielgruppen-Einstellungen",
+  label: "❓ Zielgruppen-Einstellungen",
   path: "src/content/faq/audiences",
   format: { data: "yaml" },
   schema: {
@@ -406,57 +360,41 @@ const faqAudiences = singleton({
 });
 
 const quiz = collection({
-  label: "🧪 Quiz – Module",
+  label: "🧪 Quiz-Module",
   slugField: "title",
   path: "src/content/quiz/*",
   format: { contentField: "content" },
   schema: {
-    title: fields.slug({ name: { label: "Title" } }),
-    theme: fields.text({
-      label: "Theme",
-      description: "e.g. Körper, Psyche, Alltag, Gesellschaft",
-    }),
-    questionCount: fields.integer({ label: "Number of Questions" }),
+    title: fields.slug({ name: { label: "Titel" } }), // Title
+    theme: fields.ignored(),         // tile style comes from code, not the .mdoc
+    questionCount: fields.ignored(), // not used — derived from the questions list
     questions: fields.array(
       fields.object({
         mythId: fields.text({
-          label: "Myth ID",
-          description: "Reference to a myth, e.g. m01, m22",
+          label: "Mythos-ID", // Myth ID
+          description: "Bezug zu einem Mythos, z. B. m01.",
         }),
         statement: fields.text({
-          label: "Statement (DE)",
+          label: "Aussage", // Statement
           multiline: true,
-          description: "The myth statement shown on the quiz card.",
+          description: "Die Mythos-Aussage, die auf der Quiz-Karte steht.",
         }),
-        correctClassification: fields.select({
-          label: "Correct Classification",
-          options: [
-            { label: "Richtig", value: "richtig" },
-            { label: "Eher richtig", value: "eher_richtig" },
-            { label: "Eher falsch", value: "eher_falsch" },
-            { label: "Falsch", value: "falsch" },
-          ],
-          defaultValue: "falsch",
-        }),
+        // The correct answer, the population %, and the factsheet slug live in
+        // src/components/quiz/quizData.ts (code, CLAUDE.md-protected) — that is
+        // the source of truth the quiz actually uses. These .mdoc copies are
+        // not read by the quiz page, so they are hidden to stop editors from
+        // changing a value that has no effect. Values stay in the file.
+        correctClassification: fields.ignored(),
         explanation: fields.text({
-          label: "Explanation (DE)",
+          label: "Erklärung", // Explanation
           multiline: true,
-          description:
-            "1–2 sentence explanation shown after answering.",
+          description: "1–2 Sätze, die nach dem Antworten angezeigt werden.",
         }),
-        populationCorrectPct: fields.number({
-          label: "Population Correct %",
-          description:
-            "% of German adults who answered correctly. Leave empty if unavailable.",
-        }),
-        mythPageSlug: fields.text({
-          label: "Myth Page Slug",
-          description:
-            "Slug of the related factsheet page, e.g. m01-allheilmittel",
-        }),
+        populationCorrectPct: fields.ignored(),
+        mythPageSlug: fields.ignored(),
       }),
       {
-        label: "Quiz Questions",
+        label: "Quiz-Fragen", // Quiz questions
         itemLabel: (props) =>
           `${props.fields.mythId.value || "?"}: ${props.fields.statement.value?.slice(0, 50) || "…"}`,
       }
@@ -539,78 +477,9 @@ const quiz = collection({
     ),
     ...metaFields,
     content: fields.markdoc({
-      label: "Content",
+      label: "Inhalt", // Content
       description:
-        "Quiz questions, options, correct answers, and explanations (German). Used as reference — the interactive quiz reads from the structured 'questions' field above.",
-    }),
-  },
-});
-
-const startseite = collection({
-  label: "🏠 Startseite – Scrollytelling",
-  slugField: "title",
-  path: "src/content/startseite/*",
-  format: { contentField: "content" },
-  schema: {
-    title: fields.slug({ name: { label: "Title" } }),
-    versionLabel: fields.text({
-      label: "Version Label",
-      description: "e.g. v2.0",
-    }),
-    stepCount: fields.integer({ label: "Number of Steps" }),
-    steps: fields.array(
-      fields.object({
-        stepNumber: fields.integer({
-          label: "Step Number",
-          description: "1-based step number",
-        }),
-        heading: fields.text({
-          label: "Heading (H2)",
-          multiline: true,
-          description: "Step heading shown in the text column.",
-        }),
-        bodyText: fields.text({
-          label: "Body Text",
-          multiline: true,
-          description:
-            "Paragraph text for this step (German). Use \\n\\n for paragraph breaks.",
-        }),
-        hint: fields.text({
-          label: "Hint / Instruction",
-          description:
-            "Small hint text below the body, e.g. 'Tippe auf die Karte…'",
-        }),
-        vizType: fields.select({
-          label: "Visualization Type",
-          options: [
-            { label: "Big Number", value: "bigNumber" },
-            { label: "Context Cloud (Grey)", value: "contextCloud" },
-            { label: "Group Cloud (Colored)", value: "groupCloud" },
-            { label: "Color Reveal Cloud", value: "colorReveal" },
-            { label: "Trust Gap Chart", value: "trustGap" },
-          ],
-          defaultValue: "bigNumber",
-        }),
-        ctaLabel: fields.text({
-          label: "CTA Button Label",
-          description: "Optional call-to-action button text.",
-        }),
-        ctaUrl: fields.text({
-          label: "CTA Button URL",
-          description: "Optional call-to-action button link.",
-        }),
-      }),
-      {
-        label: "Scrollytelling Steps",
-        itemLabel: (props) =>
-          `Schritt ${props.fields.stepNumber.value}: ${props.fields.heading.value?.slice(0, 40) || "…"}`,
-      }
-    ),
-    ...metaFields,
-    content: fields.markdoc({
-      label: "Content",
-      description:
-        "Full specification document (German). Used as reference and rendered on detail page.",
+        "Nur Referenz-Notizen. Das interaktive Quiz nutzt die strukturierten Quiz-Fragen oben.",
     }),
   },
 });
@@ -622,7 +491,7 @@ const startseite = collection({
 // stepNumber at render time. Replaces the legacy `ueberUns` collection
 // (deleted 2026-05-11 production-migration session).
 const ueberUnsScrolly = singleton({
-  label: "ℹ️ Über das Projekt – Scrollytelling",
+  label: "ℹ️ Scrollytelling",
   path: "src/content/ueber-uns-scrolly",
   format: { data: "yaml" },
   schema: {
@@ -697,48 +566,16 @@ const ueberUnsScrolly = singleton({
         itemLabel: (props) => props.fields.fullName.value,
       },
     ),
-    // 3 named experts (Befragte Präventionsexpert:innen).
-    namedExperts: fields.array(
-      fields.object({
-        fullName: fields.text({ label: "Voller Name" }),
-        affiliation: fields.text({ label: "Institution" }),
-        context: fields.text({ label: "Kontext", multiline: true }),
-      }),
-      {
-        label: "Befragte Präventionsexpert:innen",
-        itemLabel: (props) => props.fields.fullName.value,
-      },
-    ),
     landesstellenCredit: fields.text({
       label: "Landesstellen-Credit",
       multiline: true,
     }),
-    // Page-level footer block (below the scrollytelling).
-    footerKontakt: fields.object({
-      label: fields.text({ label: "Block-Label", defaultValue: "Kontakt" }),
-      lines: fields.array(fields.text({ label: "Adress-Zeile" }), {
-        label: "Adress-Zeilen",
-        itemLabel: (props) => props.value,
-      }),
-      email: fields.text({ label: "E-Mail-Adresse" }),
-    }),
-    footerFoerderung: fields.object({
-      label: fields.text({ label: "Block-Label", defaultValue: "Förderung" }),
-      body: fields.text({ label: "Text", multiline: true }),
-    }),
-    footerZitierweise: fields.object({
-      label: fields.text({ label: "Block-Label", defaultValue: "Zitierweise" }),
-      body: fields.text({ label: "Text", multiline: true }),
-    }),
-    footerAbschlussbericht: fields.object({
-      label: fields.text({ label: "Block-Label", defaultValue: "Abschlussbericht" }),
-      body: fields.text({ label: "Text", multiline: true }),
-    }),
+    // Footer blocks moved to the dedicated `footer` singleton (2026-06-25).
     internalNotes: fields.text({
-      label: "Internal Notes",
+      label: "Interne Notizen", // Internal notes
       multiline: true,
       description:
-        "Editorial notes. NEVER rendered publicly — only visible in the CMS.",
+        "Nur für die Redaktion — wird nie öffentlich angezeigt. (Editorial only, never shown publicly.)",
     }),
   },
 });
@@ -749,7 +586,7 @@ const meta = collection({
   path: "src/content/meta/*",
   format: { contentField: "content" },
   schema: {
-    title: fields.slug({ name: { label: "Title" } }),
+    title: fields.slug({ name: { label: "Titel" } }), // Title
     ...metaFields,
     content: fields.markdoc({
       label: "Content",
@@ -813,76 +650,9 @@ const changelog = collection({
 
 // ─── Singletons ─────────────────────────────────────────────────────────────
 
-const heroBlock = singleton({
-  label: "🏔️ Hero-Block – Startseite (Frage & Kontrast)",
-  path: "src/content/hero-block",
-  format: { data: "yaml" },
-  schema: {
-    eyebrow: fields.text({
-      label: "Eyebrow",
-      description: "Kleines Kapitälchen-Label über dem Vergleichs-Karten-Stack.",
-      defaultValue: "Was viele glauben — was die Wissenschaft zeigt",
-    }),
-    beliefLabel: fields.text({
-      label: "Linke Karten-Beschriftung",
-      defaultValue: "Was viele glauben",
-    }),
-    scienceLabel: fields.text({
-      label: "Rechte Karten-Beschriftung",
-      defaultValue: "Was die Wissenschaft zeigt",
-    }),
-    backgroundQuestions: fields.array(
-      fields.text({ label: "Frage" }),
-      {
-        label: "Hintergrund-Fragen",
-        description:
-          "Mythen-Fragen, die dezent hinter dem Karten-Stack scrollen. 42 empfohlen (21 pro Spalte) — eine Frage pro Mythos, auf Basis der vollständigen Mythos-Aussagen formuliert. Erste Hälfte = linke Spalte (scrollt nach unten); zweite Hälfte = rechte Spalte (scrollt nach oben, rechtsbündig). Gesamtzahl gerade halten für balancierte Spalten.",
-        itemLabel: (p) => p.value || "Frage",
-      },
-    ),
-    pairs: fields.array(
-      fields.object({
-        belief: fields.text({
-          label: "Volksglaube",
-          multiline: true,
-          description: "Was viele glauben (kurzer Satz).",
-        }),
-        science: fields.text({
-          label: "Wissenschaftliche Einordnung",
-          multiline: true,
-          description: "Was die Wissenschaft zeigt (kurzer Satz, kondensiert aus dem cardSummary des Mythos).",
-        }),
-        mythSlug: fields.text({
-          label: "Mythos-ID",
-          description: "z. B. m04 — für die Traceability; verlinkt nicht automatisch.",
-        }),
-        verdict: fields.select({
-          label: "Klassifikation",
-          options: [
-            { label: "Richtig", value: "richtig" },
-            { label: "Eher richtig", value: "eher_richtig" },
-            { label: "Eher falsch", value: "eher_falsch" },
-            { label: "Falsch", value: "falsch" },
-            { label: "Keine Aussage möglich", value: "keine_aussage" },
-          ],
-          defaultValue: "falsch",
-        }),
-      }),
-      {
-        label: "Vergleichs-Paare (Glaube ↔ Wissenschaft)",
-        itemLabel: (p) => p.fields.belief.value || "Paar",
-      },
-    ),
-    rotationSeconds: fields.integer({
-      label: "Rotations-Intervall (Sekunden)",
-      description: "Wie oft das Paar wechselt.",
-      defaultValue: 6,
-    }),
-  },
-});
 
 const dashboardDefinitionen = singleton({
-  label: "📊 Daten-Explorer – Definitionen & Glossar",
+  label: "📊 Definitionen & Glossar",
   path: "src/content/dashboard-definitionen",
   format: { data: "json" },
   schema: {
@@ -1088,7 +858,7 @@ const dashboardDefinitionen = singleton({
 // ─── Homepage editorial sections ───────────────────────────────────────────
 
 const headlineFinding = singleton({
-  label: "📢 Schlüsselbefund – Startseite",
+  label: "📢 Schlüsselbefund",
   path: "src/content/headline-finding",
   format: { data: "yaml" },
   schema: {
@@ -1124,7 +894,7 @@ const headlineFinding = singleton({
 });
 
 const fourPaths = singleton({
-  label: "🧭 Vier Wege ins Thema – Startseite",
+  label: "🧭 Vier Wege ins Thema",
   path: "src/content/four-paths",
   format: { data: "yaml" },
   schema: {
@@ -1204,7 +974,7 @@ const fourPaths = singleton({
 // replaced/trimmed in later commits of the redesign series.
 
 const numbersStrip = singleton({
-  label: "🔢 Forschung in Zahlen – Startseite",
+  label: "🔢 Forschung in Zahlen",
   path: "src/content/numbers-strip",
   format: { data: "yaml" },
   schema: {
@@ -1238,123 +1008,52 @@ const numbersStrip = singleton({
         itemLabel: (p) => `${p.fields.value.value} ${p.fields.label.value}`,
       },
     ),
-    linkLabel: fields.text({
-      label: "Link-Text",
-      defaultValue: "Mehr über das Projekt",
-    }),
-    linkUrl: fields.text({
-      label: "Link-Ziel",
-      defaultValue: "/projekt/",
-    }),
+    linkLabel: fields.ignored(), // not passed to the component
+    linkUrl: fields.ignored(),   // not passed to the component
   },
 });
 
-// "Über das Projekt"-Kurzfassung, die zwischen dem Hero und der Zahlen-Leiste
-// auf der Startseite steht. Erklärt in wenigen Sätzen, was die Website ist und
-// woher die Daten stammen. AI-Entwurf — wartet auf ISD-Abnahme.
-const ueberProjektTeaser = singleton({
-  label: "🔬 Über das Projekt (Kurz) – Startseite",
-  path: "src/content/ueber-projekt-teaser",
+// All website-footer content in one place (rendered by SiteFooter on every
+// page via BaseLayout). The four text blocks were previously buried in the
+// ueberUnsScrolly singleton and the links in the old projectStrip singleton —
+// unified here 2026-06-25 so editors edit the whole footer in one section.
+const footer = singleton({
+  label: "🦶 Footer-Inhalte", // Footer content
+  path: "src/content/footer",
   format: { data: "yaml" },
   schema: {
-    eyebrow: fields.text({
-      label: "Eyebrow",
-      defaultValue: "Über das Projekt",
-    }),
-    lead: fields.text({
-      label: "Lead (Serifen-Kursiv)",
-      multiline: true,
-      description: "Kurze, einleitende Zeile (DM Serif Italic, dunkelgrün).",
-      defaultValue: "Aus der Forschung — für alle.",
-    }),
-    body: fields.text({
-      label: "Fließtext",
-      multiline: true,
-      description: "Zwei, drei Sätze: was die Website ist und woher die Daten stammen.",
-      defaultValue:
-        "Zwischen April 2024 und Dezember 2025 hat das ISD Hamburg die verbreitetsten Annahmen über Cannabis gesammelt und wissenschaftlich eingeordnet. Diese Website übersetzt die Ergebnisse in etwas, das jede:r erkunden kann — von Jugendlichen bis zu Fachkräften.",
-    }),
-    funder: fields.text({
-      label: "Förderzeile",
-      multiline: true,
-      description: "Kleine, gedämpfte Förder-Credit-Zeile unter dem Fließtext.",
-      defaultValue:
-        "Gefördert vom Bundesinstitut für Öffentliche Gesundheit (BIÖG).",
-    }),
-  },
-});
-
-const audienceShortcut = singleton({
-  label: "🧭 Dein Einstieg – Startseite (Audience-Shortcut)",
-  path: "src/content/audience-shortcut",
-  format: { data: "yaml" },
-  schema: {
-    eyebrow: fields.text({ label: "Eyebrow", defaultValue: "Schon eine Idee?" }),
-    headline: fields.text({ label: "Überschrift", defaultValue: "Dein Einstieg" }),
-    lede: fields.text({
-      label: "Untertitel",
-      multiline: true,
-      defaultValue: "Wenn du schon weißt, was du suchst — hier geht's direkt los.",
-    }),
-    cards: fields.array(
-      fields.object({
-        audienceId: fields.select({
-          label: "Zielgruppe",
-          description: "Emoji + Akzent-Farbe werden automatisch aus faq/audiences.yaml übernommen.",
-          options: [
-            { label: "Eltern", value: "eltern" },
-            { label: "Jugendliche", value: "jugendliche" },
-            { label: "Konsumierende", value: "konsumierende" },
-            { label: "Lehrkräfte", value: "lehrkraefte" },
-            { label: "Fachkräfte", value: "fachkraefte" },
-          ],
-          defaultValue: "eltern",
-        }),
-        recommendation: fields.text({
-          label: "Empfehlung",
-          description: "Eine Zeile — was die Audience tun soll.",
-        }),
-        targetUrl: fields.text({
-          label: "Ziel-URL",
-          description: "Ziel des Klicks (intern oder extern).",
-        }),
-        additionalTargets: fields.array(
-          fields.object({
-            label: fields.text({
-              label: "Beschriftung",
-              description: "Kurzer Pill-Text (1–3 Wörter ideal).",
-            }),
-            url: fields.text({
-              label: "Ziel-URL",
-              description: "Tieflink zur passenden Sektion (intern oder extern).",
-            }),
-          }),
-          {
-            label: "Weitere Ziele (Pill-Row)",
-            description:
-              "Optionale Liste tiefer Verweise pro Audience. Erscheinen als kleine Pill-Links unter der primären CTA. 0–3 Einträge empfohlen.",
-            itemLabel: (p) => p.fields.label.value || "Pill",
-          },
-        ),
-      }),
+    footerKontakt: fields.object(
       {
-        label: "Audience-Karten",
-        itemLabel: (p) => `${p.fields.audienceId.value} → ${p.fields.targetUrl.value}`,
+        label: fields.text({ label: "Block-Titel", defaultValue: "Kontakt" }),
+        lines: fields.array(fields.text({ label: "Adress-Zeile" }), {
+          label: "Adress-Zeilen",
+          itemLabel: (props) => props.value,
+        }),
+        email: fields.text({ label: "E-Mail-Adresse" }),
       },
+      { label: "Kontakt" },
     ),
-  },
-});
-
-const projectStrip = singleton({
-  label: "🏛️ Über das Projekt – Streifen Startseite",
-  path: "src/content/project-strip",
-  format: { data: "yaml" },
-  schema: {
-    credit: fields.text({
-      label: "Träger-Hinweis",
-      description: "Einzeiliger Credit unten auf der Startseite.",
-      defaultValue: "Ein Projekt vom ISD Hamburg · CaRM-Studie · Stand 11/2025",
-    }),
+    footerFoerderung: fields.object(
+      {
+        label: fields.text({ label: "Block-Titel", defaultValue: "Förderung" }),
+        body: fields.text({ label: "Text", multiline: true }),
+      },
+      { label: "Förderung" },
+    ),
+    footerZitierweise: fields.object(
+      {
+        label: fields.text({ label: "Block-Titel", defaultValue: "Zitierweise" }),
+        body: fields.text({ label: "Text", multiline: true }),
+      },
+      { label: "Zitierweise" },
+    ),
+    footerAbschlussbericht: fields.object(
+      {
+        label: fields.text({ label: "Block-Titel", defaultValue: "Abschlussbericht" }),
+        body: fields.text({ label: "Text", multiline: true }),
+      },
+      { label: "Abschlussbericht" },
+    ),
     links: fields.array(
       fields.object({
         label: fields.text({ label: "Beschriftung" }),
@@ -1371,7 +1070,7 @@ const projectStrip = singleton({
 // Stage 7 — Global default share/comparison copy. Used when a quiz
 // module's `shareCopy.{band}` cell is empty. Per-module overrides win.
 const shareCopy = singleton({
-  label: "💬 Share-Karten – Default-Texte",
+  label: "💬 Share-Karten-Texte",
   path: "src/content/share-copy",
   format: { data: "yaml" },
   schema: {
@@ -1413,35 +1112,43 @@ export default config({
     },
     branchPrefix: "content/",
   },
+  // ── Editor sidebar ──────────────────────────────────────────────────────
+  // Groups mirror the public website's sections/nav so editors recognise where
+  // each thing lives (Startseite, Fakten-Karten, Quiz, Meine Interessen,
+  // Daten-Explorer, Über das Projekt). Anything NOT listed is hidden from the
+  // sidebar (it stays in the repo, still reachable by direct URL — nothing is
+  // deleted). Hidden on purpose (queued for a separate keep/delete review):
+  //   heroBlock, audienceShortcut, ueberProjektTeaser (homepage hero is built
+  //   in code / these singletons are never rendered), zahlenUndFaktenDashboard
+  //   (only a 301-redirect reads it), startseite (archive route), meta,
+  //   changelog (internal-only, never public).
+  ui: {
+    navigation: {
+      Startseite: ["headlineFinding", "fourPaths", "numbersStrip"],
+      "42 Mythen – Fakten-Karten": ["zahlenUndFakten"],
+      Quiz: ["quiz", "shareCopy"],
+      "Meine Interessen": ["faqQuestions", "faqAudiences"],
+      "Daten-Explorer": ["dashboardDefinitionen"],
+      "Über das Projekt": ["ueberUnsScrolly"],
+      Footer: ["footer"],
+    },
+  },
   collections: {
-    // ── Public sections — in nav order ──────────────────────────────────────
-    zahlenUndFakten,        // 🃏 Fakten-Karten  →  /fakten-karten/ + /daten-explorer/[slug]
-                            //   (collection name + on-disk path stay
-                            //    under `zahlen-und-fakten/` per Stage 5
-                            //    constraint — only the public URL moves.)
-    zahlenUndFaktenDashboard, // 📊 Daten-Explorer  →  /daten-explorer/
-    faqQuestions,           // ❓ FAQ – Einzelne Fragen (audience-first)
-    quiz,                   // 🧪 Quiz  →  /quiz/
-    startseite,             // 🏠 Startseite  →  / (homepage scrollytelling)
-    // Über das Projekt now lives as a singleton (ueberUnsScrolly).
-    // The legacy `ueberUns` collection + its 4 subpage mdoc files were
-    // removed in the 2026-05-11 production-migration session — the
-    // scrollytelling replaces them with a single canonical surface.
-    // ── Internal ────────────────────────────────────────────────────────────
+    zahlenUndFakten,  // 🃏 Fakten-Karten  →  /fakten-karten/ + /daten-explorer/[slug]
+    faqQuestions,     // ❓ Meine Interessen – Einzelne Fragen (audience-first)
+    quiz,             // 🧪 Quiz  →  /quiz/
+    // ── Internal (hidden from the editor sidebar via ui.navigation) ─────────
     meta,
     changelog,
   },
   singletons: {
-    heroBlock,
     headlineFinding,
     fourPaths,
-    ueberProjektTeaser,
     numbersStrip,
-    audienceShortcut,
-    projectStrip,
     dashboardDefinitionen,
     faqAudiences,
     shareCopy,
-    ueberUnsScrolly,        // ℹ️ Über das Projekt – Scrollytelling  →  /ueber-uns/
+    ueberUnsScrolly,
+    footer,
   },
 });

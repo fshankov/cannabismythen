@@ -52,7 +52,15 @@
 
 [[redirects]]
   from = "/zahlen-und-fakten/daten/*"
-  to = "/daten-explorer/daten/:splat"
+  to = "/daten-explorer/"
+  status = 301
+  force = true
+
+# The /daten-explorer/daten/{slug} indicator pages were removed (2026-06-25
+# cleanup); collapse any leftover/bookmarked links to the explorer index.
+[[redirects]]
+  from = "/daten-explorer/daten/*"
+  to = "/daten-explorer/"
   status = 301
   force = true
 

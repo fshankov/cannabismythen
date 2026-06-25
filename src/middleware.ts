@@ -29,10 +29,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
   const datenMatch = pathname.match(/^\/zahlen-und-fakten\/daten\/([^/]+)\/?$/);
   if (datenMatch) {
-    return Response.redirect(
-      new URL(`/daten-explorer/daten/${datenMatch[1]}/${search}`, context.url),
-      301,
-    );
+    return Response.redirect(new URL(`/daten-explorer/${search}`, context.url), 301);
+  }
+  // The legacy /daten-explorer/daten/{slug} indicator pages were removed
+  // (2026-06-25 cleanup) — their content lives in the interactive explorer.
+  // Collapse any leftover/bookmarked links to the explorer index.
+  if (/^\/daten-explorer\/daten\//.test(pathname)) {
+    return Response.redirect(new URL(`/daten-explorer/${search}`, context.url), 301);
   }
   const factsheetMatch = pathname.match(/^\/zahlen-und-fakten\/([^/]+)\/?$/);
   if (factsheetMatch) {

@@ -168,29 +168,7 @@ teamMembers:
     bio: >-
       Verbindet Forschungsergebnisse mit der Präventionspraxis und der Öffentlichkeitsarbeit.
     color: "#10b981"
-namedExperts: []  # Iter-14 (CAR-21): three expert entries deleted from
-                  # Step 11; their relocation to a footer credit block
-                  # ships in the separate Footer prompt. Kept as `[]`
-                  # rather than removing the key so the YAML still
-                  # matches `ScrollyContent.namedExperts` typing.
 landesstellenCredit: ''
-footerKontakt:
-  label: Kontakt
-  lines:
-    - Institut für interdisziplinäre Sucht- und Drogenforschung (ISD)
-    - Kleine Brunnenstraße 13, 22765 Hamburg
-  email: info@isd-hamburg.de
-footerFoerderung:
-  label: Förderung
-  body: >-
-    Bundesinstitut für Öffentliche Gesundheit (BIÖG) im Auftrag des Bundesministeriums für Gesundheit.
-footerZitierweise:
-  label: Zitierweise
-  body: "ISD Hamburg (2025). Cannabis: Mythen & Evidenz — Interaktives Informationstool."
-footerAbschlussbericht:
-  label: Abschlussbericht
-  body: >-
-    Schütze, C., Schulte, B., Buth, S., Degkwitz, P., Rosenkranz, M., & Lahusen, H. (2025). Cannabiskonsum — Risiken und Mythen (CaRM): Abschlussbericht. ISD Hamburg.
 internalNotes: >-
   Iter-24 (2026-06-09) — Harald Lahusen Feedbucket-Batch auf /projekt/.
   Texteingriffe in Steps 2/5/6/7/8/9/10: erste/dritte Person „wir" → „das

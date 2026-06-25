@@ -173,21 +173,6 @@ export interface TeamMember {
   bio: string;
   color: string;
 }
-export interface NamedExpert {
-  fullName: string;
-  affiliation: string;
-  context: string;
-}
-export interface FooterKontakt {
-  label: string;
-  lines: ReadonlyArray<string>;
-  email: string;
-}
-export interface FooterBlock {
-  label: string;
-  body: string;
-}
-
 export interface ScrollyContent {
   pageTitle: string;
   pageDescription: string;
@@ -197,10 +182,5 @@ export interface ScrollyContent {
   steps: ReadonlyArray<ScrollyEditorialStep>;
   timelineTooltips: ReadonlyArray<TimelineTooltip>;
   teamMembers: ReadonlyArray<TeamMember>;
-  namedExperts: ReadonlyArray<NamedExpert>;
   landesstellenCredit: string;
-  footerKontakt: FooterKontakt;
-  footerFoerderung: FooterBlock;
-  footerZitierweise: FooterBlock;
-  footerAbschlussbericht: FooterBlock;
 }

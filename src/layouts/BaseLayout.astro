@@ -38,10 +38,7 @@ const {
   hideFooter = false,
 } = Astro.props;
 
-const [footerContent, projectStripData] = await Promise.all([
-  reader.singletons.ueberUnsScrolly.read(),
-  reader.singletons.projectStrip.read(),
-]);
+const footerData = await reader.singletons.footer.read();
 
 // PREVIEW BANNER — flip to false before public launch
 const SHOW_PREVIEW_BANNER = true;
@@ -341,11 +338,11 @@ const fullTitle = `${title} | Cannabis: Mythen & Evidenz`;
 
     {!hideFooter && (
       <SiteFooter
-        kontakt={footerContent?.footerKontakt}
-        foerderung={footerContent?.footerFoerderung}
-        zitierweise={footerContent?.footerZitierweise}
-        abschlussbericht={footerContent?.footerAbschlussbericht}
-        links={projectStripData?.links ?? []}
+        kontakt={footerData?.footerKontakt}
+        foerderung={footerData?.footerFoerderung}
+        zitierweise={footerData?.footerZitierweise}
+        abschlussbericht={footerData?.footerAbschlussbericht}
+        links={footerData?.links ?? []}
       />
     )}
 

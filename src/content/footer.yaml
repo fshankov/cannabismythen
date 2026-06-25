@@ -1,0 +1,20 @@
+footerKontakt:
+  label: Kontakt
+  lines:
+    - Institut für interdisziplinäre Sucht- und Drogenforschung (ISD)
+    - Kleine Brunnenstraße 13, 22765 Hamburg
+  email: info@isd-hamburg.de
+footerFoerderung:
+  label: Förderung
+  body: >-
+    Bundesinstitut für Öffentliche Gesundheit (BIÖG) im Auftrag des Bundesministeriums für Gesundheit.
+footerZitierweise:
+  label: Zitierweise
+  body: "ISD Hamburg (2025). Cannabis: Mythen & Evidenz — Interaktives Informationstool."
+footerAbschlussbericht:
+  label: Abschlussbericht
+  body: >-
+    Schütze, C., Schulte, B., Buth, S., Degkwitz, P., Rosenkranz, M., & Lahusen, H. (2025). Cannabiskonsum — Risiken und Mythen (CaRM): Abschlussbericht. ISD Hamburg.
+links:
+  - label: 'Über das Projekt'
+    url: '/projekt/'
