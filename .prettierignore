@@ -34,3 +34,12 @@ markdoc.config.timestamp-*.mjs
 
 # Lockfile
 package-lock.json
+
+# Prose docs — format CODE, not documentation. Reflowing markdown churns tables
+# / list markers in important reference files (CLAUDE.md, DESIGN.md,
+# ARCHITECTURE.md, docs/**, .claude/**). Site content is .mdoc, already excluded.
+*.md
+
+# Editorial scratch + icon handoff artifacts (not part of the build).
+editorial/
+src/lib/icons/_handoff/
