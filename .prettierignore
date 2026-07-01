@@ -1,0 +1,36 @@
+# ── Prettier ignore (Stage 1 safety net) ─────────────────────────────
+# Prettier formats CODE only. Everything below is either schema-sensitive,
+# an immutable upstream artifact, generated, binary, or session scratch —
+# reformatting it would corrupt content or churn non-source files.
+
+# Dependencies & build output
+node_modules/
+dist/
+.astro/
+.netlify/
+
+# Keystatic content: Markdoc (.mdoc) + singleton YAML. Prettier has NO Markdoc
+# parser — it would treat .mdoc as generic markdown (reflow tables, renumber
+# lists, mangle {% %} tags) and rewrite schema-sensitive YAML block scalars.
+src/content/**
+
+# Schema source of truth — on the CLAUDE.md never-touch list.
+keystatic.config.ts
+
+# Immutable data, generated OG images, favicons, brand SVGs, static assets.
+public/
+
+# Generated design-system token mirrors.
+docs/design-system/tokens.css
+docs/design-system/tokens.json
+
+# Session artifacts / local-only reference space.
+_local/
+audit-*.json
+markdoc.config.timestamp-*.mjs
+
+# Visual-regression baselines (binary PNGs).
+**/*-snapshots/
+
+# Lockfile
+package-lock.json
