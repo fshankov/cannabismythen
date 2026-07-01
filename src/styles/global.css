@@ -25,6 +25,7 @@ html {
 
   /* Accent – forest green, carried from login page */
   --color-accent: #2d6a4f;
+  --color-accent-rgb: 45, 106, 79; /* channels of --color-accent, for rgba() */
   --color-accent-hover: #1f4f3a;
   --color-accent-light: #e8f5ef;
 
@@ -714,7 +715,7 @@ body.scrolly-page .nav:not(.nav--scrolled) .nav__hamburger-line {
   transition: background-color var(--duration-short) var(--spring-standard);
 }
 .nav__hamburger:hover {
-  background-color: rgba(45, 106, 79, 0.08);
+  background-color: rgba(var(--color-accent-rgb), 0.08);
 }
 .nav__hamburger:focus-visible {
   outline: 3px solid var(--color-accent);
@@ -831,13 +832,13 @@ body.scrolly-page .nav:not(.nav--scrolled) .nav__hamburger-line {
     color var(--duration-short) var(--spring-standard);
 }
 .nav__drawer-link:hover {
-  background: rgba(45, 106, 79, 0.08);
+  background: rgba(var(--color-accent-rgb), 0.08);
   color: var(--color-accent);
 }
 .nav__drawer-link--active {
   font-weight: 600;
   color: var(--color-accent);
-  background: rgba(45, 106, 79, 0.1);
+  background: rgba(var(--color-accent-rgb), 0.1);
 }
 .nav__drawer-link:focus-visible {
   outline: 3px solid var(--color-accent);
@@ -1475,7 +1476,7 @@ button.pill[aria-pressed="true"] {
 }
 
 .fachebene-summary:hover {
-  background: rgba(45, 106, 79, 0.04);
+  background: rgba(var(--color-accent-rgb), 0.04);
 }
 
 .fachebene-content {

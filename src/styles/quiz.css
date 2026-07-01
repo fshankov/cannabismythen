@@ -73,7 +73,7 @@
 .quiz-progress__bar {
   flex: 1;
   height: 5px;
-  background: rgba(45, 106, 79, 0.08);
+  background: rgba(var(--color-accent-rgb), 0.08);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -5479,8 +5479,8 @@ body.fakten-karten-page main {
   left: 0;
   background: linear-gradient(
     90deg,
-    rgba(45, 106, 79, 0.85),
-    rgba(45, 106, 79, 0)
+    rgba(var(--color-accent-rgb), 0.85),
+    rgba(var(--color-accent-rgb), 0)
   );
   opacity: var(--swipe-progress-prev, 0);
 }
@@ -5489,8 +5489,8 @@ body.fakten-karten-page main {
   right: 0;
   background: linear-gradient(
     -90deg,
-    rgba(45, 106, 79, 0.85),
-    rgba(45, 106, 79, 0)
+    rgba(var(--color-accent-rgb), 0.85),
+    rgba(var(--color-accent-rgb), 0)
   );
   opacity: var(--swipe-progress-next, 0);
 }
