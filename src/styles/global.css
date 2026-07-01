@@ -5,6 +5,32 @@
    login page (#2d6a4f forest green, #f4f4f0 warm off-white).
    ═══════════════════════════════════════════════════════════════ */
 
+/* ───────────────────────────────────────────────────────────────
+   Responsive breakpoints — canonical scale (DOCUMENTATION ONLY)
+
+   CSS custom properties can't be used inside @media conditions, so these
+   values stay as literals; this comment is the single reference. Do NOT
+   rewrite any @media value to "match" the scale — the 1px near-dupes below
+   are intentional (max-width complements of the min-width boundaries).
+
+   Canonical 3-tier scale:
+     • mobile   ≤ 767px
+     • tablet   768px – 1023px
+     • desktop  ≥ 1024px
+
+   Primary boundaries (frequency across 143 @media queries):
+     768  (29×)  tablet lower bound (min-width) / mobile cap (max-width)
+     1024 (14×)  desktop lower bound
+     767  ( 4×)  mobile upper bound  — complement of 768, keep split
+     1023 ( 6×)  tablet upper bound  — complement of 1024, keep split
+
+   Mobile sub-tiers:  640 (12×) · 480 (9×) · 400 (2×) · 380 (2×)
+
+   One-off outliers (candidates to fold toward the scale LATER, not now):
+     1280, 1100, 960, 859, 840, 720 (4×), 700, 600 (2×), 599, 560,
+     540, 520, 519
+   ─────────────────────────────────────────────────────────────── */
+
 @import "./peek-stack.css";
 
 /* Anchor links scroll targets below the fixed nav */
