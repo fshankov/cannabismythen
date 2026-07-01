@@ -1576,7 +1576,7 @@ body:has(.carm-explorer) main {
   margin-top: 8px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #2d6a4f;
+  color: var(--color-accent, #2d6a4f);
   text-decoration: none;
 }
 .factsheet-panel__data-link:hover {
@@ -1683,10 +1683,10 @@ body:has(.carm-explorer) main {
   display: inline-block;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #2d6a4f;
+  color: var(--color-accent, #2d6a4f);
   text-decoration: none;
   padding: 8px 16px;
-  border: 1px solid #2d6a4f;
+  border: 1px solid var(--color-accent, #2d6a4f);
   border-radius: 8px;
   transition:
     background 0.15s ease,
@@ -1695,7 +1695,7 @@ body:has(.carm-explorer) main {
 }
 
 .factsheet-panel__link:hover {
-  background: #2d6a4f;
+  background: var(--color-accent, #2d6a4f);
   color: white;
 }
 
@@ -4396,9 +4396,9 @@ body.carm-modal-open {
   outline: none;
 }
 .carm-tour-popover .driver-popover-next-btn {
-  background: #2d6a4f;
+  background: var(--color-accent, #2d6a4f);
   color: #fff;
-  border: 1px solid #2d6a4f;
+  border: 1px solid var(--color-accent, #2d6a4f);
 }
 .carm-tour-popover .driver-popover-next-btn:hover,
 .carm-tour-popover .driver-popover-next-btn:focus-visible {
@@ -4517,7 +4517,7 @@ body.carm-modal-open {
     max-height: 88vh;
     border-radius: 16px 16px 0 0;
     border: none;
-    border-top: 3px solid #2d6a4f;
+    border-top: 3px solid var(--color-accent, #2d6a4f);
     padding: 16px 16px 22px;
     /* Replace the desktop fade with a slide-up animation. */
     animation: carm-bottom-sheet-in 280ms var(--ease-out);

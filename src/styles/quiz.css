@@ -461,7 +461,7 @@
   font-size: 31px;
   line-height: 30px;
   letter-spacing: 0;
-  color: #2d6a4f;
+  color: var(--color-accent, #2d6a4f);
   /* Top-aligned with generous breathing room — DESIGN.md asks the
      statement to read like a slogan, not a centred caption. Padding-top
      scales: 32 px mobile, 56 px tablet+. */
@@ -982,7 +982,7 @@
 }
 .verdict-scale__seg--richtig {
   --seg-bg: #d1e8d1;
-  --seg-fg: #2d6a4f;
+  --seg-fg: var(--color-accent, #2d6a4f);
 }
 
 /* Hover — subtle deepen + lift. Mirrors Figma's pre-feedback hint
@@ -2923,7 +2923,12 @@ button.quiz-result__cta {
   background: linear-gradient(140deg, #0f766e 0%, #0e7490 50%, #0369a1 100%);
 }
 .share-card--erwischt .share-card__visual {
-  background: linear-gradient(140deg, #1f6f5c 0%, #2d6a4f 50%, #3f6212 100%);
+  background: linear-gradient(
+    140deg,
+    #1f6f5c 0%,
+    var(--color-accent, #2d6a4f) 50%,
+    #3f6212 100%
+  );
 }
 
 /* 2026-05-30 (Fedor) — module-name eyebrow. Names the quiz inside the

@@ -550,7 +550,7 @@ body.scrolly-page .nav:not(.nav--scrolled) .nav__hamburger-line {
   font-weight: 700;
   font-style: normal;
   line-height: 1;
-  color: #2d6a4f;
+  color: var(--color-accent, #2d6a4f);
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
