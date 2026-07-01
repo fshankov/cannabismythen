@@ -33,12 +33,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import type {
-  QuizMyth,
-  Classification,
-  CardAnswer,
-  Schritte,
-} from "./types";
+import type { QuizMyth, Classification, CardAnswer, Schritte } from "./types";
 import { t } from "./i18n";
 import { schritte } from "./quizData";
 import { fireConfetti, fireFloatingEmoji } from "./celebrate";
@@ -64,7 +59,7 @@ import {
 function hashCode(s: string): number {
   let h = 0;
   for (let i = 0; i < s.length; i++) {
-    h = ((h << 5) - h) + s.charCodeAt(i);
+    h = (h << 5) - h + s.charCodeAt(i);
     h |= 0;
   }
   return Math.abs(h);
@@ -123,40 +118,133 @@ const ANSWER_OPTIONS: { value: Classification; svg: ReactNode }[] = [
   {
     value: "falsch",
     svg: (
-      <svg width="26" height="22" viewBox="0 0 26 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M1.2666 18.8793C0.567207 18.8798 0 19.4464 0 20.1459C0 20.8454 0.567207 21.4121 1.2666 21.4125L24.2705 21.4125C24.9703 21.4125 25.5371 20.8457 25.5371 20.1459C25.5371 19.4462 24.9703 18.8793 24.2705 18.8793L1.2666 18.8793Z" fill="#E9A8B9" />
-        <path d="M12.771 1.26703L12.771 19.3997" stroke="#BE123C" strokeWidth="2.53404" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M20.8223 10.3315L12.771 19.3978L4.71974 10.3315" stroke="#BE123C" strokeWidth="2.53404" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        width="26"
+        height="22"
+        viewBox="0 0 26 22"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M1.2666 18.8793C0.567207 18.8798 0 19.4464 0 20.1459C0 20.8454 0.567207 21.4121 1.2666 21.4125L24.2705 21.4125C24.9703 21.4125 25.5371 20.8457 25.5371 20.1459C25.5371 19.4462 24.9703 18.8793 24.2705 18.8793L1.2666 18.8793Z"
+          fill="#E9A8B9"
+        />
+        <path
+          d="M12.771 1.26703L12.771 19.3997"
+          stroke="#BE123C"
+          strokeWidth="2.53404"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M20.8223 10.3315L12.771 19.3978L4.71974 10.3315"
+          stroke="#BE123C"
+          strokeWidth="2.53404"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
   {
     value: "eher_falsch",
     svg: (
-      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M32.2303 13.271L13.271 32.2303" stroke="#E0B58D" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M9.47932 9.47998L22.7508 22.7515" stroke="#B45309" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M22.7508 9.47803V22.7495H9.47929" stroke="#B45309" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        width="34"
+        height="34"
+        viewBox="0 0 34 34"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M32.2303 13.271L13.271 32.2303"
+          stroke="#E0B58D"
+          strokeWidth="2.78333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M9.47932 9.47998L22.7508 22.7515"
+          stroke="#B45309"
+          strokeWidth="2.78333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M22.7508 9.47803V22.7495H9.47929"
+          stroke="#B45309"
+          strokeWidth="2.78333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
   {
     value: "eher_richtig",
     svg: (
-      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M32.2303 20.351L13.271 1.39168" stroke="#C2D3A3" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M9.47932 24.142L22.7508 10.8705" stroke="#4D7C0F" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M22.7508 24.144V10.8724H9.47929" stroke="#4D7C0F" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        width="34"
+        height="34"
+        viewBox="0 0 34 34"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M32.2303 20.351L13.271 1.39168"
+          stroke="#C2D3A3"
+          strokeWidth="2.78333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M9.47932 24.142L22.7508 10.8705"
+          stroke="#4D7C0F"
+          strokeWidth="2.78333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M22.7508 24.144V10.8724H9.47929"
+          stroke="#4D7C0F"
+          strokeWidth="2.78333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
   {
     value: "richtig",
     svg: (
-      <svg width="30" height="22" viewBox="0 0 30 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M28.2041 1.39285L1.3916 1.39286" stroke="#A7D3C5" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M14.7979 20.1604L14.7978 1.39168" stroke="#047857" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M24.1826 10.7776L14.7982 1.39324L5.41386 10.7776" stroke="#047857" strokeWidth="2.78333" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        width="30"
+        height="22"
+        viewBox="0 0 30 22"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M28.2041 1.39285L1.3916 1.39286"
+          stroke="#A7D3C5"
+          strokeWidth="2.78333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M14.7979 20.1604L14.7978 1.39168"
+          stroke="#047857"
+          strokeWidth="2.78333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M24.1826 10.7776L14.7982 1.39324L5.41386 10.7776"
+          stroke="#047857"
+          strokeWidth="2.78333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -249,7 +337,8 @@ export default function QuizCard({
 
   // Front-face swipe back/forward — disabled once flipped to the back.
   usePointerSwipe(cardRef, {
-    enabled: !showBack && !isAnswered && isCoarsePointer && !prefersReducedMotion,
+    enabled:
+      !showBack && !isAnswered && isCoarsePointer && !prefersReducedMotion,
     canCommit: (dir) => (dir === "prev" ? index > 0 : true),
     onCommit: (dir) => {
       trackCardSwiped(dir);
@@ -277,12 +366,15 @@ export default function QuizCard({
     : null;
   const showFeedback = isAnswered && !showBack && userSchritte !== null;
   const feedbackTier = userSchritte !== null ? SCHRITTE_TIER[userSchritte] : "";
-  const FeedbackIcon = userSchritte !== null ? SCHRITTE_ICON[userSchritte] : null;
+  const FeedbackIcon =
+    userSchritte !== null ? SCHRITTE_ICON[userSchritte] : null;
   const feedbackPhrase =
     userSchritte !== null ? t(SCHRITTE_LABEL_KEY[userSchritte]) : "";
 
   const schritteVerdictText = feedbackPhrase;
-  const verdictPhrase = t(`ui.classificationPhrase.${myth.correctClassification}`);
+  const verdictPhrase = t(
+    `ui.classificationPhrase.${myth.correctClassification}`,
+  );
   const mythVerdict = t("ui.mythVerdict", {
     statement,
     verdict: verdictPhrase,
@@ -421,8 +513,7 @@ export default function QuizCard({
                 aria-label={t("ui.chooseAnswer")}
               >
                 {ANSWER_OPTIONS.map((opt, i) => {
-                  const isSelected =
-                    answer?.chosenClassification === opt.value;
+                  const isSelected = answer?.chosenClassification === opt.value;
                   const isCorrectAnswer =
                     isAnswered &&
                     opt.value === myth.correctClassification &&
@@ -454,7 +545,10 @@ export default function QuizCard({
                         .join(" ")}
                       onClick={() => handleAnswerClick(opt.value)}
                     >
-                      <span className="quiz-answer-btn__icon" aria-hidden="true">
+                      <span
+                        className="quiz-answer-btn__icon"
+                        aria-hidden="true"
+                      >
                         {opt.svg}
                       </span>
                     </button>
@@ -488,7 +582,9 @@ export default function QuizCard({
                 </p>
 
                 <div className="quiz-card__back-pill">
-                  <span className="quiz-card__verdict-label">Wissenschaftlich:</span>
+                  <span className="quiz-card__verdict-label">
+                    Wissenschaftlich:
+                  </span>
                   <VerdictPill verdict={myth.correctClassification} size="sm" />
                 </div>
 
@@ -513,10 +609,12 @@ export default function QuizCard({
                     onClick={onNext}
                     autoFocus
                   >
-                    {isLastQuestion
-                      ? t("ui.finishQuiz")
-                      : t("ui.nextQuestion")}
-                    <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
+                    {isLastQuestion ? t("ui.finishQuiz") : t("ui.nextQuestion")}
+                    <ChevronRight
+                      size={16}
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
                   </button>
                 </div>
 

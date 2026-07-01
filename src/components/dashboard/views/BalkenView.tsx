@@ -20,25 +20,41 @@
  * carm-data.json contains a stray non-null value.
  */
 import {
-  forwardRef, useCallback, useEffect, useImperativeHandle, useMemo,
-  useRef, useState,
-} from 'react';
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type {
-  Myth, Metric, GroupId, AppState, Indicator, BalkenSort,
-  DashboardDefinitions, Group,
-} from '../../../lib/dashboard/types';
+  Myth,
+  Metric,
+  GroupId,
+  AppState,
+  Indicator,
+  BalkenSort,
+  DashboardDefinitions,
+  Group,
+} from "../../../lib/dashboard/types";
 import {
-  getIndicatorValueChecked, getMythMetric, getMythShortText,
-} from '../../../lib/dashboard/data';
-import { INDICATOR_ICONS } from '../../../lib/icons';
-import { t, type TranslationKey } from '../../../lib/dashboard/translations';
-import VerdictArrowSymbols from './verdictArrowSymbols';
+  getIndicatorValueChecked,
+  getMythMetric,
+  getMythShortText,
+} from "../../../lib/dashboard/data";
+import { INDICATOR_ICONS } from "../../../lib/icons";
+import { t, type TranslationKey } from "../../../lib/dashboard/translations";
+import VerdictArrowSymbols from "./verdictArrowSymbols";
 import {
-  GridDataHeader, GridLabelHeader, GridMythCell, GridHoverTooltip,
+  GridDataHeader,
+  GridLabelHeader,
+  GridMythCell,
+  GridHoverTooltip,
   BalkenBar,
-} from '../grid';
-import { renderSpannweiteSvg } from '../../../lib/dashboard/spannweite-svg';
-import { getCorrectnessColor } from '../../../lib/dashboard/colors';
+} from "../grid";
+import { renderSpannweiteSvg } from "../../../lib/dashboard/spannweite-svg";
+import { getCorrectnessColor } from "../../../lib/dashboard/colors";
 
 interface Props {
   myths: Myth[];
@@ -72,7 +88,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     myths: Myth[];
     cellValue: (mythId: number, colId: string) => number | null;
     visibleColumns: { id: string; label: string }[];
-    lang: AppState['lang'];
+    lang: AppState["lang"];
   } | null>(null);
   useImperativeHandle(ref, () => ({
     getSvgElement: () => {
@@ -88,15 +104,15 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
   }));
 
   const lang = state.lang;
-  const groupId: GroupId = state.groupIds[0] ?? 'adults';
+  const groupId: GroupId = state.groupIds[0] ?? "adults";
   const indicator: Indicator = state.indicator;
-  const sort: BalkenSort = state.balkenSort ?? 'a-z';
+  const sort: BalkenSort = state.balkenSort ?? "a-z";
 
   // Indicator column metadata (icon + labels + definition for InfoTooltip).
   const indicatorCol = useMemo(() => {
     const Icon = INDICATOR_ICONS[indicator];
     const rawLabel = t(`indicator.${indicator}.short` as TranslationKey, lang);
-    const label = rawLabel.replace(/\s*%\s*$/, '');
+    const label = rawLabel.replace(/\s*%\s*$/, "");
     const def = definitions?.mythIndicators?.[indicator];
     return {
       id: indicator as string,
@@ -126,9 +142,9 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
   const sortedMyths = useMemo(() => {
     const rows = [...myths];
     const cmpAz = (a: Myth, b: Myth) =>
-      getMythShortText(a, lang).localeCompare(getMythShortText(b, lang), 'de');
-    if (sort === 'value-asc' || sort === 'value-desc') {
-      const dir = sort === 'value-asc' ? 1 : -1;
+      getMythShortText(a, lang).localeCompare(getMythShortText(b, lang), "de");
+    if (sort === "value-asc" || sort === "value-desc") {
+      const dir = sort === "value-asc" ? 1 : -1;
       rows.sort((a, b) => {
         const va = cellValue(a.id);
         const vb = cellValue(b.id);
@@ -138,10 +154,14 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
         if (va !== vb) return dir * (va - vb);
         return cmpAz(a, b);
       });
-    } else if (sort === 'verdict-asc' || sort === 'verdict-desc') {
-      const dir = sort === 'verdict-asc' ? 1 : -1;
+    } else if (sort === "verdict-asc" || sort === "verdict-desc") {
+      const dir = sort === "verdict-asc" ? 1 : -1;
       const order: Record<string, number> = {
-        richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, keine_aussage_moeglich: 5,
+        richtig: 1,
+        eher_richtig: 2,
+        eher_falsch: 3,
+        falsch: 4,
+        keine_aussage_moeglich: 5,
       };
       rows.sort((a, b) => {
         const oa = order[a.correctness_class] ?? 5;
@@ -157,9 +177,9 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
 
   /** Sort cycle on the indicator column: inactive → asc → desc → asc. */
   const handleColumnSortClick = useCallback(() => {
-    if (sort === 'value-asc') update('balkenSort', 'value-desc');
-    else if (sort === 'value-desc') update('balkenSort', 'value-asc');
-    else update('balkenSort', 'value-asc');
+    if (sort === "value-asc") update("balkenSort", "value-desc");
+    else if (sort === "value-desc") update("balkenSort", "value-asc");
+    else update("balkenSort", "value-asc");
   }, [sort, update]);
 
   // ─── Hover tooltip state. v3 (2026-05-26): unified label-and-cell
@@ -169,29 +189,32 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
   //     row-label hover gets the same tooltip + Lesebeispiel as the
   //     value cell.
   const [hoveredMythId, setHoveredMythId] = useState<number | null>(null);
-  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
 
   const TOOLTIP_MAX_W = 420;
   const VIEWPORT_MARGIN = 24;
-  const handleHover = useCallback(
-    (mythId: number, e: React.MouseEvent) => {
-      setHoveredMythId(mythId);
-      const halfW = TOOLTIP_MAX_W / 2;
-      const minX = halfW + VIEWPORT_MARGIN;
-      const maxX = (typeof window !== 'undefined' ? window.innerWidth : 1280) - halfW - VIEWPORT_MARGIN;
-      const clampedX = Math.max(minX, Math.min(maxX, e.clientX));
-      setHoverPos({ x: clampedX, y: e.clientY });
-    },
-    [],
-  );
+  const handleHover = useCallback((mythId: number, e: React.MouseEvent) => {
+    setHoveredMythId(mythId);
+    const halfW = TOOLTIP_MAX_W / 2;
+    const minX = halfW + VIEWPORT_MARGIN;
+    const maxX =
+      (typeof window !== "undefined" ? window.innerWidth : 1280) -
+      halfW -
+      VIEWPORT_MARGIN;
+    const clampedX = Math.max(minX, Math.min(maxX, e.clientX));
+    setHoverPos({ x: clampedX, y: e.clientY });
+  }, []);
   const handleLeave = useCallback(() => {
     setHoveredMythId(null);
     setHoverPos(null);
   }, []);
 
-  const hoveredMyth = hoveredMythId !== null
-    ? myths.find((m) => m.id === hoveredMythId) ?? null
-    : null;
+  const hoveredMyth =
+    hoveredMythId !== null
+      ? (myths.find((m) => m.id === hoveredMythId) ?? null)
+      : null;
 
   // Keep export-data ref in sync with the live view.
   useEffect(() => {
@@ -214,10 +237,10 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
       <div className="carm-balken-view" ref={wrapperRef}>
         <div className="carm-balken-empty" role="status">
           <p className="carm-balken-empty__title">
-            {t('filter.empty.title', lang)}
+            {t("filter.empty.title", lang)}
           </p>
           <p className="carm-balken-empty__body">
-            {t('filter.empty.body', lang)}
+            {t("filter.empty.body", lang)}
           </p>
           {onResetFilters && (
             <button
@@ -225,7 +248,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
               className="carm-btn carm-btn--primary carm-balken-empty__cta"
               onClick={onResetFilters}
             >
-              {t('filter.empty.cta', lang)}
+              {t("filter.empty.cta", lang)}
             </button>
           )}
         </div>
@@ -233,24 +256,27 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
     );
   }
 
-  const isAzActive = sort === 'a-z';
-  const azTooltip = t('spannweite.sort.alpha.tooltip', lang);
-  const isVerdictActive = sort === 'verdict-asc' || sort === 'verdict-desc';
-  const verdictDir: 'asc' | 'desc' = sort === 'verdict-desc' ? 'desc' : 'asc';
+  const isAzActive = sort === "a-z";
+  const azTooltip = t("spannweite.sort.alpha.tooltip", lang);
+  const isVerdictActive = sort === "verdict-asc" || sort === "verdict-desc";
+  const verdictDir: "asc" | "desc" = sort === "verdict-desc" ? "desc" : "asc";
   const verdictTooltipKey: TranslationKey = !isVerdictActive
-    ? 'spannweite.sort.verdict.activate.tooltip'
-    : sort === 'verdict-asc'
-    ? 'spannweite.sort.verdict.asc.tooltip'
-    : 'spannweite.sort.verdict.desc.tooltip';
-  const isSortCol = sort === 'value-asc' || sort === 'value-desc';
-  const isAsc = sort === 'value-asc';
-  const isDesc = sort === 'value-desc';
+    ? "spannweite.sort.verdict.activate.tooltip"
+    : sort === "verdict-asc"
+      ? "spannweite.sort.verdict.asc.tooltip"
+      : "spannweite.sort.verdict.desc.tooltip";
+  const isSortCol = sort === "value-asc" || sort === "value-desc";
+  const isAsc = sort === "value-asc";
+  const isDesc = sort === "value-desc";
   const colSortTooltipKey: TranslationKey = isAsc
-    ? 'spannweite.sort.col.asc.tooltip'
+    ? "spannweite.sort.col.asc.tooltip"
     : isDesc
-    ? 'spannweite.sort.col.desc.tooltip'
-    : 'spannweite.sort.col.activate.tooltip';
-  const colSortTooltip = t(colSortTooltipKey, lang).replace('{col}', indicatorCol.fullLabel);
+      ? "spannweite.sort.col.desc.tooltip"
+      : "spannweite.sort.col.activate.tooltip";
+  const colSortTooltip = t(colSortTooltipKey, lang).replace(
+    "{col}",
+    indicatorCol.fullLabel,
+  );
 
   const gridTemplate = `var(--carm-spannweite-label-col) minmax(0, 1fr)`;
 
@@ -272,18 +298,20 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
             role="columnheader"
           >
             <GridLabelHeader
-              labelText={t('misc.myths', lang)}
+              labelText={t("misc.myths", lang)}
               isAzActive={isAzActive}
               azTooltip={azTooltip}
-              onAzClick={() => update('balkenSort', 'a-z')}
+              onAzClick={() => update("balkenSort", "a-z")}
               verdictRank={{
                 isActive: isVerdictActive,
                 direction: verdictDir,
                 tooltip: t(verdictTooltipKey, lang),
                 onClick: () => {
-                  if (sort === 'verdict-asc') update('balkenSort', 'verdict-desc');
-                  else if (sort === 'verdict-desc') update('balkenSort', 'verdict-asc');
-                  else update('balkenSort', 'verdict-asc');
+                  if (sort === "verdict-asc")
+                    update("balkenSort", "verdict-desc");
+                  else if (sort === "verdict-desc")
+                    update("balkenSort", "verdict-asc");
+                  else update("balkenSort", "verdict-asc");
                 },
               }}
             />
@@ -303,7 +331,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
               defScale={indicatorCol.defScale}
               defSampleSize={indicatorCol.defSampleSize}
               isSortActive={isSortCol}
-              sortDir={isDesc ? 'desc' : 'asc'}
+              sortDir={isDesc ? "desc" : "asc"}
               sortTooltip={colSortTooltip}
               onSortClick={handleColumnSortClick}
             />
@@ -318,7 +346,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
             return (
               <div
                 key={`row-${myth.id}`}
-                className={`carm-spannweite__row${isHover ? ' is-hover' : ''}${rowIdx % 2 === 0 ? '' : ' is-alt'}`}
+                className={`carm-spannweite__row${isHover ? " is-hover" : ""}${rowIdx % 2 === 0 ? "" : " is-alt"}`}
                 role="row"
                 style={{
                   gridColumn: `1 / span 2`,
@@ -327,7 +355,7 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
                 onClick={() => onSelectMyth(myth.id)}
                 onMouseLeave={handleLeave}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+                  if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     onSelectMyth(myth.id);
                   }
@@ -353,7 +381,10 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
                   onMouseEnter={(e) => handleHover(myth.id, e)}
                   onMouseMove={(e) => handleHover(myth.id, e)}
                 >
-                  <BalkenBar value={value} accent={getCorrectnessColor(verdict)} />
+                  <BalkenBar
+                    value={value}
+                    accent={getCorrectnessColor(verdict)}
+                  />
                 </div>
               </div>
             );
@@ -379,19 +410,21 @@ const BalkenView = forwardRef<BalkenViewHandle, Props>(function BalkenView(
           v3: always pin Lesebeispiel to the active indicator, since
           Balken's single column means label-hover and cell-hover
           should produce identical context. */}
-      {hoveredMyth && hoverPos && (() => {
-        return (
-          <GridHoverTooltip
-            myth={hoveredMyth}
-            metrics={metrics}
-            lang={lang}
-            x={hoverPos.x}
-            y={hoverPos.y}
-            lesebeispielIndicator={indicator}
-            lesebeispielGroup={groupId}
-          />
-        );
-      })()}
+      {hoveredMyth &&
+        hoverPos &&
+        (() => {
+          return (
+            <GridHoverTooltip
+              myth={hoveredMyth}
+              metrics={metrics}
+              lang={lang}
+              x={hoverPos.x}
+              y={hoverPos.y}
+              lesebeispielIndicator={indicator}
+              lesebeispielGroup={groupId}
+            />
+          );
+        })()}
     </div>
   );
 });

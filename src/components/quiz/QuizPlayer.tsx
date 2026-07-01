@@ -21,13 +21,7 @@
  * stable, theme-guaranteed component (no Rules-of-Hooks gotchas).
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type {
   CardAnswer,
@@ -184,7 +178,8 @@ function normaliseAnswer(raw: unknown): CardAnswer | null {
   }
   return {
     mythId: r.mythId,
-    chosenClassification: r.chosenClassification as CardAnswer["chosenClassification"],
+    chosenClassification:
+      r.chosenClassification as CardAnswer["chosenClassification"],
     isCorrect: r.isCorrect,
   };
 }
@@ -287,7 +282,7 @@ const QUIZ_ACCENT: Record<string, string> = {
 function streakAt(
   answers: Record<string, CardAnswer>,
   myths: QuizTheme["myths"],
-  idx: number
+  idx: number,
 ): number {
   let streak = 0;
   for (let i = idx; i >= 0; i--) {
@@ -321,7 +316,7 @@ function shuffleMythIds(ids: string[]): string[] {
  *  no saved order exists. */
 function resolveDeckOrder(
   themeMyths: QuizTheme["myths"],
-  saved: string[] | undefined
+  saved: string[] | undefined,
 ): string[] {
   const themeIds = themeMyths.map((m) => m.id);
   if (!saved || saved.length === 0) return themeIds;
@@ -335,10 +330,7 @@ function resolveDeckOrder(
  *  client-side from saved progress + the global mythId lookup. On the
  *  server we have no localStorage, so we render a small placeholder; the
  *  real deck mounts on hydration. */
-function resolveDynamicTheme(
-  template: QuizTheme,
-  quizSlug: string
-): QuizTheme {
+function resolveDynamicTheme(template: QuizTheme, quizSlug: string): QuizTheme {
   if (typeof window === "undefined") {
     // SSR: render an empty deck. The actual myths land at hydration.
     return template;
@@ -566,14 +558,18 @@ function QuizPlayerInner({
 
   // Stage E commit 4 (2026-05-23) — fakten-karten data for the
   // wrong-myths grid on the result page.
-  const faktenContentMap: Record<string, QuizFaktenContentEntry> = useMemo(() => {
-    if (!faktenContent) return {};
-    try {
-      return JSON.parse(faktenContent) as Record<string, QuizFaktenContentEntry>;
-    } catch {
-      return {};
-    }
-  }, [faktenContent]);
+  const faktenContentMap: Record<string, QuizFaktenContentEntry> =
+    useMemo(() => {
+      if (!faktenContent) return {};
+      try {
+        return JSON.parse(faktenContent) as Record<
+          string,
+          QuizFaktenContentEntry
+        >;
+      } catch {
+        return {};
+      }
+    }, [faktenContent]);
 
   // ── Track quiz start once per mount.
   useEffect(() => {
@@ -638,13 +634,14 @@ function QuizPlayerInner({
           // Stage 9: tier was a 0–3 band; map score band → 0..3 for Matomo
           // back-compat without re-importing the deleted helper.
           const score = computeModuleScore(list, theme.myths);
-          const tierIndex = score >= 80 ? 3 : score >= 60 ? 2 : score >= 40 ? 1 : 0;
+          const tierIndex =
+            score >= 80 ? 3 : score >= 60 ? 2 : score >= 40 ? 1 : 0;
           trackQuizCompleted(t(theme.titleKey), correctCount, tierIndex);
         }
         return next;
       });
     },
-    [theme.myths, theme.titleKey, answers, totalQuestions]
+    [theme.myths, theme.titleKey, answers, totalQuestions],
   );
 
   const handleNext = useCallback(() => {
@@ -708,7 +705,7 @@ function QuizPlayerInner({
   // Resolve current myth (clamp index in case theme size changed).
   const safeIndex = Math.min(
     Math.max(0, currentIndex),
-    Math.max(0, totalQuestions - 1)
+    Math.max(0, totalQuestions - 1),
   );
 
   // ── Stage 2: derive the visible deck order. The `order` array is the
@@ -725,7 +722,7 @@ function QuizPlayerInner({
       order
         .map((id) => mythById.get(id))
         .filter((m): m is QuizMyth => Boolean(m)),
-    [order, mythById]
+    [order, mythById],
   );
 
   const currentMyth = orderedMyths[safeIndex];
@@ -742,7 +739,7 @@ function QuizPlayerInner({
   //    actually saw, not the theme's natural order. ────────────────────
   const streakCount = useMemo(
     () => streakAt(answers, orderedMyths, safeIndex),
-    [answers, orderedMyths, safeIndex]
+    [answers, orderedMyths, safeIndex],
   );
 
   // ── Keyboard shortcuts (Phase C §3.12) ──────────────────────────────
@@ -902,13 +899,11 @@ function QuizPlayerInner({
       style={{ ["--quiz-accent" as string]: accent }}
     >
       {!showResults &&
-        (portalTarget
-          ? createPortal(pinnedHeader, portalTarget)
-          : (
-            <header className="quiz-player__header">
-              {pinnedHeader}
-            </header>
-          ))}
+        (portalTarget ? (
+          createPortal(pinnedHeader, portalTarget)
+        ) : (
+          <header className="quiz-player__header">{pinnedHeader}</header>
+        ))}
 
       {!showResults && currentMyth && (
         <div className="quiz-player__flow">

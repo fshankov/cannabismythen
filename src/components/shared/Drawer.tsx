@@ -1,6 +1,6 @@
-import { useEffect, useId, useRef } from 'react';
-import { X } from 'lucide-react';
-import { trapFocus } from '../../lib/dashboard/focus-trap';
+import { useEffect, useId, useRef } from "react";
+import { X } from "lucide-react";
+import { trapFocus } from "../../lib/dashboard/focus-trap";
 
 export interface DrawerProps {
   /** Whether the drawer is mounted/visible. */
@@ -16,12 +16,12 @@ export interface DrawerProps {
    *    Daten-Explorer refactor matched the OWID grapher dialog).
    *  - `'bottom-sheet'`: forced bottom-sheet at every breakpoint.
    */
-  variant?: 'side' | 'modal' | 'bottom-sheet';
+  variant?: "side" | "modal" | "bottom-sheet";
   /** Side of the desktop slide-out. Ignored on mobile or when
    *  `variant !== 'side'`. */
-  side?: 'right' | 'left';
+  side?: "right" | "left";
   /** Width on desktop. Applies to `variant: 'side'`. */
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   /** Title rendered in the header and used as the dialog's accessible label. */
   title: string;
   /** Optional secondary line below the title. */
@@ -43,9 +43,9 @@ export interface DrawerProps {
 export default function Drawer({
   open,
   onClose,
-  variant = 'side',
-  side = 'right',
-  size = 'md',
+  variant = "side",
+  side = "right",
+  size = "md",
   title,
   description,
   initialFocusRef,
@@ -82,19 +82,19 @@ export default function Drawer({
     // Lock body scroll — overflow:hidden on <html> preserves scroll position
     // so there is no layout jump on close (same approach as FactsheetPanel).
     const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overflow = "hidden";
     if (scrollbarW > 0) {
       document.documentElement.style.paddingRight = `${scrollbarW}px`;
     }
 
     // Push a sentinel history entry so the browser back button closes the
     // drawer instead of navigating away from the page.
-    window.history.pushState({ drawerOpen: true }, '');
+    window.history.pushState({ drawerOpen: true }, "");
     const handlePopState = () => onCloseRef.current();
-    window.addEventListener('popstate', handlePopState);
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
-      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener("popstate", handlePopState);
 
       // If the drawer was closed by the X / Escape / backdrop (not by the
       // browser back button), the sentinel state is still in history — pop it
@@ -104,8 +104,8 @@ export default function Drawer({
       }
 
       // Restore scroll.
-      document.documentElement.style.overflow = '';
-      document.documentElement.style.paddingRight = '';
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.paddingRight = "";
     };
   }, [open]); // Re-runs when open changes; guard above means setup runs only while open.
 
@@ -116,16 +116,16 @@ export default function Drawer({
   // footer markup is reused so child components don't need to know
   // which variant rendered them.
   const variantClass =
-    variant === 'modal'
-      ? 'carm-drawer-root--modal'
-      : variant === 'bottom-sheet'
-        ? 'carm-drawer-root--bottom-sheet'
-        : '';
+    variant === "modal"
+      ? "carm-drawer-root--modal"
+      : variant === "bottom-sheet"
+        ? "carm-drawer-root--bottom-sheet"
+        : "";
   const panelVariantClass =
-    variant === 'modal'
-      ? 'carm-drawer--modal'
-      : variant === 'bottom-sheet'
-        ? 'carm-drawer--bottom-sheet'
+    variant === "modal"
+      ? "carm-drawer--modal"
+      : variant === "bottom-sheet"
+        ? "carm-drawer--bottom-sheet"
         : `carm-drawer--${side} carm-drawer--${size}`;
 
   // Stage 6 v3: clicking the dim backdrop closes the drawer (matches
@@ -137,7 +137,7 @@ export default function Drawer({
     const target = e.target as HTMLElement;
     if (
       e.target === e.currentTarget ||
-      target.classList?.contains('carm-drawer-backdrop')
+      target.classList?.contains("carm-drawer-backdrop")
     ) {
       onClose();
     }

@@ -17,9 +17,9 @@
  * Consumer provides the outer cell `<div>` + the inner
  * `.carm-spannweite__plot` div.
  */
-import type { CorrectnessClass } from '../../../lib/dashboard/types';
-import { getCorrectnessColor } from '../../../lib/dashboard/colors';
-import ValueCircle from './ValueCircle';
+import type { CorrectnessClass } from "../../../lib/dashboard/types";
+import { getCorrectnessColor } from "../../../lib/dashboard/colors";
+import ValueCircle from "./ValueCircle";
 
 interface Props {
   verdict: CorrectnessClass;

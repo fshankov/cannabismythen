@@ -18,7 +18,7 @@
  * Daten-Explorer refactor) — do NOT move it back into ToolbarRow.
  */
 
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 interface ToolbarRowProps {
   pivot?: ReactNode;
@@ -26,7 +26,7 @@ interface ToolbarRowProps {
   actions?: ReactNode;
   /** Optional className hook, used by per-tab style overrides. */
   className?: string;
-  'aria-label'?: string;
+  "aria-label"?: string;
 }
 
 export default function ToolbarRow({
@@ -34,12 +34,12 @@ export default function ToolbarRow({
   pickers,
   actions,
   className,
-  'aria-label': ariaLabel = 'Dashboard-Steuerung',
+  "aria-label": ariaLabel = "Dashboard-Steuerung",
 }: ToolbarRowProps) {
   const hasPickers = pickers && pickers.length > 0;
   return (
     <div
-      className={`carm-toolbar-row${className ? ` ${className}` : ''}`}
+      className={`carm-toolbar-row${className ? ` ${className}` : ""}`}
       role="toolbar"
       aria-label={ariaLabel}
     >

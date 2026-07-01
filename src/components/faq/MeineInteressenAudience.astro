@@ -44,44 +44,48 @@ const { mythIndex, mythContentMap } = popupData;
 const groupMetricsByMyth = buildGroupMetricsByMythId(carmRawJson.metrics);
 ---
 
-{audience && (
-  <MeineInteressenLayout activeAudience={slug}>
-    <article class="faq-audience-page" data-audience={audience.id}>
-      {questions.length > 1 && (
-        <nav class="faq-toc" aria-label="Inhaltsübersicht">
-          <p class="faq-toc__label">Auf dieser Seite ({questions.length}):</p>
-          <ul class="faq-toc__list">
-            {questions.map((q, i) => (
-              <li>
-                <a href={`#faq-${q.slug}`}>
-                  <span class="faq-toc__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                  {q.questionLong}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
+{
+  audience && (
+    <MeineInteressenLayout activeAudience={slug}>
+      <article class="faq-audience-page" data-audience={audience.id}>
+        {questions.length > 1 && (
+          <nav class="faq-toc" aria-label="Inhaltsübersicht">
+            <p class="faq-toc__label">Auf dieser Seite ({questions.length}):</p>
+            <ul class="faq-toc__list">
+              {questions.map((q, i) => (
+                <li>
+                  <a href={`#faq-${q.slug}`}>
+                    <span class="faq-toc__num" aria-hidden="true">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    {q.questionLong}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
 
-      <div class="faq-audience-questions" data-reveal>
-        {questions.map((q, i) => (
-          <FaqQuestionComponent
-            question={q}
-            index={i + 1}
-            open={false}
-            popupData={popupData}
-          />
-        ))}
-      </div>
+        <div class="faq-audience-questions" data-reveal>
+          {questions.map((q, i) => (
+            <FaqQuestionComponent
+              question={q}
+              index={i + 1}
+              open={false}
+              popupData={popupData}
+            />
+          ))}
+        </div>
 
-      <WeiterfuehrendList items={audience.weiterfuehrend} />
+        <WeiterfuehrendList items={audience.weiterfuehrend} />
 
-      <footer class="faq-audience-page__footer">
-        <a href="/meine-interessen/eltern/">← Alle Zielgruppen</a>
-      </footer>
-    </article>
-  </MeineInteressenLayout>
-)}
+        <footer class="faq-audience-page__footer">
+          <a href="/meine-interessen/eltern/">← Alle Zielgruppen</a>
+        </footer>
+      </article>
+    </MeineInteressenLayout>
+  )
+}
 
 <MythPopupHost
   client:load

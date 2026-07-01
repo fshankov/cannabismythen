@@ -19,12 +19,23 @@
  */
 
 import {
-  forwardRef, useImperativeHandle, useMemo, useRef, useState, useCallback, useEffect,
-} from 'react';
-import type { ReactNode } from 'react';
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
+import type { ReactNode } from "react";
 import {
-  EyeOff, ArrowDown01, ArrowDown10, ArrowDownAZ, ChevronRight, ChevronDown,
-} from 'lucide-react';
+  EyeOff,
+  ArrowDown01,
+  ArrowDown10,
+  ArrowDownAZ,
+  ChevronRight,
+  ChevronDown,
+} from "lucide-react";
 import {
   SOURCE_METRIC_ICONS,
   SOURCE_CATEGORY_ICONS,
@@ -32,7 +43,7 @@ import {
   IconCategoryRankAsc,
   IconCategoryRankDesc,
   type IconComponent,
-} from '../../../lib/icons';
+} from "../../../lib/icons";
 import type {
   AppState,
   DashboardDefinitions,
@@ -42,39 +53,51 @@ import type {
   SourceMetricType,
   SourcesStripsMode,
   SourcesSpannweiteSort,
-} from '../../../lib/dashboard/types';
-import { t, type TranslationKey } from '../../../lib/dashboard/translations';
-import InfoTooltip from '../InfoTooltip';
-import { useHiddenColumns } from '../hooks/useHiddenColumns';
-import { renderSourcesSpannweiteSvg } from '../../../lib/dashboard/sources-spannweite-svg';
-import LesebeispielSource from '../LesebeispielSource';
-import { ValueCircle } from '../grid';
-import { getCategoryDescription } from '../../../lib/dashboard/source-descriptions';
-import { getCategoryColor } from '../../../lib/dashboard/colors';
-import type { SourceCategoryId } from '../../../lib/icons/lookups';
+} from "../../../lib/dashboard/types";
+import { t, type TranslationKey } from "../../../lib/dashboard/translations";
+import InfoTooltip from "../InfoTooltip";
+import { useHiddenColumns } from "../hooks/useHiddenColumns";
+import { renderSourcesSpannweiteSvg } from "../../../lib/dashboard/sources-spannweite-svg";
+import LesebeispielSource from "../LesebeispielSource";
+import { ValueCircle } from "../grid";
+import { getCategoryDescription } from "../../../lib/dashboard/source-descriptions";
+import { getCategoryColor } from "../../../lib/dashboard/colors";
+import type { SourceCategoryId } from "../../../lib/icons/lookups";
 
 /** Column order (Fedor 2026-05-29): Suche · Wahrnehmung · Vertrauen ·
  *  Prävention — kept identical to Quellen-Tabelle's METRIC_COLS so the
  *  two source views read the same left→right. */
-const METRICS: SourceMetricType[] = ['search', 'perception', 'trust', 'prevention'];
-const GROUPS: SourceGroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
+const METRICS: SourceMetricType[] = [
+  "search",
+  "perception",
+  "trust",
+  "prevention",
+];
+const GROUPS: SourceGroupId[] = [
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
+];
 
 const METRIC_LABELS: Record<SourceMetricType, string> = {
-  search: 'Suche',
-  perception: 'Wahrnehmung',
-  trust: 'Vertrauen',
-  prevention: 'Prävention',
+  search: "Suche",
+  perception: "Wahrnehmung",
+  trust: "Vertrauen",
+  prevention: "Prävention",
 };
 
-const METRIC_ICONS: Record<SourceMetricType, IconComponent> = SOURCE_METRIC_ICONS;
+const METRIC_ICONS: Record<SourceMetricType, IconComponent> =
+  SOURCE_METRIC_ICONS;
 
 /** Full labels — used in tooltips, definition popovers, etc. */
 const GROUP_LABELS: Record<SourceGroupId, string> = {
-  adults: 'Volljährige (18–70)',
-  minors: 'Minderjährige (16–17)',
-  consumers: 'Konsument:innen',
-  young_adults: 'Junge Erwachsene (18–26)',
-  parents: 'Eltern',
+  adults: "Volljährige (18–70)",
+  minors: "Minderjährige (16–17)",
+  consumers: "Konsument:innen",
+  young_adults: "Junge Erwachsene (18–26)",
+  parents: "Eltern",
 };
 
 /** Short column-header labels — mirror Spannweite's `GROUP_SHORT_DE`
@@ -82,14 +105,15 @@ const GROUP_LABELS: Record<SourceGroupId, string> = {
  *  Spannweite and source-side Informationsquellen 2 (per Fedor's
  *  2026-05-28 consistency request). */
 const GROUP_SHORT: Record<SourceGroupId, string> = {
-  adults: 'Erw.',
-  minors: 'Minderj.',
-  consumers: 'Konsum.',
-  young_adults: 'Junge Erw.',
-  parents: 'Eltern',
+  adults: "Erw.",
+  minors: "Minderj.",
+  consumers: "Konsum.",
+  young_adults: "Junge Erw.",
+  parents: "Eltern",
 };
 
-const GROUP_ICONS: Record<SourceGroupId, IconComponent> = AUDIENCE_ICONS_BY_GROUP;
+const GROUP_ICONS: Record<SourceGroupId, IconComponent> =
+  AUDIENCE_ICONS_BY_GROUP;
 
 interface Props {
   state: AppState;
@@ -110,14 +134,17 @@ interface ResolvedRow {
   isChild: boolean;
 }
 
-const FALLBACK_COLOR = '#94a3b8';
+const FALLBACK_COLOR = "#94a3b8";
 
 const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
-  function SourcesSpannweiteView({ state, update, definitions, sourceData }, ref) {
+  function SourcesSpannweiteView(
+    { state, update, definitions, sourceData },
+    ref,
+  ) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const mode: SourcesStripsMode = state.sourcesStripsMode;
-    const sort: SourcesSpannweiteSort = state.sourcesSpannweiteSort ?? 'a-z';
+    const sort: SourcesSpannweiteSort = state.sourcesSpannweiteSort ?? "a-z";
     const sortColumn: string | null = state.sourcesSpannweiteSortColumn ?? null;
     const expanded = state.sourcesSpannweiteExpanded;
     const categoryFilter = state.sourceCategoryFilter;
@@ -129,9 +156,8 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     // v5 (2026-05-26) — toggle label = picker dimension; columns are
     // the OTHER dimension. 'metric' mode → picker = metric, cols =
     // groups. 'group' mode → picker = group, cols = metrics.
-    const allColumnIds: string[] = mode === 'metric'
-      ? (GROUPS as string[])
-      : (METRICS as string[]);
+    const allColumnIds: string[] =
+      mode === "metric" ? (GROUPS as string[]) : (METRICS as string[]);
 
     const { hide, show, isHidden } = useHiddenColumns(
       `carm.sources2.hidden.${mode}`,
@@ -139,7 +165,7 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     );
 
     const columns = useMemo(() => {
-      if (mode === 'group') {
+      if (mode === "group") {
         return METRICS.map((m) => {
           const def = definitions?.sourcesIndicators?.[m];
           return {
@@ -185,7 +211,10 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     const categoryColorMap = useMemo(() => {
       if (!sourceData) return new Map<string, string>();
       return new Map(
-        sourceData.sourceCategories.map((c) => [c.id, getCategoryColor(c.id as SourceCategoryId)]),
+        sourceData.sourceCategories.map((c) => [
+          c.id,
+          getCategoryColor(c.id as SourceCategoryId),
+        ]),
       );
     }, [sourceData]);
 
@@ -209,7 +238,11 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
       const filterByName = (s: InformationSource) =>
         q.length === 0 || s.name.toLowerCase().includes(q);
       const parents = sourceData.sources.filter(
-        (s) => s.parentId === null && filterByCat(s) && filterBySub(s) && filterByName(s),
+        (s) =>
+          s.parentId === null &&
+          filterByCat(s) &&
+          filterBySub(s) &&
+          filterByName(s),
       );
       const byParent = new Map<number, InformationSource[]>();
       for (const s of sourceData.sources) {
@@ -234,16 +267,16 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     const cellValue = useCallback(
       (sourceId: number, colId: string): number | null => {
         if (!sourceData) return null;
-        if (mode === 'metric') {
+        if (mode === "metric") {
           const g = colId as SourceGroupId;
           const data = sourceData.metrics[selectedMetric]?.data[g] || {};
           const v = data[String(sourceId)];
-          return typeof v === 'number' ? v : null;
+          return typeof v === "number" ? v : null;
         }
         const m = colId as SourceMetricType;
         const data = sourceData.metrics[m]?.data[selectedGroup] || {};
         const v = data[String(sourceId)];
-        return typeof v === 'number' ? v : null;
+        return typeof v === "number" ? v : null;
       },
       [sourceData, mode, selectedGroup, selectedMetric],
     );
@@ -266,37 +299,46 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     };
     const sortedParents = useMemo(() => {
       const arr = [...filteredParents];
-      if (sort === 'category-asc' || sort === 'category-desc') {
-        const dir = sort === 'category-asc' ? 1 : -1;
+      if (sort === "category-asc" || sort === "category-desc") {
+        const dir = sort === "category-asc" ? 1 : -1;
         return arr.sort((a, b) => {
           const oa = CATEGORY_ORDER[a.category] ?? 99;
           const ob = CATEGORY_ORDER[b.category] ?? 99;
           if (oa !== ob) return dir * (oa - ob);
-          return a.name.localeCompare(b.name, 'de');
+          return a.name.localeCompare(b.name, "de");
         });
       }
-      if (sort === 'a-z' || !sortColumn || (sort !== 'value-asc' && sort !== 'value-desc')) {
-        return arr.sort((a, b) => a.name.localeCompare(b.name, 'de'));
+      if (
+        sort === "a-z" ||
+        !sortColumn ||
+        (sort !== "value-asc" && sort !== "value-desc")
+      ) {
+        return arr.sort((a, b) => a.name.localeCompare(b.name, "de"));
       }
-      const dir = sort === 'value-desc' ? -1 : 1;
+      const dir = sort === "value-desc" ? -1 : 1;
       return arr.sort((a, b) => {
         const va = cellValue(a.id, sortColumn);
         const vb = cellValue(b.id, sortColumn);
-        if (va === null && vb === null) return a.name.localeCompare(b.name, 'de');
-        if (va === null) return 1;   // nulls last
+        if (va === null && vb === null)
+          return a.name.localeCompare(b.name, "de");
+        if (va === null) return 1; // nulls last
         if (vb === null) return -1;
         if (va !== vb) return dir * (va - vb);
-        return a.name.localeCompare(b.name, 'de');
+        return a.name.localeCompare(b.name, "de");
       });
     }, [filteredParents, sort, sortColumn, cellValue]);
 
     const sortedChildrenOf = useCallback(
       (parentId: number): InformationSource[] => {
         const kids = childrenByParent.get(parentId) ?? [];
-        if (sort === 'a-z' || !sortColumn || (sort !== 'value-asc' && sort !== 'value-desc')) {
+        if (
+          sort === "a-z" ||
+          !sortColumn ||
+          (sort !== "value-asc" && sort !== "value-desc")
+        ) {
           return kids;
         }
-        const dir = sort === 'value-desc' ? -1 : 1;
+        const dir = sort === "value-desc" ? -1 : 1;
         return [...kids].sort((a, b) => {
           const va = cellValue(a.id, sortColumn);
           const vb = cellValue(b.id, sortColumn);
@@ -315,11 +357,20 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
       const expandedSet = new Set(expanded);
       const out: ResolvedRow[] = [];
       for (const parent of sortedParents) {
-        const parentColor = categoryColorMap.get(parent.category) ?? FALLBACK_COLOR;
-        out.push({ source: parent, categoryColor: parentColor, isChild: false });
+        const parentColor =
+          categoryColorMap.get(parent.category) ?? FALLBACK_COLOR;
+        out.push({
+          source: parent,
+          categoryColor: parentColor,
+          isChild: false,
+        });
         if (expandedSet.has(parent.id)) {
           for (const child of sortedChildrenOf(parent.id)) {
-            out.push({ source: child, categoryColor: parentColor, isChild: true });
+            out.push({
+              source: child,
+              categoryColor: parentColor,
+              isChild: true,
+            });
           }
         }
       }
@@ -330,14 +381,15 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     const handleColumnSortClick = useCallback(
       (colId: string) => {
         const isThisCol =
-          (sort === 'value-asc' || sort === 'value-desc') && sortColumn === colId;
-        if (isThisCol && sort === 'value-asc') {
-          update('sourcesSpannweiteSort', 'value-desc');
-        } else if (isThisCol && sort === 'value-desc') {
-          update('sourcesSpannweiteSort', 'value-asc');
+          (sort === "value-asc" || sort === "value-desc") &&
+          sortColumn === colId;
+        if (isThisCol && sort === "value-asc") {
+          update("sourcesSpannweiteSort", "value-desc");
+        } else if (isThisCol && sort === "value-desc") {
+          update("sourcesSpannweiteSort", "value-asc");
         } else {
-          update('sourcesSpannweiteSort', 'value-asc');
-          update('sourcesSpannweiteSortColumn', colId);
+          update("sourcesSpannweiteSort", "value-asc");
+          update("sourcesSpannweiteSortColumn", colId);
         }
       },
       [sort, sortColumn, update],
@@ -349,7 +401,7 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
         const next = expanded.includes(parentId)
           ? expanded.filter((id) => id !== parentId)
           : [...expanded, parentId];
-        update('sourcesSpannweiteExpanded', next);
+        update("sourcesSpannweiteExpanded", next);
       },
       [expanded, update],
     );
@@ -359,7 +411,9 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
       sourceId: number;
       colId: string | null;
     } | null>(null);
-    const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+    const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
+      null,
+    );
 
     // v3 (2026-05-26): width bumped from 320 → 420 to match the
     // `.carm-spannweite__tooltip { max-width: 420px }` CSS rule.
@@ -375,7 +429,9 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
         const halfW = TOOLTIP_MAX_W / 2;
         const minX = halfW + VIEWPORT_MARGIN;
         const maxX =
-          (typeof window !== 'undefined' ? window.innerWidth : 1280) - halfW - VIEWPORT_MARGIN;
+          (typeof window !== "undefined" ? window.innerWidth : 1280) -
+          halfW -
+          VIEWPORT_MARGIN;
         const clampedX = Math.max(minX, Math.min(maxX, e.clientX));
         setHoverPos({ x: clampedX, y: e.clientY });
       },
@@ -388,7 +444,12 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
 
     // ── Export SVG handle ──────────────────────────────────────────
     const renderDataRef = useRef<{
-      rows: { sourceId: number; name: string; categoryColor: string; isChild: boolean }[];
+      rows: {
+        sourceId: number;
+        name: string;
+        categoryColor: string;
+        isChild: boolean;
+      }[];
       columns: { id: string; label: string }[];
       cellValue: (sourceId: number, colId: string) => number | null;
       lang: typeof lang;
@@ -423,8 +484,8 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
     // ── Grid template (visible columns 1fr, hidden 28 px) ─────────
     const gridTemplate = useMemo(() => {
       const cols = columns
-        .map((c) => (isHidden(c.id) ? '28px' : 'minmax(0, 1fr)'))
-        .join(' ');
+        .map((c) => (isHidden(c.id) ? "28px" : "minmax(0, 1fr)"))
+        .join(" ");
       return `var(--carm-spannweite-label-col) ${cols}`;
     }, [columns, isHidden]);
 
@@ -434,20 +495,29 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
       return sourceData.sources.find((s) => s.id === hovered.sourceId) ?? null;
     }, [hovered, sourceData]);
 
-    const hoveredCategoryColor =
-      hoveredSource ? categoryColorMap.get(hoveredSource.category) ?? FALLBACK_COLOR : FALLBACK_COLOR;
+    const hoveredCategoryColor = hoveredSource
+      ? (categoryColorMap.get(hoveredSource.category) ?? FALLBACK_COLOR)
+      : FALLBACK_COLOR;
     const hoveredCategoryName =
       hoveredSource && sourceData
-        ? sourceData.sourceCategories.find((c) => c.id === hoveredSource.category)?.name
-            ?? hoveredSource.category
-        : '';
+        ? (sourceData.sourceCategories.find(
+            (c) => c.id === hoveredSource.category,
+          )?.name ?? hoveredSource.category)
+        : "";
 
     if (!sourceData) {
-      return <div className="carm-loading" style={{ minHeight: 360 }}>Daten werden geladen…</div>;
+      return (
+        <div className="carm-loading" style={{ minHeight: 360 }}>
+          Daten werden geladen…
+        </div>
+      );
     }
 
     return (
-      <div className="carm-spannweite carm-sources-spannweite" ref={containerRef}>
+      <div
+        className="carm-spannweite carm-sources-spannweite"
+        ref={containerRef}
+      >
         <div className="carm-spannweite__scroller">
           <div
             className="carm-spannweite__grid"
@@ -466,48 +536,49 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
             >
               <button
                 type="button"
-                className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-left${sort === 'a-z' ? ' is-active' : ''}`}
+                className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-left${sort === "a-z" ? " is-active" : ""}`}
                 onClick={() => {
-                  update('sourcesSpannweiteSort', 'a-z');
-                  update('sourcesSpannweiteSortColumn', null);
+                  update("sourcesSpannweiteSort", "a-z");
+                  update("sourcesSpannweiteSortColumn", null);
                 }}
-                aria-pressed={sort === 'a-z'}
-                aria-label={t('sources.sort.alpha.tooltip', lang)}
-                title={t('sources.sort.alpha.tooltip', lang)}
+                aria-pressed={sort === "a-z"}
+                aria-label={t("sources.sort.alpha.tooltip", lang)}
+                title={t("sources.sort.alpha.tooltip", lang)}
               >
                 <ArrowDownAZ size={14} strokeWidth={2} aria-hidden="true" />
               </button>
               <span className="carm-spannweite__header-text">
-                {lang === 'de' ? 'INFORMATIONSWEGE' : 'SOURCES'}
+                {lang === "de" ? "INFORMATIONSWEGE" : "SOURCES"}
               </span>
               {(() => {
-                const isCatActive = sort === 'category-asc' || sort === 'category-desc';
+                const isCatActive =
+                  sort === "category-asc" || sort === "category-desc";
                 const catTooltipKey: TranslationKey =
-                  sort === 'category-asc'
-                    ? 'sources.sort.category.asc.tooltip'
-                    : sort === 'category-desc'
-                      ? 'sources.sort.category.desc.tooltip'
-                      : 'sources.sort.category.activate.tooltip';
+                  sort === "category-asc"
+                    ? "sources.sort.category.asc.tooltip"
+                    : sort === "category-desc"
+                      ? "sources.sort.category.desc.tooltip"
+                      : "sources.sort.category.activate.tooltip";
                 const catTooltip = t(catTooltipKey, lang);
                 return (
                   <button
                     type="button"
-                    className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-right${isCatActive ? ' is-active' : ''}`}
+                    className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-right${isCatActive ? " is-active" : ""}`}
                     onClick={() => {
-                      if (sort === 'category-asc') {
-                        update('sourcesSpannweiteSort', 'category-desc');
-                      } else if (sort === 'category-desc') {
-                        update('sourcesSpannweiteSort', 'category-asc');
+                      if (sort === "category-asc") {
+                        update("sourcesSpannweiteSort", "category-desc");
+                      } else if (sort === "category-desc") {
+                        update("sourcesSpannweiteSort", "category-asc");
                       } else {
-                        update('sourcesSpannweiteSort', 'category-asc');
-                        update('sourcesSpannweiteSortColumn', null);
+                        update("sourcesSpannweiteSort", "category-asc");
+                        update("sourcesSpannweiteSortColumn", null);
                       }
                     }}
                     aria-pressed={isCatActive}
                     aria-label={catTooltip}
                     title={catTooltip}
                   >
-                    {sort === 'category-desc' ? (
+                    {sort === "category-desc" ? (
                       <IconCategoryRankDesc size={14} aria-hidden="true" />
                     ) : (
                       <IconCategoryRankAsc size={14} aria-hidden="true" />
@@ -525,17 +596,28 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                     type="button"
                     className="carm-spannweite__cell carm-spannweite__cell--header carm-spannweite__cell--hidden"
                     onClick={() => show(col.id)}
-                    aria-label={`${t('column.show', lang)} — ${col.fullLabel}`}
-                    title={`${t('column.show', lang)} — ${col.fullLabel}`}
+                    aria-label={`${t("column.show", lang)} — ${col.fullLabel}`}
+                    title={`${t("column.show", lang)} — ${col.fullLabel}`}
                   >
                     {/* Closed-column layout (Fedor 2026-05-25 PM) —
                         expand chev on top + the column's metric / group
                         icon below; vertical text label dropped. */}
-                    <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
-                    <span className="carm-spannweite__hidden-icon" aria-hidden="true">
+                    <span
+                      className="carm-spannweite__hidden-chev"
+                      aria-hidden="true"
+                    >
+                      ▸
+                    </span>
+                    <span
+                      className="carm-spannweite__hidden-icon"
+                      aria-hidden="true"
+                    >
                       <ColIcon size={16} strokeWidth={1.75} />
                     </span>
-                    <span className="carm-spannweite__hidden-label" aria-hidden="true">
+                    <span
+                      className="carm-spannweite__hidden-label"
+                      aria-hidden="true"
+                    >
                       {col.label}
                     </span>
                   </button>
@@ -543,15 +625,19 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
               }
               const Icon = col.Icon;
               const isSortCol =
-                (sort === 'value-asc' || sort === 'value-desc') && sortColumn === col.id;
-              const isAsc = isSortCol && sort === 'value-asc';
-              const isDesc = isSortCol && sort === 'value-desc';
+                (sort === "value-asc" || sort === "value-desc") &&
+                sortColumn === col.id;
+              const isAsc = isSortCol && sort === "value-asc";
+              const isDesc = isSortCol && sort === "value-desc";
               const colSortTooltipKey: TranslationKey = isAsc
-                ? 'sources.sort.col.asc.tooltip'
+                ? "sources.sort.col.asc.tooltip"
                 : isDesc
-                ? 'sources.sort.col.desc.tooltip'
-                : 'sources.sort.col.activate.tooltip';
-              const colSortTooltip = t(colSortTooltipKey, lang).replace('{col}', col.fullLabel);
+                  ? "sources.sort.col.desc.tooltip"
+                  : "sources.sort.col.activate.tooltip";
+              const colSortTooltip = t(colSortTooltipKey, lang).replace(
+                "{col}",
+                col.fullLabel,
+              );
               return (
                 <div
                   key={`th-${col.id}`}
@@ -562,17 +648,23 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                     type="button"
                     className="carm-spannweite__hide-btn"
                     onClick={() => hide(col.id)}
-                    aria-label={`${t('column.hide', lang)} — ${col.fullLabel}`}
-                    title={`${t('column.hide', lang)} — ${col.fullLabel}`}
+                    aria-label={`${t("column.hide", lang)} — ${col.fullLabel}`}
+                    title={`${t("column.hide", lang)} — ${col.fullLabel}`}
                   >
                     <EyeOff size={11} strokeWidth={2} aria-hidden="true" />
                   </button>
                   <span
                     className="carm-spannweite__header-inner"
-                    title={col.defText ? `${col.fullLabel} — ${col.defText}` : col.fullLabel}
+                    title={
+                      col.defText
+                        ? `${col.fullLabel} — ${col.defText}`
+                        : col.fullLabel
+                    }
                   >
                     <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
-                    <span className="carm-spannweite__header-text">{col.label}</span>
+                    <span className="carm-spannweite__header-text">
+                      {col.label}
+                    </span>
                     {col.defTitle && col.defText && (
                       <span className="carm-spannweite__info-inline">
                         <InfoTooltip
@@ -586,16 +678,24 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                   </span>
                   <button
                     type="button"
-                    className={`carm-spannweite__col-sort-btn${isSortCol ? ' is-active' : ''}`}
+                    className={`carm-spannweite__col-sort-btn${isSortCol ? " is-active" : ""}`}
                     onClick={() => handleColumnSortClick(col.id)}
                     aria-pressed={isSortCol}
                     aria-label={colSortTooltip}
                     title={colSortTooltip}
                   >
                     {isDesc ? (
-                      <ArrowDown10 size={14} strokeWidth={2} aria-hidden="true" />
+                      <ArrowDown10
+                        size={14}
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
                     ) : (
-                      <ArrowDown01 size={14} strokeWidth={2} aria-hidden="true" />
+                      <ArrowDown01
+                        size={14}
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
                     )}
                   </button>
                 </div>
@@ -606,11 +706,12 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
             {resolvedRows.map((row, rowIdx) => {
               const { source, categoryColor, isChild } = row;
               const isExpanded = expanded.includes(source.id);
-              const hasChildren = !isChild && (childrenByParent.get(source.id)?.length ?? 0) > 0;
+              const hasChildren =
+                !isChild && (childrenByParent.get(source.id)?.length ?? 0) > 0;
               return (
                 <div
                   key={`row-${source.id}-${rowIdx}`}
-                  className={`carm-spannweite__row${isChild ? ' carm-spannweite__row--child' : ''}${rowIdx % 2 === 0 ? '' : ' is-alt'}`}
+                  className={`carm-spannweite__row${isChild ? " carm-spannweite__row--child" : ""}${rowIdx % 2 === 0 ? "" : " is-alt"}`}
                   role="row"
                   style={{
                     gridColumn: `1 / span ${columns.length + 1}`,
@@ -645,20 +746,34 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                         }
                       >
                         {isExpanded ? (
-                          <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+                          <ChevronDown
+                            size={14}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
                         ) : (
-                          <ChevronRight size={14} strokeWidth={2} aria-hidden="true" />
+                          <ChevronRight
+                            size={14}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
                         )}
                       </button>
                     ) : (
-                      <span className="carm-sources-spannweite__chev-spacer" aria-hidden="true" />
+                      <span
+                        className="carm-sources-spannweite__chev-spacer"
+                        aria-hidden="true"
+                      />
                     )}
                     {(() => {
                       // 2026-05-29: render the source-category icon (tinted
                       // with the category colour) instead of a plain
                       // swatch square, so the first column matches
                       // Quellen-Balken across all three Quellen tabs.
-                      const CategoryIcon = SOURCE_CATEGORY_ICONS[source.category as SourceCategoryId];
+                      const CategoryIcon =
+                        SOURCE_CATEGORY_ICONS[
+                          source.category as SourceCategoryId
+                        ];
                       return CategoryIcon ? (
                         <span
                           className="carm-sources-spannweite__row-icon"
@@ -675,7 +790,9 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                         />
                       );
                     })()}
-                    <span className="carm-spannweite__row-text">{source.name}</span>
+                    <span className="carm-spannweite__row-text">
+                      {source.name}
+                    </span>
                   </div>
                   {columns.map((col) => {
                     if (isHidden(col.id)) {
@@ -720,10 +837,16 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
                                   source-category color drives the fill;
                                   matches the marker used by GridValueCell
                                   (Mythen Spannweite) and BalkenBar. */}
-                              <ValueCircle value={value} accent={categoryColor} />
+                              <ValueCircle
+                                value={value}
+                                accent={categoryColor}
+                              />
                             </>
                           ) : (
-                            <span className="carm-spannweite__no-data" aria-hidden="true">
+                            <span
+                              className="carm-spannweite__no-data"
+                              aria-hidden="true"
+                            >
                               k. A.
                             </span>
                           )}
@@ -747,86 +870,91 @@ const SourcesSpannweiteView = forwardRef<SourcesSpannweiteViewHandle, Props>(
             metric = selectedMetric). Sentence templates are AI
             drafts marked in LesebeispielSource.tsx for ISD review
             on the live site. */}
-        {hoveredSource && hoverPos && (() => {
-          let lesebeispielMetric: SourceMetricType | null = null;
-          let lesebeispielGroup: SourceGroupId = selectedGroup;
-          let lesebeispielValue: number | null = null;
-          if (hovered?.colId) {
-            // v5: in 'metric' mode the cols are groups (selectedMetric
-            // is the fixed picker dim); in 'group' mode the cols are
-            // metrics (selectedGroup is fixed).
-            if (mode === 'metric') {
-              lesebeispielMetric = selectedMetric;
-              lesebeispielGroup = hovered.colId as SourceGroupId;
-            } else {
-              lesebeispielMetric = hovered.colId as SourceMetricType;
-              lesebeispielGroup = selectedGroup;
+        {hoveredSource &&
+          hoverPos &&
+          (() => {
+            let lesebeispielMetric: SourceMetricType | null = null;
+            let lesebeispielGroup: SourceGroupId = selectedGroup;
+            let lesebeispielValue: number | null = null;
+            if (hovered?.colId) {
+              // v5: in 'metric' mode the cols are groups (selectedMetric
+              // is the fixed picker dim); in 'group' mode the cols are
+              // metrics (selectedGroup is fixed).
+              if (mode === "metric") {
+                lesebeispielMetric = selectedMetric;
+                lesebeispielGroup = hovered.colId as SourceGroupId;
+              } else {
+                lesebeispielMetric = hovered.colId as SourceMetricType;
+                lesebeispielGroup = selectedGroup;
+              }
+              lesebeispielValue = cellValue(hoveredSource.id, hovered.colId);
             }
-            lesebeispielValue = cellValue(hoveredSource.id, hovered.colId);
-          }
-          // Light category-tinted background via color-mix; fall back to white if unsupported.
-          const bg = `color-mix(in srgb, ${hoveredCategoryColor} 14%, #ffffff)`;
-          return (
-            <div
-              className="carm-spannweite__tooltip carm-sources-spannweite__tooltip"
-              role="tooltip"
-              style={{
-                position: 'fixed',
-                left: hoverPos.x,
-                top: hoverPos.y,
-                background: bg,
-                borderLeft: `3px solid ${hoveredCategoryColor}`,
-              }}
-            >
-              <div className="carm-spannweite__tooltip-row">
-                <div className="carm-spannweite__tooltip-myth">
-                  {hoveredSource.name}
+            // Light category-tinted background via color-mix; fall back to white if unsupported.
+            const bg = `color-mix(in srgb, ${hoveredCategoryColor} 14%, #ffffff)`;
+            return (
+              <div
+                className="carm-spannweite__tooltip carm-sources-spannweite__tooltip"
+                role="tooltip"
+                style={{
+                  position: "fixed",
+                  left: hoverPos.x,
+                  top: hoverPos.y,
+                  background: bg,
+                  borderLeft: `3px solid ${hoveredCategoryColor}`,
+                }}
+              >
+                <div className="carm-spannweite__tooltip-row">
+                  <div className="carm-spannweite__tooltip-myth">
+                    {hoveredSource.name}
+                  </div>
+                  {(() => {
+                    // 2026-05-29: show the source-category SVG icon (tinted),
+                    // matching Quellen-Balken's hover tooltip — was a plain
+                    // colour circle before.
+                    const TipIcon =
+                      SOURCE_CATEGORY_ICONS[
+                        hoveredSource.category as SourceCategoryId
+                      ];
+                    return TipIcon ? (
+                      <span
+                        className="carm-spannweite__tooltip-glyph"
+                        style={{ color: hoveredCategoryColor }}
+                        aria-hidden="true"
+                      >
+                        <TipIcon size={20} strokeWidth={1.75} />
+                      </span>
+                    ) : null;
+                  })()}
                 </div>
+                <div
+                  className="carm-spannweite__tooltip-verdict"
+                  style={{ color: hoveredCategoryColor }}
+                >
+                  {hoveredCategoryName}
+                </div>
+                {/* v3 (2026-05-26): per-category description above the
+                  Lesebeispiel, mirroring the new Quellen Balken hover. */}
                 {(() => {
-                  // 2026-05-29: show the source-category SVG icon (tinted),
-                  // matching Quellen-Balken's hover tooltip — was a plain
-                  // colour circle before.
-                  const TipIcon = SOURCE_CATEGORY_ICONS[hoveredSource.category as SourceCategoryId];
-                  return TipIcon ? (
-                    <span
-                      className="carm-spannweite__tooltip-glyph"
-                      style={{ color: hoveredCategoryColor }}
-                      aria-hidden="true"
-                    >
-                      <TipIcon size={20} strokeWidth={1.75} />
-                    </span>
+                  const desc = getCategoryDescription(
+                    hoveredSource.category as SourceCategoryId,
+                  );
+                  return desc ? (
+                    <div className="carm-sources-tooltip__desc">{desc}</div>
                   ) : null;
                 })()}
+                {lesebeispielMetric && lesebeispielValue !== null && (
+                  <div className="carm-spannweite__tooltip-lesebeispiel">
+                    <LesebeispielSource
+                      metric={lesebeispielMetric}
+                      value={lesebeispielValue}
+                      group={lesebeispielGroup}
+                      compactHeading
+                    />
+                  </div>
+                )}
               </div>
-              <div
-                className="carm-spannweite__tooltip-verdict"
-                style={{ color: hoveredCategoryColor }}
-              >
-                {hoveredCategoryName}
-              </div>
-              {/* v3 (2026-05-26): per-category description above the
-                  Lesebeispiel, mirroring the new Quellen Balken hover. */}
-              {(() => {
-                const desc = getCategoryDescription(
-                  hoveredSource.category as SourceCategoryId,
-                );
-                return desc ? (
-                  <div className="carm-sources-tooltip__desc">{desc}</div>
-                ) : null;
-              })()}
-              {lesebeispielMetric && lesebeispielValue !== null && (
-                <div className="carm-spannweite__tooltip-lesebeispiel">
-                  <LesebeispielSource
-                    metric={lesebeispielMetric}
-                    value={lesebeispielValue}
-                    group={lesebeispielGroup}
-                    compactHeading
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })()}
+            );
+          })()}
       </div>
     );
   },

@@ -20,13 +20,8 @@ interface StreakChipProps {
 export default function StreakChip({ count }: StreakChipProps) {
   if (count < 2) return null;
   return (
-    <span
-      className="quiz-card__streak"
-      role="status"
-      aria-live="polite"
-    >
-      <span aria-hidden="true">🔥</span>{" "}
-      {t("ui.streak.label", { n: count })}
+    <span className="quiz-card__streak" role="status" aria-live="polite">
+      <span aria-hidden="true">🔥</span> {t("ui.streak.label", { n: count })}
     </span>
   );
 }

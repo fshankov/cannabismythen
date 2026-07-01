@@ -28,11 +28,11 @@
  * popover styling note in `quiz.css` for the cross-context rules.
  */
 
-import { useEffect } from 'react';
-import type { CorrectnessClass } from '../../lib/dashboard/types';
-import VerdictArrow from './VerdictArrow';
-import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
-import { t, type TranslationKey } from '../../lib/dashboard/translations';
+import { useEffect } from "react";
+import type { CorrectnessClass } from "../../lib/dashboard/types";
+import VerdictArrow from "./VerdictArrow";
+import { useFlipPosition } from "../dashboard/hooks/useFlipPosition";
+import { t, type TranslationKey } from "../../lib/dashboard/translations";
 
 interface Props {
   verdict: CorrectnessClass;
@@ -67,24 +67,25 @@ export default function VerdictArrowWithInfo({
       if (
         triggerRef.current?.contains(e.target as Node) ||
         cardRef.current?.contains(e.target as Node)
-      ) return;
+      )
+        return;
       setOpen(false);
     };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === "Escape") setOpen(false);
     };
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
     };
   }, [open, setOpen, triggerRef, cardRef]);
 
   // No info card for the "keine_aussage_moeglich" sentinel — there is no
   // explanation copy registered for it; the arrow alone communicates
   // "no verdict possible". Render a bare <VerdictArrow>.
-  if (verdict === 'keine_aussage_moeglich') {
+  if (verdict === "keine_aussage_moeglich") {
     return (
       <VerdictArrow
         verdict={verdict}
@@ -98,12 +99,12 @@ export default function VerdictArrowWithInfo({
   const labelKey: TranslationKey = `verdict.${verdict}` as TranslationKey;
   const explanationKey: TranslationKey =
     `verdict.legend.info.${verdict}` as TranslationKey;
-  const label = t(labelKey, 'de');
-  const explanation = t(explanationKey, 'de');
+  const label = t(labelKey, "de");
+  const explanation = t(explanationKey, "de");
   const tooltipId = `verdict-tooltip-${verdict}`;
 
   return (
-    <span className={`carm-verdict-arrow-info ${className ?? ''}`}>
+    <span className={`carm-verdict-arrow-info ${className ?? ""}`}>
       <button
         ref={triggerRef}
         type="button"
@@ -129,15 +130,19 @@ export default function VerdictArrowWithInfo({
         id={tooltipId}
         role="tooltip"
         tabIndex={-1}
-        className={`info-tooltip-card info-tooltip-card--fixed${open ? ' info-tooltip-card--open' : ''}`}
-        style={pos ? {
-          position: 'fixed',
-          top: pos.top,
-          left: pos.left,
-          width: pos.width,
-          maxWidth: pos.width,
-          transform: 'none',
-        } : undefined}
+        className={`info-tooltip-card info-tooltip-card--fixed${open ? " info-tooltip-card--open" : ""}`}
+        style={
+          pos
+            ? {
+                position: "fixed",
+                top: pos.top,
+                left: pos.left,
+                width: pos.width,
+                maxWidth: pos.width,
+                transform: "none",
+              }
+            : undefined
+        }
         onMouseEnter={handleOpen}
         onMouseLeave={() => setOpen(false)}
       >

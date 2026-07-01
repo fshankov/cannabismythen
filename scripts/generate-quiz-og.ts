@@ -64,7 +64,7 @@ const FONT_CACHE_DIR = path.join(
   REPO_ROOT,
   "node_modules",
   ".cache",
-  "og-fonts"
+  "og-fonts",
 );
 
 interface LoadedFont {
@@ -75,7 +75,7 @@ interface LoadedFont {
 function toArrayBuffer(buf: Buffer): ArrayBuffer {
   return buf.buffer.slice(
     buf.byteOffset,
-    buf.byteOffset + buf.byteLength
+    buf.byteOffset + buf.byteLength,
   ) as ArrayBuffer;
 }
 
@@ -127,7 +127,7 @@ async function loadInterFonts(): Promise<LoadedFont[] | null> {
 
   if (fonts.length === 0) {
     console.error(
-      "[generate-quiz-og] No Inter weights could be loaded; aborting. Existing PNGs in public/og/quiz/ are untouched."
+      "[generate-quiz-og] No Inter weights could be loaded; aborting. Existing PNGs in public/og/quiz/ are untouched.",
     );
     return null;
   }
@@ -144,7 +144,7 @@ const EMOJI_CACHE_DIR = path.join(
   REPO_ROOT,
   "node_modules",
   ".cache",
-  "og-emoji"
+  "og-emoji",
 );
 
 /** Twemoji filenames drop the FE0F variation selector — strip it so e.g.
@@ -173,7 +173,7 @@ async function loadEmojiDataUri(segment: string): Promise<string | null> {
   if (!svg) {
     try {
       const res = await fetch(
-        `https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/${cp}.svg`
+        `https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/${cp}.svg`,
       );
       if (!res.ok) throw new Error(`twemoji ${cp} → HTTP ${res.status}`);
       svg = await res.text();
@@ -181,7 +181,7 @@ async function loadEmojiDataUri(segment: string): Promise<string | null> {
     } catch (err) {
       console.warn(
         `[generate-quiz-og] emoji ${segment} (${cp}) unavailable:`,
-        err
+        err,
       );
       return null;
     }
@@ -393,10 +393,7 @@ function hubSvgTree(fontFamily: string) {
   };
 }
 
-async function renderToPng(
-  tree: object,
-  fonts: LoadedFont[]
-): Promise<Buffer> {
+async function renderToPng(tree: object, fonts: LoadedFont[]): Promise<Buffer> {
   const svg = await satori(tree as Parameters<typeof satori>[0], {
     width: WIDTH,
     height: HEIGHT,
@@ -426,7 +423,7 @@ async function main() {
   const fonts = await loadInterFonts();
   if (!fonts) {
     console.error(
-      "[generate-quiz-og] No font available; aborting. Existing PNGs in public/og/quiz/ are untouched."
+      "[generate-quiz-og] No font available; aborting. Existing PNGs in public/og/quiz/ are untouched.",
     );
     process.exit(0);
   }
@@ -455,24 +452,22 @@ async function main() {
         (slug === "quiz-schnellcheck"
           ? "7 zufällige Mythen aus allen Themenbereichen – jedes Mal neu zusammengestellt."
           : "Cannabis-Mythen — wissenschaftlich eingeordnet."),
-      questionCount:
-        eAny.questionCount ?? eAny.questions?.length ?? 7,
+      questionCount: eAny.questionCount ?? eAny.questions?.length ?? 7,
     });
   }
 
   console.log(
-    `[generate-quiz-og] Rendering ${entries.length + 1} images to ${OUT_DIR}`
+    `[generate-quiz-og] Rendering ${entries.length + 1} images to ${OUT_DIR}`,
   );
 
   for (const entry of entries) {
     try {
-      const png = await renderToPng(
-        moduleSvgTree(entry, "Inter"),
-        fonts
-      );
+      const png = await renderToPng(moduleSvgTree(entry, "Inter"), fonts);
       const out = path.join(OUT_DIR, `${entry.slug}.png`);
       await fs.writeFile(out, png);
-      console.log(`  ✓ ${entry.slug}.png (${(png.length / 1024).toFixed(1)} KB)`);
+      console.log(
+        `  ✓ ${entry.slug}.png (${(png.length / 1024).toFixed(1)} KB)`,
+      );
     } catch (err) {
       console.error(`  ✗ ${entry.slug}.png — render failed`, err);
     }

@@ -1,11 +1,19 @@
-import type { CarmData, Myth, Metric, Indicator, GroupId, Lang, VerdictFilter } from './types';
+import type {
+  CarmData,
+  Myth,
+  Metric,
+  Indicator,
+  GroupId,
+  Lang,
+  VerdictFilter,
+} from "./types";
 
 let cachedData: CarmData | null = null;
 
 /** Group ids that exist in carm-data.json but are intentionally excluded from
  *  the dashboard. `general_population` mixes minors and adults and produces
  *  scores that don't match the published per-group analysis. */
-const EXCLUDED_GROUP_IDS = new Set(['general_population']);
+const EXCLUDED_GROUP_IDS = new Set(["general_population"]);
 
 /**
  * Session 1 of 2026-05 — Daten-Explorer category taxonomy migration.
@@ -32,67 +40,99 @@ const EXCLUDED_GROUP_IDS = new Set(['general_population']);
  * is ever regenerated and ships its own 8-cat taxonomy, this override can
  * be removed.
  */
-const CATEGORIES_DOCX: CarmData['categories'] = [
-  { id: 1, name_de: 'Medizinischer und therapeutischer Nutzen', name_en: 'Medical and Therapeutic Benefits' },
-  { id: 2, name_de: 'Risiken für den Körper und die Entwicklung', name_en: 'Physical and Developmental Risks' },
-  { id: 3, name_de: 'Risiken für die psychische Gesundheit', name_en: 'Mental Health Risks' },
-  { id: 4, name_de: 'Einfluss auf Stimmung und Wahrnehmung', name_en: 'Effects on Mood and Perception' },
-  { id: 5, name_de: 'Soziale Auswirkungen und Leistungsfähigkeit', name_en: 'Social Effects and Performance' },
-  { id: 6, name_de: 'Risiken durch Dosierung und Qualität', name_en: 'Dosage and Quality Risks' },
-  { id: 7, name_de: 'Verbreitung in der Bevölkerung und Gesetzgebung', name_en: 'Prevalence and Legislation' },
-  { id: 8, name_de: 'Allgemeine Einschätzung der Gefährlichkeit', name_en: 'General Risk Assessment' },
+const CATEGORIES_DOCX: CarmData["categories"] = [
+  {
+    id: 1,
+    name_de: "Medizinischer und therapeutischer Nutzen",
+    name_en: "Medical and Therapeutic Benefits",
+  },
+  {
+    id: 2,
+    name_de: "Risiken für den Körper und die Entwicklung",
+    name_en: "Physical and Developmental Risks",
+  },
+  {
+    id: 3,
+    name_de: "Risiken für die psychische Gesundheit",
+    name_en: "Mental Health Risks",
+  },
+  {
+    id: 4,
+    name_de: "Einfluss auf Stimmung und Wahrnehmung",
+    name_en: "Effects on Mood and Perception",
+  },
+  {
+    id: 5,
+    name_de: "Soziale Auswirkungen und Leistungsfähigkeit",
+    name_en: "Social Effects and Performance",
+  },
+  {
+    id: 6,
+    name_de: "Risiken durch Dosierung und Qualität",
+    name_en: "Dosage and Quality Risks",
+  },
+  {
+    id: 7,
+    name_de: "Verbreitung in der Bevölkerung und Gesetzgebung",
+    name_en: "Prevalence and Legislation",
+  },
+  {
+    id: 8,
+    name_de: "Allgemeine Einschätzung der Gefährlichkeit",
+    name_en: "General Risk Assessment",
+  },
 ];
 
 /** mythNumber (1–42) → 8-cat docx categoryGroup id. Source of truth: the
  *  per-myth `.mdoc` `categoryGroup` field; see audit file referenced above. */
 const MYTH_NUMBER_TO_CATEGORY_ID: Record<number, number> = {
-  1: 1,    // Allheilmittel              → Medizinischer
-  2: 8,    // Harmlos                    → Allgemeine Gefährlichkeit
-  3: 8,    // Heranwachsende             → Allgemeine Gefährlichkeit (moved from 'Risiken Körper' per docx)
-  4: 8,    // Weniger schädlich Alkohol  → Allgemeine Gefährlichkeit
-  5: 6,    // Schwierig zu dosieren      → Risiken Dosierung
-  6: 6,    // Mischkonsum                → Risiken Dosierung
-  7: 6,    // Zusätze                    → Risiken Dosierung
-  8: 2,    // Fötus                      → Risiken Körper
-  9: 6,    // Überdosierung              → Risiken Dosierung (moved from 'Allgemeine Gefährlichkeit' per docx)
-  10: 1,   // Schmerzen                  → Medizinischer
-  11: 2,   // Übelkeit                   → Risiken Körper
-  12: 1,   // Entzündungen               → Medizinischer
-  13: 1,   // Spastiken                  → Medizinischer
-  14: 2,   // Herz-Kreislauf             → Risiken Körper
-  15: 2,   // Atemwege                   → Risiken Körper
-  16: 2,   // Krebs                      → Risiken Körper
-  17: 1,   // Abnehmen                   → Medizinischer
-  18: 1,   // Schlaf                     → Medizinischer
-  19: 4,   // Wahrnehmung                → Stimmung
-  20: 3,   // Kognition                  → Risiken psychisch
-  21: 5,   // Verkehr                    → Soziale Auswirkungen
-  22: 3,   // Einstiegsdroge             → Risiken psychisch
-  23: 3,   // Abhängigkeit               → Risiken psychisch
-  24: 3,   // Psychosen                  → Risiken psychisch
-  25: 1,   // Angst                      → Medizinischer
-  26: 1,   // Depressionen               → Medizinischer
-  27: 1,   // ADHS                       → Medizinischer
-  28: 3,   // Motivation                 → Risiken psychisch
-  29: 4,   // Gemütslage                 → Stimmung
-  30: 3,   // Suizid                     → Risiken psychisch
-  31: 4,   // Entspannt                  → Stimmung
-  32: 4,   // Aggressiv                  → Stimmung
-  33: 5,   // Kreativ                    → Soziale Auswirkungen (moved from 'Stimmung' per docx)
-  34: 5,   // Soziale Beziehungen        → Soziale Auswirkungen
-  35: 5,   // Soziale Regeln             → Soziale Auswirkungen
-  36: 5,   // Niedrige Leistungen        → Soziale Auswirkungen
-  37: 5,   // Niedriges soziales Niveau  → Soziale Auswirkungen
-  38: 5,   // Cool                       → Soziale Auswirkungen
-  39: 7,   // Bevölkerung konsumiert     → Verbreitung
-  40: 7,   // Überall erlaubt            → Verbreitung
-  41: 7,   // Anstieg Erwachsene         → Verbreitung
-  42: 7,   // Anstieg Minderjährige      → Verbreitung
+  1: 1, // Allheilmittel              → Medizinischer
+  2: 8, // Harmlos                    → Allgemeine Gefährlichkeit
+  3: 8, // Heranwachsende             → Allgemeine Gefährlichkeit (moved from 'Risiken Körper' per docx)
+  4: 8, // Weniger schädlich Alkohol  → Allgemeine Gefährlichkeit
+  5: 6, // Schwierig zu dosieren      → Risiken Dosierung
+  6: 6, // Mischkonsum                → Risiken Dosierung
+  7: 6, // Zusätze                    → Risiken Dosierung
+  8: 2, // Fötus                      → Risiken Körper
+  9: 6, // Überdosierung              → Risiken Dosierung (moved from 'Allgemeine Gefährlichkeit' per docx)
+  10: 1, // Schmerzen                  → Medizinischer
+  11: 2, // Übelkeit                   → Risiken Körper
+  12: 1, // Entzündungen               → Medizinischer
+  13: 1, // Spastiken                  → Medizinischer
+  14: 2, // Herz-Kreislauf             → Risiken Körper
+  15: 2, // Atemwege                   → Risiken Körper
+  16: 2, // Krebs                      → Risiken Körper
+  17: 1, // Abnehmen                   → Medizinischer
+  18: 1, // Schlaf                     → Medizinischer
+  19: 4, // Wahrnehmung                → Stimmung
+  20: 3, // Kognition                  → Risiken psychisch
+  21: 5, // Verkehr                    → Soziale Auswirkungen
+  22: 3, // Einstiegsdroge             → Risiken psychisch
+  23: 3, // Abhängigkeit               → Risiken psychisch
+  24: 3, // Psychosen                  → Risiken psychisch
+  25: 1, // Angst                      → Medizinischer
+  26: 1, // Depressionen               → Medizinischer
+  27: 1, // ADHS                       → Medizinischer
+  28: 3, // Motivation                 → Risiken psychisch
+  29: 4, // Gemütslage                 → Stimmung
+  30: 3, // Suizid                     → Risiken psychisch
+  31: 4, // Entspannt                  → Stimmung
+  32: 4, // Aggressiv                  → Stimmung
+  33: 5, // Kreativ                    → Soziale Auswirkungen (moved from 'Stimmung' per docx)
+  34: 5, // Soziale Beziehungen        → Soziale Auswirkungen
+  35: 5, // Soziale Regeln             → Soziale Auswirkungen
+  36: 5, // Niedrige Leistungen        → Soziale Auswirkungen
+  37: 5, // Niedriges soziales Niveau  → Soziale Auswirkungen
+  38: 5, // Cool                       → Soziale Auswirkungen
+  39: 7, // Bevölkerung konsumiert     → Verbreitung
+  40: 7, // Überall erlaubt            → Verbreitung
+  41: 7, // Anstieg Erwachsene         → Verbreitung
+  42: 7, // Anstieg Minderjährige      → Verbreitung
 };
 
 export async function loadData(): Promise<CarmData> {
   if (cachedData) return cachedData;
-  const res = await fetch('/data/carm-data.json');
+  const res = await fetch("/data/carm-data.json");
   const raw = (await res.json()) as CarmData & {
     metrics: Array<Metric & { group_id: string }>;
     groups: Array<{ id: string }>;
@@ -121,8 +161,12 @@ export async function loadData(): Promise<CarmData> {
     ...raw,
     categories: CATEGORIES_DOCX,
     myths: remappedMyths,
-    metrics: raw.metrics.filter((m) => !EXCLUDED_GROUP_IDS.has(m.group_id)) as Metric[],
-    groups: raw.groups.filter((g) => !EXCLUDED_GROUP_IDS.has(g.id)) as CarmData['groups'],
+    metrics: raw.metrics.filter(
+      (m) => !EXCLUDED_GROUP_IDS.has(m.group_id),
+    ) as Metric[],
+    groups: raw.groups.filter(
+      (g) => !EXCLUDED_GROUP_IDS.has(g.id),
+    ) as CarmData["groups"],
   };
   return cachedData;
 }
@@ -130,30 +174,36 @@ export async function loadData(): Promise<CarmData> {
 export function getMythMetric(
   metrics: Metric[],
   mythId: number,
-  groupId: GroupId
+  groupId: GroupId,
 ): Metric | undefined {
   return metrics.find((m) => m.myth_id === mythId && m.group_id === groupId);
 }
 
-export function getIndicatorValue(metric: Metric | undefined, indicator: Indicator): number | null {
+export function getIndicatorValue(
+  metric: Metric | undefined,
+  indicator: Indicator,
+): number | null {
   if (!metric) return null;
   return metric[indicator];
 }
 
 export function getMythText(myth: Myth, lang: Lang): string {
-  return lang === 'en' ? myth.text_en : myth.text_de;
+  return lang === "en" ? myth.text_en : myth.text_de;
 }
 
 export function getMythShortText(myth: Myth, lang: Lang): string {
-  return lang === 'en' ? myth.text_short_en : myth.text_short_de;
+  return lang === "en" ? myth.text_short_en : myth.text_short_de;
 }
 
 export function getCategoryName(myth: Myth, lang: Lang): string {
-  return lang === 'en' ? myth.category_en : myth.category_de;
+  return lang === "en" ? myth.category_en : myth.category_de;
 }
 
-export function formatValue(value: number | null, indicator: Indicator): string {
-  if (value === null || value === undefined) return 'n/a';
+export function formatValue(
+  value: number | null,
+  indicator: Indicator,
+): string {
+  if (value === null || value === undefined) return "n/a";
   // BugHerd #31 — round-to-int site-wide. Reviewer asked for "no decimals
   // please on the whole site"; Fedor confirmed round-to-int (not floor)
   // for both percentages and 0-100 indicator scores in the 2026-05-07
@@ -161,19 +211,19 @@ export function formatValue(value: number | null, indicator: Indicator): string 
   // breaks ties toward +Infinity (27.5 → 28), which is the German banking
   // convention readers expect.
   const rounded = Math.round(value);
-  if (indicator === 'awareness') {
+  if (indicator === "awareness") {
     return `${rounded}%`;
   }
   return String(rounded);
 }
 
 export function getIndicatorUnit(indicator: Indicator): string {
-  if (indicator === 'awareness') return '%';
-  return 'pts';
+  if (indicator === "awareness") return "%";
+  return "pts";
 }
 
 export function getIndicatorRange(indicator: Indicator): [number, number] {
-  if (indicator === 'awareness') return [0, 100];
+  if (indicator === "awareness") return [0, 100];
   return [0, 100];
 }
 
@@ -182,7 +232,7 @@ export function filterMyths(
   categoryIds: number[],
   verdictFilter: VerdictFilter,
   mythIds: number[] = [],
-  searchQuery: string = '',
+  searchQuery: string = "",
 ): Myth[] {
   let filtered = myths;
 
@@ -197,7 +247,7 @@ export function filterMyths(
     );
   }
 
-  if (verdictFilter !== 'all') {
+  if (verdictFilter !== "all") {
     filtered = filtered.filter((m) => m.correctness_class === verdictFilter);
   }
 
@@ -231,7 +281,7 @@ export function filterSourcesBySearch<T extends { name: string }>(
 
 /** Population_relevance was only collected for these two groups; values for
  *  the other three are null in carm-data.json. */
-const POP_REL_VALID_GROUPS: GroupId[] = ['adults', 'minors'];
+const POP_REL_VALID_GROUPS: GroupId[] = ["adults", "minors"];
 
 /** Groups for which `population_relevance` is methodologically invalid.
  *  carm-data.json contains stray non-null values for these groups that
@@ -239,9 +289,9 @@ const POP_REL_VALID_GROUPS: GroupId[] = ['adults', 'minors'];
  *  renders an indicator value (Spannweite cells, Balken bars, Tabelle
  *  cells, hover tooltips, CSV export, FactsheetGroupBars). */
 export const POP_REL_INVALID_GROUPS: ReadonlySet<GroupId> = new Set<GroupId>([
-  'consumers',
-  'young_adults',
-  'parents',
+  "consumers",
+  "young_adults",
+  "parents",
 ]);
 
 /** Predicate — true when the (indicator, groupId) combo is methodologically
@@ -250,7 +300,9 @@ export function isInvalidIndicatorGroupCombo(
   indicator: Indicator,
   groupId: GroupId,
 ): boolean {
-  return indicator === 'population_relevance' && POP_REL_INVALID_GROUPS.has(groupId);
+  return (
+    indicator === "population_relevance" && POP_REL_INVALID_GROUPS.has(groupId)
+  );
 }
 
 /** Like getIndicatorValue, but returns null for methodologically-invalid
@@ -269,8 +321,8 @@ export function getIndicatorValueChecked(
 /** Group ids that should be greyed-out in the IndicatorGroupSelector for the
  *  given indicator. Currently only `population_relevance` has a restriction. */
 export function getDisabledGroupsForIndicator(indicator: Indicator): GroupId[] {
-  if (indicator === 'population_relevance') {
-    return ['consumers', 'young_adults', 'parents'];
+  if (indicator === "population_relevance") {
+    return ["consumers", "young_adults", "parents"];
   }
   return [];
 }
@@ -282,10 +334,11 @@ export function correctGroupsForIndicator(
   indicator: Indicator,
   groupIds: GroupId[],
 ): GroupId[] {
-  if (indicator !== 'population_relevance' || groupIds.length === 0) return groupIds;
+  if (indicator !== "population_relevance" || groupIds.length === 0)
+    return groupIds;
   const valid = groupIds.filter((g) => POP_REL_VALID_GROUPS.includes(g));
   if (valid.length === groupIds.length) return groupIds;
-  if (valid.length === 0) return ['adults'];
+  if (valid.length === 0) return ["adults"];
   return valid;
 }
 
@@ -293,7 +346,7 @@ export function correctGroupsForIndicator(
 export function getFirstAvailableMetric(
   metrics: Metric[],
   mythId: number,
-  groupIds: GroupId[]
+  groupIds: GroupId[],
 ): Metric | undefined {
   for (const gid of groupIds) {
     const m = getMythMetric(metrics, mythId, gid);
@@ -306,25 +359,28 @@ export function getFirstAvailableMetric(
  *  tooltip HTML. Geometry mirrors verdictArrowSymbols.tsx exactly:
  *  vertical shaft + chevron + horizontal shadow line, rotated per
  *  verdict around (12, 12). */
-function verdictArrowSvgString(verdict: Myth['correctness_class']): string {
-  const colors: Record<Myth['correctness_class'], { fg: string; shadow: string }> = {
-    richtig: { fg: '#047857', shadow: '#a7d3c5' },
-    eher_richtig: { fg: '#4d7c0f', shadow: '#c2d3a3' },
-    eher_falsch: { fg: '#b45309', shadow: '#e0b58d' },
-    falsch: { fg: '#be123c', shadow: '#e9a8b9' },
-    keine_aussage_moeglich: { fg: '#6b7280', shadow: '#94a3b8' },
+function verdictArrowSvgString(verdict: Myth["correctness_class"]): string {
+  const colors: Record<
+    Myth["correctness_class"],
+    { fg: string; shadow: string }
+  > = {
+    richtig: { fg: "#047857", shadow: "#a7d3c5" },
+    eher_richtig: { fg: "#4d7c0f", shadow: "#c2d3a3" },
+    eher_falsch: { fg: "#b45309", shadow: "#e0b58d" },
+    falsch: { fg: "#be123c", shadow: "#e9a8b9" },
+    keine_aussage_moeglich: { fg: "#6b7280", shadow: "#94a3b8" },
   };
-  const rotations: Record<Myth['correctness_class'], string> = {
-    richtig: 'rotate(180 12 12)',
-    eher_richtig: 'rotate(-135 12 12)',
-    eher_falsch: 'rotate(45 12 12)',
-    falsch: '',
-    keine_aussage_moeglich: '',
+  const rotations: Record<Myth["correctness_class"], string> = {
+    richtig: "rotate(180 12 12)",
+    eher_richtig: "rotate(-135 12 12)",
+    eher_falsch: "rotate(45 12 12)",
+    falsch: "",
+    keine_aussage_moeglich: "",
   };
   const { fg, shadow } = colors[verdict];
   const rot = rotations[verdict];
-  const tx = rot ? ` transform="${rot}"` : '';
-  if (verdict === 'keine_aussage_moeglich') {
+  const tx = rot ? ` transform="${rot}"` : "";
+  if (verdict === "keine_aussage_moeglich") {
     return `<svg width="22" height="22" viewBox="0 0 24 24" style="display:block"><g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16h20" stroke="${shadow}"/></g></svg>`;
   }
   return `<svg width="22" height="22" viewBox="0 0 24 24" style="display:block"><g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"${tx}><path d="M2 16h20" stroke="${shadow}"/><path d="M12 2v14" stroke="${fg}"/><path d="m5 9 7 7 7-7" stroke="${fg}"/></g></svg>`;
@@ -342,30 +398,69 @@ export function buildTooltipHtml(opts: {
   const text = getMythText(myth, lang);
   // Canonical verdict label (lowercased for the "Wissenschaftlich …"
   // sentence; matches verdict.* in translations.ts).
-  const verdictLabel = lang === 'de'
-    ? ({ richtig: 'richtig', eher_richtig: 'eher richtig', eher_falsch: 'eher falsch', falsch: 'falsch', keine_aussage_moeglich: 'keine Einordnung möglich' }[myth.correctness_class])
-    : ({ richtig: 'correct', eher_richtig: 'tends to be correct', eher_falsch: 'tends to be incorrect', falsch: 'incorrect', keine_aussage_moeglich: 'not classified' }[myth.correctness_class]);
-  const wissenschaftlich = myth.correctness_class === 'keine_aussage_moeglich'
-    ? (lang === 'de' ? 'Wissenschaftlich: keine Einordnung möglich' : 'Scientific verdict: not classified')
-    : `${lang === 'de' ? 'Wissenschaftlich' : 'Scientifically'}: ${verdictLabel}`;
-  const indLabel = lang === 'de'
-    ? ({ awareness: 'Kenntnis', significance: 'Bedeutung', correctness: 'Richtigkeit', prevention_significance: 'Prävention', population_relevance: 'Bev. Relevanz' }[indicator])
-    : ({ awareness: 'Awareness', significance: 'Significance', correctness: 'Correctness', prevention_significance: 'Prevention', population_relevance: 'Pop. Relevance' }[indicator]);
+  const verdictLabel =
+    lang === "de"
+      ? {
+          richtig: "richtig",
+          eher_richtig: "eher richtig",
+          eher_falsch: "eher falsch",
+          falsch: "falsch",
+          keine_aussage_moeglich: "keine Einordnung möglich",
+        }[myth.correctness_class]
+      : {
+          richtig: "correct",
+          eher_richtig: "tends to be correct",
+          eher_falsch: "tends to be incorrect",
+          falsch: "incorrect",
+          keine_aussage_moeglich: "not classified",
+        }[myth.correctness_class];
+  const wissenschaftlich =
+    myth.correctness_class === "keine_aussage_moeglich"
+      ? lang === "de"
+        ? "Wissenschaftlich: keine Einordnung möglich"
+        : "Scientific verdict: not classified"
+      : `${lang === "de" ? "Wissenschaftlich" : "Scientifically"}: ${verdictLabel}`;
+  const indLabel =
+    lang === "de"
+      ? {
+          awareness: "Kenntnis",
+          significance: "Bedeutung",
+          correctness: "Richtigkeit",
+          prevention_significance: "Prävention",
+          population_relevance: "Bev. Relevanz",
+        }[indicator]
+      : {
+          awareness: "Awareness",
+          significance: "Significance",
+          correctness: "Correctness",
+          prevention_significance: "Prevention",
+          population_relevance: "Pop. Relevance",
+        }[indicator];
   const val = formatValue(value, indicator);
 
   // Verdict tinting (matches getCorrectnessColor / getCorrectnessBgColor).
-  const verdictColor = ({
-    richtig: '#047857', eher_richtig: '#4d7c0f', eher_falsch: '#b45309',
-    falsch: '#be123c', keine_aussage_moeglich: '#6b7280',
-  } as const)[myth.correctness_class];
-  const verdictBg = ({
-    richtig: '#ecfdf5', eher_richtig: '#f7fee7', eher_falsch: '#fffbeb',
-    falsch: '#fff1f2', keine_aussage_moeglich: '#f3f4f6',
-  } as const)[myth.correctness_class];
+  const verdictColor = (
+    {
+      richtig: "#047857",
+      eher_richtig: "#4d7c0f",
+      eher_falsch: "#b45309",
+      falsch: "#be123c",
+      keine_aussage_moeglich: "#6b7280",
+    } as const
+  )[myth.correctness_class];
+  const verdictBg = (
+    {
+      richtig: "#ecfdf5",
+      eher_richtig: "#f7fee7",
+      eher_falsch: "#fffbeb",
+      falsch: "#fff1f2",
+      keine_aussage_moeglich: "#f3f4f6",
+    } as const
+  )[myth.correctness_class];
 
   // Meta line: gruppe · indikator · value. Omit empty pieces gracefully.
-  const metaPieces = [groupName, indLabel, val].filter((s) => s && s !== 'n/a');
-  const metaLine = metaPieces.join(' · ');
+  const metaPieces = [groupName, indLabel, val].filter((s) => s && s !== "n/a");
+  const metaLine = metaPieces.join(" · ");
 
   let html =
     `<div style="background:${verdictBg};border-left:3px solid ${verdictColor};` +
@@ -374,8 +469,8 @@ export function buildTooltipHtml(opts: {
   // Row 1: myth statement + verdict glyph (right).
   html +=
     `<div style="display:flex;align-items:flex-start;gap:8px">` +
-      `<div style="flex:1;min-width:0;font-weight:600;font-size:13px">${text}</div>` +
-      `<div style="flex:0 0 auto;margin-top:1px">${verdictArrowSvgString(myth.correctness_class)}</div>` +
+    `<div style="flex:1;min-width:0;font-weight:600;font-size:13px">${text}</div>` +
+    `<div style="flex:0 0 auto;margin-top:1px">${verdictArrowSvgString(myth.correctness_class)}</div>` +
     `</div>`;
   // Row 2: Wissenschaftlich [verdict] (verdict-colored).
   html += `<div style="margin-top:6px;color:${verdictColor};font-weight:600;font-size:12px">${wissenschaftlich}</div>`;
@@ -396,38 +491,38 @@ export function exportCSV(
   myths: Myth[],
   metrics: Metric[],
   groupIds: GroupId[],
-  lang: Lang
+  lang: Lang,
 ): string {
-  const groupId = groupIds[0] || 'adults';
+  const groupId = groupIds[0] || "adults";
   const header = [
-    'ID',
-    lang === 'de' ? 'Mythos' : 'Myth',
-    lang === 'de' ? 'Kategorie' : 'Category',
-    lang === 'de' ? 'Wissenschaftliche Einordnung' : 'Science Verdict',
-    lang === 'de' ? 'Kenntnis (%)' : 'Awareness (%)',
-    lang === 'de' ? 'Bedeutung' : 'Significance',
-    lang === 'de' ? 'Richtigkeit' : 'Correctness',
-    lang === 'de' ? 'Präventionsbedeutung' : 'Prevention Significance',
-    lang === 'de' ? 'Bevölkerungsrelevanz' : 'Population Relevance',
+    "ID",
+    lang === "de" ? "Mythos" : "Myth",
+    lang === "de" ? "Kategorie" : "Category",
+    lang === "de" ? "Wissenschaftliche Einordnung" : "Science Verdict",
+    lang === "de" ? "Kenntnis (%)" : "Awareness (%)",
+    lang === "de" ? "Bedeutung" : "Significance",
+    lang === "de" ? "Richtigkeit" : "Correctness",
+    lang === "de" ? "Präventionsbedeutung" : "Prevention Significance",
+    lang === "de" ? "Bevölkerungsrelevanz" : "Population Relevance",
   ];
 
   const rows = myths.map((m) => {
     const metric = getMythMetric(metrics, m.id, groupId);
-    const popRel = isInvalidIndicatorGroupCombo('population_relevance', groupId)
-      ? ''
-      : metric?.population_relevance ?? '';
+    const popRel = isInvalidIndicatorGroupCombo("population_relevance", groupId)
+      ? ""
+      : (metric?.population_relevance ?? "");
     return [
       m.id,
       `"${getMythText(m, lang).replace(/"/g, '""')}"`,
       `"${getCategoryName(m, lang).replace(/"/g, '""')}"`,
-      `"${(lang === 'de' ? m.classification_de : '') || 'n/a'}"`,
-      metric?.awareness ?? '',
-      metric?.significance ?? '',
-      metric?.correctness ?? '',
-      metric?.prevention_significance ?? '',
+      `"${(lang === "de" ? m.classification_de : "") || "n/a"}"`,
+      metric?.awareness ?? "",
+      metric?.significance ?? "",
+      metric?.correctness ?? "",
+      metric?.prevention_significance ?? "",
       popRel,
-    ].join(',');
+    ].join(",");
   });
 
-  return [header.join(','), ...rows].join('\n');
+  return [header.join(","), ...rows].join("\n");
 }

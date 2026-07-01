@@ -16,33 +16,57 @@
  * parent via `sharedActions`.
  */
 
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 import {
   AUDIENCE_ICONS_BY_GROUP,
   SOURCE_METRIC_ICONS,
-} from '../../../lib/icons/lookups';
+} from "../../../lib/icons/lookups";
 import type {
   AppState,
   SourceGroupId,
   SourceMetricType,
-} from '../../../lib/dashboard/types';
-import { t } from '../../../lib/dashboard/translations';
-import DataPicker, { type DataPickerOption } from './DataPicker';
-import ToolbarRow from './ToolbarRow';
+} from "../../../lib/dashboard/types";
+import { t } from "../../../lib/dashboard/translations";
+import DataPicker, { type DataPickerOption } from "./DataPicker";
+import ToolbarRow from "./ToolbarRow";
 
 const METRIC_OPTIONS: DataPickerOption<SourceMetricType>[] = [
-  { value: 'search', label: 'Suche', Icon: SOURCE_METRIC_ICONS.search },
-  { value: 'perception', label: 'Wahrnehmung', Icon: SOURCE_METRIC_ICONS.perception },
-  { value: 'trust', label: 'Vertrauen', Icon: SOURCE_METRIC_ICONS.trust },
-  { value: 'prevention', label: 'Prävention', Icon: SOURCE_METRIC_ICONS.prevention },
+  { value: "search", label: "Suche", Icon: SOURCE_METRIC_ICONS.search },
+  {
+    value: "perception",
+    label: "Wahrnehmung",
+    Icon: SOURCE_METRIC_ICONS.perception,
+  },
+  { value: "trust", label: "Vertrauen", Icon: SOURCE_METRIC_ICONS.trust },
+  {
+    value: "prevention",
+    label: "Prävention",
+    Icon: SOURCE_METRIC_ICONS.prevention,
+  },
 ];
 
 const GROUP_OPTIONS: DataPickerOption<SourceGroupId>[] = [
-  { value: 'adults', label: 'Erwachsene (18–70)', Icon: AUDIENCE_ICONS_BY_GROUP.adults },
-  { value: 'minors', label: 'Minderjährige (16–17)', Icon: AUDIENCE_ICONS_BY_GROUP.minors },
-  { value: 'consumers', label: 'Konsumierende', Icon: AUDIENCE_ICONS_BY_GROUP.consumers },
-  { value: 'young_adults', label: 'Junge Erwachsene (18–26)', Icon: AUDIENCE_ICONS_BY_GROUP.young_adults },
-  { value: 'parents', label: 'Eltern', Icon: AUDIENCE_ICONS_BY_GROUP.parents },
+  {
+    value: "adults",
+    label: "Erwachsene (18–70)",
+    Icon: AUDIENCE_ICONS_BY_GROUP.adults,
+  },
+  {
+    value: "minors",
+    label: "Minderjährige (16–17)",
+    Icon: AUDIENCE_ICONS_BY_GROUP.minors,
+  },
+  {
+    value: "consumers",
+    label: "Konsumierende",
+    Icon: AUDIENCE_ICONS_BY_GROUP.consumers,
+  },
+  {
+    value: "young_adults",
+    label: "Junge Erwachsene (18–26)",
+    Icon: AUDIENCE_ICONS_BY_GROUP.young_adults,
+  },
+  { value: "parents", label: "Eltern", Icon: AUDIENCE_ICONS_BY_GROUP.parents },
 ];
 
 interface Props {
@@ -51,27 +75,31 @@ interface Props {
   sharedActions?: ReactNode;
 }
 
-export default function SourcesBalkenToolbar({ state, update, sharedActions }: Props) {
+export default function SourcesBalkenToolbar({
+  state,
+  update,
+  sharedActions,
+}: Props) {
   return (
     <ToolbarRow
-      aria-label={t('filter.title', 'de')}
+      aria-label={t("filter.title", "de")}
       pickers={[
         <DataPicker<SourceMetricType>
           key="metric"
-          caption={t('igs.indicator.legend', state.lang)}
+          caption={t("igs.indicator.legend", state.lang)}
           value={state.sourceMetric}
           options={METRIC_OPTIONS}
-          onChange={(v) => update('sourceMetric', v)}
-          aria-label={t('igs.indicator.legend', state.lang)}
+          onChange={(v) => update("sourceMetric", v)}
+          aria-label={t("igs.indicator.legend", state.lang)}
           lang={state.lang}
         />,
         <DataPicker<SourceGroupId>
           key="group"
-          caption={t('igs.group.legend', state.lang)}
+          caption={t("igs.group.legend", state.lang)}
           value={state.sourceGroup}
           options={GROUP_OPTIONS}
-          onChange={(v) => update('sourceGroup', v)}
-          aria-label={t('igs.group.legend', state.lang)}
+          onChange={(v) => update("sourceGroup", v)}
+          aria-label={t("igs.group.legend", state.lang)}
           lang={state.lang}
         />,
       ]}

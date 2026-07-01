@@ -19,7 +19,13 @@
  *         (+ .html alongside for inspection)
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  existsSync,
+  statSync,
+} from "node:fs";
 import { dirname, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
@@ -41,7 +47,8 @@ const OUT_HTML = join(OUT_DIR, "cannabismythen-mythen-faktenblaetter.html");
 const CARDS_DIR = join(PDF_DIR, "factsheets"); // one standalone PDF per myth → /factsheets/<slug>.pdf
 
 const SITE = "https://cannabismythen.de";
-const REPORT_URL = "https://www.isd-hamburg.de/wp-content/uploads/2026/03/Abschlussbericht_CaRM_final.pdf";
+const REPORT_URL =
+  "https://www.isd-hamburg.de/wp-content/uploads/2026/03/Abschlussbericht_CaRM_final.pdf";
 const SAMPLE_IDS = ["m01", "m13", "m25"]; // falsch · richtig · eher_falsch
 // Build targets: both by default; COMBINED_ONLY=1 / CARDS_ONLY=1 to limit.
 const DO_COMBINED = process.env.CARDS_ONLY !== "1";
@@ -55,7 +62,11 @@ const VERDICTS: Record<string, { label: string; color: string; bg: string }> = {
   eher_richtig: { label: "Eher richtig", color: "#4d7c0f", bg: "#f7fee7" },
   eher_falsch: { label: "Eher falsch", color: "#b45309", bg: "#fffbeb" },
   falsch: { label: "Falsch", color: "#be123c", bg: "#fff1f2" },
-  keine_aussage: { label: "Keine Aussage möglich", color: "#6b7280", bg: "#f3f4f6" },
+  keine_aussage: {
+    label: "Keine Aussage möglich",
+    color: "#6b7280",
+    bg: "#f3f4f6",
+  },
 };
 
 /**
@@ -66,7 +77,10 @@ const VERDICTS: Record<string, { label: string; color: string; bg: string }> = {
  *   richtig → tip up · eher_richtig → up-right · eher_falsch → down-left
  *   falsch → tip down · keine_aussage → flat shadow line (no arrow)
  */
-const VERDICT_GLYPHS: Record<string, { rotation: number; main: string; shadow: string } | null> = {
+const VERDICT_GLYPHS: Record<
+  string,
+  { rotation: number; main: string; shadow: string } | null
+> = {
   richtig: { rotation: 180, main: "#047857", shadow: "#a7d3c5" },
   eher_richtig: { rotation: -135, main: "#4d7c0f", shadow: "#c2d3a3" },
   eher_falsch: { rotation: 45, main: "#b45309", shadow: "#e0b58d" },
@@ -82,34 +96,87 @@ function verdictGlyph(cls: string): string {
 
 // 8 categories in the live FaktenKartenExplorer order
 const CATEGORIES: { label: string; icon: string; color: string }[] = [
-  { label: "Medizinischer und therapeutischer Nutzen", icon: "fk-medizin", color: "#3b82f6" },
-  { label: "Risiken für den Körper und die Entwicklung", icon: "fk-koerper", color: "#06b6d4" },
-  { label: "Risiken für die psychische Gesundheit", icon: "fk-psyche", color: "#8b5cf6" },
-  { label: "Einfluss auf Stimmung und Wahrnehmung", icon: "fk-stimmung", color: "#eab308" },
-  { label: "Soziale Auswirkungen und Leistungsfähigkeit", icon: "fk-soziales", color: "#ec4899" },
-  { label: "Risiken durch Dosierung und Qualität", icon: "fk-dosis", color: "#64748b" },
-  { label: "Verbreitung in der Bevölkerung und Gesetzgebung", icon: "fk-gesetz", color: "#6366f1" },
-  { label: "Allgemeine Einschätzung der Gefährlichkeit", icon: "fk-gefahr", color: "#f97316" },
+  {
+    label: "Medizinischer und therapeutischer Nutzen",
+    icon: "fk-medizin",
+    color: "#3b82f6",
+  },
+  {
+    label: "Risiken für den Körper und die Entwicklung",
+    icon: "fk-koerper",
+    color: "#06b6d4",
+  },
+  {
+    label: "Risiken für die psychische Gesundheit",
+    icon: "fk-psyche",
+    color: "#8b5cf6",
+  },
+  {
+    label: "Einfluss auf Stimmung und Wahrnehmung",
+    icon: "fk-stimmung",
+    color: "#eab308",
+  },
+  {
+    label: "Soziale Auswirkungen und Leistungsfähigkeit",
+    icon: "fk-soziales",
+    color: "#ec4899",
+  },
+  {
+    label: "Risiken durch Dosierung und Qualität",
+    icon: "fk-dosis",
+    color: "#64748b",
+  },
+  {
+    label: "Verbreitung in der Bevölkerung und Gesetzgebung",
+    icon: "fk-gesetz",
+    color: "#6366f1",
+  },
+  {
+    label: "Allgemeine Einschätzung der Gefährlichkeit",
+    icon: "fk-gefahr",
+    color: "#f97316",
+  },
 ];
 
 // Audience rows (--cmi-pop-* colour + locked pop-* icon). Order matters:
 // "Junge Erwachsene" must be tested before "Erwachsene/Volljährige".
 const AUDIENCES: { match: RegExp; color: string; icon: string }[] = [
-  { match: /^junge\s*erwachsene/i, color: "#14b8a6", icon: "pop-junge-erwachsene" },
-  { match: /^(erwachsene|volljährige)/i, color: "#475569", icon: "pop-volljaehrige" },
+  {
+    match: /^junge\s*erwachsene/i,
+    color: "#14b8a6",
+    icon: "pop-junge-erwachsene",
+  },
+  {
+    match: /^(erwachsene|volljährige)/i,
+    color: "#475569",
+    icon: "pop-volljaehrige",
+  },
   { match: /^minderjährige/i, color: "#f59e0b", icon: "pop-minderjaehrige" },
   { match: /^konsum/i, color: "#16a34a", icon: "pop-konsumierende" },
   { match: /^eltern/i, color: "#8b5cf6", icon: "pop-eltern" },
 ];
 function audience(label: string): { color: string; icon: string } {
-  return AUDIENCES.find((a) => a.match.test(label.trim())) ?? { color: "#94a3b8", icon: "" };
+  return (
+    AUDIENCES.find((a) => a.match.test(label.trim())) ?? {
+      color: "#94a3b8",
+      icon: "",
+    }
+  );
 }
 
 // Data-table value cells use the dashboard's 7-band heatmap (--band-0..6),
 // thresholds from src/lib/dashboard/lesebeispiel-bands.ts. Locked indicator
 // icons (src/lib/icons/_handoff/icons) head each of the 5 value columns.
 const BAND_THRESHOLDS = [11, 26, 38, 63, 75, 90];
-const BAND_COLORS = ["#cfe5ff", "#b6d4ff", "#d2dfff", "#ecdcd2", "#ffcfb8", "#ffb19a", "#ff8a7e"];
+const BAND_COLORS = [
+  "#cfe5ff",
+  "#b6d4ff",
+  "#d2dfff",
+  "#ecdcd2",
+  "#ffcfb8",
+  "#ffb19a",
+  "#ff8a7e",
+];
 function bandColor(v: number): string {
   let i = 0;
   while (i < BAND_THRESHOLDS.length && v >= BAND_THRESHOLDS[i]) i++;
@@ -128,18 +195,42 @@ const INDICATORS = [
 // (src/lib/dashboard/translations.ts `indicator.*.description`). Rendered as a
 // compact key under each table.
 const INDICATOR_DEFS: { icon: string; label: string; def: string }[] = [
-  { icon: "myth-kenntnis", label: "Kenntnis", def: "Anteil der Befragten, die den Mythos kennen (0–100 %). Höher = bekannter." },
-  { icon: "myth-bedeutung", label: "Bedeutung", def: "Subjektive Wichtigkeit des Mythos für den eigenen Umgang mit Cannabis (0–100 Punkte). Nur bei Personen erhoben, die den Mythos kennen." },
-  { icon: "myth-richtigkeit", label: "Richtigkeit", def: "Übereinstimmung der Einschätzung mit der wissenschaftlichen Klassifikation (0–100 Punkte). Höher = treffender." },
-  { icon: "myth-praevention", label: "Prävention", def: "Kombination aus Bedeutung und Fehleinschätzung (0–100 Punkte). Höher = größerer Präventionsbedarf." },
-  { icon: "myth-bevoelkerungsbezug", label: "Bevölkerungsrelevanz", def: "Bevölkerungsbezogene Risikobedeutung (0–100 Punkte) — kombiniert die individuelle Präventionsbedeutung mit dem Verbreitungsgrad des Mythos. Nur für Volljährige (18–70) und Minderjährige (16–17) erhoben." },
+  {
+    icon: "myth-kenntnis",
+    label: "Kenntnis",
+    def: "Anteil der Befragten, die den Mythos kennen (0–100 %). Höher = bekannter.",
+  },
+  {
+    icon: "myth-bedeutung",
+    label: "Bedeutung",
+    def: "Subjektive Wichtigkeit des Mythos für den eigenen Umgang mit Cannabis (0–100 Punkte). Nur bei Personen erhoben, die den Mythos kennen.",
+  },
+  {
+    icon: "myth-richtigkeit",
+    label: "Richtigkeit",
+    def: "Übereinstimmung der Einschätzung mit der wissenschaftlichen Klassifikation (0–100 Punkte). Höher = treffender.",
+  },
+  {
+    icon: "myth-praevention",
+    label: "Prävention",
+    def: "Kombination aus Bedeutung und Fehleinschätzung (0–100 Punkte). Höher = größerer Präventionsbedarf.",
+  },
+  {
+    icon: "myth-bevoelkerungsbezug",
+    label: "Bevölkerungsrelevanz",
+    def: "Bevölkerungsbezogene Risikobedeutung (0–100 Punkte) — kombiniert die individuelle Präventionsbedeutung mit dem Verbreitungsgrad des Mythos. Nur für Volljährige (18–70) und Minderjährige (16–17) erhoben.",
+  },
 ];
-
 
 // ---------------------------------------------------------------------------
 // Asset loaders
 // ---------------------------------------------------------------------------
-function fontFace(file: string, family: string, style: string, weight: string): string {
+function fontFace(
+  file: string,
+  family: string,
+  style: string,
+  weight: string,
+): string {
   const b64 = readFileSync(file).toString("base64");
   return `@font-face{font-family:'${family}';font-style:${style};font-weight:${weight};font-display:block;src:url(data:font/woff2;base64,${b64}) format('woff2');}`;
 }
@@ -159,7 +250,10 @@ function logoSvg(file: string): string {
     console.warn(`  ! missing logo ${file}`);
     return "";
   }
-  return readFileSync(p, "utf8").replace(/<\?xml[\s\S]*?\?>/, "").replace(/<!DOCTYPE[\s\S]*?>/, "").trim();
+  return readFileSync(p, "utf8")
+    .replace(/<\?xml[\s\S]*?\?>/, "")
+    .replace(/<!DOCTYPE[\s\S]*?>/, "")
+    .trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -202,7 +296,8 @@ function parseMdoc(file: string): Myth | null {
 
   // plain verdict sentence from the `> **Einordnung: x** — sentence` blockquote
   const bq = body.match(/^>\s*\*\*Einordnung:[^*]*\*\*\s*[—-]\s*(.+)$/m);
-  const verdictSentence = (fm.classificationLabel || (bq ? bq[1].trim() : "")) as string;
+  const verdictSentence = (fm.classificationLabel ||
+    (bq ? bq[1].trim() : "")) as string;
 
   // split body into `## ` sections
   const sections: Section[] = [];
@@ -229,7 +324,10 @@ function parseMdoc(file: string): Myth | null {
   };
 }
 
-function findSection(m: Myth, pred: (h: string) => boolean): Section | undefined {
+function findSection(
+  m: Myth,
+  pred: (h: string) => boolean,
+): Section | undefined {
   return m.sections.find((s) => pred(s.heading));
 }
 
@@ -239,7 +337,10 @@ function renderParagraphs(lines: string[]): string {
   let buf: string[] = [];
   for (const l of lines) {
     if (l.trim() === "") {
-      if (buf.length) { paras.push(buf.join(" ")); buf = []; }
+      if (buf.length) {
+        paras.push(buf.join(" "));
+        buf = [];
+      }
     } else {
       buf.push(l.trim());
     }
@@ -253,7 +354,8 @@ function renderBullets(lines: string[]): string {
   for (const l of lines) {
     const b = l.match(/^[-*]\s+(.*)$/);
     if (b) items.push(b[1].trim());
-    else if (l.trim() && items.length) items[items.length - 1] += " " + l.trim();
+    else if (l.trim() && items.length)
+      items[items.length - 1] += " " + l.trim();
   }
   if (!items.length) return "";
   return `<ul class="erkenntnisse">${items.map((i) => `<li>${inline(i)}</li>`).join("")}</ul>`;
@@ -264,25 +366,37 @@ function renderReferences(lines: string[]): string {
   for (const l of lines) {
     const r = l.match(/^(\d+)\.\s+(.*)$/);
     if (r) refs.push({ n: r[1], text: r[2].trim() });
-    else if (l.trim() && refs.length) refs[refs.length - 1].text += " " + l.trim();
+    else if (l.trim() && refs.length)
+      refs[refs.length - 1].text += " " + l.trim();
   }
   if (!refs.length) return "";
   return `<ol class="references">${refs
-    .map((r) => `<li><span class="ref-n">${r.n}.</span> <span class="ref-t">${inline(r.text)}</span></li>`)
+    .map(
+      (r) =>
+        `<li><span class="ref-n">${r.n}.</span> <span class="ref-t">${inline(r.text)}</span></li>`,
+    )
     .join("")}</ol>`;
 }
 
 function renderDataTable(lines: string[]): string {
   const rows = lines
     .filter((l) => l.trim().startsWith("|"))
-    .map((l) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim()));
+    .map((l) =>
+      l
+        .trim()
+        .replace(/^\|/, "")
+        .replace(/\|$/, "")
+        .split("|")
+        .map((c) => c.trim()),
+    );
   if (rows.length < 3) return "";
   const body = rows.slice(2); // skip header + separator rows; we relabel headers ourselves
 
   const thead = `<thead><tr>
     <th class="col-aud">Zielgruppe</th>
     ${INDICATORS.map(
-      (ind) => `<th><span class="ind-ic">${svg(ind.icon)}</span><span class="ind-lb">${esc(ind.label)}</span><span class="ind-unit">${esc(ind.unit)}</span></th>`,
+      (ind) =>
+        `<th><span class="ind-ic">${svg(ind.icon)}</span><span class="ind-lb">${esc(ind.label)}</span><span class="ind-unit">${esc(ind.unit)}</span></th>`,
     ).join("")}
   </tr></thead>`;
 
@@ -337,7 +451,10 @@ function renderMythBody(myth: Myth): string {
   ${ref ? `<div class="sec sec-ref"><div class="sec-h">Referenzen</div>${renderReferences(ref.lines)}</div>` : ""}`;
 }
 
-function renderMyth(myth: Myth, cat: { label: string; icon: string; color: string }): string {
+function renderMyth(
+  myth: Myth,
+  cat: { label: string; icon: string; color: string },
+): string {
   const v = VERDICTS[myth.classification] ?? VERDICTS.keine_aussage;
   const statement = myth.title.replace(/^Mythos\s+\d+:\s*/i, "");
   const onlineUrl = `${SITE}/daten-explorer/?mythos=${myth.number}`;
@@ -357,7 +474,10 @@ ${renderMythBody(myth)}
 // Same layout as a myth page in the combined PDF: a humble category kicker,
 // the statement as the main H1 + inline verdict pill, then the shared body.
 // Brand/domain live in the running page footer — no masthead, no footer block.
-function renderCard(myth: Myth, cat: { label: string; icon: string; color: string }): string {
+function renderCard(
+  myth: Myth,
+  cat: { label: string; icon: string; color: string },
+): string {
   const v = VERDICTS[myth.classification] ?? VERDICTS.keine_aussage;
   const statement = myth.title.replace(/^Mythos\s+\d+:\s*/i, "");
   const onlineUrl = `${SITE}/daten-explorer/?mythos=${myth.number}`;
@@ -440,7 +560,9 @@ function renderIntro(): string {
 </section>`;
 }
 
-function renderToc(byCat: { cat: any; myths: Myth[]; index: number }[]): string {
+function renderToc(
+  byCat: { cat: any; myths: Myth[]; index: number }[],
+): string {
   const groups = byCat
     .map(({ cat, myths, index }) => {
       const items = myths
@@ -640,7 +762,9 @@ function headerFooter() {
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
-  console.log(`\n📄 Generating myth-factsheet PDF${SAMPLE ? " (SAMPLE mode)" : ""}…`);
+  console.log(
+    `\n📄 Generating myth-factsheet PDF${SAMPLE ? " (SAMPLE mode)" : ""}…`,
+  );
 
   // load + parse myths
   const { readdirSync } = await import("node:fs");
@@ -656,19 +780,57 @@ async function main() {
   const byCat = CATEGORIES.map((cat, i) => ({
     cat,
     index: i + 1,
-    myths: myths.filter((m) => m.categoryGroup === cat.label).sort((a, b) => a.number - b.number),
+    myths: myths
+      .filter((m) => m.categoryGroup === cat.label)
+      .sort((a, b) => a.number - b.number),
   })).filter((g) => g.myths.length > 0);
 
   // sanity: warn on any myth whose categoryGroup didn't match
   const matched = new Set(byCat.flatMap((g) => g.myths.map((m) => m.id)));
-  myths.filter((m) => !matched.has(m.id)).forEach((m) => console.warn(`  ! ${m.id} categoryGroup unmatched: "${m.categoryGroup}"`));
+  myths
+    .filter((m) => !matched.has(m.id))
+    .forEach((m) =>
+      console.warn(`  ! ${m.id} categoryGroup unmatched: "${m.categoryGroup}"`),
+    );
 
   // fonts
   const fonts = [
-    fontFace(join(ROOT, "node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2"), "InterVar", "normal", "100 900"),
-    fontFace(join(ROOT, "node_modules/@fontsource-variable/inter/files/inter-latin-wght-italic.woff2"), "InterVar", "italic", "100 900"),
-    fontFace(join(ROOT, "node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-700-normal.woff2"), "SourceSerif", "normal", "700"),
-    fontFace(join(ROOT, "node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-700-italic.woff2"), "SourceSerif", "italic", "700"),
+    fontFace(
+      join(
+        ROOT,
+        "node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
+      ),
+      "InterVar",
+      "normal",
+      "100 900",
+    ),
+    fontFace(
+      join(
+        ROOT,
+        "node_modules/@fontsource-variable/inter/files/inter-latin-wght-italic.woff2",
+      ),
+      "InterVar",
+      "italic",
+      "100 900",
+    ),
+    fontFace(
+      join(
+        ROOT,
+        "node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-700-normal.woff2",
+      ),
+      "SourceSerif",
+      "normal",
+      "700",
+    ),
+    fontFace(
+      join(
+        ROOT,
+        "node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-700-italic.woff2",
+      ),
+      "SourceSerif",
+      "italic",
+      "700",
+    ),
   ].join("\n");
 
   if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
@@ -694,9 +856,15 @@ async function main() {
     writeFileSync(OUT_HTML, html, "utf8");
     await page.setContent(html, { waitUntil: "networkidle" });
     await page.pdf({
-      path: OUT_PDF, format: "A4", printBackground: true,
-      displayHeaderFooter: true, headerTemplate: header, footerTemplate: footer,
-      margin, tagged: true, outline: true,
+      path: OUT_PDF,
+      format: "A4",
+      printBackground: true,
+      displayHeaderFooter: true,
+      headerTemplate: header,
+      footerTemplate: footer,
+      margin,
+      tagged: true,
+      outline: true,
     });
     console.log(`   ✅ combined → ${OUT_PDF}`);
   }
@@ -705,15 +873,25 @@ async function main() {
   if (DO_CARDS) {
     if (!existsSync(CARDS_DIR)) mkdirSync(CARDS_DIR, { recursive: true });
     for (const m of myths) {
-      const cat = CATEGORIES.find((c) => c.label === m.categoryGroup) ?? CATEGORIES[0];
-      await page.setContent(htmlDoc(renderCard(m, cat)), { waitUntil: "networkidle" });
+      const cat =
+        CATEGORIES.find((c) => c.label === m.categoryGroup) ?? CATEGORIES[0];
+      await page.setContent(htmlDoc(renderCard(m, cat)), {
+        waitUntil: "networkidle",
+      });
       await page.pdf({
-        path: join(CARDS_DIR, `${m.slug}.pdf`), format: "A4", printBackground: true,
-        displayHeaderFooter: true, headerTemplate: header, footerTemplate: footer,
-        margin, tagged: true,
+        path: join(CARDS_DIR, `${m.slug}.pdf`),
+        format: "A4",
+        printBackground: true,
+        displayHeaderFooter: true,
+        headerTemplate: header,
+        footerTemplate: footer,
+        margin,
+        tagged: true,
       });
     }
-    console.log(`   ✅ ${myths.length} fact-sheet${myths.length === 1 ? "" : "s"} → ${CARDS_DIR}/`);
+    console.log(
+      `   ✅ ${myths.length} fact-sheet${myths.length === 1 ? "" : "s"} → ${CARDS_DIR}/`,
+    );
   }
 
   await browser.close();
@@ -729,7 +907,10 @@ async function main() {
       ],
       items: byCat.flatMap(({ cat, myths: cm }) => [
         { level: 1, title: cat.label },
-        ...cm.map((m) => ({ level: 2, title: m.title.replace(/^Mythos\s+\d+:\s*/i, "") })),
+        ...cm.map((m) => ({
+          level: 2,
+          title: m.title.replace(/^Mythos\s+\d+:\s*/i, ""),
+        })),
       ]),
       back: [{ title: "Über dieses Dokument", page: -1 }],
     };
@@ -744,7 +925,9 @@ async function main() {
       );
       console.log(`   ${out.trim()}`);
     } catch (e: any) {
-      console.warn(`   ⚠ outline polish skipped (${e.message?.split("\n")[0] ?? e}); using Chromium outline`);
+      console.warn(
+        `   ⚠ outline polish skipped (${e.message?.split("\n")[0] ?? e}); using Chromium outline`,
+      );
     }
   }
 
@@ -753,7 +936,8 @@ async function main() {
   // (e.g. "3,8 MB"). Only on a full publish run (a SAMPLE/partial set would be
   // misleading). Imported by src/components/shared/FactsheetPanel.tsx.
   if (!SAMPLE && DO_COMBINED && DO_CARDS) {
-    const mb = (p: string) => (statSync(p).size / 1e6).toFixed(1).replace(".", ",") + " MB";
+    const mb = (p: string) =>
+      (statSync(p).size / 1e6).toFixed(1).replace(".", ",") + " MB";
     const sizes: Record<string, string> = {};
     if (existsSync(OUT_PDF)) sizes.combined = mb(OUT_PDF);
     for (const m of myths) {
@@ -765,7 +949,9 @@ async function main() {
       JSON.stringify(sizes, null, 2) + "\n",
       "utf8",
     );
-    console.log(`   ✅ size manifest → src/components/shared/factsheet-pdf-sizes.json`);
+    console.log(
+      `   ✅ size manifest → src/components/shared/factsheet-pdf-sizes.json`,
+    );
   }
 
   console.log(`   ✅ done\n`);

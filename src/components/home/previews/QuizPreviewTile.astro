@@ -19,24 +19,28 @@ const decks = Object.entries(QUIZ_THEME_META);
 <div class="path-tile path-tile--quiz">
   <div class="path-tile__preview">
     <ul class="quiz-decks">
-      {decks.map(([slug, m]) => {
-        const Icon = m.icon;
-        return (
-          <li>
-            <a
-              class={`quiz-deck quiz-deck--${m.theme}`}
-              href={`/quiz/${slug}/`}
-              aria-label={`Quiz starten: ${m.shortTitle}`}
-            >
-              <span class="quiz-deck__icon" aria-hidden="true"><Icon size={18} strokeWidth={1.9} /></span>
-              <span class="quiz-deck__text">
-                <span class="quiz-deck__title">{m.shortTitle}</span>
-                <span class="quiz-deck__count">{m.count} Mythen</span>
-              </span>
-            </a>
-          </li>
-        );
-      })}
+      {
+        decks.map(([slug, m]) => {
+          const Icon = m.icon;
+          return (
+            <li>
+              <a
+                class={`quiz-deck quiz-deck--${m.theme}`}
+                href={`/quiz/${slug}/`}
+                aria-label={`Quiz starten: ${m.shortTitle}`}
+              >
+                <span class="quiz-deck__icon" aria-hidden="true">
+                  <Icon size={18} strokeWidth={1.9} />
+                </span>
+                <span class="quiz-deck__text">
+                  <span class="quiz-deck__title">{m.shortTitle}</span>
+                  <span class="quiz-deck__count">{m.count} Mythen</span>
+                </span>
+              </a>
+            </li>
+          );
+        })
+      }
     </ul>
   </div>
 

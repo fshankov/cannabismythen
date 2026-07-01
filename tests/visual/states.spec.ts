@@ -21,5 +21,7 @@ test("state: dashboard filter drawer", async ({ page }) => {
   await page.locator(".carm-explorer__filter").first().click();
   await page.waitForTimeout(600); // slide-in (CSS anims are disabled anyway)
   await stabilize(page, 200);
-  await expect(page).toHaveScreenshot("dashboard-filter-drawer.png", { fullPage: true });
+  await expect(page).toHaveScreenshot("dashboard-filter-drawer.png", {
+    fullPage: true,
+  });
 });

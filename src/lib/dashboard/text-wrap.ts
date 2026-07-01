@@ -12,16 +12,20 @@
  */
 
 function truncateChars(s: string, maxChars: number): string {
-  return s.length > maxChars ? s.slice(0, Math.max(1, maxChars - 1)) + '…' : s;
+  return s.length > maxChars ? s.slice(0, Math.max(1, maxChars - 1)) + "…" : s;
 }
 
-export function wrapLabel(text: string, maxChars: number, maxLines = 2): string[] {
-  const clean = text.trim().replace(/\s+/g, ' ');
-  if (!clean) return [''];
+export function wrapLabel(
+  text: string,
+  maxChars: number,
+  maxLines = 2,
+): string[] {
+  const clean = text.trim().replace(/\s+/g, " ");
+  if (!clean) return [""];
 
-  const words = clean.split(' ');
+  const words = clean.split(" ");
   const lines: string[] = [];
-  let current = '';
+  let current = "";
 
   for (let i = 0; i < words.length; i++) {
     const word = words[i];
@@ -36,7 +40,7 @@ export function wrapLabel(text: string, maxChars: number, maxLines = 2): string[
     // On the last allowed line, collapse every remaining word into it
     // (truncated with an ellipsis) so nothing silently drops.
     if (lines.length === maxLines - 1) {
-      lines.push(truncateChars(words.slice(i).join(' '), maxChars));
+      lines.push(truncateChars(words.slice(i).join(" "), maxChars));
       return lines;
     }
     current = word;
@@ -48,11 +52,11 @@ export function wrapLabel(text: string, maxChars: number, maxLines = 2): string[
 
 function escXml(s: string): string {
   return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 /**
@@ -64,13 +68,19 @@ export function renderLabelLines(
   lines: string[],
   x: number,
   yMid: number,
-  style: { fontSize: number; fontWeight: number; fill: string; opacity?: number; fontFamily?: string },
+  style: {
+    fontSize: number;
+    fontWeight: number;
+    fill: string;
+    opacity?: number;
+    fontFamily?: string;
+  },
 ): string {
-  const ff = style.fontFamily ?? 'system-ui,sans-serif';
-  const op = style.opacity != null ? ` opacity="${style.opacity}"` : '';
+  const ff = style.fontFamily ?? "system-ui,sans-serif";
+  const op = style.opacity != null ? ` opacity="${style.opacity}"` : "";
   const attrs = `dominant-baseline="middle" font-family="${ff}" font-size="${style.fontSize}" font-weight="${style.fontWeight}" fill="${style.fill}"${op}`;
   if (lines.length <= 1) {
-    return `<text x="${x}" y="${yMid}" ${attrs}>${escXml(lines[0] ?? '')}</text>`;
+    return `<text x="${x}" y="${yMid}" ${attrs}>${escXml(lines[0] ?? "")}</text>`;
   }
   const dy = Math.round(style.fontSize * 0.62);
   return (
@@ -78,4 +88,3 @@ export function renderLabelLines(
     `<text x="${x}" y="${yMid + dy}" ${attrs}>${escXml(lines[1])}</text>`
   );
 }
-

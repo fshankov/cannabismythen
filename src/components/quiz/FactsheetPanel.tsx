@@ -3,12 +3,15 @@
  * (Decision G: Merged into shared component)
  */
 
-import SharedFactsheetPanel from '../shared/FactsheetPanel';
-import type { MythContentEntry } from '../shared/FactsheetPanel';
-import VerdictArrowWithInfo from '../shared/VerdictArrowWithInfo';
-import type { MythGroupMetrics, CorrectnessClass } from '../../lib/dashboard/types';
-import type { QuizMyth } from './types';
-import { t } from './i18n';
+import SharedFactsheetPanel from "../shared/FactsheetPanel";
+import type { MythContentEntry } from "../shared/FactsheetPanel";
+import VerdictArrowWithInfo from "../shared/VerdictArrowWithInfo";
+import type {
+  MythGroupMetrics,
+  CorrectnessClass,
+} from "../../lib/dashboard/types";
+import type { QuizMyth } from "./types";
+import { t } from "./i18n";
 
 export type { MythContentEntry };
 
@@ -53,7 +56,7 @@ export default function FactsheetPanel({
       classificationLabel={t(`classification.${myth.correctClassification}`)}
       mythContentEntry={mythContentEntry}
       factsheetSlug={myth.mythPageSlug}
-      verdictLabel={t('ui.correctAnswer')}
+      verdictLabel={t("ui.correctAnswer")}
       verdictAccessory={
         <VerdictArrowWithInfo
           verdict={myth.correctClassification}

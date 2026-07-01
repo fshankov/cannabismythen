@@ -12,11 +12,11 @@ interface SampleMyth {
  *  Anchored to the same five myths the hero rotates through (m24, m31,
  *  m22, m23, m17). */
 const SAMPLES: ReadonlyArray<SampleMyth> = [
-  { text: "Cannabis verursacht Psychosen.",       verdict: "richtig" },
-  { text: "Cannabis entspannt.",                  verdict: "eher_richtig" },
-  { text: "Cannabis ist eine Einstiegsdroge.",    verdict: "eher_falsch" },
-  { text: "Cannabis macht nicht abhängig.",       verdict: "falsch" },
-  { text: "Cannabis hilft beim Abnehmen.",        verdict: "keine_aussage_moeglich" },
+  { text: "Cannabis verursacht Psychosen.", verdict: "richtig" },
+  { text: "Cannabis entspannt.", verdict: "eher_richtig" },
+  { text: "Cannabis ist eine Einstiegsdroge.", verdict: "eher_falsch" },
+  { text: "Cannabis macht nicht abhängig.", verdict: "falsch" },
+  { text: "Cannabis hilft beim Abnehmen.", verdict: "keine_aussage_moeglich" },
 ];
 
 /** Pill order matches the canonical VerdictScale row inside the quiz. */
@@ -37,7 +37,9 @@ export default function QuizPreviewDeck() {
   // animating off-screen and pre-renders the first sample so the deck
   // shows correct content before the IntersectionObserver fires).
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduce) return;
 
     const root = wrapperRef.current;
@@ -75,7 +77,11 @@ export default function QuizPreviewDeck() {
   const sample = SAMPLES[idx];
 
   return (
-    <div className="peek-stack quiz-preview-deck" ref={wrapperRef} aria-hidden="true">
+    <div
+      className="peek-stack quiz-preview-deck"
+      ref={wrapperRef}
+      aria-hidden="true"
+    >
       <div className="peek-stack__face quiz-preview-deck__face">
         <p className="quiz-preview-deck__eyebrow">Beispielfrage</p>
         <p

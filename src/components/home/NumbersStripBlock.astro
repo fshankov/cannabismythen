@@ -29,26 +29,35 @@ function suffixOf(n: { suffix?: string | null }) {
 }
 ---
 
-<section class="numbers-strip" aria-labelledby="numbers-strip-heading" data-reveal>
+<section
+  class="numbers-strip"
+  aria-labelledby="numbers-strip-heading"
+  data-reveal
+>
   <div class="numbers-strip__inner">
     <div class="numbers-strip__card">
-      <h2 id="numbers-strip-heading" class="numbers-strip__heading">{eyebrow}</h2>
+      <h2 id="numbers-strip-heading" class="numbers-strip__heading">
+        {eyebrow}
+      </h2>
 
       <ol class="numbers-strip__grid">
-        {validNumerals.map((n) => (
-          <li class="numbers-strip__item">
-            <span
-              class="numbers-strip__numeral"
-              data-final={String(n.value)}
-              data-suffix={suffixOf(n)}
-              aria-label={`${formatter.format(n.value)}${suffixOf(n)} ${n.label}`}
-            >
-              {formatter.format(n.value)}{suffixOf(n)}
-            </span>
-            <span class="numbers-strip__label">{n.label}</span>
-            <span class="numbers-strip__description">{n.description}</span>
-          </li>
-        ))}
+        {
+          validNumerals.map((n) => (
+            <li class="numbers-strip__item">
+              <span
+                class="numbers-strip__numeral"
+                data-final={String(n.value)}
+                data-suffix={suffixOf(n)}
+                aria-label={`${formatter.format(n.value)}${suffixOf(n)} ${n.label}`}
+              >
+                {formatter.format(n.value)}
+                {suffixOf(n)}
+              </span>
+              <span class="numbers-strip__label">{n.label}</span>
+              <span class="numbers-strip__description">{n.description}</span>
+            </li>
+          ))
+        }
       </ol>
       <a class="numbers-strip__cta-button" href="/projekt/">
         Mehr über das Projekt <span aria-hidden="true">→</span>
@@ -61,9 +70,13 @@ function suffixOf(n: { suffix?: string | null }) {
   /* Count-up animation triggered when the strip scrolls into view.
      SSR ships the final number, so the no-JS / reduced-motion path
      already shows the right value. */
-  const numerals = document.querySelectorAll<HTMLElement>(".numbers-strip__numeral");
+  const numerals = document.querySelectorAll<HTMLElement>(
+    ".numbers-strip__numeral",
+  );
   if (numerals.length > 0 && "IntersectionObserver" in window) {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     if (!reduceMotion) {
       const fmt = new Intl.NumberFormat("de-DE");

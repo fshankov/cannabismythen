@@ -4,10 +4,10 @@ import {
   ArrowDownLeft,
   ArrowDown,
   Minus,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import type { CorrectnessClass } from './types';
-import type { SourceCategoryId } from '../icons/lookups';
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { CorrectnessClass } from "./types";
+import type { SourceCategoryId } from "../icons/lookups";
 
 /**
  * Unified classification colors — Emerald / Lime / Amber / Rose palette.
@@ -20,28 +20,28 @@ import type { SourceCategoryId } from '../icons/lookups';
  * must stay in sync.
  */
 export const CORRECTNESS_COLORS: Record<CorrectnessClass, string> = {
-  richtig: '#047857',           // Emerald-700
-  eher_richtig: '#4d7c0f',      // Lime-700
-  eher_falsch: '#b45309',       // Amber-700
-  falsch: '#be123c',            // Rose-700
-  keine_aussage_moeglich: '#6b7280', // Gray-500
+  richtig: "#047857", // Emerald-700
+  eher_richtig: "#4d7c0f", // Lime-700
+  eher_falsch: "#b45309", // Amber-700
+  falsch: "#be123c", // Rose-700
+  keine_aussage_moeglich: "#6b7280", // Gray-500
 };
 
 export function getCorrectnessColor(cls: CorrectnessClass): string {
-  return CORRECTNESS_COLORS[cls] || '#6b7280';
+  return CORRECTNESS_COLORS[cls] || "#6b7280";
 }
 
 // Lighter versions for backgrounds.
 export const CORRECTNESS_BG_COLORS: Record<CorrectnessClass, string> = {
-  richtig: '#ecfdf5',           // Emerald-50
-  eher_richtig: '#f7fee7',      // Lime-50
-  eher_falsch: '#fffbeb',       // Amber-50
-  falsch: '#fff1f2',            // Rose-50
-  keine_aussage_moeglich: '#f3f4f6', // Gray-100
+  richtig: "#ecfdf5", // Emerald-50
+  eher_richtig: "#f7fee7", // Lime-50
+  eher_falsch: "#fffbeb", // Amber-50
+  falsch: "#fff1f2", // Rose-50
+  keine_aussage_moeglich: "#f3f4f6", // Gray-100
 };
 
 export function getCorrectnessBgColor(cls: CorrectnessClass): string {
-  return CORRECTNESS_BG_COLORS[cls] || '#f3f4f6';
+  return CORRECTNESS_BG_COLORS[cls] || "#f3f4f6";
 }
 
 /**
@@ -52,15 +52,15 @@ export function getCorrectnessBgColor(cls: CorrectnessClass): string {
  * as CSS custom properties yet — the only consumer is the dot fill.
  */
 export const CORRECTNESS_FILL_COLORS: Record<CorrectnessClass, string> = {
-  richtig: '#059669',           // Emerald-600
-  eher_richtig: '#65a30d',      // Lime-600
-  eher_falsch: '#d97706',       // Amber-600
-  falsch: '#e11d48',            // Rose-600
-  keine_aussage_moeglich: '#6b7280', // Gray-500 (kept — no -600 for neutral)
+  richtig: "#059669", // Emerald-600
+  eher_richtig: "#65a30d", // Lime-600
+  eher_falsch: "#d97706", // Amber-600
+  falsch: "#e11d48", // Rose-600
+  keine_aussage_moeglich: "#6b7280", // Gray-500 (kept — no -600 for neutral)
 };
 
 export function getCorrectnessFillColor(cls: CorrectnessClass): string {
-  return CORRECTNESS_FILL_COLORS[cls] || '#6b7280';
+  return CORRECTNESS_FILL_COLORS[cls] || "#6b7280";
 }
 
 /**
@@ -97,18 +97,18 @@ export function getCorrectnessArrow(cls: CorrectnessClass): LucideIcon {
  *   Daten-Explorer refactor lands.
  */
 export const CORRECTNESS_ICONS: Record<CorrectnessClass, string> = {
-  richtig: '↑',
-  eher_richtig: '↗',
-  eher_falsch: '↙',
-  falsch: '↓',
-  keine_aussage_moeglich: '—',
+  richtig: "↑",
+  eher_richtig: "↗",
+  eher_falsch: "↙",
+  falsch: "↓",
+  keine_aussage_moeglich: "—",
 };
 
 /**
  * @deprecated Prefer `<VerdictArrow verdict={cls} />`.
  */
 export function getCorrectnessIcon(cls: CorrectnessClass): string {
-  return CORRECTNESS_ICONS[cls] || '—';
+  return CORRECTNESS_ICONS[cls] || "—";
 }
 
 /**
@@ -119,29 +119,29 @@ export function getCorrectnessIcon(cls: CorrectnessClass): string {
  * consumers read the var().
  */
 export const SOURCE_CATEGORY_COLORS: Record<SourceCategoryId, string> = {
-  institutional: '#4b6cb7',
-  internet: '#2d8da4',
-  social_media: '#b15edb',
-  traditional_media: '#c97a3d',
-  print_physical: '#8b7355',
-  personal: '#d04a4a',
+  institutional: "#4b6cb7",
+  internet: "#2d8da4",
+  social_media: "#b15edb",
+  traditional_media: "#c97a3d",
+  print_physical: "#8b7355",
+  personal: "#d04a4a",
 };
 
 export function getCategoryColor(cat: SourceCategoryId): string {
-  return SOURCE_CATEGORY_COLORS[cat] || '#6b7280';
+  return SOURCE_CATEGORY_COLORS[cat] || "#6b7280";
 }
 
 /** Light tints for tooltip card backgrounds — mirrors the
  *  `--source-…-bg` tokens in global.css. */
 export const SOURCE_CATEGORY_BG_COLORS: Record<SourceCategoryId, string> = {
-  institutional: '#eef2fb',
-  internet: '#e7f3f5',
-  social_media: '#f6ebfb',
-  traditional_media: '#fbf2e7',
-  print_physical: '#f3eee8',
-  personal: '#fbeaea',
+  institutional: "#eef2fb",
+  internet: "#e7f3f5",
+  social_media: "#f6ebfb",
+  traditional_media: "#fbf2e7",
+  print_physical: "#f3eee8",
+  personal: "#fbeaea",
 };
 
 export function getCategoryBgColor(cat: SourceCategoryId): string {
-  return SOURCE_CATEGORY_BG_COLORS[cat] || '#f3f4f6';
+  return SOURCE_CATEGORY_BG_COLORS[cat] || "#f3f4f6";
 }

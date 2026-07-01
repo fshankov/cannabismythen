@@ -17,59 +17,70 @@
  *   - Sort state extended to support verdict-rank (asc/desc) via the
  *     stacked-circles button in the MYTHEN column header.
  */
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type {
-  Myth, Metric, AppState, Indicator, GroupId, StripsMode,
+  Myth,
+  Metric,
+  AppState,
+  Indicator,
+  GroupId,
+  StripsMode,
   DashboardDefinitions,
-} from '../../../lib/dashboard/types';
+} from "../../../lib/dashboard/types";
 import {
   getMythMetric,
   getIndicatorValueChecked,
   getMythShortText,
   getMythText,
   formatValue,
-} from '../../../lib/dashboard/data';
-import { getCorrectnessColor } from '../../../lib/dashboard/colors';
-import { renderTableSvg, type TableRenderOpts } from '../../../lib/dashboard/table-svg';
+} from "../../../lib/dashboard/data";
+import { getCorrectnessColor } from "../../../lib/dashboard/colors";
+import {
+  renderTableSvg,
+  type TableRenderOpts,
+} from "../../../lib/dashboard/table-svg";
 import {
   INDICATOR_ICONS,
   AUDIENCE_ICONS_BY_GROUP,
   type IconComponent,
-} from '../../../lib/icons';
-import VerdictArrowSymbols from './verdictArrowSymbols';
-import { t, type TranslationKey } from '../../../lib/dashboard/translations';
-import { useHiddenColumns } from '../hooks/useHiddenColumns';
-import {
-  GridDataHeader,
-  GridLabelHeader,
-  GridMythCell,
-} from '../grid';
+} from "../../../lib/icons";
+import VerdictArrowSymbols from "./verdictArrowSymbols";
+import { t, type TranslationKey } from "../../../lib/dashboard/translations";
+import { useHiddenColumns } from "../hooks/useHiddenColumns";
+import { GridDataHeader, GridLabelHeader, GridMythCell } from "../grid";
 import {
   bandIndex,
   anteilLabel,
   niveauLabel,
-} from '../../../lib/dashboard/lesebeispiel-bands';
-import Lesebeispiel from '../Lesebeispiel';
-import HoverTooltip from '../../shared/HoverTooltip';
+} from "../../../lib/dashboard/lesebeispiel-bands";
+import Lesebeispiel from "../Lesebeispiel";
+import HoverTooltip from "../../shared/HoverTooltip";
 
 /** Compact label set used by the cell-hover tooltip title bar. The
  *  in-table column header already has its own label via GridDataHeader;
  *  this set is just for "indicator · group" composition in the
  *  tooltip. */
 const INDICATOR_LABELS_FULL: Record<Indicator, string> = {
-  awareness: 'Kenntnis',
-  significance: 'Bedeutung',
-  correctness: 'Richtigkeit',
-  prevention_significance: 'Prävention',
-  population_relevance: 'Bevölkerungsrelevanz',
+  awareness: "Kenntnis",
+  significance: "Bedeutung",
+  correctness: "Richtigkeit",
+  prevention_significance: "Prävention",
+  population_relevance: "Bevölkerungsrelevanz",
 };
 
 const GROUP_FULL_LABELS: Record<string, string> = {
-  adults: 'Erwachsene (18–70)',
-  minors: 'Minderjährige (16–17)',
-  consumers: 'Konsumierende',
-  young_adults: 'Junge Erwachsene (18–26)',
-  parents: 'Eltern',
+  adults: "Erwachsene (18–70)",
+  minors: "Minderjährige (16–17)",
+  consumers: "Konsumierende",
+  young_adults: "Junge Erwachsene (18–26)",
+  parents: "Eltern",
 };
 
 /** Short column-header labels — mirror SpannweiteView's `GROUP_SHORT_DE`
@@ -77,18 +88,18 @@ const GROUP_FULL_LABELS: Record<string, string> = {
  *  Mythen-Übersicht (Fedor 2026-05-29). Full forms stay in `fullLabel`
  *  for the hide/sort tooltips + aria. */
 const GROUP_SHORT_DE: Record<string, string> = {
-  adults: 'Erw.',
-  minors: 'Minderj.',
-  consumers: 'Konsum.',
-  young_adults: 'Junge Erw.',
-  parents: 'Eltern',
+  adults: "Erw.",
+  minors: "Minderj.",
+  consumers: "Konsum.",
+  young_adults: "Junge Erw.",
+  parents: "Eltern",
 };
 const GROUP_SHORT_EN: Record<string, string> = {
-  adults: 'Adults',
-  minors: 'Minors',
-  consumers: 'Cons.',
-  young_adults: 'Y. Adults',
-  parents: 'Parents',
+  adults: "Adults",
+  minors: "Minors",
+  consumers: "Cons.",
+  young_adults: "Y. Adults",
+  parents: "Parents",
 };
 
 interface Props {
@@ -110,9 +121,9 @@ interface Props {
  *  stay constant across the pivot; the data-column sort key is just the
  *  active column ID (an Indicator in 'indicator' mode, a GroupId in
  *  'group' mode). Stored as a string so both flavors fit. */
-type SortKey = 'myth' | 'verdict' | string;
+type SortKey = "myth" | "verdict" | string;
 
-type SortDir = 'asc' | 'desc';
+type SortDir = "asc" | "desc";
 
 interface ColSpec {
   /** Indicator key (in 'indicator' mode) or GroupId (in 'group' mode). */
@@ -121,22 +132,25 @@ interface ColSpec {
 }
 
 const INDICATOR_COLS: ColSpec[] = [
-  { key: 'awareness', Icon: INDICATOR_ICONS.awareness },
-  { key: 'significance', Icon: INDICATOR_ICONS.significance },
-  { key: 'correctness', Icon: INDICATOR_ICONS.correctness },
-  { key: 'prevention_significance', Icon: INDICATOR_ICONS.prevention_significance },
-  { key: 'population_relevance', Icon: INDICATOR_ICONS.population_relevance },
+  { key: "awareness", Icon: INDICATOR_ICONS.awareness },
+  { key: "significance", Icon: INDICATOR_ICONS.significance },
+  { key: "correctness", Icon: INDICATOR_ICONS.correctness },
+  {
+    key: "prevention_significance",
+    Icon: INDICATOR_ICONS.prevention_significance,
+  },
+  { key: "population_relevance", Icon: INDICATOR_ICONS.population_relevance },
 ];
 
 /** v4 (2026-05-26): when `state.stripsMode === 'group'`, columns become
  *  the 5 Zielgruppen and each cell shows `state.indicator`'s value for
  *  that column's group. */
 const GROUP_COLS: ColSpec[] = [
-  { key: 'adults', Icon: AUDIENCE_ICONS_BY_GROUP.adults },
-  { key: 'minors', Icon: AUDIENCE_ICONS_BY_GROUP.minors },
-  { key: 'consumers', Icon: AUDIENCE_ICONS_BY_GROUP.consumers },
-  { key: 'young_adults', Icon: AUDIENCE_ICONS_BY_GROUP.young_adults },
-  { key: 'parents', Icon: AUDIENCE_ICONS_BY_GROUP.parents },
+  { key: "adults", Icon: AUDIENCE_ICONS_BY_GROUP.adults },
+  { key: "minors", Icon: AUDIENCE_ICONS_BY_GROUP.minors },
+  { key: "consumers", Icon: AUDIENCE_ICONS_BY_GROUP.consumers },
+  { key: "young_adults", Icon: AUDIENCE_ICONS_BY_GROUP.young_adults },
+  { key: "parents", Icon: AUDIENCE_ICONS_BY_GROUP.parents },
 ];
 
 export interface TableViewHandle {
@@ -148,22 +162,22 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
   ref,
 ) {
   void update;
-  const [sortKey, setSortKey] = useState<SortKey>('myth');
-  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [sortKey, setSortKey] = useState<SortKey>("myth");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
   const lang = state.lang;
   // v4: state from the SpannweiteToolbar's PivotToggle + "Wert für"
   // picker. The "off-axis" dimension comes from state.groupIds[0]
   // (when columns = indicators) or state.indicator (when columns =
   // groups), matching SpannweiteToolbar's onPickerChange wiring.
-  const mode: StripsMode = state.stripsMode ?? 'indicator';
-  const groupId: GroupId = (state.groupIds[0] as GroupId) || 'adults';
+  const mode: StripsMode = state.stripsMode ?? "indicator";
+  const groupId: GroupId = (state.groupIds[0] as GroupId) || "adults";
   const pickedIndicator: Indicator = state.indicator;
 
   // v5 (2026-05-26) — swap so the toggle label names the PICKER
   // dimension and the columns become the OTHER dimension. "Indikatoren"
   // mode → picker = indicator, columns = 5 groups. "Gruppen" mode →
   // picker = group, columns = 5 indicators.
-  const cols: ColSpec[] = mode === 'indicator' ? GROUP_COLS : INDICATOR_COLS;
+  const cols: ColSpec[] = mode === "indicator" ? GROUP_COLS : INDICATOR_COLS;
   const allColIds = cols.map((c) => c.key);
 
   // Hidden-column state is scoped per-mode so the user's hidden
@@ -177,9 +191,9 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
   // data-column sort instantly becomes meaningless. Reset to the alpha
   // sort on the myth-label column so the table stays coherent.
   useEffect(() => {
-    if (sortKey !== 'myth' && sortKey !== 'verdict') {
-      setSortKey('myth');
-      setSortDir('asc');
+    if (sortKey !== "myth" && sortKey !== "verdict") {
+      setSortKey("myth");
+      setSortDir("asc");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
@@ -187,10 +201,10 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
   /** Click cycle: same column → flip direction; new column → asc. */
   const cycleColumnSort = (key: SortKey) => {
     if (sortKey === key) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
       setSortKey(key);
-      setSortDir('asc');
+      setSortDir("asc");
     }
   };
 
@@ -200,7 +214,7 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
    *  group, columns = indicators → cell uses pickedGroup and
    *  colKey-as-Indicator. */
   const cellValueFor = (mythId: number, colKey: string): number | null => {
-    if (mode === 'indicator') {
+    if (mode === "indicator") {
       return getIndicatorValueChecked(
         getMythMetric(metrics, mythId, colKey as GroupId),
         pickedIndicator,
@@ -217,15 +231,19 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
   const sortedMyths = useMemo(() => {
     const arr = [...myths];
     const cmpAz = (a: Myth, b: Myth) =>
-      getMythShortText(a, lang).localeCompare(getMythShortText(b, lang), 'de');
+      getMythShortText(a, lang).localeCompare(getMythShortText(b, lang), "de");
     const verdictOrder: Record<string, number> = {
-      richtig: 1, eher_richtig: 2, eher_falsch: 3, falsch: 4, keine_aussage_moeglich: 5,
+      richtig: 1,
+      eher_richtig: 2,
+      eher_falsch: 3,
+      falsch: 4,
+      keine_aussage_moeglich: 5,
     };
     arr.sort((a, b) => {
       let cmp = 0;
-      if (sortKey === 'myth') {
+      if (sortKey === "myth") {
         cmp = cmpAz(a, b);
-      } else if (sortKey === 'verdict') {
+      } else if (sortKey === "verdict") {
         const oa = verdictOrder[a.correctness_class] ?? 5;
         const ob = verdictOrder[b.correctness_class] ?? 5;
         cmp = oa - ob;
@@ -240,7 +258,7 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
         else if (vb === null) cmp = -1;
         else cmp = va - vb;
       }
-      return sortDir === 'asc' ? cmp : -cmp;
+      return sortDir === "asc" ? cmp : -cmp;
     });
     return arr;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -250,10 +268,10 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
     return cols.map((col) => {
       // v5: 'indicator' pivot mode → cols are groups; 'group' pivot
       // mode → cols are indicators. Pick the metadata accordingly.
-      if (mode === 'group') {
+      if (mode === "group") {
         const ind = col.key as Indicator;
         const rawLabel = t(`indicator.${ind}.short` as TranslationKey, lang);
-        const label = rawLabel.replace(/\s*%\s*$/, '');
+        const label = rawLabel.replace(/\s*%\s*$/, "");
         const def = definitions?.mythIndicators?.[ind];
         return {
           key: col.key,
@@ -269,13 +287,15 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
       // 'indicator' mode — column is a Zielgruppe. Header shows the short
       // form (Erw./Minderj./…); tooltips/aria use the full form.
       const gid = col.key as GroupId;
-      const label = lang === 'de' ? GROUP_SHORT_DE[gid] : GROUP_SHORT_EN[gid];
+      const label = lang === "de" ? GROUP_SHORT_DE[gid] : GROUP_SHORT_EN[gid];
       const def = definitions?.groups?.[gid];
       return {
         key: col.key,
         Icon: col.Icon,
         label,
-        fullLabel: GROUP_FULL_LABELS[gid] ?? t(`igs.group.${gid}` as TranslationKey, lang),
+        fullLabel:
+          GROUP_FULL_LABELS[gid] ??
+          t(`igs.group.${gid}` as TranslationKey, lang),
         defTitle: def?.label,
         defText: def?.definition,
         defScale: undefined as string | undefined,
@@ -284,8 +304,8 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
     });
   }, [cols, mode, definitions, lang]);
 
-  const isAzActive = sortKey === 'myth';
-  const azTooltip = t('spannweite.sort.alpha.tooltip', lang);
+  const isAzActive = sortKey === "myth";
+  const azTooltip = t("spannweite.sort.alpha.tooltip", lang);
 
   // Dynamic column widths — myth column is narrower (28%); hidden
   // columns collapse to 28px; visible indicator columns share the
@@ -303,7 +323,7 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
   const renderData = useMemo<TableRenderOpts>(() => {
     const visCols = columnMeta.filter((c) => !isHidden(c.key));
     return {
-      labelHeader: lang === 'de' ? 'MYTHEN' : 'MYTHS',
+      labelHeader: lang === "de" ? "MYTHEN" : "MYTHS",
       columns: visCols.map((c) => ({ label: c.label })),
       lang,
       rows: sortedMyths.map((myth) => {
@@ -311,10 +331,10 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
         const naMask: boolean[] = [];
         for (const c of visCols) {
           const cellIndicator: Indicator =
-            mode === 'indicator' ? pickedIndicator : (c.key as Indicator);
+            mode === "indicator" ? pickedIndicator : (c.key as Indicator);
           const val = cellValueFor(myth.id, c.key);
           naMask.push(val === null);
-          cells.push(val === null ? '' : formatValue(val, cellIndicator));
+          cells.push(val === null ? "" : formatValue(val, cellIndicator));
         }
         return {
           label: getMythShortText(myth, lang),
@@ -325,13 +345,27 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
       }),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnMeta, isHidden, sortedMyths, mode, pickedIndicator, groupId, metrics, lang]);
+  }, [
+    columnMeta,
+    isHidden,
+    sortedMyths,
+    mode,
+    pickedIndicator,
+    groupId,
+    metrics,
+    lang,
+  ]);
   const renderDataRef = useRef<TableRenderOpts | null>(null);
   renderDataRef.current = renderData;
   useImperativeHandle(ref, () => ({
     getSvgElement: () => {
-      if (!renderDataRef.current || renderDataRef.current.rows.length === 0) return null;
-      try { return renderTableSvg(renderDataRef.current); } catch { return null; }
+      if (!renderDataRef.current || renderDataRef.current.rows.length === 0)
+        return null;
+      try {
+        return renderTableSvg(renderDataRef.current);
+      } catch {
+        return null;
+      }
     },
   }));
 
@@ -344,7 +378,7 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
             <col
               key={col.key}
               style={{
-                width: isHidden(col.key) ? '28px' : visibleIndicatorWidth,
+                width: isHidden(col.key) ? "28px" : visibleIndicatorWidth,
               }}
             />
           ))}
@@ -357,30 +391,33 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                 role="columnheader"
               >
                 <GridLabelHeader
-                  labelText={t('misc.myths', lang)}
+                  labelText={t("misc.myths", lang)}
                   isAzActive={isAzActive}
                   azTooltip={azTooltip}
                   onAzClick={() => {
-                    setSortKey('myth');
-                    setSortDir('asc');
+                    setSortKey("myth");
+                    setSortDir("asc");
                   }}
                   verdictRank={{
-                    isActive: sortKey === 'verdict',
-                    direction: sortKey === 'verdict' && sortDir === 'desc' ? 'desc' : 'asc',
+                    isActive: sortKey === "verdict",
+                    direction:
+                      sortKey === "verdict" && sortDir === "desc"
+                        ? "desc"
+                        : "asc",
                     tooltip: t(
-                      sortKey !== 'verdict'
-                        ? 'spannweite.sort.verdict.activate.tooltip'
-                        : sortDir === 'asc'
-                        ? 'spannweite.sort.verdict.asc.tooltip'
-                        : 'spannweite.sort.verdict.desc.tooltip',
+                      sortKey !== "verdict"
+                        ? "spannweite.sort.verdict.activate.tooltip"
+                        : sortDir === "asc"
+                          ? "spannweite.sort.verdict.asc.tooltip"
+                          : "spannweite.sort.verdict.desc.tooltip",
                       lang,
                     ),
                     onClick: () => {
-                      if (sortKey === 'verdict') {
-                        setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+                      if (sortKey === "verdict") {
+                        setSortDir((d) => (d === "asc" ? "desc" : "asc"));
                       } else {
-                        setSortKey('verdict');
-                        setSortDir('asc');
+                        setSortKey("verdict");
+                        setSortDir("asc");
                       }
                     },
                   }}
@@ -396,8 +433,8 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                     key={col.key}
                     className="data-table__hidden-th"
                     onClick={() => show(col.key)}
-                    title={`${t('column.show', lang)} — ${col.fullLabel}`}
-                    aria-label={`${t('column.show', lang)} — ${col.fullLabel}`}
+                    title={`${t("column.show", lang)} — ${col.fullLabel}`}
+                    aria-label={`${t("column.show", lang)} — ${col.fullLabel}`}
                   >
                     <div
                       className="carm-spannweite__cell carm-spannweite__cell--header carm-spannweite__cell--hidden data-table__hidden-wrap"
@@ -406,8 +443,16 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                       {/* Closed-column layout (Fedor 2026-05-25 PM):
                           chev on top + indicator icon below. Matches
                           Spannweite's redesign. */}
-                      <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
-                      <span className="carm-spannweite__hidden-icon" aria-hidden="true">
+                      <span
+                        className="carm-spannweite__hidden-chev"
+                        aria-hidden="true"
+                      >
+                        ▸
+                      </span>
+                      <span
+                        className="carm-spannweite__hidden-icon"
+                        aria-hidden="true"
+                      >
                         <ColIcon size={16} strokeWidth={1.75} />
                       </span>
                     </div>
@@ -415,14 +460,17 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                 );
               }
               const isSortCol = sortKey === col.key;
-              const isAsc = isSortCol && sortDir === 'asc';
-              const isDesc = isSortCol && sortDir === 'desc';
+              const isAsc = isSortCol && sortDir === "asc";
+              const isDesc = isSortCol && sortDir === "desc";
               const colSortTooltipKey: TranslationKey = isAsc
-                ? 'spannweite.sort.col.asc.tooltip'
+                ? "spannweite.sort.col.asc.tooltip"
                 : isDesc
-                ? 'spannweite.sort.col.desc.tooltip'
-                : 'spannweite.sort.col.activate.tooltip';
-              const colSortTooltip = t(colSortTooltipKey, lang).replace('{col}', col.fullLabel);
+                  ? "spannweite.sort.col.desc.tooltip"
+                  : "spannweite.sort.col.activate.tooltip";
+              const colSortTooltip = t(colSortTooltipKey, lang).replace(
+                "{col}",
+                col.fullLabel,
+              );
               return (
                 <th key={col.key} className="data-table__th">
                   <div
@@ -437,10 +485,10 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                       defText={col.defText}
                       defScale={col.defScale}
                       defSampleSize={col.defSampleSize}
-                      hideLabel={`${t('column.hide', lang)} — ${col.fullLabel}`}
+                      hideLabel={`${t("column.hide", lang)} — ${col.fullLabel}`}
                       onHide={() => hide(col.key)}
                       isSortActive={isSortCol}
-                      sortDir={isDesc ? 'desc' : 'asc'}
+                      sortDir={isDesc ? "desc" : "asc"}
                       sortTooltip={colSortTooltip}
                       onSortClick={() => cycleColumnSort(col.key)}
                     />
@@ -470,7 +518,7 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                   className="hover-tooltip__body"
                   style={{ color: verdictColor, fontWeight: 600 }}
                 >
-                  {lang === 'de' ? 'Wissenschaftlich' : 'Scientifically'}:{' '}
+                  {lang === "de" ? "Wissenschaftlich" : "Scientifically"}:{" "}
                   {verdictLabelDe}
                 </div>
               </div>
@@ -480,7 +528,9 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                 key={myth.id}
                 onClick={() => onSelectMyth(myth.id)}
                 tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter') onSelectMyth(myth.id); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") onSelectMyth(myth.id);
+                }}
                 role="row"
               >
                 <HoverTooltip content={mythTooltipContent} verdict={verdictKey}>
@@ -510,14 +560,16 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                   // indicator is fixed = pickedIndicator. In 'group'
                   // mode it's the other way around.
                   const cellIndicator: Indicator =
-                    mode === 'indicator'
+                    mode === "indicator"
                       ? pickedIndicator
                       : (col.key as Indicator);
                   const cellGroupId: GroupId =
-                    mode === 'indicator'
-                      ? (col.key as GroupId)
-                      : groupId;
-                  const cellMetric = getMythMetric(metrics, myth.id, cellGroupId);
+                    mode === "indicator" ? (col.key as GroupId) : groupId;
+                  const cellMetric = getMythMetric(
+                    metrics,
+                    myth.id,
+                    cellGroupId,
+                  );
                   const val = cellValueFor(myth.id, col.key);
                   if (val === null) {
                     return (
@@ -532,14 +584,14 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                   // computed on the rounded value regardless of pivot.
                   const rounded = Math.round(val);
                   const band = bandIndex(rounded);
-                  const usesAnteil = cellIndicator === 'awareness';
+                  const usesAnteil = cellIndicator === "awareness";
                   const bandLabel = usesAnteil
                     ? anteilLabel(rounded)
                     : niveauLabel(rounded);
                   const tooltipContent = (
                     <div className="hover-tooltip__inner">
                       <div className="hover-tooltip__title">
-                        {INDICATOR_LABELS_FULL[cellIndicator]} ·{' '}
+                        {INDICATOR_LABELS_FULL[cellIndicator]} ·{" "}
                         {GROUP_FULL_LABELS[cellGroupId] ?? cellGroupId}
                       </div>
                       {cellMetric ? (
@@ -553,7 +605,7 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                       ) : null}
                       <div
                         className={
-                          'hover-tooltip__band ' +
+                          "hover-tooltip__band " +
                           `hover-tooltip__band--band-${band}`
                         }
                       >
@@ -567,9 +619,7 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                       content={tooltipContent}
                       verdict={verdictKey}
                     >
-                      <td
-                        className={`value-cell value-cell--band-${band}`}
-                      >
+                      <td className={`value-cell value-cell--band-${band}`}>
                         {formatValue(val, cellIndicator)}
                       </td>
                     </HoverTooltip>

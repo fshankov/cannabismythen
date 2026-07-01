@@ -27,20 +27,29 @@ const accent = audience.accentColor;
       <span aria-hidden="true">›</span>
       <span aria-current="page">{audience.cardLabel}</span>
     </nav>
-    <span class="faq-audience-header__count" aria-label={`${questionCount} ${questionCount === 1 ? "Frage" : "Fragen"}`}>
-      {questionCount} {questionCount === 1 ? "Frage" : "Fragen"}
+    <span
+      class="faq-audience-header__count"
+      aria-label={`${questionCount} ${questionCount === 1 ? "Frage" : "Fragen"}`}
+    >
+      {questionCount}
+      {questionCount === 1 ? "Frage" : "Fragen"}
     </span>
   </div>
 
   <h1 class="faq-audience-header__title">
-    <span class="faq-audience-header__emoji" aria-hidden="true">{audience.emoji}</span>
+    <span class="faq-audience-header__emoji" aria-hidden="true"
+      >{audience.emoji}</span
+    >
     Deine Perspektive. Deine Fragen.
   </h1>
   <p class="faq-audience-header__subtitle">
-    Cannabis betrifft uns unterschiedlich. Gezielte Antworten auf Mythen — je nach Lebenssituation.
+    Cannabis betrifft uns unterschiedlich. Gezielte Antworten auf Mythen — je
+    nach Lebenssituation.
   </p>
 
-  {introNoteHtml && (
-    <aside class="faq-audience-header__note" set:html={introNoteHtml} />
-  )}
+  {
+    introNoteHtml && (
+      <aside class="faq-audience-header__note" set:html={introNoteHtml} />
+    )
+  }
 </header>

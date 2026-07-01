@@ -20,25 +20,36 @@
  * view reads state.sourceMetric / state.sourceGroup directly.
  */
 import {
-  forwardRef, useCallback, useImperativeHandle, useMemo,
-  useRef, useState,
-} from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import type {
-  AppState, DashboardDefinitions, InformationSource, InformationSourcesData,
-  SourceGroupId, SourceMetricType,
-} from '../../../lib/dashboard/types';
+  AppState,
+  DashboardDefinitions,
+  InformationSource,
+  InformationSourcesData,
+  SourceGroupId,
+  SourceMetricType,
+} from "../../../lib/dashboard/types";
 import {
-  GridDataHeader, GridLabelHeader,
-  BalkenBar, SourcesHoverTooltip,
-} from '../grid';
+  GridDataHeader,
+  GridLabelHeader,
+  BalkenBar,
+  SourcesHoverTooltip,
+} from "../grid";
 import {
-  SOURCE_CATEGORY_ICONS, SOURCE_METRIC_ICONS,
+  SOURCE_CATEGORY_ICONS,
+  SOURCE_METRIC_ICONS,
   type SourceCategoryId,
-} from '../../../lib/icons/lookups';
-import { filterSourcesBySearch } from '../../../lib/dashboard/data';
-import { getCategoryColor } from '../../../lib/dashboard/colors';
-import { renderSourcesSpannweiteSvg } from '../../../lib/dashboard/sources-spannweite-svg';
+} from "../../../lib/icons/lookups";
+import { filterSourcesBySearch } from "../../../lib/dashboard/data";
+import { getCategoryColor } from "../../../lib/dashboard/colors";
+import { renderSourcesSpannweiteSvg } from "../../../lib/dashboard/sources-spannweite-svg";
 
 interface Props {
   state: AppState;
@@ -57,7 +68,8 @@ export interface SourcesBalkenViewHandle {
   getSvgElement: () => SVGSVGElement | null;
 }
 
-type SortMode = 'a-z' | 'value-asc' | 'value-desc' | 'category-asc' | 'category-desc';
+type SortMode =
+  "a-z" | "value-asc" | "value-desc" | "category-asc" | "category-desc";
 
 /** Canonical category order for the category sort — mirrors
  *  SourcesSpannweiteView's CATEGORY_ORDER so Quellen-Balken /
@@ -74,20 +86,20 @@ const CATEGORY_ORDER: Record<string, number> = {
 
 /** Label for the active source metric — shows in the data column header. */
 const METRIC_LABELS: Record<SourceMetricType, string> = {
-  search: 'Suche',
-  perception: 'Wahrnehmung',
-  trust: 'Vertrauen',
-  prevention: 'Prävention',
+  search: "Suche",
+  perception: "Wahrnehmung",
+  trust: "Vertrauen",
+  prevention: "Prävention",
 };
 
 /** Label for the active group — used inside the column header tooltip
  *  and the value-cell aria-label. */
 const GROUP_LABELS: Record<SourceGroupId, string> = {
-  adults: 'Erwachsene (18–70)',
-  minors: 'Minderjährige (16–17)',
-  consumers: 'Konsumierende',
-  young_adults: 'Junge Erwachsene (18–26)',
-  parents: 'Eltern',
+  adults: "Erwachsene (18–70)",
+  minors: "Minderjährige (16–17)",
+  consumers: "Konsumierende",
+  young_adults: "Junge Erwachsene (18–26)",
+  parents: "Eltern",
 };
 
 /** Category color now lives in `src/lib/dashboard/colors.ts`
@@ -106,7 +118,12 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
     // Export SVG handle — built on demand from `renderDataRef`, which is
     // synced to the on-screen rows every render (mirrors SourcesSpannweiteView).
     const renderDataRef = useRef<{
-      rows: { sourceId: number; name: string; categoryColor: string; isChild: boolean }[];
+      rows: {
+        sourceId: number;
+        name: string;
+        categoryColor: string;
+        isChild: boolean;
+      }[];
       columns: { id: string; label: string }[];
       cellValue: (sourceId: number, colId: string) => number | null;
       lang: typeof state.lang;
@@ -124,7 +141,7 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
 
     // Sort lives locally in this view — no URL state hook needed for the
     // first iteration. (URL persistence can ride atop a future sub-PR.)
-    const [sort, setSort] = useState<SortMode>('a-z');
+    const [sort, setSort] = useState<SortMode>("a-z");
 
     // 2026-05-29: expandable parent/child source rows — same pattern as
     // Quellen-Übersicht (SourcesSpannweiteView). Reuses the shared
@@ -136,7 +153,7 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
         const next = expanded.includes(parentId)
           ? expanded.filter((id) => id !== parentId)
           : [...expanded, parentId];
-        update('sourcesSpannweiteExpanded', next);
+        update("sourcesSpannweiteExpanded", next);
       },
       [expanded, update],
     );
@@ -159,7 +176,7 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
       const valueMap = metricDef.data[selectedGroup] ?? {};
       const valueOf = (src: InformationSource): number | null => {
         const raw = valueMap[String(src.id)];
-        return typeof raw === 'number' ? raw : null;
+        return typeof raw === "number" ? raw : null;
       };
 
       // Group children by parent id.
@@ -173,10 +190,13 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
       }
 
       const topLevel = sourceData.sources.filter((s) => s.parentId === null);
-      const searched = filterSourcesBySearch(topLevel, state.sourcesSearchQuery);
+      const searched = filterSourcesBySearch(
+        topLevel,
+        state.sourcesSearchQuery,
+      );
 
       const cmpAz = (a: SrcRow, b: SrcRow) =>
-        a.source.name.localeCompare(b.source.name, 'de');
+        a.source.name.localeCompare(b.source.name, "de");
       const cmpVal = (dir: number) => (a: SrcRow, b: SrcRow) => {
         if (a.value === null && b.value === null) return cmpAz(a, b);
         if (a.value === null) return 1;
@@ -193,13 +213,21 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
       // Parents honour every sort mode; children only ever sort by value
       // or A-Z (category grouping applies at the parent level).
       const parentSorter =
-        sort === 'value-asc' ? cmpVal(1)
-        : sort === 'value-desc' ? cmpVal(-1)
-        : sort === 'category-asc' ? cmpCat(1)
-        : sort === 'category-desc' ? cmpCat(-1)
-        : cmpAz;
+        sort === "value-asc"
+          ? cmpVal(1)
+          : sort === "value-desc"
+            ? cmpVal(-1)
+            : sort === "category-asc"
+              ? cmpCat(1)
+              : sort === "category-desc"
+                ? cmpCat(-1)
+                : cmpAz;
       const childSorter =
-        sort === 'value-asc' ? cmpVal(1) : sort === 'value-desc' ? cmpVal(-1) : cmpAz;
+        sort === "value-asc"
+          ? cmpVal(1)
+          : sort === "value-desc"
+            ? cmpVal(-1)
+            : cmpAz;
 
       const parentRows: SrcRow[] = searched.map((src) => ({
         source: src,
@@ -215,24 +243,33 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
       for (const p of parentRows) {
         out.push(p);
         if (p.hasChildren && expandedSet.has(p.source.id)) {
-          const kids: SrcRow[] = (childrenByParent.get(p.source.id) ?? []).map((src) => ({
-            source: src,
-            value: valueOf(src),
-            categoryId: src.category as SourceCategoryId,
-            isChild: true,
-            hasChildren: false,
-          }));
+          const kids: SrcRow[] = (childrenByParent.get(p.source.id) ?? []).map(
+            (src) => ({
+              source: src,
+              value: valueOf(src),
+              categoryId: src.category as SourceCategoryId,
+              isChild: true,
+              hasChildren: false,
+            }),
+          );
           kids.sort(childSorter);
           out.push(...kids);
         }
       }
       return out;
-    }, [sourceData, selectedMetric, selectedGroup, state.sourcesSearchQuery, sort, expanded]);
+    }, [
+      sourceData,
+      selectedMetric,
+      selectedGroup,
+      state.sourcesSearchQuery,
+      sort,
+      expanded,
+    ]);
 
     const handleValueSortClick = useCallback(() => {
-      if (sort === 'value-asc') setSort('value-desc');
-      else if (sort === 'value-desc') setSort('value-asc');
-      else setSort('value-asc');
+      if (sort === "value-asc") setSort("value-desc");
+      else if (sort === "value-desc") setSort("value-asc");
+      else setSort("value-asc");
     }, [sort]);
 
     // ── Hover state (Spannweite-style rich card via SourcesHoverTooltip,
@@ -240,7 +277,9 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
     //    the X position so the 360 px-wide card never extends past the
     //    viewport edge near the left/right gutter. ─────────────────────
     const [hoveredSourceId, setHoveredSourceId] = useState<number | null>(null);
-    const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+    const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
+      null,
+    );
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     // v3 (2026-05-26): width bumped from 360 → 420 to match the
@@ -251,20 +290,17 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
     // edge. Margin 12 → 24 matches BalkenView's breathing room.
     const TOOLTIP_MAX_W = 420;
     const VIEWPORT_MARGIN = 24;
-    const handleHover = useCallback(
-      (sourceId: number, e: React.MouseEvent) => {
-        setHoveredSourceId(sourceId);
-        const halfW = TOOLTIP_MAX_W / 2;
-        const minX = halfW + VIEWPORT_MARGIN;
-        const maxX =
-          (typeof window !== 'undefined' ? window.innerWidth : 1280) -
-          halfW -
-          VIEWPORT_MARGIN;
-        const clampedX = Math.max(minX, Math.min(maxX, e.clientX));
-        setHoverPos({ x: clampedX, y: e.clientY });
-      },
-      [],
-    );
+    const handleHover = useCallback((sourceId: number, e: React.MouseEvent) => {
+      setHoveredSourceId(sourceId);
+      const halfW = TOOLTIP_MAX_W / 2;
+      const minX = halfW + VIEWPORT_MARGIN;
+      const maxX =
+        (typeof window !== "undefined" ? window.innerWidth : 1280) -
+        halfW -
+        VIEWPORT_MARGIN;
+      const clampedX = Math.max(minX, Math.min(maxX, e.clientX));
+      setHoverPos({ x: clampedX, y: e.clientY });
+    }, []);
     const handleLeave = useCallback(() => {
       setHoveredSourceId(null);
       setHoverPos(null);
@@ -281,10 +317,15 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
             categoryColor: getCategoryColor(r.categoryId),
             isChild: r.isChild,
           })),
-          columns: [{ id: selectedMetric, label: METRIC_LABELS[selectedMetric] }],
+          columns: [
+            { id: selectedMetric, label: METRIC_LABELS[selectedMetric] },
+          ],
           cellValue: (sourceId: number) => {
-            const raw = sourceData.metrics[selectedMetric]?.data[selectedGroup]?.[String(sourceId)];
-            return typeof raw === 'number' ? raw : null;
+            const raw =
+              sourceData.metrics[selectedMetric]?.data[selectedGroup]?.[
+                String(sourceId)
+              ];
+            return typeof raw === "number" ? raw : null;
           },
           lang: state.lang,
         }
@@ -310,17 +351,17 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
       );
     }
 
-    const isAzActive = sort === 'a-z';
-    const isSortCol = sort === 'value-asc' || sort === 'value-desc';
-    const isAsc = sort === 'value-asc';
+    const isAzActive = sort === "a-z";
+    const isSortCol = sort === "value-asc" || sort === "value-desc";
+    const isAsc = sort === "value-asc";
     // Category sort (2026-05-29) — same control as Quellen-Übersicht.
-    const isCatActive = sort === 'category-asc' || sort === 'category-desc';
+    const isCatActive = sort === "category-asc" || sort === "category-desc";
     const catTooltip =
-      sort === 'category-asc'
-        ? 'Reihenfolge umkehren (Persönlich → Institutionell)'
-        : sort === 'category-desc'
-          ? 'Reihenfolge umkehren (Institutionell → Persönlich)'
-          : 'Nach Informationswege-Kategorie sortieren (Institutionell → Persönlich)';
+      sort === "category-asc"
+        ? "Reihenfolge umkehren (Persönlich → Institutionell)"
+        : sort === "category-desc"
+          ? "Reihenfolge umkehren (Institutionell → Persönlich)"
+          : "Nach Informationswege-Kategorie sortieren (Institutionell → Persönlich)";
     const MetricIcon = SOURCE_METRIC_ICONS[selectedMetric];
     const metricLabel = METRIC_LABELS[selectedMetric];
     const groupLabel = GROUP_LABELS[selectedGroup];
@@ -329,7 +370,10 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
     const gridTemplate = `var(--carm-spannweite-label-col) minmax(0, 1fr)`;
 
     return (
-      <div className="carm-spannweite carm-balken-view carm-sources-balken" ref={wrapperRef}>
+      <div
+        className="carm-spannweite carm-balken-view carm-sources-balken"
+        ref={wrapperRef}
+      >
         {/* 2026-05-29: the metric + group pickers (+ search / Exportieren /
             Rundgang) now render at the panel level via
             <SourcesBalkenToolbar> in MythenExplorer — same structure as
@@ -351,16 +395,16 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
                 labelText="Informationswege"
                 isAzActive={isAzActive}
                 azTooltip="Alphabetisch sortieren"
-                onAzClick={() => setSort('a-z')}
+                onAzClick={() => setSort("a-z")}
                 categoryRank={{
                   isActive: isCatActive,
-                  direction: sort === 'category-desc' ? 'desc' : 'asc',
+                  direction: sort === "category-desc" ? "desc" : "asc",
                   tooltip: catTooltip,
                   onClick: () =>
                     setSort(
-                      sort === 'category-asc'
-                        ? 'category-desc'
-                        : 'category-asc',
+                      sort === "category-asc"
+                        ? "category-desc"
+                        : "category-asc",
                     ),
                 }}
               />
@@ -375,17 +419,23 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
                 Icon={MetricIcon}
                 label={metricLabel}
                 fullLabel={fullLabel}
-                defTitle={definitions?.sourcesIndicators?.[selectedMetric]?.label}
-                defText={definitions?.sourcesIndicators?.[selectedMetric]?.definition}
-                defScale={definitions?.sourcesIndicators?.[selectedMetric]?.scale}
+                defTitle={
+                  definitions?.sourcesIndicators?.[selectedMetric]?.label
+                }
+                defText={
+                  definitions?.sourcesIndicators?.[selectedMetric]?.definition
+                }
+                defScale={
+                  definitions?.sourcesIndicators?.[selectedMetric]?.scale
+                }
                 isSortActive={isSortCol}
-                sortDir={isAsc ? 'asc' : 'desc'}
+                sortDir={isAsc ? "asc" : "desc"}
                 sortTooltip={
                   !isSortCol
                     ? `Nach ${metricLabel} sortieren`
                     : isAsc
-                    ? `${metricLabel}: aufsteigend`
-                    : `${metricLabel}: absteigend`
+                      ? `${metricLabel}: aufsteigend`
+                      : `${metricLabel}: absteigend`
                 }
                 onSortClick={handleValueSortClick}
               />
@@ -401,9 +451,12 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
               return (
                 <div
                   key={`row-${source.id}`}
-                  className={`carm-spannweite__row${isHover ? ' is-hover' : ''}${isChild ? ' carm-spannweite__row--child' : ''}${rowIdx % 2 === 0 ? '' : ' is-alt'}`}
+                  className={`carm-spannweite__row${isHover ? " is-hover" : ""}${isChild ? " carm-spannweite__row--child" : ""}${rowIdx % 2 === 0 ? "" : " is-alt"}`}
                   role="row"
-                  style={{ gridColumn: `1 / span 2`, gridTemplateColumns: gridTemplate }}
+                  style={{
+                    gridColumn: `1 / span 2`,
+                    gridTemplateColumns: gridTemplate,
+                  }}
                   onMouseLeave={handleLeave}
                   tabIndex={0}
                 >
@@ -427,16 +480,31 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
                             ? `Unterquellen von ${source.name} einklappen`
                             : `Unterquellen von ${source.name} anzeigen`
                         }
-                        title={isExpanded ? 'Unterquellen einklappen' : 'Unterquellen anzeigen'}
+                        title={
+                          isExpanded
+                            ? "Unterquellen einklappen"
+                            : "Unterquellen anzeigen"
+                        }
                       >
                         {isExpanded ? (
-                          <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+                          <ChevronDown
+                            size={14}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
                         ) : (
-                          <ChevronRight size={14} strokeWidth={2} aria-hidden="true" />
+                          <ChevronRight
+                            size={14}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
                         )}
                       </button>
                     ) : (
-                      <span className="carm-sources-spannweite__chev-spacer" aria-hidden="true" />
+                      <span
+                        className="carm-sources-spannweite__chev-spacer"
+                        aria-hidden="true"
+                      />
                     )}
                     {CategoryIcon && (
                       <span
@@ -447,7 +515,9 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
                         <CategoryIcon size={16} strokeWidth={1.75} />
                       </span>
                     )}
-                    <span className="carm-sources-balken__name">{source.name}</span>
+                    <span className="carm-sources-balken__name">
+                      {source.name}
+                    </span>
                   </div>
                   <div
                     className="carm-spannweite__cell carm-spannweite__cell--plot"
@@ -471,20 +541,24 @@ const SourcesBalkenView = forwardRef<SourcesBalkenViewHandle, Props>(
         {/* Spannweite-style rich hover card. Replaces the previous
             native title= attribute so Quellen Balken now matches the
             hover quality of Mythen Balken / Spannweite. */}
-        {hoveredSourceId !== null && hoverPos && (() => {
-          const hovered = resolvedRows.find((r) => r.source.id === hoveredSourceId);
-          if (!hovered) return null;
-          return (
-            <SourcesHoverTooltip
-              source={hovered.source}
-              sourceData={sourceData}
-              metric={selectedMetric}
-              group={selectedGroup}
-              x={hoverPos.x}
-              y={hoverPos.y}
-            />
-          );
-        })()}
+        {hoveredSourceId !== null &&
+          hoverPos &&
+          (() => {
+            const hovered = resolvedRows.find(
+              (r) => r.source.id === hoveredSourceId,
+            );
+            if (!hovered) return null;
+            return (
+              <SourcesHoverTooltip
+                source={hovered.source}
+                sourceData={sourceData}
+                metric={selectedMetric}
+                group={selectedGroup}
+                x={hoverPos.x}
+                y={hoverPos.y}
+              />
+            );
+          })()}
       </div>
     );
   },

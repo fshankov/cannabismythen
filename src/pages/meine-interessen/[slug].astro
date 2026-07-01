@@ -22,6 +22,11 @@ const audience = await getAudience(slug as FaqAudienceId);
 if (!audience) return Astro.redirect("/meine-interessen/");
 ---
 
-<BaseLayout title={audience.title} description={audience.description || undefined} bgTexture extraBodyClass="mi-page">
+<BaseLayout
+  title={audience.title}
+  description={audience.description || undefined}
+  bgTexture
+  extraBodyClass="mi-page"
+>
   <MeineInteressenAudience slug={slug as FaqAudienceId} />
 </BaseLayout>

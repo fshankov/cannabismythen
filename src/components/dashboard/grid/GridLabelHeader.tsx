@@ -15,13 +15,13 @@
  * `carm-spannweite__cell--header` + `carm-spannweite__cell--label`
  * classes on the wrapper.
  */
-import { ArrowDownAZ } from 'lucide-react';
+import { ArrowDownAZ } from "lucide-react";
 import {
   IconVerdictRankAsc,
   IconVerdictRankDesc,
   IconCategoryRankAsc,
   IconCategoryRankDesc,
-} from '../../../lib/icons';
+} from "../../../lib/icons";
 
 interface Props {
   labelText: string;
@@ -34,7 +34,7 @@ interface Props {
    *  direction. Click toggles the direction. */
   verdictRank?: {
     isActive: boolean;
-    direction: 'asc' | 'desc';
+    direction: "asc" | "desc";
     tooltip: string;
     onClick: () => void;
   };
@@ -44,7 +44,7 @@ interface Props {
    *  uses either `verdictRank` (Mythen) or `categoryRank` (Quellen). */
   categoryRank?: {
     isActive: boolean;
-    direction: 'asc' | 'desc';
+    direction: "asc" | "desc";
     tooltip: string;
     onClick: () => void;
   };
@@ -66,7 +66,7 @@ export default function GridLabelHeader({
           order goes button → label. */}
       <button
         type="button"
-        className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-left${isAzActive ? ' is-active' : ''}`}
+        className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-left${isAzActive ? " is-active" : ""}`}
         onClick={(e) => {
           e.stopPropagation();
           onAzClick();
@@ -81,7 +81,7 @@ export default function GridLabelHeader({
       {verdictRank && (
         <button
           type="button"
-          className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-right${verdictRank.isActive ? ' is-active' : ''}`}
+          className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-right${verdictRank.isActive ? " is-active" : ""}`}
           onClick={(e) => {
             e.stopPropagation();
             verdictRank.onClick();
@@ -90,7 +90,7 @@ export default function GridLabelHeader({
           aria-label={verdictRank.tooltip}
           title={verdictRank.tooltip}
         >
-          {verdictRank.direction === 'desc' ? (
+          {verdictRank.direction === "desc" ? (
             <IconVerdictRankDesc size={14} aria-hidden="true" />
           ) : (
             <IconVerdictRankAsc size={14} aria-hidden="true" />
@@ -100,7 +100,7 @@ export default function GridLabelHeader({
       {categoryRank && (
         <button
           type="button"
-          className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-right${categoryRank.isActive ? ' is-active' : ''}`}
+          className={`carm-spannweite__col-sort-btn carm-spannweite__col-sort-btn--top-right${categoryRank.isActive ? " is-active" : ""}`}
           onClick={(e) => {
             e.stopPropagation();
             categoryRank.onClick();
@@ -109,7 +109,7 @@ export default function GridLabelHeader({
           aria-label={categoryRank.tooltip}
           title={categoryRank.tooltip}
         >
-          {categoryRank.direction === 'desc' ? (
+          {categoryRank.direction === "desc" ? (
             <IconCategoryRankDesc size={14} aria-hidden="true" />
           ) : (
             <IconCategoryRankAsc size={14} aria-hidden="true" />

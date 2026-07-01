@@ -1,5 +1,5 @@
-import type { TeamMember } from './types';
-import { withBase } from '../../lib/withBase';
+import type { TeamMember } from "./types";
+import { withBase } from "../../lib/withBase";
 
 interface Props {
   teamMembers: ReadonlyArray<TeamMember>;
@@ -33,15 +33,12 @@ interface Props {
  *   "Gefördert vom BIÖG"
  *     → "Funded by BIÖG"
  */
-export function VizTeamRow({
-  teamMembers,
-  landesstellenCredit,
-}: Props) {
+export function VizTeamRow({ teamMembers, landesstellenCredit }: Props) {
   return (
     <div className="viz viz-team">
       <ul className="viz-team__avatars" aria-label="Projektteam">
         {teamMembers.map((m, i) => (
-          <li key={m.initials} style={{ listStyle: 'none' }}>
+          <li key={m.initials} style={{ listStyle: "none" }}>
             <div
               className="viz-team__avatar"
               style={{
@@ -75,7 +72,7 @@ export function VizTeamRow({
           {/* Full ISD logo (mark + name baked in) — no text label below,
               it would duplicate the wordmark (Fedor 2026-06-09). */}
           <img
-            src={withBase('logos/isd-hamburg-neg.svg')}
+            src={withBase("logos/isd-hamburg-neg.svg")}
             alt="ISD Hamburg"
             className="viz-team__logo"
           />
@@ -89,7 +86,7 @@ export function VizTeamRow({
         >
           {/* Full BIÖG logo (mark + name baked in) — no text label below. */}
           <img
-            src={withBase('logos/bioeg-neg.svg')}
+            src={withBase("logos/bioeg-neg.svg")}
             alt="Bundesinstitut für Öffentliche Gesundheit (BIÖG)"
             className="viz-team__logo"
           />

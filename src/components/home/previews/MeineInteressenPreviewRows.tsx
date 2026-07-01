@@ -28,7 +28,11 @@ export default function MeineInteressenPreviewRows({ audiences }: Props) {
           <li
             className="meine-row"
             key={a.id}
-            style={{ ["--audience-color" as string]: `var(${colorVar})` } as CSSProperties}
+            style={
+              {
+                ["--audience-color" as string]: `var(${colorVar})`,
+              } as CSSProperties
+            }
           >
             <span className="meine-row__icon">
               {Icon ? <Icon size={18} aria-hidden /> : null}

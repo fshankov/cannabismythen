@@ -14,10 +14,10 @@
  * For hidden columns (collapsed 28px placeholder), use the
  * `GridHiddenHeader` component instead.
  */
-import type { ReactNode } from 'react';
-import { EyeOff, ArrowDown01, ArrowDown10 } from 'lucide-react';
-import InfoTooltip from '../InfoTooltip';
-import type { IconComponent } from '../../../lib/icons';
+import type { ReactNode } from "react";
+import { EyeOff, ArrowDown01, ArrowDown10 } from "lucide-react";
+import InfoTooltip from "../InfoTooltip";
+import type { IconComponent } from "../../../lib/icons";
 
 interface Props {
   Icon: IconComponent;
@@ -36,7 +36,7 @@ interface Props {
    *  styling on the sort button and the asc/desc icon swap. */
   isSortActive: boolean;
   /** Only meaningful when isSortActive=true. */
-  sortDir?: 'asc' | 'desc';
+  sortDir?: "asc" | "desc";
   sortTooltip: string;
   onSortClick: () => void;
   /** Optional extra cluster slot (rarely used) rendered before the
@@ -60,13 +60,13 @@ export default function GridDataHeader({
   onSortClick,
   trailingExtra,
 }: Props) {
-  const isDesc = isSortActive && sortDir === 'desc';
+  const isDesc = isSortActive && sortDir === "desc";
   return (
     <>
       {/* Upper-LEFT sort button (2026-05-21 swap). */}
       <button
         type="button"
-        className={`carm-spannweite__col-sort-btn${isSortActive ? ' is-active' : ''}`}
+        className={`carm-spannweite__col-sort-btn${isSortActive ? " is-active" : ""}`}
         onClick={(e) => {
           e.stopPropagation();
           onSortClick();

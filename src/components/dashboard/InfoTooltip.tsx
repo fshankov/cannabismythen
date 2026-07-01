@@ -1,7 +1,7 @@
-import { Info } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
-import { useFlipPosition } from './hooks/useFlipPosition';
+import { Info } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { useFlipPosition } from "./hooks/useFlipPosition";
 
 interface InfoTooltipProps {
   title: string;
@@ -25,7 +25,15 @@ interface InfoTooltipProps {
   cardClassName?: string;
 }
 
-export default function InfoTooltip({ title, titlePrefix, titleSuffix, definition, scale, sampleSize, cardClassName }: InfoTooltipProps) {
+export default function InfoTooltip({
+  title,
+  titlePrefix,
+  titleSuffix,
+  definition,
+  scale,
+  sampleSize,
+  cardClassName,
+}: InfoTooltipProps) {
   const { triggerRef, cardRef, pos, open, setOpen, updatePosition } =
     useFlipPosition<HTMLButtonElement, HTMLDivElement>();
 
@@ -42,7 +50,8 @@ export default function InfoTooltip({ title, titlePrefix, titleSuffix, definitio
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   useEffect(() => {
     setPortalTarget(
-      (triggerRef.current?.closest('.carm-explorer') as HTMLElement | null) ?? null,
+      (triggerRef.current?.closest(".carm-explorer") as HTMLElement | null) ??
+        null,
     );
   }, [triggerRef]);
 
@@ -58,17 +67,18 @@ export default function InfoTooltip({ title, titlePrefix, titleSuffix, definitio
       if (
         triggerRef.current?.contains(e.target as Node) ||
         cardRef.current?.contains(e.target as Node)
-      ) return;
+      )
+        return;
       setOpen(false);
     };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === "Escape") setOpen(false);
     };
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
     };
   }, [open, setOpen, triggerRef, cardRef]);
 
@@ -77,7 +87,7 @@ export default function InfoTooltip({ title, titlePrefix, titleSuffix, definitio
     if (open) cardRef.current?.focus();
   }, [open, cardRef]);
 
-  const tooltipId = `tooltip-${title.replace(/\s+/g, '-').toLowerCase()}`;
+  const tooltipId = `tooltip-${title.replace(/\s+/g, "-").toLowerCase()}`;
 
   const card = (
     <div
@@ -85,20 +95,28 @@ export default function InfoTooltip({ title, titlePrefix, titleSuffix, definitio
       id={tooltipId}
       role="tooltip"
       tabIndex={-1}
-      className={`info-tooltip-card info-tooltip-card--fixed${open ? ' info-tooltip-card--open' : ''}${cardClassName ? ` ${cardClassName}` : ''}`}
-      style={pos ? {
-        position: 'fixed',
-        top: pos.top,
-        left: pos.left,
-        width: pos.width,
-        maxWidth: pos.width,
-        transform: 'none',
-      } : undefined}
+      className={`info-tooltip-card info-tooltip-card--fixed${open ? " info-tooltip-card--open" : ""}${cardClassName ? ` ${cardClassName}` : ""}`}
+      style={
+        pos
+          ? {
+              position: "fixed",
+              top: pos.top,
+              left: pos.left,
+              width: pos.width,
+              maxWidth: pos.width,
+              transform: "none",
+            }
+          : undefined
+      }
       onMouseEnter={handleOpen}
       onMouseLeave={() => setOpen(false)}
     >
-      <p className={`info-tooltip-title${titlePrefix || titleSuffix ? ' info-tooltip-title--adorned' : ''}`}>
-        {titlePrefix}{title}{titleSuffix}
+      <p
+        className={`info-tooltip-title${titlePrefix || titleSuffix ? " info-tooltip-title--adorned" : ""}`}
+      >
+        {titlePrefix}
+        {title}
+        {titleSuffix}
       </p>
       {sampleSize && <span className="info-tooltip-sample">{sampleSize}</span>}
       {/* <div> not <p>: `definition` may be a <ul>, which is invalid inside <p>. */}

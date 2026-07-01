@@ -23,7 +23,7 @@
  *   - `open`: current open state.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface FlipPosition {
   top: number;
@@ -72,12 +72,18 @@ export function useFlipPosition<
     // clamping. Falls back to the viewport rect when omitted, preserving
     // legacy behavior.
     const bounds = boundsRef?.current?.getBoundingClientRect() ?? null;
-    const minLeft = Math.max(edgePadding, bounds ? bounds.left + edgePadding : edgePadding);
+    const minLeft = Math.max(
+      edgePadding,
+      bounds ? bounds.left + edgePadding : edgePadding,
+    );
     const maxRight = Math.min(
       vw - edgePadding,
       bounds ? bounds.right - edgePadding : vw - edgePadding,
     );
-    const minTop = Math.max(edgePadding, bounds ? bounds.top + edgePadding : edgePadding);
+    const minTop = Math.max(
+      edgePadding,
+      bounds ? bounds.top + edgePadding : edgePadding,
+    );
     const maxBottom = Math.min(
       vh - edgePadding,
       bounds ? bounds.bottom - edgePadding : vh - edgePadding,
@@ -111,11 +117,11 @@ export function useFlipPosition<
   useEffect(() => {
     if (!open) return;
     const onChange = () => updatePosition();
-    window.addEventListener('scroll', onChange, true);
-    window.addEventListener('resize', onChange);
+    window.addEventListener("scroll", onChange, true);
+    window.addEventListener("resize", onChange);
     return () => {
-      window.removeEventListener('scroll', onChange, true);
-      window.removeEventListener('resize', onChange);
+      window.removeEventListener("scroll", onChange, true);
+      window.removeEventListener("resize", onChange);
     };
   }, [open, updatePosition]);
 

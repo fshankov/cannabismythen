@@ -182,20 +182,27 @@ export default function FaktenFilterBar({
       // Stuck = ticked myths that are outside the selected categories.
       const stuck =
         selectedGroups.size > 0
-          ? allSorted.filter((m) => selectedMyths.has(m.mythNumber) && !inCategory(m))
+          ? allSorted.filter(
+              (m) => selectedMyths.has(m.mythNumber) && !inCategory(m),
+            )
           : [];
       return { stuckMatches: stuck, textMatches: categoryFiltered };
     }
 
     const matchingNums = new Set(
-      categoryFiltered.filter((m) => normalize(m.title).includes(q)).map((m) => m.mythNumber)
+      categoryFiltered
+        .filter((m) => normalize(m.title).includes(q))
+        .map((m) => m.mythNumber),
     );
     // Stuck = ticked myths not in matchingNums (outside category OR no text match).
     return {
       stuckMatches: allSorted.filter(
-        (m) => selectedMyths.has(m.mythNumber) && !matchingNums.has(m.mythNumber)
+        (m) =>
+          selectedMyths.has(m.mythNumber) && !matchingNums.has(m.mythNumber),
       ),
-      textMatches: categoryFiltered.filter((m) => matchingNums.has(m.mythNumber)),
+      textMatches: categoryFiltered.filter((m) =>
+        matchingNums.has(m.mythNumber),
+      ),
     };
   }, [myths, searchQuery, selectedMyths, selectedGroups]);
 
@@ -313,7 +320,10 @@ export default function FaktenFilterBar({
       {/* Section label is a real heading-like label for the toolbar; was
           aria-hidden, restored so SR users hear the group's purpose
           (a11y audit 2026-06-10). */}
-      <p className="fakten-filter-section__label" id="fakten-filter-section-label">
+      <p
+        className="fakten-filter-section__label"
+        id="fakten-filter-section-label"
+      >
         Kategorien &amp; Suche
       </p>
       <div
@@ -321,285 +331,289 @@ export default function FaktenFilterBar({
         role="search"
         aria-labelledby="fakten-filter-section-label"
       >
-      <div
-        className="fakten-filter-bar__category fakten-filter-dropdown"
-        ref={catContainerRef}
-      >
-        <div className="fakten-filter-dropdown__trigger-row">
-          <button
-            ref={catTriggerRef}
-            type="button"
-            className={`fakten-filter-dropdown__trigger${
-              catDropdownOpen ? " is-open" : ""
-            }`}
-            aria-haspopup="true"
-            aria-expanded={catDropdownOpen}
-            onClick={() => setCatDropdownOpen((v) => !v)}
-          >
-            <ChevronDown
-              size={14}
-              strokeWidth={2}
-              aria-hidden="true"
-              className="fakten-filter-dropdown__chevron"
-            />
-            <span className="fakten-filter-dropdown__label">
-              {/* "Alle Kategorien" only when nothing is selected. */}
-              {selectedGroupCount > 0 ? "Kategorien" : "Alle Kategorien"}
-            </span>
+        <div
+          className="fakten-filter-bar__category fakten-filter-dropdown"
+          ref={catContainerRef}
+        >
+          <div className="fakten-filter-dropdown__trigger-row">
+            <button
+              ref={catTriggerRef}
+              type="button"
+              className={`fakten-filter-dropdown__trigger${
+                catDropdownOpen ? " is-open" : ""
+              }`}
+              aria-haspopup="true"
+              aria-expanded={catDropdownOpen}
+              onClick={() => setCatDropdownOpen((v) => !v)}
+            >
+              <ChevronDown
+                size={14}
+                strokeWidth={2}
+                aria-hidden="true"
+                className="fakten-filter-dropdown__chevron"
+              />
+              <span className="fakten-filter-dropdown__label">
+                {/* "Alle Kategorien" only when nothing is selected. */}
+                {selectedGroupCount > 0 ? "Kategorien" : "Alle Kategorien"}
+              </span>
+              {selectedGroupCount > 0 && (
+                <span
+                  className="fakten-search-count fakten-filter-dropdown__count-badge"
+                  aria-label={`${selectedGroupCount} ausgewählt`}
+                >
+                  ({selectedGroupCount})
+                </span>
+              )}
+            </button>
             {selectedGroupCount > 0 && (
-              <span
-                className="fakten-search-count fakten-filter-dropdown__count-badge"
-                aria-label={`${selectedGroupCount} ausgewählt`}
+              <button
+                type="button"
+                className="fakten-filter-dropdown__clear"
+                aria-label="Kategoriefilter löschen"
+                onClick={() => onClearGroups()}
               >
-                ({selectedGroupCount})
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {catDropdownOpen && (
+            // Plain disclosure pattern, not an ARIA menu — the contents are
+            // checkboxes + a reset button, not menuitems. The previous
+            // role="menu" + role="none" stack misled screen readers into
+            // expecting menuitemcheckboxes and arrow-key navigation
+            // (a11y audit 2026-06-10).
+            <div
+              className="fakten-filter-dropdown__panel"
+              aria-label="Kategorien filtern"
+            >
+              {hasActiveFilter && (
+                <div className="fakten-filter-dropdown__footer">
+                  <button
+                    type="button"
+                    className="fakten-filter-dropdown__reset"
+                    onClick={() => {
+                      onReset();
+                      setCatDropdownOpen(false);
+                    }}
+                  >
+                    Filter zurücksetzen
+                  </button>
+                </div>
+              )}
+              <ul className="fakten-filter-dropdown__list">
+                {categoryGroups.map((group) => {
+                  const checked = selectedGroups.has(group);
+                  const count = groupCounts.get(group) ?? 0;
+                  return (
+                    <li key={group} className="fakten-filter-dropdown__item">
+                      <label className="fakten-filter-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => onToggleGroup(group)}
+                        />
+                        <CategoryFooter
+                          categoryGroup={group}
+                          className="fakten-filter-checkbox__cat"
+                        />
+                        <span className="fakten-filter-checkbox__count">
+                          ({count})
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <div className="fakten-filter-bar__search" ref={searchContainerRef}>
+          <div className="carm-filter-search-row fakten-search">
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="carm-filter-search-row__input"
+              placeholder="Mythen suchen …"
+              aria-label="Mythen suchen"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={searchOpen}
+              // aria-controls only points at a mounted element — when the panel
+              // is closed the listbox doesn't exist (a11y audit 2026-06-10).
+              aria-controls={searchOpen ? "fakten-search-panel" : undefined}
+              aria-activedescendant={activeOptionId}
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              onFocus={() => setSearchOpen(true)}
+              onKeyDown={handleSearchKeyDown}
+            />
+            {selectedMyths.size > 0 && (
+              <span
+                className="fakten-search-count"
+                aria-label={`${selectedMyths.size} Mythen ausgewählt`}
+              >
+                ({selectedMyths.size})
               </span>
             )}
-          </button>
-          {selectedGroupCount > 0 && (
-            <button
-              type="button"
-              className="fakten-filter-dropdown__clear"
-              aria-label="Kategoriefilter löschen"
-              onClick={() => onClearGroups()}
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {(searchQuery.length > 0 || selectedMyths.size > 0) && (
+              <button
+                type="button"
+                className="carm-filter-search-row__clear"
+                aria-label="Suche und Auswahl zurücksetzen"
+                onClick={() => onClearSearch()}
               >
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
-
-        {catDropdownOpen && (
-          // Plain disclosure pattern, not an ARIA menu — the contents are
-          // checkboxes + a reset button, not menuitems. The previous
-          // role="menu" + role="none" stack misled screen readers into
-          // expecting menuitemcheckboxes and arrow-key navigation
-          // (a11y audit 2026-06-10).
-          <div
-            className="fakten-filter-dropdown__panel"
-            aria-label="Kategorien filtern"
-          >
-            {hasActiveFilter && (
-              <div className="fakten-filter-dropdown__footer">
-                <button
-                  type="button"
-                  className="fakten-filter-dropdown__reset"
-                  onClick={() => {
-                    onReset();
-                    setCatDropdownOpen(false);
-                  }}
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  Filter zurücksetzen
-                </button>
-              </div>
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
             )}
-            <ul className="fakten-filter-dropdown__list">
-              {categoryGroups.map((group) => {
-                const checked = selectedGroups.has(group);
-                const count = groupCounts.get(group) ?? 0;
-                return (
-                  <li
-                    key={group}
-                    className="fakten-filter-dropdown__item"
-                  >
-                    <label className="fakten-filter-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => onToggleGroup(group)}
-                      />
-                      <CategoryFooter
-                        categoryGroup={group}
-                        className="fakten-filter-checkbox__cat"
-                      />
-                      <span className="fakten-filter-checkbox__count">
-                        ({count})
-                      </span>
-                    </label>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-      </div>
-
-      <div className="fakten-filter-bar__search" ref={searchContainerRef}>
-        <div className="carm-filter-search-row fakten-search">
-          <input
-            ref={searchInputRef}
-            type="text"
-            className="carm-filter-search-row__input"
-            placeholder="Mythen suchen …"
-            aria-label="Mythen suchen"
-            role="combobox"
-            aria-autocomplete="list"
-            aria-expanded={searchOpen}
-            // aria-controls only points at a mounted element — when the panel
-            // is closed the listbox doesn't exist (a11y audit 2026-06-10).
-            aria-controls={searchOpen ? "fakten-search-panel" : undefined}
-            aria-activedescendant={activeOptionId}
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            onFocus={() => setSearchOpen(true)}
-            onKeyDown={handleSearchKeyDown}
-          />
-          {selectedMyths.size > 0 && (
-            <span
-              className="fakten-search-count"
-              aria-label={`${selectedMyths.size} Mythen ausgewählt`}
-            >
-              ({selectedMyths.size})
-            </span>
-          )}
-          {(searchQuery.length > 0 || selectedMyths.size > 0) && (
-            <button
-              type="button"
-              className="carm-filter-search-row__clear"
-              aria-label="Suche und Auswahl zurücksetzen"
-              onClick={() => onClearSearch()}
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-          )}
-          {/* Icon last → right side, absolutely positioned + vertically
+            {/* Icon last → right side, absolutely positioned + vertically
               centered via CSS. Sized to read at the field's scale. */}
-          <span
-            className="carm-filter-search-row__icon"
-            aria-hidden="true"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-          </span>
+            <span className="carm-filter-search-row__icon" aria-hidden="true">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </span>
+          </div>
+
+          {searchOpen && (
+            // Combobox panel restructured (a11y audit 2026-06-10): the
+            // listbox must only contain options, so the reset button + hits
+            // hint live OUTSIDE the listbox. The empty-state lives inside
+            // (with role="option" disabled) so the combobox association still
+            // resolves when there are zero matches.
+            <div className="fakten-search__panel">
+              {hasActiveFilter && (
+                <div className="fakten-search__footer">
+                  <button
+                    type="button"
+                    className="fakten-search__reset"
+                    onClick={() => {
+                      onReset();
+                      setSearchOpen(false);
+                    }}
+                  >
+                    Filter zurücksetzen
+                  </button>
+                </div>
+              )}
+              <p className="fakten-search__hint">{hitsHint}</p>
+              {stuckMatches.length === 0 && textMatches.length === 0 ? (
+                <ul
+                  id="fakten-search-panel"
+                  className="fakten-search__list"
+                  role="listbox"
+                  aria-multiselectable="true"
+                  aria-label="Mythen auswählen"
+                >
+                  <li
+                    className="fakten-search__empty"
+                    role="option"
+                    aria-disabled="true"
+                  >
+                    Keine Treffer
+                  </li>
+                </ul>
+              ) : (
+                <ul
+                  id="fakten-search-panel"
+                  className="fakten-search__list"
+                  role="listbox"
+                  aria-multiselectable="true"
+                  aria-label="Mythen auswählen"
+                >
+                  {stuckMatches.length > 0 && (
+                    <>
+                      {/* Visible section label — restored from aria-hidden so
+                        SR users hear the grouping (a11y audit 2026-06-10). */}
+                      <li
+                        key="section-label"
+                        className="fakten-search__section-label"
+                        role="presentation"
+                      >
+                        Bereits ausgewählt
+                      </li>
+                      {stuckMatches.map((m, i) => (
+                        <MythRow
+                          key={m.mythNumber}
+                          m={m}
+                          checked={true}
+                          active={activeIndex === i}
+                          id={`fakten-search-opt-${m.mythNumber}`}
+                          onToggle={onToggleMyth}
+                        />
+                      ))}
+                      {textMatches.length > 0 && (
+                        <li
+                          key="divider"
+                          className="fakten-search__divider"
+                          role="presentation"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </>
+                  )}
+                  {textMatches.map((m, i) => (
+                    <MythRow
+                      key={m.mythNumber}
+                      m={m}
+                      checked={selectedMyths.has(m.mythNumber)}
+                      active={activeIndex === stuckMatches.length + i}
+                      id={`fakten-search-opt-${m.mythNumber}`}
+                      onToggle={onToggleMyth}
+                    />
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
 
-        {searchOpen && (
-          // Combobox panel restructured (a11y audit 2026-06-10): the
-          // listbox must only contain options, so the reset button + hits
-          // hint live OUTSIDE the listbox. The empty-state lives inside
-          // (with role="option" disabled) so the combobox association still
-          // resolves when there are zero matches.
-          <div
-            className="fakten-search__panel"
+        <div className="fakten-filter-bar__export">
+          <button
+            type="button"
+            className="carm-btn carm-explorer__export"
+            onClick={onOpenExport}
+            aria-label="Mythen exportieren"
           >
-            {hasActiveFilter && (
-              <div className="fakten-search__footer">
-                <button
-                  type="button"
-                  className="fakten-search__reset"
-                  onClick={() => {
-                    onReset();
-                    setSearchOpen(false);
-                  }}
-                >
-                  Filter zurücksetzen
-                </button>
-              </div>
-            )}
-            <p className="fakten-search__hint">{hitsHint}</p>
-            {stuckMatches.length === 0 && textMatches.length === 0 ? (
-              <ul
-                id="fakten-search-panel"
-                className="fakten-search__list"
-                role="listbox"
-                aria-multiselectable="true"
-                aria-label="Mythen auswählen"
-              >
-                <li className="fakten-search__empty" role="option" aria-disabled="true">
-                  Keine Treffer
-                </li>
-              </ul>
-            ) : (
-              <ul
-                id="fakten-search-panel"
-                className="fakten-search__list"
-                role="listbox"
-                aria-multiselectable="true"
-                aria-label="Mythen auswählen"
-              >
-                {stuckMatches.length > 0 && (
-                  <>
-                    {/* Visible section label — restored from aria-hidden so
-                        SR users hear the grouping (a11y audit 2026-06-10). */}
-                    <li key="section-label" className="fakten-search__section-label" role="presentation">
-                      Bereits ausgewählt
-                    </li>
-                    {stuckMatches.map((m, i) => (
-                      <MythRow
-                        key={m.mythNumber}
-                        m={m}
-                        checked={true}
-                        active={activeIndex === i}
-                        id={`fakten-search-opt-${m.mythNumber}`}
-                        onToggle={onToggleMyth}
-                      />
-                    ))}
-                    {textMatches.length > 0 && (
-                      <li key="divider" className="fakten-search__divider" role="presentation" aria-hidden="true" />
-                    )}
-                  </>
-                )}
-                {textMatches.map((m, i) => (
-                  <MythRow
-                    key={m.mythNumber}
-                    m={m}
-                    checked={selectedMyths.has(m.mythNumber)}
-                    active={activeIndex === stuckMatches.length + i}
-                    id={`fakten-search-opt-${m.mythNumber}`}
-                    onToggle={onToggleMyth}
-                  />
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="fakten-filter-bar__export">
-        <button
-          type="button"
-          className="carm-btn carm-explorer__export"
-          onClick={onOpenExport}
-          aria-label="Mythen exportieren"
-        >
-          <Download size={16} strokeWidth={2} aria-hidden="true" />
-          Exportieren
-        </button>
-      </div>
-
+            <Download size={16} strokeWidth={2} aria-hidden="true" />
+            Exportieren
+          </button>
+        </div>
       </div>
     </div>
   );

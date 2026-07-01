@@ -67,8 +67,8 @@ const factsheetLink: Schema = {
       mark === "shared"
         ? " faq-myth-link--shared"
         : mark === "diff"
-        ? " faq-myth-link--diff"
-        : "";
+          ? " faq-myth-link--diff"
+          : "";
     // Real <a href> (not <button>) for progressive enhancement: without JS
     // — or before the MythPopupHost island hydrates — the link navigates to
     // the myth's page at /daten-explorer/<slug>/ (a production redirect to the

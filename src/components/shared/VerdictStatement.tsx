@@ -19,15 +19,15 @@
  * `.astro` files (Astro SSRs it without a client directive).
  */
 
-import type { CorrectnessClass } from '../../lib/dashboard/types';
-import VerdictArrow from './VerdictArrow';
+import type { CorrectnessClass } from "../../lib/dashboard/types";
+import VerdictArrow from "./VerdictArrow";
 
 interface VerdictStatementProps {
   /** The myth statement text. Rendered as-is (German content). */
   statement: string;
   verdict: CorrectnessClass;
   /** HTML tag for the wrapper. `p` for body, `h1` / `h2` for headings. */
-  as?: 'p' | 'h1' | 'h2' | 'h3' | 'span';
+  as?: "p" | "h1" | "h2" | "h3" | "span";
   /** Pixel size of the trailing arrow. Defaults to ~0.82em (set via CSS). */
   arrowSize?: number;
   /** Extra class names appended to the wrapper. */
@@ -52,10 +52,10 @@ interface VerdictStatementProps {
  */
 function splitForTail(text: string): { head: string; tail: string } {
   // Strip trailing whitespace and terminal punctuation (.!?).
-  const stripped = text.replace(/[\s.!?]+$/u, '');
-  const lastSpace = stripped.lastIndexOf(' ');
+  const stripped = text.replace(/[\s.!?]+$/u, "");
+  const lastSpace = stripped.lastIndexOf(" ");
   if (lastSpace === -1) {
-    return { head: '', tail: stripped };
+    return { head: "", tail: stripped };
   }
   return {
     head: stripped.slice(0, lastSpace),
@@ -66,15 +66,15 @@ function splitForTail(text: string): { head: string; tail: string } {
 export default function VerdictStatement({
   statement,
   verdict,
-  as = 'p',
+  as = "p",
   arrowSize,
   className,
 }: VerdictStatementProps) {
   const Tag = as;
   const { head, tail } = splitForTail(statement);
-  const classes = ['stmt', `stmt--${verdict}`, className]
+  const classes = ["stmt", `stmt--${verdict}`, className]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   return (
     <Tag className={classes}>

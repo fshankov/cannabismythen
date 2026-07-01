@@ -168,7 +168,8 @@ export default function FaktenKartenExplorer({
       // Text narrows the grid only when no myth-ticks are active.
       // With myth-ticks the grid is an explicit selection; text is for
       // the autocomplete panel (adding more), not for removing chosen myths.
-      if (!hasMythTicks && q.length > 0 && !normalize(m.title).includes(q)) return false;
+      if (!hasMythTicks && q.length > 0 && !normalize(m.title).includes(q))
+        return false;
       return true;
     });
     return list.sort((a, b) => a.mythNumber - b.mythNumber);
@@ -282,7 +283,10 @@ export default function FaktenKartenExplorer({
       const myths = params.get("myths");
       if (myths) {
         const valid = new Set(allMyths.map((m) => m.mythNumber));
-        const nums = myths.split(",").map(Number).filter((n) => valid.has(n));
+        const nums = myths
+          .split(",")
+          .map(Number)
+          .filter((n) => valid.has(n));
         if (nums.length) setSelectedMyths(new Set(nums));
       }
 
@@ -378,7 +382,13 @@ export default function FaktenKartenExplorer({
               {
                 value: "karten",
                 label: (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                    }}
+                  >
                     <LayoutGrid size={13} aria-hidden="true" />
                     Karten
                   </span>
@@ -387,7 +397,13 @@ export default function FaktenKartenExplorer({
               {
                 value: "liste",
                 label: (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                    }}
+                  >
                     <LayoutList size={13} aria-hidden="true" />
                     Liste
                   </span>
@@ -426,7 +442,14 @@ export default function FaktenKartenExplorer({
           role="status"
           aria-live="polite"
           aria-atomic="true"
-          style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap" }}
+          style={{
+            position: "absolute",
+            width: 1,
+            height: 1,
+            overflow: "hidden",
+            clip: "rect(0,0,0,0)",
+            whiteSpace: "nowrap",
+          }}
         >
           {filteredMyths.length === allMyths.length
             ? `${allMyths.length} Mythen angezeigt`
@@ -448,7 +471,10 @@ export default function FaktenKartenExplorer({
             </button>
           </p>
         ) : view === "liste" ? (
-          <FaktenListView myths={filteredMyths} onShowFactsheet={handleShowFactsheet} />
+          <FaktenListView
+            myths={filteredMyths}
+            onShowFactsheet={handleShowFactsheet}
+          />
         ) : (
           <div className="fakten-grid">
             {filteredMyths.map((myth) => (
@@ -470,27 +496,28 @@ export default function FaktenKartenExplorer({
         myths={filteredMyths}
       />
 
-      {openMyth && (() => {
-        // The popup heading uses the unified VerdictStatement (statement
-        // with verdict color + arrow) plus the new "Wissenschaftlich:
-        // <pill>" line that lives inside SharedFactsheetPanel itself.
-        // We no longer pass the legacy verdictLabel / verdictAccessory
-        // props — they were removed in the panel's v3 refresh.
-        const verdict = toVerdict(openMyth.classification);
-        return (
-          <SharedFactsheetPanel
-            context="fakten-karten"
-            mythText={openMyth.title}
-            classificationKey={verdict}
-            classificationLabel={openMyth.classificationLabel}
-            mythContentEntry={openMythContent}
-            factsheetSlug={openMyth.slug}
-            groupMetrics={groupMetricsMap[openMyth.mythNumber]}
-            onClose={handleCloseFactsheet}
-            onSelectRelatedMyth={handleSelectRelatedMyth}
-          />
-        );
-      })()}
+      {openMyth &&
+        (() => {
+          // The popup heading uses the unified VerdictStatement (statement
+          // with verdict color + arrow) plus the new "Wissenschaftlich:
+          // <pill>" line that lives inside SharedFactsheetPanel itself.
+          // We no longer pass the legacy verdictLabel / verdictAccessory
+          // props — they were removed in the panel's v3 refresh.
+          const verdict = toVerdict(openMyth.classification);
+          return (
+            <SharedFactsheetPanel
+              context="fakten-karten"
+              mythText={openMyth.title}
+              classificationKey={verdict}
+              classificationLabel={openMyth.classificationLabel}
+              mythContentEntry={openMythContent}
+              factsheetSlug={openMyth.slug}
+              groupMetrics={groupMetricsMap[openMyth.mythNumber]}
+              onClose={handleCloseFactsheet}
+              onSelectRelatedMyth={handleSelectRelatedMyth}
+            />
+          );
+        })()}
     </div>
   );
 }

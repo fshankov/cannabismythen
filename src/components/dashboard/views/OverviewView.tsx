@@ -13,11 +13,24 @@
  * - Click any tile to open the factsheet panel
  */
 
-import { useMemo, useState } from 'react';
-import type { Myth, Metric, AppState, Category } from '../../../lib/dashboard/types';
-import { getMythMetric, getIndicatorValue, getMythShortText, formatValue } from '../../../lib/dashboard/data';
-import { getCorrectnessColor, getCorrectnessBgColor } from '../../../lib/dashboard/colors';
-import { t } from '../../../lib/dashboard/translations';
+import { useMemo, useState } from "react";
+import type {
+  Myth,
+  Metric,
+  AppState,
+  Category,
+} from "../../../lib/dashboard/types";
+import {
+  getMythMetric,
+  getIndicatorValue,
+  getMythShortText,
+  formatValue,
+} from "../../../lib/dashboard/data";
+import {
+  getCorrectnessColor,
+  getCorrectnessBgColor,
+} from "../../../lib/dashboard/colors";
+import { t } from "../../../lib/dashboard/translations";
 
 interface Props {
   myths: Myth[];
@@ -31,16 +44,23 @@ interface Props {
 // Canonical verdict labels (in sync with translations.ts verdict.*).
 // OverviewView is a legacy view but the labels still surface in tooltips.
 const VERDICT_LABELS: Record<string, string> = {
-  richtig: 'Richtig',
-  eher_richtig: 'Eher richtig',
-  eher_falsch: 'Eher falsch',
-  falsch: 'Falsch',
-  keine_aussage_moeglich: 'Keine Aussage möglich',
+  richtig: "Richtig",
+  eher_richtig: "Eher richtig",
+  eher_falsch: "Eher falsch",
+  falsch: "Falsch",
+  keine_aussage_moeglich: "Keine Aussage möglich",
 };
 
-export default function OverviewView({ myths, metrics, state, update, onSelectMyth, categories }: Props) {
+export default function OverviewView({
+  myths,
+  metrics,
+  state,
+  update,
+  onSelectMyth,
+  categories,
+}: Props) {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const groupId = state.groupIds[0] || 'adults';
+  const groupId = state.groupIds[0] || "adults";
   const indicator = state.indicator;
 
   // Find the max value for the selected indicator (for scaling bars)
@@ -80,7 +100,8 @@ export default function OverviewView({ myths, metrics, state, update, onSelectMy
   const verdictCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const myth of myths) {
-      counts[myth.correctness_class] = (counts[myth.correctness_class] || 0) + 1;
+      counts[myth.correctness_class] =
+        (counts[myth.correctness_class] || 0) + 1;
     }
     return counts;
   }, [myths]);
@@ -93,7 +114,13 @@ export default function OverviewView({ myths, metrics, state, update, onSelectMy
         <div className="overview-summary-verdicts">
           {Object.entries(verdictCounts)
             .sort(([a], [b]) => {
-              const order = ['richtig', 'eher_richtig', 'eher_falsch', 'falsch', 'keine_aussage_moeglich'];
+              const order = [
+                "richtig",
+                "eher_richtig",
+                "eher_falsch",
+                "falsch",
+                "keine_aussage_moeglich",
+              ];
               return order.indexOf(a) - order.indexOf(b);
             })
             .map(([verdict, count]) => (
@@ -122,7 +149,8 @@ export default function OverviewView({ myths, metrics, state, update, onSelectMy
             {catMyths.map((myth) => {
               const metric = getMythMetric(metrics, myth.id, groupId);
               const value = getIndicatorValue(metric, indicator);
-              const barWidth = value !== null ? Math.max(2, (value / maxVal) * 100) : 0;
+              const barWidth =
+                value !== null ? Math.max(2, (value / maxVal) * 100) : 0;
               const color = getCorrectnessColor(myth.correctness_class);
               const bgColor = getCorrectnessBgColor(myth.correctness_class);
               const isHovered = hoveredId === myth.id;
@@ -130,15 +158,15 @@ export default function OverviewView({ myths, metrics, state, update, onSelectMy
               return (
                 <button
                   key={myth.id}
-                  className={`overview-tile ${isHovered ? 'overview-tile--hover' : ''}`}
+                  className={`overview-tile ${isHovered ? "overview-tile--hover" : ""}`}
                   style={{
                     borderColor: isHovered ? color : bgColor,
-                    backgroundColor: isHovered ? bgColor : 'white',
+                    backgroundColor: isHovered ? bgColor : "white",
                   }}
                   onClick={() => onSelectMyth(myth.id)}
                   onMouseEnter={() => setHoveredId(myth.id)}
                   onMouseLeave={() => setHoveredId(null)}
-                  title={`${getMythShortText(myth, 'de')} — ${VERDICT_LABELS[myth.correctness_class] || myth.correctness_class}`}
+                  title={`${getMythShortText(myth, "de")} — ${VERDICT_LABELS[myth.correctness_class] || myth.correctness_class}`}
                 >
                   <div className="overview-tile-header">
                     <span
@@ -146,7 +174,7 @@ export default function OverviewView({ myths, metrics, state, update, onSelectMy
                       style={{ backgroundColor: color }}
                     />
                     <span className="overview-tile-name">
-                      {getMythShortText(myth, 'de')}
+                      {getMythShortText(myth, "de")}
                     </span>
                   </div>
                   <div className="overview-tile-bar-track">
@@ -158,7 +186,10 @@ export default function OverviewView({ myths, metrics, state, update, onSelectMy
                       }}
                     />
                     {value !== null && (
-                      <span className="overview-tile-bar-label" style={{ color }}>
+                      <span
+                        className="overview-tile-bar-label"
+                        style={{ color }}
+                      >
                         {formatValue(value, indicator)}
                       </span>
                     )}

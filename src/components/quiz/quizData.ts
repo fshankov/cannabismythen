@@ -87,7 +87,7 @@ export const LIKERT_VALUES: Record<Classification, 0 | 1 | 2 | 3> = {
  *  scientific verdict on the 4-point scale. `0` is exact, `3` is opposite. */
 export function schritte(
   chosen: Classification,
-  correct: Classification
+  correct: Classification,
 ): Schritte {
   const d = Math.abs(LIKERT_VALUES[chosen] - LIKERT_VALUES[correct]);
   return d as Schritte;
@@ -115,17 +115,14 @@ export function pointsDisplay(s: Schritte): string {
  *  to 0–100, so `scoreBand()` thresholds stay unchanged. Only includes
  *  questions the user actually answered — partial runs return a partial
  *  score. */
-export function moduleScore(
-  answers: CardAnswer[],
-  myths: QuizMyth[]
-): number {
+export function moduleScore(answers: CardAnswer[], myths: QuizMyth[]): number {
   if (myths.length === 0) return 0;
   let sumPoints = 0;
   for (const a of answers) {
     const myth = myths.find((m) => m.id === a.mythId);
     if (!myth) continue;
     sumPoints += pointsForSchritte(
-      schritte(a.chosenClassification, myth.correctClassification)
+      schritte(a.chosenClassification, myth.correctClassification),
     );
   }
   return Math.round((sumPoints / (myths.length * 3)) * 100);
@@ -136,7 +133,7 @@ export function moduleScore(
  *  breakdown line. */
 export function breakdownCounts(
   answers: CardAnswer[],
-  myths: QuizMyth[]
+  myths: QuizMyth[],
 ): { exact: number; near: number; off: number; far: number } {
   const out = { exact: 0, near: 0, off: 0, far: 0 };
   for (const a of answers) {
@@ -202,7 +199,7 @@ export function scoreBand(pct: number): ScoreBand {
  */
 export function userJoinedPercent(
   myth: QuizMyth,
-  userAnswer: Classification
+  userAnswer: Classification,
 ): number {
   const exact = userAnswer === myth.correctClassification;
   const raw = exact
@@ -217,7 +214,7 @@ export function userJoinedPercent(
  *  on the same 3/2/1/0 ladder). */
 export function userExpectedPunkte(
   myths: QuizMyth[],
-  answers: CardAnswer[]
+  answers: CardAnswer[],
 ): number {
   if (myths.length === 0) return 0;
   let sum = 0;
@@ -225,7 +222,7 @@ export function userExpectedPunkte(
     const myth = myths.find((m) => m.id === a.mythId);
     if (!myth) continue;
     sum += pointsForSchritte(
-      schritte(a.chosenClassification, myth.correctClassification)
+      schritte(a.chosenClassification, myth.correctClassification),
     );
   }
   return Math.round(sum * 10) / 10;
@@ -242,7 +239,7 @@ export function populationExpectedPunkte(myths: QuizMyth[]): number {
   if (myths.length === 0) return 0;
   const sum = myths.reduce(
     (acc, m) => acc + (m.populationCorrectPct * 3) / 100,
-    0
+    0,
   );
   return Math.round(sum * 10) / 10;
 }
@@ -262,7 +259,7 @@ export function populationModuleScore(myths: QuizMyth[]): number {
  *  Positive → user above the population average. (Currently unused.) */
 export function exactCountDelta(
   userExactCount: number,
-  myths: QuizMyth[]
+  myths: QuizMyth[],
 ): number {
   const expected = populationExpectedPunkte(myths);
   return Math.round((userExactCount - expected) * 10) / 10;
@@ -278,7 +275,7 @@ export function exactCountDelta(
  */
 export function distanceScore(
   chosen: Classification,
-  correct: Classification
+  correct: Classification,
 ): number {
   const s = schritte(chosen, correct);
   return ((3 - s) / 3) * 100;
@@ -302,7 +299,7 @@ export function distanceScore(
  */
 export function computePercentile(
   myths: QuizMyth[],
-  answers: CardAnswer[]
+  answers: CardAnswer[],
 ): number {
   // Build a lookup from mythId → chosen classification
   const chosenMap = new Map<string, Classification>();
@@ -348,7 +345,11 @@ function normalCdf(x: number): number {
   const sign = x < 0 ? -1 : 1;
   const absX = Math.abs(x);
   const t = 1.0 / (1.0 + p * absX);
-  const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX / 2);
+  const y =
+    1.0 -
+    ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) *
+      t *
+      Math.exp((-absX * absX) / 2);
   return 0.5 * (1.0 + sign * y);
 }
 
@@ -436,7 +437,7 @@ const mythsRisiken: QuizMyth[] = [
     statementKey: "myth.m14.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m14.explanation",
-    populationCorrectPct: 76.20,
+    populationCorrectPct: 76.2,
     mythPageSlug: "m14-herz-kreislauf",
   },
   {
@@ -452,7 +453,7 @@ const mythsRisiken: QuizMyth[] = [
     statementKey: "myth.m16.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m16.explanation",
-    populationCorrectPct: 73.70,
+    populationCorrectPct: 73.7,
     mythPageSlug: "m16-krebs",
   },
   {
@@ -468,7 +469,7 @@ const mythsRisiken: QuizMyth[] = [
     statementKey: "myth.m24.statement",
     correctClassification: "richtig",
     explanationKey: "myth.m24.explanation",
-    populationCorrectPct: 74.30,
+    populationCorrectPct: 74.3,
     mythPageSlug: "m24-psychosen",
   },
   {
@@ -521,7 +522,7 @@ const mythsStimmung: QuizMyth[] = [
     statementKey: "myth.m29.statement",
     correctClassification: "eher_richtig",
     explanationKey: "myth.m29.explanation",
-    populationCorrectPct: 84.40,
+    populationCorrectPct: 84.4,
     mythPageSlug: "m29-gemuetslage",
   },
   {
@@ -683,7 +684,7 @@ const mythsGefaehrlichkeit: QuizMyth[] = [
     correctClassification: "richtig",
     explanationKey: "myth.m09.explanation",
     // Stage E commit 3 (2026-05-23): 74.08 → 74.30 (carm-data.json alignment).
-    populationCorrectPct: 74.30,
+    populationCorrectPct: 74.3,
     mythPageSlug: "m09-ueberdosierung",
   },
   {
@@ -801,7 +802,7 @@ export const ALL_MYTHS_BY_ID: Record<string, QuizMyth> = (() => {
  * thematic variety while still feeling random.
  */
 export function pickSchnellcheckMyths(
-  rng: () => number = Math.random
+  rng: () => number = Math.random,
 ): QuizMyth[] {
   const picked: QuizMyth[] = [];
 

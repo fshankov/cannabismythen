@@ -28,9 +28,22 @@
  * German UI copy in this file is an AI draft — pending ISD review.
  */
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
-import { Download, FileText, Info, Layers, Lightbulb, List } from "lucide-react";
+import {
+  Download,
+  FileText,
+  Info,
+  Layers,
+  Lightbulb,
+  List,
+} from "lucide-react";
 import Drawer from "../shared/Drawer";
 import VerdictPill from "../shared/VerdictPill";
 import CategoryFooter from "./CategoryFooter";
@@ -118,7 +131,9 @@ export default function FaktenExport({ open, onClose, myths }: Props) {
       ),
     );
     const { toPng } = await import("html-to-image");
-    const nodes = Array.from(root.querySelectorAll<HTMLElement>(".fk-shot-front"));
+    const nodes = Array.from(
+      root.querySelectorAll<HTMLElement>(".fk-shot-front"),
+    );
     const urls: string[] = [];
     for (const node of nodes) {
       try {
@@ -359,12 +374,19 @@ function ShotFront({ myth }: { myth: ExportMyth }) {
             className="fakten-card__face fakten-card__face--front fk-shot-front"
             style={{ backgroundImage: visual.gradient }}
           >
-            <span className="fakten-card__bg-arrow" style={arrowStyle} aria-hidden="true">
+            <span
+              className="fakten-card__bg-arrow"
+              style={arrowStyle}
+              aria-hidden="true"
+            >
               <img src={visual.arrowSrc} alt="" />
             </span>
             <div className="fakten-card__face-body">
               <p className="fakten-card__statement">{myth.title}</p>
-              <CategoryFooter categoryGroup={myth.categoryGroup} tone="on-color" />
+              <CategoryFooter
+                categoryGroup={myth.categoryGroup}
+                tone="on-color"
+              />
             </div>
           </div>
         </div>
@@ -443,7 +465,11 @@ function PrintKarten({
             return (
               <section key={m.mythNumber} className="fk-print-card">
                 {front ? (
-                  <img className="fk-print-card__front-img" src={front} alt="" />
+                  <img
+                    className="fk-print-card__front-img"
+                    src={front}
+                    alt=""
+                  />
                 ) : (
                   <div className="fk-print-card__front-img" />
                 )}

@@ -7,8 +7,8 @@ import type {
   Metric,
   Myth,
   SourceMetricId,
-} from './types';
-import { withBase } from '../../lib/withBase';
+} from "./types";
+import { withBase } from "../../lib/withBase";
 
 let cached: CarmData | null = null;
 let cachedSources: InformationSourcesData | null = null;
@@ -18,7 +18,7 @@ let cachedSources: InformationSourcesData | null = null;
  */
 export async function loadCarmData(): Promise<CarmData> {
   if (cached) return cached;
-  const res = await fetch(withBase('data/carm-data.json'));
+  const res = await fetch(withBase("data/carm-data.json"));
   if (!res.ok) throw new Error(`Failed to load carm-data.json: ${res.status}`);
   cached = (await res.json()) as CarmData;
   return cached;
@@ -27,8 +27,9 @@ export async function loadCarmData(): Promise<CarmData> {
 /** Load information-sources.json from public/data/. */
 export async function loadInformationSources(): Promise<InformationSourcesData> {
   if (cachedSources) return cachedSources;
-  const res = await fetch(withBase('data/information-sources.json'));
-  if (!res.ok) throw new Error(`Failed to load information-sources.json: ${res.status}`);
+  const res = await fetch(withBase("data/information-sources.json"));
+  if (!res.ok)
+    throw new Error(`Failed to load information-sources.json: ${res.status}`);
   cachedSources = (await res.json()) as InformationSourcesData;
   return cachedSources;
 }
@@ -39,7 +40,10 @@ export function getMetric(
   mythId: number,
   groupId: GroupId,
 ): Metric | null {
-  return data.metrics.find((m) => m.myth_id === mythId && m.group_id === groupId) ?? null;
+  return (
+    data.metrics.find((m) => m.myth_id === mythId && m.group_id === groupId) ??
+    null
+  );
 }
 
 /** Read a single indicator value for one myth × one group. */
@@ -66,11 +70,11 @@ export function sortedMyths(data: CarmData): Myth[] {
 
 /** Active dashboard groups in display order. */
 export const ACTIVE_GROUPS: GroupId[] = [
-  'adults',
-  'minors',
-  'consumers',
-  'young_adults',
-  'parents',
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
 ];
 
 // Iter-24 (2026-06-02, Harald-Backlog): canonical Zielgruppe labels
@@ -83,19 +87,19 @@ export const ACTIVE_GROUPS: GroupId[] = [
 // VizSourcesStrips.tsx now imports from here instead of carrying its
 // own GROUP_OPTIONS map.
 export const GROUP_LABEL_DE: Record<GroupId, string> = {
-  adults: 'Volljährige (18–70)',
-  minors: 'Minderjährige (16–17)',
-  consumers: 'Konsument:innen',
-  young_adults: 'Junge Erwachsene (18–26)',
-  parents: 'Eltern',
+  adults: "Volljährige (18–70)",
+  minors: "Minderjährige (16–17)",
+  consumers: "Konsument:innen",
+  young_adults: "Junge Erwachsene (18–26)",
+  parents: "Eltern",
 };
 
 export const INDICATOR_LABEL_DE: Record<Indicator, string> = {
-  awareness: 'Kenntnis',
-  significance: 'Bedeutung',
-  correctness: 'Richtigkeit',
-  prevention_significance: 'Präventionsbedeutung',
-  population_relevance: 'Bevölkerungsrelevanz',
+  awareness: "Kenntnis",
+  significance: "Bedeutung",
+  correctness: "Richtigkeit",
+  prevention_significance: "Präventionsbedeutung",
+  population_relevance: "Bevölkerungsrelevanz",
 };
 
 /** Per-source-metric short label + body, used by the InfoDot popovers
@@ -107,33 +111,33 @@ export const SOURCE_METRIC_DEFS_DE: Record<
   { label: string; body: string; scale: string }
 > = {
   search: {
-    label: 'Suche',
+    label: "Suche",
     body:
-      'Anteil der Befragten, die bei dieser Quelle aktiv nach ' +
-      'Informationen über Cannabis suchen.',
-    scale: '0–100 % der Zielgruppe',
+      "Anteil der Befragten, die bei dieser Quelle aktiv nach " +
+      "Informationen über Cannabis suchen.",
+    scale: "0–100 % der Zielgruppe",
   },
   trust: {
-    label: 'Vertrauen',
+    label: "Vertrauen",
     body:
-      'Wie sehr vertraut die Zielgruppe den Informationen, die sie bei ' +
-      'dieser Quelle erhält?',
-    scale: '0–100 Punkte',
+      "Wie sehr vertraut die Zielgruppe den Informationen, die sie bei " +
+      "dieser Quelle erhält?",
+    scale: "0–100 Punkte",
   },
   perception: {
-    label: 'Wahrnehmung',
+    label: "Wahrnehmung",
     body:
-      'Anteil der Befragten, die Informationen über Cannabis von dieser ' +
-      'Quelle wahrnehmen — auch ohne aktive Suche.',
-    scale: '0–100 % der Zielgruppe',
+      "Anteil der Befragten, die Informationen über Cannabis von dieser " +
+      "Quelle wahrnehmen — auch ohne aktive Suche.",
+    scale: "0–100 % der Zielgruppe",
   },
   prevention: {
-    label: 'Prävention',
+    label: "Prävention",
     body:
-      'Wahrnehmung × Vertrauen. Das Präventionspotenzial einer Quelle: ' +
-      'der größte Hebel liegt dort, wo Reichweite und Glaubwürdigkeit ' +
-      'zusammenfallen.',
-    scale: '0–100 Punkte',
+      "Wahrnehmung × Vertrauen. Das Präventionspotenzial einer Quelle: " +
+      "der größte Hebel liegt dort, wo Reichweite und Glaubwürdigkeit " +
+      "zusammenfallen.",
+    scale: "0–100 Punkte",
   },
 };
 
@@ -151,46 +155,46 @@ export const SOURCE_METRIC_DEFS_DE: Record<
  *  map just hands them out for inline-style backgrounds (e.g. the
  *  classified grid cell + the in-body verdict puck). */
 export const VERDICT_COLOR: Record<CorrectnessClass, string> = {
-  richtig: 'var(--classification-richtig)',
-  eher_richtig: 'var(--classification-eher-richtig)',
-  eher_falsch: 'var(--classification-eher-falsch)',
-  falsch: 'var(--classification-falsch)',
-  keine_aussage_moeglich: 'var(--classification-keine-aussage)',
+  richtig: "var(--classification-richtig)",
+  eher_richtig: "var(--classification-eher-richtig)",
+  eher_falsch: "var(--classification-eher-falsch)",
+  falsch: "var(--classification-falsch)",
+  keine_aussage_moeglich: "var(--classification-keine-aussage)",
 };
 
 /** Step 4 / in-body legend uses the canonical verdict names (richtig,
  *  eher richtig, …) — not the "stimmt / stimmt nicht" pill-phrasing
  *  used in dashboard filters. Per Fedor's Iter-11 clarification. */
 export const VERDICT_LABEL_DE: Record<CorrectnessClass, string> = {
-  richtig: 'richtig',
-  eher_richtig: 'eher richtig',
-  eher_falsch: 'eher falsch',
-  falsch: 'falsch',
-  keine_aussage_moeglich: 'keine Aussage möglich',
+  richtig: "richtig",
+  eher_richtig: "eher richtig",
+  eher_falsch: "eher falsch",
+  falsch: "falsch",
+  keine_aussage_moeglich: "keine Aussage möglich",
 };
 
 /** Display order — falsch → richtig (matches the daten-explorer
  *  filter row site-wide). `keine_aussage_moeglich` lands last. */
 export const VERDICT_ORDER: CorrectnessClass[] = [
-  'falsch',
-  'eher_falsch',
-  'eher_richtig',
-  'richtig',
-  'keine_aussage_moeglich',
+  "falsch",
+  "eher_falsch",
+  "eher_richtig",
+  "richtig",
+  "keine_aussage_moeglich",
 ];
 
 /** Override for the verdict glyph when it renders ON a verdict-colored
  *  background (classified grid cell, verdict puck). White stroke on
  *  top of the background colour. */
 export const ON_VERDICT_BG_GLYPH = {
-  main: '#ffffff',
-  shadow: 'rgba(255, 255, 255, 0.55)',
+  main: "#ffffff",
+  shadow: "rgba(255, 255, 255, 0.55)",
 } as const;
 
 /** Dark themed-cell background per category. The integer category_id
  *  is mapped onto a 9-step palette of muted darks (themes 1-9). */
 export function themeColorFor(catId: number | null): string {
-  if (catId === null) return 'var(--bg-elev)';
+  if (catId === null) return "var(--bg-elev)";
   const idx = ((catId - 1) % 9) + 1;
   return `var(--theme-${idx})`;
 }
@@ -200,20 +204,20 @@ export function themeColorFor(catId: number | null): string {
  *  name. Scoped to the scrollytelling; the site-wide category palette
  *  (CATEGORY_META / --cmi-fk-*) is unchanged. (Fedor review 2026-06-08 #3.) */
 export const SCROLLY_CATEGORY_ACCENT: Record<string, string> = {
-  'Medizinischer und therapeutischer Nutzen': '#3f6fa3',
-  'Risiken für den Körper und die Entwicklung': '#2f8a8f',
-  'Risiken für die psychische Gesundheit': '#6f5aa6',
-  'Einfluss auf Stimmung und Wahrnehmung': '#b08a3e',
-  'Soziale Auswirkungen und Leistungsfähigkeit': '#a85a86',
-  'Risiken durch Dosierung und Qualität': '#5b6b78',
-  'Verbreitung in der Bevölkerung und Gesetzgebung': '#5660a8',
-  'Allgemeine Einschätzung der Gefährlichkeit': '#b06a3e',
+  "Medizinischer und therapeutischer Nutzen": "#3f6fa3",
+  "Risiken für den Körper und die Entwicklung": "#2f8a8f",
+  "Risiken für die psychische Gesundheit": "#6f5aa6",
+  "Einfluss auf Stimmung und Wahrnehmung": "#b08a3e",
+  "Soziale Auswirkungen und Leistungsfähigkeit": "#a85a86",
+  "Risiken durch Dosierung und Qualität": "#5b6b78",
+  "Verbreitung in der Bevölkerung und Gesetzgebung": "#5660a8",
+  "Allgemeine Einschätzung der Gefährlichkeit": "#b06a3e",
 };
 
 /** Palette-B accent for a category name (legend square fill). Falls back
  *  to a neutral slate for unrecognised names. */
 export function scrollyCategoryAccent(name: string): string {
-  return SCROLLY_CATEGORY_ACCENT[name] ?? '#5b6b78';
+  return SCROLLY_CATEGORY_ACCENT[name] ?? "#5b6b78";
 }
 
 /** Ordered, deduplicated list of categories that appear in the first
@@ -247,46 +251,48 @@ export const INDICATOR_DEFS_DE: Record<
   { label: string; body: string; scale: string; sampleSize?: string }
 > = {
   awareness: {
-    label: 'Kenntnis',
-    body:
-      'Anteil der Befragten, die diese Aussage schon einmal gehört haben.',
-    scale: '0–100 % der Zielgruppe',
+    label: "Kenntnis",
+    body: "Anteil der Befragten, die diese Aussage schon einmal gehört haben.",
+    scale: "0–100 % der Zielgruppe",
   },
   significance: {
-    label: 'Bedeutung',
+    label: "Bedeutung",
     body:
-      'Wie stark prägt die Aussage den eigenen Umgang mit Cannabis bei ' +
-      'denen, die sie kennen?',
-    scale: '0–100 Punkte',
+      "Wie stark prägt die Aussage den eigenen Umgang mit Cannabis bei " +
+      "denen, die sie kennen?",
+    scale: "0–100 Punkte",
   },
   correctness: {
-    label: 'Richtigkeit',
+    label: "Richtigkeit",
     body:
-      'Wie nahe liegt die Einschätzung der Befragten an der ' +
-      'wissenschaftlichen Klassifikation?',
-    scale: '0–100 Punkte',
+      "Wie nahe liegt die Einschätzung der Befragten an der " +
+      "wissenschaftlichen Klassifikation?",
+    scale: "0–100 Punkte",
   },
   prevention_significance: {
-    label: 'Präventionsbedeutung',
+    label: "Präventionsbedeutung",
     body:
-      'Bedeutung × Wissenslücke. Zeigt, wo Aufklärung am meisten ' +
-      'Wirkung zeigt — dort, wo ein falsches Bild das Verhalten prägt.',
-    scale: '0–100 Punkte',
+      "Bedeutung × Wissenslücke. Zeigt, wo Aufklärung am meisten " +
+      "Wirkung zeigt — dort, wo ein falsches Bild das Verhalten prägt.",
+    scale: "0–100 Punkte",
   },
   population_relevance: {
-    label: 'Bevölkerungsrelevanz',
+    label: "Bevölkerungsrelevanz",
     body:
-      'Präventionsbedeutung × Kenntnisanteil. Berücksichtigt die ' +
-      'Reichweite — ein weit bekannter Halbmythos erreicht mehr Menschen ' +
-      'als ein obskurer. Nur sinnvoll für Voll- und Minderjährige.',
-    scale: '0–100 Punkte',
+      "Präventionsbedeutung × Kenntnisanteil. Berücksichtigt die " +
+      "Reichweite — ein weit bekannter Halbmythos erreicht mehr Menschen " +
+      "als ein obskurer. Nur sinnvoll für Voll- und Minderjährige.",
+    scale: "0–100 Punkte",
   },
 };
 
 /** Bevölkerungsrisiko has meaningful per-group data only for
  *  Voll- + Minderjährige. The other three groups inherit the
  *  Volljährige values in the JSON, which would be misleading to show. */
-export const BEV_RISIKO_VALID_GROUPS: ReadonlySet<GroupId> = new Set<GroupId>(['adults', 'minors']);
+export const BEV_RISIKO_VALID_GROUPS: ReadonlySet<GroupId> = new Set<GroupId>([
+  "adults",
+  "minors",
+]);
 
 /** Value lookup that routes through the Bev.risiko validity guard:
  *  `population_relevance` × non-{adults,minors} returns null even when
@@ -299,7 +305,10 @@ export function getIndicatorValueChecked(
 ): number | null {
   const metric = getMetric(data, mythId, groupId);
   if (!metric) return null;
-  if (indicator === 'population_relevance' && !BEV_RISIKO_VALID_GROUPS.has(groupId)) {
+  if (
+    indicator === "population_relevance" &&
+    !BEV_RISIKO_VALID_GROUPS.has(groupId)
+  ) {
     return null;
   }
   return metric[indicator];

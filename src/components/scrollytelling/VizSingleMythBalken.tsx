@@ -23,10 +23,10 @@
  * not adults/minors (mirrors `getIndicatorValueChecked`).
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { AUDIENCE_ICONS_BY_GROUP, INDICATOR_ICONS } from '../../lib/icons';
-import type { CarmData, GroupId, Indicator } from './types';
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { AUDIENCE_ICONS_BY_GROUP, INDICATOR_ICONS } from "../../lib/icons";
+import type { CarmData, GroupId, Indicator } from "./types";
 import {
   ACTIVE_GROUPS,
   BEV_RISIKO_VALID_GROUPS,
@@ -36,15 +36,15 @@ import {
   VERDICT_COLOR,
   getIndicatorValueChecked,
   getMetric,
-} from './dataLoaders';
-import ValueCircle from '../shared/ValueCircle';
-import BalkenAxis from '../shared/BalkenAxis';
-import InfoDot from '../shared/InfoDot';
-import VerdictPill from '../shared/VerdictPill';
-import { lesebeispielSentence } from './lesebeispiel-bands';
-import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
-import DatenExplorerLink from './DatenExplorerLink';
-import type { CorrectnessClass } from '../../lib/dashboard/types';
+} from "./dataLoaders";
+import ValueCircle from "../shared/ValueCircle";
+import BalkenAxis from "../shared/BalkenAxis";
+import InfoDot from "../shared/InfoDot";
+import VerdictPill from "../shared/VerdictPill";
+import { lesebeispielSentence } from "./lesebeispiel-bands";
+import { useFlipPosition } from "../dashboard/hooks/useFlipPosition";
+import DatenExplorerLink from "./DatenExplorerLink";
+import type { CorrectnessClass } from "../../lib/dashboard/types";
 
 interface Props {
   data: CarmData;
@@ -60,27 +60,27 @@ interface Props {
 }
 
 const GROUP_COLOR: Record<GroupId, string> = {
-  adults: 'var(--group-adults)',
-  minors: 'var(--group-minors)',
-  consumers: 'var(--group-consumers)',
-  young_adults: 'var(--group-young_adults)',
-  parents: 'var(--group-parents)',
+  adults: "var(--group-adults)",
+  minors: "var(--group-minors)",
+  consumers: "var(--group-consumers)",
+  young_adults: "var(--group-young_adults)",
+  parents: "var(--group-parents)",
 };
 
 const INDICATOR_ORDER: Indicator[] = [
-  'awareness',
-  'significance',
-  'correctness',
-  'prevention_significance',
-  'population_relevance',
+  "awareness",
+  "significance",
+  "correctness",
+  "prevention_significance",
+  "population_relevance",
 ];
 
 const INDICATOR_UNIT: Record<Indicator, string> = {
-  awareness: '% gekannt',
-  significance: 'Punkte',
-  correctness: 'Punkte',
-  prevention_significance: 'Punkte',
-  population_relevance: 'Punkte',
+  awareness: "% gekannt",
+  significance: "Punkte",
+  correctness: "Punkte",
+  prevention_significance: "Punkte",
+  population_relevance: "Punkte",
 };
 
 /** Sample-size hint shown above the picker. Numbers mirror the
@@ -100,8 +100,10 @@ export function VizSingleMythBalken({
   step,
 }: Props) {
   const myth = data.myths.find((m) => m.id === mythId);
-  const [activeGroup, setActiveGroup] = useState<GroupId>('adults');
-  const [hoveredIndicator, setHoveredIndicator] = useState<Indicator | null>(null);
+  const [activeGroup, setActiveGroup] = useState<GroupId>("adults");
+  const [hoveredIndicator, setHoveredIndicator] = useState<Indicator | null>(
+    null,
+  );
 
   // Iter-14: viz-block bounds ref. `useFlipPosition` clamps the
   // tooltip inside this element so it never bleeds past the canvas
@@ -125,7 +127,9 @@ export function VizSingleMythBalken({
   });
 
   function openRowTooltip(indicator: Indicator, el: HTMLElement) {
-    (tooltipTriggerRef as unknown as React.MutableRefObject<Element | null>).current = el;
+    (
+      tooltipTriggerRef as unknown as React.MutableRefObject<Element | null>
+    ).current = el;
     setHoveredIndicator(indicator);
     setTooltipOpen(true);
     updateTooltipPosition();
@@ -177,7 +181,11 @@ export function VizSingleMythBalken({
           Iter-15 (2026-05-29): per-group audience icon instead of the
           generic lucide User glyph, so the picker mirrors the visual
           vocabulary used everywhere else on the site. */}
-      <div className="viz-balken-myth__picker" role="tablist" aria-label="Zielgruppe">
+      <div
+        className="viz-balken-myth__picker"
+        role="tablist"
+        aria-label="Zielgruppe"
+      >
         {ACTIVE_GROUPS.map((g) => {
           const isActive = activeGroup === g;
           const Icon = AUDIENCE_ICONS_BY_GROUP[g];
@@ -188,7 +196,7 @@ export function VizSingleMythBalken({
               type="button"
               aria-selected={isActive}
               onClick={() => setActiveGroup(g)}
-              className={`viz-balken-myth__pick${isActive ? ' viz-balken-myth__pick--active' : ''}`}
+              className={`viz-balken-myth__pick${isActive ? " viz-balken-myth__pick--active" : ""}`}
             >
               <Icon
                 size="1em"
@@ -204,29 +212,37 @@ export function VizSingleMythBalken({
       </div>
 
       <p className="viz-balken-myth__caption">
-        Stichprobe {GROUP_LABEL_DE[activeGroup]}, n={GROUP_N[activeGroup].toLocaleString('de-DE')}.
+        Stichprobe {GROUP_LABEL_DE[activeGroup]}, n=
+        {GROUP_N[activeGroup].toLocaleString("de-DE")}.
       </p>
 
       {/* The 5-row Balken grid. All rows always in the DOM; opacity-gated
           by `revealedRows`. */}
-      <div className="viz-balken-myth__grid carm-spannweite carm-balken-view" role="grid">
+      <div
+        className="viz-balken-myth__grid carm-spannweite carm-balken-view"
+        role="grid"
+      >
         {INDICATOR_ORDER.map((ind, i) => {
           const isRevealed = i < revealedRows;
-          const isNewlyRevealed =
-            isForward && isRevealed && i >= prevRevealed;
+          const isNewlyRevealed = isForward && isRevealed && i >= prevRevealed;
           const revealIdx = isNewlyRevealed ? i - prevRevealed : 0;
           const rowStyle: React.CSSProperties = isNewlyRevealed
             ? {
                 animation:
-                  'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                  "viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both",
                 animationDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
               }
             : { opacity: isRevealed ? 1 : 0 };
 
-          const value = getIndicatorValueChecked(data, myth.id, activeGroup, ind);
+          const value = getIndicatorValueChecked(
+            data,
+            myth.id,
+            activeGroup,
+            ind,
+          );
           const def = INDICATOR_DEFS_DE[ind];
           const Icon = INDICATOR_ICONS[ind];
-          const isBev = ind === 'population_relevance';
+          const isBev = ind === "population_relevance";
           const bevApplies = BEV_RISIKO_VALID_GROUPS.has(activeGroup);
           const showKaa = isBev && !bevApplies;
           const isHover = hoveredIndicator === ind;
@@ -235,7 +251,7 @@ export function VizSingleMythBalken({
             <div
               key={ind}
               role="row"
-              className={`viz-balken-myth__row${isHover ? ' is-hover' : ''}`}
+              className={`viz-balken-myth__row${isHover ? " is-hover" : ""}`}
               data-revealed={isRevealed}
               style={rowStyle}
               tabIndex={isRevealed ? 0 : -1}
@@ -277,15 +293,21 @@ export function VizSingleMythBalken({
                   {value !== null && value > 0 && (
                     <div
                       className="carm-balken__wash"
-                      style={{ width: `${Math.max(0, Math.min(100, value))}%`, background: accent }}
+                      style={{
+                        width: `${Math.max(0, Math.min(100, value))}%`,
+                        background: accent,
+                      }}
                       aria-hidden="true"
                     />
                   )}
                   {value !== null ? (
                     <ValueCircle value={value} accent={accent} />
                   ) : (
-                    <span className="carm-spannweite__no-data" aria-hidden="true">
-                      {showKaa ? 'nur Voll- + Minderjährige' : 'k. A.'}
+                    <span
+                      className="carm-spannweite__no-data"
+                      aria-hidden="true"
+                    >
+                      {showKaa ? "nur Voll- + Minderjährige" : "k. A."}
                     </span>
                   )}
                 </div>
@@ -311,12 +333,12 @@ export function VizSingleMythBalken({
           ref={tooltipCardRef}
           role="tooltip"
           className={`scrolly-hover-tooltip viz-balken-myth__tooltip${
-            tooltipOpen && hoveredSentence ? ' is-open' : ''
+            tooltipOpen && hoveredSentence ? " is-open" : ""
           }`}
           style={
             tooltipPos
               ? {
-                  position: 'fixed',
+                  position: "fixed",
                   top: tooltipPos.top,
                   left: tooltipPos.left,
                   width: tooltipPos.width,
@@ -327,11 +349,10 @@ export function VizSingleMythBalken({
           {hoveredIndicator && hoveredSentence && (
             <>
               <p className="scrolly-hover-tooltip__eyebrow">
-                {INDICATOR_LABEL_DE[hoveredIndicator]} · {GROUP_LABEL_DE[activeGroup]}
+                {INDICATOR_LABEL_DE[hoveredIndicator]} ·{" "}
+                {GROUP_LABEL_DE[activeGroup]}
               </p>
-              <p className="scrolly-hover-tooltip__body">
-                {hoveredSentence}
-              </p>
+              <p className="scrolly-hover-tooltip__body">{hoveredSentence}</p>
             </>
           )}
         </div>,

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import type { ReactNode } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useRef } from "react";
+import type { ReactNode } from "react";
+import { X } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -10,7 +10,13 @@ interface Props {
   children: ReactNode;
 }
 
-export function MehrPopover({ open, onClose, title, subtitle, children }: Props) {
+export function MehrPopover({
+  open,
+  onClose,
+  title,
+  subtitle,
+  children,
+}: Props) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
   const lastFocusRef = useRef<HTMLElement | null>(null);
@@ -19,17 +25,17 @@ export function MehrPopover({ open, onClose, title, subtitle, children }: Props)
     if (!open) return;
     lastFocusRef.current = document.activeElement as HTMLElement | null;
     const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
 
     requestAnimationFrame(() => closeBtnRef.current?.focus());
 
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         e.stopPropagation();
         onClose();
         return;
       }
-      if (e.key === 'Tab' && dialogRef.current) {
+      if (e.key === "Tab" && dialogRef.current) {
         const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         );
@@ -45,9 +51,9 @@ export function MehrPopover({ open, onClose, title, subtitle, children }: Props)
         }
       }
     }
-    document.addEventListener('keydown', onKey);
+    document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener('keydown', onKey);
+      document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
       lastFocusRef.current?.focus();
     };

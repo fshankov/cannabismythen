@@ -11,15 +11,15 @@
  * Ported from prototypes/scrollytelling-v3 (Iter-4, 2026-05-11).
  */
 
-import { useState, useEffect, useRef, useCallback, Fragment } from 'react';
-import type { ReactNode } from 'react';
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
+import type { ReactNode } from "react";
 import type {
   CarmData,
   InformationSourcesData,
   SampleRankedMode,
   ScrollyContent,
-} from './types';
-import { STEP_DEFINITIONS, type StepStructure } from './stepDefinitions';
+} from "./types";
+import { STEP_DEFINITIONS, type StepStructure } from "./stepDefinitions";
 import {
   loadCarmData,
   loadInformationSources,
@@ -28,27 +28,27 @@ import {
   verdictCountsFromData,
   VERDICT_ORDER,
   VERDICT_LABEL_DE,
-} from './dataLoaders';
-import { VizTimeline } from './VizTimeline';
-import { VizPeopleVoices } from './VizPeopleVoices';
-import { VizMythGrid } from './VizMythGrid';
-import { VizSampleAndRanked } from './VizSampleAndRanked';
-import { VizSingleMythBalken } from './VizSingleMythBalken';
-import { VizSourcesStrips } from './VizSourcesStrips';
-import { VizSourcesSpannweite } from './VizSourcesSpannweite';
-import { VizCtaGrid } from './VizCtaGrid';
-import { VizTeamRow } from './VizTeamRow';
-import VerdictPill from '../shared/VerdictPill';
-import VerdictArrow from '../shared/VerdictArrow';
-import type { CorrectnessClass } from '../../lib/dashboard/types';
-import type { ComponentType } from 'react';
+} from "./dataLoaders";
+import { VizTimeline } from "./VizTimeline";
+import { VizPeopleVoices } from "./VizPeopleVoices";
+import { VizMythGrid } from "./VizMythGrid";
+import { VizSampleAndRanked } from "./VizSampleAndRanked";
+import { VizSingleMythBalken } from "./VizSingleMythBalken";
+import { VizSourcesStrips } from "./VizSourcesStrips";
+import { VizSourcesSpannweite } from "./VizSourcesSpannweite";
+import { VizCtaGrid } from "./VizCtaGrid";
+import { VizTeamRow } from "./VizTeamRow";
+import VerdictPill from "../shared/VerdictPill";
+import VerdictArrow from "../shared/VerdictArrow";
+import type { CorrectnessClass } from "../../lib/dashboard/types";
+import type { ComponentType } from "react";
 import {
   AUDIENCE_ICONS_BY_GROUP,
   AUDIENCE_COLOR_VAR_BY_GROUP,
   INDICATOR_ICONS,
-} from '../../lib/icons';
-import { CATEGORY_META } from '../../lib/fakten-karten/categories';
-import { FileText, Brain, Table, CircleHelp } from 'lucide-react';
+} from "../../lib/icons";
+import { CATEGORY_META } from "../../lib/fakten-karten/categories";
+import { FileText, Brain, Table, CircleHelp } from "lucide-react";
 
 /**
  * Iter-22: inline `{icon:KEY}` tokens for the left-column body copy.
@@ -66,11 +66,26 @@ type InlineIconEntry = {
   color?: string;
 };
 const SCROLLY_INLINE_ICONS: Record<string, InlineIconEntry> = {
-  adults: { Icon: AUDIENCE_ICONS_BY_GROUP.adults, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.adults})` },
-  minors: { Icon: AUDIENCE_ICONS_BY_GROUP.minors, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.minors})` },
-  consumers: { Icon: AUDIENCE_ICONS_BY_GROUP.consumers, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.consumers})` },
-  young_adults: { Icon: AUDIENCE_ICONS_BY_GROUP.young_adults, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.young_adults})` },
-  parents: { Icon: AUDIENCE_ICONS_BY_GROUP.parents, color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.parents})` },
+  adults: {
+    Icon: AUDIENCE_ICONS_BY_GROUP.adults,
+    color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.adults})`,
+  },
+  minors: {
+    Icon: AUDIENCE_ICONS_BY_GROUP.minors,
+    color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.minors})`,
+  },
+  consumers: {
+    Icon: AUDIENCE_ICONS_BY_GROUP.consumers,
+    color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.consumers})`,
+  },
+  young_adults: {
+    Icon: AUDIENCE_ICONS_BY_GROUP.young_adults,
+    color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.young_adults})`,
+  },
+  parents: {
+    Icon: AUDIENCE_ICONS_BY_GROUP.parents,
+    color: `var(${AUDIENCE_COLOR_VAR_BY_GROUP.parents})`,
+  },
   awareness: { Icon: INDICATOR_ICONS.awareness },
   significance: { Icon: INDICATOR_ICONS.significance },
   correctness: { Icon: INDICATOR_ICONS.correctness },
@@ -78,8 +93,8 @@ const SCROLLY_INLINE_ICONS: Record<string, InlineIconEntry> = {
   population_relevance: { Icon: INDICATOR_ICONS.population_relevance },
   faktenkarten: { Icon: FileText },
   quiz: { Icon: Brain },
-  'daten-explorer': { Icon: Table },
-  'meine-interessen': { Icon: CircleHelp },
+  "daten-explorer": { Icon: Table },
+  "meine-interessen": { Icon: CircleHelp },
 };
 
 /** Inline matchers for body copy:
@@ -97,12 +112,12 @@ const SCROLLY_INLINE_ICONS: Record<string, InlineIconEntry> = {
 const INLINE_RE =
   /\[([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage möglich|keine Aussage)\]|\{([↑↗↙↓—])\s+(richtig|eher richtig|eher falsch|falsch|keine Aussage möglich|keine Aussage)\}|\*\*([^*]+)\*\*|\{icon:([a-z_-]+)\}/g;
 const VERDICT_LABEL_TO_CLASS: Record<string, CorrectnessClass> = {
-  richtig: 'richtig',
-  'eher richtig': 'eher_richtig',
-  'eher falsch': 'eher_falsch',
-  falsch: 'falsch',
-  'keine Aussage möglich': 'keine_aussage_moeglich',
-  'keine Aussage': 'keine_aussage_moeglich',
+  richtig: "richtig",
+  "eher richtig": "eher_richtig",
+  "eher falsch": "eher_falsch",
+  falsch: "falsch",
+  "keine Aussage möglich": "keine_aussage_moeglich",
+  "keine Aussage": "keine_aussage_moeglich",
 };
 
 function renderBodyWithVerdicts(text: string): ReactNode[] {
@@ -182,9 +197,9 @@ function renderBodyWithVerdicts(text: string): ReactNode[] {
  * under the text) — used for the Step-5 target groups and Step-10 offerings.
  */
 function renderParagraph(para: string): ReactNode {
-  const lines = para.split('\n').filter((l) => l.trim().length > 0);
+  const lines = para.split("\n").filter((l) => l.trim().length > 0);
   const isIconList =
-    lines.length >= 2 && lines.every((l) => l.trimStart().startsWith('{icon:'));
+    lines.length >= 2 && lines.every((l) => l.trimStart().startsWith("{icon:"));
   if (isIconList) {
     return (
       <span className="scrolly__body-list">
@@ -234,15 +249,17 @@ function StepVisualization({
   revealedColumns,
 }: VizDispatchProps) {
   switch (step.vizName) {
-    case 'timeline':
-      return <VizTimeline active={active} tooltips={content.timelineTooltips} />;
-    case 'peopleVoices':
+    case "timeline":
+      return (
+        <VizTimeline active={active} tooltips={content.timelineTooltips} />
+      );
+    case "peopleVoices":
       return <VizPeopleVoices active={active} />;
-    case 'mythGrid':
-      return <VizMythGrid data={data} mode={step.gridMode ?? 'themed'} />;
-    case 'sampleAndRanked':
+    case "mythGrid":
+      return <VizMythGrid data={data} mode={step.gridMode ?? "themed"} />;
+    case "sampleAndRanked":
       return <VizSampleAndRanked data={data} mode={sampleRankedMode} />;
-    case 'singleMythBalken':
+    case "singleMythBalken":
       return (
         <VizSingleMythBalken
           data={data}
@@ -250,9 +267,11 @@ function StepVisualization({
           step={step.stepNumber === 7 ? 7 : 6}
         />
       );
-    case 'sourcesStrips':
-      return <VizSourcesStrips data={sources} revealedColumns={revealedColumns} />;
-    case 'sourcesSpannweite':
+    case "sourcesStrips":
+      return (
+        <VizSourcesStrips data={sources} revealedColumns={revealedColumns} />
+      );
+    case "sourcesSpannweite":
       return (
         <VizSourcesSpannweite
           data={sources}
@@ -260,9 +279,9 @@ function StepVisualization({
           step={step.stepNumber === 9 ? 9 : 8}
         />
       );
-    case 'ctaGrid':
+    case "ctaGrid":
       return <VizCtaGrid data={data} />;
-    case 'teamRow':
+    case "teamRow":
       return (
         <VizTeamRow
           teamMembers={content.teamMembers}
@@ -295,18 +314,22 @@ export function ScrollytellingViewer({ content }: Props) {
 
   if (error) {
     return (
-      <p style={{ padding: '2rem', color: '#be123c' }}>
+      <p style={{ padding: "2rem", color: "#be123c" }}>
         Datensätze konnten nicht geladen werden: {error}
       </p>
     );
   }
   if (!data || !sources) {
-    return (
-      <p style={{ padding: '2rem', color: '#9ca3af' }}>Lade Daten …</p>
-    );
+    return <p style={{ padding: "2rem", color: "#9ca3af" }}>Lade Daten …</p>;
   }
 
-  return <ScrollytellingViewerInner data={data} sources={sources} content={content} />;
+  return (
+    <ScrollytellingViewerInner
+      data={data}
+      sources={sources}
+      content={content}
+    />
+  );
 }
 
 function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
@@ -328,11 +351,10 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
       const obs = new IntersectionObserver(
         (entries) => {
           entries.forEach((e) => {
-            if (e.isIntersecting)
-              setActiveStep(STEP_DEFINITIONS[i].stepNumber);
+            if (e.isIntersecting) setActiveStep(STEP_DEFINITIONS[i].stepNumber);
           });
         },
-        { threshold: 0, rootMargin: '-45% 0px -54.99% 0px' },
+        { threshold: 0, rootMargin: "-45% 0px -54.99% 0px" },
       );
       obs.observe(el);
       observers.push(obs);
@@ -348,7 +370,7 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
   // Step 7 (5 = + 2 derived). Each step's structural definition carries
   // its `sampleRankedMode` directly — no phase-idx machinery needed.
   const sampleRankedMode: SampleRankedMode =
-    currentStep.sampleRankedMode ?? 'sample';
+    currentStep.sampleRankedMode ?? "sample";
 
   // Iter-12: Steps 8 and 9 split the sources story (active vs passive).
   // Step 8 → cols 1 + 2 (Suche + Vertrauen). Step 9 → cols 3 + 4 added
@@ -363,12 +385,15 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
 
   return (
     <>
-      <section className="scrolly" aria-label="Scrollytelling: Forschungsprozess">
+      <section
+        className="scrolly"
+        aria-label="Scrollytelling: Forschungsprozess"
+      >
         {/* Mobile sticky-top viz */}
         <div
           className="scrolly__viz-mobile"
           aria-hidden="true"
-          key={`mob-${currentStep.vizName}-${currentStep.gridMode ?? ''}`}
+          key={`mob-${currentStep.vizName}-${currentStep.gridMode ?? ""}`}
         >
           <div className="scrolly__viz-canvas">
             <StepVisualization
@@ -395,16 +420,16 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                   data-step={step.stepNumber}
                   className={`scrolly__step ${
                     activeStep === step.stepNumber
-                      ? 'scrolly__step--active'
-                      : ''
+                      ? "scrolly__step--active"
+                      : ""
                   }`}
                 >
                   <span className="scrolly__step-label">
-                    {String(step.stepNumber).padStart(2, '0')} /{' '}
-                    {String(STEP_DEFINITIONS.length).padStart(2, '0')}
+                    {String(step.stepNumber).padStart(2, "0")} /{" "}
+                    {String(STEP_DEFINITIONS.length).padStart(2, "0")}
                   </span>
                   <h2 className="scrolly__heading">
-                    {editorial.heading.split('\n').map((line, li, arr) => (
+                    {editorial.heading.split("\n").map((line, li, arr) => (
                       <span key={li}>
                         {line}
                         {li < arr.length - 1 && <br />}
@@ -414,7 +439,7 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                   {/* Iter-10: all 11 steps render through one branch.
                       Step 6's old `---` phase-marker mechanism is gone
                       because the synthesis lives in its own Step 7 now. */}
-                  {editorial.bodyText.split('\n\n').map((para, pi) => (
+                  {editorial.bodyText.split("\n\n").map((para, pi) => (
                     <p key={pi} className="scrolly__body">
                       {renderParagraph(para)}
                     </p>
@@ -423,7 +448,7 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                       legend in the LEFT text column instead of below
                       the viz. Inline-wrap of swatch + name, smaller
                       print than body. */}
-                  {step.gridMode === 'themed' && (
+                  {step.gridMode === "themed" && (
                     <div
                       className="scrolly__theme-legend"
                       aria-label="Themenfelder"
@@ -438,12 +463,16 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                           <span key={c.id} className="scrolly__theme-chip">
                             <span
                               className="scrolly__theme-tile"
-                              style={{ background: scrollyCategoryAccent(c.name) }}
+                              style={{
+                                background: scrollyCategoryAccent(c.name),
+                              }}
                               aria-hidden="true"
                             >
                               {CatIcon && <CatIcon size={13} color="#ffffff" />}
                             </span>
-                            <span className="scrolly__theme-name">{c.name}</span>
+                            <span className="scrolly__theme-name">
+                              {c.name}
+                            </span>
                           </span>
                         );
                       })}
@@ -454,34 +483,34 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
                       colored puck + verdict name + (count), in
                       falsch → richtig order. Replaces the old
                       `{verb} stimmen` lines + the viz-column legend. */}
-                  {step.gridMode === 'classified' && (() => {
-                    const counts = verdictCountsFromData(data);
-                    return (
-                      <div
-                        className="scrolly__verdict-legend"
-                        aria-label="Klassifikationen"
-                      >
-                        {VERDICT_ORDER.filter((v) => counts[v] > 0).map((v) => (
-                          <div
-                            key={v}
-                            className="scrolly__verdict-row"
-                          >
-                            <VerdictPill
-                              verdict={v}
-                              size="sm"
-                              variant="puck"
-                            />
-                            <span className="scrolly__verdict-label">
-                              {VERDICT_LABEL_DE[v]}
-                            </span>
-                            <span className="scrolly__verdict-count">
-                              ({counts[v]})
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()}
+                  {step.gridMode === "classified" &&
+                    (() => {
+                      const counts = verdictCountsFromData(data);
+                      return (
+                        <div
+                          className="scrolly__verdict-legend"
+                          aria-label="Klassifikationen"
+                        >
+                          {VERDICT_ORDER.filter((v) => counts[v] > 0).map(
+                            (v) => (
+                              <div key={v} className="scrolly__verdict-row">
+                                <VerdictPill
+                                  verdict={v}
+                                  size="sm"
+                                  variant="puck"
+                                />
+                                <span className="scrolly__verdict-label">
+                                  {VERDICT_LABEL_DE[v]}
+                                </span>
+                                <span className="scrolly__verdict-count">
+                                  ({counts[v]})
+                                </span>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      );
+                    })()}
                   {editorial.legend && (
                     <p className="scrolly__legend">{editorial.legend}</p>
                   )}
@@ -510,7 +539,6 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
           </div>
         </div>
       </section>
-
     </>
   );
 }
@@ -518,16 +546,16 @@ function ScrollytellingViewerInner({ data, sources, content }: InnerProps) {
 /** Steps that share a viz instance must produce the same key. */
 function vizFamilyKey(step: StepStructure): string {
   switch (step.vizName) {
-    case 'mythGrid':
-      return 'family-mythGrid';
-    case 'sampleAndRanked':
-      return 'family-sampleAndRanked';
-    case 'singleMythBalken':
-      return 'family-singleMythBalken';
-    case 'sourcesStrips':
-      return 'family-sourcesStrips';
-    case 'sourcesSpannweite':
-      return 'family-sourcesSpannweite';
+    case "mythGrid":
+      return "family-mythGrid";
+    case "sampleAndRanked":
+      return "family-sampleAndRanked";
+    case "singleMythBalken":
+      return "family-singleMythBalken";
+    case "sourcesStrips":
+      return "family-sourcesStrips";
+    case "sourcesSpannweite":
+      return "family-sourcesSpannweite";
     default:
       return `family-${step.vizName}`;
   }

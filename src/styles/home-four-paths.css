@@ -63,7 +63,6 @@
   color: var(--color-accent);
 }
 
-
 .four-paths__quote-lead {
   font-family: "DM Serif Display", Georgia, serif;
   font-style: italic;
@@ -80,8 +79,6 @@
   line-height: 1.3;
   color: var(--color-text);
 }
-
-
 
 .four-paths__subtext {
   margin: 16px 0 0;
@@ -122,7 +119,8 @@
 .path-card:focus-visible {
   transform: translateY(-4px);
   background: #ffffff;
-  box-shadow: 0 14px 32px -6px color-mix(in srgb, var(--key-green) 16%, transparent);
+  box-shadow: 0 14px 32px -6px
+    color-mix(in srgb, var(--key-green) 16%, transparent);
   outline: none;
 }
 
@@ -296,10 +294,18 @@
 .fk-mini:last-child {
   margin-right: 0;
 }
-.fk-mini:nth-child(1) { z-index: 1; }
-.fk-mini:nth-child(2) { z-index: 2; }
-.fk-mini:nth-child(3) { z-index: 3; }
-.fk-mini:nth-child(4) { z-index: 4; }
+.fk-mini:nth-child(1) {
+  z-index: 1;
+}
+.fk-mini:nth-child(2) {
+  z-index: 2;
+}
+.fk-mini:nth-child(3) {
+  z-index: 3;
+}
+.fk-mini:nth-child(4) {
+  z-index: 4;
+}
 
 .fk-mini__statement {
   margin: 0;
@@ -365,11 +371,22 @@
   width: 0;
   border-left: 1px dotted rgba(0, 0, 0, 0.08);
 }
-.daten-chart__tick[data-pos="0"] { left: 0; }
-.daten-chart__tick[data-pos="25"] { left: 25%; }
-.daten-chart__tick[data-pos="50"] { left: 50%; border-left-color: rgba(0, 0, 0, 0.13); }
-.daten-chart__tick[data-pos="75"] { left: 75%; }
-.daten-chart__tick[data-pos="100"] { left: 100%; }
+.daten-chart__tick[data-pos="0"] {
+  left: 0;
+}
+.daten-chart__tick[data-pos="25"] {
+  left: 25%;
+}
+.daten-chart__tick[data-pos="50"] {
+  left: 50%;
+  border-left-color: rgba(0, 0, 0, 0.13);
+}
+.daten-chart__tick[data-pos="75"] {
+  left: 75%;
+}
+.daten-chart__tick[data-pos="100"] {
+  left: 100%;
+}
 
 .daten-bar {
   position: relative;
@@ -396,7 +413,11 @@
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font: 600 0.6875rem/1 ui-monospace, "SF Mono", Menlo, monospace;
+  font:
+    600 0.6875rem/1 ui-monospace,
+    "SF Mono",
+    Menlo,
+    monospace;
   font-variant-numeric: tabular-nums;
 }
 
@@ -496,11 +517,21 @@
     opacity: 1;
     transform: none;
   }
-  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(1) { transition-delay: 0.55s; }
-  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(2) { transition-delay: 0.62s; }
-  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(3) { transition-delay: 0.69s; }
-  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(4) { transition-delay: 0.76s; }
-  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(5) { transition-delay: 0.83s; }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(1) {
+    transition-delay: 0.55s;
+  }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(2) {
+    transition-delay: 0.62s;
+  }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(3) {
+    transition-delay: 0.69s;
+  }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(4) {
+    transition-delay: 0.76s;
+  }
+  html.js-reveal .four-paths.is-in .meine-preview .audience-dot:nth-child(5) {
+    transition-delay: 0.83s;
+  }
   html.js-reveal .four-paths .meine-preview::before {
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -514,7 +545,9 @@
      further so the affordance feels like it's pointing toward the page */
   .path-card__go {
     transform: translateX(8px);
-    transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+      opacity 0.2s ease,
+      transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .path-card:hover .path-card__go,
   .path-card:focus-visible .path-card__go {
@@ -551,7 +584,9 @@
     transition-delay: 0.3s; /* both strokes appear together once the buttons land */
   }
   .path-card--quiz:hover .quiz-preview__btn--richtig {
-    border-color: var(--quiz-btn-corr-ans); /* #047857 — the quiz's "correct answer" stroke */
+    border-color: var(
+      --quiz-btn-corr-ans
+    ); /* #047857 — the quiz's "correct answer" stroke */
   }
   .path-card--quiz:hover .quiz-preview__btn--eher_falsch {
     border-color: var(--quiz-btn-near); /* #fbd035 — yellow, "1 point away" */

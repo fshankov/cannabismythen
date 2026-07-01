@@ -21,22 +21,22 @@
  * every other myth's metadata) — we build it once and reuse for every entry.
  */
 
-import Markdoc from '@markdoc/markdoc';
-import { reader, getPublishedEntries } from './content';
-import { getQuestionsForMyth } from './faq';
+import Markdoc from "@markdoc/markdoc";
+import { reader, getPublishedEntries } from "./content";
+import { getQuestionsForMyth } from "./faq";
 import type {
   MythContentEntry,
   RelatedMythRef,
   FaqBacklink,
-} from '../components/shared/FactsheetPanel';
+} from "../components/shared/FactsheetPanel";
 
 /** Strip the "Mythos N:" prefix and trailing terminal punctuation so the
  *  popup title reads as a clean statement. Mirrors the rule each .astro
  *  callsite used to inline. */
 function cleanMythTitle(raw: string): string {
   return raw
-    .replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, '')
-    .replace(/[.!?]+$/u, '');
+    .replace(/^Mythos\s+\d+(?:\/\d+)?:\s*/i, "")
+    .replace(/[.!?]+$/u, "");
 }
 
 interface RelatedIndexEntry {
@@ -54,8 +54,10 @@ interface RelatedIndexEntry {
  *   - returns an empty `[]` for relatedMyths / faqBacklinks when the
  *     source data is empty (callers can still rely on the field existing)
  */
-export async function buildMythContentMap(): Promise<Record<number, MythContentEntry>> {
-  const entries = await getPublishedEntries('zahlenUndFakten');
+export async function buildMythContentMap(): Promise<
+  Record<number, MythContentEntry>
+> {
+  const entries = await getPublishedEntries("zahlenUndFakten");
 
   // Pass 1: assemble the related-myth resolution index.
   const relatedIndex = new Map<string, RelatedIndexEntry>();
@@ -70,7 +72,7 @@ export async function buildMythContentMap(): Promise<Record<number, MythContentE
     relatedIndex.set(e.mythId, {
       mythNumber: e.mythNumber,
       title: cleanMythTitle(e.title),
-      classification: e.classification ?? '',
+      classification: e.classification ?? "",
     });
   }
 
@@ -91,10 +93,11 @@ export async function buildMythContentMap(): Promise<Record<number, MythContentE
       const { node } = await full.content();
       const html = Markdoc.renderers.html(Markdoc.transform(node));
       const refCount = (html.match(/<li>/g) || []).length;
-      const title = cleanMythTitle((full.title as string) ?? '');
+      const title = cleanMythTitle((full.title as string) ?? "");
 
       // Resolve related-myth IDs against the pass-1 index.
-      const rawRelated = ((full as { relatedMyths?: readonly string[] }).relatedMyths ?? []) as readonly string[];
+      const rawRelated = ((full as { relatedMyths?: readonly string[] })
+        .relatedMyths ?? []) as readonly string[];
       const relatedMyths: RelatedMythRef[] = [];
       for (const rid of rawRelated) {
         const info = relatedIndex.get(rid);
@@ -120,8 +123,10 @@ export async function buildMythContentMap(): Promise<Record<number, MythContentE
       map[e.mythNumber] = {
         html,
         title,
-        classification: (full as { classification?: string }).classification ?? '',
-        classificationLabel: (full as { classificationLabel?: string }).classificationLabel ?? '',
+        classification:
+          (full as { classification?: string }).classification ?? "",
+        classificationLabel:
+          (full as { classificationLabel?: string }).classificationLabel ?? "",
         refCount,
         relatedMyths,
         faqBacklinks,
@@ -139,11 +144,13 @@ export async function buildMythContentMap(): Promise<Record<number, MythContentE
  * Quiz callsite variant — same data, keyed by mythId string ("m04") instead
  * of mythNumber. QuizPlayer's content map is `Record<string, MythContentEntry>`.
  */
-export async function buildMythContentMapByMythId(): Promise<Record<string, MythContentEntry>> {
+export async function buildMythContentMapByMythId(): Promise<
+  Record<string, MythContentEntry>
+> {
   const numbered = await buildMythContentMap();
   const byMythId: Record<string, MythContentEntry> = {};
   for (const [mythNumber, entry] of Object.entries(numbered)) {
-    const id = `m${String(mythNumber).padStart(2, '0')}`;
+    const id = `m${String(mythNumber).padStart(2, "0")}`;
     byMythId[id] = entry;
   }
   return byMythId;

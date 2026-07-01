@@ -3,11 +3,11 @@
  * (Decision G: Merged into shared component)
  */
 
-import SharedFactsheetPanel from '../shared/FactsheetPanel';
-import type { MythContentEntry } from '../shared/FactsheetPanel';
-import type { Myth, MythGroupMetrics } from '../../lib/dashboard/types';
-import { t, type TranslationKey } from '../../lib/dashboard/translations';
-import VerdictArrowWithInfo from './VerdictArrowWithInfo';
+import SharedFactsheetPanel from "../shared/FactsheetPanel";
+import type { MythContentEntry } from "../shared/FactsheetPanel";
+import type { Myth, MythGroupMetrics } from "../../lib/dashboard/types";
+import { t, type TranslationKey } from "../../lib/dashboard/translations";
+import VerdictArrowWithInfo from "./VerdictArrowWithInfo";
 
 export type { MythContentEntry };
 
@@ -40,7 +40,7 @@ export default function FactsheetPanel({
   // Daten-Explorer refactor unified verdict copy across the site).
   const canonicalLabel = t(
     `verdict.${myth.correctness_class}` as TranslationKey,
-    'de',
+    "de",
   );
 
   return (

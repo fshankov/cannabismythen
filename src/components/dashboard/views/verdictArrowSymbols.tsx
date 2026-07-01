@@ -29,7 +29,11 @@ export default function VerdictArrowSymbols() {
           <path d="m5 9 7 7 7-7" stroke="currentColor" />
         </g>
       </symbol>
-      <symbol id="strips-arrow-eher_richtig" viewBox="0 0 24 24" overflow="visible">
+      <symbol
+        id="strips-arrow-eher_richtig"
+        viewBox="0 0 24 24"
+        overflow="visible"
+      >
         <g
           fill="none"
           strokeWidth={3}
@@ -42,7 +46,11 @@ export default function VerdictArrowSymbols() {
           <path d="m5 9 7 7 7-7" stroke="currentColor" />
         </g>
       </symbol>
-      <symbol id="strips-arrow-eher_falsch" viewBox="0 0 24 24" overflow="visible">
+      <symbol
+        id="strips-arrow-eher_falsch"
+        viewBox="0 0 24 24"
+        overflow="visible"
+      >
         <g
           fill="none"
           strokeWidth={3}
@@ -67,7 +75,11 @@ export default function VerdictArrowSymbols() {
           <path d="m5 9 7 7 7-7" stroke="currentColor" />
         </g>
       </symbol>
-      <symbol id="strips-arrow-keine_aussage_moeglich" viewBox="0 0 24 24" overflow="visible">
+      <symbol
+        id="strips-arrow-keine_aussage_moeglich"
+        viewBox="0 0 24 24"
+        overflow="visible"
+      >
         <g
           fill="none"
           strokeWidth={3}

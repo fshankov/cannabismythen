@@ -38,7 +38,7 @@
 
 #quiz-progress-slot.quiz-progress-slot--active {
   display: block;
-  border-top: 1px solid rgba(226, 232, 240, 0.30);
+  border-top: 1px solid rgba(226, 232, 240, 0.3);
 }
 
 /* ── Progress Bar Row (rendered by ProgressBar component) ─────── */
@@ -132,8 +132,14 @@
 }
 
 @keyframes quiz-strip-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 2026-06-04 (Fedor) — ghost variant. Renders the strip's full structure
@@ -143,7 +149,6 @@
 .quiz-feedback-strip--ghost {
   visibility: hidden;
 }
-
 
 /* Stage F commit 2 (2026-05-23) — the tinted pill background was too
    aggressive on `Erwischt`/`Da liegst du daneben.` (red wash reads
@@ -199,10 +204,18 @@
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
-.quiz-feedback-strip__points--exact { color: var(--quiz-fb-exact); }
-.quiz-feedback-strip__points--near  { color: var(--quiz-fb-near); }
-.quiz-feedback-strip__points--off   { color: var(--quiz-fb-off); }
-.quiz-feedback-strip__points--far   { color: var(--quiz-fb-far); }
+.quiz-feedback-strip__points--exact {
+  color: var(--quiz-fb-exact);
+}
+.quiz-feedback-strip__points--near {
+  color: var(--quiz-fb-near);
+}
+.quiz-feedback-strip__points--off {
+  color: var(--quiz-fb-off);
+}
+.quiz-feedback-strip__points--far {
+  color: var(--quiz-fb-far);
+}
 
 .quiz-feedback-strip__sep {
   color: var(--color-text-muted);
@@ -239,7 +252,6 @@
     padding: var(--space-sm) var(--space-md);
   }
 }
-
 
 /* ── Card Grid (legacy, used by fakten-karten) ─────────────────── */
 
@@ -420,9 +432,10 @@
   box-shadow: var(--quiz-card-shadow);
   overflow: hidden;
   box-sizing: border-box;
-  transition: border-color var(--transition-fast),
-              box-shadow var(--transition-fast),
-              opacity 300ms ease-in-out;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    opacity 300ms ease-in-out;
 }
 
 /* Back face = same card surface, NO border (Figma 427-2144). */
@@ -435,7 +448,8 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .quiz-card--flow:not(.quiz-card--answered):not(.quiz-card--title):hover .quiz-card__face {
+  .quiz-card--flow:not(.quiz-card--answered):not(.quiz-card--title):hover
+    .quiz-card__face {
     box-shadow: 0 24px 36px -10px rgba(0, 0, 0, 0.28);
   }
 }
@@ -537,7 +551,9 @@
   text-align: center;
   transition: opacity 0.25s ease;
 }
-.quiz-card .quiz-answer-area__label.is-hidden { opacity: 0; }
+.quiz-card .quiz-answer-area__label.is-hidden {
+  opacity: 0;
+}
 
 .quiz-answer-grid {
   display: grid;
@@ -571,25 +587,59 @@
     transform 0.12s var(--ease-card),
     filter 0.15s ease;
 }
-.quiz-answer-btn--falsch       { background: var(--quiz-ans-falsch); }
-.quiz-answer-btn--eher_falsch  { background: var(--quiz-ans-eher-falsch); }
-.quiz-answer-btn--eher_richtig { background: var(--quiz-ans-eher-richtig); }
-.quiz-answer-btn--richtig      { background: var(--quiz-ans-richtig); }
+.quiz-answer-btn--falsch {
+  background: var(--quiz-ans-falsch);
+}
+.quiz-answer-btn--eher_falsch {
+  background: var(--quiz-ans-eher-falsch);
+}
+.quiz-answer-btn--eher_richtig {
+  background: var(--quiz-ans-eher-richtig);
+}
+.quiz-answer-btn--richtig {
+  background: var(--quiz-ans-richtig);
+}
 
-.quiz-answer-btn:not(:disabled):hover  { transform: scale(1.08); filter: brightness(1.05); }
-.quiz-answer-btn:not(:disabled):active { transform: scale(0.93); filter: brightness(0.97); }
-.quiz-answer-btn:focus-visible { outline: 2px solid #116c4a; outline-offset: 2px; z-index: 1; }
-.quiz-answer-btn:disabled { cursor: default; }
+.quiz-answer-btn:not(:disabled):hover {
+  transform: scale(1.08);
+  filter: brightness(1.05);
+}
+.quiz-answer-btn:not(:disabled):active {
+  transform: scale(0.93);
+  filter: brightness(0.97);
+}
+.quiz-answer-btn:focus-visible {
+  outline: 2px solid #116c4a;
+  outline-offset: 2px;
+  z-index: 1;
+}
+.quiz-answer-btn:disabled {
+  cursor: default;
+}
 
-.quiz-answer-btn__icon { display: flex; align-items: center; justify-content: center; }
-.quiz-answer-btn__icon svg { display: block; }
+.quiz-answer-btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.quiz-answer-btn__icon svg {
+  display: block;
+}
 
 /* Post-answer button borders: selected (solid, by tier) + the correct
    answer (dashed green) when the user didn't pick it. */
-.quiz-answer-btn.is-sel-correct { border-color: var(--quiz-btn-correct); }
-.quiz-answer-btn.is-sel-near    { border-color: var(--quiz-btn-near); }
-.quiz-answer-btn.is-sel-wrong   { border-color: var(--quiz-btn-wrong); }
-.quiz-answer-btn.is-correct-answer { border: 3px dashed var(--quiz-btn-corr-ans); }
+.quiz-answer-btn.is-sel-correct {
+  border-color: var(--quiz-btn-correct);
+}
+.quiz-answer-btn.is-sel-near {
+  border-color: var(--quiz-btn-near);
+}
+.quiz-answer-btn.is-sel-wrong {
+  border-color: var(--quiz-btn-wrong);
+}
+.quiz-answer-btn.is-correct-answer {
+  border: 3px dashed var(--quiz-btn-corr-ans);
+}
 
 /* Answer labels (grid row 2). Minimum 9px so text is actually readable
    under the ~74px buttons. Two-word labels stay at 8.5px to fit the
@@ -642,22 +692,50 @@
    strip under the progress bar.) */
 
 /* Tier colours (icon + phrase share the tier colour). */
-.quiz-card__feedback-icon--exact { color: var(--quiz-fb-exact); }
-.quiz-card__feedback-icon--near  { color: var(--quiz-fb-near); }
-.quiz-card__feedback-icon--off   { color: var(--quiz-fb-off); }
-.quiz-card__feedback-icon--far   { color: var(--quiz-fb-far); }
-.quiz-card__feedback-line--exact { color: var(--quiz-fb-exact); }
-.quiz-card__feedback-line--near  { color: var(--quiz-fb-near); }
-.quiz-card__feedback-line--off   { color: var(--quiz-fb-off); }
-.quiz-card__feedback-line--far   { color: var(--quiz-fb-far); }
+.quiz-card__feedback-icon--exact {
+  color: var(--quiz-fb-exact);
+}
+.quiz-card__feedback-icon--near {
+  color: var(--quiz-fb-near);
+}
+.quiz-card__feedback-icon--off {
+  color: var(--quiz-fb-off);
+}
+.quiz-card__feedback-icon--far {
+  color: var(--quiz-fb-far);
+}
+.quiz-card__feedback-line--exact {
+  color: var(--quiz-fb-exact);
+}
+.quiz-card__feedback-line--near {
+  color: var(--quiz-fb-near);
+}
+.quiz-card__feedback-line--off {
+  color: var(--quiz-fb-off);
+}
+.quiz-card__feedback-line--far {
+  color: var(--quiz-fb-far);
+}
 
 @keyframes quiz-fb-pop {
-  from { opacity: 0; transform: scale(0.6); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes quiz-fb-rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Stage 5 (2026-05-29) — floating 👍 reactions (near answers). Appended to
@@ -673,7 +751,9 @@
   will-change: transform, opacity;
 }
 @media (prefers-reduced-motion: reduce) {
-  .quiz-fx-emoji { display: none; }
+  .quiz-fx-emoji {
+    display: none;
+  }
 }
 
 /* ── Back face: verdict pill under the statement ── */
@@ -694,10 +774,18 @@
 /* Back-face statement tinted by the scientific verdict (Figma 427-2144).
    Explicit colour with enough specificity to beat the base front-statement
    green; underscore form matches `statement--${myth.correctClassification}`. */
-.quiz-card--flow .quiz-card__statement--back.statement--richtig { color: var(--quiz-back-richtig); }
-.quiz-card--flow .quiz-card__statement--back.statement--eher_richtig { color: var(--quiz-back-eher-richtig); }
-.quiz-card--flow .quiz-card__statement--back.statement--eher_falsch { color: var(--quiz-back-eher-falsch); }
-.quiz-card--flow .quiz-card__statement--back.statement--falsch { color: var(--quiz-back-falsch); }
+.quiz-card--flow .quiz-card__statement--back.statement--richtig {
+  color: var(--quiz-back-richtig);
+}
+.quiz-card--flow .quiz-card__statement--back.statement--eher_richtig {
+  color: var(--quiz-back-eher-richtig);
+}
+.quiz-card--flow .quiz-card__statement--back.statement--eher_falsch {
+  color: var(--quiz-back-eher-falsch);
+}
+.quiz-card--flow .quiz-card__statement--back.statement--falsch {
+  color: var(--quiz-back-falsch);
+}
 
 /* Back-face action buttons (Figma 427-2144) — flow-card overrides of the
    shared .quiz-card__more-btn / __next-btn so the Lucide icons align and
@@ -724,12 +812,16 @@
 /* Reduced motion: drop the celebration animations. */
 @media (prefers-reduced-motion: reduce) {
   .quiz-card__feedback-icon,
-  .quiz-card__feedback-line { animation: none; }
+  .quiz-card__feedback-line {
+    animation: none;
+  }
 }
 
 /* Fixed-size card: keep the verified feedback typography on mobile too. */
 @media (max-width: 640px) {
-  .quiz-card__feedback-phrase { font-size: 16px; }
+  .quiz-card__feedback-phrase {
+    font-size: 16px;
+  }
 }
 
 /* Chip pair: "Deine Antwort: [chip] · Wissenschaftlich: [chip]" on one
@@ -1103,8 +1195,13 @@
   -webkit-line-clamp: unset;
   -webkit-box-orient: unset;
   /* Soft mask-fade at the bottom hints at scrollable overflow. */
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 90%, transparent 100%);
-          mask-image: linear-gradient(180deg, #000 0%, #000 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 90%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(180deg, #000 0%, #000 90%, transparent 100%);
   /* Reset margin set by legacy rules. */
   margin: 0;
 }
@@ -1199,7 +1296,11 @@
 
 .quiz-card__pop-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--quiz-accent, var(--color-accent)) 0%, var(--color-accent) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--quiz-accent, var(--color-accent)) 0%,
+    var(--color-accent) 100%
+  );
   border-radius: var(--radius-full);
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1574,7 +1675,6 @@
   border: 0;
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    3D Card Flip — perspective on cell, rotateY on inner,
    backface-visibility on both faces.
@@ -1628,28 +1728,24 @@
      pointer events so the swipe hook's pointerdown/move/up handlers fire
      instead of the browser cancelling the gesture with pointercancel. */
   touch-action: pan-y;
-  transform:
-    rotate(var(--card-tilt, 0deg))
-    translateX(var(--swipe-x, 0))
+  transform: rotate(var(--card-tilt, 0deg)) translateX(var(--swipe-x, 0))
     rotate(var(--swipe-rot, 0deg));
-  transition: transform var(--dur-slide) var(--ease-card),
-              box-shadow var(--dur-slide) var(--ease-card),
-              opacity var(--dur-slide) var(--ease-card);
+  transition:
+    transform var(--dur-slide) var(--ease-card),
+    box-shadow var(--dur-slide) var(--ease-card),
+    opacity var(--dur-slide) var(--ease-card);
 }
 
 /* Slide-out + fade when the title card dismisses or a card commits a swipe. */
 .quiz-card--flow.quiz-card--leaving {
   opacity: 0;
-  transform:
-    rotate(var(--card-tilt, 0deg))
-    translateY(-24px);
+  transform: rotate(var(--card-tilt, 0deg)) translateY(-24px);
 }
 
 /* Hover lift only on fine pointers and only before answering. */
 @media (hover: hover) and (pointer: fine) {
   .quiz-card--flow:not(.quiz-card--answered):not(.quiz-card--title):hover {
-    transform:
-      rotate(var(--card-tilt, 0deg))
+    transform: rotate(var(--card-tilt, 0deg))
       translateY(calc(var(--lift-md) * -1));
   }
 }
@@ -1728,7 +1824,6 @@
    file). The old Stage-3 neutral-gray override that lived here actively
    fought that tint (higher specificity), so it was removed. */
 
-
 /* ── Card Content ─────────────────────────────────────────────── */
 
 .quiz-card__number {
@@ -1766,7 +1861,6 @@
   flex-direction: column;
   gap: 2px;
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    Answer Buttons — hidden by default, revealed on hover / tap.
@@ -1857,7 +1951,6 @@
   color: var(--classification-richtig);
 }
 
-
 /* ── Card Back: Result Details ─────────────────────────────────── */
 
 .quiz-card__result-header {
@@ -1945,7 +2038,6 @@
   color: var(--color-surface);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    Classification badges (shared with factsheets)
    ═══════════════════════════════════════════════════════════════ */
@@ -1983,7 +2075,6 @@
   color: var(--classification-falsch);
   border-left: 3px double var(--classification-falsch);
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    Full-Screen Result Modal
@@ -2044,10 +2135,18 @@
   gap: 2px;
 }
 
-.quiz-modal__ring--tier0 { border-color: var(--classification-eher-falsch); }
-.quiz-modal__ring--tier1 { border-color: var(--classification-eher-richtig); }
-.quiz-modal__ring--tier2 { border-color: var(--classification-richtig); }
-.quiz-modal__ring--tier3 { border-color: var(--color-accent); }
+.quiz-modal__ring--tier0 {
+  border-color: var(--classification-eher-falsch);
+}
+.quiz-modal__ring--tier1 {
+  border-color: var(--classification-eher-richtig);
+}
+.quiz-modal__ring--tier2 {
+  border-color: var(--classification-richtig);
+}
+.quiz-modal__ring--tier3 {
+  border-color: var(--color-accent);
+}
 
 .quiz-modal__score-number {
   font-size: 3rem;
@@ -2220,7 +2319,6 @@
   text-decoration: underline;
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    Inline Result Screen
    ═══════════════════════════════════════════════════════════════ */
@@ -2239,7 +2337,9 @@
      scrolls to viewport y=0 — behind the fixed sticky header — and
      the user lands inside the wrong-myths grid instead of seeing
      the consolidated ShareCard hero. */
-  scroll-margin-top: calc(var(--header-height, var(--nav-height)) + var(--space-md));
+  scroll-margin-top: calc(
+    var(--header-height, var(--nav-height)) + var(--space-md)
+  );
 }
 
 .quiz-result__header {
@@ -2813,10 +2913,18 @@ button.quiz-result__cta {
   box-shadow: 0 22px 44px -18px rgba(2, 44, 34, 0.45);
   overflow: hidden;
 }
-.share-card--profi    .share-card__visual { background: linear-gradient(140deg, #065f46 0%, #047857 48%, #0e7490 100%); }
-.share-card--guterweg .share-card__visual { background: linear-gradient(140deg, #166534 0%, #16a34a 50%, #4d7c0f 100%); }
-.share-card--gehtnoch .share-card__visual { background: linear-gradient(140deg, #0f766e 0%, #0e7490 50%, #0369a1 100%); }
-.share-card--erwischt .share-card__visual { background: linear-gradient(140deg, #1f6f5c 0%, #2d6a4f 50%, #3f6212 100%); }
+.share-card--profi .share-card__visual {
+  background: linear-gradient(140deg, #065f46 0%, #047857 48%, #0e7490 100%);
+}
+.share-card--guterweg .share-card__visual {
+  background: linear-gradient(140deg, #166534 0%, #16a34a 50%, #4d7c0f 100%);
+}
+.share-card--gehtnoch .share-card__visual {
+  background: linear-gradient(140deg, #0f766e 0%, #0e7490 50%, #0369a1 100%);
+}
+.share-card--erwischt .share-card__visual {
+  background: linear-gradient(140deg, #1f6f5c 0%, #2d6a4f 50%, #3f6212 100%);
+}
 
 /* 2026-05-30 (Fedor) — module-name eyebrow. Names the quiz inside the
    verdict card now that the top "Dein Ergebnis — [Modul]" heading is
@@ -2950,7 +3058,6 @@ button.quiz-result__cta {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    Factsheet Panel — slide-in from right (desktop) / bottom (mobile)
    ═══════════════════════════════════════════════════════════════ */
@@ -3029,7 +3136,9 @@ button.quiz-result__cta {
   cursor: pointer;
   padding: 0;
   border-radius: var(--radius-sm);
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
   z-index: 1;
 }
 
@@ -3274,13 +3383,21 @@ button.quiz-result__cta {
 }
 
 @keyframes factsheetFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes factsheetSlideInRight {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* Mobile / small-tablet: bottom sheet style. Breakpoint raised 640→700px
@@ -3310,8 +3427,12 @@ button.quiz-result__cta {
   }
 
   @keyframes factsheetSlideInBottom {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
 }
 
@@ -3324,7 +3445,6 @@ button.quiz-result__cta {
     animation: none;
   }
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    Animations
@@ -3342,8 +3462,12 @@ button.quiz-result__cta {
 }
 
 @keyframes quizModalFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes quizModalSlideUp {
@@ -3356,7 +3480,6 @@ button.quiz-result__cta {
     transform: translateY(0);
   }
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    Accessibility: reduced motion
@@ -3389,7 +3512,6 @@ button.quiz-result__cta {
     transform: rotate(var(--card-tilt, 0deg)) !important;
   }
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    Responsive
@@ -3497,7 +3619,6 @@ button.quiz-result__cta {
   }
 }
 
-
 /* ── Page-width match: quiz index + fakten-karten aligned to nav pill ─
    Nav pill effective width = nav-wrapper max-width (1200px) − 2×32px padding = 1136px.
    Setting main to the same max-width makes page content edges flush with the pill. */
@@ -3534,7 +3655,7 @@ body.fakten-karten-page main {
 
 .quiz-index__category-label {
   margin: 0 0 32px;
-  color: rgba(64, 73, 67, 0.60);
+  color: rgba(64, 73, 67, 0.6);
   font-family: var(--font-display);
   font-size: 10px;
   font-style: normal;
@@ -3574,7 +3695,9 @@ body.fakten-karten-page main {
   text-decoration: none;
   background: var(--card-bg, #047857);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition:
+    transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
 }
 
@@ -3663,10 +3786,18 @@ body.fakten-karten-page main {
 }
 
 @keyframes card-icon-pop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.05); }
-  70%  { transform: scale(0.94); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .quiz-select-card__title {
@@ -3877,7 +4008,6 @@ body.fakten-karten-page main {
   }
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    Fakten-Karten — editorial card grid (2026-05-14 redesign).
 
@@ -3932,7 +4062,7 @@ body.fakten-karten-page main {
      bit instead of a flat solid white (Fedor 2026-06-14). */
   background: rgba(255, 255, 255, 0.6);
   -webkit-backdrop-filter: blur(6px);
-          backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   border: none;
   /* Hard 16px to match the Daten-Explorer panel. NOT `var(--radius-lg)`:
      that token is 12px globally (only overridden to 16px inside
@@ -4236,7 +4366,7 @@ body.fakten-karten-page main {
    so the bright shift overrides the darkening when the cursor lands on the button. */
 .fakten-card:hover .fakten-card__cta:hover {
   background: color-mix(in srgb, var(--color-accent) 68%, white);
-  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.20);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.2);
 }
 
 /* In Nur-Fakten-Seite mode the card is already on face 2 — card hover
@@ -4244,7 +4374,7 @@ body.fakten-karten-page main {
    the light-green + glow treatment. */
 .fakten-card--active:hover .fakten-card__cta {
   background: color-mix(in srgb, var(--color-accent) 68%, white);
-  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.20);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.2);
 }
 
 /* Active / press: snap to darker green, compress shadow. */
@@ -4373,7 +4503,7 @@ body.fakten-karten-page main {
   font-family: var(--font-display);
   font-size: 10px;
   font-weight: 900;
-  color: rgba(64, 73, 67, 0.60);
+  color: rgba(64, 73, 67, 0.6);
   letter-spacing: 4px;
   line-height: 15px;
   text-transform: uppercase;
@@ -4410,7 +4540,7 @@ body.fakten-karten-page main {
   border-radius: 8px;
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   -webkit-backdrop-filter: blur(6px);
-          backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   transition:
     background var(--transition-fast),
     border-color var(--transition-fast);
@@ -4427,7 +4557,8 @@ body.fakten-karten-page main {
 .fakten-filter-bar .carm-filter-search-row:focus-within {
   background: rgba(255, 255, 255, 0.95);
   border-color: var(--color-accent, #116c4a);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent, #116c4a) 25%, transparent);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--color-accent, #116c4a) 25%, transparent);
 }
 
 /* Magnifier: absolutely centred on the right edge of the glass row
@@ -4540,7 +4671,7 @@ body.fakten-karten-page main {
   border: 1px solid #dddddd;
   background: rgba(255, 255, 255, 0.6);
   -webkit-backdrop-filter: blur(6px);
-          backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   font-size: 0.85rem;
@@ -4605,15 +4736,21 @@ body.fakten-karten-page main {
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
   -webkit-backdrop-filter: blur(6px);
-          backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   padding: 4px;
   animation: fakten-search-fade-in 140ms ease-out;
 }
 
 @keyframes fakten-search-fade-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fakten-search__hint {
@@ -4767,7 +4904,7 @@ body.fakten-karten-page main {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.6);
   -webkit-backdrop-filter: blur(6px);
-          backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   font-family: inherit;
   font-size: 14px;
@@ -4833,7 +4970,9 @@ body.fakten-karten-page main {
   background: transparent;
   color: var(--color-text-muted, #94a3b8);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .fakten-filter-dropdown__clear:hover {
@@ -4869,8 +5008,14 @@ body.fakten-karten-page main {
 }
 
 @keyframes fakten-filter-dropdown-fade-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fakten-filter-dropdown__list {
@@ -5037,7 +5182,9 @@ body.fakten-karten-page main {
 /* ── Card filter animation ───────────────────────────────────── */
 
 .fakten-grid .quiz-card__cell {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .fakten-grid .quiz-card__cell--hidden {
@@ -5053,7 +5200,6 @@ body.fakten-karten-page main {
    2026-05-14 redesign — the new `.fakten-card` (a plain <button>) owns
    its own hover state above. Kept this comment as a breadcrumb for
    anyone hunting BugHerd #45 in the file history. */
-
 
 /* ═══════════════════════════════════════════════════════════════
    Phase C — Deck overview, swipe edges, shortcut help.
@@ -5074,8 +5220,12 @@ body.fakten-karten-page main {
 }
 
 @keyframes deckOverviewFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .deck-overview__panel {
@@ -5091,8 +5241,14 @@ body.fakten-karten-page main {
 }
 
 @keyframes deckOverviewSlideUp {
-  from { transform: translateY(20%); opacity: 0; }
-  to   { transform: translateY(0);   opacity: 1; }
+  from {
+    transform: translateY(20%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .deck-overview__header {
@@ -5120,7 +5276,9 @@ body.fakten-karten-page main {
   cursor: pointer;
   padding: 4px 10px;
   border-radius: var(--radius-sm);
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .deck-overview__close:hover {
@@ -5465,8 +5623,12 @@ body.fakten-karten-page main {
 }
 
 @keyframes confidenceSlideUp {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -5545,7 +5707,6 @@ body.fakten-karten-page main {
   color: var(--color-surface);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    Verdict-arrow info popover
    Un-scoped duplicates of the .info-tooltip-card rules that live
@@ -5571,8 +5732,9 @@ body.fakten-karten-page main {
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--transition-fast),
-              visibility 0s linear var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    visibility 0s linear var(--transition-fast);
 }
 
 .info-tooltip-card--fixed {
@@ -5583,8 +5745,9 @@ body.fakten-karten-page main {
   pointer-events: auto;
   opacity: 1;
   visibility: visible;
-  transition: opacity var(--transition-fast),
-              visibility 0s linear 0s;
+  transition:
+    opacity var(--transition-fast),
+    visibility 0s linear 0s;
 }
 
 .info-tooltip-title {
@@ -5605,7 +5768,6 @@ body.fakten-karten-page main {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    Verdict-arrow trigger button — used outside the dashboard.
@@ -5641,7 +5803,6 @@ body.fakten-karten-page main {
   background: rgba(0, 0, 0, 0.04);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    Verdict row polish (shared FactsheetPanel)
    The verdict row now slots a hover-info arrow (<VerdictArrowWithInfo>)
@@ -5659,7 +5820,6 @@ body.fakten-karten-page main {
   font-size: 0.85rem;
   padding: 0.3em 0.75em;
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    FactsheetGroupBars — interactive 2-tab strip (radar + table) that
@@ -5781,8 +5941,9 @@ body.fakten-karten-page main {
   line-height: 1;
   padding: 2px 6px;
   border-radius: var(--radius-sm, 4px);
-  transition: background var(--transition-fast, 150ms ease),
-              color var(--transition-fast, 150ms ease);
+  transition:
+    background var(--transition-fast, 150ms ease),
+    color var(--transition-fast, 150ms ease);
 }
 
 .factsheet-group-bars__corner-btn:hover {
@@ -5851,8 +6012,9 @@ body.fakten-karten-page main {
   font-size: 0.7rem;
   padding: 4px 2px;
   border-radius: var(--radius-sm, 4px);
-  transition: background var(--transition-fast, 150ms ease),
-              color var(--transition-fast, 150ms ease);
+  transition:
+    background var(--transition-fast, 150ms ease),
+    color var(--transition-fast, 150ms ease);
   width: 100%;
 }
 
@@ -6071,8 +6233,9 @@ body.fakten-karten-page main {
   font-size: 0.82rem;
   line-height: 1.35;
   cursor: pointer;
-  transition: background var(--transition-fast, 150ms ease),
-              border-color var(--transition-fast, 150ms ease);
+  transition:
+    background var(--transition-fast, 150ms ease),
+    border-color var(--transition-fast, 150ms ease);
 }
 
 .factsheet-panel__extras-link:hover,

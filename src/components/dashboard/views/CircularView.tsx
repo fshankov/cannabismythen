@@ -1,7 +1,12 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import * as d3 from 'd3';
-import type { Myth, Metric, AppState, Group } from '../../../lib/dashboard/types';
-import { getMythMetric, getMythShortText } from '../../../lib/dashboard/data';
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import * as d3 from "d3";
+import type {
+  Myth,
+  Metric,
+  AppState,
+  Group,
+} from "../../../lib/dashboard/types";
+import { getMythMetric, getMythShortText } from "../../../lib/dashboard/data";
 
 /* ── Indicator config ──────────────────────────────────────────── */
 
@@ -10,28 +15,30 @@ import { getMythMetric, getMythShortText } from '../../../lib/dashboard/data';
  * Bev. Relevanz (population_relevance) is a population-level metric and
  * intentionally not displayed as a segment here.
  */
-type CircularIndicator = 'awareness' | 'significance' | 'correctness' | 'prevention_significance';
+type CircularIndicator =
+  "awareness" | "significance" | "correctness" | "prevention_significance";
 
 const INDICATORS: CircularIndicator[] = [
-  'awareness',
-  'significance',
-  'correctness',
-  'prevention_significance',
+  "awareness",
+  "significance",
+  "correctness",
+  "prevention_significance",
 ];
 
 const INDICATOR_COLORS: Record<CircularIndicator, string> = {
-  awareness: '#3B82F6',             // Blue-500
-  significance: '#2d6a4f',          // Forest Green (site accent)
-  correctness: '#D97706',           // Amber-600
-  prevention_significance: '#8B5CF6', // Violet-500
+  awareness: "#3B82F6", // Blue-500
+  significance: "#2d6a4f", // Forest Green (site accent)
+  correctness: "#D97706", // Amber-600
+  prevention_significance: "#8B5CF6", // Violet-500
 };
 
-const INDICATOR_LABELS: Record<CircularIndicator, { de: string; en: string }> = {
-  awareness:                { de: 'Kenntnis',    en: 'Awareness' },
-  significance:             { de: 'Bedeutung',   en: 'Significance' },
-  correctness:              { de: 'Richtigkeit', en: 'Correctness' },
-  prevention_significance:  { de: 'Prävention',  en: 'Prevention' },
-};
+const INDICATOR_LABELS: Record<CircularIndicator, { de: string; en: string }> =
+  {
+    awareness: { de: "Kenntnis", en: "Awareness" },
+    significance: { de: "Bedeutung", en: "Significance" },
+    correctness: { de: "Richtigkeit", en: "Correctness" },
+    prevention_significance: { de: "Prävention", en: "Prevention" },
+  };
 
 /* ── 8-category mapping (user-specified order) ─────────────────── */
 
@@ -42,51 +49,51 @@ const INDICATOR_LABELS: Record<CircularIndicator, { de: string; en: string }> = 
 //   m33 (Kreativ)        → Soziale Auswirkungen     (was Stimmung & Wahrnehmung)
 const CIRCULAR_CATEGORIES = [
   {
-    name_de: 'Medizinischer Nutzen',
-    name_en: 'Medical Benefits',
-    color: '#D97706',
+    name_de: "Medizinischer Nutzen",
+    name_en: "Medical Benefits",
+    color: "#D97706",
     mythIds: [10, 12, 13, 18, 25, 26, 27, 17, 1],
   },
   {
-    name_de: 'Körper & Entwicklung',
-    name_en: 'Body & Development',
-    color: '#DC2626',
+    name_de: "Körper & Entwicklung",
+    name_en: "Body & Development",
+    color: "#DC2626",
     mythIds: [8, 14, 15, 16, 11],
   },
   {
-    name_de: 'Psychische Gesundheit',
-    name_en: 'Mental Health',
-    color: '#2563EB',
+    name_de: "Psychische Gesundheit",
+    name_en: "Mental Health",
+    color: "#2563EB",
     mythIds: [24, 20, 28, 30, 23, 22],
   },
   {
-    name_de: 'Stimmung & Wahrnehmung',
-    name_en: 'Mood & Perception',
-    color: '#9333EA',
+    name_de: "Stimmung & Wahrnehmung",
+    name_en: "Mood & Perception",
+    color: "#9333EA",
     mythIds: [31, 29, 19, 32],
   },
   {
-    name_de: 'Soziale Auswirkungen',
-    name_en: 'Social Impact',
-    color: '#0891B2',
+    name_de: "Soziale Auswirkungen",
+    name_en: "Social Impact",
+    color: "#0891B2",
     mythIds: [21, 33, 34, 36, 37, 35, 38],
   },
   {
-    name_de: 'Dosierung & Qualität',
-    name_en: 'Dosing & Quality',
-    color: '#6B7280',
+    name_de: "Dosierung & Qualität",
+    name_en: "Dosing & Quality",
+    color: "#6B7280",
     mythIds: [5, 6, 7, 9],
   },
   {
-    name_de: 'Verbreitung & Gesetzgebung',
-    name_en: 'Prevalence & Legislation',
-    color: '#4F46E5',
+    name_de: "Verbreitung & Gesetzgebung",
+    name_en: "Prevalence & Legislation",
+    color: "#4F46E5",
     mythIds: [39, 40, 41, 42],
   },
   {
-    name_de: 'Allgemeine Gefährlichkeit',
-    name_en: 'General Risk Assessment',
-    color: '#be123c',
+    name_de: "Allgemeine Gefährlichkeit",
+    name_en: "General Risk Assessment",
+    color: "#be123c",
     mythIds: [4, 2, 3],
   },
 ];
@@ -118,7 +125,7 @@ export default function CircularView({
   groups,
   onSelectMyth,
 }: Props) {
-  const selectedGroup = state.groupIds[0] || 'adults';
+  const selectedGroup = state.groupIds[0] || "adults";
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -142,7 +149,7 @@ export default function CircularView({
   const innerRadius = size * 0.12;
   const outerRadius = size / 2 - LABEL_MARGIN;
   const CATEGORY_GAP = 0.07; // radians between categories
-  const BAR_PAD = 0.22;      // fraction of bar slot used as padding
+  const BAR_PAD = 0.22; // fraction of bar slot used as padding
 
   /* ── Build ordered myth data ──────────────────────────────────── */
   const data = useMemo((): MythDatum[] => {
@@ -184,7 +191,8 @@ export default function CircularView({
 
   /* ── Geometry: arcs + category arcs ────────────────────────── */
   const { barArcs, catArcs } = useMemo(() => {
-    if (!data.length) return { barArcs: [] as BarArc[], catArcs: [] as CatArc[] };
+    if (!data.length)
+      return { barArcs: [] as BarArc[], catArcs: [] as CatArc[] };
 
     const numCats = new Set(data.map((d) => d.categoryIdx)).size;
     const totalGap = CATEGORY_GAP * numCats;
@@ -218,7 +226,8 @@ export default function CircularView({
       const midAngle = (startAngle + endAngle) / 2;
 
       let cum = 0;
-      const segments: Array<{ indicator: CircularIndicator; path: string }> = [];
+      const segments: Array<{ indicator: CircularIndicator; path: string }> =
+        [];
       for (const ind of INDICATORS) {
         const val = d.values[ind];
         if (val <= 0) continue;
@@ -278,7 +287,7 @@ export default function CircularView({
   const groupLabel =
     groups.find((g) => g.id === selectedGroup)?.name_de ?? selectedGroup;
 
-  const lang = state.lang || 'de';
+  const lang = state.lang || "de";
 
   /* ── Render ─────────────────────────────────────────────────── */
   return (
@@ -286,12 +295,12 @@ export default function CircularView({
       className="circular-view"
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      style={{ position: 'relative' }}
+      style={{ position: "relative" }}
     >
       <svg
         width={size}
         height={size}
-        style={{ display: 'block', margin: '0 auto' }}
+        style={{ display: "block", margin: "0 auto" }}
       >
         <g transform={`translate(${size / 2}, ${size / 2})`}>
           {/* Category ring (inner colored arcs) */}
@@ -304,7 +313,7 @@ export default function CircularView({
                   outerRadius: innerRadius - 3,
                   startAngle: cat.startAngle,
                   endAngle: cat.endAngle,
-                }) || ''
+                }) || ""
               }
               fill={cat.color}
               opacity={0.55}
@@ -346,7 +355,7 @@ export default function CircularView({
                 startOffset="50%"
                 textAnchor="middle"
               >
-                {lang === 'de' ? cat.name_de : cat.name_en}
+                {lang === "de" ? cat.name_de : cat.name_en}
               </textPath>
             </text>
           ))}
@@ -355,7 +364,7 @@ export default function CircularView({
           {barArcs.map((bar, i) => (
             <g
               key={`bar-${i}`}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
               onMouseEnter={() => setHoveredIdx(i)}
               onMouseLeave={() => setHoveredIdx(null)}
               onClick={() => onSelectMyth(data[i].myth.id)}
@@ -378,29 +387,28 @@ export default function CircularView({
           {barArcs.map((bar, i) => {
             const angle = bar.midAngle;
             const rotation = (angle * 180) / Math.PI - 90;
-            const flip =
-              (angle + Math.PI) % (2 * Math.PI) < Math.PI;
+            const flip = (angle + Math.PI) % (2 * Math.PI) < Math.PI;
             const rawText = getMythShortText(data[i].myth, lang);
             const maxLen = size > 600 ? 22 : 15;
             const label =
               rawText.length > maxLen
-                ? rawText.substring(0, maxLen - 2) + '…'
+                ? rawText.substring(0, maxLen - 2) + "…"
                 : rawText;
 
             return (
               <g
                 key={`lbl-${i}`}
                 transform={`rotate(${rotation}) translate(${bar.labelRadius}, 0)`}
-                style={{ pointerEvents: 'none' }}
+                style={{ pointerEvents: "none" }}
               >
                 <text
-                  textAnchor={flip ? 'end' : 'start'}
+                  textAnchor={flip ? "end" : "start"}
                   dominantBaseline="central"
                   fontSize={size > 600 ? 9.5 : 7}
-                  fill={hoveredIdx === i ? '#1e293b' : '#4a5568'}
+                  fill={hoveredIdx === i ? "#1e293b" : "#4a5568"}
                   fontWeight={hoveredIdx === i ? 700 : 400}
                   fontFamily="'Inter Variable', Inter, sans-serif"
-                  transform={flip ? 'rotate(180)' : ''}
+                  transform={flip ? "rotate(180)" : ""}
                 >
                   {label}
                 </text>
@@ -418,7 +426,7 @@ export default function CircularView({
               y={-40}
               fontFamily="'Inter Variable', Inter, sans-serif"
             >
-              {lang === 'de' ? 'Indikatoren' : 'Indicators'}
+              {lang === "de" ? "Indikatoren" : "Indicators"}
             </text>
             {INDICATORS.map((ind, i) => {
               const y = -20 + i * 19;
@@ -465,8 +473,8 @@ export default function CircularView({
             // BugHerd #31 — round-to-int site-wide.
             const val =
               raw === null
-                ? 'k. A.'
-                : ind === 'awareness'
+                ? "k. A."
+                : ind === "awareness"
                   ? `${Math.round(raw)}%`
                   : String(Math.round(raw));
             return (

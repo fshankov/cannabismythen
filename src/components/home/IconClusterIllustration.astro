@@ -47,45 +47,54 @@ const ICONS = [
 const GLYPH = 58; // icon box, centred on each satellite circle
 ---
 
-<div class="icon-cluster" style={`width:${size}px;max-width:100%;`} aria-hidden="true" data-loader-mode={loaderMode ? '' : undefined}>
+<div
+  class="icon-cluster"
+  style={`width:${size}px;max-width:100%;`}
+  aria-hidden="true"
+  data-loader-mode={loaderMode ? "" : undefined}
+>
   <div class="icon-cluster__tilt">
     <svg viewBox="0 0 660 580" fill="none" role="img" aria-label="Icon-Cluster">
       {/* dotted hexagon connectors (under the circles, only the gaps show) */}
-      {POS.map((p, i) => {
-        const q = POS[(i + 1) % POS.length];
-        return (
-          <line
-            class="icon-cluster__link"
-            x1={p.x}
-            y1={p.y}
-            x2={q.x}
-            y2={q.y}
-            stroke="#979da4"
-            stroke-width="2.4"
-            stroke-dasharray="0.1 8"
-            stroke-linecap="round"
-          />
-        );
-      })}
+      {
+        POS.map((p, i) => {
+          const q = POS[(i + 1) % POS.length];
+          return (
+            <line
+              class="icon-cluster__link"
+              x1={p.x}
+              y1={p.y}
+              x2={q.x}
+              y2={q.y}
+              stroke="#979da4"
+              stroke-width="2.4"
+              stroke-dasharray="0.1 8"
+              stroke-linecap="round"
+            />
+          );
+        })
+      }
       {/* satellite circles + facet icons */}
-      {POS.map((p, i) => (
-        <g class="icon-cluster__node" style={`--i:${i}`}>
-          <circle cx={p.x} cy={p.y} r={RO} fill="#e8e8e0" />
-          <svg
-            x={p.x - GLYPH / 2}
-            y={p.y - GLYPH / 2}
-            width={GLYPH}
-            height={GLYPH}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#2c333d"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            set:html={ICONS[i]}
-          />
-        </g>
-      ))}
+      {
+        POS.map((p, i) => (
+          <g class="icon-cluster__node" style={`--i:${i}`}>
+            <circle cx={p.x} cy={p.y} r={RO} fill="#e8e8e0" />
+            <svg
+              x={p.x - GLYPH / 2}
+              y={p.y - GLYPH / 2}
+              width={GLYPH}
+              height={GLYPH}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#2c333d"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              set:html={ICONS[i]}
+            />
+          </g>
+        ))
+      }
     </svg>
   </div>
 </div>
@@ -159,16 +168,31 @@ const GLYPH = 58; // icon box, centred on each satellite circle
     }
   }
   @keyframes cluster-node-in {
-    from { opacity: 0; transform: scale(0.3); }
-    to   { opacity: 1; transform: scale(1);   }
+    from {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
   @keyframes cluster-link-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
   @keyframes cluster-breathe {
-    0%, 100% { transform: scale(1);    }
-    50%       { transform: scale(1.05); }
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
   }
 </style>
 
@@ -178,61 +202,63 @@ const GLYPH = 58; // icon box, centred on each satellite circle
   // nearest <section> (the design's "same block" rule), and pauses offscreen.
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!reduce) {
-    document.querySelectorAll<HTMLElement>(".icon-cluster").forEach((cluster) => {
-      const tilt = cluster.querySelector<HTMLElement>(".icon-cluster__tilt");
-      if (!tilt) return;
-      const block = cluster.closest("section") ?? cluster;
-      const MAX = 8; // peak tilt in degrees
-      const cur = { rx: 0, ry: 0, tx: 0, ty: 0 };
-      const tgt = { rx: 0, ry: 0, tx: 0, ty: 0 };
-      const start = performance.now();
+    document
+      .querySelectorAll<HTMLElement>(".icon-cluster")
+      .forEach((cluster) => {
+        const tilt = cluster.querySelector<HTMLElement>(".icon-cluster__tilt");
+        if (!tilt) return;
+        const block = cluster.closest("section") ?? cluster;
+        const MAX = 8; // peak tilt in degrees
+        const cur = { rx: 0, ry: 0, tx: 0, ty: 0 };
+        const tgt = { rx: 0, ry: 0, tx: 0, ty: 0 };
+        const start = performance.now();
 
-      const onMove = (e: PointerEvent) => {
-        const r = block.getBoundingClientRect();
-        const nx = ((e.clientX - r.left) / r.width - 0.5) * 2; // -1..1
-        const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
-        tgt.ry = nx * MAX;
-        tgt.rx = -ny * MAX;
-        tgt.tx = nx * MAX * 1.1;
-        tgt.ty = ny * MAX * 1.1;
-      };
-      const rest = () => {
-        tgt.rx = tgt.ry = tgt.tx = tgt.ty = 0;
-      };
-      block.addEventListener("pointermove", onMove, { passive: true });
-      block.addEventListener("pointerleave", rest);
+        const onMove = (e: PointerEvent) => {
+          const r = block.getBoundingClientRect();
+          const nx = ((e.clientX - r.left) / r.width - 0.5) * 2; // -1..1
+          const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
+          tgt.ry = nx * MAX;
+          tgt.rx = -ny * MAX;
+          tgt.tx = nx * MAX * 1.1;
+          tgt.ty = ny * MAX * 1.1;
+        };
+        const rest = () => {
+          tgt.rx = tgt.ry = tgt.tx = tgt.ty = 0;
+        };
+        block.addEventListener("pointermove", onMove, { passive: true });
+        block.addEventListener("pointerleave", rest);
 
-      let raf = 0;
-      let running = false;
-      const loop = (now: number) => {
-        const k = 0.07;
-        cur.rx += (tgt.rx - cur.rx) * k;
-        cur.ry += (tgt.ry - cur.ry) * k;
-        cur.tx += (tgt.tx - cur.tx) * k;
-        cur.ty += (tgt.ty - cur.ty) * k;
-        const s = (now - start) / 1000;
-        const ir = Math.sin(s * 0.5) * 0.7; // ±0.7° idle sway
-        const iy = Math.sin(s * 0.4) * 2.4; // ±2.4px idle drift
-        tilt.style.transform =
-          `rotateX(${cur.rx.toFixed(3)}deg) rotateY(${cur.ry.toFixed(3)}deg) ` +
-          `rotate(${ir.toFixed(3)}deg) translate3d(${cur.tx.toFixed(2)}px, ${(cur.ty + iy).toFixed(2)}px, 0)`;
-        raf = requestAnimationFrame(loop);
-      };
-      const io = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            if (!running) {
-              running = true;
-              raf = requestAnimationFrame(loop);
+        let raf = 0;
+        let running = false;
+        const loop = (now: number) => {
+          const k = 0.07;
+          cur.rx += (tgt.rx - cur.rx) * k;
+          cur.ry += (tgt.ry - cur.ry) * k;
+          cur.tx += (tgt.tx - cur.tx) * k;
+          cur.ty += (tgt.ty - cur.ty) * k;
+          const s = (now - start) / 1000;
+          const ir = Math.sin(s * 0.5) * 0.7; // ±0.7° idle sway
+          const iy = Math.sin(s * 0.4) * 2.4; // ±2.4px idle drift
+          tilt.style.transform =
+            `rotateX(${cur.rx.toFixed(3)}deg) rotateY(${cur.ry.toFixed(3)}deg) ` +
+            `rotate(${ir.toFixed(3)}deg) translate3d(${cur.tx.toFixed(2)}px, ${(cur.ty + iy).toFixed(2)}px, 0)`;
+          raf = requestAnimationFrame(loop);
+        };
+        const io = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              if (!running) {
+                running = true;
+                raf = requestAnimationFrame(loop);
+              }
+            } else if (running) {
+              running = false;
+              cancelAnimationFrame(raf);
             }
-          } else if (running) {
-            running = false;
-            cancelAnimationFrame(raf);
-          }
-        },
-        { threshold: 0 },
-      );
-      io.observe(cluster);
-    });
+          },
+          { threshold: 0 },
+        );
+        io.observe(cluster);
+      });
   }
 </script>

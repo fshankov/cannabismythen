@@ -7,9 +7,9 @@
  * + a short body). Used by the new viz column headers / row labels in
  * Steps 6, 7, 8, 9.
  */
-import { Info } from 'lucide-react';
-import { useEffect } from 'react';
-import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
+import { Info } from "lucide-react";
+import { useEffect } from "react";
+import { useFlipPosition } from "../dashboard/hooks/useFlipPosition";
 
 interface InfoDotProps {
   /** Short label rendered as the popover heading. */
@@ -23,9 +23,17 @@ interface InfoDotProps {
   ariaLabel?: string;
 }
 
-export default function InfoDot({ title, body, meta, ariaLabel }: InfoDotProps) {
+export default function InfoDot({
+  title,
+  body,
+  meta,
+  ariaLabel,
+}: InfoDotProps) {
   const { triggerRef, cardRef, pos, open, setOpen, updatePosition } =
-    useFlipPosition<HTMLButtonElement, HTMLDivElement>({ maxWidth: 280, gap: 6 });
+    useFlipPosition<HTMLButtonElement, HTMLDivElement>({
+      maxWidth: 280,
+      gap: 6,
+    });
 
   const handleOpen = () => {
     updatePosition();
@@ -38,21 +46,22 @@ export default function InfoDot({ title, body, meta, ariaLabel }: InfoDotProps) 
       if (
         triggerRef.current?.contains(e.target as Node) ||
         cardRef.current?.contains(e.target as Node)
-      ) return;
+      )
+        return;
       setOpen(false);
     };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === "Escape") setOpen(false);
     };
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
     };
   }, [open, setOpen, triggerRef, cardRef]);
 
-  const tooltipId = `infodot-${title.replace(/\s+/g, '-').toLowerCase()}`;
+  const tooltipId = `infodot-${title.replace(/\s+/g, "-").toLowerCase()}`;
 
   return (
     <span className="info-dot-wrap">
@@ -81,14 +90,18 @@ export default function InfoDot({ title, body, meta, ariaLabel }: InfoDotProps) 
         id={tooltipId}
         role="tooltip"
         tabIndex={-1}
-        className={`info-dot-card${open ? ' info-dot-card--open' : ''}`}
-        style={pos ? {
-          position: 'fixed',
-          top: pos.top,
-          left: pos.left,
-          width: pos.width,
-          maxWidth: pos.width,
-        } : undefined}
+        className={`info-dot-card${open ? " info-dot-card--open" : ""}`}
+        style={
+          pos
+            ? {
+                position: "fixed",
+                top: pos.top,
+                left: pos.left,
+                width: pos.width,
+                maxWidth: pos.width,
+              }
+            : undefined
+        }
         onMouseEnter={handleOpen}
         onMouseLeave={() => setOpen(false)}
       >

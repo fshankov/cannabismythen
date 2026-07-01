@@ -16,7 +16,7 @@
  * Position is fixed; the consumer supplies clamped (x, y) coords so
  * the card never extends past the viewport edges.
  */
-import { useMemo } from 'react';
+import { useMemo } from "react";
 import type {
   CorrectnessClass,
   GroupId,
@@ -24,15 +24,15 @@ import type {
   Lang,
   Metric,
   Myth,
-} from '../../../lib/dashboard/types';
+} from "../../../lib/dashboard/types";
 import {
   getCorrectnessColor,
   getCorrectnessBgColor,
-} from '../../../lib/dashboard/colors';
-import { getMythMetric, getMythText } from '../../../lib/dashboard/data';
-import { t, type TranslationKey } from '../../../lib/dashboard/translations';
-import { GROUP_POPULATION_NOUN } from '../../../lib/dashboard/lesebeispiel-bands';
-import Lesebeispiel from '../Lesebeispiel';
+} from "../../../lib/dashboard/colors";
+import { getMythMetric, getMythText } from "../../../lib/dashboard/data";
+import { t, type TranslationKey } from "../../../lib/dashboard/translations";
+import { GROUP_POPULATION_NOUN } from "../../../lib/dashboard/lesebeispiel-bands";
+import Lesebeispiel from "../Lesebeispiel";
 
 interface Props {
   myth: Myth;
@@ -61,23 +61,23 @@ export default function GridHoverTooltip({
   x,
   y,
   lesebeispielIndicator,
-  lesebeispielGroup = 'adults',
+  lesebeispielGroup = "adults",
 }: Props) {
   const verdict = myth.correctness_class as CorrectnessClass;
   const verdictColor = getCorrectnessColor(verdict);
   const verdictBg = getCorrectnessBgColor(verdict);
 
   const wissenschaftlich = useMemo(() => {
-    if (verdict === 'keine_aussage_moeglich') {
-      return lang === 'de'
-        ? 'Wissenschaftlich: keine Einordnung möglich'
-        : 'Scientific verdict: not classified';
+    if (verdict === "keine_aussage_moeglich") {
+      return lang === "de"
+        ? "Wissenschaftlich: keine Einordnung möglich"
+        : "Scientific verdict: not classified";
     }
     const verdictLabel = t(
       `verdict.${verdict}` as TranslationKey,
       lang,
     ).toLowerCase();
-    return `${lang === 'de' ? 'Wissenschaftlich' : 'Scientifically'}: ${verdictLabel}`;
+    return `${lang === "de" ? "Wissenschaftlich" : "Scientifically"}: ${verdictLabel}`;
   }, [verdict, lang]);
 
   // Pull the metric for the resolved Lesebeispiel group (matches the
@@ -87,7 +87,7 @@ export default function GridHoverTooltip({
   // is null for those three anyway).
   const lesebeispielMetric = getMythMetric(metrics, myth.id, lesebeispielGroup);
   const lesebeispielHidden =
-    lesebeispielIndicator === 'population_relevance' &&
+    lesebeispielIndicator === "population_relevance" &&
     !GROUP_POPULATION_NOUN[lesebeispielGroup];
 
   return (
@@ -95,7 +95,7 @@ export default function GridHoverTooltip({
       className="carm-spannweite__tooltip"
       role="tooltip"
       style={{
-        position: 'fixed',
+        position: "fixed",
         left: x,
         top: y,
         background: verdictBg,

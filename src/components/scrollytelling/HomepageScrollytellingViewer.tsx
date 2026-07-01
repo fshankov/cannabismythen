@@ -19,7 +19,8 @@ export interface ScrollyStep {
   heading: string;
   bodyText: string;
   hint?: string;
-  vizType: "bigNumber" | "contextCloud" | "groupCloud" | "colorReveal" | "trustGap";
+  vizType:
+    "bigNumber" | "contextCloud" | "groupCloud" | "colorReveal" | "trustGap";
   ctaLabel?: string;
   ctaUrl?: string;
 }
@@ -87,9 +88,7 @@ function VizBigNumber({ active }: { active: boolean }) {
         {revealed && (
           <div className="viz-reveal-card">
             <span className="viz-reveal-card__badge">⬡ Stimmt nicht</span>
-            <p>
-              „Cannabis macht generell antriebslos."
-            </p>
+            <p>„Cannabis macht generell antriebslos."</p>
             <p className="viz-reveal-card__detail">
               Ein allgemeiner Motivationsverlust durch Cannabis ist
               wissenschaftlich nicht belegt. Nur 25 von 100 Erwachsenen wissen
@@ -118,15 +117,48 @@ function VizBigNumber({ active }: { active: boolean }) {
 
 function VizContextCloud({ active }: { active: boolean }) {
   const myths = [
-    "Antriebslos", "Sucht", "Schmerzen", "Psychose", "Gateway",
-    "Alkohol", "Jugend", "Legalisierung", "Risiko", "Kreativität",
-    "Abhängig", "Schlaf", "Gedächtnis", "Depressionen", "Schwangerschaft",
-    "Verkehr", "Beziehungen", "Lunge", "Motivation", "Einstiegsdroge",
-    "Heilpflanze", "IQ", "Konsum", "Angst", "Medizin",
-    "Entspannung", "Gesellschaft", "Kriminalität", "Führerschein", "THC",
-    "CBD", "Prävention", "Aufklärung", "Jugendschutz", "Anbau",
-    "Regulierung", "Stigma", "Toleranz", "Dosis", "Langzeitfolgen",
-    "Passivrauchen", "Fötus",
+    "Antriebslos",
+    "Sucht",
+    "Schmerzen",
+    "Psychose",
+    "Gateway",
+    "Alkohol",
+    "Jugend",
+    "Legalisierung",
+    "Risiko",
+    "Kreativität",
+    "Abhängig",
+    "Schlaf",
+    "Gedächtnis",
+    "Depressionen",
+    "Schwangerschaft",
+    "Verkehr",
+    "Beziehungen",
+    "Lunge",
+    "Motivation",
+    "Einstiegsdroge",
+    "Heilpflanze",
+    "IQ",
+    "Konsum",
+    "Angst",
+    "Medizin",
+    "Entspannung",
+    "Gesellschaft",
+    "Kriminalität",
+    "Führerschein",
+    "THC",
+    "CBD",
+    "Prävention",
+    "Aufklärung",
+    "Jugendschutz",
+    "Anbau",
+    "Regulierung",
+    "Stigma",
+    "Toleranz",
+    "Dosis",
+    "Langzeitfolgen",
+    "Passivrauchen",
+    "Fötus",
   ];
   return (
     <div className="viz-context-cloud">
@@ -148,7 +180,11 @@ function VizContextCloud({ active }: { active: boolean }) {
           <span className="viz-stat-chip__label">Skala</span>
         </div>
       </div>
-      <div className="viz-cloud-words" role="img" aria-label="Wordcloud aller 42 Cannabis-Annahmen">
+      <div
+        className="viz-cloud-words"
+        role="img"
+        aria-label="Wordcloud aller 42 Cannabis-Annahmen"
+      >
         {myths.map((word, i) => (
           <span
             key={word}
@@ -187,10 +223,23 @@ function VizGroupCloud({ active }: { active: boolean }) {
   const selected = groups.find((g) => g.id === selectedGroup)!;
 
   const sampleWords = [
-    "Antriebslos", "Sucht", "Gateway", "Psychose", "Legalisierung",
-    "Beziehungen", "Verkehr", "Depressionen", "Alkohol", "Medizin",
-    "Schmerzen", "Jugendschutz", "Kriminalität", "Schwangerschaft",
-    "Kreativität", "Schlaf", "Anbau",
+    "Antriebslos",
+    "Sucht",
+    "Gateway",
+    "Psychose",
+    "Legalisierung",
+    "Beziehungen",
+    "Verkehr",
+    "Depressionen",
+    "Alkohol",
+    "Medizin",
+    "Schmerzen",
+    "Jugendschutz",
+    "Kriminalität",
+    "Schwangerschaft",
+    "Kreativität",
+    "Schlaf",
+    "Anbau",
   ];
 
   return (
@@ -248,14 +297,22 @@ function VizColorReveal({ active }: { active: boolean }) {
   ];
 
   const words = [
-    { text: "Verkehr", cat: 0 }, { text: "Schwangerschaft", cat: 0 },
-    { text: "Alkohol", cat: 0 }, { text: "Abhängig", cat: 0 },
-    { text: "Lunge", cat: 0 }, { text: "Jugendschutz", cat: 0 },
-    { text: "Schmerzen", cat: 1 }, { text: "Medizin", cat: 1 },
-    { text: "Angst", cat: 2 }, { text: "Gateway", cat: 2 },
-    { text: "Kreativität", cat: 2 }, { text: "Schlaf", cat: 2 },
-    { text: "Antriebslos", cat: 3 }, { text: "Depressionen", cat: 3 },
-    { text: "Konsum", cat: 3 }, { text: "Gesellschaft", cat: 4 },
+    { text: "Verkehr", cat: 0 },
+    { text: "Schwangerschaft", cat: 0 },
+    { text: "Alkohol", cat: 0 },
+    { text: "Abhängig", cat: 0 },
+    { text: "Lunge", cat: 0 },
+    { text: "Jugendschutz", cat: 0 },
+    { text: "Schmerzen", cat: 1 },
+    { text: "Medizin", cat: 1 },
+    { text: "Angst", cat: 2 },
+    { text: "Gateway", cat: 2 },
+    { text: "Kreativität", cat: 2 },
+    { text: "Schlaf", cat: 2 },
+    { text: "Antriebslos", cat: 3 },
+    { text: "Depressionen", cat: 3 },
+    { text: "Konsum", cat: 3 },
+    { text: "Gesellschaft", cat: 4 },
   ];
 
   return (
@@ -283,7 +340,11 @@ function VizColorReveal({ active }: { active: boolean }) {
       </div>
       <div className="viz-legend" aria-label="Legende">
         {categories.map((c) => (
-          <span key={c.label} className="viz-legend-item" style={{ color: c.color }}>
+          <span
+            key={c.label}
+            className="viz-legend-item"
+            style={{ color: c.color }}
+          >
             {c.symbol} {c.label} ({c.count})
           </span>
         ))}
@@ -304,14 +365,62 @@ function VizColorReveal({ active }: { active: boolean }) {
 
 function VizTrustGap({ active }: { active: boolean }) {
   const sources = [
-    { name: "Arzt / Apotheke", trust: 92, useAdults: 60, useMinors: 23, cat: "formal" },
-    { name: "Beratungsstelle", trust: 85, useAdults: 25, useMinors: 15, cat: "formal" },
-    { name: "TV / Radio", trust: 72, useAdults: 45, useMinors: 12, cat: "medial" },
-    { name: "Websites", trust: 65, useAdults: 35, useMinors: 22, cat: "digital" },
-    { name: "Suchmaschinen", trust: 60, useAdults: 40, useMinors: 25, cat: "digital" },
-    { name: "Soziale Medien", trust: 52, useAdults: 8, useMinors: 27, cat: "social" },
-    { name: "Influencer:innen", trust: 49, useAdults: 3, useMinors: 17, cat: "social" },
-    { name: "Verwandte", trust: 78, useAdults: 40, useMinors: 53, cat: "formal" },
+    {
+      name: "Arzt / Apotheke",
+      trust: 92,
+      useAdults: 60,
+      useMinors: 23,
+      cat: "formal",
+    },
+    {
+      name: "Beratungsstelle",
+      trust: 85,
+      useAdults: 25,
+      useMinors: 15,
+      cat: "formal",
+    },
+    {
+      name: "TV / Radio",
+      trust: 72,
+      useAdults: 45,
+      useMinors: 12,
+      cat: "medial",
+    },
+    {
+      name: "Websites",
+      trust: 65,
+      useAdults: 35,
+      useMinors: 22,
+      cat: "digital",
+    },
+    {
+      name: "Suchmaschinen",
+      trust: 60,
+      useAdults: 40,
+      useMinors: 25,
+      cat: "digital",
+    },
+    {
+      name: "Soziale Medien",
+      trust: 52,
+      useAdults: 8,
+      useMinors: 27,
+      cat: "social",
+    },
+    {
+      name: "Influencer:innen",
+      trust: 49,
+      useAdults: 3,
+      useMinors: 17,
+      cat: "social",
+    },
+    {
+      name: "Verwandte",
+      trust: 78,
+      useAdults: 40,
+      useMinors: 53,
+      cat: "formal",
+    },
   ];
 
   return (
@@ -322,7 +431,11 @@ function VizTrustGap({ active }: { active: boolean }) {
         <span className="viz-trust-gap__legend-dot viz-trust-gap__legend-dot--minors" />
         Minderjährige
       </div>
-      <div className="viz-trust-gap__chart" role="img" aria-label="Trust-Gap-Visualisierung: Vertrauen vs. Nutzung nach Altersgruppen">
+      <div
+        className="viz-trust-gap__chart"
+        role="img"
+        aria-label="Trust-Gap-Visualisierung: Vertrauen vs. Nutzung nach Altersgruppen"
+      >
         {sources.map((s, i) => {
           const maxUse = Math.max(s.useAdults, s.useMinors);
           const minUse = Math.min(s.useAdults, s.useMinors);
@@ -409,7 +522,9 @@ function StepVisualization({
     case "trustGap":
       return <VizTrustGap active={active} />;
     default:
-      return <div className="viz-placeholder">Visualisierung wird geladen…</div>;
+      return (
+        <div className="viz-placeholder">Visualisierung wird geladen…</div>
+      );
   }
 }
 
@@ -426,7 +541,7 @@ export default function HomepageScrollytellingViewer({
     (index: number) => (el: HTMLDivElement | null) => {
       stepsRef.current[index] = el;
     },
-    []
+    [],
   );
 
   // IntersectionObserver for scroll-driven step changes
@@ -446,7 +561,7 @@ export default function HomepageScrollytellingViewer({
         {
           threshold: 0.5,
           rootMargin: "-15% 0px -25% 0px",
-        }
+        },
       );
       obs.observe(el);
       observers.push(obs);
@@ -455,7 +570,8 @@ export default function HomepageScrollytellingViewer({
     return () => observers.forEach((obs) => obs.disconnect());
   }, [steps]);
 
-  const currentStep = steps.find((s) => s.stepNumber === activeStep) || steps[0];
+  const currentStep =
+    steps.find((s) => s.stepNumber === activeStep) || steps[0];
 
   return (
     <section className="scrollytelling" aria-label={title}>
@@ -472,12 +588,15 @@ export default function HomepageScrollytellingViewer({
               key={step.stepNumber}
               ref={setStepRef(i)}
               className={`scrollytelling__step ${
-                activeStep === step.stepNumber ? "scrollytelling__step--active" : ""
+                activeStep === step.stepNumber
+                  ? "scrollytelling__step--active"
+                  : ""
               }`}
               data-step={step.stepNumber}
             >
               <span className="scrollytelling__step-label">
-                {String(step.stepNumber).padStart(2, "0")} / {String(steps.length).padStart(2, "0")}
+                {String(step.stepNumber).padStart(2, "0")} /{" "}
+                {String(steps.length).padStart(2, "0")}
               </span>
               <h2 className="scrollytelling__heading">
                 {step.heading.split("\n").map((line, li) => (
@@ -492,9 +611,7 @@ export default function HomepageScrollytellingViewer({
                   {para}
                 </p>
               ))}
-              {step.hint && (
-                <p className="scrollytelling__hint">{step.hint}</p>
-              )}
+              {step.hint && <p className="scrollytelling__hint">{step.hint}</p>}
               {step.ctaLabel && step.ctaUrl && (
                 <a href={step.ctaUrl} className="scrollytelling__cta">
                   {step.ctaLabel} →
@@ -505,7 +622,11 @@ export default function HomepageScrollytellingViewer({
         </div>
 
         {/* Right: sticky visualization column (desktop only) */}
-        <div className="scrollytelling__viz-col" id="viz-sticky" aria-live="polite">
+        <div
+          className="scrollytelling__viz-col"
+          id="viz-sticky"
+          aria-live="polite"
+        >
           <StepVisualization vizType={currentStep.vizType} active={true} />
         </div>
       </div>

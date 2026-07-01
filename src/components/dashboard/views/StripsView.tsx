@@ -25,31 +25,60 @@
  *   - Tap anywhere outside dot/card → deselect.
  */
 
-import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from 'react';
-import type { ReactNode } from 'react';
-import * as d3 from 'd3';
 import {
-  Eye, EyeOff, TrendingUp, Target, Shield, Globe,
-  Users, Baby, Cannabis, GraduationCap, UsersRound,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+  forwardRef,
+} from "react";
+import type { ReactNode } from "react";
+import * as d3 from "d3";
+import {
+  Eye,
+  EyeOff,
+  TrendingUp,
+  Target,
+  Shield,
+  Globe,
+  Users,
+  Baby,
+  Cannabis,
+  GraduationCap,
+  UsersRound,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type {
-  Myth, Metric, Group, GroupId, AppState, Indicator,
-  StripsMode, QuizThemeSlug, DashboardDefinitions,
-} from '../../../lib/dashboard/types';
-import { getMythMetric, getIndicatorValue, getMythShortText, getMythText } from '../../../lib/dashboard/data';
-import { getCorrectnessColor } from '../../../lib/dashboard/colors';
-import { t, type TranslationKey } from '../../../lib/dashboard/translations';
-import InfoTooltip from '../InfoTooltip';
-import VerdictArrowWithInfo from '../VerdictArrowWithInfo';
-import VerdictStatement from '../../shared/VerdictStatement';
-import PivotToggle from '../controls/PivotToggle';
-import DataPicker, { type DataPickerOption } from '../controls/DataPicker';
-import ToolbarRow from '../controls/ToolbarRow';
-import { useHiddenColumns } from '../hooks/useHiddenColumns';
-import type { CorrectnessClass } from '../../../lib/dashboard/types';
-import type { MythContentEntry } from '../FactsheetPanel';
-import VerdictArrowSymbols from './verdictArrowSymbols';
+  Myth,
+  Metric,
+  Group,
+  GroupId,
+  AppState,
+  Indicator,
+  StripsMode,
+  QuizThemeSlug,
+  DashboardDefinitions,
+} from "../../../lib/dashboard/types";
+import {
+  getMythMetric,
+  getIndicatorValue,
+  getMythShortText,
+  getMythText,
+} from "../../../lib/dashboard/data";
+import { getCorrectnessColor } from "../../../lib/dashboard/colors";
+import { t, type TranslationKey } from "../../../lib/dashboard/translations";
+import InfoTooltip from "../InfoTooltip";
+import VerdictArrowWithInfo from "../VerdictArrowWithInfo";
+import VerdictStatement from "../../shared/VerdictStatement";
+import PivotToggle from "../controls/PivotToggle";
+import DataPicker, { type DataPickerOption } from "../controls/DataPicker";
+import ToolbarRow from "../controls/ToolbarRow";
+import { useHiddenColumns } from "../hooks/useHiddenColumns";
+import type { CorrectnessClass } from "../../../lib/dashboard/types";
+import type { MythContentEntry } from "../FactsheetPanel";
+import VerdictArrowSymbols from "./verdictArrowSymbols";
 
 interface Props {
   myths: Myth[];
@@ -71,8 +100,20 @@ interface Props {
   sharedActions?: ReactNode;
 }
 
-const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance', 'population_relevance'];
-const STRIP_GROUP_IDS: GroupId[] = ['adults', 'minors', 'consumers', 'young_adults', 'parents'];
+const INDICATORS: Indicator[] = [
+  "awareness",
+  "significance",
+  "correctness",
+  "prevention_significance",
+  "population_relevance",
+];
+const STRIP_GROUP_IDS: GroupId[] = [
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
+];
 
 const INDICATOR_ICONS: Record<Indicator, LucideIcon> = {
   awareness: Eye,
@@ -92,18 +133,18 @@ const GROUP_ICONS: Record<GroupId, LucideIcon> = {
 
 /** Short aliases for population groups on narrow viewports. */
 const GROUP_SHORT_DE: Record<GroupId, string> = {
-  adults: 'Erw.',
-  minors: 'Minderj.',
-  consumers: 'Konsum.',
-  young_adults: 'Junge Erw.',
-  parents: 'Eltern',
+  adults: "Erw.",
+  minors: "Minderj.",
+  consumers: "Konsum.",
+  young_adults: "Junge Erw.",
+  parents: "Eltern",
 };
 const GROUP_SHORT_EN: Record<GroupId, string> = {
-  adults: 'Adults',
-  minors: 'Minors',
-  consumers: 'Cons.',
-  young_adults: 'Y. Adults',
-  parents: 'Parents',
+  adults: "Adults",
+  minors: "Minors",
+  consumers: "Cons.",
+  young_adults: "Y. Adults",
+  parents: "Parents",
 };
 
 type ColumnId = Indicator | GroupId | QuizThemeSlug;
@@ -134,10 +175,14 @@ interface ColumnData {
 }
 
 /** Format a metric value for display in a value pill. */
-function formatPillValue(value: number | null, isAwareness: boolean, lang: 'de' | 'en'): string {
-  if (value === null) return t('strips.na', lang);
+function formatPillValue(
+  value: number | null,
+  isAwareness: boolean,
+  lang: "de" | "en",
+): string {
+  if (value === null) return t("strips.na", lang);
   // BugHerd #31 — round-to-int site-wide.
-  return `${Math.round(value)}${isAwareness ? '%' : ''}`;
+  return `${Math.round(value)}${isAwareness ? "%" : ""}`;
 }
 
 /** Imperative handle exposed via forwardRef so MythenExplorer's
@@ -151,7 +196,17 @@ export interface StripsViewHandle {
 }
 
 const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
-  { myths, metrics, groups, state, update, onSelectMyth, definitions, mythContentMap, sharedActions },
+  {
+    myths,
+    metrics,
+    groups,
+    state,
+    update,
+    onSelectMyth,
+    definitions,
+    mythContentMap,
+    sharedActions,
+  },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -163,10 +218,14 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
   const [width, setWidth] = useState(360);
   /** Available viewport height — drives the SVG's strip-rectangle height so
    *  the grey boxes always fill the chart area regardless of screen size. */
-  const [viewportH, setViewportH] = useState(typeof window !== 'undefined' ? window.innerHeight : 720);
+  const [viewportH, setViewportH] = useState(
+    typeof window !== "undefined" ? window.innerHeight : 720,
+  );
   /** Hover state — separate from selection. Drives the polyline + statement label. */
   const [hoveredMythId, setHoveredMythId] = useState<number | null>(null);
-  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   // Open/close + inline-definition expansion is encapsulated by
   // <DataPicker> in Stage 2 of the Daten-Explorer refactor — we no
   // longer need topPickerOpen / catPickerOpen / topExpandedInfo /
@@ -174,7 +233,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
 
   const selectedMythId = state.selectedMythId;
   const mode: StripsMode = state.stripsMode;
-  const selectedGroup: GroupId = state.groupIds[0] || 'adults';
+  const selectedGroup: GroupId = state.groupIds[0] || "adults";
   const selectedIndicator: Indicator = state.indicator;
 
   useEffect(() => {
@@ -189,11 +248,11 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
 
   // Track viewport height so the SVG can scale to fill the available area.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const onResize = () => setViewportH(window.innerHeight);
-    window.addEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
     onResize();
-    return () => window.removeEventListener('resize', onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   // (Outside-click + Escape close handlers were moved into <DataPicker>
@@ -235,19 +294,19 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
    * project's methodology excludes them; we hide those columns rather
    * than render them as 'k. A.' placeholders or empty strips.
    */
-  const POP_REL_VALID_GROUPS_LOCAL: GroupId[] = ['adults', 'minors'];
+  const POP_REL_VALID_GROUPS_LOCAL: GroupId[] = ["adults", "minors"];
   const dataAvailableIndicators = useMemo<Indicator[]>(() => {
-    if (mode !== 'indicator') return INDICATORS;
+    if (mode !== "indicator") return INDICATORS;
     // Drop `population_relevance` when the active group is a target group.
     return POP_REL_VALID_GROUPS_LOCAL.includes(selectedGroup)
       ? INDICATORS
-      : INDICATORS.filter((ind) => ind !== 'population_relevance');
+      : INDICATORS.filter((ind) => ind !== "population_relevance");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, selectedGroup]);
   const dataAvailableGroupIds = useMemo<GroupId[]>(() => {
-    if (mode !== 'group') return STRIP_GROUP_IDS;
+    if (mode !== "group") return STRIP_GROUP_IDS;
     // Drop the 3 target groups when `population_relevance` is selected.
-    return selectedIndicator === 'population_relevance'
+    return selectedIndicator === "population_relevance"
       ? STRIP_GROUP_IDS.filter((g) => POP_REL_VALID_GROUPS_LOCAL.includes(g))
       : STRIP_GROUP_IDS;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -255,9 +314,10 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
 
   // User-driven column hide (Stage 6 follow-up). Storage key is per-pivot
   // so hiding a column in 'indicator' mode doesn't bleed into 'group' mode.
-  const allColumnIds: string[] = mode === 'indicator'
-    ? (dataAvailableIndicators as string[])
-    : (dataAvailableGroupIds as string[]);
+  const allColumnIds: string[] =
+    mode === "indicator"
+      ? (dataAvailableIndicators as string[])
+      : (dataAvailableGroupIds as string[]);
   const { hidden, hide, show, isHidden } = useHiddenColumns(
     `carm.strips.hidden.${mode}`,
     allColumnIds,
@@ -266,29 +326,34 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
   // Visible (non-hidden) IDs in original order. The chart layout maps
   // these to the full-width strips; hidden IDs render as 28px placeholders.
   const visibleIndicators = useMemo<Indicator[]>(
-    () => (mode === 'indicator'
-      ? dataAvailableIndicators.filter((id) => !isHidden(id))
-      : dataAvailableIndicators),
+    () =>
+      mode === "indicator"
+        ? dataAvailableIndicators.filter((id) => !isHidden(id))
+        : dataAvailableIndicators,
     [mode, dataAvailableIndicators, isHidden],
   );
   const visibleGroupIds = useMemo<GroupId[]>(
-    () => (mode === 'group'
-      ? dataAvailableGroupIds.filter((id) => !isHidden(id))
-      : dataAvailableGroupIds),
+    () =>
+      mode === "group"
+        ? dataAvailableGroupIds.filter((id) => !isHidden(id))
+        : dataAvailableGroupIds,
     [mode, dataAvailableGroupIds, isHidden],
   );
 
-  const visibleNumColumns = mode === 'indicator'
-    ? visibleIndicators.length
-    : mode === 'group'
-      ? visibleGroupIds.length
-      : 5;
+  const visibleNumColumns =
+    mode === "indicator"
+      ? visibleIndicators.length
+      : mode === "group"
+        ? visibleGroupIds.length
+        : 5;
   // Reserve 28px per hidden column placeholder + colGap; remaining width
   // is split between the visible strips.
   const HIDDEN_STRIP_W = 28;
-  const hiddenColumnIds: string[] = (mode === 'indicator'
-    ? dataAvailableIndicators.filter((id) => isHidden(id))
-    : dataAvailableGroupIds.filter((id) => isHidden(id))) as string[];
+  const hiddenColumnIds: string[] = (
+    mode === "indicator"
+      ? dataAvailableIndicators.filter((id) => isHidden(id))
+      : dataAvailableGroupIds.filter((id) => isHidden(id))
+  ) as string[];
   const totalSlots = visibleNumColumns + hiddenColumnIds.length;
   const totalGaps = colGap * Math.max(0, totalSlots - 1);
   const availableForVisible = Math.max(
@@ -306,7 +371,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
    */
   type Slot = {
     id: string;
-    kind: 'visible' | 'hidden';
+    kind: "visible" | "hidden";
     /** Left x in SVG coordinates (already includes margin.left). */
     left: number;
     width: number;
@@ -314,9 +379,10 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
     originalIndex: number;
   };
   const slotLayout: Slot[] = useMemo(() => {
-    const ids: string[] = mode === 'indicator'
-      ? (dataAvailableIndicators as string[])
-      : (dataAvailableGroupIds as string[]);
+    const ids: string[] =
+      mode === "indicator"
+        ? (dataAvailableIndicators as string[])
+        : (dataAvailableGroupIds as string[]);
     const out: Slot[] = [];
     let cursor = margin.left;
     ids.forEach((id, idx) => {
@@ -324,7 +390,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
       const w = isHid ? HIDDEN_STRIP_W : colW;
       out.push({
         id,
-        kind: isHid ? 'hidden' : 'visible',
+        kind: isHid ? "hidden" : "visible",
         left: cursor,
         width: w,
         originalIndex: idx,
@@ -333,18 +399,30 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
     });
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, dataAvailableIndicators, dataAvailableGroupIds, hidden, margin.left, colW, colGap]);
+  }, [
+    mode,
+    dataAvailableIndicators,
+    dataAvailableGroupIds,
+    hidden,
+    margin.left,
+    colW,
+    colGap,
+  ]);
 
   /** Lookup: visible-only slot center for the i-th visible column. */
   const visibleSlotCentersById = new Map<string, number>();
   slotLayout
-    .filter((s) => s.kind === 'visible')
+    .filter((s) => s.kind === "visible")
     .forEach((s) => visibleSlotCentersById.set(s.id, s.left + s.width / 2));
 
   /** Y is fixed: 0 at bottom, 100 at top. The output range is shifted by
    *  headerH so dots/ticks are placed inside the dot area, below the header. */
   const yScale = useMemo(
-    () => d3.scaleLinear().domain([0, 100]).range([headerH + innerH, headerH]),
+    () =>
+      d3
+        .scaleLinear()
+        .domain([0, 100])
+        .range([headerH + innerH, headerH]),
     [innerH, headerH],
   );
 
@@ -353,7 +431,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
    *  slotLayout array directly. */
   const colCenterX = useCallback(
     (i: number) => {
-      const visible = slotLayout.filter((s) => s.kind === 'visible');
+      const visible = slotLayout.filter((s) => s.kind === "visible");
       const slot = visible[i];
       if (!slot) return margin.left + colW / 2;
       return slot.left + slot.width / 2;
@@ -373,7 +451,10 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
      *  available horizontal space comfortably across screen sizes. Clamped
      *  3.5–8 px to keep dots tappable on phones and not absurd on big screens. */
     const radius = Math.max(3.5, Math.min(8, colW * 0.07));
-    const buildNodes = (mythsForCol: Myth[], getValue: (myth: Myth) => number | null) => {
+    const buildNodes = (
+      mythsForCol: Myth[],
+      getValue: (myth: Myth) => number | null,
+    ) => {
       const nodes: BeeswarmNode[] = [];
       const map = new Map<number, number>();
       for (const myth of mythsForCol) {
@@ -385,15 +466,15 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
       }
       const sim = d3
         .forceSimulation(nodes as any)
-        .force('y', d3.forceY<BeeswarmNode>((d) => d.y0).strength(1))
-        .force('x', d3.forceX<BeeswarmNode>(0).strength(0.18))
-        .force('collide', d3.forceCollide<BeeswarmNode>(radius + 0.6))
+        .force("y", d3.forceY<BeeswarmNode>((d) => d.y0).strength(1))
+        .force("x", d3.forceX<BeeswarmNode>(0).strength(0.18))
+        .force("collide", d3.forceCollide<BeeswarmNode>(radius + 0.6))
         .stop();
       for (let i = 0; i < 140; i++) sim.tick();
       // Clamp x within the column half-width AND y within the dot area so
       // dots never spill above y=100 or below y=0 when the beeswarm is dense.
       const halfW = Math.max(4, colW / 2 - radius - 2);
-      const yMin = headerH + radius + 1;          // top edge of dot area
+      const yMin = headerH + radius + 1; // top edge of dot area
       const yMax = headerH + innerH - radius - 1; // bottom edge of dot area
       for (const n of nodes) {
         if (n.x > halfW) n.x = halfW;
@@ -404,7 +485,7 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
       return { nodes, valueByMyth: map };
     };
 
-    if (mode === 'indicator') {
+    if (mode === "indicator") {
       return visibleIndicators.map((ind) => {
         const def = definitions?.mythIndicators?.[ind];
         const { nodes, valueByMyth } = buildNodes(visibleMyths, (m) => {
@@ -420,11 +501,13 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
           defLabel: def?.label,
           defText: def?.definition,
           scale: def?.scale,
-          nodes, radius, valueByMyth,
+          nodes,
+          radius,
+          valueByMyth,
         };
       });
     }
-    if (mode === 'group') {
+    if (mode === "group") {
       return visibleGroupIds.map((gid) => {
         const g = groups.find((x) => x.id === gid);
         const def = definitions?.groups?.[gid];
@@ -432,8 +515,13 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
           const metric = getMythMetric(metrics, m.id, gid);
           return getIndicatorValue(metric, selectedIndicator);
         });
-        const fullLabel = g ? (state.lang === 'de' ? g.name_de : g.name_en) : gid;
-        const shortLabel = state.lang === 'de' ? GROUP_SHORT_DE[gid] : GROUP_SHORT_EN[gid];
+        const fullLabel = g
+          ? state.lang === "de"
+            ? g.name_de
+            : g.name_en
+          : gid;
+        const shortLabel =
+          state.lang === "de" ? GROUP_SHORT_DE[gid] : GROUP_SHORT_EN[gid];
         return {
           id: gid as ColumnId,
           label: fullLabel,
@@ -442,22 +530,39 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
           defLabel: def?.label,
           defText: def?.definition,
           sampleSize: def?.sampleSize,
-          nodes, radius, valueByMyth,
+          nodes,
+          radius,
+          valueByMyth,
         };
       });
     }
     // mode is exhaustively handled above ('indicator' or 'group').
     // (Themen no longer pivots — it stays as a filter row only.)
     return [];
-  }, [mode, myths, visibleMyths, metrics, groups, selectedGroup, selectedIndicator, yScale, isMobile, state.lang, definitions, colW, visibleIndicators, visibleGroupIds]);
+  }, [
+    mode,
+    myths,
+    visibleMyths,
+    metrics,
+    groups,
+    selectedGroup,
+    selectedIndicator,
+    yScale,
+    isMobile,
+    state.lang,
+    definitions,
+    colW,
+    visibleIndicators,
+    visibleGroupIds,
+  ]);
 
   // Stage 1 — tap a dot to highlight
   const handleDotClick = useCallback(
     (mythId: number) => {
       if (mythId === selectedMythId) {
-        update('selectedMythId', null);
+        update("selectedMythId", null);
       } else {
-        update('selectedMythId', mythId);
+        update("selectedMythId", mythId);
       }
     },
     [selectedMythId, update],
@@ -469,18 +574,24 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target || !target.closest) return;
-      if (target.closest('.strips-myth-card')) return;
-      if (target.closest('.factsheet-panel') || target.closest('.factsheet-panel__backdrop')) return;
-      update('selectedMythId', null);
+      if (target.closest(".strips-myth-card")) return;
+      if (
+        target.closest(".factsheet-panel") ||
+        target.closest(".factsheet-panel__backdrop")
+      )
+        return;
+      update("selectedMythId", null);
     };
-    document.addEventListener('click', onClick);
-    return () => document.removeEventListener('click', onClick);
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
   }, [selectedMythId, update]);
 
-  const selectedMyth = selectedMythId !== null ? myths.find((m) => m.id === selectedMythId) : null;
-  const hoveredMyth = hoveredMythId !== null && hoveredMythId !== selectedMythId
-    ? myths.find((m) => m.id === hoveredMythId) ?? null
-    : null;
+  const selectedMyth =
+    selectedMythId !== null ? myths.find((m) => m.id === selectedMythId) : null;
+  const hoveredMyth =
+    hoveredMythId !== null && hoveredMythId !== selectedMythId
+      ? (myths.find((m) => m.id === hoveredMythId) ?? null)
+      : null;
 
   // The myth whose connecting line + value pills we draw — selection wins, else hover.
   const focusMythId = selectedMythId ?? hoveredMythId;
@@ -503,39 +614,52 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
 
   // Themen filter row removed — replaced by the category pill row below the SVG.
 
-  const groupRow: RowItem[] = useMemo(() => STRIP_GROUP_IDS.map((gid) => {
-    const g = groups.find((x) => x.id === gid);
-    const def = definitions?.groups?.[gid];
-    const fullLabel = g ? (state.lang === 'de' ? g.name_de : g.name_en) : gid;
-    const shortLabel = state.lang === 'de' ? GROUP_SHORT_DE[gid] : GROUP_SHORT_EN[gid];
-    return {
-      id: gid,
-      Icon: GROUP_ICONS[gid],
-      label: fullLabel,
-      shortLabel,
-      active: state.groupIds[0] === gid,
-      onActivate: () => update('groupIds', [gid]),
-      defLabel: def?.label,
-      defText: def?.definition,
-      sampleSize: def?.sampleSize,
-    };
-  }), [groups, state.groupIds, state.lang, definitions, update]);
+  const groupRow: RowItem[] = useMemo(
+    () =>
+      STRIP_GROUP_IDS.map((gid) => {
+        const g = groups.find((x) => x.id === gid);
+        const def = definitions?.groups?.[gid];
+        const fullLabel = g
+          ? state.lang === "de"
+            ? g.name_de
+            : g.name_en
+          : gid;
+        const shortLabel =
+          state.lang === "de" ? GROUP_SHORT_DE[gid] : GROUP_SHORT_EN[gid];
+        return {
+          id: gid,
+          Icon: GROUP_ICONS[gid],
+          label: fullLabel,
+          shortLabel,
+          active: state.groupIds[0] === gid,
+          onActivate: () => update("groupIds", [gid]),
+          defLabel: def?.label,
+          defText: def?.definition,
+          sampleSize: def?.sampleSize,
+        };
+      }),
+    [groups, state.groupIds, state.lang, definitions, update],
+  );
 
-  const indicatorRow: RowItem[] = useMemo(() => INDICATORS.map((ind) => {
-    const def = definitions?.mythIndicators?.[ind];
-    const label = t(`indicator.${ind}.short` as any, state.lang);
-    return {
-      id: ind,
-      Icon: INDICATOR_ICONS[ind],
-      label,
-      shortLabel: label,
-      active: state.indicator === ind,
-      onActivate: () => update('indicator', ind),
-      defLabel: def?.label,
-      defText: def?.definition,
-      scale: def?.scale,
-    };
-  }), [state.indicator, state.lang, definitions, update]);
+  const indicatorRow: RowItem[] = useMemo(
+    () =>
+      INDICATORS.map((ind) => {
+        const def = definitions?.mythIndicators?.[ind];
+        const label = t(`indicator.${ind}.short` as any, state.lang);
+        return {
+          id: ind,
+          Icon: INDICATOR_ICONS[ind],
+          label,
+          shortLabel: label,
+          active: state.indicator === ind,
+          onActivate: () => update("indicator", ind),
+          defLabel: def?.label,
+          defText: def?.definition,
+          scale: def?.scale,
+        };
+      }),
+    [state.indicator, state.lang, definitions, update],
+  );
 
   /**
    * Above the SVG: ONE row only — the non-active dimension. The active row
@@ -543,10 +667,10 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
    *
    * Below the SVG: a horizontal pill row with [Alle] + 7 carm-data categories.
    */
-  type RowKey = 'indicator' | 'group';
+  type RowKey = "indicator" | "group";
   const topRow: { key: RowKey; items: RowItem[] } = useMemo(() => {
-    if (mode === 'indicator') return { key: 'group', items: groupRow };
-    return { key: 'indicator', items: indicatorRow };
+    if (mode === "indicator") return { key: "group", items: groupRow };
+    return { key: "indicator", items: indicatorRow };
   }, [mode, indicatorRow, groupRow]);
 
   // The earlier `renderRow` / `activeRow` helpers rendered the
@@ -555,21 +679,28 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
   // (the "Wert für" picker), so the helpers are gone.
 
   // ── Myth card content (selected state) ────────────────────────────
-  const selectedMythContent = selectedMyth ? mythContentMap?.[selectedMyth.id] : null;
+  const selectedMythContent = selectedMyth
+    ? mythContentMap?.[selectedMyth.id]
+    : null;
   const cardTitle = selectedMyth
-    ? (selectedMythContent?.title || getMythText(selectedMyth, state.lang))
-    : '';
-  const cardSummary = selectedMyth ? extractCardSummary(selectedMythContent, selectedMyth, state.lang) : '';
+    ? selectedMythContent?.title || getMythText(selectedMyth, state.lang)
+    : "";
+  const cardSummary = selectedMyth
+    ? extractCardSummary(selectedMythContent, selectedMyth, state.lang)
+    : "";
   // Canonical verdict label (matches verdict.* in translations.ts) — the
   // conversational classificationLabel from `.mdoc` is intentionally bypassed
   // so the Streifen card matches the rest of the verdict surfaces.
   const cardClassification = selectedMyth
-    ? t(`verdict.${selectedMyth.correctness_class}` as TranslationKey, state.lang)
-    : '';
+    ? t(
+        `verdict.${selectedMyth.correctness_class}` as TranslationKey,
+        state.lang,
+      )
+    : "";
 
   return (
     <div className="strips-v3" ref={containerRef}>
-      <div className={`strips-grid3 ${selectedMyth ? 'has-selection' : ''}`}>
+      <div className={`strips-grid3 ${selectedMyth ? "has-selection" : ""}`}>
         {/* Single content column. Pivot is now driven by the in-view
             'Vergleichen nach:' toggle below — same pattern as the
             Informationsquellen tab's 'Spalten:' switch. */}
@@ -580,7 +711,6 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
               Balken / Tabelle toolbars. The internal helpers
               (groupRow, indicatorRow, topRow) are kept below in case
               future reintroduction of in-view filters needs them. */}
-
           {/* Session 4a (BugHerd #54): verdict legend strip. Sits
               above the chart so first-time users see the dot-color
               encoding before they parse the chart. Uses the same
@@ -592,33 +722,37 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
           <div
             className="strips-legend"
             role="list"
-            aria-label={t('strips.legend.label', 'de')}
+            aria-label={t("strips.legend.label", "de")}
           >
             <span className="strips-legend__caption">
-              {t('strips.legend.label', 'de')}:
+              {t("strips.legend.label", "de")}:
             </span>
-            {(['richtig', 'eher_richtig', 'eher_falsch', 'falsch'] as CorrectnessClass[]).map(
-              (v) => (
-                <span key={v} className="strips-legend__item" role="listitem">
-                  <span
-                    className={`strips-legend__arrow classification--${v}`}
-                    style={{ color: getCorrectnessColor(v) }}
-                    aria-hidden="true"
-                  >
-                    <VerdictArrowWithInfo
-                      verdict={v}
-                      size={14}
-                      strokeWidth={2.5}
-                    />
-                  </span>
-                  <span className="strips-legend__label">
-                    {t(`verdict.${v}` as TranslationKey, 'de')}
-                  </span>
+            {(
+              [
+                "richtig",
+                "eher_richtig",
+                "eher_falsch",
+                "falsch",
+              ] as CorrectnessClass[]
+            ).map((v) => (
+              <span key={v} className="strips-legend__item" role="listitem">
+                <span
+                  className={`strips-legend__arrow classification--${v}`}
+                  style={{ color: getCorrectnessColor(v) }}
+                  aria-hidden="true"
+                >
+                  <VerdictArrowWithInfo
+                    verdict={v}
+                    size={14}
+                    strokeWidth={2.5}
+                  />
                 </span>
-              ),
-            )}
+                <span className="strips-legend__label">
+                  {t(`verdict.${v}` as TranslationKey, "de")}
+                </span>
+              </span>
+            ))}
           </div>
-
           {/* SVG chart wrapper — relative-positioned so HTML strip headers
               can be absolutely positioned over the in-SVG header area for
               each column, giving us a single unified box per strip.
@@ -626,225 +760,259 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
               removed because it caused the chart to jump vertically when
               a column was first hidden. Each hidden strip is itself
               clickable to reveal — that's the only reset path now. */}
-          <div className="strips-svg-wrap" style={{ position: 'relative', width }}>
-          <svg
-            ref={svgRef}
-            className="strips-svg-v3"
-            width={width}
-            height={height}
-            viewBox={`0 0 ${width} ${height}`}
-            role="img"
-            aria-label={t('howto.strips', state.lang)}
-            onMouseLeave={() => { setHoveredMythId(null); setHoverPos(null); }}
+          <div
+            className="strips-svg-wrap"
+            style={{ position: "relative", width }}
           >
-            {/* Verdict-arrow symbol library — referenced via <use> for
+            <svg
+              ref={svgRef}
+              className="strips-svg-v3"
+              width={width}
+              height={height}
+              viewBox={`0 0 ${width} ${height}`}
+              role="img"
+              aria-label={t("howto.strips", state.lang)}
+              onMouseLeave={() => {
+                setHoveredMythId(null);
+                setHoverPos(null);
+              }}
+            >
+              {/* Verdict-arrow symbol library — referenced via <use> for
                 each beeswarm marker. Five symbols, one per verdict.
                 Source of truth lives in verdictArrowSymbols.tsx so the
                 Spannweite view can reuse the same IDs. */}
-            <defs>
-              <VerdictArrowSymbols />
-            </defs>
-            {/* Stage 6 v4: the prominent left-margin y-axis numbers
+              <defs>
+                <VerdictArrowSymbols />
+              </defs>
+              {/* Stage 6 v4: the prominent left-margin y-axis numbers
                 were removed. The per-strip faint grey labels (rendered
                 inside each strip column, below each gridline) now
                 serve as the only y-axis reference. */}
-            {/* Strip backgrounds + gridlines.
+              {/* Strip backgrounds + gridlines.
                 Each strip is ONE fully-rounded grey rectangle that spans both
                 the header area at the top (icon + label + 'i') and the dots
                 area below. A thin horizontal line divides the two zones inside
                 the rect. The HTML header content is rendered above the SVG via
                 absolute positioning (see `.strips-svg-headers` below). */}
-            {columns.map((col, i) => {
-              const cx = colCenterX(i);
-              const stripLeft = cx - colW / 2;
-              return (
-                <g key={`bg-${String(col.id)}`} transform={`translate(0, ${margin.top})`}>
-                  <rect
-                    x={stripLeft}
-                    y={0}
-                    width={colW}
-                    height={headerH + innerH}
-                    rx={10}
-                    fill="#f8fafc"
-                    stroke="#cbd5e1"
-                    strokeWidth={1}
-                  />
-                  {/* Divider between header area and dot area */}
-                  <line
-                    x1={stripLeft + 1}
-                    x2={stripLeft + colW - 1}
-                    y1={headerH}
-                    y2={headerH}
-                    stroke="#cbd5e1"
-                    strokeWidth={1}
-                  />
-                  {ticks.map((tk) => (
-                    <g key={tk}>
-                      <line
-                        x1={stripLeft + 2}
-                        x2={stripLeft + colW - 2}
-                        y1={yScale(tk)}
-                        y2={yScale(tk)}
-                        stroke="#e5e7eb"
-                        strokeDasharray="2 4"
-                      />
-                      {/* Stage 6 v4: faint grey tick labels INSIDE
+              {columns.map((col, i) => {
+                const cx = colCenterX(i);
+                const stripLeft = cx - colW / 2;
+                return (
+                  <g
+                    key={`bg-${String(col.id)}`}
+                    transform={`translate(0, ${margin.top})`}
+                  >
+                    <rect
+                      x={stripLeft}
+                      y={0}
+                      width={colW}
+                      height={headerH + innerH}
+                      rx={10}
+                      fill="#f8fafc"
+                      stroke="#cbd5e1"
+                      strokeWidth={1}
+                    />
+                    {/* Divider between header area and dot area */}
+                    <line
+                      x1={stripLeft + 1}
+                      x2={stripLeft + colW - 1}
+                      y1={headerH}
+                      y2={headerH}
+                      stroke="#cbd5e1"
+                      strokeWidth={1}
+                    />
+                    {ticks.map((tk) => (
+                      <g key={tk}>
+                        <line
+                          x1={stripLeft + 2}
+                          x2={stripLeft + colW - 2}
+                          y1={yScale(tk)}
+                          y2={yScale(tk)}
+                          stroke="#e5e7eb"
+                          strokeDasharray="2 4"
+                        />
+                        {/* Stage 6 v4: faint grey tick labels INSIDE
                           every strip, BELOW the dashed gridline (was
                           above). This is the only y-axis reference now
                           that the prominent left-margin labels are
                           gone. Skip 0 (sits at the strip's bottom
                           edge — visually noisy) and 100 (header
                           divider eats the space). */}
-                      {tk !== 0 && tk !== 100 && (
-                        <text
-                          x={stripLeft + 4}
-                          y={yScale(tk) + 11}
-                          fontSize={9}
-                          fontWeight={500}
-                          style={{
-                            fill: 'var(--color-border-strong, #cbd5e1)',
-                            fontVariantNumeric: 'tabular-nums',
-                            pointerEvents: 'none',
-                          }}
-                        >
-                          {tk}
-                        </text>
-                      )}
-                    </g>
-                  ))}
-                  {col.nodes.length === 0 && (
-                    <text
-                      x={stripLeft + colW / 2}
-                      y={headerH + innerH / 2}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fontSize={11}
-                      fill="#94a3b8"
-                      style={{ fontStyle: 'italic' }}
-                    >
-                      {t('strips.na', state.lang)}
-                    </text>
-                  )}
+                        {tk !== 0 && tk !== 100 && (
+                          <text
+                            x={stripLeft + 4}
+                            y={yScale(tk) + 11}
+                            fontSize={9}
+                            fontWeight={500}
+                            style={{
+                              fill: "var(--color-border-strong, #cbd5e1)",
+                              fontVariantNumeric: "tabular-nums",
+                              pointerEvents: "none",
+                            }}
+                          >
+                            {tk}
+                          </text>
+                        )}
+                      </g>
+                    ))}
+                    {col.nodes.length === 0 && (
+                      <text
+                        x={stripLeft + colW / 2}
+                        y={headerH + innerH / 2}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize={11}
+                        fill="#94a3b8"
+                        style={{ fontStyle: "italic" }}
+                      >
+                        {t("strips.na", state.lang)}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+
+              {/* Connecting polyline through the focused myth (selection or hover) */}
+              {focusMyth && (
+                <g
+                  transform={`translate(0, ${margin.top})`}
+                  pointerEvents="none"
+                >
+                  <path
+                    d={(() => {
+                      const pts: Array<{ x: number; y: number }> = [];
+                      columns.forEach((col, i) => {
+                        const node = col.nodes.find(
+                          (n) => n.mythId === focusMyth.id,
+                        );
+                        if (!node) return;
+                        pts.push({ x: colCenterX(i) + node.x, y: node.y });
+                      });
+                      if (pts.length < 2) return "";
+                      return (
+                        d3
+                          .line<{ x: number; y: number }>()
+                          .x((p) => p.x)
+                          .y((p) => p.y)
+                          .curve(d3.curveMonotoneX)(pts) || ""
+                      );
+                    })()}
+                    fill="none"
+                    stroke={selectedMyth ? "#0f172a" : "#475569"}
+                    strokeOpacity={selectedMyth ? 0.85 : 0.55}
+                    strokeWidth={1.5}
+                    strokeDasharray={selectedMyth ? "4 3" : "2 4"}
+                  />
                 </g>
-              );
-            })}
+              )}
 
-            {/* Connecting polyline through the focused myth (selection or hover) */}
-            {focusMyth && (
-              <g transform={`translate(0, ${margin.top})`} pointerEvents="none">
-                <path
-                  d={(() => {
-                    const pts: Array<{ x: number; y: number }> = [];
-                    columns.forEach((col, i) => {
-                      const node = col.nodes.find((n) => n.mythId === focusMyth.id);
-                      if (!node) return;
-                      pts.push({ x: colCenterX(i) + node.x, y: node.y });
-                    });
-                    if (pts.length < 2) return '';
-                    return d3.line<{ x: number; y: number }>()
-                      .x((p) => p.x).y((p) => p.y)
-                      .curve(d3.curveMonotoneX)(pts) || '';
-                  })()}
-                  fill="none"
-                  stroke={selectedMyth ? '#0f172a' : '#475569'}
-                  strokeOpacity={selectedMyth ? 0.85 : 0.55}
-                  strokeWidth={1.5}
-                  strokeDasharray={selectedMyth ? '4 3' : '2 4'}
-                />
-              </g>
-            )}
-
-            {/* Dots — focused dot rendered last so its hit-area overlays neighbors.
+              {/* Dots — focused dot rendered last so its hit-area overlays neighbors.
                 Streifen colour-encodes by *Verdict* via getCorrectnessColor below.
                 Note: this differs intentionally from BalkenView, where the bar
                 colour also encodes Verdict. Streifen used to colour by Mythos
                 category; both views now share the Verdict palette so the legend
                 works site-wide. */}
-            {columns.map((col, i) => {
-              const cx = colCenterX(i);
-              const sortedNodes = focusMythId === null
-                ? col.nodes
-                : [...col.nodes.filter((n) => n.mythId !== focusMythId),
-                   ...col.nodes.filter((n) => n.mythId === focusMythId)];
-              /**
-               * Stage 6 follow-up: arrow size scales by VIEWPORT WIDTH
-               * primarily, with a small density penalty so crowded
-               * columns shrink slightly. Width tiers:
-               *   <480px   → base 10  (small phone)
-               *   <768px   → base 14  (large phone / portrait tablet)
-               *   <1280px  → base 18  (laptop / landscape tablet)
-               *   ≥1280px  → base 22  (desktop)
-               * Density penalty: -2 when ≥13 dots in the column.
-               */
-              const widthBase =
-                width < 480 ? 10
-                : width < 768 ? 14
-                : width < 1280 ? 18
-                : 22;
-              const density = col.nodes.length;
-              const densityPenalty = density >= 13 ? 2 : 0;
-              const baseSize = Math.max(8, widthBase - densityPenalty);
-              return (
-                <g key={`dots-${String(col.id)}`} transform={`translate(0, ${margin.top})`}>
-                  {sortedNodes.map((n) => {
-                    const isSel = n.mythId === selectedMythId;
-                    const isHov = n.mythId === hoveredMythId && !isSel;
-                    const dimmed = focusMythId !== null && !(isSel || isHov);
-                    const size = isSel ? baseSize + 6 : isHov ? baseSize + 3 : baseSize;
-                    const hitR = isSel ? 22 : 14;
-                    const dotX = cx + n.x;
-                    const dotY = n.y;
-                    const verdict = n.myth.correctness_class;
-                    return (
-                      <g key={`${col.id}-${n.mythId}`}>
-                        {/* Verdict arrow — replaces the old <circle> in
+              {columns.map((col, i) => {
+                const cx = colCenterX(i);
+                const sortedNodes =
+                  focusMythId === null
+                    ? col.nodes
+                    : [
+                        ...col.nodes.filter((n) => n.mythId !== focusMythId),
+                        ...col.nodes.filter((n) => n.mythId === focusMythId),
+                      ];
+                /**
+                 * Stage 6 follow-up: arrow size scales by VIEWPORT WIDTH
+                 * primarily, with a small density penalty so crowded
+                 * columns shrink slightly. Width tiers:
+                 *   <480px   → base 10  (small phone)
+                 *   <768px   → base 14  (large phone / portrait tablet)
+                 *   <1280px  → base 18  (laptop / landscape tablet)
+                 *   ≥1280px  → base 22  (desktop)
+                 * Density penalty: -2 when ≥13 dots in the column.
+                 */
+                const widthBase =
+                  width < 480 ? 10 : width < 768 ? 14 : width < 1280 ? 18 : 22;
+                const density = col.nodes.length;
+                const densityPenalty = density >= 13 ? 2 : 0;
+                const baseSize = Math.max(8, widthBase - densityPenalty);
+                return (
+                  <g
+                    key={`dots-${String(col.id)}`}
+                    transform={`translate(0, ${margin.top})`}
+                  >
+                    {sortedNodes.map((n) => {
+                      const isSel = n.mythId === selectedMythId;
+                      const isHov = n.mythId === hoveredMythId && !isSel;
+                      const dimmed = focusMythId !== null && !(isSel || isHov);
+                      const size = isSel
+                        ? baseSize + 6
+                        : isHov
+                          ? baseSize + 3
+                          : baseSize;
+                      const hitR = isSel ? 22 : 14;
+                      const dotX = cx + n.x;
+                      const dotY = n.y;
+                      const verdict = n.myth.correctness_class;
+                      return (
+                        <g key={`${col.id}-${n.mythId}`}>
+                          {/* Verdict arrow — replaces the old <circle> in
                             Stage 6 of the Daten-Explorer refactor. The
                             `<use>` references one of the five symbols
                             in <defs> above. Color tints via the parent
                             <g style={{ color: ... }}> + currentColor in
                             the symbol's stroke. Centered by offsetting
                             x/y by half the rendered size. */}
-                        <g
-                          style={{
-                            color: getCorrectnessColor(verdict),
-                            opacity: dimmed ? 0.18 : isSel ? 1 : isHov ? 1 : 0.92,
-                            transition: 'opacity 120ms ease',
-                          }}
-                        >
-                          <use
-                            href={`#strips-arrow-${verdict}`}
-                            x={dotX - size / 2}
-                            y={dotY - size / 2}
-                            width={size}
-                            height={size}
-                          />
-                        </g>
-                        {/* Invisible square hit area — keeps the
+                          <g
+                            style={{
+                              color: getCorrectnessColor(verdict),
+                              opacity: dimmed
+                                ? 0.18
+                                : isSel
+                                  ? 1
+                                  : isHov
+                                    ? 1
+                                    : 0.92,
+                              transition: "opacity 120ms ease",
+                            }}
+                          >
+                            <use
+                              href={`#strips-arrow-${verdict}`}
+                              x={dotX - size / 2}
+                              y={dotY - size / 2}
+                              width={size}
+                              height={size}
+                            />
+                          </g>
+                          {/* Invisible square hit area — keeps the
                             click/hover target uniform regardless of
                             arrow shape, matching the old dot's tap
                             footprint. Sized to the previous radius
                             so muscle memory survives the change. */}
-                        <circle
-                          cx={dotX}
-                          cy={dotY}
-                          r={hitR}
-                          fill="transparent"
-                          style={{ cursor: 'pointer' }}
-                          onClick={(e) => { e.stopPropagation(); handleDotClick(n.mythId); }}
-                          onMouseEnter={() => {
-                            setHoveredMythId(n.mythId);
-                            setHoverPos({ x: dotX, y: dotY + margin.top });
-                          }}
-                          onMouseLeave={() => setHoveredMythId(null)}
-                        />
-                      </g>
-                    );
-                  })}
-                </g>
-              );
-            })}
+                          <circle
+                            cx={dotX}
+                            cy={dotY}
+                            r={hitR}
+                            fill="transparent"
+                            style={{ cursor: "pointer" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDotClick(n.mythId);
+                            }}
+                            onMouseEnter={() => {
+                              setHoveredMythId(n.mythId);
+                              setHoverPos({ x: dotX, y: dotY + margin.top });
+                            }}
+                            onMouseLeave={() => setHoveredMythId(null)}
+                          />
+                        </g>
+                      );
+                    })}
+                  </g>
+                );
+              })}
 
-            {/* Session 4b (BugHerd #55): Export-only chrome — column
+              {/* Session 4b (BugHerd #55): Export-only chrome — column
                 headers + per-dot value labels rendered inside the SVG so
                 they're captured by the PNG/SVG export pipeline. The HTML
                 overlays below (`.strips-svg-headers`) and the focus pills
@@ -856,230 +1024,270 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 CSS classes don't survive the detached-clone rendering
                 path (the clone is fed into an offscreen Image, where
                 stylesheets don't apply). */}
-            <g data-export-only="true" style={{ display: 'none' }} pointerEvents="none">
-              {/* Column header text — mirrors the HTML headers' label.
+              <g
+                data-export-only="true"
+                style={{ display: "none" }}
+                pointerEvents="none"
+              >
+                {/* Column header text — mirrors the HTML headers' label.
                   Icon is intentionally omitted: Lucide icons render as
                   nested <svg> tags which are awkward in serialised SVG,
                   and the label alone is plenty for a static export. */}
-              {columns.map((col, i) => {
-                const cx = colCenterX(i);
-                const colLabel = isMobile ? col.shortLabel : col.label;
-                return (
-                  <text
-                    key={`exp-hd-${String(col.id)}`}
-                    x={cx}
-                    y={margin.top + headerH / 2 + 4}
-                    textAnchor="middle"
-                    fontSize={isNarrow ? 11 : 13}
-                    fontWeight={600}
-                    fill="#1a1a2e"
-                  >
-                    {colLabel}
-                  </text>
-                );
-              })}
-              {/* Per-dot value labels. Small `<text>` near each dot;
+                {columns.map((col, i) => {
+                  const cx = colCenterX(i);
+                  const colLabel = isMobile ? col.shortLabel : col.label;
+                  return (
+                    <text
+                      key={`exp-hd-${String(col.id)}`}
+                      x={cx}
+                      y={margin.top + headerH / 2 + 4}
+                      textAnchor="middle"
+                      fontSize={isNarrow ? 11 : 13}
+                      fontWeight={600}
+                      fill="#1a1a2e"
+                    >
+                      {colLabel}
+                    </text>
+                  );
+                })}
+                {/* Per-dot value labels. Small `<text>` near each dot;
                   no pill background to keep the export uncluttered when
                   every column has 12–40 dots. */}
-              {columns.map((col, i) => {
-                const cx = colCenterX(i);
-                const isAwareness = mode === 'indicator' && col.id === 'awareness';
-                return (
-                  <g key={`exp-vals-${String(col.id)}`} transform={`translate(0, ${margin.top})`}>
-                    {col.nodes.map((n) => {
-                      const valText = formatPillValue(n.value, isAwareness, state.lang);
-                      const dotX = cx + n.x;
-                      const dotY = n.y;
-                      // Anchor to the right of the dot when there's room,
-                      // else flip to the left of the dot.
-                      let labelX = dotX + 8;
-                      let anchor: 'start' | 'end' = 'start';
-                      if (labelX + valText.length * 5 > cx + colW / 2 - 2) {
-                        labelX = dotX - 8;
-                        anchor = 'end';
-                      }
-                      return (
-                        <text
-                          key={`exp-v-${col.id}-${n.mythId}`}
-                          x={labelX}
-                          y={dotY + 3}
-                          textAnchor={anchor}
-                          fontSize={9}
-                          fontWeight={600}
-                          fill="#1a1a2e"
-                        >
-                          {valText}
-                        </text>
-                      );
-                    })}
-                  </g>
-                );
-              })}
-            </g>
-
-            {/* Inline value pills next to highlighted dots — shown on
-                selection AND on hover so users see the numbers either way. */}
-            {focusMyth && (
-              <g transform={`translate(0, ${margin.top})`} pointerEvents="none">
                 {columns.map((col, i) => {
-                  const node = col.nodes.find((n) => n.mythId === focusMyth.id);
-                  const v = col.valueByMyth.get(focusMyth.id) ?? null;
-                  const isAwareness = mode === 'indicator' && col.id === 'awareness';
-                  const valText = formatPillValue(v, isAwareness, state.lang);
                   const cx = colCenterX(i);
-                  // Anchor pill to the right of the dot when there's room, else to the left
-                  let dotX = cx;
-                  let dotY = innerH / 2;
-                  if (node) {
-                    dotX = cx + node.x;
-                    dotY = node.y;
-                  }
-                  const pillW = Math.min(56, Math.max(28, valText.length * 6 + 12));
-                  const padding = 4;
-                  let pillX = dotX + 10;
-                  let pillTextAnchor: 'start' | 'end' = 'start';
-                  // Flip to left if pill would overflow strip on the right
-                  if (pillX + pillW > cx + colW / 2 - padding) {
-                    pillX = dotX - 10 - pillW;
-                    pillTextAnchor = 'end';
-                  }
-                  // Clamp within strip horizontally
-                  if (pillX < cx - colW / 2 + padding) pillX = cx - colW / 2 + padding;
+                  const isAwareness =
+                    mode === "indicator" && col.id === "awareness";
                   return (
-                    <g key={`pill-${String(col.id)}`}>
-                      <rect
-                        x={pillX}
-                        y={dotY - 9}
-                        width={pillW}
-                        height={18}
-                        rx={9}
-                        fill="#0f172a"
-                        fillOpacity={0.92}
-                      />
-                      <text
-                        x={pillTextAnchor === 'start' ? pillX + 6 : pillX + pillW - 6}
-                        y={dotY + 4}
-                        textAnchor={pillTextAnchor}
-                        fontSize={10}
-                        fontWeight={600}
-                        fill="white"
-                      >
-                        {valText}
-                      </text>
+                    <g
+                      key={`exp-vals-${String(col.id)}`}
+                      transform={`translate(0, ${margin.top})`}
+                    >
+                      {col.nodes.map((n) => {
+                        const valText = formatPillValue(
+                          n.value,
+                          isAwareness,
+                          state.lang,
+                        );
+                        const dotX = cx + n.x;
+                        const dotY = n.y;
+                        // Anchor to the right of the dot when there's room,
+                        // else flip to the left of the dot.
+                        let labelX = dotX + 8;
+                        let anchor: "start" | "end" = "start";
+                        if (labelX + valText.length * 5 > cx + colW / 2 - 2) {
+                          labelX = dotX - 8;
+                          anchor = "end";
+                        }
+                        return (
+                          <text
+                            key={`exp-v-${col.id}-${n.mythId}`}
+                            x={labelX}
+                            y={dotY + 3}
+                            textAnchor={anchor}
+                            fontSize={9}
+                            fontWeight={600}
+                            fill="#1a1a2e"
+                          >
+                            {valText}
+                          </text>
+                        );
+                      })}
                     </g>
                   );
                 })}
               </g>
-            )}
 
-          </svg>
+              {/* Inline value pills next to highlighted dots — shown on
+                selection AND on hover so users see the numbers either way. */}
+              {focusMyth && (
+                <g
+                  transform={`translate(0, ${margin.top})`}
+                  pointerEvents="none"
+                >
+                  {columns.map((col, i) => {
+                    const node = col.nodes.find(
+                      (n) => n.mythId === focusMyth.id,
+                    );
+                    const v = col.valueByMyth.get(focusMyth.id) ?? null;
+                    const isAwareness =
+                      mode === "indicator" && col.id === "awareness";
+                    const valText = formatPillValue(v, isAwareness, state.lang);
+                    const cx = colCenterX(i);
+                    // Anchor pill to the right of the dot when there's room, else to the left
+                    let dotX = cx;
+                    let dotY = innerH / 2;
+                    if (node) {
+                      dotX = cx + node.x;
+                      dotY = node.y;
+                    }
+                    const pillW = Math.min(
+                      56,
+                      Math.max(28, valText.length * 6 + 12),
+                    );
+                    const padding = 4;
+                    let pillX = dotX + 10;
+                    let pillTextAnchor: "start" | "end" = "start";
+                    // Flip to left if pill would overflow strip on the right
+                    if (pillX + pillW > cx + colW / 2 - padding) {
+                      pillX = dotX - 10 - pillW;
+                      pillTextAnchor = "end";
+                    }
+                    // Clamp within strip horizontally
+                    if (pillX < cx - colW / 2 + padding)
+                      pillX = cx - colW / 2 + padding;
+                    return (
+                      <g key={`pill-${String(col.id)}`}>
+                        <rect
+                          x={pillX}
+                          y={dotY - 9}
+                          width={pillW}
+                          height={18}
+                          rx={9}
+                          fill="#0f172a"
+                          fillOpacity={0.92}
+                        />
+                        <text
+                          x={
+                            pillTextAnchor === "start"
+                              ? pillX + 6
+                              : pillX + pillW - 6
+                          }
+                          y={dotY + 4}
+                          textAnchor={pillTextAnchor}
+                          fontSize={10}
+                          fontWeight={600}
+                          fill="white"
+                        >
+                          {valText}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
+            </svg>
 
-          {/* Absolute-positioned HTML headers over the in-SVG header area —
+            {/* Absolute-positioned HTML headers over the in-SVG header area —
               one per column — so each strip rectangle reads as a single
               unified box: header on top, divider line, dots below. Hidden
               columns (Stage 6 follow-up) render as 28px placeholders with
               a chevron + rotated label that span the full strip height. */}
-          <div className="strips-svg-headers" aria-hidden={false}>
-            {columns.map((col, i) => {
-              const cx = colCenterX(i);
-              const left = cx - colW / 2;
-              const top = margin.top;
-              const colLabel = isMobile ? col.shortLabel : col.label;
-              return (
-                <div
-                  key={`hd-${String(col.id)}`}
-                  className="strips-svg-header"
-                  style={{ left, top, width: colW, height: headerH }}
-                >
-                  {/* Stage 6: top-left EyeOff trigger to hide this column. */}
-                  <button
-                    type="button"
-                    className="strips-svg-header__hide"
-                    onClick={() => hide(String(col.id))}
-                    aria-label={`${t('column.hide', state.lang)} — ${col.label}`}
-                    title={`${t('column.hide', state.lang)} — ${col.label}`}
-                  >
-                    <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
-                  </button>
-                  <div className="strips-svg-header__inner">
-                    {col.emoji ? (
-                      <span className="strips-svg-header__emoji" aria-hidden="true">{col.emoji}</span>
-                    ) : col.Icon ? (
-                      <col.Icon size={isNarrow ? 16 : 18} strokeWidth={1.75} aria-hidden="true" />
-                    ) : null}
-                    <span className="strips-svg-header__label">
-                      {colLabel}
-                    </span>
-                  </div>
-                  {col.defLabel && col.defText && (
-                    <span className="strips-svg-header__info">
-                      <InfoTooltip
-                        title={col.defLabel}
-                        definition={col.defText}
-                        scale={col.scale}
-                        sampleSize={col.sampleSize}
-                      />
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-            {/* Hidden-column placeholders — full-strip-height pills with
-                chevron + rotated label. Click anywhere on them to reveal. */}
-            {slotLayout
-              .filter((s) => s.kind === 'hidden')
-              .map((s) => {
-                // Find the original column metadata for the label.
-                const labelLookup =
-                  mode === 'indicator'
-                    ? t(`indicator.${s.id as Indicator}.short` as TranslationKey, state.lang)
-                    : (groups.find((g) => g.id === s.id)?.[
-                        state.lang === 'de' ? 'name_de' : 'name_en'
-                      ] ?? s.id);
+            <div className="strips-svg-headers" aria-hidden={false}>
+              {columns.map((col, i) => {
+                const cx = colCenterX(i);
+                const left = cx - colW / 2;
+                const top = margin.top;
+                const colLabel = isMobile ? col.shortLabel : col.label;
                 return (
-                  <button
-                    key={`hd-hidden-${s.id}`}
-                    type="button"
-                    className="strips-svg-header strips-svg-header--hidden"
-                    style={{
-                      left: s.left,
-                      top: margin.top,
-                      width: s.width,
-                      height: headerH + innerH,
-                    }}
-                    onClick={() => show(s.id)}
-                    aria-label={`${t('column.show', state.lang)} — ${labelLookup}`}
-                    title={`${t('column.show', state.lang)} — ${labelLookup}`}
+                  <div
+                    key={`hd-${String(col.id)}`}
+                    className="strips-svg-header"
+                    style={{ left, top, width: colW, height: headerH }}
                   >
-                    <span className="strips-svg-header--hidden__chevron" aria-hidden="true">
-                      ▸
-                    </span>
-                    <span className="strips-svg-header--hidden__label">
-                      {labelLookup}
-                    </span>
-                  </button>
+                    {/* Stage 6: top-left EyeOff trigger to hide this column. */}
+                    <button
+                      type="button"
+                      className="strips-svg-header__hide"
+                      onClick={() => hide(String(col.id))}
+                      aria-label={`${t("column.hide", state.lang)} — ${col.label}`}
+                      title={`${t("column.hide", state.lang)} — ${col.label}`}
+                    >
+                      <EyeOff size={12} strokeWidth={2} aria-hidden="true" />
+                    </button>
+                    <div className="strips-svg-header__inner">
+                      {col.emoji ? (
+                        <span
+                          className="strips-svg-header__emoji"
+                          aria-hidden="true"
+                        >
+                          {col.emoji}
+                        </span>
+                      ) : col.Icon ? (
+                        <col.Icon
+                          size={isNarrow ? 16 : 18}
+                          strokeWidth={1.75}
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                      <span className="strips-svg-header__label">
+                        {colLabel}
+                      </span>
+                    </div>
+                    {col.defLabel && col.defText && (
+                      <span className="strips-svg-header__info">
+                        <InfoTooltip
+                          title={col.defLabel}
+                          definition={col.defText}
+                          scale={col.scale}
+                          sampleSize={col.sampleSize}
+                        />
+                      </span>
+                    )}
+                  </div>
                 );
               })}
-          </div>
+              {/* Hidden-column placeholders — full-strip-height pills with
+                chevron + rotated label. Click anywhere on them to reveal. */}
+              {slotLayout
+                .filter((s) => s.kind === "hidden")
+                .map((s) => {
+                  // Find the original column metadata for the label.
+                  const labelLookup =
+                    mode === "indicator"
+                      ? t(
+                          `indicator.${s.id as Indicator}.short` as TranslationKey,
+                          state.lang,
+                        )
+                      : (groups.find((g) => g.id === s.id)?.[
+                          state.lang === "de" ? "name_de" : "name_en"
+                        ] ?? s.id);
+                  return (
+                    <button
+                      key={`hd-hidden-${s.id}`}
+                      type="button"
+                      className="strips-svg-header strips-svg-header--hidden"
+                      style={{
+                        left: s.left,
+                        top: margin.top,
+                        width: s.width,
+                        height: headerH + innerH,
+                      }}
+                      onClick={() => show(s.id)}
+                      aria-label={`${t("column.show", state.lang)} — ${labelLookup}`}
+                      title={`${t("column.show", state.lang)} — ${labelLookup}`}
+                    >
+                      <span
+                        className="strips-svg-header--hidden__chevron"
+                        aria-hidden="true"
+                      >
+                        ▸
+                      </span>
+                      <span className="strips-svg-header--hidden__label">
+                        {labelLookup}
+                      </span>
+                    </button>
+                  );
+                })}
+            </div>
 
-          {/* Hover statement card — rendered AFTER strip-svg-headers so it
+            {/* Hover statement card — rendered AFTER strip-svg-headers so it
               paints on top of the icons + 'i' tooltip triggers when it
               overlaps them near the top of the chart. Pure HTML (not SVG
               foreignObject) so z-index works reliably. */}
-          {hoveredMyth && hoverPos && !selectedMyth && (
-            <div
-              className="strips-hover-statement strips-hover-statement--abs"
-              style={{
-                left: Math.max(8, Math.min(width - 260, hoverPos.x - 130)),
-                top: Math.max(8, hoverPos.y - 92),
-                width: 260,
-              }}
-            >
-              {getMythText(hoveredMyth, state.lang)}
-            </div>
-          )}
-          </div> {/* /.strips-svg-wrap */}
-
+            {hoveredMyth && hoverPos && !selectedMyth && (
+              <div
+                className="strips-hover-statement strips-hover-statement--abs"
+                style={{
+                  left: Math.max(8, Math.min(width - 260, hoverPos.x - 130)),
+                  top: Math.max(8, hoverPos.y - 92),
+                  width: 260,
+                }}
+              >
+                {getMythText(hoveredMyth, state.lang)}
+              </div>
+            )}
+          </div>{" "}
+          {/* /.strips-svg-wrap */}
           {/* Myth card — appears BELOW the SVG (above the categories pills)
               when a myth is selected, with a × close button at the top-right. */}
           {selectedMyth && (
@@ -1089,14 +1297,16 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 className="strips-myth-card__close"
                 onClick={(e) => {
                   e.stopPropagation();
-                  update('selectedMythId', null);
+                  update("selectedMythId", null);
                 }}
-                aria-label={t('detail.close', state.lang)}
-                title={t('detail.close', state.lang)}
+                aria-label={t("detail.close", state.lang)}
+                title={t("detail.close", state.lang)}
               >
                 ×
               </button>
-              <div className={`strips-myth-card__bar classification--${selectedMyth.correctness_class}`}>
+              <div
+                className={`strips-myth-card__bar classification--${selectedMyth.correctness_class}`}
+              >
                 <span
                   className="strips-myth-card__bar-icon"
                   onClick={(e) => e.stopPropagation()}
@@ -1107,7 +1317,9 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                     strokeWidth={2.5}
                   />
                 </span>
-                <span className="strips-myth-card__bar-label">{cardClassification}</span>
+                <span className="strips-myth-card__bar-label">
+                  {cardClassification}
+                </span>
               </div>
               <VerdictStatement
                 statement={cardTitle}
@@ -1115,7 +1327,9 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                 as="p"
                 className="strips-myth-card__statement"
               />
-              {cardSummary && <p className="strips-myth-card__summary">{cardSummary}</p>}
+              {cardSummary && (
+                <p className="strips-myth-card__summary">{cardSummary}</p>
+              )}
               <div className="strips-myth-card__actions">
                 <button
                   className="strips-myth-card__more"
@@ -1124,12 +1338,11 @@ const StripsView = forwardRef<StripsViewHandle, Props>(function StripsView(
                     onSelectMyth(selectedMyth.id);
                   }}
                 >
-                  {t('strips.more', state.lang)} →
+                  {t("strips.more", state.lang)} →
                 </button>
               </div>
             </div>
           )}
-
           {/* (Mythos-Kategorie dropdown moved to the top controls row.) */}
         </div>
       </div>
@@ -1153,18 +1366,21 @@ export default StripsView;
 function extractCardSummary(
   content: MythContentEntry | null | undefined,
   myth: Myth,
-  lang: 'de' | 'en',
+  lang: "de" | "en",
 ): string {
   if (!content) return getMythShortText(myth, lang);
   const html = content.html;
   const match = html.match(/<h2[^>]*>\s*Synthese\s*<\/h2>([\s\S]*?)(?=<h2|$)/i);
   if (!match) return getMythShortText(myth, lang);
   const text = match[1]
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
   if (!text) return getMythShortText(myth, lang);
   // Take roughly the first sentence(s) up to ~220 chars
-  const trimmed = text.length > 220 ? text.slice(0, 220).replace(/[^.!?…]+$/, '') + '…' : text;
+  const trimmed =
+    text.length > 220
+      ? text.slice(0, 220).replace(/[^.!?…]+$/, "") + "…"
+      : text;
   return trimmed || getMythShortText(myth, lang);
 }

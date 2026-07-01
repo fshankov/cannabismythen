@@ -94,7 +94,9 @@
 .fakten-list-sort__arrow {
   color: var(--color-text-muted, #9a9a90);
   opacity: 0.45;
-  transition: color 140ms ease, opacity 140ms ease;
+  transition:
+    color 140ms ease,
+    opacity 140ms ease;
 }
 
 .fakten-list-sort__arrow.is-active {
@@ -173,15 +175,25 @@
 /* ── Verdict color tokens — cascaded to row hover, statement arrow,
    chevron + detail accent (shared by the main + detail rows). ── */
 .fakten-list-row[data-classification="richtig"],
-.fakten-list-detail-row[data-classification="richtig"]                { --rv: var(--classification-richtig, #047857); }
+.fakten-list-detail-row[data-classification="richtig"] {
+  --rv: var(--classification-richtig, #047857);
+}
 .fakten-list-row[data-classification="eher_richtig"],
-.fakten-list-detail-row[data-classification="eher_richtig"]           { --rv: var(--classification-eher-richtig, #4d7c0f); }
+.fakten-list-detail-row[data-classification="eher_richtig"] {
+  --rv: var(--classification-eher-richtig, #4d7c0f);
+}
 .fakten-list-row[data-classification="eher_falsch"],
-.fakten-list-detail-row[data-classification="eher_falsch"]            { --rv: var(--classification-eher-falsch, #b45309); }
+.fakten-list-detail-row[data-classification="eher_falsch"] {
+  --rv: var(--classification-eher-falsch, #b45309);
+}
 .fakten-list-row[data-classification="falsch"],
-.fakten-list-detail-row[data-classification="falsch"]                 { --rv: var(--classification-falsch, #be123c); }
+.fakten-list-detail-row[data-classification="falsch"] {
+  --rv: var(--classification-falsch, #be123c);
+}
 .fakten-list-row[data-classification="keine_aussage_moeglich"],
-.fakten-list-detail-row[data-classification="keine_aussage_moeglich"] { --rv: #6b7280; }
+.fakten-list-detail-row[data-classification="keine_aussage_moeglich"] {
+  --rv: #6b7280;
+}
 
 /* ── Statement cell ── */
 /* A2-4: calm hover — the row tint + a trailing arrow are the only two
@@ -228,11 +240,17 @@
   color: var(--color-text-muted, #6b6b63);
   cursor: pointer;
   border-radius: 999px;
-  transition: background 160ms ease, color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
 }
 
 .fakten-list-expand:hover {
-  background: color-mix(in srgb, var(--rv, var(--color-accent, #2d6a4f)) 14%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--rv, var(--color-accent, #2d6a4f)) 14%,
+    transparent
+  );
   color: var(--rv, var(--color-text));
 }
 
@@ -299,7 +317,9 @@
   border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.18);
-  transition: background 160ms ease, box-shadow 160ms ease;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .fakten-list-detail__cta:hover {
@@ -400,7 +420,11 @@
    two callouts read as a hierarchy rather than two equal grey blocks. */
 .carm-export-callout--accent {
   background: var(--color-accent-light, #e8f5ef);
-  border-color: color-mix(in srgb, var(--color-accent, #2d6a4f) 24%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--color-accent, #2d6a4f) 24%,
+    transparent
+  );
   color: var(--color-text, #1a1a2e);
 }
 

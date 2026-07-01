@@ -7,7 +7,10 @@ export interface FooterBlock {
   email?: string;
   body?: string;
 }
-export interface ProjectLink { label: string; url: string }
+export interface ProjectLink {
+  label: string;
+  url: string;
+}
 
 export interface Props {
   kontakt?: FooterBlock | null;
@@ -17,7 +20,13 @@ export interface Props {
   links?: ReadonlyArray<ProjectLink>;
 }
 
-const { kontakt, foerderung, zitierweise, abschlussbericht, links = [] } = Astro.props;
+const {
+  kontakt,
+  foerderung,
+  zitierweise,
+  abschlussbericht,
+  links = [],
+} = Astro.props;
 // CaRM final report PDF — linked from the "Abschlussbericht" word in the footer citation.
 const ABSCHLUSSBERICHT_URL =
   "https://www.isd-hamburg.de/wp-content/uploads/2026/03/Abschlussbericht_CaRM_final.pdf";
@@ -34,70 +43,113 @@ const year = new Date().getFullYear();
 <footer class="site-footer" aria-label="Seitenbereich: Über das Projekt">
   <div class="site-footer__inner">
     <div class="site-footer__grid">
-
       <!-- Col 1: Brand + Kontakt -->
       <div class="site-footer__col">
         <div class="site-footer__brand">
-          <a href="/" class="nav__brand site-footer__logo-link" aria-label="Cannabis Mythen – Startseite">
+          <a
+            href="/"
+            class="nav__brand site-footer__logo-link"
+            aria-label="Cannabis Mythen – Startseite"
+          >
             <span class="cm-logo" aria-hidden="true">
-              <img src="/germany-logo.svg" alt="" style="width:100%;height:100%;object-fit:contain;display:block;">
+              <img
+                src="/germany-logo.svg"
+                alt=""
+                style="width:100%;height:100%;object-fit:contain;display:block;"
+              />
             </span>
-            <span class="nav__brand-text">Cannabis<span class="nav__brand-myth">Mythen</span></span>
+            <span class="nav__brand-text"
+              >Cannabis<span class="nav__brand-myth">Mythen</span></span
+            >
           </a>
-          <p class="site-footer__tagline">Cannabis: Mythen &amp; Evidenz — Ein interaktives Informationstool des ISD Hamburg.</p>
+          <p class="site-footer__tagline">
+            Cannabis: Mythen &amp; Evidenz — Ein interaktives Informationstool
+            des ISD Hamburg.
+          </p>
         </div>
-        {kontakt && (
-          <div class="site-footer__block">
-            <h2 class="site-footer__h">{kontakt.label}</h2>
-            {(kontakt.lines ?? []).map((l) => <p class="site-footer__line">{l}</p>)}
-            {kontakt.email && (
-              <a class="site-footer__email" href={`mailto:${kontakt.email}`}>{kontakt.email}</a>
-            )}
-          </div>
-        )}
+        {
+          kontakt && (
+            <div class="site-footer__block">
+              <h2 class="site-footer__h">{kontakt.label}</h2>
+              {(kontakt.lines ?? []).map((l) => (
+                <p class="site-footer__line">{l}</p>
+              ))}
+              {kontakt.email && (
+                <a class="site-footer__email" href={`mailto:${kontakt.email}`}>
+                  {kontakt.email}
+                </a>
+              )}
+            </div>
+          )
+        }
       </div>
 
       <!-- Col 2: Förderung + Zitierweise -->
       <div class="site-footer__col">
-        {foerderung && (
-          <div class="site-footer__block">
-            <h2 class="site-footer__h">{foerderung.label}</h2>
-            <p class="site-footer__line">{foerderung.body}</p>
-          </div>
-        )}
-        {zitierweise && (
-          <div class="site-footer__block">
-            <h2 class="site-footer__h">{zitierweise.label}</h2>
-            <p class="site-footer__line">{zitierweise.body}</p>
-          </div>
-        )}
+        {
+          foerderung && (
+            <div class="site-footer__block">
+              <h2 class="site-footer__h">{foerderung.label}</h2>
+              <p class="site-footer__line">{foerderung.body}</p>
+            </div>
+          )
+        }
+        {
+          zitierweise && (
+            <div class="site-footer__block">
+              <h2 class="site-footer__h">{zitierweise.label}</h2>
+              <p class="site-footer__line">{zitierweise.body}</p>
+            </div>
+          )
+        }
       </div>
 
       <!-- Col 3: Abschlussbericht -->
       <div class="site-footer__col">
-        {abschlussbericht && (
-          <div class="site-footer__block">
-            <h2 class="site-footer__h">{abschlussbericht.label}</h2>
-            {/* Link the word "Abschlussbericht" in the citation. before/after are
+        {
+          abschlussbericht && (
+            <div class="site-footer__block">
+              <h2 class="site-footer__h">{abschlussbericht.label}</h2>
+              {/* Link the word "Abschlussbericht" in the citation. before/after are
                 kept adjacent (no template whitespace) so the period hugs the word. */}
-            <p class="site-footer__line">{abIdx === -1 ? abschlussbericht.body : (<Fragment>{abBefore}<a class="site-footer__report-link" href={ABSCHLUSSBERICHT_URL} target="_blank" rel="noopener noreferrer">{AB_WORD}</a>{abAfter}</Fragment>)}</p>
-          </div>
-        )}
+              <p class="site-footer__line">
+                {abIdx === -1 ? (
+                  abschlussbericht.body
+                ) : (
+                  <Fragment>
+                    {abBefore}
+                    <a
+                      class="site-footer__report-link"
+                      href={ABSCHLUSSBERICHT_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {AB_WORD}
+                    </a>
+                    {abAfter}
+                  </Fragment>
+                )}
+              </p>
+            </div>
+          )
+        }
       </div>
-
     </div>
 
     <!-- Bottom bar -->
     <div class="site-footer__bar">
       <p class="site-footer__copy">© {year} ISD Hamburg · CaRM-Projekt</p>
-      {links.length > 0 && (
-        <ul class="site-footer__links" role="list">
-          {links.map((l) => (
-            <li><a href={l.url}>{l.label}</a></li>
-          ))}
-        </ul>
-      )}
+      {
+        links.length > 0 && (
+          <ul class="site-footer__links" role="list">
+            {links.map((l) => (
+              <li>
+                <a href={l.url}>{l.label}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
     </div>
-
   </div>
 </footer>

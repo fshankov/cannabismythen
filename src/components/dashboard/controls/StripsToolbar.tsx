@@ -13,12 +13,12 @@
  *  - mode === 'group'     → indicator picker (active = state.indicator)
  */
 
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 import {
   INDICATOR_ICONS as ICONS_INDICATOR,
   AUDIENCE_ICONS_BY_GROUP,
   type IconComponent,
-} from '../../../lib/icons';
+} from "../../../lib/icons";
 import type {
   AppState,
   Group,
@@ -26,44 +26,44 @@ import type {
   Indicator,
   StripsMode,
   DashboardDefinitions,
-} from '../../../lib/dashboard/types';
-import { t, type TranslationKey } from '../../../lib/dashboard/translations';
-import PivotToggle from './PivotToggle';
-import DataPicker, { type DataPickerOption } from './DataPicker';
-import ToolbarRow from './ToolbarRow';
+} from "../../../lib/dashboard/types";
+import { t, type TranslationKey } from "../../../lib/dashboard/translations";
+import PivotToggle from "./PivotToggle";
+import DataPicker, { type DataPickerOption } from "./DataPicker";
+import ToolbarRow from "./ToolbarRow";
 
 const INDICATORS: Indicator[] = [
-  'awareness',
-  'significance',
-  'correctness',
-  'prevention_significance',
-  'population_relevance',
+  "awareness",
+  "significance",
+  "correctness",
+  "prevention_significance",
+  "population_relevance",
 ];
 
 const STRIP_GROUP_IDS: GroupId[] = [
-  'adults',
-  'minors',
-  'consumers',
-  'young_adults',
-  'parents',
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
 ];
 
 const INDICATOR_ICONS: Record<Indicator, IconComponent> = ICONS_INDICATOR;
 const GROUP_ICONS: Record<GroupId, IconComponent> = AUDIENCE_ICONS_BY_GROUP;
 
 const GROUP_SHORT_DE: Record<GroupId, string> = {
-  adults: 'Erw.',
-  minors: 'Minderj.',
-  consumers: 'Konsum.',
-  young_adults: 'Junge Erw.',
-  parents: 'Eltern',
+  adults: "Erw.",
+  minors: "Minderj.",
+  consumers: "Konsum.",
+  young_adults: "Junge Erw.",
+  parents: "Eltern",
 };
 const GROUP_SHORT_EN: Record<GroupId, string> = {
-  adults: 'Adults',
-  minors: 'Minors',
-  consumers: 'Cons.',
-  young_adults: 'Y. Adults',
-  parents: 'Parents',
+  adults: "Adults",
+  minors: "Minors",
+  consumers: "Cons.",
+  young_adults: "Y. Adults",
+  parents: "Parents",
 };
 
 interface Props {
@@ -89,11 +89,15 @@ export default function StripsToolbar({
   // are indicators, so the user picks the GROUP from this dropdown
   // (and vice versa).
   const valueOptions: DataPickerOption<string>[] =
-    mode === 'indicator'
+    mode === "indicator"
       ? STRIP_GROUP_IDS.map((gid) => {
           const g = groups.find((x) => x.id === gid);
           const def = definitions?.groups?.[gid];
-          const fullLabel = g ? (state.lang === 'de' ? g.name_de : g.name_en) : gid;
+          const fullLabel = g
+            ? state.lang === "de"
+              ? g.name_de
+              : g.name_en
+            : gid;
           return {
             value: gid as string,
             label: fullLabel,
@@ -110,7 +114,10 @@ export default function StripsToolbar({
         })
       : INDICATORS.map((ind) => {
           const def = definitions?.mythIndicators?.[ind];
-          const label = t(`indicator.${ind}.short` as TranslationKey, state.lang);
+          const label = t(
+            `indicator.${ind}.short` as TranslationKey,
+            state.lang,
+          );
           return {
             value: ind as string,
             label,
@@ -127,15 +134,15 @@ export default function StripsToolbar({
         });
 
   const activeId =
-    mode === 'indicator'
-      ? state.groupIds[0] ?? STRIP_GROUP_IDS[0]
+    mode === "indicator"
+      ? (state.groupIds[0] ?? STRIP_GROUP_IDS[0])
       : state.indicator;
 
   const onPickerChange = (next: string) => {
-    if (mode === 'indicator') {
-      update('groupIds', [next as GroupId]);
+    if (mode === "indicator") {
+      update("groupIds", [next as GroupId]);
     } else {
-      update('indicator', next as Indicator);
+      update("indicator", next as Indicator);
     }
   };
 
@@ -148,26 +155,29 @@ export default function StripsToolbar({
 
   return (
     <ToolbarRow
-      aria-label={t('strips.compare.label', state.lang)}
+      aria-label={t("strips.compare.label", state.lang)}
       pivot={
         <PivotToggle<StripsMode>
-          aria-label={t('strips.compare.label', state.lang)}
+          aria-label={t("strips.compare.label", state.lang)}
           value={mode}
-          onChange={(v) => update('stripsMode', v)}
+          onChange={(v) => update("stripsMode", v)}
           options={[
-            { value: 'indicator', label: t('strips.mode.indicator', state.lang) },
-            { value: 'group', label: t('strips.mode.group', state.lang) },
+            {
+              value: "indicator",
+              label: t("strips.mode.indicator", state.lang),
+            },
+            { value: "group", label: t("strips.mode.group", state.lang) },
           ]}
         />
       }
       pickers={[
         <DataPicker<string>
           key="value"
-          caption={t('strips.value.label', state.lang)}
+          caption={t("strips.value.label", state.lang)}
           value={activeId}
           options={valueOptions}
           onChange={onPickerChange}
-          aria-label={t('strips.value.label', state.lang)}
+          aria-label={t("strips.value.label", state.lang)}
           lang={state.lang}
         />,
       ]}

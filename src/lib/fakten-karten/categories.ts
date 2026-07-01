@@ -32,7 +32,7 @@ import {
   Landmark,
   CircleAlert,
   type LucideIcon,
-} from 'lucide-react';
+} from "lucide-react";
 
 export interface CategoryMetaEntry {
   /** ASCII slug — reserved for future per-category URL routes. */
@@ -46,53 +46,53 @@ export interface CategoryMetaEntry {
 }
 
 export const CATEGORY_META: Record<string, CategoryMetaEntry> = {
-  'Medizinischer und therapeutischer Nutzen': {
-    slug: 'medizin',
+  "Medizinischer und therapeutischer Nutzen": {
+    slug: "medizin",
     icon: BriefcaseMedical,
-    strip: '#3b82f6', // Blue-500
-    label: '#1d4ed8', // Blue-700
+    strip: "#3b82f6", // Blue-500
+    label: "#1d4ed8", // Blue-700
   },
-  'Risiken für den Körper und die Entwicklung': {
-    slug: 'koerper',
+  "Risiken für den Körper und die Entwicklung": {
+    slug: "koerper",
     icon: HeartPulse,
-    strip: '#06b6d4', // Cyan-500
-    label: '#0e7490', // Cyan-700
+    strip: "#06b6d4", // Cyan-500
+    label: "#0e7490", // Cyan-700
   },
-  'Risiken für die psychische Gesundheit': {
-    slug: 'psyche',
+  "Risiken für die psychische Gesundheit": {
+    slug: "psyche",
     icon: Brain,
-    strip: '#8b5cf6', // Violet-500
-    label: '#6d28d9', // Violet-700
+    strip: "#8b5cf6", // Violet-500
+    label: "#6d28d9", // Violet-700
   },
-  'Einfluss auf Stimmung und Wahrnehmung': {
-    slug: 'stimmung',
+  "Einfluss auf Stimmung und Wahrnehmung": {
+    slug: "stimmung",
     icon: Meh,
-    strip: '#eab308', // Yellow-500
-    label: '#a16207', // Yellow-700
+    strip: "#eab308", // Yellow-500
+    label: "#a16207", // Yellow-700
   },
-  'Soziale Auswirkungen und Leistungsfähigkeit': {
-    slug: 'sozial',
+  "Soziale Auswirkungen und Leistungsfähigkeit": {
+    slug: "sozial",
     icon: UsersRound, // handoff `fk-soziales` — round-avatar people glyph
-    strip: '#ec4899', // Pink-500
-    label: '#be185d', // Pink-700
+    strip: "#ec4899", // Pink-500
+    label: "#be185d", // Pink-700
   },
-  'Risiken durch Dosierung und Qualität': {
-    slug: 'dosis',
+  "Risiken durch Dosierung und Qualität": {
+    slug: "dosis",
     icon: Scale,
-    strip: '#64748b', // Slate-500
-    label: '#334155', // Slate-700
+    strip: "#64748b", // Slate-500
+    label: "#334155", // Slate-700
   },
-  'Verbreitung in der Bevölkerung und Gesetzgebung': {
-    slug: 'gesetz',
+  "Verbreitung in der Bevölkerung und Gesetzgebung": {
+    slug: "gesetz",
     icon: Landmark,
-    strip: '#6366f1', // Indigo-500
-    label: '#4338ca', // Indigo-700
+    strip: "#6366f1", // Indigo-500
+    label: "#4338ca", // Indigo-700
   },
-  'Allgemeine Einschätzung der Gefährlichkeit': {
-    slug: 'gefahr',
+  "Allgemeine Einschätzung der Gefährlichkeit": {
+    slug: "gefahr",
     icon: CircleAlert,
-    strip: '#f97316', // Orange-500
-    label: '#c2410c', // Orange-700
+    strip: "#f97316", // Orange-500
+    label: "#c2410c", // Orange-700
   },
 };
 
@@ -100,10 +100,10 @@ export const CATEGORY_META: Record<string, CategoryMetaEntry> = {
 export function getCategoryMeta(categoryGroup: string): CategoryMetaEntry {
   return (
     CATEGORY_META[categoryGroup] ?? {
-      slug: 'sonstige',
+      slug: "sonstige",
       icon: CircleAlert,
-      strip: '#94a3b8', // Slate-400 — neutral fallback
-      label: '#475569', // Slate-600
+      strip: "#94a3b8", // Slate-400 — neutral fallback
+      label: "#475569", // Slate-600
     }
   );
 }

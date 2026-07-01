@@ -10,12 +10,12 @@
  *    by viz components; renaming them would silently break the runtime
  */
 
-import type { SampleRankedMode, VizName } from './types';
+import type { SampleRankedMode, VizName } from "./types";
 
 export interface StepStructure {
   stepNumber: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
   vizName: VizName;
-  gridMode?: 'themed' | 'classified';
+  gridMode?: "themed" | "classified";
   sampleRankedMode?: SampleRankedMode;
   /** Only set for `singleMythBalken`. 3 → Step 6, 5 → Step 7. */
   revealedRows?: 3 | 5;
@@ -33,15 +33,15 @@ export interface StepStructure {
 // sources × 4 metric columns); the same `revealedColumns` 2 → 4
 // reveal pattern carries the active vs passive split.
 export const STEP_DEFINITIONS: StepStructure[] = [
-  { stepNumber: 1,  vizName: 'timeline' },
-  { stepNumber: 2,  vizName: 'peopleVoices' },
-  { stepNumber: 3,  vizName: 'mythGrid', gridMode: 'themed' },
-  { stepNumber: 4,  vizName: 'mythGrid', gridMode: 'classified' },
-  { stepNumber: 5,  vizName: 'sampleAndRanked', sampleRankedMode: 'sample' },
-  { stepNumber: 6,  vizName: 'singleMythBalken', revealedRows: 3 },
-  { stepNumber: 7,  vizName: 'singleMythBalken', revealedRows: 5 },
-  { stepNumber: 8,  vizName: 'sourcesSpannweite' },
-  { stepNumber: 9,  vizName: 'sourcesSpannweite' },
-  { stepNumber: 10, vizName: 'ctaGrid' },
-  { stepNumber: 11, vizName: 'teamRow' },
+  { stepNumber: 1, vizName: "timeline" },
+  { stepNumber: 2, vizName: "peopleVoices" },
+  { stepNumber: 3, vizName: "mythGrid", gridMode: "themed" },
+  { stepNumber: 4, vizName: "mythGrid", gridMode: "classified" },
+  { stepNumber: 5, vizName: "sampleAndRanked", sampleRankedMode: "sample" },
+  { stepNumber: 6, vizName: "singleMythBalken", revealedRows: 3 },
+  { stepNumber: 7, vizName: "singleMythBalken", revealedRows: 5 },
+  { stepNumber: 8, vizName: "sourcesSpannweite" },
+  { stepNumber: 9, vizName: "sourcesSpannweite" },
+  { stepNumber: 10, vizName: "ctaGrid" },
+  { stepNumber: 11, vizName: "teamRow" },
 ];

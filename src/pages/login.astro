@@ -10,7 +10,13 @@ export const prerender = false;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zugang — Cannabis: Mythen & Evidenz</title>
     <style>
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
       body {
         min-height: 100vh;
@@ -19,7 +25,10 @@ export const prerender = false;
         align-items: center;
         justify-content: center;
         background: #f4f4f0;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
         color: #1a1a1a;
       }
 
@@ -29,7 +38,7 @@ export const prerender = false;
         padding: 2.5rem 3rem;
         width: 100%;
         max-width: 380px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
         text-align: center;
       }
 
@@ -73,7 +82,9 @@ export const prerender = false;
         transition: background 0.15s;
       }
 
-      button:hover { background: #1f4f3a; }
+      button:hover {
+        background: #1f4f3a;
+      }
 
       .error {
         margin-top: 0.8rem;
@@ -104,38 +115,44 @@ export const prerender = false;
     </div>
 
     <script>
-      const form = document.getElementById('loginForm') as HTMLFormElement | null;
-      const errorMsg = document.getElementById('errorMsg') as HTMLElement | null;
-      const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement | null;
+      const form = document.getElementById(
+        "loginForm",
+      ) as HTMLFormElement | null;
+      const errorMsg = document.getElementById(
+        "errorMsg",
+      ) as HTMLElement | null;
+      const submitBtn = document.getElementById(
+        "submitBtn",
+      ) as HTMLButtonElement | null;
 
       function showError(): void {
-        if (errorMsg) errorMsg.style.display = 'block';
+        if (errorMsg) errorMsg.style.display = "block";
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Einloggen';
+          submitBtn.textContent = "Einloggen";
         }
       }
 
       if (form) {
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener("submit", async (e) => {
           e.preventDefault();
-          if (errorMsg) errorMsg.style.display = 'none';
+          if (errorMsg) errorMsg.style.display = "none";
           if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.textContent = '…';
+            submitBtn.textContent = "…";
           }
 
           try {
             const body = new FormData(form);
-            const res = await fetch('/api/auth', {
-              method: 'POST',
+            const res = await fetch("/api/auth", {
+              method: "POST",
               body,
-              credentials: 'same-origin',
+              credentials: "same-origin",
             });
-            const json = await res.json() as { ok: boolean };
+            const json = (await res.json()) as { ok: boolean };
 
             if (json.ok) {
-              window.location.href = '/';
+              window.location.href = "/";
             } else {
               showError();
             }

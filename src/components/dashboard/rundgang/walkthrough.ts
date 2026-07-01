@@ -22,8 +22,8 @@
  * via innerHTML, so we embed lucide SVGs (paths copied verbatim from the
  * installed `lucide-react`) to mirror the real dashboard controls.
  */
-import { driver, type Driver } from 'driver.js';
-import 'driver.js/dist/driver.css';
+import { driver, type Driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 /** Wrap lucide path markup in a 1em, currentColor inline SVG. */
 const icon = (inner: string): string =>
@@ -31,19 +31,37 @@ const icon = (inner: string): string =>
 
 // lucide path data (verbatim from lucide-react).
 const ICONS = {
-  toggle: icon('<circle cx="15" cy="12" r="3"/><rect width="20" height="14" x="2" y="5" rx="7"/>'),
+  toggle: icon(
+    '<circle cx="15" cy="12" r="3"/><rect width="20" height="14" x="2" y="5" rx="7"/>',
+  ),
   chevronDown: icon('<path d="m6 9 6 6 6-6"/>'),
-  filter: icon('<path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/>'),
-  sort: icon('<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/>'),
-  info: icon('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'),
-  eyeOff: icon('<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>'),
+  filter: icon(
+    '<path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/>',
+  ),
+  sort: icon(
+    '<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/>',
+  ),
+  info: icon(
+    '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  ),
+  eyeOff: icon(
+    '<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>',
+  ),
   search: icon('<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>'),
-  signpost: icon('<path d="M12 13v8"/><path d="M12 3v3"/><path d="M2.354 10.354a1.207 1.207 0 0 1 0-1.708l2.06-2.06A2 2 0 0 1 5.828 6h12.344a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H5.828a2 2 0 0 1-1.414-.586z"/>'),
-  lightbulb: icon('<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>'),
-  download: icon('<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>'),
+  signpost: icon(
+    '<path d="M12 13v8"/><path d="M12 3v3"/><path d="M2.354 10.354a1.207 1.207 0 0 1 0-1.708l2.06-2.06A2 2 0 0 1 5.828 6h12.344a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H5.828a2 2 0 0 1-1.414-.586z"/>',
+  ),
+  lightbulb: icon(
+    '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  ),
+  download: icon(
+    '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+  ),
   // The site's "falsch" verdict arrow (tip-down ↓, rotation 0 so no transform),
   // rendered uncolored via icon()'s currentColor stroke at 1em to match signpost.
-  verdictFalsch: icon('<path d="M2 16h20"/><path d="M12 2v14"/><path d="m5 9 7 7 7-7"/>'),
+  verdictFalsch: icon(
+    '<path d="M2 16h20"/><path d="M12 2v14"/><path d="m5 9 7 7 7-7"/>',
+  ),
 } as const;
 
 /** A Factsheet-style collapsible (native <details>) so each step stays
@@ -69,10 +87,10 @@ export function buildWalkthrough(): Driver {
     // Guiding, not gatekeeping — keep the dashboard clickable underneath.
     stagePadding: 6,
     stageRadius: 8,
-    nextBtnText: 'Weiter →',
-    prevBtnText: '← Zurück',
+    nextBtnText: "Weiter →",
+    prevBtnText: "← Zurück",
     doneBtnText: `${ICONS.search} Erkunden`,
-    popoverClass: 'carm-tour-popover',
+    popoverClass: "carm-tour-popover",
     // NB: we intentionally do NOT call tour.refresh() on accordion toggle —
     // re-positioning made the whole popover jump. The popover is positioned
     // once and grows in place (downward); its description scrolls (with a
@@ -84,30 +102,30 @@ export function buildWalkthrough(): Driver {
     },
     steps: [
       {
-        element: '.carm-explorer__tab-bar',
+        element: ".carm-explorer__tab-bar",
         popover: {
-          title: '1 / 4 · Zwei Datensätze aus der CaRM-Studie',
+          title: "1 / 4 · Zwei Datensätze aus der CaRM-Studie",
           // Keep the popover BELOW the tab bar so it never climbs up over the
           // element it's pointing at; it grows downward / scrolls instead.
-          side: 'bottom',
-          align: 'center',
+          side: "bottom",
+          align: "center",
           description:
             `Oben <strong>wechselst du die Ansicht</strong> ${ICONS.toggle} zwischen <strong>Mythen</strong> und <strong>Informationswege</strong> — zwei Datensätze aus derselben Studie, je als Balken, Übersicht oder Tabelle.` +
             `<div class="carm-tour-note">Alle Werte stammen aus der CaRM-Befragung.</div>`,
         },
       },
       {
-        element: '.carm-toolbar-row',
+        element: ".carm-toolbar-row",
         popover: {
-          title: '2 / 4 · Zielgruppe, Indikator & Filter',
+          title: "2 / 4 · Zielgruppe, Indikator & Filter",
           // Keep the popover BELOW the toolbar (grows down / scrolls).
-          side: 'bottom',
-          align: 'center',
+          side: "bottom",
+          align: "center",
           description:
             `Hier stellst du die Ansicht ein: mit dem <strong>Umschalter</strong> ${ICONS.toggle} wechselst du zwischen Indikatoren und Gruppen, unter <strong>Wert für</strong> ${ICONS.chevronDown} wählst du je nach Ansicht die konkrete Gruppe oder den Indikator, und über <strong>Filter</strong> ${ICONS.filter} und die Suche grenzt du auf bestimmte Mythen ein.` +
             accordion(
               ICONS.verdictFalsch,
-              'Anwendungsbeispiele Mythen',
+              "Anwendungsbeispiele Mythen",
               `<p><strong>Beispiel 1: Du willst wissen, welche Mythen unter den Erwachsenen und unter den Minderjährigen besonders oft falsch beurteilt werden?</strong></p>` +
                 `<p>Tippe auf den Reiter „Übersicht". Schiebe den Schalter „Indikatoren" ${ICONS.toggle} nach links. Wähle im Dropdown „Wert für" Richtigkeit ${ICONS.chevronDown}. Blende die Spalten für Konsument:innen, Junge Erwachsene und Eltern jeweils aus ${ICONS.eyeOff}. Nun kannst du sortieren ${ICONS.sort}: bei den Erwachsenen oder auch bei den Minderjährigen. Auf- oder auch absteigend, je nachdem, was dich interessiert. Und die Werte vergleichen.</p>` +
                 `<p>Du willst nur bestimmte Mythen vergleichen? Wähle sie über den Filter-Button ${ICONS.filter} aus. Entweder blockweise oder je einzeln. Diese Auswahl bleibt erhalten, auch wenn du dir andere Gruppen ein- oder ausblendest. Drücke im Filterbereich „Alle Filter zurücksetzen", wenn du wieder alle Mythen sehen willst oder eine neue Auswahl an Mythen starten willst.</p>` +
@@ -118,7 +136,7 @@ export function buildWalkthrough(): Driver {
             ) +
             accordion(
               ICONS.signpost,
-              'Anwendungsbeispiele Informationswege',
+              "Anwendungsbeispiele Informationswege",
               `<p><strong>Beispiel 1: Du willst wissen, auf welchem Weg Minderjährige besonders nach Gesundheitsinfos, z. B. zu Cannabis, suchen?</strong></p>` +
                 `<p>Tippe auf den Reiter „Balken". Wähle im Dropdown „Indikatoren" Suche ${ICONS.chevronDown}. Wähle im Dropdown „Gruppe" Minderjährige ${ICONS.chevronDown}. Nun kannst du die Werte sortieren ${ICONS.sort}, auf- oder auch absteigend, je nachdem, was dich interessiert.</p>` +
                 `<p><strong>Beispiel 2: Du willst wissen, auf welchem Weg Minderjährige besonders nach Gesundheitsinfos, z. B. zu Cannabis, suchen? Du willst wissen, ob Influencer:innen eigentlich in Bezug auf Gesundheitsinformationen zu Cannabis vertraut wird? Und wie sieht es im Vergleich dazu mit Gesundheitsportalen im Internet aus?</strong></p>` +
@@ -129,19 +147,19 @@ export function buildWalkthrough(): Driver {
         },
       },
       {
-        element: '.carm-spannweite__cell--header:not(.carm-spannweite__cell--label)',
+        element:
+          ".carm-spannweite__cell--header:not(.carm-spannweite__cell--label)",
         popover: {
-          title: '3 / 4 · Sortieren & ausblenden',
-          description:
-            `Mit dem <strong>Sortier-Symbol</strong> ${ICONS.sort} ordnest du die Mythen nach dieser Spalte. Das ${ICONS.info} öffnet die Definition. Mit dem <strong>Ausblenden-Symbol</strong> ${ICONS.eyeOff} blendest du eine Spalte aus, die dich gerade nicht interessiert.`,
+          title: "3 / 4 · Sortieren & ausblenden",
+          description: `Mit dem <strong>Sortier-Symbol</strong> ${ICONS.sort} ordnest du die Mythen nach dieser Spalte. Das ${ICONS.info} öffnet die Definition. Mit dem <strong>Ausblenden-Symbol</strong> ${ICONS.eyeOff} blendest du eine Spalte aus, die dich gerade nicht interessiert.`,
         },
       },
       {
-        element: '.carm-spannweite__row',
+        element: ".carm-spannweite__row",
         popover: {
-          title: '4 / 4 · Mythos öffnen',
+          title: "4 / 4 · Mythos öffnen",
           description:
-            '<strong>Klick auf einen Mythos</strong> öffnet sein vollständiges <strong>Fact-Sheet</strong>.<br>Dieselbe Steuerung gilt für die Informationswege.<br><br>Das war’s – jetzt bist du dran! Erkunde die Daten.',
+            "<strong>Klick auf einen Mythos</strong> öffnet sein vollständiges <strong>Fact-Sheet</strong>.<br>Dieselbe Steuerung gilt für die Informationswege.<br><br>Das war’s – jetzt bist du dran! Erkunde die Daten.",
         },
       },
     ],

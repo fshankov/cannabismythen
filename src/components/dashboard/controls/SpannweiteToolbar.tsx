@@ -10,27 +10,38 @@
  * cell reads from. Filter + Export pass through via `sharedActions`.
  */
 
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 import {
   INDICATOR_ICONS as ICONS_INDICATOR,
   AUDIENCE_ICONS_BY_GROUP,
   type IconComponent,
-} from '../../../lib/icons';
+} from "../../../lib/icons";
 import type {
-  AppState, Group, GroupId, Indicator, StripsMode,
+  AppState,
+  Group,
+  GroupId,
+  Indicator,
+  StripsMode,
   DashboardDefinitions,
-} from '../../../lib/dashboard/types';
-import { t, type TranslationKey } from '../../../lib/dashboard/translations';
-import PivotToggle from './PivotToggle';
-import DataPicker, { type DataPickerOption } from './DataPicker';
-import ToolbarRow from './ToolbarRow';
+} from "../../../lib/dashboard/types";
+import { t, type TranslationKey } from "../../../lib/dashboard/translations";
+import PivotToggle from "./PivotToggle";
+import DataPicker, { type DataPickerOption } from "./DataPicker";
+import ToolbarRow from "./ToolbarRow";
 
 const INDICATORS: Indicator[] = [
-  'awareness', 'significance', 'correctness',
-  'prevention_significance', 'population_relevance',
+  "awareness",
+  "significance",
+  "correctness",
+  "prevention_significance",
+  "population_relevance",
 ];
 const STRIP_GROUP_IDS: GroupId[] = [
-  'adults', 'minors', 'consumers', 'young_adults', 'parents',
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
 ];
 
 const INDICATOR_ICONS: Record<Indicator, IconComponent> = ICONS_INDICATOR;
@@ -45,7 +56,11 @@ interface Props {
 }
 
 export default function SpannweiteToolbar({
-  state, update, groups, definitions, sharedActions,
+  state,
+  update,
+  groups,
+  definitions,
+  sharedActions,
 }: Props) {
   const mode: StripsMode = state.stripsMode;
 
@@ -56,10 +71,13 @@ export default function SpannweiteToolbar({
   // Fedor's confusion that "Wert für: Prävention" appeared in Gruppen
   // mode when groups should be the picker, not metrics.
   const valueOptions: DataPickerOption<string>[] =
-    mode === 'indicator'
+    mode === "indicator"
       ? INDICATORS.map((ind) => {
           const def = definitions?.mythIndicators?.[ind];
-          const label = t(`indicator.${ind}.short` as TranslationKey, state.lang);
+          const label = t(
+            `indicator.${ind}.short` as TranslationKey,
+            state.lang,
+          );
           return {
             value: ind as string,
             label,
@@ -73,52 +91,63 @@ export default function SpannweiteToolbar({
       : STRIP_GROUP_IDS.map((gid) => {
           const g = groups.find((x) => x.id === gid);
           const def = definitions?.groups?.[gid];
-          const fullLabel = g ? (state.lang === 'de' ? g.name_de : g.name_en) : gid;
+          const fullLabel = g
+            ? state.lang === "de"
+              ? g.name_de
+              : g.name_en
+            : gid;
           return {
             value: gid as string,
             label: fullLabel,
             Icon: GROUP_ICONS[gid],
             definition:
               def?.label && def?.definition
-                ? { title: def.label, text: def.definition, sampleSize: def.sampleSize }
+                ? {
+                    title: def.label,
+                    text: def.definition,
+                    sampleSize: def.sampleSize,
+                  }
                 : undefined,
           };
         });
 
   const activeId =
-    mode === 'indicator'
+    mode === "indicator"
       ? state.indicator
-      : state.groupIds[0] ?? STRIP_GROUP_IDS[0];
+      : (state.groupIds[0] ?? STRIP_GROUP_IDS[0]);
 
   const onPickerChange = (next: string) => {
-    if (mode === 'indicator') {
-      update('indicator', next as Indicator);
+    if (mode === "indicator") {
+      update("indicator", next as Indicator);
     } else {
-      update('groupIds', [next as GroupId]);
+      update("groupIds", [next as GroupId]);
     }
   };
 
   return (
     <ToolbarRow
-      aria-label={t('strips.compare.label', state.lang)}
+      aria-label={t("strips.compare.label", state.lang)}
       pickers={[
         <PivotToggle<StripsMode>
           key="mode"
-          aria-label={t('strips.compare.label', state.lang)}
+          aria-label={t("strips.compare.label", state.lang)}
           value={mode}
-          onChange={(v) => update('stripsMode', v)}
+          onChange={(v) => update("stripsMode", v)}
           options={[
-            { value: 'indicator', label: t('strips.mode.indicator', state.lang) },
-            { value: 'group', label: t('strips.mode.group', state.lang) },
+            {
+              value: "indicator",
+              label: t("strips.mode.indicator", state.lang),
+            },
+            { value: "group", label: t("strips.mode.group", state.lang) },
           ]}
         />,
         <DataPicker<string>
           key="value"
-          caption={t('strips.value.label', state.lang)}
+          caption={t("strips.value.label", state.lang)}
           value={activeId}
           options={valueOptions}
           onChange={onPickerChange}
-          aria-label={t('strips.value.label', state.lang)}
+          aria-label={t("strips.value.label", state.lang)}
           lang={state.lang}
         />,
       ]}

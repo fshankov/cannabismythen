@@ -16,12 +16,7 @@
  */
 
 import { useId } from "react";
-import {
-  ArrowUp,
-  ArrowUpRight,
-  ArrowDownLeft,
-  ArrowDown,
-} from "lucide-react";
+import { ArrowUp, ArrowUpRight, ArrowDownLeft, ArrowDown } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Classification } from "./types";
 import { t } from "./i18n";
@@ -71,9 +66,7 @@ export default function VerdictScale({
 }: VerdictScaleProps) {
   const headingId = useId();
   return (
-    <div
-      className={`verdict-scale ${compact ? "verdict-scale--compact" : ""}`}
-    >
+    <div className={`verdict-scale ${compact ? "verdict-scale--compact" : ""}`}>
       {!compact && (
         <p id={headingId} className="verdict-scale__heading">
           {t("ui.verdictScale.label")}
@@ -117,9 +110,7 @@ export default function VerdictScale({
                 })()}
               </span>
               {!compact && (
-                <span className="verdict-scale__label">
-                  {t(`answer.${c}`)}
-                </span>
+                <span className="verdict-scale__label">{t(`answer.${c}`)}</span>
               )}
               {!compact && (
                 <kbd className="verdict-scale__kbd" aria-hidden="true">

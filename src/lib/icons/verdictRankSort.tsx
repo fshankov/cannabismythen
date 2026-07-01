@@ -23,15 +23,15 @@
  * fill is fragile across browsers — Safari sometimes drops the
  * resolution when the SVG is generated outside a <style> context.
  */
-import type { SVGProps } from 'react';
-import { forwardRef } from 'react';
+import type { SVGProps } from "react";
+import { forwardRef } from "react";
 
-const RICHTIG = '#047857';   // --classification-richtig (Emerald-700)
-const FALSCH  = '#be123c';   // --classification-falsch  (Rose-700)
-const SHADOW  = '#0f172a';   // dark hairline ring so the colored dots
-                             // stay legible on near-white header backgrounds
+const RICHTIG = "#047857"; // --classification-richtig (Emerald-700)
+const FALSCH = "#be123c"; // --classification-falsch  (Rose-700)
+const SHADOW = "#0f172a"; // dark hairline ring so the colored dots
+// stay legible on near-white header backgrounds
 
-export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
+export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "children"> {
   size?: number | string;
 }
 
@@ -67,25 +67,49 @@ function StackedDots({
       {/* Two stacked dots on the RIGHT (where the A/Z letters sit in
           Lucide's ArrowDownAZ). cx=17 keeps the dots inside the 24-unit
           viewBox with breathing room from the chevron at x=11. */}
-      <circle cx="17" cy="7"  r="3" fill={topColor}    stroke={SHADOW} strokeWidth="0.5" />
-      <circle cx="17" cy="17" r="3" fill={bottomColor} stroke={SHADOW} strokeWidth="0.5" />
+      <circle
+        cx="17"
+        cy="7"
+        r="3"
+        fill={topColor}
+        stroke={SHADOW}
+        strokeWidth="0.5"
+      />
+      <circle
+        cx="17"
+        cy="17"
+        r="3"
+        fill={bottomColor}
+        stroke={SHADOW}
+        strokeWidth="0.5"
+      />
     </svg>
   );
 }
 
 export const IconVerdictRankAsc = forwardRef<SVGSVGElement, IconProps>(
   ({ ...rest }, ref) => (
-    <StackedDots ref={ref as never} topColor={RICHTIG} bottomColor={FALSCH} {...rest} />
+    <StackedDots
+      ref={ref as never}
+      topColor={RICHTIG}
+      bottomColor={FALSCH}
+      {...rest}
+    />
   ),
 );
-IconVerdictRankAsc.displayName = 'IconVerdictRankAsc';
+IconVerdictRankAsc.displayName = "IconVerdictRankAsc";
 
 export const IconVerdictRankDesc = forwardRef<SVGSVGElement, IconProps>(
   ({ ...rest }, ref) => (
-    <StackedDots ref={ref as never} topColor={FALSCH} bottomColor={RICHTIG} {...rest} />
+    <StackedDots
+      ref={ref as never}
+      topColor={FALSCH}
+      bottomColor={RICHTIG}
+      {...rest}
+    />
   ),
 );
-IconVerdictRankDesc.displayName = 'IconVerdictRankDesc';
+IconVerdictRankDesc.displayName = "IconVerdictRankDesc";
 
 /**
  * Category-rank sort icons — sibling of the verdict-rank pair, but
@@ -102,8 +126,8 @@ IconVerdictRankDesc.displayName = 'IconVerdictRankDesc';
  * `src/styles/scrollytelling.css`. We inline the hexes for the same
  * cross-browser reason as the verdict variant.
  */
-const SRC_INSTITUTIONAL = '#2563eb';   // first category in canonical order
-const SRC_PERSONAL      = '#6b7280';   // last category in canonical order
+const SRC_INSTITUTIONAL = "#2563eb"; // first category in canonical order
+const SRC_PERSONAL = "#6b7280"; // last category in canonical order
 
 export const IconCategoryRankAsc = forwardRef<SVGSVGElement, IconProps>(
   ({ ...rest }, ref) => (
@@ -115,7 +139,7 @@ export const IconCategoryRankAsc = forwardRef<SVGSVGElement, IconProps>(
     />
   ),
 );
-IconCategoryRankAsc.displayName = 'IconCategoryRankAsc';
+IconCategoryRankAsc.displayName = "IconCategoryRankAsc";
 
 export const IconCategoryRankDesc = forwardRef<SVGSVGElement, IconProps>(
   ({ ...rest }, ref) => (
@@ -127,4 +151,4 @@ export const IconCategoryRankDesc = forwardRef<SVGSVGElement, IconProps>(
     />
   ),
 );
-IconCategoryRankDesc.displayName = 'IconCategoryRankDesc';
+IconCategoryRankDesc.displayName = "IconCategoryRankDesc";

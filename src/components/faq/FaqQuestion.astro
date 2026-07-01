@@ -28,12 +28,7 @@ interface Props {
   popupData?: FaqMythPopupData;
 }
 
-const {
-  question,
-  open = false,
-  index,
-  popupData: popupDataProp,
-} = Astro.props;
+const { question, open = false, index, popupData: popupDataProp } = Astro.props;
 
 const popupData = popupDataProp ?? (await loadMythPopupData());
 const { resolveTitlesInHtml, mythIndex } = popupData;
@@ -56,31 +51,43 @@ const html = applySourceNote(
 const id = `faq-${question.slug}`;
 ---
 
-<article id={id} class="faq-question" data-classification={question.classification}>
+<article
+  id={id}
+  class="faq-question"
+  data-classification={question.classification}
+>
   <!-- name= makes the questions an exclusive (single-open) accordion natively. -->
   <details class="faq-question__details" name="faq-accordion" open={open}>
     <summary class="faq-question__summary">
-      <span class="faq-question__index" aria-hidden="true">{String(index).padStart(2, "0")}</span>
+      <span class="faq-question__index" aria-hidden="true"
+        >{String(index).padStart(2, "0")}</span
+      >
       <h2 class="faq-question__heading">{question.questionLong}</h2>
       <span class="faq-question__chevron" aria-hidden="true">▾</span>
     </summary>
 
     <div class="faq-question__body">
-      {question.leadAnswer && (
-        <p class="faq-question__lead">{question.leadAnswer}</p>
-      )}
+      {
+        question.leadAnswer && (
+          <p class="faq-question__lead">{question.leadAnswer}</p>
+        )
+      }
 
       <div class="faq-question__answer" set:html={html} />
 
       <FaqRelatedRail question={question} mythIndex={mythIndex} />
 
-      {question.helpline && question.helpline.url && (
-        <HelplineBox helpline={question.helpline} variant="inline" />
-      )}
+      {
+        question.helpline && question.helpline.url && (
+          <HelplineBox helpline={question.helpline} variant="inline" />
+        )
+      }
 
-      {/* Permalink removed per ISD request (Asana 1215623512246223) — the
+      {
+        /* Permalink removed per ISD request (Asana 1215623512246223) — the
           per-question deep link wasn't needed. The article still carries
-          id={id} so existing #faq-<slug> anchors keep working. */}
+          id={id} so existing #faq-<slug> anchors keep working. */
+      }
 
       <button type="button" class="faq-collapse" aria-label="Frage einklappen">
         <span class="faq-collapse__arrow" aria-hidden="true">▴</span>
@@ -105,12 +112,17 @@ const id = `faq-${question.slug}`;
     document.addEventListener("click", (e) => {
       const btn = (e.target as HTMLElement | null)?.closest(".faq-collapse");
       if (!btn) return;
-      const details = btn.closest("details.faq-question__details") as HTMLDetailsElement | null;
+      const details = btn.closest(
+        "details.faq-question__details",
+      ) as HTMLDetailsElement | null;
       if (!details) return;
       details.open = false;
       const summary = details.querySelector(".faq-question__summary");
       if (summary) {
-        (summary as HTMLElement).scrollIntoView({ behavior: "smooth", block: "nearest" });
+        (summary as HTMLElement).scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
       }
     });
 
@@ -119,7 +131,9 @@ const id = `faq-${question.slug}`;
     //    there instead of leaving the viewport on the question that just
     //    collapsed. toggle doesn't bubble → bind per element.
     const all = Array.from(
-      document.querySelectorAll<HTMLDetailsElement>("details.faq-question__details"),
+      document.querySelectorAll<HTMLDetailsElement>(
+        "details.faq-question__details",
+      ),
     );
     for (const d of all) {
       d.addEventListener("toggle", () => {
@@ -136,8 +150,9 @@ const id = `faq-${question.slug}`;
             const rect = (article as HTMLElement).getBoundingClientRect();
             const headerHeight =
               parseFloat(
-                getComputedStyle(document.documentElement)
-                  .getPropertyValue("--header-height")
+                getComputedStyle(document.documentElement).getPropertyValue(
+                  "--header-height",
+                ),
               ) || 80;
             const gap = 16;
             const targetY = window.scrollY + rect.top - headerHeight - gap;

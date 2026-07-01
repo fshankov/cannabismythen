@@ -11,72 +11,67 @@
  * (`Indicator`, `GroupId`, `Metric`) which already match cannabismythen's
  * shape (see `src/components/scrollytelling/types.ts`).
  */
-import type {
-  GroupId,
-  Indicator,
-  Metric,
-  SourceMetricId,
-} from './types';
+import type { GroupId, Indicator, Metric, SourceMetricId } from "./types";
 
 /** Structural subset of `Metric` the Lesebeispiel needs. */
 export type LesebeispielMetric = Pick<
   Metric,
-  | 'awareness'
-  | 'significance'
-  | 'correctness'
-  | 'prevention_significance'
-  | 'population_relevance'
+  | "awareness"
+  | "significance"
+  | "correctness"
+  | "prevention_significance"
+  | "population_relevance"
 >;
 
 /** Genitive-plural form of each Zielgruppe used inside the Lesebeispiel
  *  sentence ("In der Zielgruppe der **Erwachsenen** kennen X % …"). */
 export const GROUP_INTRO_GENITIVE: Record<GroupId, string> = {
-  adults: 'Erwachsenen',
-  minors: 'Minderjährigen',
-  consumers: 'Konsumierenden',
-  young_adults: 'jungen Erwachsenen',
-  parents: 'Eltern',
+  adults: "Erwachsenen",
+  minors: "Minderjährigen",
+  consumers: "Konsumierenden",
+  young_adults: "jungen Erwachsenen",
+  parents: "Eltern",
 };
 
 /** Demonstrative+noun phrase used in the Beurteilung (correctness)
  *  sentence: "… erreicht bei **diesen Erwachsenen ein** hohes mittleres
  *  Niveau …". */
 export const GROUP_DEMONSTRATIVE: Record<GroupId, string> = {
-  adults: 'diesen Erwachsenen ein',
-  minors: 'diesen Minderjährigen ein',
-  consumers: 'diesen Konsumierenden ein',
-  young_adults: 'diesen jungen Erwachsenen ein',
-  parents: 'diesen Eltern ein',
+  adults: "diesen Erwachsenen ein",
+  minors: "diesen Minderjährigen ein",
+  consumers: "diesen Konsumierenden ein",
+  young_adults: "diesen jungen Erwachsenen ein",
+  parents: "diesen Eltern ein",
 };
 
 /** Population noun used by the Bevölkerungsrelevanz sentence. Only
  *  adults + minors have non-null pop_rel data in carm-data.json. */
 export const GROUP_POPULATION_NOUN: Partial<Record<GroupId, string>> = {
-  adults: 'volljährige Bevölkerung',
-  minors: 'minderjährige Bevölkerung',
+  adults: "volljährige Bevölkerung",
+  minors: "minderjährige Bevölkerung",
 };
 
 /** Lower bound (inclusive) of bands 1 through 6. Band 0 is value < 11. */
 export const BAND_THRESHOLDS = [11, 26, 38, 63, 75, 90] as const;
 
 export const ANTEIL_LABELS = [
-  'sehr niedriger Anteil',
-  'niedriger Anteil',
-  'niedriger mittlerer Anteil',
-  'mittlerer Anteil',
-  'hoher mittlerer Anteil',
-  'hoher Anteil',
-  'sehr hoher Anteil',
+  "sehr niedriger Anteil",
+  "niedriger Anteil",
+  "niedriger mittlerer Anteil",
+  "mittlerer Anteil",
+  "hoher mittlerer Anteil",
+  "hoher Anteil",
+  "sehr hoher Anteil",
 ] as const;
 
 export const NIVEAU_LABELS = [
-  'sehr niedriges Niveau',
-  'niedriges Niveau',
-  'niedriges mittleres Niveau',
-  'mittleres Niveau',
-  'hohes mittleres Niveau',
-  'hohes Niveau',
-  'sehr hohes Niveau',
+  "sehr niedriges Niveau",
+  "niedriges Niveau",
+  "niedriges mittleres Niveau",
+  "mittleres Niveau",
+  "hohes mittleres Niveau",
+  "hohes Niveau",
+  "sehr hohes Niveau",
 ] as const;
 
 /** Pick the band index (0–6) for an integer value in 0–100. Callers must
@@ -114,7 +109,7 @@ export function lesebeispielSentence(
   const v = metric[indicator];
   if (v === null) return null;
 
-  if (indicator === 'population_relevance' && !GROUP_POPULATION_NOUN[group]) {
+  if (indicator === "population_relevance" && !GROUP_POPULATION_NOUN[group]) {
     return null;
   }
 
@@ -124,12 +119,12 @@ export function lesebeispielSentence(
   const populationNoun = GROUP_POPULATION_NOUN[group];
 
   switch (indicator) {
-    case 'awareness':
+    case "awareness":
       return (
         `In der Zielgruppe der ${intro} kennen ${rounded} % diesen Mythos. ` +
         `Das ist ein ${anteilLabel(rounded)}.`
       );
-    case 'significance': {
+    case "significance": {
       if (metric.awareness === null) return null;
       const kenntnis = Math.round(metric.awareness);
       return (
@@ -138,20 +133,20 @@ export function lesebeispielSentence(
         `${niveauLabel(rounded)} von ${rounded} Punkten.`
       );
     }
-    case 'correctness':
+    case "correctness":
       return (
         `Die Beurteilung des Mythos in Übereinstimmung mit der ` +
         `wissenschaftlichen Klassifizierung erreicht bei ${demonstrative} ` +
         `${niveauLabel(rounded)} von ${rounded} Punkten.`
       );
-    case 'prevention_significance':
+    case "prevention_significance":
       return (
         `Aus der individuellen Bedeutung und der Beurteilung der ` +
         `Richtigkeit resultiert ein ${niveauLabel(rounded)} für die ` +
         `Präventionsbedeutung (${rounded} Punkte) für die Zielgruppe der ` +
         `${intro}, die diesen Mythos kennen.`
       );
-    case 'population_relevance':
+    case "population_relevance":
       return (
         `Mit Blick auf die gesamte ${populationNoun} (nicht nur diejenigen, ` +
         `die den Mythos schon kennen) ergibt sich ein ${niveauLabel(rounded)} ` +
@@ -173,22 +168,22 @@ export function lesebeispielSourceSentence(
   const intro = GROUP_INTRO_GENITIVE[group];
   const rounded = Math.round(value);
   switch (metric) {
-    case 'search':
+    case "search":
       return (
         `In der Zielgruppe der ${intro} suchen ${rounded} % bei dieser ` +
         `Quelle Informationen über Cannabis. Das ist ein ${anteilLabel(rounded)}.`
       );
-    case 'perception':
+    case "perception":
       return (
         `In der Zielgruppe der ${intro} nehmen ${rounded} % Informationen ` +
         `über Cannabis von dieser Quelle wahr. Das ist ein ${anteilLabel(rounded)}.`
       );
-    case 'trust':
+    case "trust":
       return (
         `Das Vertrauen der ${intro} in diese Quelle hat ein ` +
         `${niveauLabel(rounded)} von ${rounded} Punkten.`
       );
-    case 'prevention':
+    case "prevention":
       return (
         `Das Präventionspotenzial dieser Quelle für die ${intro} hat ein ` +
         `${niveauLabel(rounded)} von ${rounded} Punkten.`

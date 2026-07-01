@@ -50,13 +50,15 @@ const tiles = quizzes.map(([slug, entry]) => {
   bgTexture
   extraBodyClass="quiz-index-page"
 >
-  <h1 class="quiz-index__title" data-reveal>Quiz: Was weißt du über Cannabis?</h1>
+  <h1 class="quiz-index__title" data-reveal>
+    Quiz: Was weißt du über Cannabis?
+  </h1>
 
   <div class="quiz-index__intro" data-reveal>
     <p>
-      Teste dein Wissen in fünf thematischen Quiz-Modulen oder im
-      Schnellcheck mit zufällig ausgewählten Mythen aus allen Themenbereichen. Zu jedem Mythos
-      wird der Stand der Forschung erklärt; deine Einschätzungen
+      Teste dein Wissen in fünf thematischen Quiz-Modulen oder im Schnellcheck
+      mit zufällig ausgewählten Mythen aus allen Themenbereichen. Zu jedem
+      Mythos wird der Stand der Forschung erklärt; deine Einschätzungen
       vergleichen wir mit denen der Erwachsenen (18–70) in einer
       Bevölkerungsbefragung in Deutschland.
     </p>
@@ -65,42 +67,46 @@ const tiles = quizzes.map(([slug, entry]) => {
   <p class="quiz-index__category-label" data-reveal>Wähle eine Kategorie aus</p>
 
   <section class="quiz-selection" data-reveal>
-    {tiles.map((tile) => (
-      <a
-        href={`/quiz/${tile.slug}/`}
-        class={`quiz-select-card quiz-select-card--${tile.theme}`}
-        aria-label={`Quiz starten: ${tile.title}`}
-      >
-        <span class="quiz-select-card__orb" aria-hidden="true"></span>
+    {
+      tiles.map((tile) => (
+        <a
+          href={`/quiz/${tile.slug}/`}
+          class={`quiz-select-card quiz-select-card--${tile.theme}`}
+          aria-label={`Quiz starten: ${tile.title}`}
+        >
+          <span class="quiz-select-card__orb" aria-hidden="true" />
 
-        {tile.theme === "gradient" && (
-          <span class="quiz-select-card__mix" aria-hidden="true">MIX</span>
-        )}
+          {tile.theme === "gradient" && (
+            <span class="quiz-select-card__mix" aria-hidden="true">
+              MIX
+            </span>
+          )}
 
-        <div class="quiz-select-card__content">
-          <span class="quiz-select-card__icon" aria-hidden="true">
-            <tile.Icon size={56} strokeWidth={1.75} />
-          </span>
-          <h2 class="quiz-select-card__title">{tile.title}</h2>
-          {/* 2026-05-28 (CAR-5) — framing question (desktop hover /
+          <div class="quiz-select-card__content">
+            <span class="quiz-select-card__icon" aria-hidden="true">
+              <tile.Icon size={56} strokeWidth={1.75} />
+            </span>
+            <h2 class="quiz-select-card__title">{tile.title}</h2>
+            {/* 2026-05-28 (CAR-5) — framing question (desktop hover /
               mobile always). Replaces the prior AI-drafted
               "Fragen, die deine Perspektive…" subline. */}
-          <p class="quiz-select-card__framing">{tile.framingQuestion}</p>
-        </div>
+            <p class="quiz-select-card__framing">{tile.framingQuestion}</p>
+          </div>
 
-        {/* 2026-05-29 (Fedor) — meta line centered directly above the
+          {/* 2026-05-29 (Fedor) — meta line centered directly above the
             CTA button, always visible on every card. */}
-        <p class="quiz-select-card__meta">
-          {tile.count} Mythen · ca. {tile.minutes} Min.
-        </p>
+          <p class="quiz-select-card__meta">
+            {tile.count} Mythen · ca. {tile.minutes} Min.
+          </p>
 
-        <span class="quiz-select-card__cta" aria-hidden="true">
-          <span class="quiz-select-card__cta-text">QUIZ STARTEN</span>
-          <span class="quiz-select-card__cta-icon">
-            <Send size={20} strokeWidth={1.75} />
+          <span class="quiz-select-card__cta" aria-hidden="true">
+            <span class="quiz-select-card__cta-text">QUIZ STARTEN</span>
+            <span class="quiz-select-card__cta-icon">
+              <Send size={20} strokeWidth={1.75} />
+            </span>
           </span>
-        </span>
-      </a>
-    ))}
+        </a>
+      ))
+    }
   </section>
 </BaseLayout>

@@ -18,7 +18,7 @@
  * the layered pieces. The consumer renders the outer
  * `.carm-spannweite__cell--plot` wrapper.
  */
-import ValueCircle from './ValueCircle';
+import ValueCircle from "./ValueCircle";
 
 interface Props {
   /** Value to plot (0–100). `null` → italic "k. A." placeholder. */
@@ -64,7 +64,11 @@ function BalkenAxis() {
     <div className="carm-balken__axis" aria-hidden="true">
       <span className="carm-balken__axis-tick" data-pos="0" />
       <span className="carm-balken__axis-tick" data-pos="25" />
-      <span className="carm-balken__axis-tick" data-pos="50" data-emphasis="mid" />
+      <span
+        className="carm-balken__axis-tick"
+        data-pos="50"
+        data-emphasis="mid"
+      />
       <span className="carm-balken__axis-tick" data-pos="75" />
       <span className="carm-balken__axis-tick" data-pos="100" />
     </div>

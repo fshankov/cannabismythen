@@ -59,12 +59,16 @@ const description =
   <article class="faq-single-question" data-reveal>
     <nav class="faq-audience-header__crumbs" aria-label="Brotkrumen">
       <a href="/meine-interessen/eltern/">Meine Interessen</a>
-      {currentAudience && (
-        <>
-          <span aria-hidden="true">›</span>
-          <a href={`/meine-interessen/${currentAudience.id}/`}>{currentAudience.cardLabel}</a>
-        </>
-      )}
+      {
+        currentAudience && (
+          <>
+            <span aria-hidden="true">›</span>
+            <a href={`/meine-interessen/${currentAudience.id}/`}>
+              {currentAudience.cardLabel}
+            </a>
+          </>
+        )
+      }
       <span aria-hidden="true">›</span>
       <span aria-current="page">Einzelne Frage</span>
     </nav>
@@ -76,27 +80,29 @@ const description =
       popupData={popupData}
     />
 
-    {siblings.length > 0 && (
-      <aside class="faq-also-see">
-        <h2 class="faq-also-see__heading">
-          Andere Zielgruppen zu diesem Thema:
-        </h2>
-        <ul class="faq-also-see__list">
-          {siblings.map(({ question: sib, audience: a }) => (
-            <li>
-              <a
-                href={`/meine-interessen/frage/${sib.slug}/`}
-                style={`--audience-accent: ${a.accentColor}`}
-              >
-                <span aria-hidden="true">{a.emoji}</span>{" "}
-                <span class="faq-also-see__audience">{a.cardLabel}:</span>{" "}
-                <span class="faq-also-see__question">{sib.questionLong}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </aside>
-    )}
+    {
+      siblings.length > 0 && (
+        <aside class="faq-also-see">
+          <h2 class="faq-also-see__heading">
+            Andere Zielgruppen zu diesem Thema:
+          </h2>
+          <ul class="faq-also-see__list">
+            {siblings.map(({ question: sib, audience: a }) => (
+              <li>
+                <a
+                  href={`/meine-interessen/frage/${sib.slug}/`}
+                  style={`--audience-accent: ${a.accentColor}`}
+                >
+                  <span aria-hidden="true">{a.emoji}</span>{" "}
+                  <span class="faq-also-see__audience">{a.cardLabel}:</span>{" "}
+                  <span class="faq-also-see__question">{sib.questionLong}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
 
     <footer class="faq-audience-page__footer">
       <a href="/meine-interessen/eltern/">← Alle Zielgruppen</a>

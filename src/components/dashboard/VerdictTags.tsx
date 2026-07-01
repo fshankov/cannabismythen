@@ -17,9 +17,13 @@
  * `dashboard.css` are now dead code and can be removed in cleanup.
  */
 
-import type { Lang, VerdictFilter, CorrectnessClass } from '../../lib/dashboard/types';
-import { t } from '../../lib/dashboard/translations';
-import VerdictPill from '../shared/VerdictPill';
+import type {
+  Lang,
+  VerdictFilter,
+  CorrectnessClass,
+} from "../../lib/dashboard/types";
+import { t } from "../../lib/dashboard/translations";
+import VerdictPill from "../shared/VerdictPill";
 
 interface Props {
   lang: Lang;
@@ -28,28 +32,32 @@ interface Props {
 }
 
 const VERDICT_KEYS: CorrectnessClass[] = [
-  'richtig',
-  'eher_richtig',
-  'eher_falsch',
-  'falsch',
-  'keine_aussage_moeglich',
+  "richtig",
+  "eher_richtig",
+  "eher_falsch",
+  "falsch",
+  "keine_aussage_moeglich",
 ];
 
 export default function VerdictTags({ lang, verdictFilter, onChange }: Props) {
-  const hasActive = verdictFilter !== 'all';
-  const groupClass = `verdict-tags pill-group${hasActive ? ' pill-group--has-active' : ''}`;
+  const hasActive = verdictFilter !== "all";
+  const groupClass = `verdict-tags pill-group${hasActive ? " pill-group--has-active" : ""}`;
 
   return (
-    <div className={groupClass} role="radiogroup" aria-label="Filter by verdict">
+    <div
+      className={groupClass}
+      role="radiogroup"
+      aria-label="Filter by verdict"
+    >
       <button
         type="button"
-        className={`pill pill--keine_aussage${verdictFilter === 'all' ? ' pill--all-active' : ''}`}
-        aria-pressed={verdictFilter === 'all'}
-        onClick={() => onChange('all')}
+        className={`pill pill--keine_aussage${verdictFilter === "all" ? " pill--all-active" : ""}`}
+        aria-pressed={verdictFilter === "all"}
+        onClick={() => onChange("all")}
         role="radio"
-        aria-checked={verdictFilter === 'all'}
+        aria-checked={verdictFilter === "all"}
       >
-        <span className="pill__label">{t('verdict.all' as any, lang)}</span>
+        <span className="pill__label">{t("verdict.all" as any, lang)}</span>
       </button>
 
       {VERDICT_KEYS.map((key) => {
@@ -63,7 +71,7 @@ export default function VerdictTags({ lang, verdictFilter, onChange }: Props) {
             as="button"
             aria-pressed={isActive}
             aria-label={`Filter: ${label}`}
-            onClick={() => onChange(isActive ? 'all' : key)}
+            onClick={() => onChange(isActive ? "all" : key)}
           />
         );
       })}

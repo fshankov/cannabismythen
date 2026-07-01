@@ -21,7 +21,8 @@ import { getAllAudiences } from "@lib/faq";
 // H1 — two lines, SEO-friendly (keyword "Cannabis" present). ISD-provided wording (Backlog 1.1, 2026-06-03).
 const heroHeadline1 = "Was glauben wir über Cannabis zu wissen —";
 const heroHeadline2 = "und was stimmt wirklich?";
-const heroEyebrow   = "ISD Hamburg · Bevölkerungsbefragung zu Cannabis in Deutschland · Wissenschaftlich geprüft";
+const heroEyebrow =
+  "ISD Hamburg · Bevölkerungsbefragung zu Cannabis in Deutschland · Wissenschaftlich geprüft";
 
 // ── Fakten-Karten preview: pick three short representative myths ───────────
 type MythRecord = {
@@ -36,7 +37,12 @@ const mythRecords: MythRecord[] = [];
 for (const [slug, entry] of await getPublishedEntries("zahlenUndFakten")) {
   const prefixMatch = slug.match(/^m\d+/);
   if (!prefixMatch) continue;
-  const e = entry as { classification: string; title?: string; cardShortSummary?: string; categoryGroup?: string };
+  const e = entry as {
+    classification: string;
+    title?: string;
+    cardShortSummary?: string;
+    categoryGroup?: string;
+  };
   // Strip the "Mythos N: " prefix and trailing period so the title alone
   // fits the small preview-card stripes.
   const title = (e.title ?? "")
@@ -76,7 +82,12 @@ const previewMyths: PreviewMyth[] = [
   pickShortest("keine_aussage"),
 ]
   .filter((r): r is MythRecord => r !== undefined)
-  .map((r) => ({ text: r.title, classification: r.classification, categoryGroup: r.categoryGroup, summary: r.summary }));
+  .map((r) => ({
+    text: r.title,
+    classification: r.classification,
+    categoryGroup: r.categoryGroup,
+    summary: r.summary,
+  }));
 
 // ── Editorial section content ──────────────────────────────────────────────
 const numbersStripData = await reader.singletons.numbersStrip.read();
@@ -100,30 +111,33 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
   />
 
   <div class="home-canvas">
-  {headlineFinding && fourPathsData && (
-    <FourPathsBlock
-      hookQuote={{
-        eyebrow: headlineFinding.eyebrow,
-        leadClause: headlineFinding.leadClause,
-        counterClause: headlineFinding.counterClause,
-        counterClassification: headlineFinding.counterClassification,
-      }}
-      quizTile={fourPathsData.quizTile}
-      faktenKartenTile={fourPathsData.faktenKartenTile}
-      datenExplorerTile={fourPathsData.datenExplorerTile}
-      meineInteressenTile={fourPathsData.meineInteressenTile}
-      previewMyths={previewMyths}
-      audienceChips={audienceChips}
-    />
-  )}
+    {
+      headlineFinding && fourPathsData && (
+        <FourPathsBlock
+          hookQuote={{
+            eyebrow: headlineFinding.eyebrow,
+            leadClause: headlineFinding.leadClause,
+            counterClause: headlineFinding.counterClause,
+            counterClassification: headlineFinding.counterClassification,
+          }}
+          quizTile={fourPathsData.quizTile}
+          faktenKartenTile={fourPathsData.faktenKartenTile}
+          datenExplorerTile={fourPathsData.datenExplorerTile}
+          meineInteressenTile={fourPathsData.meineInteressenTile}
+          previewMyths={previewMyths}
+          audienceChips={audienceChips}
+        />
+      )
+    }
 
-  {numbersStripData && (
-    <NumbersStripBlock
-      eyebrow={numbersStripData.eyebrow}
-      numerals={numbersStripData.numerals}
-    />
-  )}
-
+    {
+      numbersStripData && (
+        <NumbersStripBlock
+          eyebrow={numbersStripData.eyebrow}
+          numerals={numbersStripData.numerals}
+        />
+      )
+    }
   </div>
 </BaseLayout>
 
@@ -140,6 +154,4 @@ const audienceChips: AudienceChip[] = audienceMetaList.map((a) => ({
     padding-top: 48px;
     padding-bottom: 16px;
   }
-
-
 </style>

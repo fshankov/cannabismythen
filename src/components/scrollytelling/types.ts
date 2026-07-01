@@ -5,20 +5,21 @@
  */
 
 export type CorrectnessClass =
-  | 'richtig'
-  | 'eher_richtig'
-  | 'eher_falsch'
-  | 'falsch'
-  | 'keine_aussage_moeglich';
+  | "richtig"
+  | "eher_richtig"
+  | "eher_falsch"
+  | "falsch"
+  | "keine_aussage_moeglich";
 
-export type GroupId = 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
+export type GroupId =
+  "adults" | "minors" | "consumers" | "young_adults" | "parents";
 
 export type Indicator =
-  | 'awareness'
-  | 'significance'
-  | 'correctness'
-  | 'prevention_significance'
-  | 'population_relevance';
+  | "awareness"
+  | "significance"
+  | "correctness"
+  | "prevention_significance"
+  | "population_relevance";
 
 export interface Myth {
   id: number;
@@ -75,12 +76,12 @@ export interface CarmData {
 /* ───── Information sources (mirrors src/lib/dashboard/types.ts) ───── */
 
 export type SourceCategoryId =
-  | 'institutional'
-  | 'internet'
-  | 'social_media'
-  | 'traditional_media'
-  | 'print_physical'
-  | 'personal';
+  | "institutional"
+  | "internet"
+  | "social_media"
+  | "traditional_media"
+  | "print_physical"
+  | "personal";
 
 export interface SourceCategory {
   id: SourceCategoryId | string;
@@ -100,7 +101,7 @@ export interface InformationSource {
   parentId: number | null;
 }
 
-export type SourceMetricId = 'search' | 'perception' | 'trust' | 'prevention';
+export type SourceMetricId = "search" | "perception" | "trust" | "prevention";
 
 export interface SourceMetricDef {
   label: string;
@@ -121,32 +122,27 @@ export interface InformationSourcesData {
 
 /** Step 6 sub-phase identifier — one per indicator, in display order. */
 export type IndicatorPhase =
-  | 'awareness'
-  | 'significance'
-  | 'correctness'
-  | 'prevention_significance'
-  | 'population_relevance';
+  | "awareness"
+  | "significance"
+  | "correctness"
+  | "prevention_significance"
+  | "population_relevance";
 
 /** Step 5+6 unified mode (Iter-3 shared-DOM refactor). */
 export type SampleRankedMode =
-  | 'sample'
-  | 'ranked-1'
-  | 'ranked-2'
-  | 'ranked-3'
-  | 'ranked-4'
-  | 'ranked-5';
+  "sample" | "ranked-1" | "ranked-2" | "ranked-3" | "ranked-4" | "ranked-5";
 
 /** Names of all viz components in the scrollytelling. */
 export type VizName =
-  | 'timeline'
-  | 'peopleVoices'
-  | 'mythGrid'
-  | 'sampleAndRanked'
-  | 'singleMythBalken'
-  | 'sourcesStrips'
-  | 'sourcesSpannweite'
-  | 'ctaGrid'
-  | 'teamRow';
+  | "timeline"
+  | "peopleVoices"
+  | "mythGrid"
+  | "sampleAndRanked"
+  | "singleMythBalken"
+  | "sourcesStrips"
+  | "sourcesSpannweite"
+  | "ctaGrid"
+  | "teamRow";
 
 /* ───── Keystatic editorial-content shape ─────
  *  Paired by index with STEP_DEFINITIONS in stepDefinitions.ts. Source of

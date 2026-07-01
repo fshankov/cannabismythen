@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { GroupId } from '../types';
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { GroupId } from "../types";
 
 /**
  * useAutoCycleGroup — auto-rotate the active Bevölkerungsgruppe
@@ -68,7 +68,7 @@ export function useAutoCycleGroup(
   } = options;
 
   const [activeGroup, setActiveGroupState] = useState<GroupId>(
-    groups[0] ?? 'adults',
+    groups[0] ?? "adults",
   );
   const [manuallyPaused, setManuallyPaused] = useState(false);
   const [hovering, setHovering] = useState(false);

@@ -48,22 +48,48 @@ for (const [slug, entry] of factsheetEntries) {
 const mythContentMap = await buildMythContentMap();
 ---
 
-<BaseLayout title="Daten-Explorer" description="Interaktive Datenvisualisierung zu 42 Cannabis-Mythen — Erkunden Sie wissenschaftliche Einordnungen, Bevölkerungsdaten und Indikatoren." bgTexture>
+<BaseLayout
+  title="Daten-Explorer"
+  description="Interaktive Datenvisualisierung zu 42 Cannabis-Mythen — Erkunden Sie wissenschaftliche Einordnungen, Bevölkerungsdaten und Indikatoren."
+  bgTexture
+>
   <script is:inline>
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    try { window.scrollTo(0, 0); } catch (_) {}
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    try {
+      window.scrollTo(0, 0);
+    } catch (_) {}
   </script>
   <header class="carm-explorer__page-header" data-reveal>
     <h1 class="carm-explorer__page-header__h1">Daten-Explorer</h1>
     <p class="carm-explorer__page-header__sub">
-      Hier erkundest du die Daten der CaRM-Studie, 2025 in Deutschland erhoben.<br/>
+      Hier erkundest du die Daten der CaRM-Studie, 2025 in Deutschland erhoben.<br
+      />
       <strong>Neu hier?</strong> Der <strong>Rundgang</strong>
-      <svg class="carm-rundgang-bookmark-inline" viewBox="0 0 40 52" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 0 H32 A8 8 0 0 1 40 8 V52 L20 40 L0 52 V8 A8 8 0 0 1 8 0 Z" fill="#2d6a4f"/>
-        <text x="20" y="20" text-anchor="middle" dominant-baseline="central" font-size="23" font-weight="800" fill="#ffffff" font-family="'Inter Variable', 'Inter', system-ui, sans-serif">?</text>
+      <svg
+        class="carm-rundgang-bookmark-inline"
+        viewBox="0 0 40 52"
+        aria-hidden="true"
+        focusable="false"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M8 0 H32 A8 8 0 0 1 40 8 V52 L20 40 L0 52 V8 A8 8 0 0 1 8 0 Z"
+          fill="#2d6a4f"></path>
+        <text
+          x="20"
+          y="20"
+          text-anchor="middle"
+          dominant-baseline="central"
+          font-size="23"
+          font-weight="800"
+          fill="#ffffff"
+          font-family="'Inter Variable', 'Inter', system-ui, sans-serif">?</text
+        >
       </svg>
-      führt dich in etwa einer Minute durch den Explorer.<br/>
-      Wie die Daten entstanden sind, erfährst du in <a href="/projekt/">„Über das Projekt"</a>.
+      führt dich in etwa einer Minute durch den Explorer.<br />
+      Wie die Daten entstanden sind, erfährst du in <a href="/projekt/"
+        >„Über das Projekt"</a
+      >.
     </p>
   </header>
   <div class="de-loader-wrap">
@@ -80,7 +106,9 @@ const mythContentMap = await buildMythContentMap();
         mythThemes={JSON.stringify(mythIdToTheme)}
       />
       <noscript>
-        <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+        <p
+          style="padding: 24px; text-align: center; color: var(--color-text-secondary);"
+        >
           Der Daten-Explorer benötigt JavaScript. Ohne JavaScript stehen
           einzelne Faktenblätter über die Navigation zur Verfügung.
         </p>
@@ -97,17 +125,17 @@ const mythContentMap = await buildMythContentMap();
        The animation is untouched; the timeout is a safety net in case
        animationend never fires (e.g. animations globally disabled). */
     (function () {
-      var el = document.querySelector('.de-loader');
+      var el = document.querySelector(".de-loader");
       if (!el) return;
       var hidden = false;
       function clear() {
         if (hidden) return;
         hidden = true;
-        el.style.display = 'none';
+        el.style.display = "none";
       }
       // Only the loader's OWN exit animation — child entrance animations
       // (cluster nodes/links, the infinite breathe) bubble animationend too.
-      el.addEventListener('animationend', function (e) {
+      el.addEventListener("animationend", function (e) {
         if (e.target === el) clear();
       });
       setTimeout(clear, 3500); // well after the ~2.55s exit completes
@@ -145,11 +173,17 @@ const mythContentMap = await buildMythContentMap();
     }
   }
   /* Keep nav above the loader */
-  :global(.nav-wrapper) { z-index: 9999; }
+  :global(.nav-wrapper) {
+    z-index: 9999;
+  }
   /* Hide feedbucket footer until loader is gone */
   :global(.feedbucket-footer) {
     visibility: hidden;
     animation: de-fb-show 0s 2.6s linear forwards;
   }
-  @keyframes de-fb-show { to { visibility: visible; } }
+  @keyframes de-fb-show {
+    to {
+      visibility: visible;
+    }
+  }
 </style>

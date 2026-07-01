@@ -20,7 +20,7 @@
  * wrapper). No `null` handling — the caller decides what to render for
  * `value === null` or `value === 0` (typically "k. A." or "0").
  */
-import type { CSSProperties } from 'react';
+import type { CSSProperties } from "react";
 
 interface Props {
   /** Value to render inside the circle (0–100). Rounded to integer. */

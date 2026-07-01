@@ -24,7 +24,7 @@
  * action is a no-op if it would leave the visible set empty.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
 interface UseHiddenColumnsResult {
   /** Set of hidden column IDs, intersected with `allIds`. */
@@ -44,20 +44,20 @@ interface UseHiddenColumnsResult {
 }
 
 function readStorage(key: string): Set<string> {
-  if (typeof window === 'undefined') return new Set();
+  if (typeof window === "undefined") return new Set();
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return new Set();
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return new Set();
-    return new Set(parsed.filter((x): x is string => typeof x === 'string'));
+    return new Set(parsed.filter((x): x is string => typeof x === "string"));
   } catch {
     return new Set();
   }
 }
 
 function writeStorage(key: string, set: Set<string>): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(key, JSON.stringify([...set]));
   } catch {

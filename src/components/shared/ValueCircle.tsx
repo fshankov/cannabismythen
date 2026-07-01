@@ -8,7 +8,7 @@
  * with cannabismythen; the dark surface tokens override the same vars
  * inside `:root`.
  */
-import type { CSSProperties } from 'react';
+import type { CSSProperties } from "react";
 
 interface Props {
   /** 0–100 numeric. Rendered as the rounded integer inside the disc. */

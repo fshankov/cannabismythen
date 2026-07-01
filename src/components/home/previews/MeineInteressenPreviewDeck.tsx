@@ -18,7 +18,9 @@ export default function MeineInteressenPreviewDeck({ audiences }: Props) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduce) return;
 
     const root = wrapperRef.current;
@@ -67,7 +69,9 @@ export default function MeineInteressenPreviewDeck({ audiences }: Props) {
         <span className="meine-preview-deck__stripe" aria-hidden="true" />
         <span className="meine-preview-deck__emoji">{audience.emoji}</span>
         <span className="meine-preview-deck__label">{audience.cardLabel}</span>
-        <span className="meine-preview-deck__rec">{audience.recommendation}</span>
+        <span className="meine-preview-deck__rec">
+          {audience.recommendation}
+        </span>
       </div>
     </div>
   );

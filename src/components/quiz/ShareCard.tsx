@@ -180,7 +180,11 @@ export default function ShareCard({
     // No image: native text share (mobile) or clipboard (desktop).
     if (navigator.share) {
       try {
-        await navigator.share({ title: shareTitle, text: fullShareText, url: quizUrl });
+        await navigator.share({
+          title: shareTitle,
+          text: fullShareText,
+          url: quizUrl,
+        });
         trackResultCardShared("native");
         return;
       } catch {

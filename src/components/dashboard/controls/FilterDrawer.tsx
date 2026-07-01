@@ -23,15 +23,15 @@
  * visible row count correct without surprising the user.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronRight, Layers, Search, X } from 'lucide-react';
-import type { AppState, Category, Myth } from '../../../lib/dashboard/types';
-import Drawer from '../../shared/Drawer';
-import { t } from '../../../lib/dashboard/translations';
-import { getMythText, getMythShortText } from '../../../lib/dashboard/data';
-import { normalize } from '../../../lib/text-normalize';
-import VerdictStatement from '../../shared/VerdictStatement';
-import type { MythContentEntry } from '../FactsheetPanel';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronRight, Layers, Search, X } from "lucide-react";
+import type { AppState, Category, Myth } from "../../../lib/dashboard/types";
+import Drawer from "../../shared/Drawer";
+import { t } from "../../../lib/dashboard/translations";
+import { getMythText, getMythShortText } from "../../../lib/dashboard/data";
+import { normalize } from "../../../lib/text-normalize";
+import VerdictStatement from "../../shared/VerdictStatement";
+import type { MythContentEntry } from "../FactsheetPanel";
 
 interface Props {
   open: boolean;
@@ -61,7 +61,7 @@ export default function FilterDrawer({
   categories,
   mythContent,
 }: Props) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   /** Set of category-ids whose accordion is currently expanded.
    *  Default: empty (all collapsed). The user expands a category to
    *  reveal its myths. */
@@ -80,7 +80,7 @@ export default function FilterDrawer({
   /** Long statement (Markdoc title) when available, else the short label.
    *  This is what the drawer + autocomplete render. */
   const longText = (m: Myth): string =>
-    mythContent?.[m.id]?.title?.trim() || getMythText(m, 'de');
+    mythContent?.[m.id]?.title?.trim() || getMythText(m, "de");
 
   // Group myths by category for the accordion list.
   const mythsByCategory = useMemo(() => {
@@ -99,7 +99,7 @@ export default function FilterDrawer({
     if (q.length === 0) return null; // null = show full grouped list
     return myths.filter((m) => {
       const haystack = `${normalize(longText(m))} ${normalize(
-        getMythShortText(m, 'de'),
+        getMythShortText(m, "de"),
       )} ${normalize(m.category_de)}`;
       return haystack.includes(q);
     });
@@ -116,19 +116,19 @@ export default function FilterDrawer({
   };
 
   /** Category-level selection state derived from categoryIds + mythIds. */
-  const categoryState = (id: number): 'all' | 'some' | 'none' => {
-    if (state.categoryIds.includes(id)) return 'all';
+  const categoryState = (id: number): "all" | "some" | "none" => {
+    if (state.categoryIds.includes(id)) return "all";
     const myths = mythsByCategory.get(id) ?? [];
     const picked = myths.filter((m) => state.mythIds.includes(m.id)).length;
-    if (picked === 0) return 'none';
-    if (picked === myths.length) return 'all';
-    return 'some';
+    if (picked === 0) return "none";
+    if (picked === myths.length) return "all";
+    return "some";
   };
 
   const toggleCategory = (id: number) => {
     const current = categoryState(id);
     const myths = mythsByCategory.get(id) ?? [];
-    if (current === 'all') {
+    if (current === "all") {
       // Was fully selected → clear it. Drop the id from `categoryIds`
       // AND drop any individual myth ids of this category from
       // `mythIds` (they were redundant before, and dropping them
@@ -173,7 +173,7 @@ export default function FilterDrawer({
     }
     if (included) {
       update(
-        'mythIds',
+        "mythIds",
         state.mythIds.filter((mid) => mid !== m.id),
       );
     } else {
@@ -194,7 +194,7 @@ export default function FilterDrawer({
           return;
         }
       }
-      update('mythIds', nextMythIds);
+      update("mythIds", nextMythIds);
     }
   };
 
@@ -211,9 +211,9 @@ export default function FilterDrawer({
     updateMany({
       categoryIds: [],
       mythIds: [],
-      verdictFilter: 'all',
+      verdictFilter: "all",
     });
-    setQuery('');
+    setQuery("");
     setExpanded(new Set());
   };
 
@@ -225,7 +225,7 @@ export default function FilterDrawer({
     );
     const extraMythIds = state.mythIds.filter((id) => !categoryMythIds.has(id));
     let n = categoryMythIds.size + extraMythIds.length;
-    if (state.verdictFilter !== 'all') n += 1;
+    if (state.verdictFilter !== "all") n += 1;
     return n;
   }, [state.categoryIds, state.mythIds, state.verdictFilter, mythsByCategory]);
 
@@ -235,38 +235,30 @@ export default function FilterDrawer({
       onClose={onClose}
       side="right"
       size="md"
-      title={t('filter.title', 'de')}
+      title={t("filter.title", "de")}
       headerEnd={
         // Selection count lives next to the title — `aria-live="polite"`
         // announces changes for screen readers, the visual fade-in
         // means it doesn't pop into existence when crossing zero.
         totalSelected > 0 ? (
-          <span
-            className="carm-filter-count"
-            role="status"
-            aria-live="polite"
-          >
-            {totalSelected} {totalSelected === 1 ? 'Mythos' : 'Mythen'}{' '}
+          <span className="carm-filter-count" role="status" aria-live="polite">
+            {totalSelected} {totalSelected === 1 ? "Mythos" : "Mythen"}{" "}
             <span className="carm-filter-count__suffix">ausgewählt</span>
           </span>
         ) : undefined
       }
       footer={
         <>
-          <button
-            type="button"
-            className="carm-btn"
-            onClick={reset}
-          >
+          <button type="button" className="carm-btn" onClick={reset}>
             <X size={13} strokeWidth={2.5} aria-hidden="true" />
-            {t('filter.reset', 'de')}
+            {t("filter.reset", "de")}
           </button>
           <button
             type="button"
             className="carm-btn carm-btn--primary"
             onClick={onClose}
           >
-            {t('filter.apply', 'de')}
+            {t("filter.apply", "de")}
           </button>
         </>
       }
@@ -282,8 +274,8 @@ export default function FilterDrawer({
           ref={searchInputRef}
           type="search"
           className="carm-filter-search-row__input"
-          placeholder={t('filter.myths.searchPlaceholder', 'de')}
-          aria-label={t('filter.myths.searchPlaceholder', 'de')}
+          placeholder={t("filter.myths.searchPlaceholder", "de")}
+          aria-label={t("filter.myths.searchPlaceholder", "de")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -291,8 +283,8 @@ export default function FilterDrawer({
           <button
             type="button"
             className="carm-filter-search-row__clear"
-            aria-label={t('filter.reset', 'de')}
-            onClick={() => setQuery('')}
+            aria-label={t("filter.reset", "de")}
+            onClick={() => setQuery("")}
           >
             <X size={14} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -306,15 +298,11 @@ export default function FilterDrawer({
         const selectedCats = categories.filter((c) =>
           state.categoryIds.includes(c.id),
         );
-        const selectedMyths = myths.filter((m) =>
-          state.mythIds.includes(m.id),
-        );
-        if (selectedCats.length === 0 && selectedMyths.length === 0) return null;
+        const selectedMyths = myths.filter((m) => state.mythIds.includes(m.id));
+        if (selectedCats.length === 0 && selectedMyths.length === 0)
+          return null;
         return (
-          <div
-            className="carm-filter-selected"
-            aria-label="Ausgewählte Filter"
-          >
+          <div className="carm-filter-selected" aria-label="Ausgewählte Filter">
             <div className="carm-filter-selected__head">
               <p className="carm-filter-selected__label">Ausgewählt</p>
               <button
@@ -333,10 +321,7 @@ export default function FilterDrawer({
                 const label = `${c.name_de} (${count})`;
                 return (
                   <li key={`cat-${c.id}`}>
-                    <span
-                      className="carm-filter-selected__chip"
-                      title={label}
-                    >
+                    <span className="carm-filter-selected__chip" title={label}>
                       <Layers
                         size={13}
                         strokeWidth={1.75}
@@ -351,7 +336,7 @@ export default function FilterDrawer({
                         className="carm-filter-selected__chip-remove"
                         onClick={() =>
                           update(
-                            'categoryIds',
+                            "categoryIds",
                             state.categoryIds.filter((id) => id !== c.id),
                           )
                         }
@@ -365,14 +350,12 @@ export default function FilterDrawer({
                 );
               })}
               {selectedMyths.map((m) => {
-                const txt = getMythShortText(m, 'de');
-                const truncated = txt.length > 32 ? txt.slice(0, 30) + '…' : txt;
+                const txt = getMythShortText(m, "de");
+                const truncated =
+                  txt.length > 32 ? txt.slice(0, 30) + "…" : txt;
                 return (
                   <li key={m.id}>
-                    <span
-                      className="carm-filter-selected__chip"
-                      title={txt}
-                    >
+                    <span className="carm-filter-selected__chip" title={txt}>
                       <VerdictStatement
                         statement={truncated}
                         verdict={m.correctness_class}
@@ -384,7 +367,7 @@ export default function FilterDrawer({
                         className="carm-filter-selected__chip-remove"
                         onClick={() =>
                           update(
-                            'mythIds',
+                            "mythIds",
                             state.mythIds.filter((id) => id !== m.id),
                           )
                         }
@@ -405,13 +388,13 @@ export default function FilterDrawer({
       <section className="carm-filter-section">
         <h3 className="carm-filter-section__title">
           {filteredMyths === null
-            ? t('filter.myths.label', 'de')
+            ? t("filter.myths.label", "de")
             : `${filteredMyths.length} ${
-                filteredMyths.length === 1 ? 'Treffer' : 'Treffer'
+                filteredMyths.length === 1 ? "Treffer" : "Treffer"
               }`}
         </h3>
         {filteredMyths !== null && filteredMyths.length === 0 && (
-          <p className="carm-filter-empty">{t('filter.myths.empty', 'de')}</p>
+          <p className="carm-filter-empty">{t("filter.myths.empty", "de")}</p>
         )}
         {filteredMyths === null ? (
           <ul className="carm-filter-accordion" role="list">
@@ -437,9 +420,9 @@ export default function FilterDrawer({
                     >
                       <input
                         type="checkbox"
-                        checked={sel === 'all'}
+                        checked={sel === "all"}
                         ref={(el) => {
-                          if (el) el.indeterminate = sel === 'some';
+                          if (el) el.indeterminate = sel === "some";
                         }}
                         onChange={() => toggleCategory(c.id)}
                         aria-label={`${c.name_de} (${cMyths.length})`}
@@ -448,7 +431,7 @@ export default function FilterDrawer({
                     <button
                       type="button"
                       className={`carm-filter-accordion__toggle${
-                        isOpen ? ' is-open' : ''
+                        isOpen ? " is-open" : ""
                       }`}
                       aria-expanded={isOpen}
                       aria-controls={panelId}
@@ -478,9 +461,9 @@ export default function FilterDrawer({
                       open in older ones). `inert` keeps the collapsed
                       content out of the focus order + AT tree. */}
                   <div
-                    {...(isOpen ? {} : { inert: '' as unknown as boolean })}
+                    {...(isOpen ? {} : { inert: "" as unknown as boolean })}
                     className={`carm-filter-accordion__panel-wrap${
-                      isOpen ? ' is-open' : ''
+                      isOpen ? " is-open" : ""
                     }`}
                   >
                     <ul

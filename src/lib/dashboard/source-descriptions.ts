@@ -16,45 +16,43 @@
  * live site. JSDoc English glosses below each entry give a non-fluent
  * reviewer the intended meaning.
  */
-import type { SourceCategoryId } from '../icons/lookups';
+import type { SourceCategoryId } from "../icons/lookups";
 
-export const SOURCE_CATEGORY_DESCRIPTIONS_DE: Record<
-  SourceCategoryId,
-  string
-> = {
-  /** "Sources with professional or official authority — doctors,
-   *  pharmacies, counselling services, public agencies." */
-  institutional:
-    'Quellen mit fachlicher oder amtlicher Autorität — ' +
-    'Ärzt:innen, Apotheken, Beratungsstellen, Behörden.',
-  /** "Online sources without editorial accountability — search
-   *  engines, forums, health portals." */
-  internet:
-    'Online-Quellen ohne redaktionelle Verantwortung — ' +
-    'Suchmaschinen, Foren, Gesundheitsportale.',
-  /** "Social platforms with algorithmic reach — Instagram, TikTok,
-   *  YouTube, X." */
-  social_media:
-    'Soziale Plattformen mit algorithmischer Reichweite — ' +
-    'Instagram, TikTok, YouTube, X.',
-  /** "Traditional editorial media — TV, radio, news websites." */
-  traditional_media:
-    'Klassische Medien mit redaktioneller Verantwortung — ' +
-    'Fernsehen, Radio, Nachrichten-Websites.',
-  /** "Printed or physically distributed material — Apothekenumschau,
-   *  flyers, in-store info screens." */
-  print_physical:
-    'Gedrucktes oder physisch verteiltes Material — ' +
-    'Apothekenumschau, Flyer, Infoscreens.',
-  /** "Personal environment without a professional background —
-   *  relatives, friends, acquaintances." */
-  personal:
-    'Persönliches Umfeld ohne fachlichen Hintergrund — ' +
-    'Angehörige, Freund:innen, Bekannte.',
-};
+export const SOURCE_CATEGORY_DESCRIPTIONS_DE: Record<SourceCategoryId, string> =
+  {
+    /** "Sources with professional or official authority — doctors,
+     *  pharmacies, counselling services, public agencies." */
+    institutional:
+      "Quellen mit fachlicher oder amtlicher Autorität — " +
+      "Ärzt:innen, Apotheken, Beratungsstellen, Behörden.",
+    /** "Online sources without editorial accountability — search
+     *  engines, forums, health portals." */
+    internet:
+      "Online-Quellen ohne redaktionelle Verantwortung — " +
+      "Suchmaschinen, Foren, Gesundheitsportale.",
+    /** "Social platforms with algorithmic reach — Instagram, TikTok,
+     *  YouTube, X." */
+    social_media:
+      "Soziale Plattformen mit algorithmischer Reichweite — " +
+      "Instagram, TikTok, YouTube, X.",
+    /** "Traditional editorial media — TV, radio, news websites." */
+    traditional_media:
+      "Klassische Medien mit redaktioneller Verantwortung — " +
+      "Fernsehen, Radio, Nachrichten-Websites.",
+    /** "Printed or physically distributed material — Apothekenumschau,
+     *  flyers, in-store info screens." */
+    print_physical:
+      "Gedrucktes oder physisch verteiltes Material — " +
+      "Apothekenumschau, Flyer, Infoscreens.",
+    /** "Personal environment without a professional background —
+     *  relatives, friends, acquaintances." */
+    personal:
+      "Persönliches Umfeld ohne fachlichen Hintergrund — " +
+      "Angehörige, Freund:innen, Bekannte.",
+  };
 
 /** Safe accessor — falls back to an empty string so callers can still
  *  render their card if a future category ID isn't yet covered. */
 export function getCategoryDescription(cat: SourceCategoryId): string {
-  return SOURCE_CATEGORY_DESCRIPTIONS_DE[cat] ?? '';
+  return SOURCE_CATEGORY_DESCRIPTIONS_DE[cat] ?? "";
 }

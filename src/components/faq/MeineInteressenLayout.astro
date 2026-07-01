@@ -22,11 +22,11 @@ interface Props {
 const { activeAudience } = Astro.props;
 
 const AUDIENCES: Array<{ id: FaqAudienceId; label: string }> = [
-  { id: "eltern",        label: "Eltern" },
-  { id: "jugendliche",   label: "Jugendliche" },
+  { id: "eltern", label: "Eltern" },
+  { id: "jugendliche", label: "Jugendliche" },
   { id: "konsumierende", label: "Konsumierende" },
-  { id: "lehrkraefte",   label: "Lehrkräfte" },
-  { id: "fachkraefte",   label: "Fachkräfte" },
+  { id: "lehrkraefte", label: "Lehrkräfte" },
+  { id: "fachkraefte", label: "Fachkräfte" },
 ];
 
 const resolved = AUDIENCES.map((a) => ({
@@ -65,15 +65,14 @@ const isFachkraefte = activeAudience === "fachkraefte";
   (function () {
     try {
       var ref = document.referrer ? new URL(document.referrer) : null;
-      if (ref && ref.pathname.startsWith('/meine-interessen/')) {
-        document.documentElement.classList.remove('js-reveal');
+      if (ref && ref.pathname.startsWith("/meine-interessen/")) {
+        document.documentElement.classList.remove("js-reveal");
       }
     } catch (e) {}
   })();
 </script>
 
 <div class="mi-layout">
-
   <!-- Page header -->
   <header class="mi-header" data-reveal>
     <h1 class="mi-header__title">{pageTitle}</h1>
@@ -93,18 +92,20 @@ const isFachkraefte = activeAudience === "fachkraefte";
        Visual is unchanged — styling is class-based (.tab-btn / .active). -->
   <nav class="mi-tab-bar" aria-label="Zielgruppe wählen">
     <div class="tabs-bar">
-      {resolved.map((item) => (
-        <a
-          href={`/meine-interessen/${item.id}/`}
-          class:list={["tab-btn", { "active": item.isActive }]}
-          aria-current={item.isActive ? "page" : undefined}
-        >
-          <span class="mi-tab-icon" aria-hidden="true">
-            <item.Icon size={15} />
-          </span>
-          <span class="mi-tab-label">{item.label}</span>
-        </a>
-      ))}
+      {
+        resolved.map((item) => (
+          <a
+            href={`/meine-interessen/${item.id}/`}
+            class:list={["tab-btn", { active: item.isActive }]}
+            aria-current={item.isActive ? "page" : undefined}
+          >
+            <span class="mi-tab-icon" aria-hidden="true">
+              <item.Icon size={15} />
+            </span>
+            <span class="mi-tab-label">{item.label}</span>
+          </a>
+        ))
+      }
     </div>
   </nav>
 
@@ -113,615 +114,687 @@ const isFachkraefte = activeAudience === "fachkraefte";
     <!-- Per-group intro description: first thing inside the panel, above the
          first accordion. (The per-group title was removed per request — only
          the body description remains.) -->
-    {audienceData?.description && (
-      <div class="mi-panel-intro" data-reveal>
-        <p class="mi-panel-intro__desc">{audienceData.description}</p>
-      </div>
-    )}
-    {isFachkraefte && (
-      <p class="mi-hinweis">
-        <strong>Hinweis:</strong> Schulkontext-spezifische Fragen finden Sie unter{' '}
-        <a href="/meine-interessen/lehrkraefte/">Lehrkräfte</a>.
-      </p>
-    )}
+    {
+      audienceData?.description && (
+        <div class="mi-panel-intro" data-reveal>
+          <p class="mi-panel-intro__desc">{audienceData.description}</p>
+        </div>
+      )
+    }
+    {
+      isFachkraefte && (
+        <p class="mi-hinweis">
+          <strong>Hinweis:</strong> Schulkontext-spezifische Fragen finden Sie
+          unter <a href="/meine-interessen/lehrkraefte/">Lehrkräfte</a>.
+        </p>
+      )
+    }
     <div class="mi-questions">
       <slot />
     </div>
   </div>
-
 </div>
 
 <style>
-/* ══════════════════════════════════════════════════════════════════════
+  /* ══════════════════════════════════════════════════════════════════════
    GLOBAL layout rules — :global() so they always apply regardless of
    Astro's hash-based CSS scoping. Mirrors how dashboard.css handles
    main:has(.carm-explorer) but scoped to body.mi-page.
    ══════════════════════════════════════════════════════════════════════ */
 
-:global(body.mi-page) {
-  background-color: #faf9f5;
-}
+  :global(body.mi-page) {
+    background-color: #faf9f5;
+  }
 
-:global(body.mi-page main) {
-  max-width: none !important;
-  margin: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  padding-bottom: 0 !important;
-  min-height: unset !important;
-}
+  :global(body.mi-page main) {
+    max-width: none !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: unset !important;
+  }
 
-:global(.mi-layout) {
-  display: flex !important;
-  flex-direction: column !important;
-  width: 100%;
-  /* Matches the quiz index content width: nav pill (1200px) − 2×32px = 1136px.
+  :global(.mi-layout) {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100%;
+    /* Matches the quiz index content width: nav pill (1200px) − 2×32px = 1136px.
      The 24px horizontal padding below equals --space-lg, so the content edges
      line up flush with the quiz page and the nav pill. */
-  max-width: 1136px;
-  margin: 0 auto;
-  padding: 0 24px 80px;
-  box-sizing: border-box;
+    max-width: 1136px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    box-sizing: border-box;
 
-  --color-surface: #ffffff;
-  --color-bg-subtle: #eeeee9;
-  --color-border-soft: rgba(191, 201, 193, 0.35);
-  --color-border: rgba(191, 201, 193, 0.5);
-  --radius-lg: 16px;
-  --shadow-chip: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-}
+    --color-surface: #ffffff;
+    --color-bg-subtle: #eeeee9;
+    --color-border-soft: rgba(191, 201, 193, 0.35);
+    --color-border: rgba(191, 201, 193, 0.5);
+    --radius-lg: 16px;
+    --shadow-chip: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  }
 
-:global(.mi-layout .mi-header) {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  /* 48px gap under the header part (h1 + intro) → per-category text. */
-  margin-bottom: 48px;
-}
+  :global(.mi-layout .mi-header) {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    /* 48px gap under the header part (h1 + intro) → per-category text. */
+    margin-bottom: 48px;
+  }
 
-/* h1 — matches .quiz-index__title (quiz index page). */
-:global(.mi-layout .mi-header__title) {
-  max-width: 746px;
-  margin: 0;
-  color: var(--color-accent, #2d6a4f);
-  font-family: var(--font-display);
-  font-size: 48px;
-  font-weight: 900;
-  line-height: 52px;
-  letter-spacing: -1.8px;
-}
+  /* h1 — matches .quiz-index__title (quiz index page). */
+  :global(.mi-layout .mi-header__title) {
+    max-width: 746px;
+    margin: 0;
+    color: var(--color-accent, #2d6a4f);
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 52px;
+    letter-spacing: -1.8px;
+  }
 
-/* Intro body — matches .quiz-index__intro p. */
-:global(.mi-layout .mi-header__subtitle) {
-  max-width: 680px;
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 400;
-  line-height: 1.65;
-  color: var(--color-text-secondary);
-}
+  /* Intro body — matches .quiz-index__intro p. */
+  :global(.mi-layout .mi-header__subtitle) {
+    max-width: 680px;
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
 
-/* ── Per-group intro description (inside the white panel) ───────────
+  /* ── Per-group intro description (inside the white panel) ───────────
    First block in the panel, above the first accordion. (The per-group title
    was removed — only the body description remains.) */
-:global(.mi-layout .mi-panel-intro) {
-  margin: 0 0 28px;
-}
+  :global(.mi-layout .mi-panel-intro) {
+    margin: 0 0 28px;
+  }
 
-:global(.mi-layout .mi-panel-intro__desc) {
-  margin: 0;
-  max-width: 60%;
-  font-size: 1.05rem;
-  font-weight: 400;
-  line-height: 1.65;
-  color: var(--color-text-secondary);
-}
+  :global(.mi-layout .mi-panel-intro__desc) {
+    margin: 0;
+    max-width: 60%;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
 
-/* Category selector caption. Proper German sentence case (no all-caps):
+  /* Category selector caption. Proper German sentence case (no all-caps):
    "Wähle eine Kategorie aus" — the noun Kategorie stays capitalised.
    Left-aligned so it lines up with the tabs and the white container's left edge. */
-:global(.mi-layout .mi-category-label) {
-  margin: 0 0 16px;
-  color: rgba(64, 73, 67, 0.60);
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 900;
-  line-height: 15px;
-  letter-spacing: 4px;
-  text-align: left;
-}
+  :global(.mi-layout .mi-category-label) {
+    margin: 0 0 16px;
+    color: rgba(64, 73, 67, 0.6);
+    font-family: var(--font-display);
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 15px;
+    letter-spacing: 4px;
+    text-align: left;
+  }
 
-:global(.mi-layout .mi-tab-bar) {
-  display: flex;
-  align-items: flex-end;
-  position: relative;
-  z-index: 1;
-}
+  :global(.mi-layout .mi-tab-bar) {
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+    z-index: 1;
+  }
 
-:global(.mi-layout .mi-tab-bar .tabs-bar) {
-  gap: 16px;
-  width: 100%;
-  justify-content: flex-start;
-  border-bottom: 0px;
-  /* Prevent the tabs-bar from capturing scroll events — the global .tabs-bar
+  :global(.mi-layout .mi-tab-bar .tabs-bar) {
+    gap: 16px;
+    width: 100%;
+    justify-content: flex-start;
+    border-bottom: 0px;
+    /* Prevent the tabs-bar from capturing scroll events — the global .tabs-bar
      rule sets overflow-x: auto which hijacks the mouse wheel when hovering
      over the tabs. MI tabs always fit without scrolling, so hidden is safe. */
-  overflow-x: hidden;
-}
+    overflow-x: hidden;
+  }
 
-:global(.mi-layout .mi-tab-bar .tab-btn) {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  background: var(--color-bg-subtle, #eeeee9);
-  text-decoration: none;
-  border-radius: 16px 16px 0 0;
-}
+  :global(.mi-layout .mi-tab-bar .tab-btn) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: var(--color-bg-subtle, #eeeee9);
+    text-decoration: none;
+    border-radius: 16px 16px 0 0;
+  }
 
-:global(.mi-layout .mi-tab-bar .tab-btn:not(.active):hover) {
-  background: #e4e4df;
-}
+  :global(.mi-layout .mi-tab-bar .tab-btn:not(.active):hover) {
+    background: #e4e4df;
+  }
 
-:global(.mi-layout .mi-tab-bar .tab-btn.active) {
-  background: var(--color-surface, #ffffff);
-  border: none;
-  border-radius: 16px 16px 0 0;
-}
+  :global(.mi-layout .mi-tab-bar .tab-btn.active) {
+    background: var(--color-surface, #ffffff);
+    border: none;
+    border-radius: 16px 16px 0 0;
+  }
 
-:global(.mi-layout .mi-panel) {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  background: var(--color-surface, #ffffff);
-  /* No stroke — the box-shadow alone defines the panel. Top-left squared off so
+  :global(.mi-layout .mi-panel) {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--color-surface, #ffffff);
+    /* No stroke — the box-shadow alone defines the panel. Top-left squared off so
      the left-aligned active tab merges flush into it. */
-  border-radius: 0 var(--radius-lg, 16px) var(--radius-lg, 16px) var(--radius-lg, 16px);
-  box-shadow: var(--shadow-chip, 0 4px 20px -2px rgba(0, 0, 0, 0.05));
-  padding: 32px;
-}
+    border-radius: 0 var(--radius-lg, 16px) var(--radius-lg, 16px)
+      var(--radius-lg, 16px);
+    box-shadow: var(--shadow-chip, 0 4px 20px -2px rgba(0, 0, 0, 0.05));
+    padding: 32px;
+  }
 
-:global(.mi-layout .mi-hinweis) {
-  font-size: 14.5px;
-  line-height: 1.55;
-  color: #2f3a33;
-  margin: 0 0 24px;
-  padding: 12px 16px;
-  background: rgba(233, 240, 225, 0.55);
-  border-left: 3px solid #0f5238;
-  border-radius: 0 10px 10px 0;
-}
+  :global(.mi-layout .mi-hinweis) {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: #2f3a33;
+    margin: 0 0 24px;
+    padding: 12px 16px;
+    background: rgba(233, 240, 225, 0.55);
+    border-left: 3px solid #0f5238;
+    border-radius: 0 10px 10px 0;
+  }
 
-:global(.mi-layout .mi-hinweis strong) { font-weight: 700; color: #0f5238; }
+  :global(.mi-layout .mi-hinweis strong) {
+    font-weight: 700;
+    color: #0f5238;
+  }
 
-:global(.mi-layout .mi-hinweis a) {
-  color: #0f5238;
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
+  :global(.mi-layout .mi-hinweis a) {
+    color: #0f5238;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
 
-:global(.mi-layout .mi-questions) {
-  display: flex;
-  flex-direction: column;
-  /* +16px before the first accordion (on top of the panel-intro's 28px). */
-  margin-top: 16px;
-}
+  :global(.mi-layout .mi-questions) {
+    display: flex;
+    flex-direction: column;
+    /* +16px before the first accordion (on top of the panel-intro's 28px). */
+    margin-top: 16px;
+  }
 
-:global(.mi-layout .faq-audience-questions) {
-  gap: 24px;
-}
+  :global(.mi-layout .faq-audience-questions) {
+    gap: 24px;
+  }
 
-/* ── Audience page overrides ───────────────────────────────────────── */
-:global(.mi-layout .faq-audience-page)       { max-width: none; margin: 0; }
-:global(.mi-layout .faq-audience-header)     { display: none; }
-:global(.mi-layout .faq-toc)                 { display: none; }
-:global(.mi-layout .faq-audience-page__footer) { display: none; }
-:global(.mi-layout .faq-audience-questions)  { margin-top: 0; }
+  /* ── Audience page overrides ───────────────────────────────────────── */
+  :global(.mi-layout .faq-audience-page) {
+    max-width: none;
+    margin: 0;
+  }
+  :global(.mi-layout .faq-audience-header) {
+    display: none;
+  }
+  :global(.mi-layout .faq-toc) {
+    display: none;
+  }
+  :global(.mi-layout .faq-audience-page__footer) {
+    display: none;
+  }
+  :global(.mi-layout .faq-audience-questions) {
+    margin-top: 0;
+  }
 
-/* ── FAQ accordion cards ───────────────────────────────────────────── */
-:global(.mi-layout .faq-question) {
-  background: #ffffff;
-  border: 1px solid rgba(191, 201, 193, 0.38);
-  border-radius: 24px;
-  box-shadow: none;
-  transition: background 180ms ease, border-color 180ms ease;
-}
+  /* ── FAQ accordion cards ───────────────────────────────────────────── */
+  :global(.mi-layout .faq-question) {
+    background: #ffffff;
+    border: 1px solid rgba(191, 201, 193, 0.38);
+    border-radius: 24px;
+    box-shadow: none;
+    transition:
+      background 180ms ease,
+      border-color 180ms ease;
+  }
 
-:global(.mi-layout .faq-question:hover) {
-  border-color: rgba(191, 201, 193, 0.95);
-}
+  :global(.mi-layout .faq-question:hover) {
+    border-color: rgba(191, 201, 193, 0.95);
+  }
 
-:global(.mi-layout .faq-question:has(.faq-question__details:not([open])):hover) {
-  background: rgba(45, 106, 79, 0.04);
-}
+  :global(
+    .mi-layout .faq-question:has(.faq-question__details:not([open])):hover
+  ) {
+    background: rgba(45, 106, 79, 0.04);
+  }
 
-:global(.mi-layout .faq-question__summary) {
-  display: grid;
-  grid-template-columns: 32px 1fr auto;
-  align-items: center;
-  gap: 0 24px;
-  padding: 24px;
-}
+  :global(.mi-layout .faq-question__summary) {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: center;
+    gap: 0 24px;
+    padding: 24px;
+  }
 
-:global(.mi-layout .faq-question__details[open] > .faq-question__summary) {
-  border-bottom: 1px solid rgba(191, 201, 193, 0.3);
-}
+  :global(.mi-layout .faq-question__details[open] > .faq-question__summary) {
+    border-bottom: 1px solid rgba(191, 201, 193, 0.3);
+  }
 
-:global(.mi-layout .faq-question__index) {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
-  color: #bfc9c1;
-  line-height: 30px;
-  min-width: unset;
-}
+  :global(.mi-layout .faq-question__index) {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: #bfc9c1;
+    line-height: 30px;
+    min-width: unset;
+  }
 
-:global(.mi-layout .faq-question__heading) {
-  font-size: 18px;
-  font-weight: 400;
-  color: #1a1c1a;
-  line-height: 27px;
-  margin: 0;
-}
+  :global(.mi-layout .faq-question__heading) {
+    font-size: 18px;
+    font-weight: 400;
+    color: #1a1c1a;
+    line-height: 27px;
+    margin: 0;
+  }
 
-:global(.mi-layout .faq-question__chevron) {
-  font-size: 0;
-  line-height: 0;
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23404943' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 12px 8px;
-}
+  :global(.mi-layout .faq-question__chevron) {
+    font-size: 0;
+    line-height: 0;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23404943' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 12px 8px;
+  }
 
-:global(.mi-layout .faq-question__body) {
-  /* 32px top so the lead "header" sits 32px below the question summary. */
-  padding: 32px 24px 25px;
-  padding-left: 80px;
-}
+  :global(.mi-layout .faq-question__body) {
+    /* 32px top so the lead "header" sits 32px below the question summary. */
+    padding: 32px 24px 25px;
+    padding-left: 80px;
+  }
 
-:global(.mi-layout .faq-question__lead) {
-  position: relative;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1a1c1a;
-  line-height: 1.7;
-  /* 32px gap after the lead before the body text (matches the 32px above it). */
-  margin: 0 0 32px;
-  /* No salad-green fill — keep only a rounded-ended accent bar (the ::before).
+  :global(.mi-layout .faq-question__lead) {
+    position: relative;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1c1a;
+    line-height: 1.7;
+    /* 32px gap after the lead before the body text (matches the 32px above it). */
+    margin: 0 0 32px;
+    /* No salad-green fill — keep only a rounded-ended accent bar (the ::before).
      A plain border-left can't have rounded ends, hence the pseudo-element. */
-  background: none;
-  border-left: none;
-  padding: 0 0 0 18px;
-}
+    background: none;
+    border-left: none;
+    padding: 0 0 0 18px;
+  }
 
-:global(.mi-layout .faq-question__lead)::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  border-radius: 99px;
-  background: var(--audience-accent, var(--color-accent));
-}
+  :global(.mi-layout .faq-question__lead)::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 99px;
+    background: var(--audience-accent, var(--color-accent));
+  }
 
-:global(.mi-layout .faq-question__answer),
-:global(.mi-layout .faq-question__answer p) {
-  font-size: 16px;
-  font-weight: 400;
-  color: #404943;
-  line-height: 1.7;
-}
+  :global(.mi-layout .faq-question__answer),
+  :global(.mi-layout .faq-question__answer p) {
+    font-size: 16px;
+    font-weight: 400;
+    color: #404943;
+    line-height: 1.7;
+  }
 
-/* Links inside the answer (everything above the rail line) — bold. Scoped to
+  /* Links inside the answer (everything above the rail line) — bold. Scoped to
    .faq-question__answer so the rail's own links BELOW the line (which share the
    .faq-myth-link class) keep their normal weight. */
-:global(.mi-layout .faq-question__answer a),
-:global(.mi-layout .faq-question__answer .faq-myth-link) {
-  font-weight: 700;
-}
+  :global(.mi-layout .faq-question__answer a),
+  :global(.mi-layout .faq-question__answer .faq-myth-link) {
+    font-weight: 700;
+  }
 
-/* Data tables inside FAQ answers — styled to match the Daten-Explorer
+  /* Data tables inside FAQ answers — styled to match the Daten-Explorer
    `.data-table` (src/styles/dashboard.css): token border, small header, tight
    cell padding, right-aligned tabular numbers, and the signature row hover
    (light-green wash + green left accent bar). Kept borderless (no card) like the
    explorer's in-panel table. */
-:global(.mi-layout .faq-question__answer table) {
-  width: 100%;
-  border-collapse: collapse;
-  margin: var(--space-lg) 0;
-  font-size: 0.83rem;
-  line-height: 1.45;
-}
+  :global(.mi-layout .faq-question__answer table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-lg) 0;
+    font-size: 0.83rem;
+    line-height: 1.45;
+  }
 
-:global(.mi-layout .faq-question__answer th) {
-  text-align: left;
-  vertical-align: bottom;
-  font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0.03em;
-  color: var(--color-text-secondary);
-  padding: 0 12px 9px 0;
-  border-bottom: 1px solid var(--color-border);
-}
+  :global(.mi-layout .faq-question__answer th) {
+    text-align: left;
+    vertical-align: bottom;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    color: var(--color-text-secondary);
+    padding: 0 12px 9px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
 
-:global(.mi-layout .faq-question__answer td) {
-  vertical-align: middle;
-  padding: 9px 12px 9px 0;
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-text);
-}
+  :global(.mi-layout .faq-question__answer td) {
+    vertical-align: middle;
+    padding: 9px 12px 9px 0;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
 
-/* Numeric columns (markdown `---:` → align="right") right-align + tabular figures.
+  /* Numeric columns (markdown `---:` → align="right") right-align + tabular figures.
    No !important: the attribute selector wins over the base rule by specificity. */
-:global(.mi-layout .faq-question__answer th[align="right"]),
-:global(.mi-layout .faq-question__answer td[align="right"]) {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
+  :global(.mi-layout .faq-question__answer th[align="right"]),
+  :global(.mi-layout .faq-question__answer td[align="right"]) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
 
-/* First column flush to the text margin; right-most column flush to the edge;
+  /* First column flush to the text margin; right-most column flush to the edge;
    no trailing border on the last row. */
-:global(.mi-layout .faq-question__answer th:first-child),
-:global(.mi-layout .faq-question__answer td:first-child) {
-  padding-left: 0;
-}
-:global(.mi-layout .faq-question__answer th:last-child),
-:global(.mi-layout .faq-question__answer td:last-child) {
-  padding-right: 0;
-}
-:global(.mi-layout .faq-question__answer tbody tr:last-child td) {
-  border-bottom: none;
-}
+  :global(.mi-layout .faq-question__answer th:first-child),
+  :global(.mi-layout .faq-question__answer td:first-child) {
+    padding-left: 0;
+  }
+  :global(.mi-layout .faq-question__answer th:last-child),
+  :global(.mi-layout .faq-question__answer td:last-child) {
+    padding-right: 0;
+  }
+  :global(.mi-layout .faq-question__answer tbody tr:last-child td) {
+    border-bottom: none;
+  }
 
-/* Daten-Explorer row hover: light-green wash + green left accent bar. */
-:global(.mi-layout .faq-question__answer tbody tr) {
-  transition: background var(--duration-fast, 150ms) var(--ease-out, ease);
-}
-:global(.mi-layout .faq-question__answer tbody tr:hover) {
-  background: var(--color-accent-light);
-}
-:global(.mi-layout .faq-question__answer tbody tr:hover td:first-child) {
-  box-shadow: inset 3px 0 0 var(--color-accent);
-}
+  /* Daten-Explorer row hover: light-green wash + green left accent bar. */
+  :global(.mi-layout .faq-question__answer tbody tr) {
+    transition: background var(--duration-fast, 150ms) var(--ease-out, ease);
+  }
+  :global(.mi-layout .faq-question__answer tbody tr:hover) {
+    background: var(--color-accent-light);
+  }
+  :global(.mi-layout .faq-question__answer tbody tr:hover td:first-child) {
+    box-shadow: inset 3px 0 0 var(--color-accent);
+  }
 
-/* ── Heatmap tint for FAQ value tables (Daten-Explorer "Tabelle" look) ──────
+  /* ── Heatmap tint for FAQ value tables (Daten-Explorer "Tabelle" look) ──────
    Cells whose content is "NN %" are tinted by value via the shared --band ramp
    (applied by src/lib/faq-heatmap-bands.ts). The --band-* tokens live in
    global.css, which IS loaded on this page. */
-:global(.mi-layout .faq-question__answer .faq-hm--band-0) { background: var(--band-0); }
-:global(.mi-layout .faq-question__answer .faq-hm--band-1) { background: var(--band-1); }
-:global(.mi-layout .faq-question__answer .faq-hm--band-2) { background: var(--band-2); }
-:global(.mi-layout .faq-question__answer .faq-hm--band-3) { background: var(--band-3); }
-:global(.mi-layout .faq-question__answer .faq-hm--band-4) { background: var(--band-4); }
-:global(.mi-layout .faq-question__answer .faq-hm--band-5) { background: var(--band-5); }
-:global(.mi-layout .faq-question__answer .faq-hm--band-6) { background: var(--band-6); }
-:global(.mi-layout .faq-question__answer td.faq-hm) {
-  color: #33302c;
-  font-variant-numeric: tabular-nums;
-}
-/* Heatmap-table layout (scoped to the tinted table only): fixed layout so all
+  :global(.mi-layout .faq-question__answer .faq-hm--band-0) {
+    background: var(--band-0);
+  }
+  :global(.mi-layout .faq-question__answer .faq-hm--band-1) {
+    background: var(--band-1);
+  }
+  :global(.mi-layout .faq-question__answer .faq-hm--band-2) {
+    background: var(--band-2);
+  }
+  :global(.mi-layout .faq-question__answer .faq-hm--band-3) {
+    background: var(--band-3);
+  }
+  :global(.mi-layout .faq-question__answer .faq-hm--band-4) {
+    background: var(--band-4);
+  }
+  :global(.mi-layout .faq-question__answer .faq-hm--band-5) {
+    background: var(--band-5);
+  }
+  :global(.mi-layout .faq-question__answer .faq-hm--band-6) {
+    background: var(--band-6);
+  }
+  :global(.mi-layout .faq-question__answer td.faq-hm) {
+    color: #33302c;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Heatmap-table layout (scoped to the tinted table only): fixed layout so all
    five number columns get the same width regardless of header text length;
    value cells never wrap. Header cells may wrap to two lines for the longer
    group names — only the number cells are kept on one line. The wrapper is the
    horizontal-scroll container (overrides Phase-1's `display: block` rule that
    would otherwise break `table-layout: fixed` on narrow viewports). */
-:global(.mi-layout .faq-question__answer .faq-hm-wrap) {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-:global(.mi-layout .faq-question__answer table.faq-hm-table) {
-  table-layout: fixed;
-  /* Min width so the 7 fixed-% columns stay readable on phones; below this
+  :global(.mi-layout .faq-question__answer .faq-hm-wrap) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  :global(.mi-layout .faq-question__answer table.faq-hm-table) {
+    table-layout: fixed;
+    /* Min width so the 7 fixed-% columns stay readable on phones; below this
      width the wrapper scrolls horizontally. The per-column widths are defined
      by the <colgroup> injected in src/lib/faq-heatmap-bands.ts (sum = 100 %),
      which lets `table-layout: fixed` size columns independently of which row is
      first — needed because the suphead row uses colspan. */
-  min-width: 720px;
-}
-:global(.mi-layout .faq-question__answer table.faq-hm-table th[align="right"]) {
-  white-space: normal;
-  line-height: 1.25;
-}
-:global(.mi-layout .faq-question__answer table.faq-hm-table td[align="right"]) {
-  white-space: nowrap;
-}
-/* Sub-header row above the regular headers: empty cell over Aussage + Korrekte
+    min-width: 720px;
+  }
+  :global(
+    .mi-layout .faq-question__answer table.faq-hm-table th[align="right"]
+  ) {
+    white-space: normal;
+    line-height: 1.25;
+  }
+  :global(
+    .mi-layout .faq-question__answer table.faq-hm-table td[align="right"]
+  ) {
+    white-space: nowrap;
+  }
+  /* Sub-header row above the regular headers: empty cell over Aussage + Korrekte
    Antwort, then a single label cell spanning the 5 Zielgruppen columns. Reads
    as a category caption — smaller, secondary colour, with a thin rule under
    the spanning cell to visually group the columns below it. */
-:global(.mi-layout .faq-question__answer table.faq-hm-table .faq-hm-suphead th) {
-  border-bottom: none;
-  background: transparent;
-}
-:global(.mi-layout .faq-question__answer table.faq-hm-table .faq-hm-suphead__spacer) {
-  padding: 0;
-}
-:global(.mi-layout .faq-question__answer table.faq-hm-table .faq-hm-suphead__group) {
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--color-text-secondary);
-  text-align: center;
-  padding: 0 8px 6px;
-  border-bottom: 1px solid var(--color-border);
-}
-:global(.mi-layout .faq-question__answer .faq-hm-legend) {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin: 10px 0 20px;
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-}
-:global(.mi-layout .faq-question__answer .faq-hm-legend__bar) {
-  display: inline-flex;
-  border-radius: 2px;
-  overflow: hidden;
-}
-:global(.mi-layout .faq-question__answer .faq-hm-legend__bar span) {
-  width: 20px;
-  height: 11px;
-}
+  :global(
+    .mi-layout .faq-question__answer table.faq-hm-table .faq-hm-suphead th
+  ) {
+    border-bottom: none;
+    background: transparent;
+  }
+  :global(
+    .mi-layout .faq-question__answer table.faq-hm-table .faq-hm-suphead__spacer
+  ) {
+    padding: 0;
+  }
+  :global(
+    .mi-layout .faq-question__answer table.faq-hm-table .faq-hm-suphead__group
+  ) {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+    text-align: center;
+    padding: 0 8px 6px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  :global(.mi-layout .faq-question__answer .faq-hm-legend) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 20px;
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+  }
+  :global(.mi-layout .faq-question__answer .faq-hm-legend__bar) {
+    display: inline-flex;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  :global(.mi-layout .faq-question__answer .faq-hm-legend__bar span) {
+    width: 20px;
+    height: 11px;
+  }
 
-/* Lesart legend under the Konsumierende-vs-Minderjährige tables. Smaller font,
+  /* Lesart legend under the Konsumierende-vs-Minderjährige tables. Smaller font,
    secondary colour for the prose. The colour words "blau" / "lila" carry an
    inline swatch (the same 8 px dot used inside the tables) plus matching text
    colour, so the legend reads as a self-explaining key. */
-:global(.mi-layout .faq-question__answer p.faq-lesart) {
-  font-size: 0.78rem;
-  line-height: 1.55;
-  color: var(--color-text-secondary);
-  /* Bottom margin separates the legend block (= end of one table) from the
+  :global(.mi-layout .faq-question__answer p.faq-lesart) {
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    /* Bottom margin separates the legend block (= end of one table) from the
      next section heading (start of the second table) so the two Top-10
      groupings read as distinct visual blocks rather than one continuous list. */
-  margin: 10px 0 var(--space-lg);
-}
-:global(.mi-layout .faq-question__answer p.faq-lesart strong) {
-  color: var(--color-text);
-  font-weight: 600;
-}
-:global(.mi-layout .faq-lesart-shared),
-:global(.mi-layout .faq-lesart-diff) {
-  font-weight: 600;
-  white-space: nowrap;
-}
-:global(.mi-layout .faq-lesart-shared) { color: #2b6cb0; }
-:global(.mi-layout .faq-lesart-diff)   { color: #7c3aed; }
-:global(.mi-layout .faq-lesart-shared::before),
-:global(.mi-layout .faq-lesart-diff::before) {
-  content: "";
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 5px;
-  vertical-align: middle;
-}
-:global(.mi-layout .faq-lesart-shared::before) { background: #2b6cb0; }
-:global(.mi-layout .faq-lesart-diff::before)   { background: #7c3aed; }
+    margin: 10px 0 var(--space-lg);
+  }
+  :global(.mi-layout .faq-question__answer p.faq-lesart strong) {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+  :global(.mi-layout .faq-lesart-shared),
+  :global(.mi-layout .faq-lesart-diff) {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  :global(.mi-layout .faq-lesart-shared) {
+    color: #2b6cb0;
+  }
+  :global(.mi-layout .faq-lesart-diff) {
+    color: #7c3aed;
+  }
+  :global(.mi-layout .faq-lesart-shared::before),
+  :global(.mi-layout .faq-lesart-diff::before) {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+  :global(.mi-layout .faq-lesart-shared::before) {
+    background: #2b6cb0;
+  }
+  :global(.mi-layout .faq-lesart-diff::before) {
+    background: #7c3aed;
+  }
 
-/* Source-note line (rendered from "Quelle: …" paragraphs in the .mdoc).
+  /* Source-note line (rendered from "Quelle: …" paragraphs in the .mdoc).
    Sits at the end of an answer as metadata, so it reads as a small footnote:
    smaller font, muted colour, and the link is dark underlined inline text
    rather than the loud green accent (it's a citation, not a CTA — the brand
    colour shouldn't compete with the answer's content). */
-:global(.mi-layout .faq-question__answer p.faq-source-note) {
-  font-size: 0.72rem;
-  line-height: 1.5;
-  color: var(--color-text-muted);
-  margin: 12px 0 0;
-}
-:global(.mi-layout .faq-question__answer p.faq-source-note a) {
-  color: var(--color-text);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-decoration-color: currentColor;
-  text-underline-offset: 2px;
-  font-weight: 500;
-  transition: color 120ms ease;
-}
-:global(.mi-layout .faq-question__answer p.faq-source-note a:hover) {
-  color: var(--color-accent);
-  text-decoration-color: var(--color-accent);
-}
+  :global(.mi-layout .faq-question__answer p.faq-source-note) {
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 12px 0 0;
+  }
+  :global(.mi-layout .faq-question__answer p.faq-source-note a) {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: currentColor;
+    text-underline-offset: 2px;
+    font-weight: 500;
+    transition: color 120ms ease;
+  }
+  :global(.mi-layout .faq-question__answer p.faq-source-note a:hover) {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
+  }
 
-@media (max-width: 640px) {
-  /* Override Phase-1's `display: block; overflow-x: auto` on tables for the
+  @media (max-width: 640px) {
+    /* Override Phase-1's `display: block; overflow-x: auto` on tables for the
      heatmap table — it must stay `display: table` for `table-layout: fixed`
      to keep equal-width columns. The .faq-hm-wrap is the scroll container. */
-  :global(.mi-layout .faq-question__answer table.faq-hm-table) {
-    display: table;
-    overflow-x: visible;
-    font-size: 0.78rem;
+    :global(.mi-layout .faq-question__answer table.faq-hm-table) {
+      display: table;
+      overflow-x: visible;
+      font-size: 0.78rem;
+    }
   }
-}
 
-/* Related-myths rail divider (the line above MYTHOS / VERWANDTE MYTHEN):
+  /* Related-myths rail divider (the line above MYTHOS / VERWANDTE MYTHEN):
    +8px before the line (margin-top) and +16px after it (padding-top),
    on top of the global --space-md (16px) base. */
-:global(.mi-layout .faq-related-rail) {
-  margin-top: calc(var(--space-md) + 8px);
-  padding-top: calc(var(--space-md) + 16px);
-}
+  :global(.mi-layout .faq-related-rail) {
+    margin-top: calc(var(--space-md) + 8px);
+    padding-top: calc(var(--space-md) + 16px);
+  }
 
-/* Fold bar — break out of the MI body padding (0 24px 25px, padding-left 80px)
+  /* Fold bar — break out of the MI body padding (0 24px 25px, padding-left 80px)
    so it spans the card edge-to-edge and sits flush at the rounded bottom. */
-:global(.mi-layout .faq-collapse) {
-  /* MI body padding is 0 24px 25px with padding-left 80px → span 100% + 80 + 24 */
-  width: calc(100% + 104px);
-  margin: 20px -24px -25px -80px;
-  border-top: 1px solid rgba(191, 201, 193, 0.3);
-  border-radius: 0 0 24px 24px;
-  color: #6b7770;
-}
-:global(.mi-layout .faq-collapse:hover),
-:global(.mi-layout .faq-collapse:focus-visible) {
-  background: rgba(45, 106, 79, 0.05);
-  color: var(--color-accent, #2d6a4f);
-}
-
-/* ── Scoped: tab icon ──────────────────────────────────────────────── */
-.mi-tab-icon {
-  display: inline-flex;
-  align-items: center;
-  flex: none;
-  opacity: 0.65;
-  transition: opacity 150ms ease, color 150ms ease;
-}
-
-:global(.mi-layout .mi-tab-bar .tab-btn.active) .mi-tab-icon {
-  opacity: 1;
-  color: var(--color-accent, #2d6a4f);
-}
-
-/* ── Responsive ────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  :global(.mi-layout .mi-tab-bar) {
-    position: sticky;
-    top: calc(var(--header-height, 60px) - 1px);
-    z-index: 50;
-    background: #faf9f5;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+  :global(.mi-layout .faq-collapse) {
+    /* MI body padding is 0 24px 25px with padding-left 80px → span 100% + 80 + 24 */
+    width: calc(100% + 104px);
+    margin: 20px -24px -25px -80px;
+    border-top: 1px solid rgba(191, 201, 193, 0.3);
+    border-radius: 0 0 24px 24px;
+    color: #6b7770;
   }
-  :global(.mi-layout .mi-tab-bar)::-webkit-scrollbar { display: none; }
-
-  :global(.mi-layout .mi-panel) { padding: 20px 16px 24px; }
-}
-
-@media (max-width: 640px) {
-  :global(.mi-layout) { padding-left: 16px; padding-right: 16px; }
-  :global(.mi-layout .mi-header__title) { font-size: 30px; line-height: 1.15; }
-  /* Full-width description on phones — 60% would be too cramped for the text. */
-  :global(.mi-layout .mi-panel-intro__desc) { max-width: 100%; }
-  /* Wide data tables scroll horizontally on phones instead of overflowing. */
-  :global(.mi-layout .faq-question__answer table) {
-    display: block;
-    overflow-x: auto;
-    font-size: 0.78rem;
-    -webkit-overflow-scrolling: touch;
+  :global(.mi-layout .faq-collapse:hover),
+  :global(.mi-layout .faq-collapse:focus-visible) {
+    background: rgba(45, 106, 79, 0.05);
+    color: var(--color-accent, #2d6a4f);
   }
 
-  :global(.mi-layout .mi-tab-bar .tab-btn:not(.active) .mi-tab-label) {
-    position: absolute;
-    width: 1px; height: 1px;
-    padding: 0; margin: -1px;
-    overflow: hidden;
-    clip: rect(0,0,0,0);
-    white-space: nowrap;
-    border: 0;
+  /* ── Scoped: tab icon ──────────────────────────────────────────────── */
+  .mi-tab-icon {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    opacity: 0.65;
+    transition:
+      opacity 150ms ease,
+      color 150ms ease;
   }
-  :global(.mi-layout .mi-tab-bar .tab-btn:not(.active)) { padding: 9px 14px; }
-}
+
+  :global(.mi-layout .mi-tab-bar .tab-btn.active) .mi-tab-icon {
+    opacity: 1;
+    color: var(--color-accent, #2d6a4f);
+  }
+
+  /* ── Responsive ────────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    :global(.mi-layout .mi-tab-bar) {
+      position: sticky;
+      top: calc(var(--header-height, 60px) - 1px);
+      z-index: 50;
+      background: #faf9f5;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    :global(.mi-layout .mi-tab-bar)::-webkit-scrollbar {
+      display: none;
+    }
+
+    :global(.mi-layout .mi-panel) {
+      padding: 20px 16px 24px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    :global(.mi-layout) {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    :global(.mi-layout .mi-header__title) {
+      font-size: 30px;
+      line-height: 1.15;
+    }
+    /* Full-width description on phones — 60% would be too cramped for the text. */
+    :global(.mi-layout .mi-panel-intro__desc) {
+      max-width: 100%;
+    }
+    /* Wide data tables scroll horizontally on phones instead of overflowing. */
+    :global(.mi-layout .faq-question__answer table) {
+      display: block;
+      overflow-x: auto;
+      font-size: 0.78rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    :global(.mi-layout .mi-tab-bar .tab-btn:not(.active) .mi-tab-label) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    :global(.mi-layout .mi-tab-bar .tab-btn:not(.active)) {
+      padding: 9px 14px;
+    }
+  }
 </style>

@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties } from "react";
 
 interface Props {
   className?: string;
@@ -26,7 +26,7 @@ export default function RundgangBookmark({ className, title, style }: Props) {
       className={className}
       style={style}
       viewBox="0 0 40 52"
-      role={title ? 'img' : undefined}
+      role={title ? "img" : undefined}
       aria-label={title}
       aria-hidden={title ? undefined : true}
       focusable="false"

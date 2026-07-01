@@ -23,40 +23,52 @@
  * views feel like the same control set across the dashboard divider.
  */
 import {
-  forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState,
-} from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import type {
-  AppState, DashboardDefinitions, InformationSource, InformationSourcesData,
-  SourceGroupId, SourceMetricType, SourcesStripsMode,
-} from '../../../lib/dashboard/types';
-import {
-  GridDataHeader, GridLabelHeader,
-} from '../grid';
+  AppState,
+  DashboardDefinitions,
+  InformationSource,
+  InformationSourcesData,
+  SourceGroupId,
+  SourceMetricType,
+  SourcesStripsMode,
+} from "../../../lib/dashboard/types";
+import { GridDataHeader, GridLabelHeader } from "../grid";
 import {
   AUDIENCE_ICONS_BY_GROUP,
-  SOURCE_CATEGORY_ICONS, SOURCE_METRIC_ICONS,
+  SOURCE_CATEGORY_ICONS,
+  SOURCE_METRIC_ICONS,
   type SourceCategoryId,
-} from '../../../lib/icons/lookups';
+} from "../../../lib/icons/lookups";
 import {
   bandIndex,
   anteilLabel,
   niveauLabel,
-} from '../../../lib/dashboard/lesebeispiel-bands';
-import LesebeispielSource from '../LesebeispielSource';
-import HoverTooltip from '../../shared/HoverTooltip';
-import { useHiddenColumns } from '../hooks/useHiddenColumns';
-import { t } from '../../../lib/dashboard/translations';
-import { filterSourcesBySearch } from '../../../lib/dashboard/data';
-import { getCategoryDescription } from '../../../lib/dashboard/source-descriptions';
-import { getCategoryColor } from '../../../lib/dashboard/colors';
-import { renderTableSvg, type TableRenderOpts } from '../../../lib/dashboard/table-svg';
+} from "../../../lib/dashboard/lesebeispiel-bands";
+import LesebeispielSource from "../LesebeispielSource";
+import HoverTooltip from "../../shared/HoverTooltip";
+import { useHiddenColumns } from "../hooks/useHiddenColumns";
+import { t } from "../../../lib/dashboard/translations";
+import { filterSourcesBySearch } from "../../../lib/dashboard/data";
+import { getCategoryDescription } from "../../../lib/dashboard/source-descriptions";
+import { getCategoryColor } from "../../../lib/dashboard/colors";
+import {
+  renderTableSvg,
+  type TableRenderOpts,
+} from "../../../lib/dashboard/table-svg";
 
 /** Whether a source metric uses the %-share band ("…Anteil") or the
  *  point-score band ("…Niveau"). Mirrors the convention in
  *  LesebeispielSource. */
 function sourceMetricUsesAnteil(metric: SourceMetricType): boolean {
-  return metric === 'search' || metric === 'perception';
+  return metric === "search" || metric === "perception";
 }
 
 /* SOURCE_METRIC_LABELS_FULL and SOURCE_GROUP_FULL_LABELS were retired
@@ -81,11 +93,21 @@ export interface SourcesTableViewHandle {
 
 /** Sort target: 'source' (the alpha row-label sort) plus a string for
  *  any data column ID (metric in 'metric' mode, group in 'group' mode). */
-type SortKey = 'source' | string;
-type SortDir = 'asc' | 'desc';
+type SortKey = "source" | string;
+type SortDir = "asc" | "desc";
 
-interface MetricCol { key: SourceMetricType; label: string; short?: string; flavor: 'metric'; }
-interface GroupCol { key: SourceGroupId; label: string; short?: string; flavor: 'group'; }
+interface MetricCol {
+  key: SourceMetricType;
+  label: string;
+  short?: string;
+  flavor: "metric";
+}
+interface GroupCol {
+  key: SourceGroupId;
+  label: string;
+  short?: string;
+  flavor: "group";
+}
 type ColSpec = MetricCol | GroupCol;
 
 /** v3 (2026-05-26): Wahrnehmung moves to the trailing slot so the
@@ -95,10 +117,10 @@ type ColSpec = MetricCol | GroupCol;
 // Prävention — matches SourcesSpannweiteView's METRICS so Tabelle and
 // Übersicht read the same left→right.
 const METRIC_COLS: MetricCol[] = [
-  { key: 'search', label: 'Suche', flavor: 'metric' },
-  { key: 'perception', label: 'Wahrnehmung', flavor: 'metric' },
-  { key: 'trust', label: 'Vertrauen', flavor: 'metric' },
-  { key: 'prevention', label: 'Prävention', flavor: 'metric' },
+  { key: "search", label: "Suche", flavor: "metric" },
+  { key: "perception", label: "Wahrnehmung", flavor: "metric" },
+  { key: "trust", label: "Vertrauen", flavor: "metric" },
+  { key: "prevention", label: "Prävention", flavor: "metric" },
 ];
 
 /** v4 (2026-05-26): pivot to group columns. Same 5 Zielgruppen as
@@ -107,11 +129,31 @@ const METRIC_COLS: MetricCol[] = [
 // Mythen-Übersicht); `label` stays the full form for tooltips + aria
 // (Fedor 2026-05-29).
 const GROUP_COLS: GroupCol[] = [
-  { key: 'adults', label: 'Erwachsene (18–70)', short: 'Erw.', flavor: 'group' },
-  { key: 'minors', label: 'Minderjährige (16–17)', short: 'Minderj.', flavor: 'group' },
-  { key: 'consumers', label: 'Konsumierende', short: 'Konsum.', flavor: 'group' },
-  { key: 'young_adults', label: 'Junge Erwachsene (18–26)', short: 'Junge Erw.', flavor: 'group' },
-  { key: 'parents', label: 'Eltern', short: 'Eltern', flavor: 'group' },
+  {
+    key: "adults",
+    label: "Erwachsene (18–70)",
+    short: "Erw.",
+    flavor: "group",
+  },
+  {
+    key: "minors",
+    label: "Minderjährige (16–17)",
+    short: "Minderj.",
+    flavor: "group",
+  },
+  {
+    key: "consumers",
+    label: "Konsumierende",
+    short: "Konsum.",
+    flavor: "group",
+  },
+  {
+    key: "young_adults",
+    label: "Junge Erwachsene (18–26)",
+    short: "Junge Erw.",
+    flavor: "group",
+  },
+  { key: "parents", label: "Eltern", short: "Eltern", flavor: "group" },
 ];
 
 /** Canonical category order for the category sort — mirrors
@@ -127,18 +169,18 @@ const CATEGORY_ORDER: Record<string, number> = {
 };
 
 const GROUP_FULL_LABELS_DE: Record<SourceGroupId, string> = {
-  adults: 'Erwachsene (18–70)',
-  minors: 'Minderjährige (16–17)',
-  consumers: 'Konsumierende',
-  young_adults: 'Junge Erwachsene (18–26)',
-  parents: 'Eltern',
+  adults: "Erwachsene (18–70)",
+  minors: "Minderjährige (16–17)",
+  consumers: "Konsumierende",
+  young_adults: "Junge Erwachsene (18–26)",
+  parents: "Eltern",
 };
 
 const METRIC_FULL_LABELS_DE: Record<SourceMetricType, string> = {
-  search: 'Suche',
-  perception: 'Wahrnehmung',
-  trust: 'Vertrauen',
-  prevention: 'Prävention',
+  search: "Suche",
+  perception: "Wahrnehmung",
+  trust: "Vertrauen",
+  prevention: "Prävention",
 };
 
 const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
@@ -150,31 +192,36 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
       const next = expanded.includes(parentId)
         ? expanded.filter((id) => id !== parentId)
         : [...expanded, parentId];
-      update('sourcesSpannweiteExpanded', next);
+      update("sourcesSpannweiteExpanded", next);
     };
     // v4 (2026-05-26): pivot mode from the shared SourcesSpannweiteToolbar.
     // `state.sourcesStripsMode === 'metric'` → columns = the 4 metrics,
     // off-axis dimension = `state.sourceGroup` (one group fills all cells).
     // `'group'` → columns = the 5 Zielgruppen, off-axis = `state.sourceMetric`.
-    const mode: SourcesStripsMode = state.sourcesStripsMode ?? 'metric';
+    const mode: SourcesStripsMode = state.sourcesStripsMode ?? "metric";
     const selectedGroup: SourceGroupId = state.sourceGroup;
     const selectedMetric: SourceMetricType = state.sourceMetric;
 
     const renderDataRef = useRef<TableRenderOpts | null>(null);
     useImperativeHandle(ref, () => ({
       getSvgElement: () => {
-        if (!renderDataRef.current || renderDataRef.current.rows.length === 0) return null;
-        try { return renderTableSvg(renderDataRef.current); } catch { return null; }
+        if (!renderDataRef.current || renderDataRef.current.rows.length === 0)
+          return null;
+        try {
+          return renderTableSvg(renderDataRef.current);
+        } catch {
+          return null;
+        }
       },
     }));
 
-    const [sortKey, setSortKey] = useState<SortKey>('source');
-    const [sortDir, setSortDir] = useState<SortDir>('asc');
+    const [sortKey, setSortKey] = useState<SortKey>("source");
+    const [sortDir, setSortDir] = useState<SortDir>("asc");
 
     // v5 (2026-05-26) — swap so the toggle label names the PICKER
     // dimension. 'metric' pivot → picker = metric, columns = 5 groups.
     // 'group' pivot → picker = group, columns = 4 metrics.
-    const cols: ColSpec[] = mode === 'metric' ? GROUP_COLS : METRIC_COLS;
+    const cols: ColSpec[] = mode === "metric" ? GROUP_COLS : METRIC_COLS;
     const allColIds = cols.map((c) => c.key as string);
 
     // Hidden-column state is scoped per-mode so flipping the pivot
@@ -188,9 +235,9 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
     // When the pivot changes the column schema changes too — reset
     // any data-column sort to the alpha sort on the source-label column.
     useEffect(() => {
-      if (sortKey !== 'source') {
-        setSortKey('source');
-        setSortDir('asc');
+      if (sortKey !== "source") {
+        setSortKey("source");
+        setSortDir("asc");
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mode]);
@@ -198,10 +245,10 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
     /** Cycle: same column → flip direction; new column → asc. */
     const cycleColumnSort = (key: SortKey) => {
       if (sortKey === key) {
-        setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+        setSortDir((d) => (d === "asc" ? "desc" : "asc"));
       } else {
         setSortKey(key);
-        setSortDir('asc');
+        setSortDir("asc");
       }
     };
 
@@ -211,15 +258,17 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
         const sourceKey = String(src.id);
         const values: Record<string, number | null> = {};
         if (!sourceData) return values;
-        if (mode === 'metric') {
+        if (mode === "metric") {
           for (const g of GROUP_COLS) {
-            const raw = sourceData.metrics[selectedMetric]?.data?.[g.key]?.[sourceKey];
-            values[g.key] = typeof raw === 'number' ? raw : null;
+            const raw =
+              sourceData.metrics[selectedMetric]?.data?.[g.key]?.[sourceKey];
+            values[g.key] = typeof raw === "number" ? raw : null;
           }
         } else {
           for (const m of METRIC_COLS) {
-            const raw = sourceData.metrics[m.key]?.data?.[selectedGroup]?.[sourceKey];
-            values[m.key] = typeof raw === 'number' ? raw : null;
+            const raw =
+              sourceData.metrics[m.key]?.data?.[selectedGroup]?.[sourceKey];
+            values[m.key] = typeof raw === "number" ? raw : null;
           }
         }
         return values;
@@ -251,7 +300,10 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
       if (!sourceData) return [];
       const topLevel = sourceData.sources.filter((s) => s.parentId === null);
       // Universal source search (Fedor 2026-05-25 PM, item F).
-      const searched = filterSourcesBySearch(topLevel, state.sourcesSearchQuery);
+      const searched = filterSourcesBySearch(
+        topLevel,
+        state.sourcesSearchQuery,
+      );
       return searched.map((src) => ({
         source: src,
         categoryId: src.category as SourceCategoryId,
@@ -264,12 +316,12 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
     const sortedRows = useMemo(() => {
       const arr = [...rows];
       const cmpAz = (a: SrcTableRow, b: SrcTableRow) =>
-        a.source.name.localeCompare(b.source.name, 'de');
+        a.source.name.localeCompare(b.source.name, "de");
       arr.sort((a, b) => {
         let cmp = 0;
-        if (sortKey === 'source') {
+        if (sortKey === "source") {
           cmp = cmpAz(a, b);
-        } else if (sortKey === 'category') {
+        } else if (sortKey === "category") {
           // 2026-05-29: category sort (same control as Quellen-Übersicht).
           const oa = CATEGORY_ORDER[a.source.category] ?? 99;
           const ob = CATEGORY_ORDER[b.source.category] ?? 99;
@@ -283,7 +335,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
           else cmp = va - vb;
           if (cmp === 0) cmp = cmpAz(a, b);
         }
-        return sortDir === 'asc' ? cmp : -cmp;
+        return sortDir === "asc" ? cmp : -cmp;
       });
       return arr;
     }, [rows, sortKey, sortDir]);
@@ -303,7 +355,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
               isChild: true,
               hasChildren: false,
             }))
-            .sort((a, b) => a.source.name.localeCompare(b.source.name, 'de'));
+            .sort((a, b) => a.source.name.localeCompare(b.source.name, "de"));
           out.push(...kids);
         }
       }
@@ -314,7 +366,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
     // stale/null when ExportDrawer reads it.
     const visExportCols = cols.filter((c) => !isHidden(c.key as string));
     renderDataRef.current = {
-      labelHeader: lang === 'de' ? 'INFORMATIONSWEGE' : 'SOURCES',
+      labelHeader: lang === "de" ? "INFORMATIONSWEGE" : "SOURCES",
       columns: visExportCols.map((c) => ({ label: c.short ?? c.label })),
       lang,
       rows: displayRows.map((row) => {
@@ -323,7 +375,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
         for (const c of visExportCols) {
           const v = row.values[c.key as string];
           naMask.push(v == null);
-          cells.push(v == null ? '' : String(Math.round(v)));
+          cells.push(v == null ? "" : String(Math.round(v)));
         }
         return {
           label: row.source.name,
@@ -345,19 +397,19 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
       );
     }
 
-    const isAzActive = sortKey === 'source';
+    const isAzActive = sortKey === "source";
     // Category sort (2026-05-29) — same control as Quellen-Übersicht.
-    const isCatActive = sortKey === 'category';
+    const isCatActive = sortKey === "category";
     const catTooltip = isCatActive
-      ? sortDir === 'asc'
-        ? t('sources.sort.category.asc.tooltip', lang)
-        : t('sources.sort.category.desc.tooltip', lang)
-      : t('sources.sort.category.activate.tooltip', lang);
+      ? sortDir === "asc"
+        ? t("sources.sort.category.asc.tooltip", lang)
+        : t("sources.sort.category.desc.tooltip", lang)
+      : t("sources.sort.category.activate.tooltip", lang);
     // v5: off-axis label = the picker's selection (the fixed value
     // for this view). 'metric' mode → picker = metric, so label =
     // metric. 'group' mode → picker = group, so label = group.
     const offAxisLabel =
-      mode === 'metric'
+      mode === "metric"
         ? METRIC_FULL_LABELS_DE[selectedMetric]
         : GROUP_FULL_LABELS_DE[selectedGroup];
     const MYTH_COL_PCT = 32;
@@ -378,14 +430,18 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
             by MythenExplorer when state.view === 'sources_table'). The
             inline group picker that used to live here is retired. */}
 
-        <table className="data-table" role="table" aria-label={`Informationsquellen — ${offAxisLabel}`}>
+        <table
+          className="data-table"
+          role="table"
+          aria-label={`Informationsquellen — ${offAxisLabel}`}
+        >
           <colgroup>
             <col style={{ width: `${MYTH_COL_PCT}%` }} />
             {cols.map((col) => (
               <col
                 key={col.key}
                 style={{
-                  width: isHidden(col.key as string) ? '28px' : visibleColWidth,
+                  width: isHidden(col.key as string) ? "28px" : visibleColWidth,
                 }}
               />
             ))}
@@ -401,17 +457,21 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                     labelText="Informationswege"
                     isAzActive={isAzActive}
                     azTooltip="Alphabetisch sortieren"
-                    onAzClick={() => { setSortKey('source'); setSortDir('asc'); }}
+                    onAzClick={() => {
+                      setSortKey("source");
+                      setSortDir("asc");
+                    }}
                     categoryRank={{
                       isActive: isCatActive,
-                      direction: isCatActive && sortDir === 'desc' ? 'desc' : 'asc',
+                      direction:
+                        isCatActive && sortDir === "desc" ? "desc" : "asc",
                       tooltip: catTooltip,
                       onClick: () => {
-                        if (sortKey !== 'category') {
-                          setSortKey('category');
-                          setSortDir('asc');
+                        if (sortKey !== "category") {
+                          setSortKey("category");
+                          setSortDir("asc");
                         } else {
-                          setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+                          setSortDir((d) => (d === "asc" ? "desc" : "asc"));
                         }
                       },
                     }}
@@ -421,7 +481,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
               {cols.map((col) => {
                 const colKey = col.key as string;
                 const Icon =
-                  col.flavor === 'metric'
+                  col.flavor === "metric"
                     ? SOURCE_METRIC_ICONS[col.key]
                     : AUDIENCE_ICONS_BY_GROUP[col.key];
                 if (isHidden(colKey)) {
@@ -432,15 +492,23 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                       key={colKey}
                       className="data-table__hidden-th"
                       onClick={() => show(colKey)}
-                      title={`${t('column.show', lang)} — ${col.label}`}
-                      aria-label={`${t('column.show', lang)} — ${col.label}`}
+                      title={`${t("column.show", lang)} — ${col.label}`}
+                      aria-label={`${t("column.show", lang)} — ${col.label}`}
                     >
                       <div
                         className="carm-spannweite__cell carm-spannweite__cell--header carm-spannweite__cell--hidden data-table__hidden-wrap"
                         role="columnheader"
                       >
-                        <span className="carm-spannweite__hidden-chev" aria-hidden="true">▸</span>
-                        <span className="carm-spannweite__hidden-icon" aria-hidden="true">
+                        <span
+                          className="carm-spannweite__hidden-chev"
+                          aria-hidden="true"
+                        >
+                          ▸
+                        </span>
+                        <span
+                          className="carm-spannweite__hidden-icon"
+                          aria-hidden="true"
+                        >
                           <Icon size={16} strokeWidth={1.75} />
                         </span>
                       </div>
@@ -448,8 +516,8 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                   );
                 }
                 const isSortCol = sortKey === colKey;
-                const isAsc = isSortCol && sortDir === 'asc';
-                const isDesc = isSortCol && sortDir === 'desc';
+                const isAsc = isSortCol && sortDir === "asc";
+                const isDesc = isSortCol && sortDir === "desc";
                 const fullLabel = `${col.label} — ${offAxisLabel}`;
                 // BugHerd 4.13 (2026-06-03, ISD): wire the ℹ️ definition tooltip
                 // onto Quellen-Tabelle headers, mirroring the Mythen Tabelle.
@@ -458,7 +526,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                 // also surface the sample-size badge (n = …) so the (i) tooltip
                 // matches Quellen-Übersicht exactly (Fedor 2026-06-15).
                 const colDef =
-                  col.flavor === 'metric'
+                  col.flavor === "metric"
                     ? definitions?.sourcesIndicators?.[colKey]
                     : definitions?.groups?.[colKey];
                 return (
@@ -474,17 +542,21 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                         defTitle={colDef?.label}
                         defText={colDef?.definition}
                         defScale={colDef?.scale}
-                        defSampleSize={col.flavor === 'group' ? colDef?.sampleSize : undefined}
-                        hideLabel={`${t('column.hide', lang)} — ${col.label}`}
+                        defSampleSize={
+                          col.flavor === "group"
+                            ? colDef?.sampleSize
+                            : undefined
+                        }
+                        hideLabel={`${t("column.hide", lang)} — ${col.label}`}
                         onHide={() => hide(colKey)}
                         isSortActive={isSortCol}
-                        sortDir={isDesc ? 'desc' : 'asc'}
+                        sortDir={isDesc ? "desc" : "asc"}
                         sortTooltip={
                           !isSortCol
                             ? `Nach ${col.label} sortieren`
                             : isAsc
-                            ? `${col.label}: aufsteigend`
-                            : `${col.label}: absteigend`
+                              ? `${col.label}: aufsteigend`
+                              : `${col.label}: absteigend`
                         }
                         onSortClick={() => cycleColumnSort(colKey)}
                       />
@@ -504,7 +576,9 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
               // Lesebeispiel (no metric × group is pinned at the
               // label). The wrapper's half-width clamp keeps the card
               // fully on screen at both edges.
-              const categoryDescription = getCategoryDescription(row.categoryId);
+              const categoryDescription = getCategoryDescription(
+                row.categoryId,
+              );
               const labelTooltipContent = (
                 <div className="hover-tooltip__inner">
                   <div className="hover-tooltip__title">{row.source.name}</div>
@@ -519,7 +593,9 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                 <tr
                   key={row.source.id}
                   role="row"
-                  className={row.isChild ? 'carm-sources-table__row--child' : undefined}
+                  className={
+                    row.isChild ? "carm-sources-table__row--child" : undefined
+                  }
                 >
                   <HoverTooltip content={labelTooltipContent}>
                     <td className="myth-cell">
@@ -538,16 +614,31 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                                 ? `Unterquellen von ${row.source.name} einklappen`
                                 : `Unterquellen von ${row.source.name} anzeigen`
                             }
-                            title={isExpanded ? 'Unterquellen einklappen' : 'Unterquellen anzeigen'}
+                            title={
+                              isExpanded
+                                ? "Unterquellen einklappen"
+                                : "Unterquellen anzeigen"
+                            }
                           >
                             {isExpanded ? (
-                              <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+                              <ChevronDown
+                                size={14}
+                                strokeWidth={2}
+                                aria-hidden="true"
+                              />
                             ) : (
-                              <ChevronRight size={14} strokeWidth={2} aria-hidden="true" />
+                              <ChevronRight
+                                size={14}
+                                strokeWidth={2}
+                                aria-hidden="true"
+                              />
                             )}
                           </button>
                         ) : (
-                          <span className="carm-sources-spannweite__chev-spacer" aria-hidden="true" />
+                          <span
+                            className="carm-sources-spannweite__chev-spacer"
+                            aria-hidden="true"
+                          />
                         )}
                         {CategoryIcon && (
                           <span
@@ -561,7 +652,9 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                             <CategoryIcon size={16} strokeWidth={1.75} />
                           </span>
                         )}
-                        <span className="carm-sources-table__name">{row.source.name}</span>
+                        <span className="carm-sources-table__name">
+                          {row.source.name}
+                        </span>
                       </div>
                     </td>
                   </HoverTooltip>
@@ -591,16 +684,18 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                     // group is selectedGroup; in group mode the column
                     // IS the group and the metric is selectedMetric.
                     const cellMetric: SourceMetricType =
-                      col.flavor === 'metric' ? col.key : selectedMetric;
+                      col.flavor === "metric" ? col.key : selectedMetric;
                     const cellGroup: SourceGroupId =
-                      col.flavor === 'group' ? col.key : selectedGroup;
+                      col.flavor === "group" ? col.key : selectedGroup;
                     // Heatmap band + LesebeispielSource hover.
                     const rounded = Math.round(val);
                     const band = bandIndex(rounded);
                     const bandLabel = sourceMetricUsesAnteil(cellMetric)
                       ? anteilLabel(rounded)
                       : niveauLabel(rounded);
-                    const categoryDescription = getCategoryDescription(row.categoryId);
+                    const categoryDescription = getCategoryDescription(
+                      row.categoryId,
+                    );
                     const tooltipContent = (
                       <div className="hover-tooltip__inner">
                         <div className="hover-tooltip__title">
@@ -619,7 +714,7 @@ const SourcesTableView = forwardRef<SourcesTableViewHandle, Props>(
                         />
                         <div
                           className={
-                            'hover-tooltip__band ' +
+                            "hover-tooltip__band " +
                             `hover-tooltip__band--band-${band}`
                           }
                         >

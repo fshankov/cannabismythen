@@ -47,27 +47,27 @@
  *   - t('indicator.<key>.description', 'de') for column-header tooltips.
  */
 
-import { useMemo, useState } from 'react';
-import { ArrowDown01, ArrowDown10 } from 'lucide-react';
+import { useMemo, useState } from "react";
+import { ArrowDown01, ArrowDown10 } from "lucide-react";
 import type {
   CorrectnessClass,
   GroupId,
   Indicator,
   MythGroupMetrics,
-} from '../../lib/dashboard/types';
-import { POP_REL_INVALID_GROUPS } from '../../lib/dashboard/data';
-import { t } from '../../lib/dashboard/translations';
+} from "../../lib/dashboard/types";
+import { POP_REL_INVALID_GROUPS } from "../../lib/dashboard/data";
+import { t } from "../../lib/dashboard/translations";
 import {
   AUDIENCE_ICONS_BY_GROUP,
   INDICATOR_ICONS,
-} from '../../lib/icons/lookups';
+} from "../../lib/icons/lookups";
 import {
   bandIndex,
   anteilLabel,
   niveauLabel,
-} from '../../lib/dashboard/lesebeispiel-bands';
-import Lesebeispiel from '../dashboard/Lesebeispiel';
-import HoverTooltip from './HoverTooltip';
+} from "../../lib/dashboard/lesebeispiel-bands";
+import Lesebeispiel from "../dashboard/Lesebeispiel";
+import HoverTooltip from "./HoverTooltip";
 
 interface Props {
   /** Pre-computed metrics for the open myth — one entry per Zielgruppe. */
@@ -83,53 +83,53 @@ interface Props {
 }
 
 const INDICATORS: Indicator[] = [
-  'awareness',
-  'significance',
-  'correctness',
-  'prevention_significance',
-  'population_relevance',
+  "awareness",
+  "significance",
+  "correctness",
+  "prevention_significance",
+  "population_relevance",
 ];
 
 /** Column-header text — abbreviated so 5 columns fit a 540 px popup
  *  without horizontal scroll. Full names live in the hover tooltip. */
 const INDICATOR_LABELS_SHORT: Record<Indicator, string> = {
-  awareness: 'Kennt.',
-  significance: 'Bedeut.',
-  correctness: 'Richtig.',
-  prevention_significance: 'Prävent.',
-  population_relevance: 'Bev. Rel.',
+  awareness: "Kennt.",
+  significance: "Bedeut.",
+  correctness: "Richtig.",
+  prevention_significance: "Prävent.",
+  population_relevance: "Bev. Rel.",
 };
 
 /** Full indicator names — rendered inside the hover tooltip body. */
 const INDICATOR_LABELS_FULL: Record<Indicator, string> = {
-  awareness: 'Kenntnis',
-  significance: 'Bedeutung',
-  correctness: 'Richtigkeit',
-  prevention_significance: 'Prävention',
-  population_relevance: 'Bevölkerungsrelevanz',
+  awareness: "Kenntnis",
+  significance: "Bedeutung",
+  correctness: "Richtigkeit",
+  prevention_significance: "Prävention",
+  population_relevance: "Bevölkerungsrelevanz",
 };
 
 /** Whether an indicator is the Kenntnis %-share band ("…Anteil") or a
  *  point-score band ("…Niveau"). Mirrors the convention locked at the
  *  top of lesebeispiel-bands.ts. */
 function indicatorUsesAnteil(indicator: Indicator): boolean {
-  return indicator === 'awareness';
+  return indicator === "awareness";
 }
 
 const GROUP_ORDER: GroupId[] = [
-  'adults',
-  'minors',
-  'consumers',
-  'young_adults',
-  'parents',
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
 ];
 
 const GROUP_FULL_LABELS: Record<GroupId, string> = {
-  adults: 'Erwachsene (18–70)',
-  minors: 'Minderjährige (16–17)',
-  consumers: 'Konsumierende',
-  young_adults: 'Junge Erwachsene (18–26)',
-  parents: 'Eltern',
+  adults: "Erwachsene (18–70)",
+  minors: "Minderjährige (16–17)",
+  consumers: "Konsumierende",
+  young_adults: "Junge Erwachsene (18–26)",
+  parents: "Eltern",
 };
 
 /** Visible label per Zielgruppe in the row header. Full natural
@@ -139,11 +139,11 @@ const GROUP_FULL_LABELS: Record<GroupId, string> = {
  *  on desktop to accommodate "Junge Erwachsene" (the longest label)
  *  without horizontal scroll. */
 const GROUP_SHORT_LABELS: Record<GroupId, string> = {
-  adults: 'Erwachsene',
-  minors: 'Minderjährige',
-  consumers: 'Konsumierende',
-  young_adults: 'Junge Erwachsene',
-  parents: 'Eltern',
+  adults: "Erwachsene",
+  minors: "Minderjährige",
+  consumers: "Konsumierende",
+  young_adults: "Junge Erwachsene",
+  parents: "Eltern",
 };
 
 /** Short definition surfaced in the row-header tooltip body. Mirrors the
@@ -154,25 +154,24 @@ const GROUP_SHORT_LABELS: Record<GroupId, string> = {
  *  the tooltip title (GROUP_FULL_LABELS), so the body carries n + definition. */
 const GROUP_DESCRIPTIONS: Record<GroupId, string> = {
   adults:
-    'n = 2.097 — Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund.',
+    "n = 2.097 — Stichprobe der Bevölkerung (18–70 J.), gewichtet nach Geschlecht, Alter, Bildung und Migrationshintergrund.",
   minors:
-    'n = 555 — Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel.',
+    "n = 555 — Stichprobe der 16–17-Jährigen aus dem Horizoom-Jugendpanel.",
   consumers:
-    'n = 358 — Personen mit Cannabis-Konsum in den letzten 30 Tagen (30-Tage-Prävalenz).',
+    "n = 358 — Personen mit Cannabis-Konsum in den letzten 30 Tagen (30-Tage-Prävalenz).",
   young_adults:
-    'n = 333 — Teilgruppe der Volljährigen im Alter von 18–26 Jahren.',
-  parents:
-    'n = 539 — Volljährige mit mindestens einem Kind unter 18 Jahren.',
+    "n = 333 — Teilgruppe der Volljährigen im Alter von 18–26 Jahren.",
+  parents: "n = 539 — Volljährige mit mindestens einem Kind unter 18 Jahren.",
 };
 
-type SortDir = 'desc' | 'asc';
+type SortDir = "desc" | "asc";
 interface SortState {
   column: Indicator | null; // null = canonical group order
   dir: SortDir;
 }
 
 export default function FactsheetGroupBars({ metrics, verdict }: Props) {
-  const [sort, setSort] = useState<SortState>({ column: null, dir: 'desc' });
+  const [sort, setSort] = useState<SortState>({ column: null, dir: "desc" });
 
   // Quick lookup so we can render rows in any order without
   // re-scanning the metrics array per cell.
@@ -192,7 +191,7 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
       const entry = byGroup.get(g);
       const raw = entry ? (entry[col] as number | null) : null;
       const value =
-        col === 'population_relevance' && POP_REL_INVALID_GROUPS.has(g)
+        col === "population_relevance" && POP_REL_INVALID_GROUPS.has(g)
           ? null
           : raw;
       return { g, value };
@@ -202,7 +201,7 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
       if (a.value === null && b.value === null) return 0;
       if (a.value === null) return 1;
       if (b.value === null) return -1;
-      return dir === 'desc' ? b.value - a.value : a.value - b.value;
+      return dir === "desc" ? b.value - a.value : a.value - b.value;
     });
     return withValue.map((x) => x.g);
   }, [byGroup, sort]);
@@ -213,15 +212,15 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
   // way back to canonical order.
   const handleSortClick = (col: Indicator) => {
     setSort((prev) => {
-      if (prev.column !== col) return { column: col, dir: 'asc' };
-      return { column: col, dir: prev.dir === 'asc' ? 'desc' : 'asc' };
+      if (prev.column !== col) return { column: col, dir: "asc" };
+      return { column: col, dir: prev.dir === "asc" ? "desc" : "asc" };
     });
   };
 
   // Click handler for the corner / row-header column: reset to
   // canonical group order.
   const handleResetSort = () => {
-    setSort({ column: null, dir: 'desc' });
+    setSort({ column: null, dir: "desc" });
   };
 
   return (
@@ -237,10 +236,10 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
               <th
                 scope="col"
                 className={
-                  'factsheet-group-bars__corner' +
+                  "factsheet-group-bars__corner" +
                   (sort.column === null
-                    ? ' factsheet-group-bars__corner--active'
-                    : '')
+                    ? " factsheet-group-bars__corner--active"
+                    : "")
                 }
               >
                 <button
@@ -263,35 +262,35 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                       {INDICATOR_LABELS_FULL[indicator]}
                     </div>
                     <p className="hover-tooltip__body">
-                      {t(`indicator.${indicator}.description`, 'de')}
+                      {t(`indicator.${indicator}.description`, "de")}
                     </p>
                     <div className="hover-tooltip__hint">
                       Klicken zum Sortieren
                     </div>
                   </div>
                 );
-                const isDesc = isActive && dir === 'desc';
+                const isDesc = isActive && dir === "desc";
                 const sortTooltip = !isActive
                   ? `Nach ${INDICATOR_LABELS_FULL[indicator]} sortieren`
                   : isDesc
-                  ? `${INDICATOR_LABELS_FULL[indicator]}: absteigend`
-                  : `${INDICATOR_LABELS_FULL[indicator]}: aufsteigend`;
+                    ? `${INDICATOR_LABELS_FULL[indicator]}: absteigend`
+                    : `${INDICATOR_LABELS_FULL[indicator]}: aufsteigend`;
                 return (
                   <HoverTooltip key={indicator} content={tooltipContent}>
                     <th
                       scope="col"
                       className={
-                        'factsheet-group-bars__col-header' +
+                        "factsheet-group-bars__col-header" +
                         (isActive
-                          ? ' factsheet-group-bars__col-header--active'
-                          : '')
+                          ? " factsheet-group-bars__col-header--active"
+                          : "")
                       }
                       aria-sort={
                         isActive
-                          ? dir === 'desc'
-                            ? 'descending'
-                            : 'ascending'
-                          : 'none'
+                          ? dir === "desc"
+                            ? "descending"
+                            : "ascending"
+                          : "none"
                       }
                     >
                       {/* Tabelle-style sort button (Fedor 2026-05-26)
@@ -307,8 +306,8 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                       <button
                         type="button"
                         className={
-                          'factsheet-group-bars__col-sort-btn' +
-                          (isActive ? ' is-active' : '')
+                          "factsheet-group-bars__col-sort-btn" +
+                          (isActive ? " is-active" : "")
                         }
                         onClick={(e) => {
                           e.stopPropagation();
@@ -319,9 +318,17 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                         title={sortTooltip}
                       >
                         {isDesc ? (
-                          <ArrowDown10 size={12} strokeWidth={2} aria-hidden="true" />
+                          <ArrowDown10
+                            size={12}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
                         ) : (
-                          <ArrowDown01 size={12} strokeWidth={2} aria-hidden="true" />
+                          <ArrowDown01
+                            size={12}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
                         )}
                       </button>
                       <button
@@ -355,9 +362,7 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                   <div className="hover-tooltip__title">
                     {GROUP_FULL_LABELS[g]}
                   </div>
-                  <p className="hover-tooltip__body">
-                    {GROUP_DESCRIPTIONS[g]}
-                  </p>
+                  <p className="hover-tooltip__body">{GROUP_DESCRIPTIONS[g]}</p>
                 </div>
               );
               return (
@@ -383,11 +388,11 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                       ? (entry[indicator] as number | null)
                       : null;
                     const value =
-                      indicator === 'population_relevance' &&
+                      indicator === "population_relevance" &&
                       POP_REL_INVALID_GROUPS.has(g)
                         ? null
                         : raw;
-                    const hasValue = typeof value === 'number';
+                    const hasValue = typeof value === "number";
                     if (!hasValue) {
                       return (
                         <td
@@ -410,7 +415,7 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                     const cellTooltipContent = (
                       <div className="hover-tooltip__inner">
                         <div className="hover-tooltip__title">
-                          {INDICATOR_LABELS_FULL[indicator]} ·{' '}
+                          {INDICATOR_LABELS_FULL[indicator]} ·{" "}
                           {GROUP_FULL_LABELS[g]}
                         </div>
                         {entry ? (
@@ -424,7 +429,7 @@ export default function FactsheetGroupBars({ metrics, verdict }: Props) {
                         ) : null}
                         <div
                           className={
-                            'hover-tooltip__band ' +
+                            "hover-tooltip__band " +
                             `hover-tooltip__band--band-${band}`
                           }
                         >

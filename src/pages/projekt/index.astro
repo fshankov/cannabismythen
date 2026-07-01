@@ -31,8 +31,10 @@ const { internalNotes, ...publicContent } = content;
   extraBodyClass="scrolly-page"
 >
   <script is:inline>
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    try { window.scrollTo(0, 0); } catch (_) {}
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    try {
+      window.scrollTo(0, 0);
+    } catch (_) {}
   </script>
   <div class="proj-loader-wrap">
     <div class="proj-loader" aria-hidden="true">
@@ -41,7 +43,9 @@ const { internalNotes, ...publicContent } = content;
     </div>
     <ScrollytellingViewer client:load content={publicContent} />
     <noscript>
-      <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+      <p
+        style="padding: 24px; text-align: center; color: var(--color-text-secondary);"
+      >
         Diese Scrollytelling-Ansicht benötigt JavaScript. Bitte aktiviere
         JavaScript, um die Projektgeschichte zu lesen.
       </p>
@@ -49,8 +53,19 @@ const { internalNotes, ...publicContent } = content;
   </div>
 
   <button id="scrolly-top-btn" aria-label="Nach oben scrollen">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M10 15V5M10 5L5 10M10 5l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M10 15V5M10 5L5 10M10 5l5 5"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
     </svg>
   </button>
 
@@ -66,7 +81,12 @@ const { internalNotes, ...publicContent } = content;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(168deg, #1b3827 0%, #0e1e14 40%, #183a26 100%);
+      background: linear-gradient(
+        168deg,
+        #1b3827 0%,
+        #0e1e14 40%,
+        #183a26 100%
+      );
       animation: proj-loader-exit 0.8s ease forwards;
       animation-delay: 1.75s;
       pointer-events: none;
@@ -84,13 +104,19 @@ const { internalNotes, ...publicContent } = content;
       }
     }
     /* Keep nav above the loader */
-    :global(.nav-wrapper) { z-index: 9999; }
+    :global(.nav-wrapper) {
+      z-index: 9999;
+    }
     /* Hide feedbucket footer until loader is gone */
     :global(.feedbucket-footer) {
       visibility: hidden;
       animation: proj-fb-show 0s 2.6s linear forwards;
     }
-    @keyframes proj-fb-show { to { visibility: visible; } }
+    @keyframes proj-fb-show {
+      to {
+        visibility: visible;
+      }
+    }
     #scrolly-top-btn {
       position: fixed;
       bottom: 2rem;
@@ -109,7 +135,9 @@ const { internalNotes, ...publicContent } = content;
       opacity: 0;
       pointer-events: none;
       transform: translateY(8px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
     #scrolly-top-btn.visible {
@@ -124,14 +152,18 @@ const { internalNotes, ...publicContent } = content;
 
   <script is:inline>
     (function () {
-      var btn = document.getElementById('scrolly-top-btn');
+      var btn = document.getElementById("scrolly-top-btn");
       if (!btn) return;
-      window.addEventListener('scroll', function () {
-        btn.classList.toggle('visible', window.scrollY > 1200);
-      }, { passive: true });
-      btn.addEventListener('click', function () {
-        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
-        document.body.scrollTo({ top: 0, behavior: 'smooth' });
+      window.addEventListener(
+        "scroll",
+        function () {
+          btn.classList.toggle("visible", window.scrollY > 1200);
+        },
+        { passive: true },
+      );
+      btn.addEventListener("click", function () {
+        document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+        document.body.scrollTo({ top: 0, behavior: "smooth" });
       });
     })();
   </script>
@@ -145,17 +177,17 @@ const { internalNotes, ...publicContent } = content;
        The animation is untouched; the timeout is a safety net in case
        animationend never fires (e.g. animations globally disabled). */
     (function () {
-      var el = document.querySelector('.proj-loader');
+      var el = document.querySelector(".proj-loader");
       if (!el) return;
       var hidden = false;
       function clear() {
         if (hidden) return;
         hidden = true;
-        el.style.display = 'none';
+        el.style.display = "none";
       }
       // Only the loader's OWN exit animation — child entrance animations
       // (cluster nodes/links, the infinite breathe) bubble animationend too.
-      el.addEventListener('animationend', function (e) {
+      el.addEventListener("animationend", function (e) {
         if (e.target === el) clear();
       });
       setTimeout(clear, 3500); // well after the ~2.55s exit completes

@@ -7,10 +7,7 @@
 
 /** The 4 classification values used in the quiz answer buttons. */
 export type Classification =
-  | "richtig"
-  | "eher_richtig"
-  | "eher_falsch"
-  | "falsch";
+  "richtig" | "eher_richtig" | "eher_falsch" | "falsch";
 
 /** A single myth/question within a quiz. */
 export interface QuizMyth {

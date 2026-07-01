@@ -13,8 +13,15 @@ interface Props {
   myths: ReadonlyArray<FaktenDeckMyth>;
 }
 
-const VALID = new Set(["richtig", "eher_richtig", "eher_falsch", "falsch", "keine_aussage_moeglich"]);
-const toVerdict = (c: string): CorrectnessClass => (VALID.has(c) ? (c as CorrectnessClass) : "keine_aussage_moeglich");
+const VALID = new Set([
+  "richtig",
+  "eher_richtig",
+  "eher_falsch",
+  "falsch",
+  "keine_aussage_moeglich",
+]);
+const toVerdict = (c: string): CorrectnessClass =>
+  VALID.has(c) ? (c as CorrectnessClass) : "keine_aussage_moeglich";
 const ROTATE_MS = 3200;
 
 // Cycles the REAL Fakten-Karten card front (verdict gradient + faint direction
@@ -29,11 +36,28 @@ export default function FaktenKartenPreviewDeck({ myths }: Props) {
     const root = ref.current;
     if (!root || myths.length < 2) return;
     let iv: number | null = null;
-    const start = () => { if (iv === null) iv = window.setInterval(() => setIdx((i) => (i + 1) % myths.length), ROTATE_MS); };
-    const stop = () => { if (iv !== null) { window.clearInterval(iv); iv = null; } };
-    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.5 });
+    const start = () => {
+      if (iv === null)
+        iv = window.setInterval(
+          () => setIdx((i) => (i + 1) % myths.length),
+          ROTATE_MS,
+        );
+    };
+    const stop = () => {
+      if (iv !== null) {
+        window.clearInterval(iv);
+        iv = null;
+      }
+    };
+    const io = new IntersectionObserver(
+      ([e]) => (e.isIntersecting ? start() : stop()),
+      { threshold: 0.5 },
+    );
     io.observe(root);
-    return () => { io.disconnect(); stop(); };
+    return () => {
+      io.disconnect();
+      stop();
+    };
   }, [myths.length]);
 
   if (!myths.length) return null;
@@ -44,17 +68,30 @@ export default function FaktenKartenPreviewDeck({ myths }: Props) {
 
   return (
     <div className="karten-deck" ref={ref} aria-hidden="true">
-      <div className="karten-deck__card" key={idx} style={{ backgroundImage: v.gradient } as CSSProperties}>
+      <div
+        className="karten-deck__card"
+        key={idx}
+        style={{ backgroundImage: v.gradient } as CSSProperties}
+      >
         <span
           className="karten-deck__arrow"
-          style={{ top: v.arrowFrame.top, left: v.arrowFrame.left, width: v.arrowFrame.width, height: v.arrowFrame.height } as CSSProperties}
+          style={
+            {
+              top: v.arrowFrame.top,
+              left: v.arrowFrame.left,
+              width: v.arrowFrame.width,
+              height: v.arrowFrame.height,
+            } as CSSProperties
+          }
         >
           <img src={v.arrowSrc} alt="" />
         </span>
         <div className="karten-deck__body">
           <p className="karten-deck__statement">{m.text}</p>
           <span className="karten-deck__cat">
-            {CatIcon ? <CatIcon size={15} strokeWidth={2} aria-hidden="true" /> : null}
+            {CatIcon ? (
+              <CatIcon size={15} strokeWidth={2} aria-hidden="true" />
+            ) : null}
             <span className="karten-deck__cat-name">{m.categoryGroup}</span>
           </span>
         </div>

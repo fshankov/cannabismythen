@@ -84,10 +84,7 @@ const SCHRITTE_ICON: Record<Schritte, LucideIcon> = {
   3: CircleX,
 };
 
-export default function FeedbackStrip({
-  myth,
-  answer,
-}: FeedbackStripProps) {
+export default function FeedbackStrip({ myth, answer }: FeedbackStripProps) {
   // ── Answer-mode strip ───────────────────────────────────────────────
   // Guard: render nothing when the parent didn't pass a myth.
   if (!myth) return null;
@@ -132,7 +129,9 @@ export default function FeedbackStrip({
           </span>{" "}
           <VerdictPill verdict={chosen} size="sm" />
         </span>
-        <span className="quiz-feedback-strip__sep" aria-hidden="true">·</span>
+        <span className="quiz-feedback-strip__sep" aria-hidden="true">
+          ·
+        </span>
         <span className="quiz-feedback-strip__scientific">
           <span className="quiz-feedback-strip__scientific-label">
             {t("classification.scientific")}:
@@ -150,7 +149,9 @@ export default function FeedbackStrip({
             aria-hidden="true"
             className="quiz-feedback-strip__verdict-icon"
           />
-          <span className="quiz-feedback-strip__verdict-text">{verdictText}</span>
+          <span className="quiz-feedback-strip__verdict-text">
+            {verdictText}
+          </span>
         </span>
         <span
           className={`quiz-feedback-strip__points quiz-feedback-strip__points--${verdictModifier}`}

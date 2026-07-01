@@ -27,12 +27,29 @@ const ROUTES: Route[] = [
   // mobile .scrolly__viz-mobile) and animates continuously in ways
   // reduced-motion doesn't fully quiet. Mask it; the text column + layout
   // (what color/breakpoint changes affect) stays covered.
-  { name: "projekt", path: "/projekt/", mask: [".scrolly__viz-canvas"], settle: 1500 },
+  {
+    name: "projekt",
+    path: "/projekt/",
+    mask: [".scrolly__viz-canvas"],
+    settle: 1500,
+  },
   { name: "quiz-index", path: "/quiz/" },
-  { name: "quiz-medizinischer-nutzen", path: "/quiz/quiz-medizinischer-nutzen/" },
-  { name: "quiz-risiken-koerper-psyche", path: "/quiz/quiz-risiken-koerper-psyche/" },
-  { name: "quiz-stimmung-wahrnehmung", path: "/quiz/quiz-stimmung-wahrnehmung/" },
-  { name: "quiz-soziales-bevoelkerung", path: "/quiz/quiz-soziales-bevoelkerung/" },
+  {
+    name: "quiz-medizinischer-nutzen",
+    path: "/quiz/quiz-medizinischer-nutzen/",
+  },
+  {
+    name: "quiz-risiken-koerper-psyche",
+    path: "/quiz/quiz-risiken-koerper-psyche/",
+  },
+  {
+    name: "quiz-stimmung-wahrnehmung",
+    path: "/quiz/quiz-stimmung-wahrnehmung/",
+  },
+  {
+    name: "quiz-soziales-bevoelkerung",
+    path: "/quiz/quiz-soziales-bevoelkerung/",
+  },
   { name: "quiz-gefaehrlichkeit", path: "/quiz/quiz-gefaehrlichkeit/" },
 ];
 

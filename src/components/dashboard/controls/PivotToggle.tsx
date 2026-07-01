@@ -15,7 +15,7 @@
  * and the same `onChange(value)` signature. No consumer-side edits.
  */
 
-import { useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { useRef, type KeyboardEvent, type ReactNode } from "react";
 
 interface PivotOption<T extends string> {
   value: T;
@@ -32,14 +32,14 @@ interface PivotToggleProps<T extends string> {
   value: T;
   onChange: (next: T) => void;
   /** Required for the underlying track button — German label is fine. */
-  'aria-label': string;
+  "aria-label": string;
 }
 
 export default function PivotToggle<T extends string>({
   options,
   value,
   onChange,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
 }: PivotToggleProps<T>) {
   const trackRef = useRef<HTMLButtonElement | null>(null);
 
@@ -47,24 +47,24 @@ export default function PivotToggle<T extends string>({
   // fall back to a stable order if a caller passes more / fewer.
   const left = options[0];
   const right = options[1] ?? options[0];
-  const activeSide: 'left' | 'right' = value === right.value ? 'right' : 'left';
+  const activeSide: "left" | "right" = value === right.value ? "right" : "left";
 
   const toggle = () => {
-    onChange(activeSide === 'left' ? right.value : left.value);
+    onChange(activeSide === "left" ? right.value : left.value);
   };
 
-  const select = (side: 'left' | 'right') => {
-    onChange(side === 'left' ? left.value : right.value);
+  const select = (side: "left" | "right") => {
+    onChange(side === "left" ? left.value : right.value);
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === 'ArrowLeft' || e.key === 'Home') {
+    if (e.key === "ArrowLeft" || e.key === "Home") {
       e.preventDefault();
-      select('left');
-    } else if (e.key === 'ArrowRight' || e.key === 'End') {
+      select("left");
+    } else if (e.key === "ArrowRight" || e.key === "End") {
       e.preventDefault();
-      select('right');
-    } else if (e.key === ' ' || e.key === 'Enter') {
+      select("right");
+    } else if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
       toggle();
     }
@@ -75,11 +75,11 @@ export default function PivotToggle<T extends string>({
       <button
         type="button"
         className={
-          'carm-pivot-switch__label' +
-          (activeSide === 'left' ? ' carm-pivot-switch__label--active' : '')
+          "carm-pivot-switch__label" +
+          (activeSide === "left" ? " carm-pivot-switch__label--active" : "")
         }
-        onClick={() => select('left')}
-        aria-pressed={activeSide === 'left'}
+        onClick={() => select("left")}
+        aria-pressed={activeSide === "left"}
         tabIndex={-1}
       >
         {left.label}
@@ -91,7 +91,7 @@ export default function PivotToggle<T extends string>({
         ref={trackRef}
         type="button"
         role="switch"
-        aria-checked={activeSide === 'right'}
+        aria-checked={activeSide === "right"}
         aria-label={ariaLabel}
         className="carm-pivot-switch__track"
         data-active={activeSide}
@@ -103,11 +103,11 @@ export default function PivotToggle<T extends string>({
       <button
         type="button"
         className={
-          'carm-pivot-switch__label' +
-          (activeSide === 'right' ? ' carm-pivot-switch__label--active' : '')
+          "carm-pivot-switch__label" +
+          (activeSide === "right" ? " carm-pivot-switch__label--active" : "")
         }
-        onClick={() => select('right')}
-        aria-pressed={activeSide === 'right'}
+        onClick={() => select("right")}
+        aria-pressed={activeSide === "right"}
         tabIndex={-1}
       >
         {right.label}

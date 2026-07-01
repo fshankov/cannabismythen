@@ -1,15 +1,19 @@
-import type { ViewTab, Lang } from '../../lib/dashboard/types';
-import { t, type TranslationKey } from '../../lib/dashboard/translations';
-import TabsBar, { type TabDef } from '../shared/TabsBar';
-import { ChartBarIcon, Grid3x3Icon, Table2Icon } from '../../lib/icons/viewTypeIcons';
+import type { ViewTab, Lang } from "../../lib/dashboard/types";
+import { t, type TranslationKey } from "../../lib/dashboard/translations";
+import TabsBar, { type TabDef } from "../shared/TabsBar";
+import {
+  ChartBarIcon,
+  Grid3x3Icon,
+  Table2Icon,
+} from "../../lib/icons/viewTypeIcons";
 
 // Public tab order — split into LEFT (myth views) and RIGHT (source
 // views) groups. Each group is preceded by a permanent "Mythen" /
 // "Quellen" label (rendered in MythenExplorer), so the tabs themselves
 // only need the view type. (The Rundgang is not a tab — it's the yellow
 // "?" bookmark rendered directly in MythenExplorer's tab bar.)
-const TABS_LEFT: ViewTab[] = ['balken', 'spannweite', 'table'];
-const TABS_RIGHT: ViewTab[] = ['sources', 'sources2', 'sources_table'];
+const TABS_LEFT: ViewTab[] = ["balken", "spannweite", "table"];
+const TABS_RIGHT: ViewTab[] = ["sources", "sources2", "sources_table"];
 const TABS: ViewTab[] = [...TABS_LEFT, ...TABS_RIGHT];
 
 // Leading view-type glyph per data view (2026-05-30, Fedor). The same
@@ -30,21 +34,21 @@ const VIEW_ICON: Partial<Record<ViewTab, typeof ChartBarIcon>> = {
 // (and collapses to just its icon on narrow screens). The full name
 // ("Mythen-Balken" …) is kept as the button's aria-label.
 const SHORT_LABEL: Partial<Record<ViewTab, string>> = {
-  balken: 'Balken',
-  spannweite: 'Übersicht',
-  table: 'Tabelle',
-  sources: 'Balken',
-  sources2: 'Übersicht',
-  sources_table: 'Tabelle',
+  balken: "Balken",
+  spannweite: "Übersicht",
+  table: "Tabelle",
+  sources: "Balken",
+  sources2: "Übersicht",
+  sources_table: "Tabelle",
 };
 
 const TAB_LABEL_KEY: Record<ViewTab, TranslationKey | null> = {
-  balken: 'view.balken',
-  spannweite: 'view.spannweite',
-  table: 'view.tabelle',
-  sources: 'view.quellen',
-  sources2: 'view.quellen2',
-  sources_table: 'view.quellen-tabelle',
+  balken: "view.balken",
+  spannweite: "view.spannweite",
+  table: "view.tabelle",
+  sources: "view.quellen",
+  sources2: "view.quellen2",
+  sources_table: "view.quellen-tabelle",
   // Retired views — never shown in the tab bar; keys present so the type
   // remains exhaustive and url-state redirects don't crash on lookup.
   strips: null,
@@ -63,16 +67,19 @@ interface Props {
   /** Which slice to render. Defaults to all tabs (back-compat). Pass
    *  `group="left"` / `group="right"` twice from `MythenExplorer` to get
    *  the Mythen / Quellen split. */
-  group?: 'left' | 'right' | 'all';
+  group?: "left" | "right" | "all";
 }
 
-export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props) {
+export default function ViewTabs({
+  view,
+  lang,
+  onChange,
+  group = "all",
+}: Props) {
   // Pick the slice for this render: LEFT (myth views), RIGHT (source
   // views), or all (back-compat).
   const slice =
-    group === 'left' ? TABS_LEFT :
-    group === 'right' ? TABS_RIGHT :
-    TABS;
+    group === "left" ? TABS_LEFT : group === "right" ? TABS_RIGHT : TABS;
 
   const tabDefs: TabDef<ViewTab>[] = slice.map((tab) => {
     const key = TAB_LABEL_KEY[tab];
@@ -84,9 +91,7 @@ export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props)
       // Keep the full, unambiguous name for assistive tech (the visible
       // short label leans on the adjacent group label for context).
       ariaLabel: fullLabel,
-      icon: ViewIcon ? (
-        <ViewIcon size={15} aria-hidden="true" />
-      ) : undefined,
+      icon: ViewIcon ? <ViewIcon size={15} aria-hidden="true" /> : undefined,
     };
   });
 
@@ -95,7 +100,11 @@ export default function ViewTabs({ view, lang, onChange, group = 'all' }: Props)
       tabs={tabDefs}
       activeKey={view}
       onChange={onChange}
-      ariaLabel={group === 'right' ? 'Informationswege-Ansicht wählen' : 'Mythos-Ansicht wählen'}
+      ariaLabel={
+        group === "right"
+          ? "Informationswege-Ansicht wählen"
+          : "Mythos-Ansicht wählen"
+      }
     />
   );
 }

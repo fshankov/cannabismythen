@@ -46,7 +46,7 @@ export function trackQuizEvent(event: MatomoEvent): void {
     event.category,
     event.action,
     event.name,
-    event.value ?? undefined
+    event.value ?? undefined,
   );
 }
 
@@ -69,7 +69,7 @@ export function trackQuizStarted(themeName: string): void {
 export function trackAnswerSubmitted(
   mythId: string,
   isCorrect: boolean,
-  chosenAnswer: Classification
+  chosenAnswer: Classification,
 ): void {
   trackQuizEvent({
     category: "Quiz",
@@ -85,7 +85,7 @@ export function trackAnswerSubmitted(
 export function trackQuizCompleted(
   themeName: string,
   score: number,
-  tierIndex: MatomoTierIndex
+  tierIndex: MatomoTierIndex,
 ): void {
   const tierLabels: Record<MatomoTierIndex, string> = {
     0: "bottom30",

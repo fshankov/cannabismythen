@@ -40,7 +40,7 @@ const { items } = Astro.props;
 function hashCode(input: string): number {
   let h = 0;
   for (let i = 0; i < input.length; i++) {
-    h = (((h << 5) - h) + input.charCodeAt(i)) | 0;
+    h = ((h << 5) - h + input.charCodeAt(i)) | 0;
   }
   return Math.abs(h);
 }
@@ -74,26 +74,31 @@ const tiles: ResolvedTile[] = items.map((item) => {
 ---
 
 <section class="quiz-selection mi-hub" aria-label="Audiences">
-  {tiles.map((tile) => (
-    <a
-      href={`/meine-interessen/${tile.audience.id}/`}
-      class="quiz-select-card mi-hub-card"
-      data-deck={tile.deckDepth}
-      style={`--card-tilt: ${tile.tilt}deg; --tile-strip: ${tile.accentVar}; --tile-label: ${tile.accentVar};`}
-    >
-      <span class="quiz-select-card__band" aria-hidden="true"></span>
-      <span class="quiz-select-card__icon mi-hub-card__icon" aria-hidden="true">
-        <tile.Icon size={44} strokeWidth={1.75} />
-      </span>
-      <h2 class="quiz-select-card__title">{tile.audience.cardLabel}</h2>
-      <span class="quiz-select-card__count">
-        {tile.count} {tile.count === 1 ? "Frage" : "Fragen"}
-      </span>
-      {tile.audience.description && (
-        <p class="mi-hub-card__description">{tile.audience.description}</p>
-      )}
-    </a>
-  ))}
+  {
+    tiles.map((tile) => (
+      <a
+        href={`/meine-interessen/${tile.audience.id}/`}
+        class="quiz-select-card mi-hub-card"
+        data-deck={tile.deckDepth}
+        style={`--card-tilt: ${tile.tilt}deg; --tile-strip: ${tile.accentVar}; --tile-label: ${tile.accentVar};`}
+      >
+        <span class="quiz-select-card__band" aria-hidden="true" />
+        <span
+          class="quiz-select-card__icon mi-hub-card__icon"
+          aria-hidden="true"
+        >
+          <tile.Icon size={44} strokeWidth={1.75} />
+        </span>
+        <h2 class="quiz-select-card__title">{tile.audience.cardLabel}</h2>
+        <span class="quiz-select-card__count">
+          {tile.count} {tile.count === 1 ? "Frage" : "Fragen"}
+        </span>
+        {tile.audience.description && (
+          <p class="mi-hub-card__description">{tile.audience.description}</p>
+        )}
+      </a>
+    ))
+  }
 </section>
 
 <style>

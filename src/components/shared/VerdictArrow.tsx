@@ -25,8 +25,8 @@
  * `src/lib/dashboard/colors.ts` is `@deprecated` and should not be used.
  */
 
-import type { CorrectnessClass } from '../../lib/dashboard/types';
-import { VerdictGlyphPaths, type VerdictColorOverride } from './verdictGlyph';
+import type { CorrectnessClass } from "../../lib/dashboard/types";
+import { VerdictGlyphPaths, type VerdictColorOverride } from "./verdictGlyph";
 
 interface VerdictArrowProps {
   verdict: CorrectnessClass;
@@ -35,7 +35,7 @@ interface VerdictArrowProps {
   /** Stroke width in SVG user units (24×24 viewBox). Default 2. */
   strokeWidth?: number;
   /** Set to `false` if the icon is the only label for its meaning. Default `true`. */
-  'aria-hidden'?: boolean;
+  "aria-hidden"?: boolean;
   className?: string;
   /** Override the per-verdict main/shadow colors. Use when rendering ON a
    *  verdict-colored background (the scrollytelling Step 4 grid cells). */
@@ -46,7 +46,7 @@ export default function VerdictArrow({
   verdict,
   size = 14,
   strokeWidth = 2,
-  'aria-hidden': ariaHidden = true,
+  "aria-hidden": ariaHidden = true,
   className,
   colorOverride,
 }: VerdictArrowProps) {

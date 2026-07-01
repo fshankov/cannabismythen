@@ -29,7 +29,11 @@ function seedAndPin() {
   // (>= 3500ms) and all intervals; short timers still work — React
   // scheduling, reveals, and the homepage's 3000ms second-card reveal.
   const realSetTimeout = window.setTimeout.bind(window);
-  window.setTimeout = function (handler: TimerHandler, timeout?: number, ...args: unknown[]) {
+  window.setTimeout = function (
+    handler: TimerHandler,
+    timeout?: number,
+    ...args: unknown[]
+  ) {
     if (typeof timeout === "number" && timeout >= 3500) return 0;
     return realSetTimeout(handler, timeout, ...args);
   } as typeof window.setTimeout;
@@ -74,7 +78,8 @@ export async function stabilize(page: Page, extraSettleMs = 400) {
     }
   });
   await page.addStyleTag({
-    content: "astro-dev-toolbar, #dev-toolbar-root { display: none !important; }",
+    content:
+      "astro-dev-toolbar, #dev-toolbar-root { display: none !important; }",
   });
   await page.waitForLoadState("networkidle").catch(() => {});
   await page.waitForTimeout(extraSettleMs);

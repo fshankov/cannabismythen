@@ -16,7 +16,7 @@
  * myth tabs and the source tabs is preserved.
  */
 
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 export interface TabDef<K extends string> {
   /** Stable identifier for the tab. Passed back to `onChange`. */
@@ -66,7 +66,7 @@ export default function TabsBar<K extends string>({
   tabs,
   activeKey,
   onChange,
-  ariaLabel = 'Ansicht wählen',
+  ariaLabel = "Ansicht wählen",
   dividerBeforeKey,
   endSlot,
 }: Props<K>) {
@@ -76,13 +76,13 @@ export default function TabsBar<K extends string>({
         const isActive = tab.key === activeKey;
         const hasDivider = dividerBeforeKey === tab.key;
         const classes = [
-          'tab-btn',
-          isActive ? 'active' : '',
-          hasDivider ? 'tab-btn--after-divider' : '',
-          tab.className ?? '',
+          "tab-btn",
+          isActive ? "active" : "",
+          hasDivider ? "tab-btn--after-divider" : "",
+          tab.className ?? "",
         ]
           .filter(Boolean)
-          .join(' ');
+          .join(" ");
         return (
           <button
             key={tab.key}

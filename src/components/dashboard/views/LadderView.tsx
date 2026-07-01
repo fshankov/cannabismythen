@@ -1,9 +1,20 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import * as d3 from 'd3';
-import type { Myth, Metric, Group, GroupId, AppState, Indicator } from '../../../lib/dashboard/types';
-import { getMythMetric, getIndicatorValue, getMythShortText } from '../../../lib/dashboard/data';
-import { getCorrectnessColor } from '../../../lib/dashboard/colors';
-import { t } from '../../../lib/dashboard/translations';
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import * as d3 from "d3";
+import type {
+  Myth,
+  Metric,
+  Group,
+  GroupId,
+  AppState,
+  Indicator,
+} from "../../../lib/dashboard/types";
+import {
+  getMythMetric,
+  getIndicatorValue,
+  getMythShortText,
+} from "../../../lib/dashboard/data";
+import { getCorrectnessColor } from "../../../lib/dashboard/colors";
+import { t } from "../../../lib/dashboard/translations";
 
 interface Props {
   myths: Myth[];
@@ -14,17 +25,29 @@ interface Props {
   onSelectMyth: (id: number) => void;
 }
 
-const INDICATORS: Indicator[] = ['awareness', 'significance', 'correctness', 'prevention_significance'];
+const INDICATORS: Indicator[] = [
+  "awareness",
+  "significance",
+  "correctness",
+  "prevention_significance",
+];
 
 function jitter(mythId: number): number {
   const frac = (mythId * 0.6180339887) % 1;
   return frac - 0.5;
 }
 
-export default function LadderView({ myths, metrics, groups, state, update, onSelectMyth }: Props) {
+export default function LadderView({
+  myths,
+  metrics,
+  groups,
+  state,
+  update,
+  onSelectMyth,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(360);
-  const selectedGroup: GroupId = state.groupIds[0] || 'adults';
+  const selectedGroup: GroupId = state.groupIds[0] || "adults";
   const selectedMythId = state.selectedMythId;
 
   useEffect(() => {
@@ -47,7 +70,10 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
   const axisGap = innerW / INDICATORS.length;
   const laneHalf = Math.min(28, axisGap * 0.32);
 
-  const yScale = useMemo(() => d3.scaleLinear().domain([0, 100]).range([innerH, 0]), [innerH]);
+  const yScale = useMemo(
+    () => d3.scaleLinear().domain([0, 100]).range([innerH, 0]),
+    [innerH],
+  );
 
   const axisX = useCallback(
     (i: number) => margin.left + axisGap * (i + 0.5),
@@ -97,18 +123,23 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
       if (mythId === selectedMythId) {
         onSelectMyth(mythId);
       } else {
-        update('selectedMythId', mythId);
+        update("selectedMythId", mythId);
       }
     },
     [selectedMythId, update, onSelectMyth],
   );
 
-  const selectedMyth = selectedMythId !== null ? myths.find((m) => m.id === selectedMythId) : null;
+  const selectedMyth =
+    selectedMythId !== null ? myths.find((m) => m.id === selectedMythId) : null;
   const ticks = [0, 25, 50, 75, 100];
 
   return (
     <div className="ladder-view" ref={containerRef}>
-      <div className="population-pills" role="tablist" aria-label={t('misc.population', state.lang)}>
+      <div
+        className="population-pills"
+        role="tablist"
+        aria-label={t("misc.population", state.lang)}
+      >
         {groups.map((g) => {
           const active = g.id === selectedGroup;
           return (
@@ -116,10 +147,10 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
               key={g.id}
               role="tab"
               aria-selected={active}
-              className={`population-pill ${active ? 'active' : ''}`}
-              onClick={() => update('groupIds', [g.id])}
+              className={`population-pill ${active ? "active" : ""}`}
+              onClick={() => update("groupIds", [g.id])}
             >
-              {state.lang === 'de' ? g.name_de : g.name_en}
+              {state.lang === "de" ? g.name_de : g.name_en}
             </button>
           );
         })}
@@ -131,7 +162,7 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
         height={height}
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label={t('howto.ladder', state.lang)}
+        aria-label={t("howto.ladder", state.lang)}
       >
         {/* Gridlines */}
         <g aria-hidden="true">
@@ -154,7 +185,14 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
           const label = t(`indicator.${ind}.short` as any, state.lang);
           return (
             <g key={ind} transform={`translate(0, ${margin.top})`}>
-              <line x1={x} x2={x} y1={0} y2={innerH} stroke="#cbd5e1" strokeWidth={1} />
+              <line
+                x1={x}
+                x2={x}
+                y1={0}
+                y2={innerH}
+                stroke="#cbd5e1"
+                strokeWidth={1}
+              />
               <text
                 x={x}
                 y={-10}
@@ -197,7 +235,7 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
                   r={r}
                   fill={getCorrectnessColor(d.myth.correctness_class)}
                   fillOpacity={dimmed ? 0.15 : isSelected ? 1 : 0.75}
-                  stroke={isSelected ? '#0f172a' : 'none'}
+                  stroke={isSelected ? "#0f172a" : "none"}
                   strokeWidth={isSelected ? 1.5 : 0}
                 />
                 {/* Transparent enlarged hit area for touch */}
@@ -206,7 +244,7 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
                   cy={d.cy}
                   r={14}
                   fill="transparent"
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                   onClick={() => handleDotClick(d.mythId)}
                 >
                   <title>
@@ -223,10 +261,13 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
         {polylinePoints && (
           <g transform={`translate(0, ${margin.top})`} pointerEvents="none">
             <path
-              d={d3.line<{ cx: number; cy: number }>()
-                .x((p) => p.cx)
-                .y((p) => p.cy)
-                .curve(d3.curveMonotoneX)(polylinePoints) || ''}
+              d={
+                d3
+                  .line<{ cx: number; cy: number }>()
+                  .x((p) => p.cx)
+                  .y((p) => p.cy)
+                  .curve(d3.curveMonotoneX)(polylinePoints) || ""
+              }
               fill="none"
               stroke="#0f172a"
               strokeWidth={1.5}
@@ -241,17 +282,25 @@ export default function LadderView({ myths, metrics, groups, state, update, onSe
           <span className="ladder-footer__label">
             <span
               className="ladder-footer__swatch"
-              style={{ background: getCorrectnessColor(selectedMyth.correctness_class) }}
+              style={{
+                background: getCorrectnessColor(selectedMyth.correctness_class),
+              }}
               aria-hidden="true"
             />
             <strong>{getMythShortText(selectedMyth, state.lang)}</strong>
           </span>
           <span className="ladder-footer__actions">
-            <button className="ladder-footer__btn" onClick={() => onSelectMyth(selectedMyth.id)}>
-              {t('misc.viewDetails', state.lang)}
+            <button
+              className="ladder-footer__btn"
+              onClick={() => onSelectMyth(selectedMyth.id)}
+            >
+              {t("misc.viewDetails", state.lang)}
             </button>
-            <button className="ladder-footer__btn ladder-footer__btn--muted" onClick={() => update('selectedMythId', null)}>
-              {t('misc.deselect', state.lang)}
+            <button
+              className="ladder-footer__btn ladder-footer__btn--muted"
+              onClick={() => update("selectedMythId", null)}
+            >
+              {t("misc.deselect", state.lang)}
             </button>
           </span>
         </div>

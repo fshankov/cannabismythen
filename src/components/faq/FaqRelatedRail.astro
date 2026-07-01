@@ -54,7 +54,10 @@ const showRelated = SHOW_RELATED_MYTHS && related.length > 0;
 // is redundant when a specific dashboard view is already linked. Drop the bare
 // "/daten-explorer/" (and its legacy "/zahlen-und-fakten/" form) in that case;
 // questions that ONLY link the generic root keep it.
-const GENERIC_DASHBOARD_URLS = new Set(["/daten-explorer/", "/zahlen-und-fakten/"]);
+const GENERIC_DASHBOARD_URLS = new Set([
+  "/daten-explorer/",
+  "/zahlen-und-fakten/",
+]);
 const hasSpecificDashboard = question.relatedDashboard.some(
   (url) => !GENERIC_DASHBOARD_URLS.has(url),
 );
@@ -71,56 +74,60 @@ const dashboard = question.relatedDashboard
 const hasRail = primary || showRelated || dashboard.length > 0;
 ---
 
-{hasRail && (
-  <div class="faq-related-rail">
-    {primary && (
-      <div class="faq-related-rail__group faq-related-rail__group--primary">
-        <span class="faq-related-rail__heading">Mythos</span>
-        <a
-          href={`/daten-explorer/${primary.slug}/`}
-          class="faq-related-rail__link faq-related-rail__link--primary faq-myth-link"
-          data-faq-myth-id={primary.id}
-          aria-haspopup="dialog"
-        >
-          <span class="faq-related-rail__icon" aria-hidden="true">▸</span>
-          {primary.title}
-        </a>
-      </div>
-    )}
+{
+  hasRail && (
+    <div class="faq-related-rail">
+      {primary && (
+        <div class="faq-related-rail__group faq-related-rail__group--primary">
+          <span class="faq-related-rail__heading">Mythos</span>
+          <a
+            href={`/daten-explorer/${primary.slug}/`}
+            class="faq-related-rail__link faq-related-rail__link--primary faq-myth-link"
+            data-faq-myth-id={primary.id}
+            aria-haspopup="dialog"
+          >
+            <span class="faq-related-rail__icon" aria-hidden="true">
+              ▸
+            </span>
+            {primary.title}
+          </a>
+        </div>
+      )}
 
-    {showRelated && (
-      <div class="faq-related-rail__group">
-        <span class="faq-related-rail__heading">Verwandte Mythen</span>
-        <ul class="faq-related-rail__list">
-          {related.map((m) => (
-            <li>
-              <a
-                href={`/daten-explorer/${m.slug}/`}
-                class="faq-related-rail__link faq-myth-link"
-                data-faq-myth-id={m.id}
-                aria-haspopup="dialog"
-              >
-                {m.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
+      {showRelated && (
+        <div class="faq-related-rail__group">
+          <span class="faq-related-rail__heading">Verwandte Mythen</span>
+          <ul class="faq-related-rail__list">
+            {related.map((m) => (
+              <li>
+                <a
+                  href={`/daten-explorer/${m.slug}/`}
+                  class="faq-related-rail__link faq-myth-link"
+                  data-faq-myth-id={m.id}
+                  aria-haspopup="dialog"
+                >
+                  {m.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-    {dashboard.length > 0 && (
-      <div class="faq-related-rail__group">
-        <span class="faq-related-rail__heading">Daten</span>
-        <ul class="faq-related-rail__list">
-          {dashboard.map((d) => (
-            <li>
-              <a href={d.url} class="faq-related-rail__link">
-                {d.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-  </div>
-)}
+      {dashboard.length > 0 && (
+        <div class="faq-related-rail__group">
+          <span class="faq-related-rail__heading">Daten</span>
+          <ul class="faq-related-rail__list">
+            {dashboard.map((d) => (
+              <li>
+                <a href={d.url} class="faq-related-rail__link">
+                  {d.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}

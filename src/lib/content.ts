@@ -25,7 +25,7 @@ interface ContentEntry {
  * Returns an array of [slug, entry] tuples.
  */
 export async function getPublishedEntries(
-  collectionName: keyof typeof keystaticConfig.collections
+  collectionName: keyof typeof keystaticConfig.collections,
 ) {
   const allSlugs = await reader.collections[collectionName].list();
   const entries: [string, Record<string, unknown>][] = [];

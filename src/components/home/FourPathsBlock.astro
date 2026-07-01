@@ -24,7 +24,8 @@ export interface TileBase {
 export interface QuizTileConfig extends TileBase {
   sampleEyebrow?: string;
   sampleMythText?: string;
-  sampleMythClassification?: "falsch" | "eher_falsch" | "eher_richtig" | "richtig";
+  sampleMythClassification?:
+    "falsch" | "eher_falsch" | "eher_richtig" | "richtig";
 }
 
 export interface Props {
@@ -79,13 +80,25 @@ const FAKTEN_ARROWS: Record<string, { viewBox: string; inner: string }> = {
 // Fakten card preview: 4 mini cards in the verdict spectrum falsch → richtig
 // (left → right). Pair the shortest myth per verdict with the real per-verdict
 // card gradient + the (inlined) direction arrow.
-const FAKTEN_SPECTRUM: CorrectnessClass[] = ["falsch", "eher_falsch", "eher_richtig", "richtig"];
+const FAKTEN_SPECTRUM: CorrectnessClass[] = [
+  "falsch",
+  "eher_falsch",
+  "eher_richtig",
+  "richtig",
+];
 const faktenCards = FAKTEN_SPECTRUM.map((v) => {
   const myth = previewMyths.find((m) => m.classification === v);
   if (!myth) return null;
-  return { verdict: v, text: myth.text, gradient: getVerdictVisual(v).gradient, arrow: FAKTEN_ARROWS[v] };
+  return {
+    verdict: v,
+    text: myth.text,
+    gradient: getVerdictVisual(v).gradient,
+    arrow: FAKTEN_ARROWS[v],
+  };
 }).filter(
-  (x): x is {
+  (
+    x,
+  ): x is {
     verdict: CorrectnessClass;
     text: string;
     gradient: string;
@@ -142,10 +155,10 @@ const QUIZ_OPTIONS = [
 //   daten  → "For professionals & teachers"
 //   meine  → "For everyone"
 const CARD_AUDIENCE: Record<string, string> = {
-  quiz:   "Für alle",
+  quiz: "Für alle",
   fakten: "Für alle",
-  daten:  "Für Fachkräfte & Lehrkräfte",
-  meine:  "Für alle",
+  daten: "Für Fachkräfte & Lehrkräfte",
+  meine: "Für alle",
 };
 
 // Card order matches the landing-page nav: 42 Mythen · Quiz · Meine
@@ -164,7 +177,8 @@ const cards = [
     <div class="four-paths__card">
       <div class="four-paths__quote" id="four-paths-quote">
         <div class="four-paths__quote-head">
-          <span class="four-paths__quote-lead">{hookQuote.leadClause}</span><br />
+          <span class="four-paths__quote-lead">{hookQuote.leadClause}</span><br
+          />
           <span
             class="four-paths__quote-counter"
             data-classification={hookQuote.counterClassification}
@@ -172,105 +186,128 @@ const cards = [
             {hookQuote.counterClause}
           </span>
         </div>
-        <p class="four-paths__subtext">Zwischen April 2024 und Dezember 2025 hat das ISD Hamburg die verbreitetsten Annahmen über Cannabis gesammelt und wissenschaftlich eingeordnet. Diese Website übersetzt die Ergebnisse in etwas, das jede:r erkunden kann — von Jugendlichen bis zu Fachkräften.</p>
+        <p class="four-paths__subtext">
+          Zwischen April 2024 und Dezember 2025 hat das ISD Hamburg die
+          verbreitetsten Annahmen über Cannabis gesammelt und wissenschaftlich
+          eingeordnet. Diese Website übersetzt die Ergebnisse in etwas, das
+          jede:r erkunden kann — von Jugendlichen bis zu Fachkräften.
+        </p>
       </div>
 
       <span class="four-paths__cards-eyebrow">{hookQuote.eyebrow}</span>
 
-      {cards.map((c) => (
-        <a class={`path-card path-card--${c.mod}`} href={c.targetUrl}>
-          <span class="path-card__go" aria-hidden="true">
-            <span class="path-card__go-label">Erkunden</span>
-            <svg
-              class="path-card__go-chevron"
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ><path d="m9 18 6-6-6-6"></path></svg>
-          </span>
-          <div class="path-card__top">
-            <span class="path-card__icon" aria-hidden="true">
+      {
+        cards.map((c) => (
+          <a class={`path-card path-card--${c.mod}`} href={c.targetUrl}>
+            <span class="path-card__go" aria-hidden="true">
+              <span class="path-card__go-label">Erkunden</span>
               <svg
+                class="path-card__go-chevron"
                 viewBox="0 0 24 24"
-                width="17.5"
-                height="17.5"
+                width="16"
+                height="16"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="3"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                set:html={c.icon}
-              ></svg>
+              >
+                <path d="m9 18 6-6-6-6" />
+              </svg>
             </span>
-            <span class="path-card__audience">{CARD_AUDIENCE[c.mod]}</span>
-          </div>
-          <h3 class="path-card__title">{c.title}</h3>
-          <p class="path-card__body">{c.description}</p>
-
-          {c.mod === "quiz" && (
-            <div class="quiz-preview" aria-hidden="true">
-              {QUIZ_OPTIONS.map((o) => (
-                <span class={`quiz-preview__btn quiz-preview__btn--${o.value}`} set:html={o.svg}></span>
-              ))}
+            <div class="path-card__top">
+              <span class="path-card__icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="17.5"
+                  height="17.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  set:html={c.icon}
+                />
+              </span>
+              <span class="path-card__audience">{CARD_AUDIENCE[c.mod]}</span>
             </div>
-          )}
+            <h3 class="path-card__title">{c.title}</h3>
+            <p class="path-card__body">{c.description}</p>
 
-          {c.mod === "fakten" && (
-            <div class="fakten-preview" aria-hidden="true">
-              {faktenCards.map((fc) => (
-                <span class={`fk-mini fk-mini--${fc.verdict}`} style={`background-image:${fc.gradient}`}>
-                  <span class="fk-mini__statement">{fc.text}</span>
-                  <svg
-                    class="fk-mini__arrow"
-                    viewBox={fc.arrow.viewBox}
-                    fill="none"
-                    preserveAspectRatio="xMidYMid meet"
-                    set:html={fc.arrow.inner}
-                  ></svg>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {c.mod === "daten" && (
-            <div class="daten-preview" aria-hidden="true">
-              <div class="daten-chart">
-                <div class="daten-chart__axis">
-                  <span class="daten-chart__tick" data-pos="0"></span>
-                  <span class="daten-chart__tick" data-pos="25"></span>
-                  <span class="daten-chart__tick" data-pos="50"></span>
-                  <span class="daten-chart__tick" data-pos="75"></span>
-                  <span class="daten-chart__tick" data-pos="100"></span>
-                </div>
-                {DATEN_BARS.map((b) => (
-                  <div class="daten-bar" data-idle={b.idle} data-hover={b.hover}>
-                    <span class="daten-bar__wash" style={`width:${b.idle}%;background:${b.accent}`}></span>
-                    <span class="daten-bar__circle" style={`left:${b.idle}%;background:${b.accent}`}>{b.idle}</span>
-                  </div>
+            {c.mod === "quiz" && (
+              <div class="quiz-preview" aria-hidden="true">
+                {QUIZ_OPTIONS.map((o) => (
+                  <span
+                    class={`quiz-preview__btn quiz-preview__btn--${o.value}`}
+                    set:html={o.svg}
+                  />
                 ))}
               </div>
-            </div>
-          )}
+            )}
 
-          {c.mod === "meine" && (
-            <div class="meine-preview" aria-hidden="true">
-              {audienceChips.map((a) => {
-                const Icon = AUDIENCE_ICONS_BY_FAQ_ID[a.id];
-                return (
-                  <span class="audience-dot">
-                    {Icon && <Icon />}
+            {c.mod === "fakten" && (
+              <div class="fakten-preview" aria-hidden="true">
+                {faktenCards.map((fc) => (
+                  <span
+                    class={`fk-mini fk-mini--${fc.verdict}`}
+                    style={`background-image:${fc.gradient}`}
+                  >
+                    <span class="fk-mini__statement">{fc.text}</span>
+                    <svg
+                      class="fk-mini__arrow"
+                      viewBox={fc.arrow.viewBox}
+                      fill="none"
+                      preserveAspectRatio="xMidYMid meet"
+                      set:html={fc.arrow.inner}
+                    />
                   </span>
-                );
-              })}
-            </div>
-          )}
-        </a>
-      ))}
+                ))}
+              </div>
+            )}
+
+            {c.mod === "daten" && (
+              <div class="daten-preview" aria-hidden="true">
+                <div class="daten-chart">
+                  <div class="daten-chart__axis">
+                    <span class="daten-chart__tick" data-pos="0" />
+                    <span class="daten-chart__tick" data-pos="25" />
+                    <span class="daten-chart__tick" data-pos="50" />
+                    <span class="daten-chart__tick" data-pos="75" />
+                    <span class="daten-chart__tick" data-pos="100" />
+                  </div>
+                  {DATEN_BARS.map((b) => (
+                    <div
+                      class="daten-bar"
+                      data-idle={b.idle}
+                      data-hover={b.hover}
+                    >
+                      <span
+                        class="daten-bar__wash"
+                        style={`width:${b.idle}%;background:${b.accent}`}
+                      />
+                      <span
+                        class="daten-bar__circle"
+                        style={`left:${b.idle}%;background:${b.accent}`}
+                      >
+                        {b.idle}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {c.mod === "meine" && (
+              <div class="meine-preview" aria-hidden="true">
+                {audienceChips.map((a) => {
+                  const Icon = AUDIENCE_ICONS_BY_FAQ_ID[a.id];
+                  return <span class="audience-dot">{Icon && <Icon />}</span>;
+                })}
+              </div>
+            )}
+          </a>
+        ))
+      }
     </div>
   </div>
 </section>
@@ -287,44 +324,54 @@ const cards = [
   }
   const dLerp = (a: number, b: number, t: number) => a + (b - a) * t;
   const dEase = (t: number) => 1 - Math.pow(1 - t, 3);
-  document.querySelectorAll<HTMLElement>(".daten-preview").forEach((preview) => {
-    const card = preview.closest<HTMLElement>(".path-card") ?? preview;
-    const bars: DBar[] = Array.from(
-      preview.querySelectorAll<HTMLElement>(".daten-bar"),
-    ).map((bar) => ({
-      wash: bar.querySelector<HTMLElement>(".daten-bar__wash"),
-      circle: bar.querySelector<HTMLElement>(".daten-bar__circle"),
-      idle: Number(bar.dataset.idle),
-      hover: Number(bar.dataset.hover),
-      cur: Number(bar.dataset.idle),
-    }));
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let raf = 0;
-    const apply = (b: DBar, v: number) => {
-      if (b.wash) b.wash.style.width = v + "%";
-      if (b.circle) {
-        b.circle.style.left = v + "%";
-        b.circle.textContent = String(Math.round(v));
-      }
-    };
-    const tween = (toHover: boolean) => {
-      cancelAnimationFrame(raf);
-      const starts = bars.map((b) => b.cur);
-      const targets = bars.map((b) => (toHover ? b.hover : b.idle));
-      if (reduce) {
-        bars.forEach((b, i) => { b.cur = targets[i]; apply(b, b.cur); });
-        return;
-      }
-      const t0 = performance.now();
-      const dur = 480;
-      const step = (now: number) => {
-        const e = dEase(Math.min((now - t0) / dur, 1));
-        bars.forEach((b, i) => { b.cur = dLerp(starts[i], targets[i], e); apply(b, b.cur); });
-        if (e < 1) raf = requestAnimationFrame(step);
+  document
+    .querySelectorAll<HTMLElement>(".daten-preview")
+    .forEach((preview) => {
+      const card = preview.closest<HTMLElement>(".path-card") ?? preview;
+      const bars: DBar[] = Array.from(
+        preview.querySelectorAll<HTMLElement>(".daten-bar"),
+      ).map((bar) => ({
+        wash: bar.querySelector<HTMLElement>(".daten-bar__wash"),
+        circle: bar.querySelector<HTMLElement>(".daten-bar__circle"),
+        idle: Number(bar.dataset.idle),
+        hover: Number(bar.dataset.hover),
+        cur: Number(bar.dataset.idle),
+      }));
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      let raf = 0;
+      const apply = (b: DBar, v: number) => {
+        if (b.wash) b.wash.style.width = v + "%";
+        if (b.circle) {
+          b.circle.style.left = v + "%";
+          b.circle.textContent = String(Math.round(v));
+        }
       };
-      raf = requestAnimationFrame(step);
-    };
-    card.addEventListener("mouseenter", () => tween(true));
-    card.addEventListener("mouseleave", () => tween(false));
-  });
+      const tween = (toHover: boolean) => {
+        cancelAnimationFrame(raf);
+        const starts = bars.map((b) => b.cur);
+        const targets = bars.map((b) => (toHover ? b.hover : b.idle));
+        if (reduce) {
+          bars.forEach((b, i) => {
+            b.cur = targets[i];
+            apply(b, b.cur);
+          });
+          return;
+        }
+        const t0 = performance.now();
+        const dur = 480;
+        const step = (now: number) => {
+          const e = dEase(Math.min((now - t0) / dur, 1));
+          bars.forEach((b, i) => {
+            b.cur = dLerp(starts[i], targets[i], e);
+            apply(b, b.cur);
+          });
+          if (e < 1) raf = requestAnimationFrame(step);
+        };
+        raf = requestAnimationFrame(step);
+      };
+      card.addEventListener("mouseenter", () => tween(true));
+      card.addEventListener("mouseleave", () => tween(false));
+    });
 </script>

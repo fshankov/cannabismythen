@@ -19,7 +19,12 @@ const className = `helpline-box helpline-box--${variant}`;
   <span class="helpline-box__icon" aria-hidden="true">⌇</span>
   <div class="helpline-box__body">
     {label && <p class="helpline-box__lead">{label}</p>}
-    <a href={url} class="helpline-box__link" rel="noopener noreferrer" target="_blank">
+    <a
+      href={url}
+      class="helpline-box__link"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
       {title}
     </a>
   </div>

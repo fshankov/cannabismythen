@@ -13,9 +13,14 @@
  * spannweite-svg); source rows show a small category-colour marker.
  */
 
-import type { Lang, CorrectnessClass } from './types';
-import { wrapLabel, renderLabelLines } from './text-wrap';
-import { symbolDefs, VERDICT_FG, VERDICT_Y_SHIFT, GLYPH_SIZE } from './spannweite-svg';
+import type { Lang, CorrectnessClass } from "./types";
+import { wrapLabel, renderLabelLines } from "./text-wrap";
+import {
+  symbolDefs,
+  VERDICT_FG,
+  VERDICT_Y_SHIFT,
+  GLYPH_SIZE,
+} from "./spannweite-svg";
 
 export interface TableSvgRow {
   /** Raw row-label text (myth short text / source name). */
@@ -48,16 +53,16 @@ const TOTAL_W = 1000;
 const LABEL_COL_W = 240;
 const HEADER_H = 56;
 const ROW_H = 32;
-const ROW_H_2 = 48;          // taller row when a label wraps to 2 lines
-const LABEL_MAX_CHARS = 28;  // label shares the 240px column with a glyph/marker
+const ROW_H_2 = 48; // taller row when a label wraps to 2 lines
+const LABEL_MAX_CHARS = 28; // label shares the 240px column with a glyph/marker
 
 function escapeXml(s: string): string {
   return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 /** Build the table SVG as a string (no DOM — testable headlessly). */
@@ -74,18 +79,25 @@ export function buildTableSvgString(opts: TableRenderOpts): string {
   });
   const rowTops: number[] = [];
   let accH = 0;
-  for (const rl of rowLayouts) { rowTops.push(accH); accH += rl.height; }
+  for (const rl of rowLayouts) {
+    rowTops.push(accH);
+    accH += rl.height;
+  }
   const bodyH = accH;
   const totalH = HEADER_H + bodyH;
 
   const parts: string[] = [];
 
   // Outer frame.
-  parts.push(`<rect x="0.5" y="0.5" width="${TOTAL_W - 1}" height="${totalH - 1}" fill="#ffffff" stroke="#e5e7eb"/>`);
+  parts.push(
+    `<rect x="0.5" y="0.5" width="${TOTAL_W - 1}" height="${totalH - 1}" fill="#ffffff" stroke="#e5e7eb"/>`,
+  );
 
   // ── Header row ──────────────────────────────────────────────────
   parts.push(`<g class="header">`);
-  parts.push(`<line x1="0" y1="${HEADER_H}" x2="${TOTAL_W}" y2="${HEADER_H}" stroke="#e5e7eb"/>`);
+  parts.push(
+    `<line x1="0" y1="${HEADER_H}" x2="${TOTAL_W}" y2="${HEADER_H}" stroke="#e5e7eb"/>`,
+  );
   parts.push(
     `<text x="${LABEL_COL_W / 2}" y="${HEADER_H / 2}" text-anchor="middle" dominant-baseline="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" letter-spacing="0.04em" fill="#64748b">${escapeXml(labelHeader)}</text>`,
   );
@@ -95,9 +107,13 @@ export function buildTableSvgString(opts: TableRenderOpts): string {
       `<text x="${cx}" y="${HEADER_H / 2}" text-anchor="middle" dominant-baseline="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#0f172a">${escapeXml(columns[i].label)}</text>`,
     );
     const x = LABEL_COL_W + (i + 1) * colW;
-    parts.push(`<line x1="${x}" y1="0" x2="${x}" y2="${HEADER_H}" stroke="#e5e7eb"/>`);
+    parts.push(
+      `<line x1="${x}" y1="0" x2="${x}" y2="${HEADER_H}" stroke="#e5e7eb"/>`,
+    );
   }
-  parts.push(`<line x1="${LABEL_COL_W}" y1="0" x2="${LABEL_COL_W}" y2="${HEADER_H}" stroke="#e5e7eb"/>`);
+  parts.push(
+    `<line x1="${LABEL_COL_W}" y1="0" x2="${LABEL_COL_W}" y2="${HEADER_H}" stroke="#e5e7eb"/>`,
+  );
   parts.push(`</g>`);
 
   // ── Body rows ───────────────────────────────────────────────────
@@ -110,10 +126,14 @@ export function buildTableSvgString(opts: TableRenderOpts): string {
     const rowOpacity = row.isChild ? 0.62 : 1;
 
     if (r % 2 === 1) {
-      parts.push(`<rect x="0" y="${yTop}" width="${TOTAL_W}" height="${rowH}" fill="#fafbfc"/>`);
+      parts.push(
+        `<rect x="0" y="${yTop}" width="${TOTAL_W}" height="${rowH}" fill="#fafbfc"/>`,
+      );
     }
     if (r > 0) {
-      parts.push(`<line x1="0" y1="${yTop}" x2="${TOTAL_W}" y2="${yTop}" stroke="#f1f5f9"/>`);
+      parts.push(
+        `<line x1="0" y1="${yTop}" x2="${TOTAL_W}" y2="${yTop}" stroke="#f1f5f9"/>`,
+      );
     }
 
     // Label cell: verdict glyph (myths) or category marker (sources) + text.
@@ -127,7 +147,9 @@ export function buildTableSvgString(opts: TableRenderOpts): string {
       labelTextX = gx + GLYPH_SIZE / 2 + 8;
     } else if (row.accent) {
       const mx = row.isChild ? 30 : 14;
-      parts.push(`<circle cx="${mx}" cy="${yMid}" r="5" fill="${row.accent}" opacity="${rowOpacity}"/>`);
+      parts.push(
+        `<circle cx="${mx}" cy="${yMid}" r="5" fill="${row.accent}" opacity="${rowOpacity}"/>`,
+      );
       labelTextX = mx + 12;
     } else {
       labelTextX = row.isChild ? 30 : 14;
@@ -136,17 +158,21 @@ export function buildTableSvgString(opts: TableRenderOpts): string {
       renderLabelLines(labelLines, labelTextX, yMid, {
         fontSize: row.isChild ? 11 : 12,
         fontWeight: row.isChild ? 400 : 500,
-        fill: '#0f172a',
+        fill: "#0f172a",
         opacity: rowOpacity,
       }),
     );
-    parts.push(`<line x1="${LABEL_COL_W}" y1="${yTop}" x2="${LABEL_COL_W}" y2="${yTop + rowH}" stroke="#f1f5f9"/>`);
+    parts.push(
+      `<line x1="${LABEL_COL_W}" y1="${yTop}" x2="${LABEL_COL_W}" y2="${yTop + rowH}" stroke="#f1f5f9"/>`,
+    );
 
     // Value cells (centred display strings; italic muted "k. A." when null).
     for (let i = 0; i < colCount; i++) {
       const cellX = LABEL_COL_W + i * colW;
       if (i < colCount - 1) {
-        parts.push(`<line x1="${cellX + colW}" y1="${yTop}" x2="${cellX + colW}" y2="${yTop + rowH}" stroke="#f1f5f9"/>`);
+        parts.push(
+          `<line x1="${cellX + colW}" y1="${yTop}" x2="${cellX + colW}" y2="${yTop + rowH}" stroke="#f1f5f9"/>`,
+        );
       }
       if (row.naMask[i]) {
         parts.push(
@@ -154,20 +180,20 @@ export function buildTableSvgString(opts: TableRenderOpts): string {
         );
       } else {
         parts.push(
-          `<text x="${cellX + colW / 2}" y="${yMid}" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="12" fill="#0f172a" opacity="${rowOpacity}">${escapeXml(row.cells[i] ?? '')}</text>`,
+          `<text x="${cellX + colW / 2}" y="${yMid}" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="12" fill="#0f172a" opacity="${rowOpacity}">${escapeXml(row.cells[i] ?? "")}</text>`,
         );
       }
     }
   }
   parts.push(`</g>`);
 
-  const defs = hasVerdict ? `<defs>${symbolDefs()}</defs>` : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${TOTAL_W}" height="${totalH}" viewBox="0 0 ${TOTAL_W} ${totalH}">${defs}${parts.join('')}</svg>`;
+  const defs = hasVerdict ? `<defs>${symbolDefs()}</defs>` : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${TOTAL_W}" height="${totalH}" viewBox="0 0 ${TOTAL_W} ${totalH}">${defs}${parts.join("")}</svg>`;
 }
 
 export function renderTableSvg(opts: TableRenderOpts): SVGSVGElement {
   const svgString = buildTableSvgString(opts);
   const parser = new DOMParser();
-  const doc = parser.parseFromString(svgString, 'image/svg+xml');
+  const doc = parser.parseFromString(svgString, "image/svg+xml");
   return doc.documentElement as unknown as SVGSVGElement;
 }

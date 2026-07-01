@@ -9,4 +9,4 @@
  * should import directly from `../shared/VerdictArrowWithInfo`.
  */
 
-export { default } from '../shared/VerdictArrowWithInfo';
+export { default } from "../shared/VerdictArrowWithInfo";

@@ -15,8 +15,8 @@
  * Prävention appears only once and is consumed by both axes.
  */
 
-import type { SVGProps } from 'react';
-import { forwardRef } from 'react';
+import type { SVGProps } from "react";
+import { forwardRef } from "react";
 import {
   Eye,
   LocateFixed,
@@ -24,19 +24,19 @@ import {
   Globe,
   Search,
   Handshake,
-} from 'lucide-react';
+} from "lucide-react";
 
-export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
+export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "children"> {
   size?: number | string;
 }
 
 const baseProps = {
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
   strokeWidth: 1.75,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
 };
 
 /* Myth-data axis ---------------------------------------------------- */
@@ -46,7 +46,7 @@ export const IconKenntnis = forwardRef<SVGSVGElement, IconProps>(
     <Eye ref={ref as never} size={size} {...rest} />
   ),
 );
-IconKenntnis.displayName = 'IconKenntnis';
+IconKenntnis.displayName = "IconKenntnis";
 
 /** Bedeutung — custom flag/pennant (handoff `myth-bedeutung`, variant B). */
 export const IconBedeutung = forwardRef<SVGSVGElement, IconProps>(
@@ -56,14 +56,14 @@ export const IconBedeutung = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconBedeutung.displayName = 'IconBedeutung';
+IconBedeutung.displayName = "IconBedeutung";
 
 export const IconRichtigkeit = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <LocateFixed ref={ref as never} size={size} {...rest} />
   ),
 );
-IconRichtigkeit.displayName = 'IconRichtigkeit';
+IconRichtigkeit.displayName = "IconRichtigkeit";
 
 /** Prävention — shared between myth-data axis and source axis. */
 export const IconPraevention = forwardRef<SVGSVGElement, IconProps>(
@@ -71,14 +71,14 @@ export const IconPraevention = forwardRef<SVGSVGElement, IconProps>(
     <ShieldCheck ref={ref as never} size={size} {...rest} />
   ),
 );
-IconPraevention.displayName = 'IconPraevention';
+IconPraevention.displayName = "IconPraevention";
 
 export const IconBevoelkerungsbezug = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <Globe ref={ref as never} size={size} {...rest} />
   ),
 );
-IconBevoelkerungsbezug.displayName = 'IconBevoelkerungsbezug';
+IconBevoelkerungsbezug.displayName = "IconBevoelkerungsbezug";
 
 /* Source axis -------------------------------------------------------- */
 
@@ -87,7 +87,7 @@ export const IconSuche = forwardRef<SVGSVGElement, IconProps>(
     <Search ref={ref as never} size={size} {...rest} />
   ),
 );
-IconSuche.displayName = 'IconSuche';
+IconSuche.displayName = "IconSuche";
 
 /** Wahrnehmung — antenna with broadcast waves. Custom SVG. */
 export const IconWahrnehmung = forwardRef<SVGSVGElement, IconProps>(
@@ -100,11 +100,11 @@ export const IconWahrnehmung = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconWahrnehmung.displayName = 'IconWahrnehmung';
+IconWahrnehmung.displayName = "IconWahrnehmung";
 
 export const IconVertrauen = forwardRef<SVGSVGElement, IconProps>(
   ({ size = 24, ...rest }, ref) => (
     <Handshake ref={ref as never} size={size} {...rest} />
   ),
 );
-IconVertrauen.displayName = 'IconVertrauen';
+IconVertrauen.displayName = "IconVertrauen";

@@ -79,10 +79,7 @@ export default function LesebeispielSource({
       aria-label={headingText ? undefined : "Lesebeispiel"}
     >
       {headingText && (
-        <h2
-          id="lesebeispiel-source-heading"
-          className="lesebeispiel__heading"
-        >
+        <h2 id="lesebeispiel-source-heading" className="lesebeispiel__heading">
           {headingText}
         </h2>
       )}
@@ -90,15 +87,16 @@ export default function LesebeispielSource({
         {metric === "search" && (
           <>
             In der Zielgruppe der {groupGenitive} suchen{" "}
-            <strong>{rounded}&nbsp;%</strong> bei dieser Quelle Informationen über
-            Cannabis. Das ist ein <strong>{anteilLabel(rounded)}</strong>.
+            <strong>{rounded}&nbsp;%</strong> bei dieser Quelle Informationen
+            über Cannabis. Das ist ein <strong>{anteilLabel(rounded)}</strong>.
           </>
         )}
         {metric === "perception" && (
           <>
             In der Zielgruppe der {groupGenitive} nehmen{" "}
             <strong>{rounded}&nbsp;%</strong> Informationen über Cannabis von
-            dieser Quelle wahr. Das ist ein <strong>{anteilLabel(rounded)}</strong>.
+            dieser Quelle wahr. Das ist ein{" "}
+            <strong>{anteilLabel(rounded)}</strong>.
           </>
         )}
         {metric === "trust" && (

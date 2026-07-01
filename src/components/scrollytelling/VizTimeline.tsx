@@ -1,7 +1,7 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import type { TimelineTooltip } from './types';
-import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import type { TimelineTooltip } from "./types";
+import { useFlipPosition } from "../dashboard/hooks/useFlipPosition";
 
 interface Props {
   active: boolean;
@@ -18,33 +18,33 @@ interface Anchor {
 
 const ANCHORS: Anchor[] = [
   {
-    date: '2024-04-01',
-    labelDate: 'April 2024',
-    title: 'Konsumcannabisgesetz',
-    subtitle: 'Inkrafttreten KCanG',
+    date: "2024-04-01",
+    labelDate: "April 2024",
+    title: "Konsumcannabisgesetz",
+    subtitle: "Inkrafttreten KCanG",
   },
   {
-    date: '2024-09-01',
-    labelDate: 'Aug.–Okt. 2024',
-    title: 'Erste Online-Befragung',
-    subtitle: 'n = 1.041 Personen',
+    date: "2024-09-01",
+    labelDate: "Aug.–Okt. 2024",
+    title: "Erste Online-Befragung",
+    subtitle: "n = 1.041 Personen",
   },
   {
-    date: '2025-01-15',
-    labelDate: 'Jan.–Feb. 2025',
-    title: 'Literaturanalysen',
-    subtitle: 'PubMed · PsychInfo · SocIndex',
+    date: "2025-01-15",
+    labelDate: "Jan.–Feb. 2025",
+    title: "Literaturanalysen",
+    subtitle: "PubMed · PsychInfo · SocIndex",
   },
   {
-    date: '2025-07-15',
-    labelDate: 'Juli–Aug. 2025',
-    title: 'Hauptbefragung',
-    subtitle: 'n = 2.795 Personen',
+    date: "2025-07-15",
+    labelDate: "Juli–Aug. 2025",
+    title: "Hauptbefragung",
+    subtitle: "n = 2.795 Personen",
   },
   {
-    date: '2025-11-15',
-    labelDate: 'November 2025',
-    title: 'Expert:innen-Diskussion',
+    date: "2025-11-15",
+    labelDate: "November 2025",
+    title: "Expert:innen-Diskussion",
   },
   {
     // Iter-14 (Harald review, CAR-12 + CAR-13): publication moved from
@@ -55,10 +55,10 @@ const ANCHORS: Anchor[] = [
     // src/content/ueber-uns-scrolly.yaml moved to "2025-12-01" so the
     // tooltipMap lookup still resolves.
     // English gloss: "Publication — December 2025 — Final report".
-    date: '2025-12-01',
-    labelDate: 'Dezember 2025',
-    title: 'Veröffentlichung',
-    subtitle: 'Abschlussbericht',
+    date: "2025-12-01",
+    labelDate: "Dezember 2025",
+    title: "Veröffentlichung",
+    subtitle: "Abschlussbericht",
     highlight: true,
   },
 ];
@@ -152,27 +152,21 @@ export function VizTimeline({ active, tooltips }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  const {
-    triggerRef,
-    cardRef,
-    pos,
-    open,
-    setOpen,
-    updatePosition,
-  } = useFlipPosition<HTMLElement, HTMLDivElement>({
-    maxWidth: 320,
-    gap: 12,
-    // Iter-14: clamp the tooltip inside the timeline column so the
-    // publication anchor's card no longer bleeds past the right edge
-    // when the user hovers near it.
-    boundsRef: containerRef,
-  });
+  const { triggerRef, cardRef, pos, open, setOpen, updatePosition } =
+    useFlipPosition<HTMLElement, HTMLDivElement>({
+      maxWidth: 320,
+      gap: 12,
+      // Iter-14: clamp the tooltip inside the timeline column so the
+      // publication anchor's card no longer bleeds past the right edge
+      // when the user hovers near it.
+      boundsRef: containerRef,
+    });
 
   useEffect(() => {
     const reduced =
-      typeof window !== 'undefined' &&
-      (window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-        document.documentElement.dataset.reducedMotion === 'true');
+      typeof window !== "undefined" &&
+      (window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        document.documentElement.dataset.reducedMotion === "true");
     if (!active) {
       setDrawn(0);
       return;
@@ -183,7 +177,9 @@ export function VizTimeline({ active, tooltips }: Props) {
     }
     // First activation only: wait for the page loader to finish before drawing.
     // Loader exits at 2550ms from navigation start (1750ms delay + 800ms fade).
-    const delay = hasActivatedRef.current ? 0 : Math.max(0, 2550 - performance.now());
+    const delay = hasActivatedRef.current
+      ? 0
+      : Math.max(0, 2550 - performance.now());
     hasActivatedRef.current = true;
     let cancelled = false;
     // Iter-18: slower, calmer sweep (1.4s → 3.5s) so the yellow locator
@@ -232,15 +228,15 @@ export function VizTimeline({ active, tooltips }: Props) {
   // flashes (see `reached` below). It hides at the very end so it doesn't
   // sit on top of the golden publication anchor.
   const lineBgStyle = lineGeom
-    ? { top: lineGeom.top, height: lineGeom.height, bottom: 'auto' as const }
-    : { top: 0, height: 0, bottom: 'auto' as const };
+    ? { top: lineGeom.top, height: lineGeom.height, bottom: "auto" as const }
+    : { top: 0, height: 0, bottom: "auto" as const };
   const lineFgStyle = lineGeom
     ? {
         top: lineGeom.top,
         height: drawn * lineGeom.height,
-        bottom: 'auto' as const,
+        bottom: "auto" as const,
       }
-    : { top: 0, height: 0, bottom: 'auto' as const };
+    : { top: 0, height: 0, bottom: "auto" as const };
   const showLocator = lineGeom !== null && drawn > 0.005 && drawn < 0.999;
   const locatorStyle = lineGeom
     ? { top: lineGeom.top + drawn * lineGeom.height }
@@ -286,20 +282,22 @@ export function VizTimeline({ active, tooltips }: Props) {
           <div
             key={i}
             className={[
-              'viz-timeline-v__row',
-              a.highlight ? 'viz-timeline-v__row--highlight' : '',
-              isHovered ? 'viz-timeline-v__row--hovered' : '',
+              "viz-timeline-v__row",
+              a.highlight ? "viz-timeline-v__row--highlight" : "",
+              isHovered ? "viz-timeline-v__row--hovered" : "",
             ]
               .filter(Boolean)
-              .join(' ')}
+              .join(" ")}
             data-reached={reached}
             style={{ opacity: visible ? 1 : 0 }}
           >
             <div
               className="viz-timeline-v__row-cell viz-timeline-v__row-cell--left"
-              onMouseEnter={(e) => { if (!labelOnRight) handleEnter(i, e.currentTarget); }}
+              onMouseEnter={(e) => {
+                if (!labelOnRight) handleEnter(i, e.currentTarget);
+              }}
               onMouseLeave={handleLeave}
-              style={!labelOnRight ? { cursor: 'default' } : undefined}
+              style={!labelOnRight ? { cursor: "default" } : undefined}
             >
               {!labelOnRight && <AnchorLabel anchor={a} />}
             </div>
@@ -312,7 +310,7 @@ export function VizTimeline({ active, tooltips }: Props) {
                 />
               )}
               <span
-                className={`viz-timeline-v__dot${reached ? ' is-reached' : ''}`}
+                className={`viz-timeline-v__dot${reached ? " is-reached" : ""}`}
                 ref={(el) => {
                   dotRefs.current[i] = el;
                 }}
@@ -329,9 +327,11 @@ export function VizTimeline({ active, tooltips }: Props) {
 
             <div
               className="viz-timeline-v__row-cell viz-timeline-v__row-cell--right"
-              onMouseEnter={(e) => { if (labelOnRight) handleEnter(i, e.currentTarget); }}
+              onMouseEnter={(e) => {
+                if (labelOnRight) handleEnter(i, e.currentTarget);
+              }}
               onMouseLeave={handleLeave}
-              style={labelOnRight ? { cursor: 'default' } : undefined}
+              style={labelOnRight ? { cursor: "default" } : undefined}
             >
               {labelOnRight && <AnchorLabel anchor={a} />}
             </div>
@@ -345,11 +345,11 @@ export function VizTimeline({ active, tooltips }: Props) {
         <div
           ref={cardRef}
           role="tooltip"
-          className={`scrolly-hover-tooltip ${open && hoveredAnchor ? 'is-open' : ''}`}
+          className={`scrolly-hover-tooltip ${open && hoveredAnchor ? "is-open" : ""}`}
           style={
             pos
               ? {
-                  position: 'fixed',
+                  position: "fixed",
                   top: pos.top,
                   left: pos.left,
                   width: pos.width,
@@ -362,7 +362,9 @@ export function VizTimeline({ active, tooltips }: Props) {
               <p className="scrolly-hover-tooltip__date">
                 {hoveredAnchor.labelDate}
               </p>
-              <p className="scrolly-hover-tooltip__title">{hoveredAnchor.title}</p>
+              <p className="scrolly-hover-tooltip__title">
+                {hoveredAnchor.title}
+              </p>
               {tooltipMap[hoveredAnchor.date] && (
                 <p className="scrolly-hover-tooltip__body">
                   {tooltipMap[hoveredAnchor.date]}

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import * as d3 from 'd3';
-import { AUDIENCE_ICONS_BY_GROUP } from '../../lib/icons';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import * as d3 from "d3";
+import { AUDIENCE_ICONS_BY_GROUP } from "../../lib/icons";
 import type {
   GroupId,
   InformationSource,
@@ -9,20 +9,20 @@ import type {
   SourceCategory,
   SourceCategoryId,
   SourceMetricId,
-} from './types';
-import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
-import { useAutoCycleGroup } from './hooks/useAutoCycleGroup';
-import { ACTIVE_GROUPS, GROUP_LABEL_DE } from './dataLoaders';
+} from "./types";
+import { useFlipPosition } from "../dashboard/hooks/useFlipPosition";
+import { useAutoCycleGroup } from "./hooks/useAutoCycleGroup";
+import { ACTIVE_GROUPS, GROUP_LABEL_DE } from "./dataLoaders";
 
 /** Per-group color tokens — must match GROUP_COLOR in VizSampleAndRanked.tsx
  *  so the User icons in both pickers (step 6 + step 7/8) read as the same
  *  visual identity for each Zielgruppe. */
 const GROUP_COLOR: Record<GroupId, string> = {
-  adults: 'var(--group-adults)',
-  minors: 'var(--group-minors)',
-  consumers: 'var(--group-consumers)',
-  young_adults: 'var(--group-young_adults)',
-  parents: 'var(--group-parents)',
+  adults: "var(--group-adults)",
+  minors: "var(--group-minors)",
+  consumers: "var(--group-consumers)",
+  young_adults: "var(--group-young_adults)",
+  parents: "var(--group-parents)",
 };
 
 interface Props {
@@ -41,33 +41,39 @@ interface Props {
 
 /** Four metric columns shown side-by-side as a parallel-coordinates strip
  *  viz. The order is fixed: Suche → Vertrauen → Wahrnehmung → Prävention. */
-const COLUMNS: ReadonlyArray<SourceMetricId> = ['search', 'trust', 'perception', 'prevention'];
+const COLUMNS: ReadonlyArray<SourceMetricId> = [
+  "search",
+  "trust",
+  "perception",
+  "prevention",
+];
 
 const SHORT_METRIC_LABEL: Record<SourceMetricId, string> = {
-  search: 'Suche',
-  trust: 'Vertrauen',
-  perception: 'Wahrnehmung',
-  prevention: 'Prävention',
+  search: "Suche",
+  trust: "Vertrauen",
+  perception: "Wahrnehmung",
+  prevention: "Prävention",
 };
 
 const METRIC_UNIT_LABEL: Record<SourceMetricId, string> = {
-  search: '% gesucht',
-  trust: 'Vertrauen',
-  perception: '% wahrgen.',
-  prevention: 'Potenzial',
+  search: "% gesucht",
+  trust: "Vertrauen",
+  perception: "% wahrgen.",
+  prevention: "Potenzial",
 };
 
 /** Five exemplary sources, ordered to span 5 different categories so the
  *  legend always shows the full source taxonomy. */
 const UNIFIED_EXEMPLARY_SOURCE_IDS: ReadonlyArray<number> = [
-  2,  // Apotheke / Arztpraxis      — institutionell
-  1,  // Angehörige                — persönliches Umfeld
+  2, // Apotheke / Arztpraxis      — institutionell
+  1, // Angehörige                — persönliches Umfeld
   16, // Foren                       — internet
   33, // Plakat / Flyer              — print / physisch
   43, // Kurzer Beitrag TV + Radio   — traditionelle Medien
 ];
 
-const UNIFIED_HEADER = 'Apotheke · Angehörige · Foren · Plakat · Kurzbeitrag TV';
+const UNIFIED_HEADER =
+  "Apotheke · Angehörige · Foren · Plakat · Kurzbeitrag TV";
 
 // Iter-24 (2026-06-02, Harald-Backlog): the local GROUP_OPTIONS map
 // has been deleted — labels now come from `GROUP_LABEL_DE` in
@@ -101,11 +107,11 @@ const PADDING_BOTTOM = 24;
 // of the Zielgruppe tab. Matches GROUP_OPTIONS but typed as the more
 // general `ReadonlyArray<GroupId>` expected by useAutoCycleGroup.
 const GROUP_ROTATION: ReadonlyArray<GroupId> = [
-  'adults',
-  'minors',
-  'consumers',
-  'young_adults',
-  'parents',
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
 ];
 
 export function VizSourcesStrips({ data, revealedColumns }: Props) {
@@ -153,7 +159,9 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
   });
 
   function openSourceTooltip(id: number, el: SVGGElement) {
-    (tooltipTriggerRef as unknown as React.MutableRefObject<Element | null>).current = el;
+    (
+      tooltipTriggerRef as unknown as React.MutableRefObject<Element | null>
+    ).current = el;
     setHoverId(id);
     setTooltipOpen(true);
     updateTooltipPosition();
@@ -164,7 +172,9 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
   }
 
   const parentSources: InformationSource[] = useMemo(() => {
-    const allParents = data.sources.filter((s: InformationSource) => s.parentId === null);
+    const allParents = data.sources.filter(
+      (s: InformationSource) => s.parentId === null,
+    );
     const allowSet = new Set(UNIFIED_EXEMPLARY_SOURCE_IDS);
     return allParents.filter((s: InformationSource) => allowSet.has(s.id));
   }, [data]);
@@ -201,9 +211,10 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
   const totalW = STRIP_W * COLUMNS.length + STRIP_GAP * (COLUMNS.length - 1);
   const totalH = STRIP_H + PADDING_TOP + PADDING_BOTTOM;
 
-  const hoveredSource = hoverId !== null
-    ? parentSources.find((s) => s.id === hoverId) ?? null
-    : null;
+  const hoveredSource =
+    hoverId !== null
+      ? (parentSources.find((s) => s.id === hoverId) ?? null)
+      : null;
 
   return (
     // hoverHandlers pause the Zielgruppe auto-cycle while the user
@@ -220,43 +231,43 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         className="viz-strips__picker"
         role="tablist"
         aria-label="Zielgruppe"
-        data-auto-cycling={isAutoCycling ? 'true' : 'false'}
+        data-auto-cycling={isAutoCycling ? "true" : "false"}
       >
         {ACTIVE_GROUPS.map((id) => {
           const isActive = activeGroup === id;
           const Icon = AUDIENCE_ICONS_BY_GROUP[id];
           return (
-          <button
-            key={id}
-            role="tab"
-            aria-selected={isActive}
-            className={`viz-strips__pick ${isActive ? 'viz-strips__pick--active' : ''}`}
-            onClick={() => setActiveGroup(id)}
-            type="button"
-          >
-            {/* Iter-24: per-audience icon (same shape the left-column
+            <button
+              key={id}
+              role="tab"
+              aria-selected={isActive}
+              className={`viz-strips__pick ${isActive ? "viz-strips__pick--active" : ""}`}
+              onClick={() => setActiveGroup(id)}
+              type="button"
+            >
+              {/* Iter-24: per-audience icon (same shape the left-column
                 `{icon:adults}` inline marker draws). Was the generic
                 Lucide `<User>`. */}
-            <Icon
-              size="1em"
-              strokeWidth={1.75}
-              color={GROUP_COLOR[id]}
-              aria-hidden="true"
-              style={{ flexShrink: 0 }}
-            />
-            {GROUP_LABEL_DE[id]}
-            {/* Auto-cycle progress bar — only mounts under the ACTIVE
+              <Icon
+                size="1em"
+                strokeWidth={1.75}
+                color={GROUP_COLOR[id]}
+                aria-hidden="true"
+                style={{ flexShrink: 0 }}
+              />
+              {GROUP_LABEL_DE[id]}
+              {/* Auto-cycle progress bar — only mounts under the ACTIVE
                 pill while cycling is on. Keyed by activeGroup so the
                 CSS animation restarts on every tick. */}
-            {isActive && isAutoCycling && (
-              <span
-                key={`pb-${id}`}
-                className="viz-strips__pick-progress"
-                style={{ animationDuration: `${cycleMs}ms` }}
-                aria-hidden="true"
-              />
-            )}
-          </button>
+              {isActive && isAutoCycling && (
+                <span
+                  key={`pb-${id}`}
+                  className="viz-strips__pick-progress"
+                  style={{ animationDuration: `${cycleMs}ms` }}
+                  aria-hidden="true"
+                />
+              )}
+            </button>
           );
         })}
       </div>
@@ -279,23 +290,20 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
           // Iter-12: CSS keyframe animation (not transition) for the
           // first-entry stagger — fires on mount even if isRevealed is
           // already true.
-          const isNewlyRevealed =
-            isForward && isRevealed && i >= prevRevealed;
+          const isNewlyRevealed = isForward && isRevealed && i >= prevRevealed;
           const revealIdx = isNewlyRevealed ? i - prevRevealed : 0;
           const colStyle: React.CSSProperties = isNewlyRevealed
             ? {
-                animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                animation:
+                  "viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both",
                 animationDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
               }
-            // Iter-13: unrevealed columns hidden entirely (was 0.45
-            // faint placeholder). In Step 8, cols 3+4 (Wahrnehmung,
-            // Prävention) are fully invisible until Step 9 reveals them.
-            : { opacity: isRevealed ? 1 : 0 };
+            : // Iter-13: unrevealed columns hidden entirely (was 0.45
+              // faint placeholder). In Step 8, cols 3+4 (Wahrnehmung,
+              // Prävention) are fully invisible until Step 9 reveals them.
+              { opacity: isRevealed ? 1 : 0 };
           return (
-            <g
-              key={metric}
-              style={colStyle}
-            >
+            <g key={metric} style={colStyle}>
               <rect
                 x={x}
                 y={PADDING_TOP}
@@ -315,7 +323,7 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
                       y2={ty}
                       stroke="#2d3748"
                       strokeWidth={1}
-                      strokeDasharray={tick === 0 || tick === 100 ? '0' : '2 4'}
+                      strokeDasharray={tick === 0 || tick === 100 ? "0" : "2 4"}
                     />
                     <text
                       x={x - 4}
@@ -338,8 +346,8 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
                 fontSize={12}
                 fontFamily="Georgia, serif"
                 fontWeight={600}
-                fill={isRevealed ? '#e5e7eb' : '#6b7280'}
-                style={{ transition: 'fill 320ms ease' }}
+                fill={isRevealed ? "#e5e7eb" : "#6b7280"}
+                style={{ transition: "fill 320ms ease" }}
               >
                 {SHORT_METRIC_LABEL[metric]}
               </text>
@@ -359,7 +367,7 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
         })}
 
         {/* Slope lines — fade in with the LATER column they bridge. */}
-        <g className="viz-strips__pairs" style={{ pointerEvents: 'none' }}>
+        <g className="viz-strips__pairs" style={{ pointerEvents: "none" }}>
           {slopeSegments.map((segPairs, segIdx) => {
             const laterIdx = segIdx + 1;
             const segVisible = laterIdx < revealedColumns;
@@ -371,7 +379,8 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
             const segRevealIdx = isNewlyRevealed ? laterIdx - prevRevealed : 0;
             const segGroupStyle: React.CSSProperties = isNewlyRevealed
               ? {
-                  animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                  animation:
+                    "viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both",
                   animationDelay: `calc(${segRevealIdx} * var(--viz-reveal-stagger))`,
                 }
               : { opacity: segVisible ? 1 : 0 };
@@ -390,7 +399,7 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
                       stroke={categoryColor(p.category)}
                       strokeWidth={1}
                       opacity={isHovered ? 0.95 : isDimmed ? 0.06 : 0.22}
-                      style={{ transition: 'opacity 180ms ease' }}
+                      style={{ transition: "opacity 180ms ease" }}
                     />
                   );
                 })}
@@ -410,7 +419,8 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
           const revealIdx = isNewlyRevealed ? colIdx - prevRevealed : 0;
           const dotsColStyle: React.CSSProperties = isNewlyRevealed
             ? {
-                animation: 'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
+                animation:
+                  "viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both",
                 animationDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
               }
             : { opacity: isRevealed ? 1 : 0 };
@@ -440,53 +450,62 @@ export function VizSourcesStrips({ data, revealedColumns }: Props) {
           flips above/below the dot depending on viewport room and
           clamps horizontally. */}
       {/* Portalled to body so Safari's contain:layout doesn't trap position:fixed. */}
-      {createPortal(<div
-        ref={tooltipCardRef}
-        role="tooltip"
-        className={`scrolly-hover-tooltip ${tooltipOpen && hoveredSource ? 'is-open' : ''}`}
-        style={
-          tooltipPos
-            ? {
-                position: 'fixed',
-                top: tooltipPos.top,
-                left: tooltipPos.left,
-                width: tooltipPos.width,
-              }
-            : undefined
-        }
-      >
-        {hoveredSource && (
-          <>
-            <p className="scrolly-hover-tooltip__title">{hoveredSource.name}</p>
-            <p
-              className="scrolly-hover-tooltip__category"
-              style={{ color: categoryColor(hoveredSource.category) }}
-            >
-              {hoveredSource.category.replace('_', ' ')}
-            </p>
-            <p className="scrolly-hover-tooltip__metrics">
-              {COLUMNS.slice(0, revealedColumns).map((metric, i) => {
-                const v =
-                  data.metrics[metric]?.data[activeGroup]?.[String(hoveredSource.id)];
-                return (
-                  <span key={metric}>
-                    {i > 0 && ' · '}
-                    {SHORT_METRIC_LABEL[metric]}:{' '}
-                    <b>{v == null ? '–' : Math.round(v)}</b>
-                  </span>
-                );
-              })}
-            </p>
-          </>
-        )}
-      </div>, document.body)}
+      {createPortal(
+        <div
+          ref={tooltipCardRef}
+          role="tooltip"
+          className={`scrolly-hover-tooltip ${tooltipOpen && hoveredSource ? "is-open" : ""}`}
+          style={
+            tooltipPos
+              ? {
+                  position: "fixed",
+                  top: tooltipPos.top,
+                  left: tooltipPos.left,
+                  width: tooltipPos.width,
+                }
+              : undefined
+          }
+        >
+          {hoveredSource && (
+            <>
+              <p className="scrolly-hover-tooltip__title">
+                {hoveredSource.name}
+              </p>
+              <p
+                className="scrolly-hover-tooltip__category"
+                style={{ color: categoryColor(hoveredSource.category) }}
+              >
+                {hoveredSource.category.replace("_", " ")}
+              </p>
+              <p className="scrolly-hover-tooltip__metrics">
+                {COLUMNS.slice(0, revealedColumns).map((metric, i) => {
+                  const v =
+                    data.metrics[metric]?.data[activeGroup]?.[
+                      String(hoveredSource.id)
+                    ];
+                  return (
+                    <span key={metric}>
+                      {i > 0 && " · "}
+                      {SHORT_METRIC_LABEL[metric]}:{" "}
+                      <b>{v == null ? "–" : Math.round(v)}</b>
+                    </span>
+                  );
+                })}
+              </p>
+            </>
+          )}
+        </div>,
+        document.body,
+      )}
 
       {/* Category legend — only the categories present in the 5 visible
           sources, so the reader never sees a chip for a category that has
           no dot on the chart. */}
       <div className="viz-strips__legend" aria-label="Quellen-Kategorien">
         {(() => {
-          const visibleCats = new Set(parentSources.map((s: InformationSource) => s.category));
+          const visibleCats = new Set(
+            parentSources.map((s: InformationSource) => s.category),
+          );
           return data.sourceCategories
             .filter((c: SourceCategory) => visibleCats.has(c.id))
             .map((c: SourceCategory) => (
@@ -522,8 +541,8 @@ function Dot({ d, dim, enabled, onEnter, onLeave }: DotProps) {
       transform={`translate(${d.x}, ${d.y})`}
       style={{
         opacity: dim ? 0.28 : 1,
-        cursor: enabled ? 'pointer' : 'default',
-        transition: 'opacity 180ms ease',
+        cursor: enabled ? "pointer" : "default",
+        transition: "opacity 180ms ease",
       }}
       onMouseEnter={(e) => enabled && onEnter(d.id, e.currentTarget)}
       onMouseLeave={() => enabled && onLeave()}
@@ -565,9 +584,9 @@ function beeswarmLayout(dots: Dot[], xOffset: number): LaidOutDot[] {
   });
 
   d3.forceSimulation<SimNode>(nodes)
-    .force('y', d3.forceY<SimNode>((n) => n._targetY).strength(1))
-    .force('x', d3.forceX<SimNode>(centerX).strength(0.25))
-    .force('collide', d3.forceCollide<SimNode>(7))
+    .force("y", d3.forceY<SimNode>((n) => n._targetY).strength(1))
+    .force("x", d3.forceX<SimNode>(centerX).strength(0.25))
+    .force("collide", d3.forceCollide<SimNode>(7))
     .stop()
     .tick(160);
 

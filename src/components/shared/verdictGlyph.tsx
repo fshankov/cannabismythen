@@ -28,8 +28,8 @@
  * bg tint) derived from the main color.
  */
 
-import type { JSX } from 'react';
-import type { CorrectnessClass } from '../../lib/dashboard/types';
+import type { JSX } from "react";
+import type { CorrectnessClass } from "../../lib/dashboard/types";
 
 interface GlyphSpec {
   /** Rotation around (12,12) in degrees inside a 24×24 viewBox. */
@@ -41,17 +41,17 @@ interface GlyphSpec {
 }
 
 export const VERDICT_GLYPHS: Record<
-  Exclude<CorrectnessClass, 'keine_aussage_moeglich'>,
+  Exclude<CorrectnessClass, "keine_aussage_moeglich">,
   GlyphSpec
 > = {
-  richtig: { rotation: 180, main: '#047857', shadow: '#a7d3c5' },
-  eher_richtig: { rotation: -135, main: '#4d7c0f', shadow: '#c2d3a3' },
-  eher_falsch: { rotation: 45, main: '#b45309', shadow: '#e0b58d' },
-  falsch: { rotation: 0, main: '#be123c', shadow: '#e9a8b9' },
+  richtig: { rotation: 180, main: "#047857", shadow: "#a7d3c5" },
+  eher_richtig: { rotation: -135, main: "#4d7c0f", shadow: "#c2d3a3" },
+  eher_falsch: { rotation: 45, main: "#b45309", shadow: "#e0b58d" },
+  falsch: { rotation: 0, main: "#be123c", shadow: "#e9a8b9" },
 };
 
 /** Shadow line color used for the no-classification case. */
-export const NO_CLASSIFICATION_COLOR = '#94a3b8';
+export const NO_CLASSIFICATION_COLOR = "#94a3b8";
 
 /** Optional per-instance color override for the verdict glyph. When the
  *  glyph renders ON a verdict-colored background (e.g. the scrollytelling
@@ -101,8 +101,10 @@ export function VerdictGlyphPaths({
   // flat shadow-line glyph (= "no scientific verdict") rather than
   // crashing on `spec.rotation` when the lookup misses.
   const spec =
-    verdict !== 'keine_aussage_moeglich'
-      ? VERDICT_GLYPHS[verdict as Exclude<CorrectnessClass, 'keine_aussage_moeglich'>]
+    verdict !== "keine_aussage_moeglich"
+      ? VERDICT_GLYPHS[
+          verdict as Exclude<CorrectnessClass, "keine_aussage_moeglich">
+        ]
       : undefined;
   if (!spec) {
     return (

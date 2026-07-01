@@ -56,8 +56,7 @@ export function usePointerSwipe(
     let abandoned = false; // vertical scroll detected → ignore
 
     const computedThreshold =
-      threshold ??
-      Math.min(140, Math.round(window.innerWidth * 0.35));
+      threshold ?? Math.min(140, Math.round(window.innerWidth * 0.35));
 
     const setVars = (x: number) => {
       el.style.setProperty("--swipe-x", `${x}px`);
@@ -68,11 +67,11 @@ export function usePointerSwipe(
       const progress = Math.min(1, Math.abs(x) / computedThreshold);
       el.style.setProperty(
         "--swipe-progress-next",
-        x < 0 ? String(progress) : "0"
+        x < 0 ? String(progress) : "0",
       );
       el.style.setProperty(
         "--swipe-progress-prev",
-        x > 0 ? String(progress) : "0"
+        x > 0 ? String(progress) : "0",
       );
     };
 
@@ -189,7 +188,9 @@ export function usePointerSwipe(
 export function useIsCoarsePointer(): boolean {
   const ref = useRef(false);
   if (typeof window !== "undefined" && !ref.current) {
-    ref.current = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    ref.current = window.matchMedia(
+      "(hover: none) and (pointer: coarse)",
+    ).matches;
   }
   return ref.current;
 }

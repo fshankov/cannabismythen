@@ -25,17 +25,26 @@ export const onRequest = defineMiddleware(async (context, next) => {
    * regex doesn't try to redirect `''` as a slug.
    */
   if (pathname === "/zahlen-und-fakten" || pathname === "/zahlen-und-fakten/") {
-    return Response.redirect(new URL(`/daten-explorer/${search}`, context.url), 301);
+    return Response.redirect(
+      new URL(`/daten-explorer/${search}`, context.url),
+      301,
+    );
   }
   const datenMatch = pathname.match(/^\/zahlen-und-fakten\/daten\/([^/]+)\/?$/);
   if (datenMatch) {
-    return Response.redirect(new URL(`/daten-explorer/${search}`, context.url), 301);
+    return Response.redirect(
+      new URL(`/daten-explorer/${search}`, context.url),
+      301,
+    );
   }
   // The legacy /daten-explorer/daten/{slug} indicator pages were removed
   // (2026-06-25 cleanup) — their content lives in the interactive explorer.
   // Collapse any leftover/bookmarked links to the explorer index.
   if (/^\/daten-explorer\/daten\//.test(pathname)) {
-    return Response.redirect(new URL(`/daten-explorer/${search}`, context.url), 301);
+    return Response.redirect(
+      new URL(`/daten-explorer/${search}`, context.url),
+      301,
+    );
   }
   const factsheetMatch = pathname.match(/^\/zahlen-und-fakten\/([^/]+)\/?$/);
   if (factsheetMatch) {
@@ -54,7 +63,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
    * Slug pattern: `m\d+` optionally followed by a `-…` kebab tail.
    * Mirror rule also lives in netlify.toml.
    */
-  const mythPageMatch = pathname.match(/^\/daten-explorer\/m(\d+)(?:-[a-z0-9-]+)?\/?$/i);
+  const mythPageMatch = pathname.match(
+    /^\/daten-explorer\/m(\d+)(?:-[a-z0-9-]+)?\/?$/i,
+  );
   if (mythPageMatch) {
     const id = String(parseInt(mythPageMatch[1], 10));
     return Response.redirect(
@@ -71,19 +82,30 @@ export const onRequest = defineMiddleware(async (context, next) => {
    * splat regex doesn't try to redirect `''` as a slug.
    */
   if (pathname === "/haeufige-fragen" || pathname === "/haeufige-fragen/") {
-    return Response.redirect(new URL(`/meine-interessen/${search}`, context.url), 301);
+    return Response.redirect(
+      new URL(`/meine-interessen/${search}`, context.url),
+      301,
+    );
   }
-  const fragenFrageMatch = pathname.match(/^\/haeufige-fragen\/frage\/([^/]+)\/?$/);
+  const fragenFrageMatch = pathname.match(
+    /^\/haeufige-fragen\/frage\/([^/]+)\/?$/,
+  );
   if (fragenFrageMatch) {
     return Response.redirect(
-      new URL(`/meine-interessen/frage/${fragenFrageMatch[1]}/${search}`, context.url),
+      new URL(
+        `/meine-interessen/frage/${fragenFrageMatch[1]}/${search}`,
+        context.url,
+      ),
       301,
     );
   }
   const fragenAudienceMatch = pathname.match(/^\/haeufige-fragen\/([^/]+)\/?$/);
   if (fragenAudienceMatch) {
     return Response.redirect(
-      new URL(`/meine-interessen/${fragenAudienceMatch[1]}/${search}`, context.url),
+      new URL(
+        `/meine-interessen/${fragenAudienceMatch[1]}/${search}`,
+        context.url,
+      ),
       301,
     );
   }
@@ -142,7 +164,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_") ||
     pathname.startsWith("/data/") ||
-    pathname.match(/\.(ico|png|svg|jpg|jpeg|gif|webp|css|js|mjs|woff2?|json|txt|xml|pdf)$/)
+    pathname.match(
+      /\.(ico|png|svg|jpg|jpeg|gif|webp|css|js|mjs|woff2?|json|txt|xml|pdf)$/,
+    )
   ) {
     return next();
   }

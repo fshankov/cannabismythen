@@ -30,12 +30,12 @@ body:has(.carm-explorer) main {
      panel brief, Figma node 403:1976.) The LEFT/RIGHT inactive-tab tint
      difference (#eeeee9 vs #f2f2f2) still applies via the
      .carm-explorer__tabs--* scoped rules below, not this token. */
-  --color-bg: #f4f4f0;                /* page surface around the panel — matches the site-wide background */
-  --color-surface: #ffffff;           /* chart panel — explicitly white */
-  --color-surface-alt: #f8fafc;       /* canvas inner — cool-tint card inside the white panel */
+  --color-bg: #f4f4f0; /* page surface around the panel — matches the site-wide background */
+  --color-surface: #ffffff; /* chart panel — explicitly white */
+  --color-surface-alt: #f8fafc; /* canvas inner — cool-tint card inside the white panel */
   --color-surface-raised: #f1f5f9;
-  --color-border: #dddddd;            /* warmer border for chips + panel */
-  --color-border-soft: #f2f2f2;       /* hairline border for the canvas inner card */
+  --color-border: #dddddd; /* warmer border for chips + panel */
+  --color-border-soft: #f2f2f2; /* hairline border for the canvas inner card */
   --color-border-strong: #c6c5be;
   /* Inactive-tab fallback bg (used by .tab-btn base rule). Real values
      come from .carm-explorer__tabs--left / --right which override per
@@ -65,11 +65,13 @@ body:has(.carm-explorer) main {
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --font-sans: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-sans:
+    "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    system-ui, sans-serif;
   /* Motion */
   --transition: 150ms ease;
-  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
-  --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --duration-fast: 150ms;
   --duration-normal: 250ms;
   font-family: var(--font-sans);
@@ -243,9 +245,10 @@ body:has(.carm-explorer) main {
   color: #6b7280;
   cursor: pointer;
   margin-bottom: 0;
-  transition: background var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out),
-              border-color var(--duration-fast) var(--ease-out);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
   white-space: nowrap;
   font-family: var(--font-sans);
 }
@@ -268,8 +271,12 @@ body:has(.carm-explorer) main {
 /* 2026-05-28 PM: active tab is the resting state — don't darken on
    hover. The state-layer `::after` overlay applies to interactive
    surfaces that are still "targets"; the active tab is not. */
-.tab-btn.active::after { display: none; }
-.tab-btn.active:hover { background: var(--color-surface, #ffffff); }
+.tab-btn.active::after {
+  display: none;
+}
+.tab-btn.active:hover {
+  background: var(--color-surface, #ffffff);
+}
 
 .tab-btn:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -324,9 +331,10 @@ body:has(.carm-explorer) main {
   color: var(--color-text-secondary);
   font-size: 0.72rem;
   cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-out),
-              border-color var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
   white-space: nowrap;
   font-family: var(--font-sans);
 }
@@ -339,7 +347,9 @@ body:has(.carm-explorer) main {
 
 .carm-explorer .util-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--color-primary-light), 0 0 0 4px var(--color-primary);
+  box-shadow:
+    0 0 0 3px var(--color-primary-light),
+    0 0 0 4px var(--color-primary);
 }
 
 .carm-explorer .util-btn svg {
@@ -564,7 +574,9 @@ body:has(.carm-explorer) main {
 }
 
 .carm-explorer .info-tooltip-trigger:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-primary-light), 0 0 0 3px var(--color-primary);
+  box-shadow:
+    0 0 0 2px var(--color-primary-light),
+    0 0 0 3px var(--color-primary);
 }
 
 .carm-explorer .info-tooltip-card {
@@ -584,8 +596,9 @@ body:has(.carm-explorer) main {
   opacity: 0;
   /* Pair visibility with opacity so it's removed from a11y tree when hidden */
   visibility: hidden;
-  transition: opacity var(--duration-fast) var(--ease-out),
-              visibility 0s linear var(--duration-fast);
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    visibility 0s linear var(--duration-fast);
 }
 
 /* When using viewport-relative (fixed) positioning, the inline style sets
@@ -607,8 +620,9 @@ body:has(.carm-explorer) main {
   opacity: 1;
   visibility: visible;
   /* When opening, remove visibility delay */
-  transition: opacity var(--duration-fast) var(--ease-out),
-              visibility 0s linear 0s;
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    visibility 0s linear 0s;
 }
 
 /* The card is .focus()'d on open. The browser's default focus ring doesn't
@@ -621,11 +635,15 @@ body:has(.carm-explorer) main {
 .carm-explorer .info-tooltip-card:focus,
 .carm-explorer .info-tooltip-card:focus-visible {
   outline: none;
-  box-shadow: var(--shadow-lg), 0 0 0 2px #1d4ed8;
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 2px #1d4ed8;
 }
 .carm-explorer .info-tooltip-card--accent:focus,
 .carm-explorer .info-tooltip-card--accent:focus-visible {
-  box-shadow: var(--shadow-lg), 0 0 0 2px var(--color-accent, #2d6a4f);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 2px var(--color-accent, #2d6a4f);
 }
 
 .carm-explorer .info-tooltip-title {
@@ -734,7 +752,6 @@ body:has(.carm-explorer) main {
   opacity: 1;
 }
 
-
 /* ==================== DATA TABLE ==================== */
 .carm-explorer .data-table-container {
   /* 2026-05-21: Tabelle MUST fit the viewport — never overflow
@@ -812,7 +829,9 @@ body:has(.carm-explorer) main {
   opacity: 1;
   color: #767676;
   font-size: 0.7rem;
-  transition: color 0.15s ease, opacity 0.15s ease;
+  transition:
+    color 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .carm-explorer .data-table th:hover .sort-arrow,
@@ -870,7 +889,7 @@ body:has(.carm-explorer) main {
 
 .carm-explorer .data-table .value-cell {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
+  font-feature-settings: "tnum";
   /* 2026-05-21: numbers centered (was right-aligned) for tighter
      visual scan when columns share the same 0-100 numeric scale. */
   text-align: center;
@@ -890,13 +909,27 @@ body:has(.carm-explorer) main {
    bandIndex() from src/lib/dashboard/lesebeispiel-bands.ts; tokens
    defined in src/styles/global.css. NA cells skip the modifier so
    they stay transparent. */
-.carm-explorer .data-table .value-cell--band-0 { background: var(--band-0); }
-.carm-explorer .data-table .value-cell--band-1 { background: var(--band-1); }
-.carm-explorer .data-table .value-cell--band-2 { background: var(--band-2); }
-.carm-explorer .data-table .value-cell--band-3 { background: var(--band-3); }
-.carm-explorer .data-table .value-cell--band-4 { background: var(--band-4); }
-.carm-explorer .data-table .value-cell--band-5 { background: var(--band-5); }
-.carm-explorer .data-table .value-cell--band-6 { background: var(--band-6); }
+.carm-explorer .data-table .value-cell--band-0 {
+  background: var(--band-0);
+}
+.carm-explorer .data-table .value-cell--band-1 {
+  background: var(--band-1);
+}
+.carm-explorer .data-table .value-cell--band-2 {
+  background: var(--band-2);
+}
+.carm-explorer .data-table .value-cell--band-3 {
+  background: var(--band-3);
+}
+.carm-explorer .data-table .value-cell--band-4 {
+  background: var(--band-4);
+}
+.carm-explorer .data-table .value-cell--band-5 {
+  background: var(--band-5);
+}
+.carm-explorer .data-table .value-cell--band-6 {
+  background: var(--band-6);
+}
 
 .carm-explorer .myth-header-row {
   display: flex;
@@ -938,7 +971,9 @@ body:has(.carm-explorer) main {
   border: 1px solid var(--color-border, #e2e8f0);
   background: var(--color-surface, #ffffff);
   box-shadow: var(--shadow-chip);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .carm-myth-search-row:focus-within {
   border-color: var(--color-accent, #2d6a4f);
@@ -979,7 +1014,9 @@ body:has(.carm-explorer) main {
   cursor: pointer;
   border-radius: 50%;
   padding: 0;
-  transition: color 120ms ease, background-color 120ms ease;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease;
 }
 .carm-myth-search-clear:hover,
 .carm-myth-search-clear:focus-visible {
@@ -1088,10 +1125,11 @@ body:has(.carm-explorer) main {
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease-out),
-              background var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out),
-              box-shadow var(--duration-fast) var(--ease-out);
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
   font-family: var(--font-sans);
   color: var(--color-text-secondary);
 }
@@ -1111,7 +1149,9 @@ body:has(.carm-explorer) main {
 
 .carm-explorer .indicator-tag:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--color-primary-light), 0 0 0 4px var(--color-primary);
+  box-shadow:
+    0 0 0 3px var(--color-primary-light),
+    0 0 0 4px var(--color-primary);
 }
 
 /* ==================== DETAIL PANEL ==================== */
@@ -1272,7 +1312,10 @@ body:has(.carm-explorer) main {
   cursor: pointer;
   text-align: left;
   font-family: var(--font-sans);
-  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .overview-tile:hover,
@@ -1403,7 +1446,9 @@ body:has(.carm-explorer) main {
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
   z-index: 1;
 }
 
@@ -1643,7 +1688,9 @@ body:has(.carm-explorer) main {
   padding: 8px 16px;
   border: 1px solid #2d6a4f;
   border-radius: 8px;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
   margin-top: 8px;
 }
 
@@ -1653,13 +1700,21 @@ body:has(.carm-explorer) main {
 }
 
 @keyframes factsheetFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes factsheetSlideInRight {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* Mobile: bottom sheet style */
@@ -1677,8 +1732,12 @@ body:has(.carm-explorer) main {
   }
 
   @keyframes factsheetSlideInBottom {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
 
   .factsheet-panel__header {
@@ -1981,7 +2040,11 @@ body:has(.carm-explorer) main {
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  background: linear-gradient(to bottom, var(--color-bg, #f4f4f0) 70%, transparent);
+  background: linear-gradient(
+    to bottom,
+    var(--color-bg, #f4f4f0) 70%,
+    transparent
+  );
 }
 
 .population-pill {
@@ -1997,7 +2060,10 @@ body:has(.carm-explorer) main {
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .population-pill:hover {
@@ -2070,7 +2136,9 @@ body:has(.carm-explorer) main {
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .ladder-footer__btn:hover {
@@ -2139,7 +2207,6 @@ body:has(.carm-explorer) main {
   box-sizing: border-box;
 }
 
-
 /* Legacy class kept for any older callers — same horizontal layout. */
 .strips-top-row {
   display: flex;
@@ -2157,7 +2224,9 @@ body:has(.carm-explorer) main {
   cursor: pointer;
   background: var(--color-bg-subtle, #eeeee8);
   border: 1px solid var(--color-border, #cbd5e1);
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .strips-ios-toggle--vertical {
@@ -2277,7 +2346,10 @@ body:has(.carm-explorer) main {
   font-weight: 500;
   cursor: pointer;
   box-sizing: border-box;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .strips-switch-btn:hover,
@@ -2501,7 +2573,9 @@ body:has(.carm-explorer) main {
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
 }
 
 .strips-readout-more:hover {
@@ -2626,7 +2700,6 @@ body:has(.carm-explorer) main {
   box-sizing: border-box;
 }
 
-
 /* Three rows of icon-blocks above the SVG */
 .strips-row-wrap {
   margin-bottom: 4px;
@@ -2681,7 +2754,10 @@ body:has(.carm-explorer) main {
   font-weight: 500;
   cursor: pointer;
   box-sizing: border-box;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .strips-block-btn:hover:not(:disabled) {
@@ -2785,7 +2861,9 @@ body:has(.carm-explorer) main {
   color: var(--color-text-muted, #94a3b8);
   cursor: pointer;
   line-height: 0;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .strips-svg-header__hide:hover,
@@ -2811,7 +2889,9 @@ body:has(.carm-explorer) main {
   border-radius: 10px;
   background: var(--color-bg-subtle, #f8fafc);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
   overflow: hidden;
 }
 
@@ -2945,7 +3025,10 @@ body:has(.carm-explorer) main {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .strips-picker__trigger:hover {
@@ -3035,7 +3118,9 @@ body:has(.carm-explorer) main {
   font-size: 0.95rem;
   cursor: pointer;
   border-radius: 6px;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .strips-picker__row-info:hover {
@@ -3144,7 +3229,9 @@ body:has(.carm-explorer) main {
   font-weight: 500;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .strips-picker__item-btn:hover {
@@ -3195,8 +3282,12 @@ body:has(.carm-explorer) main {
   color: var(--color-accent, #2d6a4f);
 }
 
-.strips-picker__item.active .strips-picker__item-info .info-tooltip-trigger:hover,
-.strips-picker__item.active .strips-picker__item-info .info-tooltip-trigger:focus-visible {
+.strips-picker__item.active
+  .strips-picker__item-info
+  .info-tooltip-trigger:hover,
+.strips-picker__item.active
+  .strips-picker__item-info
+  .info-tooltip-trigger:focus-visible {
   color: white;
 }
 
@@ -3257,7 +3348,10 @@ body:has(.carm-explorer) main {
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .strips-pill__btn:hover {
@@ -3350,7 +3444,10 @@ body:has(.carm-explorer) main {
   font-size: 0.74rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .strips-cat-pill:hover {
@@ -3458,7 +3555,9 @@ body:has(.carm-explorer) main {
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .strips-pivot-toggle__btn:hover {
@@ -3676,7 +3775,10 @@ body:has(.carm-explorer) main {
   font-size: 1.2rem;
   line-height: 1;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .strips-myth-card__close:hover {
@@ -3704,12 +3806,22 @@ body:has(.carm-explorer) main {
 }
 
 /* Verdict bar colors — reuse the dashboard correctness palette. */
-.strips-myth-card__bar.classification--richtig { background: #047857; }
-.strips-myth-card__bar.classification--eher_richtig { background: #4d7c0f; }
-.strips-myth-card__bar.classification--eher_falsch { background: #b45309; }
-.strips-myth-card__bar.classification--falsch { background: #be123c; }
+.strips-myth-card__bar.classification--richtig {
+  background: #047857;
+}
+.strips-myth-card__bar.classification--eher_richtig {
+  background: #4d7c0f;
+}
+.strips-myth-card__bar.classification--eher_falsch {
+  background: #b45309;
+}
+.strips-myth-card__bar.classification--falsch {
+  background: #be123c;
+}
 .strips-myth-card__bar.classification--keine_aussage_moeglich,
-.strips-myth-card__bar.classification--keine_aussage_moeglich { background: #6b7280; }
+.strips-myth-card__bar.classification--keine_aussage_moeglich {
+  background: #6b7280;
+}
 
 .strips-myth-card__bar-icon {
   font-size: 0.86rem;
@@ -3849,8 +3961,12 @@ body:has(.carm-explorer) main {
 }
 
 @keyframes carm-overlay-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Locks page scroll while a modal is open. */
@@ -3883,7 +3999,7 @@ body.carm-modal-open {
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
   --transition: 150ms ease;
-  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
 
   position: relative;
   background: var(--color-surface);
@@ -3894,7 +4010,7 @@ body.carm-modal-open {
   padding: 18px 20px 20px;
   margin: 0 0 16px;
   animation: carm-onboarding-in 250ms var(--ease-out);
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-family: "Inter Variable", "Inter", system-ui, sans-serif;
   line-height: 1.5;
   color: var(--color-text);
 }
@@ -3909,8 +4025,12 @@ body.carm-modal-open {
   padding: 0;
   color: inherit;
 }
-.carm-onboarding-card ol { list-style: none; }
-.carm-onboarding-card * { box-sizing: border-box; }
+.carm-onboarding-card ol {
+  list-style: none;
+}
+.carm-onboarding-card * {
+  box-sizing: border-box;
+}
 
 /* Overlay variant — used by the portalled modal. Drops the bottom margin,
    bumps shadow, allows internal scroll if content exceeds the viewport,
@@ -3923,7 +4043,9 @@ body.carm-modal-open {
   max-width: 620px;
   max-height: calc(100vh - 48px);
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25), 0 6px 14px rgba(15, 23, 42, 0.12);
+  box-shadow:
+    0 20px 50px rgba(15, 23, 42, 0.25),
+    0 6px 14px rgba(15, 23, 42, 0.12);
   position: relative;
   animation: carm-onboarding-in 220ms var(--ease-out);
 }
@@ -3933,8 +4055,14 @@ body.carm-modal-open {
 }
 
 @keyframes carm-onboarding-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .carm-onboarding-close {
@@ -3951,7 +4079,9 @@ body.carm-modal-open {
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background var(--transition), color var(--transition);
+  transition:
+    background var(--transition),
+    color var(--transition);
 }
 .carm-onboarding-close:hover,
 .carm-onboarding-close:focus-visible {
@@ -4018,7 +4148,10 @@ body.carm-modal-open {
   cursor: pointer;
   font-family: var(--font-sans);
   color: var(--color-text);
-  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    transform var(--transition);
   /* Even row heights — so the three buttons line up regardless of label
      length. */
   min-height: 100px;
@@ -4169,7 +4302,10 @@ body.carm-modal-open {
   color: var(--color-text-secondary);
   cursor: pointer;
   box-shadow: var(--shadow);
-  transition: border-color var(--transition), color var(--transition), background var(--transition);
+  transition:
+    border-color var(--transition),
+    color var(--transition),
+    background var(--transition);
 }
 .carm-explorer .carm-help-fab:hover,
 .carm-explorer .carm-help-fab:focus-visible {
@@ -4178,7 +4314,9 @@ body.carm-modal-open {
   background: var(--color-primary-light);
   outline: none;
 }
-.carm-explorer .carm-help-fab svg { color: currentColor; }
+.carm-explorer .carm-help-fab svg {
+  color: currentColor;
+}
 
 /* Inline variant — used when the pill is portalled into .tabs-bar.
    Sits as a normal flex item at the right end (margin-left:auto), no
@@ -4197,8 +4335,10 @@ body.carm-modal-open {
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.08);
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  box-shadow:
+    0 8px 28px rgba(15, 23, 42, 0.18),
+    0 2px 6px rgba(15, 23, 42, 0.08);
+  font-family: "Inter Variable", "Inter", system-ui, sans-serif;
   color: #1a1a2e;
   max-width: 360px;
   padding: 18px 20px;
@@ -4222,7 +4362,9 @@ body.carm-modal-open {
   max-height: min(58vh, 420px);
   overflow-y: auto;
 }
-.carm-tour-popover .driver-popover-description strong { color: #1a1a2e; }
+.carm-tour-popover .driver-popover-description strong {
+  color: #1a1a2e;
+}
 .carm-tour-popover .driver-popover-progress-text {
   font-size: 0.74rem;
   color: #718096;
@@ -4237,7 +4379,10 @@ body.carm-modal-open {
   border-radius: 6px;
   padding: 6px 12px;
   text-shadow: none;
-  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
 }
 .carm-tour-popover .driver-popover-prev-btn {
   background: transparent;
@@ -4287,7 +4432,10 @@ body.carm-modal-open {
   text-shadow: none;
   cursor: pointer;
   z-index: 2;
-  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
 }
 .carm-tour-popover .driver-popover-close-btn:hover,
 .carm-tour-popover .driver-popover-close-btn:focus-visible {
@@ -4298,9 +4446,13 @@ body.carm-modal-open {
 }
 
 /* Soften the page-darkening overlay so the dashboard stays partly readable. */
-.driver-overlay { opacity: 0.55 !important; }
+.driver-overlay {
+  opacity: 0.55 !important;
+}
 /* Ensure the popover sits above the overlay on every browser. */
-.carm-tour-popover.driver-popover { z-index: 100002; }
+.carm-tour-popover.driver-popover {
+  z-index: 100002;
+}
 
 /* ---------- Mobile tweaks ---------- */
 @media (max-width: 768px) {
@@ -4372,7 +4524,7 @@ body.carm-modal-open {
   }
   /* Tiny grab-handle so the affordance reads as a sheet. */
   .carm-onboarding-card--overlay::before {
-    content: '';
+    content: "";
     display: block;
     width: 36px;
     height: 4px;
@@ -4383,8 +4535,14 @@ body.carm-modal-open {
 }
 
 @keyframes carm-bottom-sheet-in {
-  from { transform: translateY(100%); opacity: 0.6; }
-  to   { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(100%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Very narrow phones (<= 380 px): tighten further to keep tap targets ≥40 px. */
@@ -4395,8 +4553,12 @@ body.carm-modal-open {
   .carm-onboarding-eyebrow {
     font-size: 0.68rem;
   }
-  .carm-onboarding-action strong { font-size: 0.85rem; }
-  .carm-onboarding-action small { font-size: 0.72rem; }
+  .carm-onboarding-action strong {
+    font-size: 0.85rem;
+  }
+  .carm-onboarding-action small {
+    font-size: 0.72rem;
+  }
 }
 
 /* ===========================================================================
@@ -4447,9 +4609,15 @@ body.carm-modal-open {
     margin-right: auto;
     animation-name: carm-drawer-slide-left;
   }
-  .carm-drawer--sm { width: 360px; }
-  .carm-drawer--md { width: 440px; }
-  .carm-drawer--lg { width: 560px; }
+  .carm-drawer--sm {
+    width: 360px;
+  }
+  .carm-drawer--md {
+    width: 440px;
+  }
+  .carm-drawer--lg {
+    width: 560px;
+  }
 }
 
 /* Mobile layout — bottom-sheet, ignores `side` prop */
@@ -4506,8 +4674,14 @@ body.carm-modal-open {
 }
 
 @keyframes carm-modal-rise {
-  from { transform: translateY(12px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Header mirrors FactsheetPanel: position:relative so the close button can
@@ -4572,7 +4746,9 @@ body.carm-modal-open {
   cursor: pointer;
   padding: 0;
   border-radius: var(--radius-sm, 4px);
-  transition: background var(--transition-fast, 0.15s ease), color var(--transition-fast, 0.15s ease);
+  transition:
+    background var(--transition-fast, 0.15s ease),
+    color var(--transition-fast, 0.15s ease);
 }
 
 .carm-drawer__close:hover {
@@ -4607,21 +4783,35 @@ body.carm-modal-open {
 }
 
 @keyframes carm-drawer-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes carm-drawer-slide-right {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 @keyframes carm-drawer-slide-left {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .carm-drawer-backdrop,
-  .carm-drawer { animation: none; }
+  .carm-drawer {
+    animation: none;
+  }
 }
 
 /* ===========================================================================
@@ -4629,7 +4819,9 @@ body.carm-modal-open {
    =========================================================================== */
 
 .carm-explorer {
-  --carm-sticky-top-desktop: calc(var(--nav-height, 56px) + var(--space-sm, 8px));
+  --carm-sticky-top-desktop: calc(
+    var(--nav-height, 56px) + var(--space-sm, 8px)
+  );
   --carm-sticky-top-mobile: var(--space-sm, 8px);
 }
 
@@ -4664,8 +4856,13 @@ body.carm-modal-open {
   flex-wrap: wrap;
 }
 
-.carm-sticky-toolbar__start { flex: 1 1 auto; min-width: 0; }
-.carm-sticky-toolbar__end { flex: 0 0 auto; }
+.carm-sticky-toolbar__start {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.carm-sticky-toolbar__end {
+  flex: 0 0 auto;
+}
 
 /* (FAB removed in Stage 1 of the Daten-Explorer refactor — Rundgang
    now lives in the tabs row. The `.tabs-bar__rundgang` styles up top
@@ -4675,7 +4872,9 @@ body.carm-modal-open {
    IndicatorGroupSelector — pills on desktop, native dropdowns on mobile.
    =========================================================================== */
 
-.carm-igs { width: 100%; }
+.carm-igs {
+  width: 100%;
+}
 
 .carm-igs__mobile {
   display: flex;
@@ -4683,10 +4882,14 @@ body.carm-modal-open {
   gap: var(--space-sm, 8px);
 }
 
-.carm-igs__desktop { display: none; }
+.carm-igs__desktop {
+  display: none;
+}
 
 @media (min-width: 1024px) {
-  .carm-igs__mobile { display: none; }
+  .carm-igs__mobile {
+    display: none;
+  }
   .carm-igs__desktop {
     display: flex;
     flex-direction: column;
@@ -4718,8 +4921,7 @@ body.carm-modal-open {
   padding: 6px 28px 6px 10px;
   border: 1px solid var(--color-border, #e2e8f0);
   border-radius: var(--radius-md, 8px);
-  background:
-    var(--color-surface, #ffffff)
+  background: var(--color-surface, #ffffff)
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%234a5568' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>")
     no-repeat right 10px center;
   appearance: none;
@@ -4771,7 +4973,10 @@ body.carm-modal-open {
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background var(--transition-fast, 0.15s ease), border-color var(--transition-fast, 0.15s ease), color var(--transition-fast, 0.15s ease);
+  transition:
+    background var(--transition-fast, 0.15s ease),
+    border-color var(--transition-fast, 0.15s ease),
+    color var(--transition-fast, 0.15s ease);
 }
 
 .carm-pill:hover:not(.is-disabled) {
@@ -4822,12 +5027,20 @@ body.carm-modal-open {
 }
 
 @keyframes carm-snackbar-in {
-  from { opacity: 0; transform: translate(-50%, 8px); }
-  to   { opacity: 1; transform: translate(-50%, 0); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .carm-snackbar { animation: none; }
+  .carm-snackbar {
+    animation: none;
+  }
 }
 
 /* ===========================================================================
@@ -4889,7 +5102,9 @@ body.carm-modal-open {
   user-select: none;
 }
 
-.carm-verdict-legend__label { font-weight: 500; }
+.carm-verdict-legend__label {
+  font-weight: 500;
+}
 
 .carm-verdict-legend__info-btn {
   appearance: none;
@@ -4903,7 +5118,9 @@ body.carm-modal-open {
   align-items: center;
 }
 
-.carm-verdict-legend__info-btn:hover { color: var(--color-text-secondary, #4a5568); }
+.carm-verdict-legend__info-btn:hover {
+  color: var(--color-text-secondary, #4a5568);
+}
 .carm-verdict-legend__info-btn:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
   outline-offset: 2px;
@@ -4977,7 +5194,9 @@ body.carm-modal-open {
    itself stays native (accent-color only); the old green outline-on-row-hover
    read as a false selection (2026-06-12). */
 .carm-checkbox:hover,
-.carm-radio:hover { background: var(--color-accent-light, #e8f5ef); }
+.carm-radio:hover {
+  background: var(--color-accent-light, #e8f5ef);
+}
 
 .carm-checkbox input,
 .carm-radio input {
@@ -5066,7 +5285,9 @@ body.carm-modal-open {
   background: var(--color-bg-subtle, #eeeee8);
 }
 
-.carm-mythos-search__item-title { font-weight: 500; }
+.carm-mythos-search__item-title {
+  font-weight: 500;
+}
 
 .carm-mythos-search__item-meta {
   font-size: 0.78rem;
@@ -5099,7 +5320,11 @@ body.carm-modal-open {
   white-space: nowrap;
   cursor: pointer;
   box-shadow: var(--shadow-chip);
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .carm-btn:hover,
@@ -5131,7 +5356,9 @@ body.carm-modal-open {
 /* `--ghost` is now a no-op alias kept for backward compat with any
    stragglers that still pass it. The base `.carm-btn` IS the ghost
    appearance. Safe to drop the modifier in JSX. */
-.carm-btn--ghost { /* alias of .carm-btn — Stage 6 unified chip */ }
+.carm-btn--ghost {
+  /* alias of .carm-btn — Stage 6 unified chip */
+}
 
 /* Green map-pin / teardrop Rundgang badge (2026-05-27 PM refresh) —
    silhouette is a navigation pin (rounded top, pointed bottom-left
@@ -5163,7 +5390,10 @@ body.carm-modal-open {
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(45, 106, 79, 0.22);
   flex-shrink: 0;
-  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .carm-rundgang-badge > svg {
   /* Counter-rotate so the question-mark icon reads upright inside the
@@ -5179,8 +5409,14 @@ body.carm-modal-open {
   outline-offset: 4px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .carm-rundgang-badge { transition: background 0.15s ease, box-shadow 0.15s ease; }
-  .carm-rundgang-badge:hover { transform: rotate(-45deg); }
+  .carm-rundgang-badge {
+    transition:
+      background 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .carm-rundgang-badge:hover {
+    transform: rotate(-45deg);
+  }
 }
 
 /* ===========================================================================
@@ -5295,7 +5531,7 @@ body.carm-modal-open {
 .carm-tab-divider {
   width: 1px;
   height: 24px;
-  background: rgba(0, 0, 0, 0.10);
+  background: rgba(0, 0, 0, 0.1);
   margin: 0 12px 4px;
   align-self: center;
   flex-shrink: 0;
@@ -5447,7 +5683,7 @@ body.carm-modal-open {
 .carm-picker__trigger::after,
 .carm-myth-search-row::after,
 .carm-rundgang-badge::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -5461,11 +5697,15 @@ body.carm-modal-open {
 .carm-btn:hover::after,
 .carm-picker__trigger:hover::after,
 .carm-myth-search-row:focus-within::after,
-.carm-rundgang-badge:hover::after { opacity: 0.06; }
+.carm-rundgang-badge:hover::after {
+  opacity: 0.06;
+}
 .tab-btn:active::after,
 .carm-btn:active::after,
 .carm-picker__trigger:active::after,
-.carm-rundgang-badge:active::after { opacity: 0.10; }
+.carm-rundgang-badge:active::after {
+  opacity: 0.1;
+}
 
 /* Make sure the host element's actual content sits above the
    ::after overlay (z-index 0 means the overlay sits at the same
@@ -5553,7 +5793,10 @@ body.carm-modal-open {
   color: var(--color-accent-hover, #1f4f3a);
 }
 @media (max-width: 768px) {
-  .carm-explorer__page-header { margin-bottom: 20px; gap: 10px; }
+  .carm-explorer__page-header {
+    margin-bottom: 20px;
+    gap: 10px;
+  }
 }
 
 /* 2026-05-27 refresh — drop the chip + tab scale on tablet/phone so the
@@ -5713,7 +5956,9 @@ body.carm-modal-open {
    BalkenView
    =========================================================================== */
 
-.carm-balken-view { width: 100%; }
+.carm-balken-view {
+  width: 100%;
+}
 
 /* (BalkenView2 CSS removed 2026-05-22 — view was retired in favour of
    the Spannweite-parity Balken rebuild.) */
@@ -5728,8 +5973,10 @@ body.carm-modal-open {
   border-radius: 4px;
   /* Hint that there's more above/below when scrolled away from edges. */
   background:
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.03), transparent 8px) top / 100% 8px no-repeat,
-    linear-gradient(to top, rgba(0, 0, 0, 0.03), transparent 8px) bottom / 100% 8px no-repeat;
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03), transparent 8px) top / 100%
+      8px no-repeat,
+    linear-gradient(to top, rgba(0, 0, 0, 0.03), transparent 8px) bottom / 100%
+      8px no-repeat;
 }
 
 /* Stage 6: the inline `.carm-balken-sort` chip row was retired — sort
@@ -5747,7 +5994,10 @@ body.carm-modal-open {
   color: var(--color-text, #1a1a2e);
 }
 
-.carm-balken-empty__body { margin: 0 0 14px; font-size: 0.92rem; }
+.carm-balken-empty__body {
+  margin: 0 0 14px;
+  font-size: 0.92rem;
+}
 
 .carm-balken-empty__cta {
   /* Slight visual lift so the CTA reads as the recovery action,
@@ -5764,15 +6014,22 @@ body.carm-modal-open {
   gap: var(--space-md, 16px);
 }
 
-.chart-area__legend--mobile { display: block; }
-.chart-area__legend--sidebar { display: none; }
+.chart-area__legend--mobile {
+  display: block;
+}
+.chart-area__legend--sidebar {
+  display: none;
+}
 
 @media (min-width: 1024px) {
   .chart-area--with-legend {
     grid-template-columns: minmax(0, 1fr) 220px;
-    grid-template-areas: 'chart legend';
+    grid-template-areas: "chart legend";
   }
-  .chart-area__chart { grid-area: chart; min-width: 0; }
+  .chart-area__chart {
+    grid-area: chart;
+    min-width: 0;
+  }
   .chart-area__legend--sidebar {
     grid-area: legend;
     display: block;
@@ -5780,7 +6037,9 @@ body.carm-modal-open {
     position: sticky;
     top: var(--carm-sticky-top-desktop);
   }
-  .chart-area__legend--mobile { display: none; }
+  .chart-area__legend--mobile {
+    display: none;
+  }
 }
 
 /* ===========================================================================
@@ -5825,7 +6084,8 @@ body.carm-modal-open {
   text-align: left;
   text-decoration: none;
   cursor: pointer;
-  transition: border-color var(--transition-fast, 0.15s ease),
+  transition:
+    border-color var(--transition-fast, 0.15s ease),
     background var(--transition-fast, 0.15s ease),
     box-shadow var(--transition-fast, 0.15s ease);
 }
@@ -5833,7 +6093,7 @@ body.carm-modal-open {
 .carm-export-row:hover:not(:disabled) {
   border-color: var(--color-accent, #2d6a4f);
   background: var(--color-accent-light, #e8f5ef);
-  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.10);
+  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.1);
 }
 
 .carm-export-row:hover:not(:disabled) .carm-export-row__dl {
@@ -5841,7 +6101,10 @@ body.carm-modal-open {
   color: #fff;
 }
 
-.carm-export-row:disabled { opacity: 0.5; cursor: not-allowed; }
+.carm-export-row:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .carm-export-row:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
@@ -5892,7 +6155,8 @@ body.carm-modal-open {
   border-radius: var(--radius-full, 9999px);
   color: var(--color-text-muted, #718096);
   background: var(--color-bg-subtle, #eeeee8);
-  transition: background var(--transition-fast, 0.15s ease),
+  transition:
+    background var(--transition-fast, 0.15s ease),
     color var(--transition-fast, 0.15s ease);
 }
 
@@ -5919,7 +6183,8 @@ body.carm-modal-open {
   border: 1px solid var(--color-accent, #2d6a4f);
   background: var(--color-accent, #2d6a4f);
   color: #fff;
-  transition: background var(--transition-fast, 0.15s ease),
+  transition:
+    background var(--transition-fast, 0.15s ease),
     transform var(--transition-fast, 0.15s ease);
 }
 
@@ -5933,7 +6198,9 @@ body.carm-modal-open {
   color: var(--color-accent, #2d6a4f);
 }
 
-.carm-export-btn--ghost:hover { background: var(--color-accent-light, #e8f5ef); }
+.carm-export-btn--ghost:hover {
+  background: var(--color-accent-light, #e8f5ef);
+}
 
 .carm-export-btn:focus-visible {
   outline: 2px solid var(--color-accent, #2d6a4f);
@@ -6035,7 +6302,9 @@ body.carm-modal-open {
   border: 1px solid var(--color-border, #dddddd);
   border-radius: 14px;
   cursor: pointer;
-  transition: background 150ms ease, border-color 150ms ease;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
   flex-shrink: 0;
   vertical-align: middle;
 }
@@ -6065,7 +6334,9 @@ body.carm-modal-open {
   transform: translateX(28px);
 }
 @media (prefers-reduced-motion: reduce) {
-  .carm-pivot-switch__knob { transition: none; }
+  .carm-pivot-switch__knob {
+    transition: none;
+  }
 }
 
 /* DataPicker — caption + dropdown trigger + menu (with inline definitions). */
@@ -6241,7 +6512,9 @@ body.carm-modal-open {
   font-weight: 500;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .carm-picker__item-btn:not(:disabled):hover {
@@ -6371,7 +6644,9 @@ body.carm-modal-open {
   /* Hide the picker captions ("Wert für:" …) to keep the row compact —
      EXCEPT on Balken, where "Indikator:" / "Gruppe:" stay visible until
      tablet (Fedor 2026-06-14); Balken's captions drop in the ≤768 block. */
-  .carm-toolbar-row:not(.carm-toolbar-row--balken) .carm-toolbar-row__pickers .carm-picker__caption {
+  .carm-toolbar-row:not(.carm-toolbar-row--balken)
+    .carm-toolbar-row__pickers
+    .carm-picker__caption {
     display: none;
   }
   .carm-toolbar-row__picker {
@@ -6615,7 +6890,9 @@ body.carm-modal-open {
   color: var(--color-text-muted, #94a3b8);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .carm-filter-selected__chip-remove:hover,
@@ -6648,7 +6925,7 @@ body.carm-modal-open {
    opaque cap fills the band — done WITHOUT a negative margin, which had
    pulled the "Einzelne Mythen" heading up underneath the pill (2026-06-12). */
 .carm-filter-search-row::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   right: 0;
@@ -6688,7 +6965,9 @@ body.carm-modal-open {
   font-size: 0.95rem;
   color: var(--color-text, #1a1a2e);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   /* Strip the browser-native search affordances so only our custom
      clear button shows. WebKit + Chromium render an inset ✕ inside
      type="search" inputs by default; the row already has its own
@@ -6768,8 +7047,14 @@ body.carm-modal-open {
 }
 
 @keyframes carm-filter-count-fade {
-  from { opacity: 0; transform: translateY(-2px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 480px) {
@@ -6860,8 +7145,9 @@ body.carm-modal-open {
   font-weight: 600;
   text-align: left;
   cursor: pointer;
-  transition: background var(--duration-fast, 150ms) var(--ease-out, ease),
-              color var(--duration-fast, 150ms) var(--ease-out, ease);
+  transition:
+    background var(--duration-fast, 150ms) var(--ease-out, ease),
+    color var(--duration-fast, 150ms) var(--ease-out, ease);
 }
 
 .carm-filter-accordion__toggle:hover {
@@ -6984,7 +7270,6 @@ body.carm-modal-open {
   background: rgba(0, 0, 0, 0.04);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    Verdict row polish (shared FactsheetPanel)
    The verdict row slots a hover-info arrow next to the badge — the
@@ -7002,7 +7287,6 @@ body.carm-modal-open {
   font-size: 0.85rem;
   padding: 4px 12px;
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    FactsheetGroupBars (v5, 2026-05-25) — transposed sortable
@@ -7070,7 +7354,9 @@ body.carm-modal-open {
   line-height: 1;
   padding: 2px 6px;
   border-radius: 4px;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .factsheet-group-bars__corner-btn:hover {
@@ -7119,7 +7405,9 @@ body.carm-modal-open {
   border-radius: 3px;
   cursor: pointer;
   color: var(--color-text-muted, #64748b);
-  transition: color 0.15s ease, background 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
   z-index: 1;
 }
 
@@ -7147,7 +7435,9 @@ body.carm-modal-open {
   font-size: 0.7rem;
   padding: 4px 2px;
   border-radius: 4px;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
   width: 100%;
 }
 
@@ -7379,7 +7669,9 @@ body.carm-modal-open {
   font-size: 0.82rem;
   line-height: 1.35;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .factsheet-panel__extras-link:hover,
@@ -7434,9 +7726,9 @@ body.carm-modal-open {
                   top edge stays inside the cell, with `overflow:hidden`
                   on `.carm-spannweite__cell--plot` as the hard
                   guardrail. */
-  --carm-spannweite-dot-size: 0.75rem;       /* 12 px */
-  --carm-spannweite-num-size: 0.625rem;      /* 10 px */
-  --carm-spannweite-num-offset: -0.6875rem;  /* -11 px */
+  --carm-spannweite-dot-size: 0.75rem; /* 12 px */
+  --carm-spannweite-num-size: 0.625rem; /* 10 px */
+  --carm-spannweite-num-offset: -0.6875rem; /* -11 px */
 
   /* ─── Balken bar + circle sizing (2026-05-26 v2) ───
      The Mythen Balken + Quellen Balken views render a translucent
@@ -7445,12 +7737,12 @@ body.carm-modal-open {
      circle, just paired with the existing 2 px stem instead of a
      wash. Tokens are scoped to `.carm-spannweite` because all four
      views compose the same grid primitives. */
-  --carm-balken-bar-height: 22px;        /* wash height on Balken */
-  --carm-balken-wash-opacity: 0.32;      /* translucent fill */
+  --carm-balken-bar-height: 22px; /* wash height on Balken */
+  --carm-balken-wash-opacity: 0.32; /* translucent fill */
   --carm-balken-wash-opacity-hover: 0.46;
-  --carm-circle-size: 22px;              /* unified value-marker diameter */
-  --carm-circle-num-size: 0.6875rem;     /* 11 px inside the circle */
-  --carm-spannweite-row-h: 2.375rem;         /* 38 px */
+  --carm-circle-size: 22px; /* unified value-marker diameter */
+  --carm-circle-num-size: 0.6875rem; /* 11 px inside the circle */
+  --carm-spannweite-row-h: 2.375rem; /* 38 px */
 
   position: relative;
   padding: 0.25rem 0 1.25rem;
@@ -7629,7 +7921,9 @@ body.carm-modal-open {
   transition: opacity 120ms ease;
 }
 
-.carm-spannweite__header-inner:hover .carm-spannweite__info-inline .info-tooltip-trigger,
+.carm-spannweite__header-inner:hover
+  .carm-spannweite__info-inline
+  .info-tooltip-trigger,
 .carm-spannweite__info-inline:hover .info-tooltip-trigger,
 .carm-spannweite__info-inline:focus-within .info-tooltip-trigger {
   opacity: 1;
@@ -7653,7 +7947,9 @@ body.carm-modal-open {
   cursor: pointer;
   padding: 0;
   opacity: 0.55;
-  transition: opacity 120ms ease, background-color 120ms ease;
+  transition:
+    opacity 120ms ease,
+    background-color 120ms ease;
   z-index: 1;
 }
 
@@ -7689,7 +7985,10 @@ body.carm-modal-open {
   padding: 0;
   opacity: 0.45;
   z-index: 1;
-  transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease;
+  transition:
+    opacity 120ms ease,
+    background-color 120ms ease,
+    color 120ms ease;
 }
 
 .carm-spannweite__col-sort-btn:hover,
@@ -7713,7 +8012,9 @@ body.carm-modal-open {
 
 /* `--top-left` is a no-op alias after the 2026-05-21 swap (sort is at
    top-LEFT by default). Kept so GridLabelHeader callers don't break. */
-.carm-spannweite__col-sort-btn--top-left { /* alias */ }
+.carm-spannweite__col-sort-btn--top-left {
+  /* alias */
+}
 
 /* `--top-right` anchors the button to the upper-RIGHT corner of the
    cell (2026-05-23). Used by the optional verdict-rank button in
@@ -7733,7 +8034,7 @@ body.carm-modal-open {
    appears after ~1.5s — but ours is already visible by then. */
 .carm-spannweite__col-sort-btn[title],
 .carm-spannweite__hide-btn[title] {
-  position: absolute;  /* already set above, but explicit for tooltip anchor */
+  position: absolute; /* already set above, but explicit for tooltip anchor */
 }
 
 .carm-spannweite__col-sort-btn[title]:hover::after,
@@ -7747,7 +8048,11 @@ body.carm-modal-open {
   transform: translateX(-50%);
   background: var(--color-text, #0f172a);
   color: #ffffff;
-  font: 500 11px/1.4 system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font:
+    500 11px/1.4 system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   padding: 5px 9px;
   border-radius: 4px;
   white-space: normal;
@@ -7794,7 +8099,10 @@ body.carm-modal-open {
   gap: 4px;
   border-radius: 4px;
   overflow: hidden;
-  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
 }
 
 .carm-spannweite__cell--hidden:hover,
@@ -7960,7 +8268,10 @@ body.carm-modal-open {
   justify-content: space-between;
   padding: 0 0.5rem;
   font:
-    10px ui-monospace, 'SF Mono', Menlo, monospace;
+    10px ui-monospace,
+    "SF Mono",
+    Menlo,
+    monospace;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-muted, #94a3b8);
 }
@@ -8068,16 +8379,25 @@ body.carm-modal-open {
    icon and the InfoTooltip "ⓘ" visible (so meaning is never lost,
    only abbreviated). The sort + hide buttons in the corners stay put. */
 @media (max-width: 1100px) {
-  .carm-spannweite__header-text { font-size: 0.72rem; }
+  .carm-spannweite__header-text {
+    font-size: 0.72rem;
+  }
 }
 @media (max-width: 960px) {
-  .carm-spannweite__header-text { font-size: 0.66rem; }
+  .carm-spannweite__header-text {
+    font-size: 0.66rem;
+  }
 }
 @media (max-width: 840px) {
   /* Hide the textual label. Indicator icon + InfoTooltip "ⓘ" remain
      so the column is still identifiable on hover/click. */
-  .carm-spannweite__header-text { display: none; }
-  .carm-spannweite__header-inner { gap: 0.25rem; padding: 0 18px; }
+  .carm-spannweite__header-text {
+    display: none;
+  }
+  .carm-spannweite__header-inner {
+    gap: 0.25rem;
+    padding: 0 18px;
+  }
 }
 
 /* ─── Polish v7 lollipop breakpoints ──────────────────────────────────
@@ -8096,7 +8416,7 @@ body.carm-modal-open {
 /* Laptop (721–1024 px): same dot/num as desktop, slightly tighter row. */
 @media (max-width: 1024px) {
   .carm-spannweite {
-    --carm-spannweite-row-h: 2.25rem;    /* 36 px */
+    --carm-spannweite-row-h: 2.25rem; /* 36 px */
   }
 }
 
@@ -8104,10 +8424,10 @@ body.carm-modal-open {
 @media (max-width: 720px) {
   .carm-spannweite {
     --carm-spannweite-label-col: 150px;
-    --carm-spannweite-dot-size: 0.6875rem;   /* 11 px */
-    --carm-spannweite-num-size: 0.5625rem;   /* 9 px */
+    --carm-spannweite-dot-size: 0.6875rem; /* 11 px */
+    --carm-spannweite-num-size: 0.5625rem; /* 9 px */
     --carm-spannweite-num-offset: -0.625rem; /* -10 px */
-    --carm-spannweite-row-h: 2.125rem;       /* 34 px */
+    --carm-spannweite-row-h: 2.125rem; /* 34 px */
   }
 
   .carm-spannweite__grid {
@@ -8128,10 +8448,10 @@ body.carm-modal-open {
    nothing overlaps even on a 320-px Safari-mobile window. */
 @media (max-width: 480px) {
   .carm-spannweite {
-    --carm-spannweite-dot-size: 0.625rem;     /* 10 px */
-    --carm-spannweite-num-size: 0.5625rem;    /* 9 px */
+    --carm-spannweite-dot-size: 0.625rem; /* 10 px */
+    --carm-spannweite-num-size: 0.5625rem; /* 9 px */
     --carm-spannweite-num-offset: -0.5625rem; /* -9 px */
-    --carm-spannweite-row-h: 2rem;            /* 32 px */
+    --carm-spannweite-row-h: 2rem; /* 32 px */
   }
 }
 
@@ -8155,7 +8475,9 @@ body.carm-modal-open {
   border-radius: 4px;
   cursor: pointer;
   padding: 0;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 }
 
 .carm-sources-spannweite__chev:hover,
@@ -8197,11 +8519,15 @@ body.carm-modal-open {
   cursor: default;
 }
 
-.carm-sources-spannweite .carm-spannweite__row--child .carm-spannweite__cell--label {
+.carm-sources-spannweite
+  .carm-spannweite__row--child
+  .carm-spannweite__cell--label {
   padding-left: 1.75rem;
 }
 
-.carm-sources-spannweite .carm-spannweite__row--child .carm-spannweite__row-text {
+.carm-sources-spannweite
+  .carm-spannweite__row--child
+  .carm-spannweite__row-text {
   font-size: 0.74rem;
 }
 
@@ -8212,7 +8538,9 @@ body.carm-modal-open {
   opacity: 0.62;
   cursor: default;
 }
-.carm-sources-balken .carm-spannweite__row--child .carm-spannweite__cell--label {
+.carm-sources-balken
+  .carm-spannweite__row--child
+  .carm-spannweite__cell--label {
   padding-left: 1.75rem;
 }
 .carm-sources-balken .carm-spannweite__row--child .carm-sources-balken__name {
@@ -8225,10 +8553,16 @@ body.carm-modal-open {
 .carm-explorer .data-table tr.carm-sources-table__row--child td {
   opacity: 0.62;
 }
-.carm-explorer .data-table tr.carm-sources-table__row--child .carm-sources-table__label {
+.carm-explorer
+  .data-table
+  tr.carm-sources-table__row--child
+  .carm-sources-table__label {
   padding-left: 1.5rem;
 }
-.carm-explorer .data-table tr.carm-sources-table__row--child .carm-sources-table__name {
+.carm-explorer
+  .data-table
+  tr.carm-sources-table__row--child
+  .carm-sources-table__name {
   font-size: 0.78rem;
 }
 
@@ -8246,7 +8580,9 @@ body.carm-modal-open {
   transition: transform 160ms ease;
 }
 
-.carm-sources-spannweite .carm-spannweite__row:hover .carm-sources-spannweite__circle {
+.carm-sources-spannweite
+  .carm-spannweite__row:hover
+  .carm-sources-spannweite__circle {
   transform: translate(-50%, -50%) scale(1.12);
 }
 
@@ -8267,7 +8603,6 @@ body.carm-modal-open {
 .carm-sources-spannweite .carm-spannweite__row {
   cursor: default;
 }
-
 
 /* Static Lesebeispiel block inside the FactsheetPanel modal. The
    `aside.lesebeispiel` default styling (global.css) is tuned for a
@@ -8316,11 +8651,22 @@ body.carm-modal-open {
   border-left: 1px dotted rgba(0, 0, 0, 0.08);
 }
 
-.carm-balken__axis-tick[data-pos="0"]   { left: 0; }
-.carm-balken__axis-tick[data-pos="25"]  { left: 25%; }
-.carm-balken__axis-tick[data-pos="50"]  { left: 50%; border-left-color: rgba(0, 0, 0, 0.13); }
-.carm-balken__axis-tick[data-pos="75"]  { left: 75%; }
-.carm-balken__axis-tick[data-pos="100"] { left: 100%; }
+.carm-balken__axis-tick[data-pos="0"] {
+  left: 0;
+}
+.carm-balken__axis-tick[data-pos="25"] {
+  left: 25%;
+}
+.carm-balken__axis-tick[data-pos="50"] {
+  left: 50%;
+  border-left-color: rgba(0, 0, 0, 0.13);
+}
+.carm-balken__axis-tick[data-pos="75"] {
+  left: 75%;
+}
+.carm-balken__axis-tick[data-pos="100"] {
+  left: 100%;
+}
 
 /* Translucent fill 0 → value %. The bar's visual mass. Color set
    inline by the consumer (verdict color or source-category color).
@@ -8363,8 +8709,11 @@ body.carm-modal-open {
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font: 600 var(--carm-circle-num-size, 0.6875rem) / 1
-        ui-monospace, 'SF Mono', Menlo, monospace;
+  font:
+    600 var(--carm-circle-num-size, 0.6875rem) / 1 ui-monospace,
+    "SF Mono",
+    Menlo,
+    monospace;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
   pointer-events: none;
@@ -8428,7 +8777,9 @@ body.carm-modal-open {
   width: 100%;
   height: 100%;
 }
-.carm-explorer__rundgang-help:hover { filter: brightness(0.94); }
+.carm-explorer__rundgang-help:hover {
+  filter: brightness(0.94);
+}
 .carm-explorer__rundgang-help:focus-visible {
   outline: 2px solid #1a1a2e;
   outline-offset: 2px;
@@ -8441,12 +8792,20 @@ body.carm-modal-open {
   animation: carm-rundgang-pulse 1.8s var(--ease-out, ease-out) infinite;
 }
 @keyframes carm-rundgang-pulse {
-  0%   { filter: drop-shadow(0 0 0 rgba(45, 106, 79, 0)); }
-  35%  { filter: drop-shadow(0 0 6px rgba(45, 106, 79, 0.85)); }
-  100% { filter: drop-shadow(0 0 0 rgba(45, 106, 79, 0)); }
+  0% {
+    filter: drop-shadow(0 0 0 rgba(45, 106, 79, 0));
+  }
+  35% {
+    filter: drop-shadow(0 0 6px rgba(45, 106, 79, 0.85));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 rgba(45, 106, 79, 0));
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .carm-explorer__rundgang-help.is-nudge svg { animation: none; }
+  .carm-explorer__rundgang-help.is-nudge svg {
+    animation: none;
+  }
 }
 
 /* Inline bookmark in the Daten-Explorer intro paragraph — matches the
@@ -8493,25 +8852,57 @@ body.carm-modal-open {
    <details>: hide the default disclosure marker, rotate the chevron on
    open, and drop the inner max-height so only the popover description
    scrolls. Keeps each step short (collapsed) with detail one click away. */
-.carm-tour-popover summary.factsheet-panel__section-toggle { list-style: none; }
-.carm-tour-popover summary.factsheet-panel__section-toggle::-webkit-details-marker { display: none; }
-.carm-tour-popover details[open] .factsheet-panel__chevron { transform: rotate(180deg); }
-.carm-tour-popover .factsheet-panel__section--collapsible { margin: 8px 0 0; }
-.carm-tour-popover .factsheet-panel__section-content { max-height: none; }
-.carm-tour-popover .factsheet-panel__section-title .carm-tour-icon { margin-right: 6px; }
+.carm-tour-popover summary.factsheet-panel__section-toggle {
+  list-style: none;
+}
+.carm-tour-popover
+  summary.factsheet-panel__section-toggle::-webkit-details-marker {
+  display: none;
+}
+.carm-tour-popover details[open] .factsheet-panel__chevron {
+  transform: rotate(180deg);
+}
+.carm-tour-popover .factsheet-panel__section--collapsible {
+  margin: 8px 0 0;
+}
+.carm-tour-popover .factsheet-panel__section-content {
+  max-height: none;
+}
+.carm-tour-popover .factsheet-panel__section-title .carm-tour-icon {
+  margin-right: 6px;
+}
 /* Long accordion titles (e.g. "Anwendungsbeispiel 3: Für welche Mythen …")
    must wrap fully inside the narrow tour popover instead of being clipped at
    the right edge. Top-align the summary row so the fixed-size chevron sits
    beside a multi-line title, give the title the remaining width (min-width:0)
    and let it break (Asana 1215624306460941). Scoped to the tour popover so
    the Fakten-Karten factsheet headings are untouched. */
-.carm-tour-popover .factsheet-panel__section-toggle { align-items: flex-start; gap: 8px; }
-.carm-tour-popover .factsheet-panel__section-title { min-width: 0; overflow-wrap: anywhere; }
-.carm-tour-popover .factsheet-panel__chevron { flex: 0 0 auto; margin-top: 3px; }
+.carm-tour-popover .factsheet-panel__section-toggle {
+  align-items: flex-start;
+  gap: 8px;
+}
+.carm-tour-popover .factsheet-panel__section-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.carm-tour-popover .factsheet-panel__chevron {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
 .carm-tour-popover .factsheet-panel__section-content ul,
-.carm-tour-popover .factsheet-panel__section-content ol { margin: 4px 0; padding-left: 18px; line-height: 1.5; }
-.carm-tour-popover .factsheet-panel__section-content li { margin: 2px 0; }
-.carm-tour-popover .carm-tour-note { margin-top: 10px; font-size: 0.8rem; color: #718096; }
+.carm-tour-popover .factsheet-panel__section-content ol {
+  margin: 4px 0;
+  padding-left: 18px;
+  line-height: 1.5;
+}
+.carm-tour-popover .factsheet-panel__section-content li {
+  margin: 2px 0;
+}
+.carm-tour-popover .carm-tour-note {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: #718096;
+}
 
 /* Stable popover sizing (Rundgang). Wider (mobile-safe via min()) so the
    content needs far fewer lines — the popover is short. */
@@ -8526,8 +8917,13 @@ body.carm-modal-open {
    (global.css) bleeding in — Driver renders a real <footer> element and the
    popover lives outside .carm-explorer. 16px top padding sits the nav buttons
    16px below that line. Shared by all 4 steps. */
-.carm-tour-popover .driver-popover-footer { margin-top: 10px; padding: 16px 0 0; }
-.carm-tour-popover .driver-popover-description { scrollbar-gutter: stable; }
+.carm-tour-popover .driver-popover-footer {
+  margin-top: 10px;
+  padding: 16px 0 0;
+}
+.carm-tour-popover .driver-popover-description {
+  scrollbar-gutter: stable;
+}
 /* The accordion steps (1 & 2) use a FIXED, short scroll area, so the popover
    is a CONSTANT size — unfolding an accordion scrolls DOWN within it instead
    of the popover growing and climbing up over the element it points at

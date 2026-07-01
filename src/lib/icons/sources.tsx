@@ -16,20 +16,20 @@
  *   • Persönliches Umfeld → person + speech swoop (interpersonal cue)
  */
 
-import type { SVGProps } from 'react';
-import { forwardRef } from 'react';
+import type { SVGProps } from "react";
+import { forwardRef } from "react";
 
-export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
+export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "children"> {
   size?: number | string;
 }
 
 const baseProps = {
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
   strokeWidth: 1.75,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
 };
 
 /* ─── Institutionell — building with floor markings ───────────────── */
@@ -45,7 +45,7 @@ export const IconSrcInstitutionell = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconSrcInstitutionell.displayName = 'IconSrcInstitutionell';
+IconSrcInstitutionell.displayName = "IconSrcInstitutionell";
 
 /* ─── Internet — wifi arc stack ──────────────────────────────────── */
 export const IconSrcInternet = forwardRef<SVGSVGElement, IconProps>(
@@ -58,7 +58,7 @@ export const IconSrcInternet = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconSrcInternet.displayName = 'IconSrcInternet';
+IconSrcInternet.displayName = "IconSrcInternet";
 
 /* ─── Soziale Medien — speech bubble with three dots ─────────────── */
 export const IconSrcSozialeMedien = forwardRef<SVGSVGElement, IconProps>(
@@ -71,7 +71,7 @@ export const IconSrcSozialeMedien = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconSrcSozialeMedien.displayName = 'IconSrcSozialeMedien';
+IconSrcSozialeMedien.displayName = "IconSrcSozialeMedien";
 
 /* ─── Traditionelle Medien — envelope (mail icon) ─────────────────── */
 export const IconSrcTraditionelleMedien = forwardRef<SVGSVGElement, IconProps>(
@@ -82,7 +82,7 @@ export const IconSrcTraditionelleMedien = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconSrcTraditionelleMedien.displayName = 'IconSrcTraditionelleMedien';
+IconSrcTraditionelleMedien.displayName = "IconSrcTraditionelleMedien";
 
 /* ─── Print / Physisch — printer with paper tray ─────────────────── */
 export const IconSrcPrintPhysisch = forwardRef<SVGSVGElement, IconProps>(
@@ -94,7 +94,7 @@ export const IconSrcPrintPhysisch = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconSrcPrintPhysisch.displayName = 'IconSrcPrintPhysisch';
+IconSrcPrintPhysisch.displayName = "IconSrcPrintPhysisch";
 
 /* ─── Persönliches Umfeld — person + speech swoop ─────────────────── */
 export const IconSrcPersoenlich = forwardRef<SVGSVGElement, IconProps>(
@@ -106,4 +106,4 @@ export const IconSrcPersoenlich = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconSrcPersoenlich.displayName = 'IconSrcPersoenlich';
+IconSrcPersoenlich.displayName = "IconSrcPersoenlich";

@@ -39,13 +39,13 @@ import {
   useState,
   type ReactElement,
   type ReactNode,
-} from 'react';
-import { createPortal } from 'react-dom';
-import type { CorrectnessClass } from '../../lib/dashboard/types';
+} from "react";
+import { createPortal } from "react-dom";
+import type { CorrectnessClass } from "../../lib/dashboard/types";
 import {
   getCorrectnessColor,
   getCorrectnessBgColor,
-} from '../../lib/dashboard/colors';
+} from "../../lib/dashboard/colors";
 
 interface Props {
   /** Tooltip body. Any React node — including `<strong>` for the
@@ -54,7 +54,7 @@ interface Props {
 
   /** Preferred placement. `'auto'` (default) picks `top` when there's
    *  room above the trigger in the viewport, else flips to `bottom`. */
-  placement?: 'top' | 'bottom' | 'auto';
+  placement?: "top" | "bottom" | "auto";
 
   /** Optional class name appended to the `.hover-tooltip` wrapper. */
   className?: string;
@@ -74,7 +74,7 @@ interface Props {
 interface Coords {
   x: number;
   y: number;
-  place: 'top' | 'bottom';
+  place: "top" | "bottom";
 }
 
 /** Matches the `.hover-tooltip { max-width }` declared in global.css.
@@ -88,7 +88,7 @@ const VIEWPORT_MARGIN = 24;
 
 export default function HoverTooltip({
   content,
-  placement = 'auto',
+  placement = "auto",
   className,
   verdict,
   children,
@@ -96,7 +96,7 @@ export default function HoverTooltip({
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
-  const [coords, setCoords] = useState<Coords>({ x: 0, y: 0, place: 'top' });
+  const [coords, setCoords] = useState<Coords>({ x: 0, y: 0, place: "top" });
 
   const measure = useCallback(() => {
     const tr = triggerRef.current?.getBoundingClientRect();
@@ -107,10 +107,10 @@ export default function HoverTooltip({
     // first measurement runs before the DOM exists, so fall back to the
     // declared max-width.
     const tooltipW = tooltipRect?.width ?? TOOLTIP_MAX_W;
-    let place: 'top' | 'bottom';
-    if (placement === 'top') place = 'top';
-    else if (placement === 'bottom') place = 'bottom';
-    else place = tr.top - tooltipH - 10 > 8 ? 'top' : 'bottom';
+    let place: "top" | "bottom";
+    if (placement === "top") place = "top";
+    else if (placement === "bottom") place = "bottom";
+    else place = tr.top - tooltipH - 10 > 8 ? "top" : "bottom";
     // Half-width-aware horizontal clamp — keep the ENTIRE tooltip on
     // screen, not just its center. The v1 clamp only constrained the
     // center, which let the right half (up to ~210 px) spill past the
@@ -128,7 +128,7 @@ export default function HoverTooltip({
       minX > maxX
         ? window.innerWidth / 2
         : Math.max(minX, Math.min(maxX, naturalX));
-    const y = place === 'top' ? tr.top - 8 : tr.bottom + 8;
+    const y = place === "top" ? tr.top - 8 : tr.bottom + 8;
     setCoords({ x, y, place });
   }, [placement]);
 
@@ -139,12 +139,12 @@ export default function HoverTooltip({
     // first measure uses an 80 px default before the DOM exists.
     const id = requestAnimationFrame(measure);
     const onScrollOrResize = () => measure();
-    window.addEventListener('scroll', onScrollOrResize, true);
-    window.addEventListener('resize', onScrollOrResize);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
     return () => {
       cancelAnimationFrame(id);
-      window.removeEventListener('scroll', onScrollOrResize, true);
-      window.removeEventListener('resize', onScrollOrResize);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
     };
   }, [open, measure]);
 
@@ -154,9 +154,9 @@ export default function HoverTooltip({
     (node: HTMLElement | null) => {
       triggerRef.current = node;
       const childRef = (children as ReactElement & { ref?: unknown }).ref;
-      if (typeof childRef === 'function') {
+      if (typeof childRef === "function") {
         (childRef as (n: HTMLElement | null) => void)(node);
-      } else if (childRef && typeof childRef === 'object') {
+      } else if (childRef && typeof childRef === "object") {
         (childRef as { current: HTMLElement | null }).current = node;
       }
     },
@@ -166,59 +166,56 @@ export default function HoverTooltip({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const childProps = children.props as any;
 
-  const enhancedChild = cloneElement(
-    children,
-    {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ref: setRef as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onMouseEnter: (e: any) => {
-        setOpen(true);
-        childProps.onMouseEnter?.(e);
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onMouseLeave: (e: any) => {
-        setOpen(false);
-        childProps.onMouseLeave?.(e);
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onFocus: (e: any) => {
-        setOpen(true);
-        childProps.onFocus?.(e);
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onBlur: (e: any) => {
-        setOpen(false);
-        childProps.onBlur?.(e);
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any,
-  );
+  const enhancedChild = cloneElement(children, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ref: setRef as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onMouseEnter: (e: any) => {
+      setOpen(true);
+      childProps.onMouseEnter?.(e);
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onMouseLeave: (e: any) => {
+      setOpen(false);
+      childProps.onMouseLeave?.(e);
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onFocus: (e: any) => {
+      setOpen(true);
+      childProps.onFocus?.(e);
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onBlur: (e: any) => {
+      setOpen(false);
+      childProps.onBlur?.(e);
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
 
   return (
     <>
       {enhancedChild}
-      {open && typeof document !== 'undefined'
+      {open && typeof document !== "undefined"
         ? createPortal(
             <div
               ref={tooltipRef}
               role="tooltip"
               className={
-                'hover-tooltip hover-tooltip--' +
+                "hover-tooltip hover-tooltip--" +
                 coords.place +
-                (verdict ? ' hover-tooltip--verdict' : '') +
-                (className ? ' ' + className : '')
+                (verdict ? " hover-tooltip--verdict" : "") +
+                (className ? " " + className : "")
               }
               style={{
-                position: 'fixed',
+                position: "fixed",
                 left: coords.x,
                 top: coords.y,
                 transform:
-                  coords.place === 'top'
-                    ? 'translate(-50%, -100%)'
-                    : 'translate(-50%, 0)',
+                  coords.place === "top"
+                    ? "translate(-50%, -100%)"
+                    : "translate(-50%, 0)",
                 zIndex: 10000,
-                pointerEvents: 'none',
+                pointerEvents: "none",
                 // Apply verdict-tinted background + left border via
                 // inline styles — matches the GridHoverTooltip
                 // pattern in `src/components/dashboard/grid/`. When

@@ -27,15 +27,10 @@ import {
   Dices,
   CircleAlert,
   type LucideIcon,
-} from 'lucide-react';
+} from "lucide-react";
 
 export type QuizThemeKey =
-  | 'green'
-  | 'blue'
-  | 'purple'
-  | 'gradient'
-  | 'indigo'
-  | 'yellow';
+  "green" | "blue" | "purple" | "gradient" | "indigo" | "yellow";
 
 export interface QuizThemeMetaEntry {
   /** Lucide icon component, rendered top-left at 56 px white. */
@@ -51,44 +46,44 @@ export interface QuizThemeMetaEntry {
 }
 
 export const QUIZ_THEME_META: Record<string, QuizThemeMetaEntry> = {
-  'quiz-medizinischer-nutzen': {
+  "quiz-medizinischer-nutzen": {
     icon: BriefcaseMedical,
-    theme: 'blue',
+    theme: "blue",
     count: 7,
-    shortTitle: 'Medizinischer Nutzen',
+    shortTitle: "Medizinischer Nutzen",
   },
-  'quiz-risiken-koerper-psyche': {
+  "quiz-risiken-koerper-psyche": {
     icon: Brain,
-    theme: 'purple',
+    theme: "purple",
     count: 10,
-    shortTitle: 'Risiken Körper & Psyche',
+    shortTitle: "Risiken Körper & Psyche",
   },
-  'quiz-stimmung-wahrnehmung': {
+  "quiz-stimmung-wahrnehmung": {
     icon: Meh,
-    theme: 'yellow',
+    theme: "yellow",
     count: 6,
-    shortTitle: 'Stimmung & Wahrnehmung',
+    shortTitle: "Stimmung & Wahrnehmung",
   },
-  'quiz-soziales-bevoelkerung': {
+  "quiz-soziales-bevoelkerung": {
     // handoff `quiz-soziales` → UsersRound (people), distinct from the
     // Landmark used for fakten-karten "Gesetz". 2026-05-30 icon sync.
     icon: UsersRound,
-    theme: 'indigo',
+    theme: "indigo",
     count: 10,
-    shortTitle: 'Soziales & Bevölkerung',
+    shortTitle: "Soziales & Bevölkerung",
   },
-  'quiz-gefaehrlichkeit': {
+  "quiz-gefaehrlichkeit": {
     icon: ShieldAlert,
-    theme: 'green',
+    theme: "green",
     count: 7,
     // 2026-06-02 (ISD/Fedor) — renamed from 'Gefährlichkeit'.
-    shortTitle: 'Allgemeine Gefährlichkeit',
+    shortTitle: "Allgemeine Gefährlichkeit",
   },
-  'quiz-schnellcheck': {
+  "quiz-schnellcheck": {
     icon: Dices,
-    theme: 'gradient',
+    theme: "gradient",
     count: 7,
-    shortTitle: 'Schnellcheck',
+    shortTitle: "Schnellcheck",
   },
 };
 
@@ -97,9 +92,9 @@ export function getQuizThemeMeta(slug: string): QuizThemeMetaEntry {
   return (
     QUIZ_THEME_META[slug] ?? {
       icon: CircleAlert,
-      theme: 'blue',
+      theme: "blue",
       count: 7,
-      shortTitle: 'Quiz',
+      shortTitle: "Quiz",
     }
   );
 }

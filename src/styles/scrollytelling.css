@@ -39,8 +39,8 @@ body:has(.scrolly) {
   --classification-keine-aussage-bg: #e5e7eb;
 
   /* Step-6 indicator hue per phase (saturation = magnitude) */
-  --indicator-awareness: 218 100% 50%;          /* blue */
-  --indicator-correctness: 152 60% 40%;         /* green */
+  --indicator-awareness: 218 100% 50%; /* blue */
+  --indicator-correctness: 152 60% 40%; /* green */
   --indicator-prevention_significance: 32 95% 50%; /* amber */
 
   /* Iter-24 (2026-06-02, Harald-Backlog): Zielgruppe colors are now
@@ -53,11 +53,11 @@ body:has(.scrolly) {
      One source of truth — change a `--cmi-pop-*` value in global.css
      and both sides update. Previous hardcoded indigo/orange/teal/
      yellow/purple values are retired. */
-  --group-adults:       var(--cmi-pop-volljaehrige);
-  --group-minors:       var(--cmi-pop-minderjaehrige);
-  --group-consumers:    var(--cmi-pop-konsumierende);
+  --group-adults: var(--cmi-pop-volljaehrige);
+  --group-minors: var(--cmi-pop-minderjaehrige);
+  --group-consumers: var(--cmi-pop-konsumierende);
   --group-young_adults: var(--cmi-pop-junge-erwachsene);
-  --group-parents:      var(--cmi-pop-eltern);
+  --group-parents: var(--cmi-pop-eltern);
 
   /* Theme — forest research backdrop (migrated from slate 2026-06-08;
      mirrors the homepage hero green family #143b2c–#265a43). Scoped to
@@ -91,10 +91,14 @@ body:has(.scrolly) {
   /* Typography — aligned to the site/brand fonts (2026-06-08). Body +
      secondary titles use Inter; the per-step H1 headline uses the brand
      serif (Source Serif 4, 700) via --font-serif on .scrolly__heading. */
-  --font-body: 'Inter Variable', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-serif: 'Source Serif 4', Charter, 'Iowan Old Style', Georgia, serif;
-  --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+  --font-body:
+    "Inter Variable", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --font-display:
+    "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Source Serif 4", Charter, "Iowan Old Style", Georgia, serif;
+  --font-mono:
+    "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
 
   /* Spacing — looser than global.css (--space-lg=1.5rem, --space-xl=2rem in
      global). This stretches the scrollytelling step rhythm. */
@@ -118,9 +122,9 @@ body:has(.scrolly) {
      from these tokens so the scale is consistent across the
      scrollytelling and editable from one place. The Iter-9 baseline
      was 13/10; bumped to 14/11 per Fedor's readability ask. */
-  --viz-text-primary: 14px;    /* strip headers, anchor titles, indicator names — Georgia bold */
-  --viz-text-secondary: 11px;  /* units, dates, mini-defs — mono */
-  --viz-text-micro: 10px;      /* tick labels, smallest annotations */
+  --viz-text-primary: 14px; /* strip headers, anchor titles, indicator names — Georgia bold */
+  --viz-text-secondary: 11px; /* units, dates, mini-defs — mono */
+  --viz-text-micro: 10px; /* tick labels, smallest annotations */
 
   /* Iter-10/12 — staggered-reveal rhythm. Each revealable element in
      VizSampleAndRanked (strips) and VizSourcesStrips (columns) sets
@@ -169,19 +173,22 @@ body:has(.scrolly) {
      category accents (Fedor review 2026-06-08 #3), aligned by category_id
      so the step-3 matrix grouping harmonises with the left-column legend.
      Kept dark enough that the white icon + text stay legible. */
-  --theme-1: #25455f;  /* Medizinischer Nutzen (blau) */
-  --theme-2: #1d4e51;  /* Risiken Körper (teal) */
-  --theme-3: #3b3458;  /* Risiken Psyche (violett) */
-  --theme-4: #574a26;  /* Stimmung & Wahrnehmung (ocker) */
-  --theme-5: #542f44;  /* Soziale Auswirkungen (rosé) */
-  --theme-6: #36404a;  /* Dosierung & Qualität (schiefer) */
-  --theme-7: #2f3358;  /* Verbreitung & Gesetz (indigo) */
-  --theme-8: #573726;  /* Gefährlichkeit (rost) */
-  --theme-9: #36404a;  /* reserve (neutral dark) */
+  --theme-1: #25455f; /* Medizinischer Nutzen (blau) */
+  --theme-2: #1d4e51; /* Risiken Körper (teal) */
+  --theme-3: #3b3458; /* Risiken Psyche (violett) */
+  --theme-4: #574a26; /* Stimmung & Wahrnehmung (ocker) */
+  --theme-5: #542f44; /* Soziale Auswirkungen (rosé) */
+  --theme-6: #36404a; /* Dosierung & Qualität (schiefer) */
+  --theme-7: #2f3358; /* Verbreitung & Gesetz (indigo) */
+  --theme-8: #573726; /* Gefährlichkeit (rost) */
+  --theme-9: #36404a; /* reserve (neutral dark) */
 }
 
-* { box-sizing: border-box; }
-html, body {
+* {
+  box-sizing: border-box;
+}
+html,
+body {
   margin: 0;
   padding: 0;
   background: linear-gradient(168deg, #1b3827 0%, #0e1e14 40%, #183a26 100%);
@@ -192,12 +199,19 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 body::after {
-  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  opacity: .055; mix-blend-mode: screen;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: screen;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   background-size: 160px;
 }
-#root { min-height: 100vh; }
+#root {
+  min-height: 100vh;
+}
 
 /* ── Dark site nav on /projekt/ (Iter-21) ───────────────────────
    The global floating nav pill (.nav-wrapper > .nav) + mobile tab
@@ -247,9 +261,15 @@ body:has(.scrolly) .site-footer {
 }
 /* Recolour every footer sub-element light so it stays legible on the dark
    canvas (the cream-footer colours live in home-site-footer.css). */
-body:has(.scrolly) .site-footer__tagline { color: var(--fg); }
-body:has(.scrolly) .site-footer__h { color: var(--fg-muted); }
-body:has(.scrolly) .site-footer__line { color: var(--fg); }
+body:has(.scrolly) .site-footer__tagline {
+  color: var(--fg);
+}
+body:has(.scrolly) .site-footer__h {
+  color: var(--fg-muted);
+}
+body:has(.scrolly) .site-footer__line {
+  color: var(--fg);
+}
 /* The email link's glyph fill follows -webkit-text-fill-color (its initial
    `currentColor` keeps the dark cream-footer value even when `color` is
    overridden), so set both to the gold link accent. */
@@ -257,16 +277,24 @@ body:has(.scrolly) .site-footer__email {
   color: var(--ui-accent);
   -webkit-text-fill-color: var(--ui-accent);
 }
-body:has(.scrolly) .site-footer__copy { color: var(--fg-muted); }
-body:has(.scrolly) .site-footer__links a { color: var(--fg-muted); }
+body:has(.scrolly) .site-footer__copy {
+  color: var(--fg-muted);
+}
+body:has(.scrolly) .site-footer__links a {
+  color: var(--fg-muted);
+}
 body:has(.scrolly) .site-footer__bar {
   border-top-color: rgba(255, 255, 255, 0.12);
 }
 /* Brand wordmark + logo: light text, and invert the black monogram SVG to
    white so it doesn't disappear on the dark canvas. */
 body:has(.scrolly) .site-footer .nav__brand,
-body:has(.scrolly) .site-footer .nav__brand-text { color: var(--fg); }
-body:has(.scrolly) .site-footer .nav__brand-myth { color: #95c4ad; }
+body:has(.scrolly) .site-footer .nav__brand-text {
+  color: var(--fg);
+}
+body:has(.scrolly) .site-footer .nav__brand-myth {
+  color: #95c4ad;
+}
 body:has(.scrolly) .site-footer .cm-logo img {
   filter: brightness(0) invert(1);
 }
@@ -274,11 +302,13 @@ body:has(.scrolly) .site-footer .cm-logo img {
 body:has(.scrolly) .feedbucket-footer {
   border-top: none;
   padding: 0 0 1.5rem;
-  margin-top: -1.5rem;   /* pull into footer bottom-padding so button sits on dark bg */
+  margin-top: -1.5rem; /* pull into footer bottom-padding so button sits on dark bg */
   position: relative;
   z-index: 1;
 }
-body:has(.scrolly) .feedbucket-footer > p { margin: 0; }
+body:has(.scrolly) .feedbucket-footer > p {
+  margin: 0;
+}
 /* Iter-21b: hide the global `.nav-blur-shield` — a fixed light-white
    gradient strip (rgba(248,249,255,…)) that reads as a white fade over
    the dark page. */
@@ -295,20 +325,36 @@ body:has(.scrolly) .nav.nav--scrolled {
   border-color: rgba(48, 95, 73, 0.55);
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
 }
-body:has(.scrolly) .nav .nav__brand { color: var(--fg); }
-body:has(.scrolly) .nav__link { color: var(--fg-muted); }
-body:has(.scrolly) .nav__link:not(.nav__link--active):hover { color: var(--fg); }
-body:has(.scrolly) .nav__link--active { color: var(--fg); }
-body:has(.scrolly) .nav__link::after { background-color: var(--fg); }
-body:has(.scrolly) .nav__hamburger-line { background-color: var(--fg-muted); }
-body:has(.scrolly) .nav__hamburger:hover { background-color: rgba(255, 255, 255, 0.08); }
+body:has(.scrolly) .nav .nav__brand {
+  color: var(--fg);
+}
+body:has(.scrolly) .nav__link {
+  color: var(--fg-muted);
+}
+body:has(.scrolly) .nav__link:not(.nav__link--active):hover {
+  color: var(--fg);
+}
+body:has(.scrolly) .nav__link--active {
+  color: var(--fg);
+}
+body:has(.scrolly) .nav__link::after {
+  background-color: var(--fg);
+}
+body:has(.scrolly) .nav__hamburger-line {
+  background-color: var(--fg-muted);
+}
+body:has(.scrolly) .nav__hamburger:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
 
 /* Mobile slide-in drawer */
 body:has(.scrolly) .nav__drawer {
   background: var(--bg-elev, #1a4836);
   border-color: rgba(48, 95, 73, 0.55);
 }
-body:has(.scrolly) .nav__drawer-link { color: var(--fg-muted); }
+body:has(.scrolly) .nav__drawer-link {
+  color: var(--fg-muted);
+}
 body:has(.scrolly) .nav__drawer-link:hover,
 body:has(.scrolly) .nav__drawer-link--active {
   color: var(--fg);
@@ -320,10 +366,14 @@ body:has(.scrolly) .mobile-tab-bar {
   background: rgba(15, 40, 32, 0.92);
   border-top-color: rgba(48, 95, 73, 0.55);
 }
-body:has(.scrolly) .mobile-tab-bar__item { color: var(--fg-muted); }
+body:has(.scrolly) .mobile-tab-bar__item {
+  color: var(--fg-muted);
+}
 body:has(.scrolly) .mobile-tab-bar__item:hover,
 body:has(.scrolly) .mobile-tab-bar__item[aria-current="page"],
-body:has(.scrolly) .mobile-tab-bar__item.active { color: var(--fg); }
+body:has(.scrolly) .mobile-tab-bar__item.active {
+  color: var(--fg);
+}
 
 /* ── Full-bleed scrolly content (Iter-21c) ──────────────────────
    The global `main` wrapper clamps content to `max-width: 1100px`
@@ -385,7 +435,9 @@ body:has(.scrolly) main {
   border-top: 1px solid rgba(48, 95, 73, 0.4);
 }
 
-.scrolly__step--active { opacity: 1; }
+.scrolly__step--active {
+  opacity: 1;
+}
 
 /* Step 1 opens near the top instead of vertically centred in a 90vh box —
    removes the large empty band under the nav (Fedor review 2026-06-08 #1).
@@ -456,14 +508,33 @@ body:has(.scrolly) main {
   vertical-align: -3px;
   border: 1px solid rgba(255, 255, 255, 0.28);
 }
-.verdict-puck--sm { width: 18px; height: 18px; }
-.verdict-puck--md { width: 22px; height: 22px; }
-.verdict-puck--lg { width: 28px; height: 28px; }
-.verdict-puck--richtig      { background: var(--classification-richtig); }
-.verdict-puck--eher_richtig { background: var(--classification-eher-richtig); }
-.verdict-puck--eher_falsch  { background: var(--classification-eher-falsch); }
-.verdict-puck--falsch       { background: var(--classification-falsch); }
-.verdict-puck--keine_aussage_moeglich { background: var(--classification-keine-aussage); }
+.verdict-puck--sm {
+  width: 18px;
+  height: 18px;
+}
+.verdict-puck--md {
+  width: 22px;
+  height: 22px;
+}
+.verdict-puck--lg {
+  width: 28px;
+  height: 28px;
+}
+.verdict-puck--richtig {
+  background: var(--classification-richtig);
+}
+.verdict-puck--eher_richtig {
+  background: var(--classification-eher-richtig);
+}
+.verdict-puck--eher_falsch {
+  background: var(--classification-eher-falsch);
+}
+.verdict-puck--falsch {
+  background: var(--classification-falsch);
+}
+.verdict-puck--keine_aussage_moeglich {
+  background: var(--classification-keine-aussage);
+}
 
 /* In-body Themenfelder legend (Step 3) — small colored swatches +
    names, wrapping inline. Replaces the legend block that used to sit
@@ -635,7 +706,9 @@ body:has(.scrolly) main {
   text-decoration: none;
   font-size: 0.9375rem;
   font-weight: 500;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 .scrolly__cta:hover {
   background: var(--ui-accent);
@@ -680,8 +753,12 @@ body:has(.scrolly) main {
    keyframe's translateY(8px) → 0 firing when vizFamilyKey changed
    (mythGrid → sampleAndRanked, sampleAndRanked → sourcesStrips, …). */
 @keyframes scrolly-stage-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Iter-13 invisible canvas — every step's viz lives inside one shared
@@ -734,7 +811,9 @@ body:has(.scrolly) main {
   .scrolly__container {
     grid-template-columns: 1fr;
   }
-  .scrolly__viz-col { display: none; }
+  .scrolly__viz-col {
+    display: none;
+  }
   .scrolly__viz-mobile {
     display: flex;
     position: sticky;
@@ -800,16 +879,30 @@ body:has(.scrolly) main {
    Iter-13: opacity-only (was translateY 8px → 0). Several viz pieces
    reuse `viz-fade-up` — keeping the name for compat but no movement. */
 @keyframes viz-fade-up {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes viz-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes viz-pop-in {
-  from { opacity: 0; transform: scale(0.85); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ───── VizTimeline (step 1) ───── */
@@ -834,8 +927,15 @@ body:has(.scrolly) main {
   letter-spacing: 0.05em;
 }
 @keyframes viz-timeline-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.7; }
-  50%      { transform: scale(1.4); opacity: 0; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }
 
 /* Iter-12: viz reveal-in keyframe — applied to strips, columns, slope
@@ -844,8 +944,12 @@ body:has(.scrolly) main {
    the reveal fires on initial-mount-with-already-revealed-state, e.g.
    when the user opens /ueber-uns/ already scrolled past Step 5. */
 @keyframes viz-reveal-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ───── VizTimeline — Step 1 (Iter-15 rewrite) ─────
@@ -953,16 +1057,19 @@ body:has(.scrolly) main {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #4f6a5c;            /* unreached = grey */
+  background: #4f6a5c; /* unreached = grey */
   border: 2px solid var(--bg);
   box-shadow: 0 0 0 1px rgba(75, 85, 99, 0.4);
-  transition: width 160ms ease, height 160ms ease,
-    background 220ms ease, box-shadow 220ms ease;
+  transition:
+    width 160ms ease,
+    height 160ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease;
   z-index: 2;
   position: relative;
 }
 .viz-timeline-v__dot.is-reached {
-  background: #f5c542;            /* reached = gold (was green; gold avoids green-on-green) */
+  background: #f5c542; /* reached = gold (was green; gold avoids green-on-green) */
   box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.4);
   animation: viz-timeline-dot-flash 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -981,18 +1088,30 @@ body:has(.scrolly) main {
 }
 /* One-shot grow as a dot becomes reached. */
 @keyframes viz-timeline-dot-flash {
-  0%   { transform: scale(1); }
-  45%  { transform: scale(1.55); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.55);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 /* Label gives a subtle one-shot brighten/pop as its stage is reached. */
-.viz-timeline-v__row[data-reached='true'] .viz-timeline-v__label-title {
+.viz-timeline-v__row[data-reached="true"] .viz-timeline-v__label-title {
   animation: viz-timeline-label-flash 520ms ease;
 }
 @keyframes viz-timeline-label-flash {
-  0%   { text-shadow: 0 0 0 rgba(245, 197, 66, 0); }
-  35%  { text-shadow: 0 0 10px rgba(245, 197, 66, 0.55); }
-  100% { text-shadow: 0 0 0 rgba(245, 197, 66, 0); }
+  0% {
+    text-shadow: 0 0 0 rgba(245, 197, 66, 0);
+  }
+  35% {
+    text-shadow: 0 0 10px rgba(245, 197, 66, 0.55);
+  }
+  100% {
+    text-shadow: 0 0 0 rgba(245, 197, 66, 0);
+  }
 }
 .viz-timeline-v__dot-pulse {
   position: absolute;
@@ -1066,9 +1185,15 @@ body:has(.scrolly) main {
   transition: opacity 160ms ease;
   max-width: 320px;
 }
-.scrolly-hover-tooltip.is-open { opacity: 1; }
-.scrolly-hover-tooltip p { margin: 0; }
-.scrolly-hover-tooltip p + p { margin-top: 0.4rem; }
+.scrolly-hover-tooltip.is-open {
+  opacity: 1;
+}
+.scrolly-hover-tooltip p {
+  margin: 0;
+}
+.scrolly-hover-tooltip p + p {
+  margin-top: 0.4rem;
+}
 .scrolly-hover-tooltip__date {
   font-family: var(--font-mono);
   font-size: var(--viz-text-secondary);
@@ -1096,7 +1221,9 @@ body:has(.scrolly) main {
   font-size: var(--viz-text-secondary);
   color: var(--fg-muted);
 }
-.scrolly-hover-tooltip__metrics b { color: var(--fg); }
+.scrolly-hover-tooltip__metrics b {
+  color: var(--fg);
+}
 
 /* ───── VizPeopleVoices (step 2) — Iter-17 (2026-05-30) message sphere
    Billboarded 3-D sphere of horizontal chat messages + media-source
@@ -1128,9 +1255,14 @@ body:has(.scrolly) main {
   opacity: 0;
   transition: opacity 0.9s ease;
 }
-.viz-voice-cloud__sphere.is-visible { opacity: 1; }
+.viz-voice-cloud__sphere.is-visible {
+  opacity: 1;
+}
 @media (prefers-reduced-motion: reduce) {
-  .viz-voice-cloud__sphere { transition: none; opacity: 1; }
+  .viz-voice-cloud__sphere {
+    transition: none;
+    opacity: 1;
+  }
 }
 .viz-chip {
   position: absolute;
@@ -1147,10 +1279,18 @@ body:has(.scrolly) main {
   will-change: transform, opacity;
   /* Only the hover look-changes transition; position is written each
      frame by the RAF loop (no transition on transform during spin). */
-  transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
 }
-.viz-chip svg { flex-shrink: 0; display: block; }
-.viz-chip__icon { color: var(--accent, var(--fg-muted)); }
+.viz-chip svg {
+  flex-shrink: 0;
+  display: block;
+}
+.viz-chip__icon {
+  color: var(--accent, var(--fg-muted));
+}
 
 /* ── MESSAGE — clean rounded pill (Iter-20). The earlier per-side
       `::after` tail nubs read as stray "pizza-slice" shards on the
@@ -1162,7 +1302,7 @@ body:has(.scrolly) main {
   white-space: nowrap;
   border-radius: 13px;
   border: 1px solid var(--bubble-bd, rgba(99, 102, 241, 0.34));
-  background: var(--bubble-bg, rgba(99, 102, 241, 0.20));
+  background: var(--bubble-bg, rgba(99, 102, 241, 0.2));
   color: var(--fg);
 }
 
@@ -1195,7 +1335,7 @@ body:has(.scrolly) main {
   pointer-events: none;
 }
 .viz-speck::before {
-  content: '';
+  content: "";
   width: 3px;
   height: 3px;
   border-radius: 50%;
@@ -1223,23 +1363,57 @@ body:has(.scrolly) main {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border-color: rgba(250, 249, 245, 0.6) !important;
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(250, 249, 245, 0.3) inset;
+  box-shadow:
+    0 8px 24px -4px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(250, 249, 245, 0.3) inset;
   z-index: 1500 !important;
 }
 
 /* Per-audience accent (bubble bg + border + icon) */
-.viz-chip[data-group="adults"]       { --accent: var(--group-adults); --bubble-bg: rgba(99, 102, 241, 0.20); --bubble-bd: rgba(99, 102, 241, 0.34); }
-.viz-chip[data-group="minors"]       { --accent: var(--group-minors); --bubble-bg: rgba(249, 115, 22, 0.20); --bubble-bd: rgba(249, 115, 22, 0.34); }
-.viz-chip[data-group="consumers"]    { --accent: var(--group-consumers); --bubble-bg: rgba(20, 184, 166, 0.20); --bubble-bd: rgba(20, 184, 166, 0.34); }
-.viz-chip[data-group="young_adults"] { --accent: var(--group-young_adults); --bubble-bg: rgba(234, 179, 8, 0.20); --bubble-bd: rgba(234, 179, 8, 0.34); }
-.viz-chip[data-group="parents"]      { --accent: var(--group-parents); --bubble-bg: rgba(168, 85, 247, 0.20); --bubble-bd: rgba(168, 85, 247, 0.34); }
-.viz-chip[data-group="professional"] { --accent: #38bdf8; --bubble-bg: rgba(56, 189, 248, 0.20); --bubble-bd: rgba(56, 189, 248, 0.34); }
+.viz-chip[data-group="adults"] {
+  --accent: var(--group-adults);
+  --bubble-bg: rgba(99, 102, 241, 0.2);
+  --bubble-bd: rgba(99, 102, 241, 0.34);
+}
+.viz-chip[data-group="minors"] {
+  --accent: var(--group-minors);
+  --bubble-bg: rgba(249, 115, 22, 0.2);
+  --bubble-bd: rgba(249, 115, 22, 0.34);
+}
+.viz-chip[data-group="consumers"] {
+  --accent: var(--group-consumers);
+  --bubble-bg: rgba(20, 184, 166, 0.2);
+  --bubble-bd: rgba(20, 184, 166, 0.34);
+}
+.viz-chip[data-group="young_adults"] {
+  --accent: var(--group-young_adults);
+  --bubble-bg: rgba(234, 179, 8, 0.2);
+  --bubble-bd: rgba(234, 179, 8, 0.34);
+}
+.viz-chip[data-group="parents"] {
+  --accent: var(--group-parents);
+  --bubble-bg: rgba(168, 85, 247, 0.2);
+  --bubble-bd: rgba(168, 85, 247, 0.34);
+}
+.viz-chip[data-group="professional"] {
+  --accent: #38bdf8;
+  --bubble-bg: rgba(56, 189, 248, 0.2);
+  --bubble-bd: rgba(56, 189, 248, 0.34);
+}
 
 /* Source-category accent (icon only — media/social categories) */
-.viz-chip[data-source="internet"]           { --accent: var(--source-cat-internet); }
-.viz-chip[data-source="social_media"]       { --accent: var(--source-cat-social_media); }
-.viz-chip[data-source="traditional_media"]  { --accent: var(--source-cat-traditional_media); }
-.viz-chip[data-source="print_physical"]     { --accent: var(--source-cat-print_physical); }
+.viz-chip[data-source="internet"] {
+  --accent: var(--source-cat-internet);
+}
+.viz-chip[data-source="social_media"] {
+  --accent: var(--source-cat-social_media);
+}
+.viz-chip[data-source="traditional_media"] {
+  --accent: var(--source-cat-traditional_media);
+}
+.viz-chip[data-source="print_physical"] {
+  --accent: var(--source-cat-print_physical);
+}
 
 /* ───── VizMythGrid (steps 3 + 4 — shared DOM) ───── */
 .viz-grid {
@@ -1248,7 +1422,7 @@ body:has(.scrolly) main {
   grid-template-rows: repeat(6, minmax(0, 1fr));
   gap: 4px;
   width: 100%;
-  max-width: 620px;          /* unified — no more pop between mode swap */
+  max-width: 620px; /* unified — no more pop between mode swap */
   aspect-ratio: 7 / 6;
 }
 .viz-grid__cell {
@@ -1399,7 +1573,11 @@ body:has(.scrolly) main {
   justify-content: center;
   animation: viz-fade-up var(--anim-entry-dur) var(--anim-entry-ease) 300ms both;
 }
-.viz-grid__verdict-item { display: inline-flex; align-items: center; gap: 6px; }
+.viz-grid__verdict-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .viz-grid__verdict-pill {
   display: inline-flex;
   align-items: center;
@@ -1522,7 +1700,9 @@ body:has(.scrolly) main {
   font-weight: 600;
   color: var(--fg);
 }
-.viz-sr__chip--compact .viz-sr__chip-num { font-size: 0.9375rem; }
+.viz-sr__chip--compact .viz-sr__chip-num {
+  font-size: 0.9375rem;
+}
 .viz-sr__chip-label {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
@@ -1538,7 +1718,7 @@ body:has(.scrolly) main {
 .viz-sr__panels-stack {
   position: relative;
   display: grid;
-  grid-template-areas: 'stack';
+  grid-template-areas: "stack";
   grid-template-columns: 1fr;
 }
 .viz-sr__panels-stack > .viz-sr__sample,
@@ -1553,11 +1733,11 @@ body:has(.scrolly) main {
   gap: var(--space-md);
   transition: opacity 400ms ease;
 }
-.viz-sr__sample[data-active='false'] {
+.viz-sr__sample[data-active="false"] {
   opacity: 0;
   pointer-events: none;
 }
-.viz-sr__sample[data-active='true'] {
+.viz-sr__sample[data-active="true"] {
   opacity: 1;
 }
 .viz-sr__panel {
@@ -1576,21 +1756,37 @@ body:has(.scrolly) main {
   font-family: var(--font-mono);
   margin: 0 0 var(--space-md) 0;
 }
-.viz-sr__groups { display: flex; flex-direction: column; gap: var(--space-md); }
+.viz-sr__groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
 .viz-sr__group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.viz-sr__group-header { display: flex; align-items: baseline; gap: 12px; }
+.viz-sr__group-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
 .viz-sr__group-num {
   font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--fg);
 }
-.viz-sr__group-label { font-size: 0.8125rem; color: var(--fg-muted); }
-.viz-sr__icon-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.viz-sr__group-label {
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+}
+.viz-sr__icon-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
 .viz-sr__icon {
   animation: viz-pop-in var(--anim-entry-dur) var(--anim-entry-ease) both;
 }
@@ -1612,18 +1808,29 @@ body:has(.scrolly) main {
   font-size: 0.8125rem;
   animation: viz-fade-up var(--anim-entry-dur) var(--anim-entry-ease) both;
 }
-.viz-sr__indicator:last-child { border-bottom: none; }
-.viz-sr__indicator-name { font-weight: 500; color: var(--fg); }
+.viz-sr__indicator:last-child {
+  border-bottom: none;
+}
+.viz-sr__indicator-name {
+  font-weight: 500;
+  color: var(--fg);
+}
 .viz-sr__indicator-unit {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   color: var(--fg-dim);
 }
-.viz-sr__indicator-desc { color: var(--fg-muted); line-height: 1.45; }
+.viz-sr__indicator-desc {
+  color: var(--fg-muted);
+  line-height: 1.45;
+}
 
 /* Active indicator (the phase the reader is currently on) */
 .viz-sr__indicator {
-  transition: background 240ms ease, padding 240ms ease, opacity 240ms ease;
+  transition:
+    background 240ms ease,
+    padding 240ms ease,
+    opacity 240ms ease;
   border-radius: var(--radius-sm);
   opacity: 0.55;
 }
@@ -1652,11 +1859,11 @@ body:has(.scrolly) main {
   gap: var(--space-md);
   transition: opacity 400ms ease;
 }
-.viz-sr__ranked[data-active='false'] {
+.viz-sr__ranked[data-active="false"] {
   opacity: 0;
   pointer-events: none;
 }
-.viz-sr__ranked[data-active='true'] {
+.viz-sr__ranked[data-active="true"] {
   opacity: 1;
 }
 .viz-sr__phase-pills {
@@ -1726,8 +1933,16 @@ body:has(.scrolly) main {
   font-size: 0.75rem;
   color: var(--fg-muted);
 }
-.viz-sr__legend-item { display: inline-flex; align-items: center; gap: 5px; }
-.viz-sr__legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+.viz-sr__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.viz-sr__legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
 
 /* Example-myth × indicator-rows × Zielgruppen-bars (step 6 phases 2/3). */
 .viz-sr__example {
@@ -1815,7 +2030,7 @@ body:has(.scrolly) main {
     background 200ms ease,
     color 200ms ease;
 }
-.viz-sr__example-cta[data-revealed='true'] {
+.viz-sr__example-cta[data-revealed="true"] {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
@@ -1841,7 +2056,9 @@ body:has(.scrolly) main {
   overflow-x: auto;
   scrollbar-width: none;
 }
-.viz-sr__example-picker::-webkit-scrollbar { display: none; }
+.viz-sr__example-picker::-webkit-scrollbar {
+  display: none;
+}
 .viz-sr__example-pick {
   display: inline-flex;
   align-items: center;
@@ -1939,7 +2156,7 @@ body:has(.scrolly) main {
     transform 320ms ease,
     background 240ms ease;
 }
-.viz-sr__example-row[data-revealed='true'] {
+.viz-sr__example-row[data-revealed="true"] {
   opacity: 0.7;
   transform: translateY(0);
   pointer-events: auto;
@@ -1948,7 +2165,7 @@ body:has(.scrolly) main {
   background: var(--bg-elev);
   box-shadow: inset 3px 0 0 var(--classification-richtig);
 }
-.viz-sr__example-row--active[data-revealed='true'] {
+.viz-sr__example-row--active[data-revealed="true"] {
   opacity: 1;
 }
 .viz-sr__example-row-head {
@@ -1969,8 +2186,16 @@ body:has(.scrolly) main {
   font-size: 0.6875rem;
   color: var(--fg-dim);
 }
-.viz-sr__example-bars { display: flex; flex-direction: column; gap: 2px; }
-.viz-sr__bars { display: flex; flex-direction: column; gap: 2px; }
+.viz-sr__example-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.viz-sr__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 .viz-sr__bar-row {
   position: relative;
   display: grid;
@@ -2033,7 +2258,10 @@ body:has(.scrolly) main {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 .viz-sr__expand:hover {
   background: var(--bg-elev-2);
@@ -2074,7 +2302,9 @@ body:has(.scrolly) main {
   overflow-x: auto;
   scrollbar-width: none;
 }
-.viz-strips__picker::-webkit-scrollbar { display: none; }
+.viz-strips__picker::-webkit-scrollbar {
+  display: none;
+}
 /* Step 7/8 header — small label + sources list. Mirror .viz-sr__example-
    header (Step 6): align-items: flex-start so the eyebrow + title sit at
    the left edge of the viz container. */
@@ -2171,7 +2401,9 @@ body:has(.scrolly) main {
   font-size: 0.8125rem;
   color: var(--fg);
   min-height: 36px;
-  transition: background 200ms ease, border-color 200ms ease;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease;
 }
 .viz-strips__pill--idle {
   background: transparent;
@@ -2189,8 +2421,12 @@ body:has(.scrolly) main {
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-.viz-strips__pill-vals { color: var(--fg-muted); }
-.viz-strips__pill-vals b { color: var(--fg); }
+.viz-strips__pill-vals {
+  color: var(--fg-muted);
+}
+.viz-strips__pill-vals b {
+  color: var(--fg);
+}
 .viz-strips__legend {
   display: flex;
   flex-wrap: wrap;
@@ -2200,7 +2436,11 @@ body:has(.scrolly) main {
   color: var(--fg-muted);
   margin-top: var(--space-sm);
 }
-.viz-strips__legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.viz-strips__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
 .viz-strips__legend-dot {
   display: inline-block;
   width: 9px;
@@ -2382,7 +2622,10 @@ body:has(.scrolly) main {
   gap: var(--space-lg);
   text-align: center;
 }
-.viz-team__avatars { display: flex; gap: 0; }
+.viz-team__avatars {
+  display: flex;
+  gap: 0;
+}
 .viz-team__avatar {
   position: relative;
   width: 44px;
@@ -2403,10 +2646,14 @@ body:has(.scrolly) main {
      avatar) is preserved so each face stays identifiable. */
   cursor: default;
   outline: none;
-  transition: transform var(--anim-hover-dur) ease, z-index 0s;
+  transition:
+    transform var(--anim-hover-dur) ease,
+    z-index 0s;
   animation: viz-pop-in var(--anim-entry-dur) var(--anim-entry-ease) both;
 }
-.viz-team__avatar:first-child { margin-left: 0; }
+.viz-team__avatar:first-child {
+  margin-left: 0;
+}
 .viz-team__avatar:hover,
 .viz-team__avatar:focus {
   transform: scale(1.15);
@@ -2449,17 +2696,32 @@ body:has(.scrolly) main {
 
 /* ───── Mobile ───── */
 @media (max-width: 768px) {
-  .viz-grid { max-width: 100%; }
-  .viz-grid__cell-text { font-size: 0.5625rem; }
-  .viz-grid__cell--classified { font-size: 0.625rem; }
-  .viz-sr__indicator { grid-template-columns: 1fr; gap: 2px; }
+  .viz-grid {
+    max-width: 100%;
+  }
+  .viz-grid__cell-text {
+    font-size: 0.5625rem;
+  }
+  .viz-grid__cell--classified {
+    font-size: 0.625rem;
+  }
+  .viz-sr__indicator {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
   .viz-sr__row {
     grid-template-columns: 22px 110px 1fr;
     font-size: 0.6875rem;
   }
-  .viz-sr__lead { font-size: 0.8125rem; }
-  .viz-strips { max-width: 100%; }
-  .viz-strips__chart { font-size: 11px; }
+  .viz-sr__lead {
+    font-size: 0.8125rem;
+  }
+  .viz-strips {
+    max-width: 100%;
+  }
+  .viz-strips__chart {
+    font-size: 11px;
+  }
 }
 
 /* ───── Reduced motion ───── */
@@ -2477,15 +2739,15 @@ body:has(.scrolly) main {
     animation: none !important;
   }
 }
-[data-reduced-motion='true'] .viz-grid__cell,
-[data-reduced-motion='true'] .viz-voice-chip,
-[data-reduced-motion='true'] .viz-cta__card,
-[data-reduced-motion='true'] .viz-sr__bar-fill,
-[data-reduced-motion='true'] .viz-sr__row,
-[data-reduced-motion='true'] .viz-sr__icon,
-[data-reduced-motion='true'] .viz-sr__indicator,
-[data-reduced-motion='true'] .viz-strips__pick,
-[data-reduced-motion='true'] .viz-team__avatar {
+[data-reduced-motion="true"] .viz-grid__cell,
+[data-reduced-motion="true"] .viz-voice-chip,
+[data-reduced-motion="true"] .viz-cta__card,
+[data-reduced-motion="true"] .viz-sr__bar-fill,
+[data-reduced-motion="true"] .viz-sr__row,
+[data-reduced-motion="true"] .viz-sr__icon,
+[data-reduced-motion="true"] .viz-sr__indicator,
+[data-reduced-motion="true"] .viz-strips__pick,
+[data-reduced-motion="true"] .viz-team__avatar {
   transition: none !important;
   animation: none !important;
 }
@@ -2498,12 +2760,22 @@ body:has(.scrolly) main {
    the prototype's dark backdrop. */
 
 @keyframes mehr-popover-backdrop-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes mehr-popover-in {
-  from { opacity: 0; transform: translateY(12px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .mehr-popover__backdrop {
@@ -2546,7 +2818,10 @@ body:has(.scrolly) main {
   padding: 1.25rem 1.25rem 0.75rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
-.mehr-popover__titles { min-width: 0; flex: 1; }
+.mehr-popover__titles {
+  min-width: 0;
+  flex: 1;
+}
 .mehr-popover__title {
   margin: 0;
   font-family: var(--font-display);
@@ -2577,11 +2852,13 @@ body:has(.scrolly) main {
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background var(--anim-hover-dur, 200ms) ease, color var(--anim-hover-dur, 200ms) ease;
+  transition:
+    background var(--anim-hover-dur, 200ms) ease,
+    color var(--anim-hover-dur, 200ms) ease;
 }
 .mehr-popover__close:hover,
 .mehr-popover__close:focus-visible {
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.1);
   color: #f3f4f6;
   outline: none;
 }
@@ -2596,19 +2873,32 @@ body:has(.scrolly) main {
   line-height: 1.6;
   color: #d1d5db;
 }
-.mehr-popover__body p { margin: 0 0 0.85rem; }
-.mehr-popover__body p:last-child { margin-bottom: 0; }
-.mehr-popover__body strong { color: #f3f4f6; font-weight: 600; }
+.mehr-popover__body p {
+  margin: 0 0 0.85rem;
+}
+.mehr-popover__body p:last-child {
+  margin-bottom: 0;
+}
+.mehr-popover__body strong {
+  color: #f3f4f6;
+  font-weight: 600;
+}
 .mehr-popover__body a {
   color: #facc15;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
-.mehr-popover__body a:hover { color: #fde047; }
+.mehr-popover__body a:hover {
+  color: #fde047;
+}
 
-.mehr-popover__section { margin-top: 1rem; }
-.mehr-popover__section:first-child { margin-top: 0; }
+.mehr-popover__section {
+  margin-top: 1rem;
+}
+.mehr-popover__section:first-child {
+  margin-top: 0;
+}
 .mehr-popover__section-title {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -2664,14 +2954,22 @@ body:has(.scrolly) main {
     max-height: 92vh;
     border-radius: var(--radius-md, 8px);
   }
-  .mehr-popover__header { padding: 1rem 1rem 0.6rem 1.1rem; }
-  .mehr-popover__body { padding: 0.85rem 1.1rem 1.2rem; }
-  .mehr-popover__title { font-size: 1.1rem; }
+  .mehr-popover__header {
+    padding: 1rem 1rem 0.6rem 1.1rem;
+  }
+  .mehr-popover__body {
+    padding: 0.85rem 1.1rem 1.2rem;
+  }
+  .mehr-popover__title {
+    font-size: 1.1rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mehr-popover__backdrop,
-  .mehr-popover { animation: none; }
+  .mehr-popover {
+    animation: none;
+  }
 }
 
 /* ───── Scrollytelling "Mehr"-chip — inline trigger inside step bodies ───── */
@@ -2687,7 +2985,7 @@ body:has(.scrolly) main {
   gap: 0.35rem;
   margin-top: 0.5rem;
   padding: 0.35rem 0.7rem;
-  background: rgba(250, 204, 21, 0.10);
+  background: rgba(250, 204, 21, 0.1);
   color: #facc15;
   border: 1px solid rgba(250, 204, 21, 0.35);
   border-radius: 999px;
@@ -2695,7 +2993,9 @@ body:has(.scrolly) main {
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
-  transition: background var(--anim-hover-dur, 200ms) ease, transform var(--anim-hover-dur, 200ms) ease;
+  transition:
+    background var(--anim-hover-dur, 200ms) ease,
+    transform var(--anim-hover-dur, 200ms) ease;
 }
 .scrolly__mehr-chip:hover {
   background: rgba(250, 204, 21, 0.18);
@@ -2727,7 +3027,9 @@ body:has(.scrolly) main {
   opacity: 0;
   transition: opacity 140ms ease;
 }
-.viz-timeline__tooltip[data-visible='true'] { opacity: 1; }
+.viz-timeline__tooltip[data-visible="true"] {
+  opacity: 1;
+}
 .viz-timeline__tooltip-date {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -2753,7 +3055,9 @@ body:has(.scrolly) main {
   cursor: pointer;
   pointer-events: all;
 }
-.viz-timeline__hotspot:focus { outline: none; }
+.viz-timeline__hotspot:focus {
+  outline: none;
+}
 
 /* ───── VizTeamRow — expanded layout (Iter-4) ───── */
 .viz-team {
@@ -2812,7 +3116,7 @@ body:has(.scrolly) main {
 .viz-team__expert-avatar {
   position: relative;
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background: #21543f;
   color: #e5e7eb;
   width: 40px;
@@ -2827,7 +3131,9 @@ body:has(.scrolly) main {
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background var(--anim-hover-dur, 200ms) ease, transform var(--anim-hover-dur, 200ms) ease;
+  transition:
+    background var(--anim-hover-dur, 200ms) ease,
+    transform var(--anim-hover-dur, 200ms) ease;
 }
 .viz-team__expert-avatar:hover {
   background: #2a6149;
@@ -2885,9 +3191,10 @@ body:has(.scrolly) main {
    inner grid keeps its 3+1 row wrap. The ::before paints the gradient and
    border-top across 100vw using the left: 50%−50vw trick. */
 .scrolly-page-footer::before {
-  content: '';
+  content: "";
   position: absolute;
-  top: 0; bottom: 0;
+  top: 0;
+  bottom: 0;
   left: calc(50% - 50vw);
   width: 100vw;
   background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.18) 100%);
@@ -2901,7 +3208,9 @@ body:has(.scrolly) main {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem 2rem;
 }
-.scrolly-page-footer__block { min-width: 0; }
+.scrolly-page-footer__block {
+  min-width: 0;
+}
 .scrolly-page-footer__label {
   margin: 0 0 0.5rem;
   font-family: var(--font-mono);
@@ -2923,7 +3232,9 @@ body:has(.scrolly) main {
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
-.scrolly-page-footer__body a:hover { color: #fde047; }
+.scrolly-page-footer__body a:hover {
+  color: #fde047;
+}
 
 /* ════════════════════════════════════════════════════════════════
    Iter-12 — Daten-Explorer Balken + Spannweite primitives (dark)
@@ -2954,13 +3265,24 @@ body:has(.scrolly) main {
   top: 0;
   bottom: 0;
   width: 0;
-  border-left: 1px dotted var(--carm-axis-tick-color, rgba(229, 231, 235, 0.10));
+  border-left: 1px dotted var(--carm-axis-tick-color, rgba(229, 231, 235, 0.1));
 }
-.carm-balken__axis-tick[data-pos="0"]   { left: 0; }
-.carm-balken__axis-tick[data-pos="25"]  { left: 25%; }
-.carm-balken__axis-tick[data-pos="50"]  { left: 50%; border-left-color: var(--carm-axis-tick-color-mid, rgba(229, 231, 235, 0.20)); }
-.carm-balken__axis-tick[data-pos="75"]  { left: 75%; }
-.carm-balken__axis-tick[data-pos="100"] { left: 100%; }
+.carm-balken__axis-tick[data-pos="0"] {
+  left: 0;
+}
+.carm-balken__axis-tick[data-pos="25"] {
+  left: 25%;
+}
+.carm-balken__axis-tick[data-pos="50"] {
+  left: 50%;
+  border-left-color: var(--carm-axis-tick-color-mid, rgba(229, 231, 235, 0.2));
+}
+.carm-balken__axis-tick[data-pos="75"] {
+  left: 75%;
+}
+.carm-balken__axis-tick[data-pos="100"] {
+  left: 100%;
+}
 
 .carm-balken__wash {
   position: absolute;
@@ -3022,14 +3344,19 @@ body:has(.scrolly) main {
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font: 600 var(--carm-circle-num-size, 0.6875rem) / 1
-        ui-monospace, 'SF Mono', Menlo, monospace;
+  font:
+    600 var(--carm-circle-num-size, 0.6875rem) / 1 ui-monospace,
+    "SF Mono",
+    Menlo,
+    monospace;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
   pointer-events: none;
   z-index: 2;
   box-shadow: 0 0 0 1px rgba(15, 19, 24, 0.55);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 .viz-balken-myth__row.is-hover .carm-value-circle,
 .viz-balken-myth__row:focus-visible .carm-value-circle,
@@ -3062,7 +3389,9 @@ body:has(.scrolly) main {
   border: 0;
   cursor: pointer;
   opacity: 0.7;
-  transition: opacity 160ms ease, color 160ms ease;
+  transition:
+    opacity 160ms ease,
+    color 160ms ease;
 }
 .info-dot-trigger:hover,
 .info-dot-trigger:focus-visible {
@@ -3172,7 +3501,9 @@ body:has(.scrolly) main {
   overflow-x: auto;
   scrollbar-width: none;
 }
-.viz-balken-myth__picker::-webkit-scrollbar { display: none; }
+.viz-balken-myth__picker::-webkit-scrollbar {
+  display: none;
+}
 .viz-balken-myth__pick {
   display: inline-flex;
   align-items: center;
@@ -3240,7 +3571,7 @@ body:has(.scrolly) main {
 .viz-balken-myth__row:focus-visible {
   background: rgba(255, 255, 255, 0.04);
 }
-.viz-balken-myth__row[data-revealed='false'] {
+.viz-balken-myth__row[data-revealed="false"] {
   pointer-events: none;
 }
 
@@ -3350,7 +3681,9 @@ body:has(.scrolly) main {
   overflow-x: auto;
   scrollbar-width: none;
 }
-.viz-spannweite-sources__picker::-webkit-scrollbar { display: none; }
+.viz-spannweite-sources__picker::-webkit-scrollbar {
+  display: none;
+}
 
 .viz-spannweite-sources__grid {
   display: flex;
@@ -3362,7 +3695,10 @@ body:has(.scrolly) main {
 }
 .viz-spannweite-sources__row {
   display: grid;
-  grid-template-columns: var(--label-col) repeat(var(--source-cols, 4), minmax(0, 1fr));
+  grid-template-columns: var(--label-col) repeat(
+      var(--source-cols, 4),
+      minmax(0, 1fr)
+    );
   gap: 4px;
   align-items: center;
   min-height: var(--carm-spannweite-row-h, 2.625rem);
@@ -3374,7 +3710,9 @@ body:has(.scrolly) main {
   padding-bottom: 6px;
   border-bottom: 1px solid var(--border);
 }
-.viz-spannweite-sources__row:not(.viz-spannweite-sources__row--head):nth-child(even) {
+.viz-spannweite-sources__row:not(.viz-spannweite-sources__row--head):nth-child(
+    even
+  ) {
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -3453,7 +3791,7 @@ body:has(.scrolly) main {
 .viz-spannweite-sources__cell--plot:focus-visible {
   background: rgba(255, 255, 255, 0.05);
 }
-.viz-spannweite-sources__cell--plot[data-revealed='false'] {
+.viz-spannweite-sources__cell--plot[data-revealed="false"] {
   pointer-events: none;
 }
 /* Iter-18: unrevealed column keeps its dotted axis as a faint
@@ -3462,7 +3800,7 @@ body:has(.scrolly) main {
 .viz-spannweite-sources__cell--plot .carm-balken__axis {
   transition: opacity 360ms ease;
 }
-.viz-spannweite-sources__cell--plot[data-revealed='false'] .carm-balken__axis {
+.viz-spannweite-sources__cell--plot[data-revealed="false"] .carm-balken__axis {
   opacity: 0.4;
 }
 /* The fill wrapper (stem + ValueCircle) carries the staggered reveal
@@ -3593,7 +3931,9 @@ body:has(.scrolly) main {
   border-bottom: 0;
   text-decoration: none;
   color: var(--fg-muted);
-  transition: background 160ms ease, color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
 }
 .viz-team__institution:hover,
 .viz-team__institution:focus-visible {
@@ -3611,8 +3951,12 @@ body:has(.scrolly) main {
   height: var(--logo-h);
   width: auto;
 }
-.viz-team__logo[src*="isd-hamburg-neg"] { height: calc(var(--logo-h) * 0.84); }
-.viz-team__logo[src*="bioeg-neg"]       { height: calc(var(--logo-h) * 1.18); }
+.viz-team__logo[src*="isd-hamburg-neg"] {
+  height: calc(var(--logo-h) * 0.84);
+}
+.viz-team__logo[src*="bioeg-neg"] {
+  height: calc(var(--logo-h) * 1.18);
+}
 .viz-team__institution-label {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -3771,25 +4115,59 @@ body:has(.scrolly) main {
    shrinks the same internals so tall vizzes (timeline, balken, sources,
    team) fit without vertical clipping. */
 @container scrolly-canvas (max-height: 540px) {
-  .viz-timeline-v { gap: 0.9rem; }
-  .viz-timeline-v__label-title { font-size: 0.9rem; }
+  .viz-timeline-v {
+    gap: 0.9rem;
+  }
+  .viz-timeline-v__label-title {
+    font-size: 0.9rem;
+  }
   .viz-timeline-v__label-date,
-  .viz-timeline-v__label-subtitle { font-size: 0.7rem; }
-  .viz-grid__cell { min-height: 40px; }
-  .viz-grid__cell-text { font-size: 0.56rem; }
+  .viz-timeline-v__label-subtitle {
+    font-size: 0.7rem;
+  }
+  .viz-grid__cell {
+    min-height: 40px;
+  }
+  .viz-grid__cell-text {
+    font-size: 0.56rem;
+  }
   .viz-balken-myth,
-  .viz-spannweite-sources { min-height: 0; gap: 6px; }
-  .viz-balken-myth__row { min-height: 30px; }
-  .viz-sr__indicator { padding: 4px 0; }
-  .viz-team__avatar { width: 30px; height: 30px; font-size: 0.62rem; }
+  .viz-spannweite-sources {
+    min-height: 0;
+    gap: 6px;
+  }
+  .viz-balken-myth__row {
+    min-height: 30px;
+  }
+  .viz-sr__indicator {
+    padding: 4px 0;
+  }
+  .viz-team__avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 0.62rem;
+  }
 }
 @container scrolly-canvas (max-height: 420px) {
-  .viz-timeline-v { gap: 0.6rem; }
-  .viz-timeline-v__label-title { font-size: 0.82rem; }
-  .viz-grid__cell { min-height: 30px; }
-  .viz-grid__cell-text { font-size: 0.5rem; }
-  .viz-balken-myth__row { min-height: 24px; }
-  .viz-team__avatar { width: 26px; height: 26px; }
+  .viz-timeline-v {
+    gap: 0.6rem;
+  }
+  .viz-timeline-v__label-title {
+    font-size: 0.82rem;
+  }
+  .viz-grid__cell {
+    min-height: 30px;
+  }
+  .viz-grid__cell-text {
+    font-size: 0.5rem;
+  }
+  .viz-balken-myth__row {
+    min-height: 24px;
+  }
+  .viz-team__avatar {
+    width: 26px;
+    height: 26px;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -3826,4 +4204,3 @@ body:has(.scrolly) .info-tooltip-sample,
 body:has(.scrolly) .info-tooltip-scale {
   color: var(--color-text-secondary);
 }
-

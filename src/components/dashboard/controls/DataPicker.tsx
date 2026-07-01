@@ -24,10 +24,10 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactElement,
-} from 'react';
-import { Search } from 'lucide-react';
-import type { IconComponent } from '@lib/icons';
-import InfoTooltip from '../InfoTooltip';
+} from "react";
+import { Search } from "lucide-react";
+import type { IconComponent } from "@lib/icons";
+import InfoTooltip from "../InfoTooltip";
 
 export interface DataPickerOption<T extends string> {
   value: T;
@@ -57,7 +57,7 @@ interface DataPickerProps<T extends string> {
   value: T;
   options: DataPickerOption<T>[];
   onChange: (value: T) => void;
-  'aria-label'?: string;
+  "aria-label"?: string;
   /** When true, the menu opens upward (used by the Streifen bottom
    *  Mythos-Kategorie picker so it doesn't clip the page bottom). */
   dropup?: boolean;
@@ -72,7 +72,7 @@ interface DataPickerProps<T extends string> {
   searchPlaceholder?: string;
   /** Locale string for menu microcopy that isn't covered by the
    *  consumer-passed labels (e.g. the inline-definition "Skala" prefix). */
-  lang?: 'de' | 'en';
+  lang?: "de" | "en";
 }
 
 export default function DataPicker<T extends string>({
@@ -80,16 +80,16 @@ export default function DataPicker<T extends string>({
   value,
   options,
   onChange,
-  'aria-label': ariaLabel,
+  "aria-label": ariaLabel,
   dropup = false,
   searchable = false,
   searchPlaceholder,
-  lang = 'de',
+  lang = "de",
 }: DataPickerProps<T>): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const listboxId = useId();
 
@@ -100,7 +100,7 @@ export default function DataPicker<T extends string>({
   const visibleOptions = useMemo(() => {
     if (!searchable || !query.trim()) return options;
     const norm = (s: string) =>
-      s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
     const q = norm(query.trim());
     return options.filter((o) => norm(o.label).includes(q));
   }, [options, query, searchable]);
@@ -108,7 +108,7 @@ export default function DataPicker<T extends string>({
   // Reset query + highlight when the dropdown opens / closes.
   useEffect(() => {
     if (!open) {
-      setQuery('');
+      setQuery("");
       setHighlightIndex(-1);
       return;
     }
@@ -127,22 +127,22 @@ export default function DataPicker<T extends string>({
     if (!open) return;
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement | null;
-      if (target?.closest?.('.info-tooltip-card')) return;
+      if (target?.closest?.(".info-tooltip-card")) return;
       const node = containerRef.current;
       if (node && !node.contains(e.target as Node)) {
         setOpen(false);
       }
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setOpen(false);
       }
     };
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKey);
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKey);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
     };
   }, [open]);
 
@@ -165,7 +165,7 @@ export default function DataPicker<T extends string>({
   return (
     <div
       ref={containerRef}
-      className={`carm-picker${dropup ? ' carm-picker--dropup' : ''}`}
+      className={`carm-picker${dropup ? " carm-picker--dropup" : ""}`}
     >
       <span className="carm-picker__caption">{caption}:</span>
       <span className="carm-picker__anchor">
@@ -181,7 +181,7 @@ export default function DataPicker<T extends string>({
           }}
         >
           {renderLeading(active)}
-          <span className="carm-picker__current">{active?.label ?? ''}</span>
+          <span className="carm-picker__current">{active?.label ?? ""}</span>
           <span className="carm-picker__chevron" aria-hidden="true">
             ▾
           </span>
@@ -193,111 +193,111 @@ export default function DataPicker<T extends string>({
             role="listbox"
             aria-label={ariaLabel}
           >
-          {searchable && (
-            <div className="carm-picker__search">
-              <Search
-                size={14}
-                strokeWidth={2}
-                aria-hidden="true"
-                className="carm-picker__search-icon"
-              />
-              <input
-                ref={searchInputRef}
-                type="search"
-                className="carm-picker__search-input"
-                placeholder={
-                  searchPlaceholder ??
-                  (lang === 'de' ? 'Suche…' : 'Search…')
-                }
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setHighlightIndex(-1);
-                }}
-                onKeyDown={(e: ReactKeyboardEvent<HTMLInputElement>) => {
-                  if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    setHighlightIndex((i) =>
-                      visibleOptions.length === 0
-                        ? -1
-                        : (i + 1) % visibleOptions.length,
-                    );
-                  } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    setHighlightIndex((i) =>
-                      visibleOptions.length === 0
-                        ? -1
-                        : (i - 1 + visibleOptions.length) % visibleOptions.length,
-                    );
-                  } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const target =
-                      highlightIndex >= 0
-                        ? visibleOptions[highlightIndex]
-                        : visibleOptions[0];
-                    if (target && !target.disabled) {
-                      onChange(target.value);
+            {searchable && (
+              <div className="carm-picker__search">
+                <Search
+                  size={14}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                  className="carm-picker__search-icon"
+                />
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  className="carm-picker__search-input"
+                  placeholder={
+                    searchPlaceholder ?? (lang === "de" ? "Suche…" : "Search…")
+                  }
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setHighlightIndex(-1);
+                  }}
+                  onKeyDown={(e: ReactKeyboardEvent<HTMLInputElement>) => {
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      setHighlightIndex((i) =>
+                        visibleOptions.length === 0
+                          ? -1
+                          : (i + 1) % visibleOptions.length,
+                      );
+                    } else if (e.key === "ArrowUp") {
+                      e.preventDefault();
+                      setHighlightIndex((i) =>
+                        visibleOptions.length === 0
+                          ? -1
+                          : (i - 1 + visibleOptions.length) %
+                            visibleOptions.length,
+                      );
+                    } else if (e.key === "Enter") {
+                      e.preventDefault();
+                      const target =
+                        highlightIndex >= 0
+                          ? visibleOptions[highlightIndex]
+                          : visibleOptions[0];
+                      if (target && !target.disabled) {
+                        onChange(target.value);
+                        setOpen(false);
+                      }
+                    } else if (e.key === "Escape") {
                       setOpen(false);
                     }
-                  } else if (e.key === 'Escape') {
-                    setOpen(false);
-                  }
-                }}
-                aria-controls={listboxId}
-              />
-            </div>
-          )}
-          {visibleOptions.length === 0 && (
-            <p className="carm-picker__empty" role="status">
-              {lang === 'de' ? 'Keine Treffer' : 'No matches'}
-            </p>
-          )}
-          {visibleOptions.map((opt, i) => {
-            const isActive = opt.value === value;
-            const hasDef = !!opt.definition?.text;
-            const isDisabled = !!opt.disabled;
-            const isHighlighted = i === highlightIndex;
-            return (
-              <div
-                key={opt.value}
-                className={`carm-picker__row ${
-                  isDisabled ? 'is-disabled' : ''
-                } ${isHighlighted ? 'is-highlighted' : ''}`}
-              >
-                <div className="carm-picker__row-line">
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={isActive}
-                    aria-disabled={isDisabled || undefined}
-                    title={isDisabled ? opt.disabledReason : undefined}
-                    disabled={isDisabled}
-                    className={`carm-picker__item-btn ${isActive ? 'active' : ''}`}
-                    onClick={() => {
-                      if (isDisabled) return;
-                      onChange(opt.value);
-                      setOpen(false);
-                    }}
-                  >
-                    {renderLeading(opt)}
-                    <span className="carm-picker__item-label">
-                      {opt.label}
-                    </span>
-                  </button>
-                  {hasDef && opt.definition && (
-                    <span className="carm-picker__row-info-wrap">
-                      <InfoTooltip
-                        title={opt.definition.title}
-                        definition={opt.definition.text}
-                        scale={opt.definition.scale}
-                        sampleSize={opt.definition.sampleSize}
-                      />
-                    </span>
-                  )}
-                </div>
+                  }}
+                  aria-controls={listboxId}
+                />
               </div>
-            );
-          })}
+            )}
+            {visibleOptions.length === 0 && (
+              <p className="carm-picker__empty" role="status">
+                {lang === "de" ? "Keine Treffer" : "No matches"}
+              </p>
+            )}
+            {visibleOptions.map((opt, i) => {
+              const isActive = opt.value === value;
+              const hasDef = !!opt.definition?.text;
+              const isDisabled = !!opt.disabled;
+              const isHighlighted = i === highlightIndex;
+              return (
+                <div
+                  key={opt.value}
+                  className={`carm-picker__row ${
+                    isDisabled ? "is-disabled" : ""
+                  } ${isHighlighted ? "is-highlighted" : ""}`}
+                >
+                  <div className="carm-picker__row-line">
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isActive}
+                      aria-disabled={isDisabled || undefined}
+                      title={isDisabled ? opt.disabledReason : undefined}
+                      disabled={isDisabled}
+                      className={`carm-picker__item-btn ${isActive ? "active" : ""}`}
+                      onClick={() => {
+                        if (isDisabled) return;
+                        onChange(opt.value);
+                        setOpen(false);
+                      }}
+                    >
+                      {renderLeading(opt)}
+                      <span className="carm-picker__item-label">
+                        {opt.label}
+                      </span>
+                    </button>
+                    {hasDef && opt.definition && (
+                      <span className="carm-picker__row-info-wrap">
+                        <InfoTooltip
+                          title={opt.definition.title}
+                          definition={opt.definition.text}
+                          scale={opt.definition.scale}
+                          sampleSize={opt.definition.sampleSize}
+                        />
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </span>

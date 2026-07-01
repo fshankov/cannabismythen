@@ -31,19 +31,37 @@
   html.js-reveal .four-paths.is-in .path-card {
     animation: home-rise-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
-  html.js-reveal .four-paths.is-in .path-card--fakten { animation-delay: 0.10s; }
-  html.js-reveal .four-paths.is-in .path-card--quiz   { animation-delay: 0.20s; }
-  html.js-reveal .four-paths.is-in .path-card--meine  { animation-delay: 0.30s; }
-  html.js-reveal .four-paths.is-in .path-card--daten  { animation-delay: 0.40s; }
+  html.js-reveal .four-paths.is-in .path-card--fakten {
+    animation-delay: 0.1s;
+  }
+  html.js-reveal .four-paths.is-in .path-card--quiz {
+    animation-delay: 0.2s;
+  }
+  html.js-reveal .four-paths.is-in .path-card--meine {
+    animation-delay: 0.3s;
+  }
+  html.js-reveal .four-paths.is-in .path-card--daten {
+    animation-delay: 0.4s;
+  }
 
   /* Block 3 — the numerals cascade in */
   html.js-reveal .numbers-strip.is-in .numbers-strip__item {
     animation: home-rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-    animation-delay: 0.10s;
+    animation-delay: 0.1s;
   }
-  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(2) { animation-delay: 0.18s; }
-  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(3) { animation-delay: 0.26s; }
-  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(4) { animation-delay: 0.34s; }
-  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(5) { animation-delay: 0.42s; }
-  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(6) { animation-delay: 0.50s; }
+  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(2) {
+    animation-delay: 0.18s;
+  }
+  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(3) {
+    animation-delay: 0.26s;
+  }
+  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(4) {
+    animation-delay: 0.34s;
+  }
+  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(5) {
+    animation-delay: 0.42s;
+  }
+  html.js-reveal .numbers-strip.is-in .numbers-strip__item:nth-child(6) {
+    animation-delay: 0.5s;
+  }
 }

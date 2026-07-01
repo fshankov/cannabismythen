@@ -42,7 +42,12 @@ const VERDICT_VISUALS: Record<CorrectnessClass, VerdictVisual> = {
       "linear-gradient(-16.44deg, #3D8653 30.5%, #CAE1D2 107.53%, #FFFFFF 123.41%)",
     headingColor: "#3D7360",
     arrowSrc: "/icons/fakten-karten/verdict-arrow-richtig.svg",
-    arrowFrame: { top: "46.9%", left: "0%", width: "56.5625%", height: "37.2%" },
+    arrowFrame: {
+      top: "46.9%",
+      left: "0%",
+      width: "56.5625%",
+      height: "37.2%",
+    },
   },
   // ↗ diagonal arrow. SVG viewBox 190×280 → card (0, 200).
   eher_richtig: {
@@ -70,7 +75,12 @@ const VERDICT_VISUALS: Record<CorrectnessClass, VerdictVisual> = {
       "linear-gradient(-18.37deg, #AA3B3D 20.1%, #EEA0AF 113.73%, #FFFFFF 131.03%)",
     headingColor: "#C86A7C",
     arrowSrc: "/icons/fakten-karten/verdict-arrow-falsch.svg",
-    arrowFrame: { top: "42.3%", left: "0%", width: "56.5625%", height: "37.2%" },
+    arrowFrame: {
+      top: "42.3%",
+      left: "0%",
+      width: "56.5625%",
+      height: "37.2%",
+    },
   },
   // — horizontal line. SVG viewBox 186×32 → card (32, 277).
   keine_aussage_moeglich: {

@@ -3,13 +3,13 @@
    Overrides the generic `footer` rule in global.css that sets max-width. */
 
 .site-footer {
-  max-width: none;            /* override global footer { max-width } */
+  max-width: none; /* override global footer { max-width } */
   background: #eeeee8;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   margin-top: 88px;
   padding: clamp(2.5rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 3rem) 2.5rem;
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  text-align: left;           /* override global footer { text-align: center } */
+  font-family: "Inter Variable", "Inter", system-ui, sans-serif;
+  text-align: left; /* override global footer { text-align: center } */
 }
 
 .site-footer__inner {
@@ -88,7 +88,9 @@
   color: #0f5238;
   text-decoration: none;
 }
-.site-footer__email:hover { text-decoration: underline; }
+.site-footer__email:hover {
+  text-decoration: underline;
+}
 
 /* Inline link on the "Abschlussbericht" word in the citation line — always
    underlined (per request), in the footer's green link colour. */
@@ -96,7 +98,9 @@
   color: #0f5238;
   text-decoration: underline;
 }
-.site-footer__report-link:hover { color: #116c4a; }
+.site-footer__report-link:hover {
+  color: #116c4a;
+}
 
 /* ── Bottom bar ── */
 .site-footer__bar {
@@ -135,7 +139,9 @@
   color: rgba(64, 73, 67, 0.8);
   text-decoration: none;
 }
-.site-footer__links a:hover { text-decoration: underline; }
+.site-footer__links a:hover {
+  text-decoration: underline;
+}
 
 /* ── Responsive ── */
 @media (max-width: 768px) {

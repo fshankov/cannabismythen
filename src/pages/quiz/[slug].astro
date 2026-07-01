@@ -23,7 +23,10 @@ const groupMetricsByMythId = buildGroupMetricsByMythId(carmRawJson.metrics);
 // headline instead of falling back to the long statement — keeping the
 // quiz cards format-identical to the /fakten-karten/ page.
 const shortLabelByMythNumber = new Map<number, string>();
-for (const m of carmRawJson.myths as Array<{ id: number; text_short_de: string }>) {
+for (const m of carmRawJson.myths as Array<{
+  id: number;
+  text_short_de: string;
+}>) {
   if (typeof m.text_short_de === "string" && m.text_short_de.length > 0) {
     shortLabelByMythNumber.set(m.id, m.text_short_de);
   }
@@ -51,7 +54,8 @@ if (!entry || entry.status !== "published") {
 }
 
 // Build quiz text map from Keystatic-editable questions (statement + explanation)
-const quizTextMap: Record<string, { statement: string; explanation: string }> = {};
+const quizTextMap: Record<string, { statement: string; explanation: string }> =
+  {};
 if (entry.questions) {
   for (const q of entry.questions) {
     if (q.mythId && q.statement) {
@@ -95,14 +99,22 @@ const introsPayload = {
 const defaultShareCopy = await reader.singletons.shareCopy.read();
 const moduleOverrides = entryAny.shareCopy ?? {};
 const sharePayload = {
-  profi:
-    (moduleOverrides.profi || defaultShareCopy?.profi || "").trim(),
-  guterweg:
-    (moduleOverrides.guterweg || defaultShareCopy?.guterweg || "").trim(),
-  gehtnoch:
-    (moduleOverrides.gehtnoch || defaultShareCopy?.gehtnoch || "").trim(),
-  erwischt:
-    (moduleOverrides.erwischt || defaultShareCopy?.erwischt || "").trim(),
+  profi: (moduleOverrides.profi || defaultShareCopy?.profi || "").trim(),
+  guterweg: (
+    moduleOverrides.guterweg ||
+    defaultShareCopy?.guterweg ||
+    ""
+  ).trim(),
+  gehtnoch: (
+    moduleOverrides.gehtnoch ||
+    defaultShareCopy?.gehtnoch ||
+    ""
+  ).trim(),
+  erwischt: (
+    moduleOverrides.erwischt ||
+    defaultShareCopy?.erwischt ||
+    ""
+  ).trim(),
 };
 
 // Pre-render myth page content for the factsheet panel. Travel pipeline
@@ -143,7 +155,9 @@ const quizFaktenContentMap: Record<
 if (theme) {
   for (const myth of theme.myths) {
     try {
-      const mythEntry = await reader.collections.zahlenUndFakten.read(myth.mythPageSlug);
+      const mythEntry = await reader.collections.zahlenUndFakten.read(
+        myth.mythPageSlug,
+      );
       if (mythEntry) {
         // Strip "Mythos N:" / "Mythos N/M:" prefix AND trailing terminal
         // punctuation (.!?) so the popup heading reads as a clean
@@ -167,7 +181,9 @@ if (theme) {
         // card's explanation. Quiz mdoc's `explanation` stays as the
         // fallback for myths where the new summary hasn't been added
         // yet (and is preserved in the schema for archival reasons).
-        const mythCardShortSummary = (mythEntry as { cardShortSummary?: string }).cardShortSummary;
+        const mythCardShortSummary = (
+          mythEntry as { cardShortSummary?: string }
+        ).cardShortSummary;
         if (mythCardShortSummary && quizTextMap[myth.id]) {
           quizTextMap[myth.id] = {
             ...quizTextMap[myth.id],
@@ -226,16 +242,81 @@ if (theme) {
     <div class="quiz-loader" aria-hidden="true">
       <div class="quiz-loader__grid">
         <span class="quiz-loader__btn quiz-loader__btn--richtig">
-          <svg width="30" height="22" viewBox="0 0 30 22" fill="none"><path d="M28.2041 1.39285L1.3916 1.39286" stroke="#A7D3C5" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.7979 20.1604L14.7978 1.39168" stroke="#047857" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M24.1826 10.7776L14.7982 1.39324L5.41386 10.7776" stroke="#047857" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="30" height="22" viewBox="0 0 30 22" fill="none"
+            ><path
+              d="M28.2041 1.39285L1.3916 1.39286"
+              stroke="#A7D3C5"
+              stroke-width="2.78"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path><path
+              d="M14.7979 20.1604L14.7978 1.39168"
+              stroke="#047857"
+              stroke-width="2.78"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path><path
+              d="M24.1826 10.7776L14.7982 1.39324L5.41386 10.7776"
+              stroke="#047857"
+              stroke-width="2.78"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path></svg
+          >
         </span>
         <span class="quiz-loader__btn quiz-loader__btn--eher_falsch">
-          <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><path d="M32.2303 13.271L13.271 32.2303" stroke="#E0B58D" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.47932 9.47998L22.7508 22.7515" stroke="#B45309" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.7508 9.47803V22.7495H9.47929" stroke="#B45309" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none"
+            ><path
+              d="M32.2303 13.271L13.271 32.2303"
+              stroke="#E0B58D"
+              stroke-width="2.78"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path><path
+              d="M9.47932 9.47998L22.7508 22.7515"
+              stroke="#B45309"
+              stroke-width="2.78"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path><path
+              d="M22.7508 9.47803V22.7495H9.47929"
+              stroke="#B45309"
+              stroke-width="2.78"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path></svg
+          >
         </span>
         <span class="quiz-loader__btn quiz-loader__btn--eher_richtig">
-          <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><path d="M32.2303 20.351L13.271 1.39168" stroke="#C2D3A3" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.47932 24.142L22.7508 10.8705" stroke="#4D7C0F" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/><path d="M22.7508 24.144V10.8724H9.47929" stroke="#4D7C0F" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="34" height="34" viewBox="0 0 34 34" fill="none"
+            ><path
+              d="M32.2303 20.351L13.271 1.39168"
+              stroke="#C2D3A3"
+              stroke-width="2.78"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path><path
+              d="M9.47932 24.142L22.7508 10.8705"
+              stroke="#4D7C0F"
+              stroke-width="2.78"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path><path
+              d="M22.7508 24.144V10.8724H9.47929"
+              stroke="#4D7C0F"
+              stroke-width="2.78"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path></svg
+          >
         </span>
         <span class="quiz-loader__btn quiz-loader__btn--falsch">
-          <svg width="26" height="22" viewBox="0 0 26 22" fill="none"><path d="M1.2666 18.8793C0.567207 18.8798 0 19.4464 0 20.1459C0 20.8454 0.567207 21.4121 1.2666 21.4125L24.2705 21.4125C24.9703 21.4125 25.5371 20.8457 25.5371 20.1459C25.5371 19.4462 24.9703 18.8793 24.2705 18.8793L1.2666 18.8793Z" fill="#E9A8B9"/><path d="M12.771 1.26703L12.771 19.3997" stroke="#BE123C" stroke-width="2.53" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.8223 10.3315L12.771 19.3978L4.71974 10.3315" stroke="#BE123C" stroke-width="2.53" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="26" height="22" viewBox="0 0 26 22" fill="none"
+            ><path
+              d="M1.2666 18.8793C0.567207 18.8798 0 19.4464 0 20.1459C0 20.8454 0.567207 21.4121 1.2666 21.4125L24.2705 21.4125C24.9703 21.4125 25.5371 20.8457 25.5371 20.1459C25.5371 19.4462 24.9703 18.8793 24.2705 18.8793L1.2666 18.8793Z"
+              fill="#E9A8B9"></path><path
+              d="M12.771 1.26703L12.771 19.3997"
+              stroke="#BE123C"
+              stroke-width="2.53"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path><path
+              d="M20.8223 10.3315L12.771 19.3978L4.71974 10.3315"
+              stroke="#BE123C"
+              stroke-width="2.53"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path></svg
+          >
         </span>
       </div>
       <p class="quiz-loader__text">Daten werden geladen …</p>
@@ -254,7 +335,9 @@ if (theme) {
         quizSummary={(entry as any).summary || undefined}
       />
       <noscript>
-        <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+        <p
+          style="padding: 24px; text-align: center; color: var(--color-text-secondary);"
+        >
           Das Quiz benötigt JavaScript. Bitte aktiviere JavaScript, um zu
           starten.
         </p>
@@ -271,17 +354,17 @@ if (theme) {
        The animation is untouched; the timeout is a safety net in case
        animationend never fires (e.g. animations globally disabled). */
     (function () {
-      var el = document.querySelector('.quiz-loader');
+      var el = document.querySelector(".quiz-loader");
       if (!el) return;
       var hidden = false;
       function clear() {
         if (hidden) return;
         hidden = true;
-        el.style.display = 'none';
+        el.style.display = "none";
       }
       // Only the loader's OWN exit animation — the button pop/jump and text
       // fade are child animations whose animationend bubbles up here too.
-      el.addEventListener('animationend', function (e) {
+      el.addEventListener("animationend", function (e) {
         if (e.target === el) clear();
       });
       setTimeout(clear, 3500); // well after the ~2.25s exit completes
@@ -314,7 +397,9 @@ if (theme) {
     animation: quiz-loader-text-in 0.35s ease 0.5s forwards;
   }
   @keyframes quiz-loader-text-in {
-    to { opacity: 1; }
+    to {
+      opacity: 1;
+    }
   }
   .quiz-loader__grid {
     display: grid;
@@ -336,25 +421,53 @@ if (theme) {
       quiz-btn-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
       quiz-btn-jump 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
   }
-  .quiz-loader__btn svg { display: block; }
+  .quiz-loader__btn svg {
+    display: block;
+  }
 
-  .quiz-loader__btn--richtig    { background: #d1e8d1; animation-delay: 0.08s, 0.85s; }
-  .quiz-loader__btn--eher_falsch { background: #ffefbc; animation-delay: 0.16s, 0.93s; }
-  .quiz-loader__btn--eher_richtig{ background: #e1ebe2; animation-delay: 0.24s, 1.01s; }
-  .quiz-loader__btn--falsch      { background: #ffe9ed; animation-delay: 0.32s, 1.09s; }
-
+  .quiz-loader__btn--richtig {
+    background: #d1e8d1;
+    animation-delay: 0.08s, 0.85s;
+  }
+  .quiz-loader__btn--eher_falsch {
+    background: #ffefbc;
+    animation-delay: 0.16s, 0.93s;
+  }
+  .quiz-loader__btn--eher_richtig {
+    background: #e1ebe2;
+    animation-delay: 0.24s, 1.01s;
+  }
+  .quiz-loader__btn--falsch {
+    background: #ffe9ed;
+    animation-delay: 0.32s, 1.09s;
+  }
 
   @keyframes quiz-btn-pop {
-    from { opacity: 0; transform: scale(0.25); }
-    to   { opacity: 1; transform: scale(1); }
+    from {
+      opacity: 0;
+      transform: scale(0.25);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
   @keyframes quiz-btn-jump {
-    0%  { transform: translateY(0); }
-    45% { transform: translateY(-14px); }
-    100%{ transform: translateY(0); }
+    0% {
+      transform: translateY(0);
+    }
+    45% {
+      transform: translateY(-14px);
+    }
+    100% {
+      transform: translateY(0);
+    }
   }
   @keyframes quiz-loader-exit {
-    to { opacity: 0; visibility: hidden; }
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

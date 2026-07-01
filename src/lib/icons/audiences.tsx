@@ -14,20 +14,20 @@
  * scrollytelling, Meine Interessen, etc.
  */
 
-import type { SVGProps } from 'react';
-import { forwardRef } from 'react';
+import type { SVGProps } from "react";
+import { forwardRef } from "react";
 
-export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
+export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "children"> {
   size?: number | string;
 }
 
 const baseProps = {
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
   strokeWidth: 1.75,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
 };
 
 /* ─── Erwachsene (Volljährige) — Lucide UsersRound family ───────── */
@@ -40,7 +40,7 @@ export const IconVolljaehrige = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconVolljaehrige.displayName = 'IconVolljaehrige';
+IconVolljaehrige.displayName = "IconVolljaehrige";
 
 /* ─── Minderjährige — head + body + headphones + phone ──────────── */
 export const IconMinderjaehrige = forwardRef<SVGSVGElement, IconProps>(
@@ -79,7 +79,7 @@ export const IconMinderjaehrige = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconMinderjaehrige.displayName = 'IconMinderjaehrige';
+IconMinderjaehrige.displayName = "IconMinderjaehrige";
 
 /** Alias: FAQ surface uses `IconJugendliche` for the same Minderjährige
  *  visual. Future divergence becomes a single-file edit here. */
@@ -119,7 +119,7 @@ export const IconJungeErwachsene = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconJungeErwachsene.displayName = 'IconJungeErwachsene';
+IconJungeErwachsene.displayName = "IconJungeErwachsene";
 
 /* ─── Konsumierende — head + body + green check-down arrow ──────── */
 export const IconKonsumierende = forwardRef<SVGSVGElement, IconProps>(
@@ -136,7 +136,7 @@ export const IconKonsumierende = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconKonsumierende.displayName = 'IconKonsumierende';
+IconKonsumierende.displayName = "IconKonsumierende";
 
 /* ─── Eltern — parent + smaller child silhouette ────────────────── */
 export const IconEltern = forwardRef<SVGSVGElement, IconProps>(
@@ -149,7 +149,7 @@ export const IconEltern = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconEltern.displayName = 'IconEltern';
+IconEltern.displayName = "IconEltern";
 
 /* ─── Lehrkräfte — handoff `pop-lehrkraefte` (LOCKED Option B, 2026-05-30):
  *      user-round + glasses + open-book-check. */
@@ -165,7 +165,7 @@ export const IconLehrkraefte = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconLehrkraefte.displayName = 'IconLehrkraefte';
+IconLehrkraefte.displayName = "IconLehrkraefte";
 
 /* ─── Fachkräfte — handoff `pop-fachkraefte` (2026-05-30):
  *      user-round + search magnifier. */
@@ -179,4 +179,4 @@ export const IconFachkraefte = forwardRef<SVGSVGElement, IconProps>(
     </svg>
   ),
 );
-IconFachkraefte.displayName = 'IconFachkraefte';
+IconFachkraefte.displayName = "IconFachkraefte";

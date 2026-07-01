@@ -1,13 +1,19 @@
 export type CorrectnessClass =
-  | 'richtig'
-  | 'eher_richtig'
-  | 'eher_falsch'
-  | 'falsch'
-  | 'keine_aussage_moeglich';
+  | "richtig"
+  | "eher_richtig"
+  | "eher_falsch"
+  | "falsch"
+  | "keine_aussage_moeglich";
 
-export type GroupId = 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
+export type GroupId =
+  "adults" | "minors" | "consumers" | "young_adults" | "parents";
 
-export type Indicator = 'awareness' | 'significance' | 'correctness' | 'prevention_significance' | 'population_relevance';
+export type Indicator =
+  | "awareness"
+  | "significance"
+  | "correctness"
+  | "prevention_significance"
+  | "population_relevance";
 
 export interface Myth {
   id: number;
@@ -45,12 +51,12 @@ export interface Metric {
  *  See `src/components/shared/FactsheetGroupBars.tsx`. */
 export type MythGroupMetrics = Pick<
   Metric,
-  | 'group_id'
-  | 'awareness'
-  | 'significance'
-  | 'correctness'
-  | 'prevention_significance'
-  | 'population_relevance'
+  | "group_id"
+  | "awareness"
+  | "significance"
+  | "correctness"
+  | "prevention_significance"
+  | "population_relevance"
 >[];
 
 export interface Group {
@@ -81,7 +87,20 @@ export interface CarmData {
   correctness_classes: Record<CorrectnessClass, CorrectnessLabel>;
 }
 
-export type ViewTab = 'balken' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'overview' | 'circular' | 'ladder' | 'strips' | 'spannweite' | 'sources' | 'sources2' | 'sources_table';
+export type ViewTab =
+  | "balken"
+  | "table"
+  | "bar"
+  | "scatter"
+  | "lollipop"
+  | "overview"
+  | "circular"
+  | "ladder"
+  | "strips"
+  | "spannweite"
+  | "sources"
+  | "sources2"
+  | "sources_table";
 
 /** Spannweite view sort key (post-2026-05-22 verdict-rank revival).
  *  - 'a-z' — alphabetical by short text. Lives in the MYTHEN column
@@ -94,11 +113,7 @@ export type ViewTab = 'balken' | 'table' | 'bar' | 'scatter' | 'lollipop' | 'ove
  *    with an A-Z tie-break. Triggered by the verdict-rank button in
  *    the MYTHEN column header (top-RIGHT). */
 export type SpannweiteSort =
-  | 'a-z'
-  | 'value-asc'
-  | 'value-desc'
-  | 'verdict-asc'
-  | 'verdict-desc';
+  "a-z" | "value-asc" | "value-desc" | "verdict-asc" | "verdict-desc";
 
 /** Informationsquellen-Spannweite view sort key.
  *  - 'a-z' — alphabetical by source name.
@@ -111,25 +126,21 @@ export type SpannweiteSort =
  *    print_physical → personal), with alphabetical within-category
  *    tie-break. Mirrors the verdict-rank affordance on the myth views. */
 export type SourcesSpannweiteSort =
-  | 'a-z'
-  | 'value-asc'
-  | 'value-desc'
-  | 'category-asc'
-  | 'category-desc';
+  "a-z" | "value-asc" | "value-desc" | "category-asc" | "category-desc";
 
 /** Information-sources Streifen view — pivot mirrors the Mythen-Streifen idiom.
  *  - 'metric' → 4 strips (Suche / Wahrnehmung / Vertrauen / Prävention),
  *               picker selects a Bevölkerungsgruppe.
  *  - 'group'  → 5 strips (Volljährige / Minderjährige / Konsument:innen /
  *               Junge Erwachsene / Eltern), picker selects an Indikator. */
-export type SourcesStripsMode = 'metric' | 'group';
+export type SourcesStripsMode = "metric" | "group";
 
 /** "Streifen" (strips) tab — which dimension forms the columns ("pivot").
  *  Themen is intentionally NOT a pivot: in both modes the Themen row is a
  *  multi-select filter inside the view. */
-export type StripsMode = 'indicator' | 'group';
+export type StripsMode = "indicator" | "group";
 export type StripsSortAxis = Indicator | GroupId;
-export type StripsSortDir = 'asc' | 'desc';
+export type StripsSortDir = "asc" | "desc";
 
 /** Balken view sort options (Spannweite parity, post-2026-05-22).
  *  - 'a-z' — alphabetical by the myth's short text (default).
@@ -137,27 +148,24 @@ export type StripsSortDir = 'asc' | 'desc';
  *  - 'verdict-asc' / 'verdict-desc' — by scientific verdict band
  *    (richtig → falsch / falsch → richtig). */
 export type BalkenSort =
-  | 'a-z'
-  | 'value-asc'
-  | 'value-desc'
-  | 'verdict-asc'
-  | 'verdict-desc';
+  "a-z" | "value-asc" | "value-desc" | "verdict-asc" | "verdict-desc";
 
 /** Quiz module slugs — the 5 Themen blocks shown in StripsView.
  *  Renamed in Session 1 of 2026-05 to match the docx 5-cat taxonomy. */
 export type QuizThemeSlug =
-  | 'quiz-gefaehrlichkeit'
-  | 'quiz-medizinischer-nutzen'
-  | 'quiz-risiken-koerper-psyche'
-  | 'quiz-soziales-bevoelkerung'
-  | 'quiz-stimmung-wahrnehmung';
+  | "quiz-gefaehrlichkeit"
+  | "quiz-medizinischer-nutzen"
+  | "quiz-risiken-koerper-psyche"
+  | "quiz-soziales-bevoelkerung"
+  | "quiz-stimmung-wahrnehmung";
 
-export type Lang = 'de' | 'en';
+export type Lang = "de" | "en";
 
-export type VerdictFilter = CorrectnessClass | 'all';
+export type VerdictFilter = CorrectnessClass | "all";
 
-export type SourceMetricType = 'search' | 'perception' | 'trust' | 'prevention';
-export type SourceGroupId = 'adults' | 'minors' | 'consumers' | 'young_adults' | 'parents';
+export type SourceMetricType = "search" | "perception" | "trust" | "prevention";
+export type SourceGroupId =
+  "adults" | "minors" | "consumers" | "young_adults" | "parents";
 
 export interface InformationSource {
   id: number;

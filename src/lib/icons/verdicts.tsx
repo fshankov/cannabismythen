@@ -13,9 +13,7 @@ export {
   VERDICT_GLYPHS,
   NO_CLASSIFICATION_COLOR,
   VerdictGlyphPaths,
-} from '../../components/shared/verdictGlyph';
-export type {
-  VerdictColorOverride,
-} from '../../components/shared/verdictGlyph';
+} from "../../components/shared/verdictGlyph";
+export type { VerdictColorOverride } from "../../components/shared/verdictGlyph";
 
-export { default as VerdictArrow } from '../../components/shared/VerdictArrow';
+export { default as VerdictArrow } from "../../components/shared/VerdictArrow";

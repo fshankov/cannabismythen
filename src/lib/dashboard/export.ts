@@ -1,4 +1,4 @@
-import type { ECharts } from 'echarts';
+import type { ECharts } from "echarts";
 import type {
   CarmData,
   CorrectnessClass,
@@ -8,15 +8,16 @@ import type {
   Myth,
   SourceGroupId,
   SourceMetricType,
-} from './types';
-import { exportCSV } from './data';
+} from "./types";
+import { exportCSV } from "./data";
 
-const SOURCE_LINE = 'Datenquelle: CaRM-Studie, ISD Hamburg, 2024–2025 · cannabismythen.de';
+const SOURCE_LINE =
+  "Datenquelle: CaRM-Studie, ISD Hamburg, 2024–2025 · cannabismythen.de";
 const SOURCE_LINE_CSV = `# ${SOURCE_LINE}`;
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);
@@ -41,20 +42,20 @@ function downloadBlob(blob: Blob, filename: string) {
 /** Indicator → German filename token (matches the on-screen column
  *  labels; `correctness` → `richtigkeit` per Fedor 2026-05-29). */
 const INDICATOR_FILE_DE: Record<Indicator, string> = {
-  awareness: 'kenntnis',
-  significance: 'bedeutung',
-  correctness: 'richtigkeit',
-  prevention_significance: 'praeventionsbedeutung',
-  population_relevance: 'bevoelkerungsrelevanz',
+  awareness: "kenntnis",
+  significance: "bedeutung",
+  correctness: "richtigkeit",
+  prevention_significance: "praeventionsbedeutung",
+  population_relevance: "bevoelkerungsrelevanz",
 };
 
 /** Group → German filename token (ASCII-folded). */
 const GROUP_FILE_DE: Record<GroupId, string> = {
-  adults: 'erwachsene',
-  minors: 'minderjaehrige',
-  consumers: 'konsumierende',
-  young_adults: 'junge-erwachsene',
-  parents: 'eltern',
+  adults: "erwachsene",
+  minors: "minderjaehrige",
+  consumers: "konsumierende",
+  young_adults: "junge-erwachsene",
+  parents: "eltern",
 };
 
 /** Lowercase, ASCII-fold (ü→ue, ä→ae, ö→oe, ß→ss), collapse non-alnum
@@ -62,20 +63,20 @@ const GROUP_FILE_DE: Record<GroupId, string> = {
 function slugifyAscii(input: string): string {
   return input
     .toLowerCase()
-    .replace(/ä/g, 'ae')
-    .replace(/ö/g, 'oe')
-    .replace(/ü/g, 'ue')
-    .replace(/ß/g, 'ss')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 /** Today as YYYY-MM-DD (local). */
 function isoDateStamp(): string {
   const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
+  const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
@@ -84,18 +85,18 @@ function isoDateStamp(): string {
 function mythSegment(myths: Myth[], totalMyths?: number): string {
   if (myths.length === 1) {
     const m = myths[0];
-    return `m${String(m.id).padStart(2, '0')}-${slugifyAscii(m.text_short_de)}`;
+    return `m${String(m.id).padStart(2, "0")}-${slugifyAscii(m.text_short_de)}`;
   }
   if (totalMyths && myths.length > 0 && myths.length < totalMyths) {
     return `${myths.length}-mythen`;
   }
-  return '';
+  return "";
 }
 
 export interface ExportFilenameOpts {
   /** 'chart' = PNG/SVG (indicator-specific slice); 'data' = CSV/JSON
    *  (spans all indicators). */
-  kind: 'chart' | 'data';
+  kind: "chart" | "data";
   ext: string;
   view: string;
   indicator?: Indicator;
@@ -110,32 +111,40 @@ export function buildExportFilename(opts: ExportFilenameOpts): string {
   const date = isoDateStamp();
   const myth = mythSegment(myths, totalMyths);
 
-  if (kind === 'chart') {
-    const ind = indicator ? INDICATOR_FILE_DE[indicator] : '';
-    const grp = group ? GROUP_FILE_DE[group] : '';
-    const parts = ['cannabismythen', view, ind, grp, myth, date].filter(Boolean);
-    return `${parts.join('_')}.${ext}`;
+  if (kind === "chart") {
+    const ind = indicator ? INDICATOR_FILE_DE[indicator] : "";
+    const grp = group ? GROUP_FILE_DE[group] : "";
+    const parts = ["cannabismythen", view, ind, grp, myth, date].filter(
+      Boolean,
+    );
+    return `${parts.join("_")}.${ext}`;
   }
 
   // kind === 'data' (CSV/JSON) — spans all indicators, omit the indikator
   // block. No myth filter → `rohdaten`; otherwise the myth segment.
-  const grp = group ? GROUP_FILE_DE[group] : '';
-  const datasetSeg = myth || 'rohdaten';
-  const parts = ['cannabismythen', 'daten-explorer', grp, datasetSeg, date].filter(Boolean);
-  return `${parts.join('_')}.${ext}`;
+  const grp = group ? GROUP_FILE_DE[group] : "";
+  const datasetSeg = myth || "rohdaten";
+  const parts = [
+    "cannabismythen",
+    "daten-explorer",
+    grp,
+    datasetSeg,
+    date,
+  ].filter(Boolean);
+  return `${parts.join("_")}.${ext}`;
 }
 
 /** CSV: full filtered dataset, BOM-prefixed for Excel, with a German source
  *  comment row at the top. */
 export function downloadFullCSV(
   myths: Myth[],
-  metrics: CarmData['metrics'],
+  metrics: CarmData["metrics"],
   groupIds: GroupId[],
-  filename = 'cannabismythen-carm-daten.csv',
+  filename = "cannabismythen-carm-daten.csv",
 ) {
-  const csv = exportCSV(myths, metrics, groupIds, 'de');
+  const csv = exportCSV(myths, metrics, groupIds, "de");
   const body = `${SOURCE_LINE_CSV}\n${csv}`;
-  const blob = new Blob(['﻿' + body], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob(["﻿" + body], { type: "text/csv;charset=utf-8;" });
   downloadBlob(blob, filename);
 }
 
@@ -147,14 +156,18 @@ export function downloadFullCSV(
    ===================================================================== */
 
 const SOURCE_METRIC_COLUMNS: { key: SourceMetricType; label: string }[] = [
-  { key: 'search', label: 'Suche (%)' },
-  { key: 'perception', label: 'Wahrnehmung (%)' },
-  { key: 'trust', label: 'Vertrauen (Punkte)' },
-  { key: 'prevention', label: 'Präventionspotential (Punkte)' },
+  { key: "search", label: "Suche (%)" },
+  { key: "perception", label: "Wahrnehmung (%)" },
+  { key: "trust", label: "Vertrauen (Punkte)" },
+  { key: "prevention", label: "Präventionspotential (Punkte)" },
 ];
 
 const SOURCE_GROUP_ORDER: SourceGroupId[] = [
-  'adults', 'minors', 'consumers', 'young_adults', 'parents',
+  "adults",
+  "minors",
+  "consumers",
+  "young_adults",
+  "parents",
 ];
 
 /** Long-format CSV of the full information-channels dataset: one row per
@@ -166,13 +179,17 @@ export function exportSourcesCSV(data: InformationSourcesData): string {
   const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
 
   const header = [
-    'ID', 'Kanal', 'Kategorie', 'group_id', 'Zielgruppe',
+    "ID",
+    "Kanal",
+    "Kategorie",
+    "group_id",
+    "Zielgruppe",
     ...SOURCE_METRIC_COLUMNS.map((m) => m.label),
   ];
 
   const rows: string[] = [];
   for (const src of data.sources) {
-    const name = (src.name ?? '').trim();
+    const name = (src.name ?? "").trim();
     const cat = catName.get(src.category) ?? src.category;
     for (const gid of SOURCE_GROUP_ORDER) {
       const cells = [
@@ -183,24 +200,24 @@ export function exportSourcesCSV(data: InformationSourcesData): string {
         esc(groupName.get(gid) ?? gid),
         ...SOURCE_METRIC_COLUMNS.map((m) => {
           const v = data.metrics[m.key]?.data?.[gid]?.[String(src.id)];
-          return v === undefined || v === null ? '' : String(v);
+          return v === undefined || v === null ? "" : String(v);
         }),
       ];
-      rows.push(cells.join(','));
+      rows.push(cells.join(","));
     }
   }
-  return [header.join(','), ...rows].join('\n');
+  return [header.join(","), ...rows].join("\n");
 }
 
 /** CSV download of the full information-channels dataset, BOM-prefixed for
  *  Excel, with the German source comment row. */
 export function downloadFullSourcesCSV(
   data: InformationSourcesData,
-  filename = 'cannabismythen-informationswege.csv',
+  filename = "cannabismythen-informationswege.csv",
 ) {
   const csv = exportSourcesCSV(data);
   const body = `${SOURCE_LINE_CSV}\n${csv}`;
-  const blob = new Blob(['﻿' + body], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob(["﻿" + body], { type: "text/csv;charset=utf-8;" });
   downloadBlob(blob, filename);
 }
 
@@ -222,16 +239,16 @@ export function downloadFullSourcesCSV(
  */
 export function downloadFullJSON(
   myths: Myth[],
-  metrics: CarmData['metrics'],
+  metrics: CarmData["metrics"],
   groupIds: GroupId[],
-  filename = 'cannabismythen-carm-daten.json',
+  filename = "cannabismythen-carm-daten.json",
 ) {
   const indicators: Indicator[] = [
-    'awareness',
-    'significance',
-    'correctness',
-    'prevention_significance',
-    'population_relevance',
+    "awareness",
+    "significance",
+    "correctness",
+    "prevention_significance",
+    "population_relevance",
   ];
   type Row = {
     mythId: number;
@@ -244,11 +261,11 @@ export function downloadFullJSON(
     value: number | null;
   };
   const VERDICT_DE: Record<string, string> = {
-    richtig: 'Richtig',
-    eher_richtig: 'Eher richtig',
-    eher_falsch: 'Eher falsch',
-    falsch: 'Falsch',
-    keine_aussage_moeglich: 'Keine Aussage möglich',
+    richtig: "Richtig",
+    eher_richtig: "Eher richtig",
+    eher_falsch: "Eher falsch",
+    falsch: "Falsch",
+    keine_aussage_moeglich: "Keine Aussage möglich",
   };
   const rows: Row[] = [];
   for (const m of myths) {
@@ -264,10 +281,10 @@ export function downloadFullJSON(
           statement_de: m.text_de,
           category_de: m.category_de,
           classification: m.correctness_class,
-          classificationLabel_de: VERDICT_DE[m.correctness_class] ?? '',
+          classificationLabel_de: VERDICT_DE[m.correctness_class] ?? "",
           group: g,
           indicator: ind,
-          value: typeof v === 'number' ? v : null,
+          value: typeof v === "number" ? v : null,
         });
       }
     }
@@ -279,7 +296,7 @@ export function downloadFullJSON(
     rows,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
-    type: 'application/json;charset=utf-8;',
+    type: "application/json;charset=utf-8;",
   });
   downloadBlob(blob, filename);
 }
@@ -316,12 +333,19 @@ const SOURCE_HEIGHT = 18;
 /** Verdict-arrow glyph colours (foreground + shadow) and rotation —
  *  must mirror `verdictArrowSymbols.tsx` exactly so the PNG legend
  *  reads identically to the on-page glyphs. */
-const VERDICT_GLYPH_GEOMETRY: Record<CorrectnessClass, { fg: string; shadow: string; rotation: number }> = {
-  richtig:           { fg: '#047857', shadow: '#a7d3c5', rotation: Math.PI }, // 180°
-  eher_richtig:      { fg: '#4d7c0f', shadow: '#c2d3a3', rotation: -3 * Math.PI / 4 }, // -135°
-  eher_falsch:       { fg: '#b45309', shadow: '#e0b58d', rotation: Math.PI / 4 }, // 45°
-  falsch:            { fg: '#be123c', shadow: '#e9a8b9', rotation: 0 },
-  keine_aussage_moeglich: { fg: '#6b7280', shadow: '#94a3b8', rotation: 0 },
+const VERDICT_GLYPH_GEOMETRY: Record<
+  CorrectnessClass,
+  { fg: string; shadow: string; rotation: number }
+> = {
+  richtig: { fg: "#047857", shadow: "#a7d3c5", rotation: Math.PI }, // 180°
+  eher_richtig: {
+    fg: "#4d7c0f",
+    shadow: "#c2d3a3",
+    rotation: (-3 * Math.PI) / 4,
+  }, // -135°
+  eher_falsch: { fg: "#b45309", shadow: "#e0b58d", rotation: Math.PI / 4 }, // 45°
+  falsch: { fg: "#be123c", shadow: "#e9a8b9", rotation: 0 },
+  keine_aussage_moeglich: { fg: "#6b7280", shadow: "#94a3b8", rotation: 0 },
 };
 
 /** Draw a verdict-arrow glyph centred at (cx, cy) on a 2D canvas. Size
@@ -342,8 +366,8 @@ function drawVerdictGlyph(
   ctx.scale(scale, scale);
   ctx.translate(-12, -12); // viewBox origin
   ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
 
   // Shadow horizontal line at y=16.
   ctx.beginPath();
@@ -352,7 +376,7 @@ function drawVerdictGlyph(
   ctx.strokeStyle = shadow;
   ctx.stroke();
 
-  if (verdict !== 'keine_aussage_moeglich') {
+  if (verdict !== "keine_aussage_moeglich") {
     // Shaft.
     ctx.beginPath();
     ctx.moveTo(12, 2);
@@ -372,8 +396,8 @@ function drawVerdictGlyph(
 /** Type guard distinguishing the ECharts instance from a raw SVGElement. */
 function isEcharts(chart: ChartHandle): chart is ECharts {
   return (
-    typeof (chart as ECharts).getDataURL === 'function' &&
-    typeof (chart as { tagName?: string }).tagName !== 'string'
+    typeof (chart as ECharts).getDataURL === "function" &&
+    typeof (chart as { tagName?: string }).tagName !== "string"
   );
 }
 
@@ -384,27 +408,35 @@ function isEcharts(chart: ChartHandle): chart is ECharts {
  * canvas via an Image, and returns a 2× pixelRatio data URL so the
  * resulting PNG is retina-sharp.
  */
-function chartToPngDataUrl(chart: ChartHandle): Promise<{ dataUrl: string; width: number; height: number }> {
+function chartToPngDataUrl(
+  chart: ChartHandle,
+): Promise<{ dataUrl: string; width: number; height: number }> {
   if (isEcharts(chart)) {
-    const dataUrl = chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' });
+    const dataUrl = chart.getDataURL({
+      type: "png",
+      pixelRatio: 2,
+      backgroundColor: "#ffffff",
+    });
     // Echarts already accounts for pixelRatio; we still need to know the
     // pixel dimensions so the outer canvas can size correctly.
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => resolve({ dataUrl, width: img.width, height: img.height });
+      img.onload = () =>
+        resolve({ dataUrl, width: img.width, height: img.height });
       img.onerror = reject;
       img.src = dataUrl;
     });
   }
   // Raw SVG path (StripsView / SourcesStripsView).
   const svgEl = chart;
-  const w = Number(svgEl.getAttribute('width')) || svgEl.clientWidth || 800;
-  const h = Number(svgEl.getAttribute('height')) || svgEl.clientHeight || 500;
+  const w = Number(svgEl.getAttribute("width")) || svgEl.clientWidth || 800;
+  const h = Number(svgEl.getAttribute("height")) || svgEl.clientHeight || 500;
   // Clone + add xmlns so the serialised SVG is self-contained.
   const clone = svgEl.cloneNode(true) as SVGElement;
-  if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-  clone.setAttribute('width', String(w));
-  clone.setAttribute('height', String(h));
+  if (!clone.getAttribute("xmlns"))
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  clone.setAttribute("width", String(w));
+  clone.setAttribute("height", String(h));
   revealExportOnly(clone);
   const xml = new XMLSerializer().serializeToString(clone);
   const svg64 = btoa(unescape(encodeURIComponent(xml)));
@@ -414,19 +446,19 @@ function chartToPngDataUrl(chart: ChartHandle): Promise<{ dataUrl: string; width
     const img = new Image();
     img.onload = () => {
       const scale = 2;
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = w * scale;
       canvas.height = h * scale;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (!ctx) {
-        reject(new Error('Canvas 2D context unavailable'));
+        reject(new Error("Canvas 2D context unavailable"));
         return;
       }
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       resolve({
-        dataUrl: canvas.toDataURL('image/png'),
+        dataUrl: canvas.toDataURL("image/png"),
         width: canvas.width,
         height: canvas.height,
       });
@@ -439,8 +471,22 @@ function chartToPngDataUrl(chart: ChartHandle): Promise<{ dataUrl: string; width
 /** PNG export with title, subtitle, legend, and source baked in. The chart
  *  itself is captured at 2× pixelRatio for retina screens. */
 export async function downloadChartPng(opts: ChartExportOpts) {
-  const { chart, title, subtitle, legend, view, indicator, group, myths, totalMyths } = opts;
-  const { dataUrl, width: chartW, height: chartH } = await chartToPngDataUrl(chart);
+  const {
+    chart,
+    title,
+    subtitle,
+    legend,
+    view,
+    indicator,
+    group,
+    myths,
+    totalMyths,
+  } = opts;
+  const {
+    dataUrl,
+    width: chartW,
+    height: chartH,
+  } = await chartToPngDataUrl(chart);
 
   const img = new Image();
   await new Promise<void>((resolve, reject) => {
@@ -455,25 +501,25 @@ export async function downloadChartPng(opts: ChartExportOpts) {
   const totalW = W;
   const totalH = headerH + chartH + footerH + CANVAS_PADDING * 4;
 
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = totalW;
   canvas.height = totalH;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, totalW, totalH);
 
   // Title
   let y = CANVAS_PADDING * 2;
-  ctx.fillStyle = '#1a1a2e';
+  ctx.fillStyle = "#1a1a2e";
   ctx.font = 'bold 32px "Segoe UI", system-ui, sans-serif';
-  ctx.textBaseline = 'top';
+  ctx.textBaseline = "top";
   ctx.fillText(title, CANVAS_PADDING * 2, y);
   y += TITLE_HEIGHT * 2;
 
   // Subtitle
-  ctx.fillStyle = '#4a5568';
+  ctx.fillStyle = "#4a5568";
   ctx.font = '24px "Segoe UI", system-ui, sans-serif';
   ctx.fillText(subtitle, CANVAS_PADDING * 2, y);
   y += SUBTITLE_HEIGHT * 2 + CANVAS_PADDING;
@@ -491,12 +537,18 @@ export async function downloadChartPng(opts: ChartExportOpts) {
   const glyphSize = 28; // rendered diameter on-canvas (*2 for retina)
   for (const item of legend) {
     if (item.verdict) {
-      drawVerdictGlyph(ctx, item.verdict, lx + glyphSize / 2, y + 4 + glyphSize / 2, glyphSize);
+      drawVerdictGlyph(
+        ctx,
+        item.verdict,
+        lx + glyphSize / 2,
+        y + 4 + glyphSize / 2,
+        glyphSize,
+      );
     } else {
       ctx.fillStyle = item.color;
       ctx.fillRect(lx, y + 4, 24, 24);
     }
-    ctx.fillStyle = '#1a1a2e';
+    ctx.fillStyle = "#1a1a2e";
     const labelX = lx + glyphSize + 10;
     ctx.fillText(item.label, labelX, y + 4);
     const w = ctx.measureText(item.label).width;
@@ -505,7 +557,7 @@ export async function downloadChartPng(opts: ChartExportOpts) {
   y += LEGEND_HEIGHT * 2;
 
   // Source line
-  ctx.fillStyle = '#718096';
+  ctx.fillStyle = "#718096";
   ctx.font = '20px "Segoe UI", system-ui, sans-serif';
   ctx.fillText(SOURCE_LINE, CANVAS_PADDING * 2, y);
 
@@ -516,27 +568,40 @@ export async function downloadChartPng(opts: ChartExportOpts) {
         return;
       }
       const filename = buildExportFilename({
-        kind: 'chart', ext: 'png', view, indicator, group,
-        myths: myths ?? [], totalMyths,
+        kind: "chart",
+        ext: "png",
+        view,
+        indicator,
+        group,
+        myths: myths ?? [],
+        totalMyths,
       });
       downloadBlob(blob, filename);
       resolve();
-    }, 'image/png');
+    }, "image/png");
   });
 }
 
 /** Get a self-contained SVG string for either an ECharts instance or a
  *  raw SVG element. The Streifen / Sources views render with D3, so we
  *  serialise their live `<svg>` directly. */
-function chartToSvgString(chart: ChartHandle): { svg: string; width: number; height: number } {
+function chartToSvgString(chart: ChartHandle): {
+  svg: string;
+  width: number;
+  height: number;
+} {
   if (isEcharts(chart)) {
-    const renderToSvg = (chart as unknown as { renderToSVGString?: () => string }).renderToSVGString;
+    const renderToSvg = (
+      chart as unknown as { renderToSVGString?: () => string }
+    ).renderToSVGString;
     const inner =
-      typeof renderToSvg === 'function'
+      typeof renderToSvg === "function"
         ? renderToSvg.call(chart)
-        : chart.getDataURL({ type: 'svg' });
-    const innerSvg = inner.startsWith('data:')
-      ? decodeURIComponent(inner.replace(/^data:image\/svg\+xml(;base64)?,/, ''))
+        : chart.getDataURL({ type: "svg" });
+    const innerSvg = inner.startsWith("data:")
+      ? decodeURIComponent(
+          inner.replace(/^data:image\/svg\+xml(;base64)?,/, ""),
+        )
       : inner;
     const widthMatch = innerSvg.match(/width="(\d+)"/);
     const heightMatch = innerSvg.match(/height="(\d+)"/);
@@ -548,14 +613,19 @@ function chartToSvgString(chart: ChartHandle): { svg: string; width: number; hei
   }
   // Raw SVGElement — clone and ensure xmlns + dimensions are present.
   const svgEl = chart;
-  const w = Number(svgEl.getAttribute('width')) || svgEl.clientWidth || 800;
-  const h = Number(svgEl.getAttribute('height')) || svgEl.clientHeight || 500;
+  const w = Number(svgEl.getAttribute("width")) || svgEl.clientWidth || 800;
+  const h = Number(svgEl.getAttribute("height")) || svgEl.clientHeight || 500;
   const clone = svgEl.cloneNode(true) as SVGElement;
-  if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-  clone.setAttribute('width', String(w));
-  clone.setAttribute('height', String(h));
+  if (!clone.getAttribute("xmlns"))
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  clone.setAttribute("width", String(w));
+  clone.setAttribute("height", String(h));
   revealExportOnly(clone);
-  return { svg: new XMLSerializer().serializeToString(clone), width: w, height: h };
+  return {
+    svg: new XMLSerializer().serializeToString(clone),
+    width: w,
+    height: h,
+  };
 }
 
 /**
@@ -577,19 +647,35 @@ function chartToSvgString(chart: ChartHandle): { svg: string; width: number; hei
  * that survives both rendering paths.
  */
 function revealExportOnly(root: SVGElement): void {
-  const exportEls = root.querySelectorAll<SVGElement>('[data-export-only="true"]');
+  const exportEls = root.querySelectorAll<SVGElement>(
+    '[data-export-only="true"]',
+  );
   exportEls.forEach((el) => {
     // Some browsers serialise `style.display` cleared as an empty
     // attribute; setting via removeProperty is the cleanest.
-    el.style.removeProperty('display');
-    el.removeAttribute('display');
+    el.style.removeProperty("display");
+    el.removeAttribute("display");
   });
 }
 
 /** SVG export — the chart itself plus header/footer text wrapped into one SVG. */
 export function downloadChartSvg(opts: ChartExportOpts) {
-  const { chart, title, subtitle, legend, view, indicator, group, myths, totalMyths } = opts;
-  const { svg: innerSvg, width: innerW, height: innerH } = chartToSvgString(chart);
+  const {
+    chart,
+    title,
+    subtitle,
+    legend,
+    view,
+    indicator,
+    group,
+    myths,
+    totalMyths,
+  } = opts;
+  const {
+    svg: innerSvg,
+    width: innerW,
+    height: innerH,
+  } = chartToSvgString(chart);
 
   const padding = 24;
   const titleH = 28;
@@ -609,13 +695,13 @@ export function downloadChartSvg(opts: ChartExportOpts) {
       lx += 20 + it.label.length * 7 + 24;
       return swatch + text;
     })
-    .join('');
+    .join("");
 
   // Strip outer <svg ...> from inner so we can place it as a <g> with transform
   const innerBody = innerSvg
-    .replace(/<\?xml[^?]*\?>/, '')
-    .replace(/<svg[^>]*>/, '')
-    .replace(/<\/svg>/, '');
+    .replace(/<\?xml[^?]*\?>/, "")
+    .replace(/<svg[^>]*>/, "")
+    .replace(/<\/svg>/, "");
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}">
@@ -627,10 +713,15 @@ export function downloadChartSvg(opts: ChartExportOpts) {
   <text x="${padding}" y="${totalH - padding / 2}" font-family="Segoe UI, system-ui, sans-serif" font-size="12" fill="#718096">${escapeXml(SOURCE_LINE)}</text>
 </svg>`;
 
-  const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
   const filename = buildExportFilename({
-    kind: 'chart', ext: 'svg', view, indicator, group,
-    myths: myths ?? [], totalMyths,
+    kind: "chart",
+    ext: "svg",
+    view,
+    indicator,
+    group,
+    myths: myths ?? [],
+    totalMyths,
   });
   downloadBlob(blob, filename);
 }
@@ -642,36 +733,43 @@ export function downloadChartSvg(opts: ChartExportOpts) {
  * intentionally low (1× pixelRatio) since the thumb is rendered at
  * roughly that size in the dialog.
  */
-export async function chartPreviewDataUrl(chart: ChartHandle): Promise<string | null> {
+export async function chartPreviewDataUrl(
+  chart: ChartHandle,
+): Promise<string | null> {
   try {
     if (isEcharts(chart)) {
-      return chart.getDataURL({ type: 'png', pixelRatio: 1, backgroundColor: '#ffffff' });
+      return chart.getDataURL({
+        type: "png",
+        pixelRatio: 1,
+        backgroundColor: "#ffffff",
+      });
     }
     const svgEl = chart;
-    const w = Number(svgEl.getAttribute('width')) || svgEl.clientWidth || 600;
-    const h = Number(svgEl.getAttribute('height')) || svgEl.clientHeight || 400;
+    const w = Number(svgEl.getAttribute("width")) || svgEl.clientWidth || 600;
+    const h = Number(svgEl.getAttribute("height")) || svgEl.clientHeight || 400;
     const clone = svgEl.cloneNode(true) as SVGElement;
-    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    clone.setAttribute('width', String(w));
-    clone.setAttribute('height', String(h));
+    if (!clone.getAttribute("xmlns"))
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.setAttribute("width", String(w));
+    clone.setAttribute("height", String(h));
     const xml = new XMLSerializer().serializeToString(clone);
     const svg64 = btoa(unescape(encodeURIComponent(xml)));
     const svgDataUrl = `data:image/svg+xml;base64,${svg64}`;
     return await new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         canvas.width = w;
         canvas.height = h;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
         if (!ctx) {
           resolve(null);
           return;
         }
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
+        resolve(canvas.toDataURL("image/png"));
       };
       img.onerror = () => resolve(null);
       img.src = svgDataUrl;
@@ -683,9 +781,9 @@ export async function chartPreviewDataUrl(chart: ChartHandle): Promise<string | 
 
 function escapeXml(s: string): string {
   return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }

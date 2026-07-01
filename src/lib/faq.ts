@@ -11,11 +11,7 @@
 import { reader } from "./content";
 
 export type FaqAudienceId =
-  | "eltern"
-  | "jugendliche"
-  | "konsumierende"
-  | "lehrkraefte"
-  | "fachkraefte";
+  "eltern" | "jugendliche" | "konsumierende" | "lehrkraefte" | "fachkraefte";
 
 export type FaqClassification =
   | "richtig"
@@ -36,10 +32,7 @@ export type FaqVizType =
   | "table-comparison";
 
 export type FaqVizPlacement =
-  | "after-lead"
-  | "before-data"
-  | "after-data"
-  | "end";
+  "after-lead" | "before-data" | "after-data" | "end";
 
 export interface FaqVizSpec {
   vizType: FaqVizType;
@@ -242,8 +235,7 @@ interface FaqAudiencesSingleton {
     description?: string | null;
     introNote?: string | null;
     weiterfuehrend?:
-      | readonly { label?: string | null; url?: string | null }[]
-      | null;
+      readonly { label?: string | null; url?: string | null }[] | null;
     helplines?:
       | readonly {
           label?: string | null;
@@ -256,9 +248,8 @@ interface FaqAudiencesSingleton {
 
 export async function getAllAudiences(): Promise<FaqAudienceMeta[]> {
   if (cachedAudiences) return cachedAudiences;
-  const data = (await reader.singletons.faqAudiences.read()) as
-    | FaqAudiencesSingleton
-    | null;
+  const data =
+    (await reader.singletons.faqAudiences.read()) as FaqAudiencesSingleton | null;
   const out: FaqAudienceMeta[] = (data?.audiences ?? [])
     .map((a) => {
       const id = asAudience(a.id);
@@ -401,7 +392,12 @@ export async function loadMythPopupData(): Promise<FaqMythPopupData> {
   // now-complete mythIndex. A single-pass version would silently drop a
   // related-myth ref whenever the iteration order put the related myth
   // after its referencer (filesystem order is not guaranteed).
-  const cached: { slug: string; e: EntryShape; mythNumber: number; cleanTitle: string }[] = [];
+  const cached: {
+    slug: string;
+    e: EntryShape;
+    mythNumber: number;
+    cleanTitle: string;
+  }[] = [];
   for (const slug of slugs) {
     const entry = await reader.collections.zahlenUndFakten.read(slug);
     if (!entry || entry.status !== "published") continue;
@@ -484,24 +480,26 @@ export async function loadMythPopupData(): Promise<FaqMythPopupData> {
   }
 
   function resolveTitlesInHtml(html: string): string {
-    return html
-      .replace(/__FAQ_MYTH_TITLE:(m\d+)__/g, (_full, rawId: string) => {
-        const norm = normalizeMythId(rawId);
-        const title = titleById.get(norm) ?? titleById.get(rawId);
-        // Fallback: show the raw id if no title (e.g. m99 reference to a
-        // myth that doesn't exist) so an editor catches it during review.
-        return title ?? rawId;
-      })
-      // Resolve the factsheet-link href sentinel to the myth's Daten-Explorer
-      // URL — the no-JS fallback target (see faq-nodes.ts). The slug→?mythos
-      // 301 is wired in middleware.ts + netlify.toml. Falls back to the
-      // explorer root if the myth id is unknown, so a stale ref never leaks a
-      // raw placeholder into an href.
-      .replace(/__FAQ_MYTH_HREF:(m\d+)__/g, (_full, rawId: string) => {
-        const norm = normalizeMythId(rawId);
-        const meta = mythIndex[norm] ?? mythIndex[rawId];
-        return meta ? `/daten-explorer/${meta.slug}/` : "/daten-explorer/";
-      });
+    return (
+      html
+        .replace(/__FAQ_MYTH_TITLE:(m\d+)__/g, (_full, rawId: string) => {
+          const norm = normalizeMythId(rawId);
+          const title = titleById.get(norm) ?? titleById.get(rawId);
+          // Fallback: show the raw id if no title (e.g. m99 reference to a
+          // myth that doesn't exist) so an editor catches it during review.
+          return title ?? rawId;
+        })
+        // Resolve the factsheet-link href sentinel to the myth's Daten-Explorer
+        // URL — the no-JS fallback target (see faq-nodes.ts). The slug→?mythos
+        // 301 is wired in middleware.ts + netlify.toml. Falls back to the
+        // explorer root if the myth id is unknown, so a stale ref never leaks a
+        // raw placeholder into an href.
+        .replace(/__FAQ_MYTH_HREF:(m\d+)__/g, (_full, rawId: string) => {
+          const norm = normalizeMythId(rawId);
+          const meta = mythIndex[norm] ?? mythIndex[rawId];
+          return meta ? `/daten-explorer/${meta.slug}/` : "/daten-explorer/";
+        })
+    );
   }
 
   cachedPopupData = { mythIndex, mythContentMap, resolveTitlesInHtml };
@@ -624,9 +622,12 @@ export function dashboardLinkLabel(url: string): string {
     // record. The middleware 301-redirects the URL itself anyway.
     "/zahlen-und-fakten/": "Daten-Explorer",
     "/zahlen-und-fakten/informationswege/": "Dashboard: Informationswege",
-    "/zahlen-und-fakten/praeventionsbedeutung/": "Dashboard: Präventionsbedeutung",
-    "/zahlen-und-fakten/praeventionspotential/": "Dashboard: Präventionspotential",
-    "/zahlen-und-fakten/bevoelkerungsrelevanz/": "Dashboard: Bevölkerungsrelevanz",
+    "/zahlen-und-fakten/praeventionsbedeutung/":
+      "Dashboard: Präventionsbedeutung",
+    "/zahlen-und-fakten/praeventionspotential/":
+      "Dashboard: Präventionspotential",
+    "/zahlen-und-fakten/bevoelkerungsrelevanz/":
+      "Dashboard: Bevölkerungsrelevanz",
     "/zahlen-und-fakten/zielgruppen/": "Dashboard: Zielgruppenvergleich",
     "/zahlen-und-fakten/minderjaehrige/": "Dashboard: Minderjährige",
   };
@@ -646,18 +647,25 @@ export function dashboardLinkUrl(url: string): string {
     // informationswege → Quellen-Übersicht, by Gruppe (ISD-specified target).
     "/daten-explorer/informationswege/": "/daten-explorer/?view=quellen",
     "/daten-explorer/minderjaehrige/": "/daten-explorer/?group=minderjaehrige",
-    "/daten-explorer/praeventionsbedeutung/": "/daten-explorer/?indicator=praevention",
+    "/daten-explorer/praeventionsbedeutung/":
+      "/daten-explorer/?indicator=praevention",
     // praeventionspotential has no dedicated indicator — closest is Präventionsbedeutung.
-    "/daten-explorer/praeventionspotential/": "/daten-explorer/?indicator=praevention",
-    "/daten-explorer/bevoelkerungsrelevanz/": "/daten-explorer/?indicator=bevoelkerungsrelevanz",
+    "/daten-explorer/praeventionspotential/":
+      "/daten-explorer/?indicator=praevention",
+    "/daten-explorer/bevoelkerungsrelevanz/":
+      "/daten-explorer/?indicator=bevoelkerungsrelevanz",
     // zielgruppen ("Zielgruppenvergleich") → the Mythen-Tabelle group comparison.
     "/daten-explorer/zielgruppen/": "/daten-explorer/?view=tabelle",
     // Legacy /zahlen-und-fakten/ equivalents (pre-Stage-5 editor content).
     "/zahlen-und-fakten/informationswege/": "/daten-explorer/?view=quellen",
-    "/zahlen-und-fakten/minderjaehrige/": "/daten-explorer/?group=minderjaehrige",
-    "/zahlen-und-fakten/praeventionsbedeutung/": "/daten-explorer/?indicator=praevention",
-    "/zahlen-und-fakten/praeventionspotential/": "/daten-explorer/?indicator=praevention",
-    "/zahlen-und-fakten/bevoelkerungsrelevanz/": "/daten-explorer/?indicator=bevoelkerungsrelevanz",
+    "/zahlen-und-fakten/minderjaehrige/":
+      "/daten-explorer/?group=minderjaehrige",
+    "/zahlen-und-fakten/praeventionsbedeutung/":
+      "/daten-explorer/?indicator=praevention",
+    "/zahlen-und-fakten/praeventionspotential/":
+      "/daten-explorer/?indicator=praevention",
+    "/zahlen-und-fakten/bevoelkerungsrelevanz/":
+      "/daten-explorer/?indicator=bevoelkerungsrelevanz",
     "/zahlen-und-fakten/zielgruppen/": "/daten-explorer/?view=tabelle",
   };
   return map[url] ?? url;

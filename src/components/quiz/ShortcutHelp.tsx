@@ -52,16 +52,9 @@ export default function ShortcutHelp({ onClose }: ShortcutHelpProps) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div
-        className="shortcut-help__panel"
-        ref={panelRef}
-        tabIndex={-1}
-      >
+      <div className="shortcut-help__panel" ref={panelRef} tabIndex={-1}>
         <div className="shortcut-help__header">
-          <h3
-            id="shortcut-help-title"
-            className="shortcut-help__title"
-          >
+          <h3 id="shortcut-help-title" className="shortcut-help__title">
             {t("ui.shortcuts.title")}
           </h3>
           <button
@@ -82,6 +75,6 @@ export default function ShortcutHelp({ onClose }: ShortcutHelpProps) {
         </ul>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

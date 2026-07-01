@@ -59,11 +59,14 @@ export function applyHeatmapBands(html: string): string {
   if (!html.includes("<table")) return html;
   return html.replace(/<table\b[\s\S]*?<\/table>/g, (table) => {
     let tinted = false;
-    const out = table.replace(PERCENT_CELL_RE, (_full, attrs: string, num: string) => {
-      tinted = true;
-      const band = bandIndex(parseInt(num, 10));
-      return `<td${attrs} class="faq-hm faq-hm--band-${band}">${num} %</td>`;
-    });
+    const out = table.replace(
+      PERCENT_CELL_RE,
+      (_full, attrs: string, num: string) => {
+        tinted = true;
+        const band = bandIndex(parseInt(num, 10));
+        return `<td${attrs} class="faq-hm faq-hm--band-${band}">${num} %</td>`;
+      },
+    );
     if (!tinted) return table;
     // Heatmap-only layout: tag the table, inject the colgroup (column widths)
     // and the spanning sub-header row, wrap the table in a horizontal-scroll
@@ -73,7 +76,10 @@ export function applyHeatmapBands(html: string): string {
       /^<table\b[^>]*>/,
       '<table class="faq-hm-table">' + COLGROUP_HTML,
     );
-    tagged = tagged.replace(/<thead>\s*<tr>/, "<thead>" + SUPHEAD_HTML + "<tr>");
+    tagged = tagged.replace(
+      /<thead>\s*<tr>/,
+      "<thead>" + SUPHEAD_HTML + "<tr>",
+    );
     return `<div class="faq-hm-wrap">${tagged}</div>${LEGEND_HTML}`;
   });
 }

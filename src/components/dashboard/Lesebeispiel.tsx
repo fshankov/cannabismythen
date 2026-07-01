@@ -102,7 +102,8 @@ export default function Lesebeispiel({
     // The significance sentence references the kenntnis % — bail if
     // awareness is missing for this myth, to avoid a half-rendered
     // sentence with a "kennen …%" gap.
-    if (onlyIndicator === "significance" && metric.awareness === null) return null;
+    if (onlyIndicator === "significance" && metric.awareness === null)
+      return null;
     const rounded = Math.round(value as number);
     const kenntnis =
       metric.awareness !== null ? Math.round(metric.awareness as number) : null;
@@ -121,16 +122,16 @@ export default function Lesebeispiel({
         <p className="lesebeispiel__body">
           {onlyIndicator === "awareness" && (
             <>
-              Unter den {groupGenitive} kennen{" "}
-              <strong>{rounded}&nbsp;%</strong> diesen Mythos. Das ist ein{" "}
-              <strong>{anteilLabel(rounded)}</strong>.
+              Unter den {groupGenitive} kennen <strong>{rounded}&nbsp;%</strong>{" "}
+              diesen Mythos. Das ist ein <strong>{anteilLabel(rounded)}</strong>
+              .
             </>
           )}
           {onlyIndicator === "significance" && (
             <>
               Unter den {groupGenitive}, die diesen Mythos kennen (
-              <strong>{kenntnis}&nbsp;%</strong>), hat die Bedeutung des Mythos für
-              ihren Umgang mit Cannabis ein{" "}
+              <strong>{kenntnis}&nbsp;%</strong>), hat die Bedeutung des Mythos
+              für ihren Umgang mit Cannabis ein{" "}
               <strong>{niveauLabel(rounded)}</strong> von{" "}
               <strong>{rounded}&nbsp;Punkten</strong>.
             </>
@@ -145,19 +146,20 @@ export default function Lesebeispiel({
           )}
           {onlyIndicator === "prevention_significance" && (
             <>
-              Aus der individuellen Bedeutung und der Beurteilung der Richtigkeit
-              resultiert ein <strong>{niveauLabel(rounded)}</strong> für die
-              Präventionsbedeutung (<strong>{rounded}&nbsp;Punkte</strong>) für jene{" "}
-              {groupGenitive}, die diesen Mythos kennen.
+              Aus der individuellen Bedeutung und der Beurteilung der
+              Richtigkeit resultiert ein <strong>{niveauLabel(rounded)}</strong>{" "}
+              für die Präventionsbedeutung (
+              <strong>{rounded}&nbsp;Punkte</strong>) für jene {groupGenitive},
+              die diesen Mythos kennen.
             </>
           )}
           {onlyIndicator === "population_relevance" && (
             <>
               Mit Blick auf die gesamte {populationNoun} (nicht nur diejenigen,
               die den Mythos schon kennen) ergibt sich ein{" "}
-              <strong>{niveauLabel(rounded)}</strong> für die Präventionsbedeutung
-              (Bevölkerungsrelevanz: <strong>{rounded}&nbsp;Punkte</strong>) für diesen
-              Mythos.
+              <strong>{niveauLabel(rounded)}</strong> für die
+              Präventionsbedeutung (Bevölkerungsrelevanz:{" "}
+              <strong>{rounded}&nbsp;Punkte</strong>) für diesen Mythos.
             </>
           )}
         </p>
@@ -185,24 +187,24 @@ export default function Lesebeispiel({
         </h2>
       )}
       <p className="lesebeispiel__body">
-        Unter den {groupGenitive} kennen{" "}
-        <strong>{kenntnis}&nbsp;%</strong> diesen Mythos. Das ist ein{" "}
-        <strong>{anteilLabel(kenntnis)}</strong>. Unter den {groupGenitive}, die
-        diesen Mythos kennen (<strong>{kenntnis}&nbsp;%</strong>), hat die Bedeutung
-        des Mythos für ihren Umgang mit Cannabis ein{" "}
-        <strong>{niveauLabel(bedeutung)}</strong> von{" "}
-        <strong>{bedeutung}&nbsp;Punkten</strong>. Unter den {groupGenitive} erreicht
-        die Beurteilung des Mythos in Übereinstimmung mit der wissenschaftlichen
-        Klassifizierung ein <strong>{niveauLabel(beurteilung)}</strong> von{" "}
-        <strong>{beurteilung}&nbsp;Punkten</strong>. Aus der individuellen Bedeutung und
-        der Beurteilung der Richtigkeit resultiert ein{" "}
-        <strong>{niveauLabel(praevention)}</strong> für die
-        Präventionsbedeutung (<strong>{praevention}&nbsp;Punkte</strong>) für jene{" "}
-        {groupGenitive}, die diesen Mythos kennen. Mit Blick auf die gesamte{" "}
-        {populationNoun} (nicht nur diejenigen, die den Mythos schon kennen) ergibt
-        sich ein <strong>{niveauLabel(bevoelkerung)}</strong> für die
-        Präventionsbedeutung (Bevölkerungsrelevanz: <strong>{bevoelkerung}&nbsp;Punkte</strong>)
-        für diesen Mythos.
+        Unter den {groupGenitive} kennen <strong>{kenntnis}&nbsp;%</strong>{" "}
+        diesen Mythos. Das ist ein <strong>{anteilLabel(kenntnis)}</strong>.
+        Unter den {groupGenitive}, die diesen Mythos kennen (
+        <strong>{kenntnis}&nbsp;%</strong>), hat die Bedeutung des Mythos für
+        ihren Umgang mit Cannabis ein <strong>{niveauLabel(bedeutung)}</strong>{" "}
+        von <strong>{bedeutung}&nbsp;Punkten</strong>. Unter den {groupGenitive}{" "}
+        erreicht die Beurteilung des Mythos in Übereinstimmung mit der
+        wissenschaftlichen Klassifizierung ein{" "}
+        <strong>{niveauLabel(beurteilung)}</strong> von{" "}
+        <strong>{beurteilung}&nbsp;Punkten</strong>. Aus der individuellen
+        Bedeutung und der Beurteilung der Richtigkeit resultiert ein{" "}
+        <strong>{niveauLabel(praevention)}</strong> für die Präventionsbedeutung
+        (<strong>{praevention}&nbsp;Punkte</strong>) für jene {groupGenitive},
+        die diesen Mythos kennen. Mit Blick auf die gesamte {populationNoun}{" "}
+        (nicht nur diejenigen, die den Mythos schon kennen) ergibt sich ein{" "}
+        <strong>{niveauLabel(bevoelkerung)}</strong> für die
+        Präventionsbedeutung (Bevölkerungsrelevanz:{" "}
+        <strong>{bevoelkerung}&nbsp;Punkte</strong>) für diesen Mythos.
       </p>
     </aside>
   );

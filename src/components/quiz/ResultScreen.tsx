@@ -17,12 +17,14 @@
  */
 
 import { useEffect, useMemo, useRef } from "react";
-import type { CardAnswer, QuizMyth, QuizResult, QuizTheme, ScoreBand } from "./types";
-import {
-  QUIZ_THEMES,
-  schritte,
-  scoreBand,
-} from "./quizData";
+import type {
+  CardAnswer,
+  QuizMyth,
+  QuizResult,
+  QuizTheme,
+  ScoreBand,
+} from "./types";
+import { QUIZ_THEMES, schritte, scoreBand } from "./quizData";
 import { t } from "./i18n";
 import { trackResultCardViewed } from "./matomo";
 import ShareCard from "./ShareCard";
@@ -227,10 +229,7 @@ export default function ResultScreen({
             {t("ui.nextModule.cta", { title: nextThemeTitle })}
           </a>
         )}
-        <a
-          href="/quiz/"
-          className="quiz-result__cta quiz-result__cta--primary"
-        >
+        <a href="/quiz/" className="quiz-result__cta quiz-result__cta--primary">
           ← {t("ui.backToQuizzes")}
         </a>
         <button

@@ -17,20 +17,23 @@
  * group accent (emerald for Mythen, blue for Quellen) as an inline style.
  */
 
-import type { SVGProps } from 'react';
-import { forwardRef } from 'react';
+import type { SVGProps } from "react";
+import { forwardRef } from "react";
 
-export interface ViewTypeIconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
+export interface ViewTypeIconProps extends Omit<
+  SVGProps<SVGSVGElement>,
+  "children"
+> {
   size?: number | string;
 }
 
 const baseProps = {
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
   strokeWidth: 2,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
 };
 
 /* ─── Balken — Lucide chart-bar ────────────────────────────────── */
@@ -44,7 +47,7 @@ export const ChartBarIcon = forwardRef<SVGSVGElement, ViewTypeIconProps>(
     </svg>
   ),
 );
-ChartBarIcon.displayName = 'ChartBarIcon';
+ChartBarIcon.displayName = "ChartBarIcon";
 
 /* ─── Übersicht — Lucide grid-3x3 ──────────────────────────────── */
 export const Grid3x3Icon = forwardRef<SVGSVGElement, ViewTypeIconProps>(
@@ -58,7 +61,7 @@ export const Grid3x3Icon = forwardRef<SVGSVGElement, ViewTypeIconProps>(
     </svg>
   ),
 );
-Grid3x3Icon.displayName = 'Grid3x3Icon';
+Grid3x3Icon.displayName = "Grid3x3Icon";
 
 /* ─── Tabelle — Lucide table-2 ─────────────────────────────────── */
 export const Table2Icon = forwardRef<SVGSVGElement, ViewTypeIconProps>(
@@ -68,4 +71,4 @@ export const Table2Icon = forwardRef<SVGSVGElement, ViewTypeIconProps>(
     </svg>
   ),
 );
-Table2Icon.displayName = 'Table2Icon';
+Table2Icon.displayName = "Table2Icon";

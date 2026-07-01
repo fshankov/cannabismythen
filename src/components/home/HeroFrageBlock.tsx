@@ -27,7 +27,11 @@ const RESUME_AFTER_INTERACTION_MS = 10_000;
 
 /** Fold a positive offset into a symmetric range around 0.
  *  e.g. for length 5: 0→0, 1→1, 2→2, 3→-2, 4→-1. */
-function symmetricOffset(idx: number, activeIdx: number, length: number): number {
+function symmetricOffset(
+  idx: number,
+  activeIdx: number,
+  length: number,
+): number {
   const raw = (idx - activeIdx + length) % length;
   return raw > length / 2 ? raw - length : raw;
 }
@@ -63,7 +67,9 @@ export default function HeroFrageBlock({
   // by the timer.
   useEffect(() => {
     if (pairs.length < 2) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduce) return;
 
     const periodMs = Math.max(2500, rotationSeconds * 1000);
@@ -76,19 +82,22 @@ export default function HeroFrageBlock({
     return () => window.clearInterval(id);
   }, [advance, rotationSeconds, pairs.length]);
 
-  const setActive = useCallback((next: number) => {
-    lastInteractionRef.current = performance.now();
-    setActiveIdx(((next % pairs.length) + pairs.length) % pairs.length);
-  }, [pairs.length]);
+  const setActive = useCallback(
+    (next: number) => {
+      lastInteractionRef.current = performance.now();
+      setActiveIdx(((next % pairs.length) + pairs.length) % pairs.length);
+    },
+    [pairs.length],
+  );
 
   // Scroll the next section into view when the user taps the down-chevron
   // that replaces the old "Quiz starten" / "Alle 42 Mythen" CTA pair.
   // The hero's next sibling is the NumbersStripBlock on the home page;
   // using nextElementSibling keeps this independent of section IDs.
   const handleScrollCue = useCallback(() => {
-    const hero = document.querySelector('.hero-frage');
+    const hero = document.querySelector(".hero-frage");
     const next = hero?.nextElementSibling as HTMLElement | null;
-    next?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    next?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   const handleCardKey = (e: KeyboardEvent<HTMLButtonElement>) => {
@@ -230,7 +239,11 @@ export default function HeroFrageBlock({
                 aria-label={`Mythos ${i + 1} von ${pairs.length}: ${p.belief}. Befund: ${p.science}.`}
               >
                 <span className="hero-frage__verdict-icon" aria-hidden="true">
-                  <VerdictArrow verdict={p.verdict} size={28} strokeWidth={2.25} />
+                  <VerdictArrow
+                    verdict={p.verdict}
+                    size={28}
+                    strokeWidth={2.25}
+                  />
                 </span>
 
                 <span className="hero-frage__half-label hero-frage__half-label--belief">
@@ -238,7 +251,11 @@ export default function HeroFrageBlock({
                 </span>
                 <p className="hero-frage__belief">„{p.belief}"</p>
 
-                <span className="hero-frage__divider" data-verdict={p.verdict} aria-hidden="true" />
+                <span
+                  className="hero-frage__divider"
+                  data-verdict={p.verdict}
+                  aria-hidden="true"
+                />
 
                 <span className="hero-frage__half-label hero-frage__half-label--science">
                   {scienceLabel}

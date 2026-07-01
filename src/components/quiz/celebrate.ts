@@ -89,7 +89,11 @@ export function fireFloatingEmoji(
     const anim = el.animate(
       [
         { transform: "translate(-50%, 0) scale(0.5)", opacity: 0 },
-        { transform: "translate(-50%, -16px) scale(1.15)", opacity: 1, offset: 0.25 },
+        {
+          transform: "translate(-50%, -16px) scale(1.15)",
+          opacity: 1,
+          offset: 0.25,
+        },
         { transform: `translate(-50%, -${rise}px) scale(1)`, opacity: 0 },
       ],
       {

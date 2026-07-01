@@ -77,67 +77,49 @@ const translations: Record<Lang, Record<string, string>> = {
     "myth.m02.statement": "Cannabiskonsum ist harmlos.",
     "myth.m03.statement":
       "Konsum durch Heranwachsende führt — stärker als bei Erwachsenen — zu gesundheitlichen Schäden.",
-    "myth.m04.statement":
-      "Cannabis ist weniger schädlich als Alkohol.",
+    "myth.m04.statement": "Cannabis ist weniger schädlich als Alkohol.",
     "myth.m05.statement": "Cannabis ist schwierig zu dosieren.",
-    "myth.m06.statement":
-      "Mischkonsum ist besonders risikoreich.",
-    "myth.m07.statement":
-      "Zusätze führen zu erhöhten Gesundheitsrisiken.",
+    "myth.m06.statement": "Mischkonsum ist besonders risikoreich.",
+    "myth.m07.statement": "Zusätze führen zu erhöhten Gesundheitsrisiken.",
     "myth.m08.statement": "Cannabiskonsum schädigt den Fötus.",
     "myth.m09.statement":
       "Eine Überdosierung von Cannabis führt nicht zum Tod.",
     "myth.m10.statement": "Cannabis lindert Schmerzen.",
-    "myth.m11.statement":
-      "Cannabiskonsum bewirkt Übelkeit und Erbrechen.",
+    "myth.m11.statement": "Cannabiskonsum bewirkt Übelkeit und Erbrechen.",
     "myth.m12.statement": "Cannabis hemmt Entzündungen.",
     "myth.m13.statement": "Cannabiskonsum lindert Spastiken.",
-    "myth.m14.statement":
-      "Cannabiskonsum bewirkt Herz-Kreislaufkrankheiten.",
-    "myth.m15.statement":
-      "Inhalativer Konsum bewirkt Atemwegserkrankungen.",
-    "myth.m16.statement":
-      "Cannabiskonsum verursacht Krebserkrankungen.",
+    "myth.m14.statement": "Cannabiskonsum bewirkt Herz-Kreislaufkrankheiten.",
+    "myth.m15.statement": "Inhalativer Konsum bewirkt Atemwegserkrankungen.",
+    "myth.m16.statement": "Cannabiskonsum verursacht Krebserkrankungen.",
     "myth.m17.statement": "Cannabiskonsum hilft beim Abnehmen.",
-    "myth.m18.statement":
-      "Cannabiskonsum hilft bei Schlafproblemen.",
-    "myth.m19.statement":
-      "Cannabiskonsum verändert die Wahrnehmungen.",
+    "myth.m18.statement": "Cannabiskonsum hilft bei Schlafproblemen.",
+    "myth.m19.statement": "Cannabiskonsum verändert die Wahrnehmungen.",
     "myth.m20.statement":
       "Cannabiskonsum beeinträchtigt kognitive Fähigkeiten.",
-    "myth.m21.statement":
-      "Cannabiskonsum gefährdet die Verkehrssicherheit.",
+    "myth.m21.statement": "Cannabiskonsum gefährdet die Verkehrssicherheit.",
     "myth.m22.statement": "Cannabis ist eine Einstiegsdroge.",
-    "myth.m23.statement":
-      "Cannabis verursacht keine Abhängigkeit.",
+    "myth.m23.statement": "Cannabis verursacht keine Abhängigkeit.",
     "myth.m24.statement": "Cannabiskonsum löst Psychosen aus.",
     "myth.m25.statement": "Cannabiskonsum hilft gegen Angst.",
-    "myth.m26.statement":
-      "Cannabiskonsum hilft gegen Depressionen.",
+    "myth.m26.statement": "Cannabiskonsum hilft gegen Depressionen.",
     "myth.m27.statement": "Cannabiskonsum hilft bei ADHS.",
     "myth.m28.statement":
       "Cannabiskonsum verursacht einen generellen Motivationsverlust.",
-    "myth.m29.statement":
-      "Cannabiskonsum verbessert die Gemütslage.",
-    "myth.m30.statement":
-      "Cannabiskonsum führt zu Suizidgedanken.",
+    "myth.m29.statement": "Cannabiskonsum verbessert die Gemütslage.",
+    "myth.m30.statement": "Cannabiskonsum führt zu Suizidgedanken.",
     "myth.m31.statement": "Cannabiskonsum entspannt.",
-    "myth.m32.statement":
-      "Cannabiskonsum macht nicht aggressiv.",
+    "myth.m32.statement": "Cannabiskonsum macht nicht aggressiv.",
     "myth.m33.statement": "Cannabiskonsum macht kreativ.",
-    "myth.m34.statement":
-      "Cannabiskonsum schädigt soziale Beziehungen.",
+    "myth.m34.statement": "Cannabiskonsum schädigt soziale Beziehungen.",
     "myth.m35.statement":
       "Konsument*innen halten sich in geringerem Maße an soziale Regeln.",
-    "myth.m36.statement":
-      "Cannabiskonsum führt zu niedrigen Leistungen.",
+    "myth.m36.statement": "Cannabiskonsum führt zu niedrigen Leistungen.",
     "myth.m37.statement":
       "Cannabiskonsum geht einher mit einem niedrigen sozialen Niveau.",
     "myth.m38.statement": "Cannabiskonsum ist cool.",
     "myth.m39.statement":
       "Ein großer Teil der Bevölkerung konsumiert Cannabis.",
-    "myth.m40.statement":
-      "Cannabiskonsum ist nun für alle überall erlaubt.",
+    "myth.m40.statement": "Cannabiskonsum ist nun für alle überall erlaubt.",
     "myth.m41.statement":
       "Das neue Gesetz wird einen Anstieg des Cannabiskonsums bewirken.",
     "myth.m42.statement":
@@ -187,7 +169,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "myth.m21.explanation":
       "Cannabiskonsum beeinträchtigt Reaktionszeit, Aufmerksamkeit und Koordination und erhöht das Unfallrisiko im Straßenverkehr signifikant.",
     "myth.m22.explanation":
-      'Die \u201EGateway-Hypothese\u201C ist wissenschaftlich umstritten. Der Zusammenhang ist eher auf gemeinsame Risikofaktoren zur\u00FCckzuf\u00FChren als auf eine pharmakologische Wirkung.',
+      "Die \u201EGateway-Hypothese\u201C ist wissenschaftlich umstritten. Der Zusammenhang ist eher auf gemeinsame Risikofaktoren zur\u00FCckzuf\u00FChren als auf eine pharmakologische Wirkung.",
     "myth.m23.explanation":
       "Cannabis kann abhängig machen. Etwa 9 % der Konsument:innen entwickeln eine Abhängigkeit; bei Jugendlichen liegt der Anteil bei bis zu 17 %.",
     "myth.m24.explanation":
@@ -199,7 +181,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "myth.m27.explanation":
       "Trotz verbreiteter Selbstmedikation gibt es keine ausreichende wissenschaftliche Grundlage dafür, dass Cannabis bei ADHS hilft.",
     "myth.m28.explanation":
-      'Das Klischee des \u201Eamotivationalen Syndroms\u201C ist wissenschaftlich nicht gut belegt. Ein genereller Motivationsverlust kann nicht nachgewiesen werden.',
+      "Das Klischee des \u201Eamotivationalen Syndroms\u201C ist wissenschaftlich nicht gut belegt. Ein genereller Motivationsverlust kann nicht nachgewiesen werden.",
     "myth.m29.explanation":
       "Cannabis kann kurzfristig die Stimmung heben. Bei regelmäßigem Konsum können sich jedoch gegenteilige Effekte einstellen.",
     "myth.m30.explanation":
@@ -219,7 +201,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "myth.m37.explanation":
       "Cannabiskonsum zieht sich durch alle sozialen Schichten. Die Annahme eines niedrigen sozialen Niveaus ist ein Vorurteil ohne wissenschaftliche Grundlage.",
     "myth.m38.explanation":
-      'Die Gleichsetzung von Cannabiskonsum mit \u201ECoolness\u201C ist ein Mythos. Cannabiskonsum ist weder cool noch uncool \u2014 er ist mit realen Gesundheitsrisiken verbunden.',
+      "Die Gleichsetzung von Cannabiskonsum mit \u201ECoolness\u201C ist ein Mythos. Cannabiskonsum ist weder cool noch uncool \u2014 er ist mit realen Gesundheitsrisiken verbunden.",
     "myth.m39.explanation":
       "Nur ein relativ kleiner Teil der Bevölkerung konsumiert regelmäßig Cannabis. Die 12-Monats-Prävalenz liegt bei Erwachsenen bei etwa 8 %.",
     "myth.m40.explanation":
@@ -321,8 +303,7 @@ const translations: Record<Lang, Record<string, string>> = {
     "ui.finishQuiz": "Ergebnis ansehen",
     "ui.persistenceNotice":
       "Wir speichern deinen Fortschritt nur in diesem Browser.",
-    "ui.progressRestored":
-      "Fortschritt wiederhergestellt.",
+    "ui.progressRestored": "Fortschritt wiederhergestellt.",
     "ui.resetProgress": "Quiz zur\u00fccksetzen",
     "ui.retrospectiveTitle": "Deine Antworten im \u00dcberblick",
     "ui.exploreData": "Daten-Explorer \u00f6ffnen",
@@ -396,8 +377,7 @@ const translations: Record<Lang, Record<string, string>> = {
     // "möglichen" for a tighter line; the percentage comparison now lives
     // in the delta sentence below (no percentages elsewhere on cards).
     // EN gloss: "You scored {X,X} out of {total} points."
-    "result.scoreLine.user":
-      "Du hast {points} von {total} Punkten erreicht.",
+    "result.scoreLine.user": "Du hast {points} von {total} Punkten erreicht.",
     // 2026-06-02 (ISD/HL review) — the result-page comparison now stays in
     // POINTS (same 0–N scale as the user line), not percentage points. Per
     // Fedor's explicit ruling this line drops the "(18–70)" qualifier
@@ -439,7 +419,10 @@ export function setLang(lang: Lang): void {
  * Translate a key, with optional interpolation.
  * Interpolation tokens: {key} in the string are replaced by values from `params`.
  */
-export function t(key: string, params?: Record<string, string | number>): string {
+export function t(
+  key: string,
+  params?: Record<string, string | number>,
+): string {
   const dict = translations[currentLang];
   let str = dict[key];
 

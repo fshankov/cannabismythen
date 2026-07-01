@@ -21,17 +21,17 @@ import type {
   InformationSourcesData,
   SourceMetricType,
   SourceGroupId,
-} from '../../../lib/dashboard/types';
+} from "../../../lib/dashboard/types";
 import {
   SOURCE_CATEGORY_ICONS,
   type SourceCategoryId,
-} from '../../../lib/icons/lookups';
+} from "../../../lib/icons/lookups";
 import {
   getCategoryColor,
   getCategoryBgColor,
-} from '../../../lib/dashboard/colors';
-import { getCategoryDescription } from '../../../lib/dashboard/source-descriptions';
-import LesebeispielSource from '../LesebeispielSource';
+} from "../../../lib/dashboard/colors";
+import { getCategoryDescription } from "../../../lib/dashboard/source-descriptions";
+import LesebeispielSource from "../LesebeispielSource";
 
 interface Props {
   source: InformationSource;
@@ -66,14 +66,14 @@ export default function SourcesHoverTooltip({
   // null and the divider/Lesebeispiel block is skipped.
   const metricDef = sourceData.metrics[metric];
   const rawValue = metricDef?.data?.[group]?.[String(source.id)];
-  const value = typeof rawValue === 'number' ? rawValue : null;
+  const value = typeof rawValue === "number" ? rawValue : null;
 
   return (
     <div
       className="carm-spannweite__tooltip carm-sources-tooltip"
       role="tooltip"
       style={{
-        position: 'fixed',
+        position: "fixed",
         left: x,
         top: y,
         background: bg,

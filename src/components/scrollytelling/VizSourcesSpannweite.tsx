@@ -18,30 +18,30 @@
  * LesebeispielSource sentence for that (metric, group) pair.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AUDIENCE_ICONS_BY_GROUP,
   SOURCE_CATEGORY_ICONS,
   SOURCE_METRIC_ICONS,
   type SourceCategoryId,
-} from '../../lib/icons';
+} from "../../lib/icons";
 import type {
   GroupId,
   InformationSource,
   InformationSourcesData,
   SourceMetricId,
-} from './types';
+} from "./types";
 import {
   ACTIVE_GROUPS,
   GROUP_LABEL_DE,
   SOURCE_METRIC_DEFS_DE,
-} from './dataLoaders';
-import ValueCircle from '../shared/ValueCircle';
-import BalkenAxis from '../shared/BalkenAxis';
-import InfoDot from '../shared/InfoDot';
-import { lesebeispielSourceSentence } from './lesebeispiel-bands';
-import { useFlipPosition } from '../dashboard/hooks/useFlipPosition';
-import DatenExplorerLink from './DatenExplorerLink';
+} from "./dataLoaders";
+import ValueCircle from "../shared/ValueCircle";
+import BalkenAxis from "../shared/BalkenAxis";
+import InfoDot from "../shared/InfoDot";
+import { lesebeispielSourceSentence } from "./lesebeispiel-bands";
+import { useFlipPosition } from "../dashboard/hooks/useFlipPosition";
+import DatenExplorerLink from "./DatenExplorerLink";
 
 interface Props {
   data: InformationSourcesData;
@@ -56,10 +56,10 @@ interface Props {
  *  (Step 8 = active: Suche + Vertrauen; Step 9 = passive: Wahrnehmung +
  *  Prävention). */
 const COLUMNS: ReadonlyArray<SourceMetricId> = [
-  'search',
-  'trust',
-  'perception',
-  'prevention',
+  "search",
+  "trust",
+  "perception",
+  "prevention",
 ];
 
 /** The curated 5 sources featured in the scrolly. Same IDs as
@@ -67,11 +67,11 @@ const COLUMNS: ReadonlyArray<SourceMetricId> = [
 const CURATED_IDS: ReadonlyArray<number> = [2, 1, 16, 33, 43];
 
 const GROUP_COLOR: Record<GroupId, string> = {
-  adults: 'var(--group-adults)',
-  minors: 'var(--group-minors)',
-  consumers: 'var(--group-consumers)',
-  young_adults: 'var(--group-young_adults)',
-  parents: 'var(--group-parents)',
+  adults: "var(--group-adults)",
+  minors: "var(--group-minors)",
+  consumers: "var(--group-consumers)",
+  young_adults: "var(--group-young_adults)",
+  parents: "var(--group-parents)",
 };
 
 function categoryColorVar(cat: string): string {
@@ -84,7 +84,7 @@ interface HoverState {
 }
 
 export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
-  const [activeGroup, setActiveGroup] = useState<GroupId>('adults');
+  const [activeGroup, setActiveGroup] = useState<GroupId>("adults");
   const [hover, setHover] = useState<HoverState | null>(null);
 
   // Iter-14: viz-block bounds ref. `useFlipPosition` clamps the tooltip
@@ -106,7 +106,9 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
   });
 
   function openCellTooltip(state: HoverState, el: HTMLElement) {
-    (tooltipTriggerRef as unknown as React.MutableRefObject<Element | null>).current = el;
+    (
+      tooltipTriggerRef as unknown as React.MutableRefObject<Element | null>
+    ).current = el;
     setHover(state);
     setTooltipOpen(true);
     updateTooltipPosition();
@@ -138,11 +140,13 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
 
   const hoveredSource =
     hover !== null
-      ? curatedSources.find((s) => s.id === hover.sourceId) ?? null
+      ? (curatedSources.find((s) => s.id === hover.sourceId) ?? null)
       : null;
   const hoveredValue =
     hover !== null
-      ? data.metrics[hover.metric]?.data[activeGroup]?.[String(hover.sourceId)] ?? null
+      ? (data.metrics[hover.metric]?.data[activeGroup]?.[
+          String(hover.sourceId)
+        ] ?? null)
       : null;
   const hoveredSentence =
     hover && hoveredValue != null
@@ -152,13 +156,19 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
   return (
     <div className="viz viz-spannweite-sources" ref={containerRef}>
       <header className="viz-spannweite-sources__header">
-        <span className="viz-spannweite-sources__header-eyebrow">Beispiel-Informationswege</span>
+        <span className="viz-spannweite-sources__header-eyebrow">
+          Beispiel-Informationswege
+        </span>
         <p className="viz-spannweite-sources__header-list">
           Apotheke · Angehörige · Foren · Plakat · Kurzbeitrag TV/Radio
         </p>
       </header>
 
-      <div className="viz-spannweite-sources__picker" role="tablist" aria-label="Zielgruppe">
+      <div
+        className="viz-spannweite-sources__picker"
+        role="tablist"
+        aria-label="Zielgruppe"
+      >
         {ACTIVE_GROUPS.map((g) => {
           const isActive = activeGroup === g;
           const Icon = AUDIENCE_ICONS_BY_GROUP[g];
@@ -169,7 +179,7 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
               type="button"
               aria-selected={isActive}
               onClick={() => setActiveGroup(g)}
-              className={`viz-balken-myth__pick${isActive ? ' viz-balken-myth__pick--active' : ''}`}
+              className={`viz-balken-myth__pick${isActive ? " viz-balken-myth__pick--active" : ""}`}
             >
               <Icon
                 size="1em"
@@ -187,15 +197,20 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
       <div
         className="viz-spannweite-sources__grid carm-spannweite"
         role="grid"
-        style={{ ['--source-cols' as string]: COLUMNS.length }}
+        style={{ ["--source-cols" as string]: COLUMNS.length }}
       >
         {/* Header row — QUELLEN label cell + 4 metric headers. */}
-        <div className="viz-spannweite-sources__row viz-spannweite-sources__row--head" role="row">
+        <div
+          className="viz-spannweite-sources__row viz-spannweite-sources__row--head"
+          role="row"
+        >
           <div
             className="viz-spannweite-sources__cell viz-spannweite-sources__cell--label viz-spannweite-sources__cell--header"
             role="columnheader"
           >
-            <span className="viz-spannweite-sources__col-eyebrow">Informationswege</span>
+            <span className="viz-spannweite-sources__col-eyebrow">
+              Informationswege
+            </span>
           </div>
           {COLUMNS.map((metric, i) => {
             const isRevealed = i < revealedColumns;
@@ -203,7 +218,9 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
             // rather than flashing from 0, so on Step 9 the Wahrnehmung
             // + Prävention headers brighten from their Step-8 placeholder
             // state instead of appearing from blank.
-            const cellStyle: React.CSSProperties = { opacity: isRevealed ? 1 : 0.35 };
+            const cellStyle: React.CSSProperties = {
+              opacity: isRevealed ? 1 : 0.35,
+            };
             const def = SOURCE_METRIC_DEFS_DE[metric];
             const Icon = SOURCE_METRIC_ICONS[metric];
             return (
@@ -215,7 +232,9 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
                 style={cellStyle}
               >
                 <Icon size={14} strokeWidth={1.75} aria-hidden="true" />
-                <span className="viz-spannweite-sources__col-name">{def.label}</span>
+                <span className="viz-spannweite-sources__col-name">
+                  {def.label}
+                </span>
                 <InfoDot title={def.label} body={def.body} meta={def.scale} />
               </div>
             );
@@ -228,109 +247,137 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
             inherits from the row label cell's `currentColor`, which
             equals the category accent via an inline `color`. */}
         {curatedSources.map((source) => {
-          const CatIcon = SOURCE_CATEGORY_ICONS[source.category as SourceCategoryId];
+          const CatIcon =
+            SOURCE_CATEGORY_ICONS[source.category as SourceCategoryId];
           return (
-          <div
-            key={source.id}
-            role="row"
-            className="viz-spannweite-sources__row"
-          >
             <div
-              className="viz-spannweite-sources__cell viz-spannweite-sources__cell--label"
-              role="rowheader"
-              style={{ color: categoryColorVar(source.category) }}
+              key={source.id}
+              role="row"
+              className="viz-spannweite-sources__row"
             >
-              {CatIcon ? (
-                <CatIcon
-                  size={16}
-                  strokeWidth={1.75}
-                  className="viz-spannweite-sources__cat-icon"
-                  aria-hidden="true"
-                />
-              ) : (
-                <span
-                  className="viz-spannweite-sources__cat-dot"
-                  style={{ background: categoryColorVar(source.category) }}
-                  aria-hidden="true"
-                />
-              )}
-              <span className="viz-spannweite-sources__source-name">
-                {source.name}
-              </span>
-            </div>
-            {COLUMNS.map((metric, colIdx) => {
-              const isRevealed = colIdx < revealedColumns;
-              const isNewlyRevealed =
-                isForward && isRevealed && colIdx >= prevRevealed;
-              const revealIdx = isNewlyRevealed ? colIdx - prevRevealed : 0;
-              // Iter-18: the CELL is always opaque — its dotted axis stays
-              // visible as a placeholder while the column is unrevealed
-              // (dimmed via [data-revealed="false"] in CSS). Only the
-              // stem + ValueCircle FILL animates in on reveal, so on
-              // Step 9 Wahrnehmung + Prävention fill over the Step-8
-              // scaffold instead of appearing from blank.
-              const fillStyle: React.CSSProperties = isNewlyRevealed
-                ? {
-                    animation:
-                      'viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both',
-                    animationDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
-                  }
-                : {};
-              const raw = data.metrics[metric]?.data[activeGroup]?.[String(source.id)];
-              const value = typeof raw === 'number' ? raw : null;
-              const isHover =
-                hover !== null && hover.sourceId === source.id && hover.metric === metric;
-              return (
-                <div
-                  key={`${source.id}-${metric}`}
-                  role="gridcell"
-                  className={`viz-spannweite-sources__cell viz-spannweite-sources__cell--plot${isHover ? ' is-hover' : ''}`}
-                  data-revealed={isRevealed}
-                  aria-label={
-                    isRevealed && value !== null
-                      ? `${source.name} · ${SOURCE_METRIC_DEFS_DE[metric].label}: ${Math.round(value)}`
-                      : `${source.name} · ${SOURCE_METRIC_DEFS_DE[metric].label}: keine Aussage`
-                  }
-                  tabIndex={isRevealed && value !== null ? 0 : -1}
-                  onMouseEnter={(e) =>
-                    isRevealed && value !== null && openCellTooltip({ sourceId: source.id, metric }, e.currentTarget)
-                  }
-                  onMouseMove={(e) =>
-                    isRevealed && value !== null && openCellTooltip({ sourceId: source.id, metric }, e.currentTarget)
-                  }
-                  onMouseLeave={closeCellTooltip}
-                  onFocus={(e) =>
-                    isRevealed && value !== null && openCellTooltip({ sourceId: source.id, metric }, e.currentTarget)
-                  }
-                  onBlur={closeCellTooltip}
-                >
-                  {/* Always render the dotted axis so unrevealed columns
+              <div
+                className="viz-spannweite-sources__cell viz-spannweite-sources__cell--label"
+                role="rowheader"
+                style={{ color: categoryColorVar(source.category) }}
+              >
+                {CatIcon ? (
+                  <CatIcon
+                    size={16}
+                    strokeWidth={1.75}
+                    className="viz-spannweite-sources__cat-icon"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <span
+                    className="viz-spannweite-sources__cat-dot"
+                    style={{ background: categoryColorVar(source.category) }}
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="viz-spannweite-sources__source-name">
+                  {source.name}
+                </span>
+              </div>
+              {COLUMNS.map((metric, colIdx) => {
+                const isRevealed = colIdx < revealedColumns;
+                const isNewlyRevealed =
+                  isForward && isRevealed && colIdx >= prevRevealed;
+                const revealIdx = isNewlyRevealed ? colIdx - prevRevealed : 0;
+                // Iter-18: the CELL is always opaque — its dotted axis stays
+                // visible as a placeholder while the column is unrevealed
+                // (dimmed via [data-revealed="false"] in CSS). Only the
+                // stem + ValueCircle FILL animates in on reveal, so on
+                // Step 9 Wahrnehmung + Prävention fill over the Step-8
+                // scaffold instead of appearing from blank.
+                const fillStyle: React.CSSProperties = isNewlyRevealed
+                  ? {
+                      animation:
+                        "viz-reveal-in var(--viz-reveal-dur) cubic-bezier(0.22, 1, 0.36, 1) both",
+                      animationDelay: `calc(${revealIdx} * var(--viz-reveal-stagger))`,
+                    }
+                  : {};
+                const raw =
+                  data.metrics[metric]?.data[activeGroup]?.[String(source.id)];
+                const value = typeof raw === "number" ? raw : null;
+                const isHover =
+                  hover !== null &&
+                  hover.sourceId === source.id &&
+                  hover.metric === metric;
+                return (
+                  <div
+                    key={`${source.id}-${metric}`}
+                    role="gridcell"
+                    className={`viz-spannweite-sources__cell viz-spannweite-sources__cell--plot${isHover ? " is-hover" : ""}`}
+                    data-revealed={isRevealed}
+                    aria-label={
+                      isRevealed && value !== null
+                        ? `${source.name} · ${SOURCE_METRIC_DEFS_DE[metric].label}: ${Math.round(value)}`
+                        : `${source.name} · ${SOURCE_METRIC_DEFS_DE[metric].label}: keine Aussage`
+                    }
+                    tabIndex={isRevealed && value !== null ? 0 : -1}
+                    onMouseEnter={(e) =>
+                      isRevealed &&
+                      value !== null &&
+                      openCellTooltip(
+                        { sourceId: source.id, metric },
+                        e.currentTarget,
+                      )
+                    }
+                    onMouseMove={(e) =>
+                      isRevealed &&
+                      value !== null &&
+                      openCellTooltip(
+                        { sourceId: source.id, metric },
+                        e.currentTarget,
+                      )
+                    }
+                    onMouseLeave={closeCellTooltip}
+                    onFocus={(e) =>
+                      isRevealed &&
+                      value !== null &&
+                      openCellTooltip(
+                        { sourceId: source.id, metric },
+                        e.currentTarget,
+                      )
+                    }
+                    onBlur={closeCellTooltip}
+                  >
+                    {/* Always render the dotted axis so unrevealed columns
                       read as present-but-empty placeholders (dimmed). */}
-                  <div className="carm-spannweite__plot">
-                    <BalkenAxis />
-                    {isRevealed && value !== null && (
-                      <div className="viz-spannweite-sources__fill" style={fillStyle}>
+                    <div className="carm-spannweite__plot">
+                      <BalkenAxis />
+                      {isRevealed && value !== null && (
                         <div
-                          className="carm-spannweite__bar"
-                          style={{
-                            width: `${Math.max(0, Math.min(100, value))}%`,
-                            background: categoryColorVar(source.category),
-                          }}
+                          className="viz-spannweite-sources__fill"
+                          style={fillStyle}
+                        >
+                          <div
+                            className="carm-spannweite__bar"
+                            style={{
+                              width: `${Math.max(0, Math.min(100, value))}%`,
+                              background: categoryColorVar(source.category),
+                            }}
+                            aria-hidden="true"
+                          />
+                          <ValueCircle
+                            value={value}
+                            accent={categoryColorVar(source.category)}
+                          />
+                        </div>
+                      )}
+                      {isRevealed && value === null && (
+                        <span
+                          className="carm-spannweite__no-data"
                           aria-hidden="true"
-                        />
-                        <ValueCircle value={value} accent={categoryColorVar(source.category)} />
-                      </div>
-                    )}
-                    {isRevealed && value === null && (
-                      <span className="carm-spannweite__no-data" aria-hidden="true">
-                        k. A.
-                      </span>
-                    )}
+                        >
+                          k. A.
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
           );
         })}
       </div>
@@ -340,7 +387,10 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
           row labels) instead of a bare colour dot; the Daten-Explorer
           link trails on the right of the same row (after Persönliches
           Umfeld, the last category). */}
-      <div className="viz-spannweite-sources__legend" aria-label="Informationswege-Kategorien">
+      <div
+        className="viz-spannweite-sources__legend"
+        aria-label="Informationswege-Kategorien"
+      >
         {visibleCategories.map((c) => {
           const LegIcon = SOURCE_CATEGORY_ICONS[c.id as SourceCategoryId];
           return (
@@ -374,12 +424,12 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
         ref={tooltipCardRef}
         role="tooltip"
         className={`scrolly-hover-tooltip viz-balken-myth__tooltip${
-          tooltipOpen && hoveredSource && hoveredSentence ? ' is-open' : ''
+          tooltipOpen && hoveredSource && hoveredSentence ? " is-open" : ""
         }`}
         style={
           tooltipPos
             ? {
-                position: 'fixed',
+                position: "fixed",
                 top: tooltipPos.top,
                 left: tooltipPos.left,
                 width: tooltipPos.width,
@@ -387,36 +437,43 @@ export function VizSourcesSpannweite({ data, revealedColumns, step }: Props) {
             : undefined
         }
       >
-        {hover && hoveredSource && hoveredSentence && (() => {
-          const TipIcon = SOURCE_CATEGORY_ICONS[hoveredSource.category as SourceCategoryId];
-          return (
-          <>
-            <p className="scrolly-hover-tooltip__eyebrow">
-              {/* Iter-18: colored category ICON in the upper-left
+        {hover &&
+          hoveredSource &&
+          hoveredSentence &&
+          (() => {
+            const TipIcon =
+              SOURCE_CATEGORY_ICONS[hoveredSource.category as SourceCategoryId];
+            return (
+              <>
+                <p className="scrolly-hover-tooltip__eyebrow">
+                  {/* Iter-18: colored category ICON in the upper-left
                   corner instead of a small dot. */}
-              {TipIcon ? (
-                <TipIcon
-                  size={15}
-                  strokeWidth={1.75}
-                  className="viz-spannweite-sources__tip-icon"
-                  style={{ color: categoryColorVar(hoveredSource.category) }}
-                  aria-hidden="true"
-                />
-              ) : (
-                <span
-                  className="viz-spannweite-sources__cat-dot"
-                  style={{ background: categoryColorVar(hoveredSource.category) }}
-                  aria-hidden="true"
-                />
-              )}
-              {hoveredSource.name} · {SOURCE_METRIC_DEFS_DE[hover.metric].label}
-            </p>
-            <p className="scrolly-hover-tooltip__body">
-              {hoveredSentence}
-            </p>
-          </>
-          );
-        })()}
+                  {TipIcon ? (
+                    <TipIcon
+                      size={15}
+                      strokeWidth={1.75}
+                      className="viz-spannweite-sources__tip-icon"
+                      style={{
+                        color: categoryColorVar(hoveredSource.category),
+                      }}
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <span
+                      className="viz-spannweite-sources__cat-dot"
+                      style={{
+                        background: categoryColorVar(hoveredSource.category),
+                      }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  {hoveredSource.name} ·{" "}
+                  {SOURCE_METRIC_DEFS_DE[hover.metric].label}
+                </p>
+                <p className="scrolly-hover-tooltip__body">{hoveredSentence}</p>
+              </>
+            );
+          })()}
       </div>
     </div>
   );

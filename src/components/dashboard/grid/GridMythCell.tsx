@@ -16,8 +16,8 @@
  * inside the chart container; Balken and Tabelle should mount it too
  * so the `<use href>` references resolve.
  */
-import type { CorrectnessClass } from '../../../lib/dashboard/types';
-import { getCorrectnessColor } from '../../../lib/dashboard/colors';
+import type { CorrectnessClass } from "../../../lib/dashboard/types";
+import { getCorrectnessColor } from "../../../lib/dashboard/colors";
 
 interface Props {
   verdict: CorrectnessClass;

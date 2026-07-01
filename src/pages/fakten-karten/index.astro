@@ -33,7 +33,10 @@ const factsheetEntries = await getPublishedEntries("zahlenUndFakten");
 // surface it on the back of FaktenCard so the back differs from the long front
 // statement.
 const shortLabelByMythNumber = new Map<number, string>();
-for (const m of carmRawJson.myths as Array<{ id: number; text_short_de: string }>) {
+for (const m of carmRawJson.myths as Array<{
+  id: number;
+  text_short_de: string;
+}>) {
   if (typeof m.text_short_de === "string" && m.text_short_de.length > 0) {
     shortLabelByMythNumber.set(m.id, m.text_short_de);
   }
@@ -89,10 +92,21 @@ myths.sort((a, b) => a.mythNumber - b.mythNumber);
 // still backs that endpoint — just off the initial-document critical path.
 ---
 
-<BaseLayout title="42 Mythen" description="42 Cannabis-Mythen — sofort erkennbar wahr oder falsch, mit wissenschaftlicher Einordnung." bgTexture extraBodyClass="fakten-karten-page">
+<BaseLayout
+  title="42 Mythen"
+  description="42 Cannabis-Mythen — sofort erkennbar wahr oder falsch, mit wissenschaftlicher Einordnung."
+  bgTexture
+  extraBodyClass="fakten-karten-page"
+>
   <header class="fakten-page-header" data-reveal>
     <h1 class="fakten-page-header__h1">42 Mythen</h1>
-    <p class="fakten-page-header__sub">Stimmt das? 42 verbreitete Cannabis-Mythen, sofort eingeordnet — tippe auf eine Karte für die Erklärung. Oder lasse Dir eine <a href="/fakten-karten/?view=liste" data-list-toggle>Liste aller Mythen anzeigen</a>.</p>
+    <p class="fakten-page-header__sub">
+      Stimmt das? 42 verbreitete Cannabis-Mythen, sofort eingeordnet — tippe auf
+      eine Karte für die Erklärung. Oder lasse Dir eine <a
+        href="/fakten-karten/?view=liste"
+        data-list-toggle>Liste aller Mythen anzeigen</a
+      >.
+    </p>
   </header>
   <div data-reveal-fade>
     <FaktenKartenExplorer
@@ -101,7 +115,9 @@ myths.sort((a, b) => a.mythNumber - b.mythNumber);
       groupMetrics={JSON.stringify(groupMetricsByMyth)}
     />
     <noscript>
-      <p style="padding: 24px; text-align: center; color: var(--color-text-secondary);">
+      <p
+        style="padding: 24px; text-align: center; color: var(--color-text-secondary);"
+      >
         Diese interaktive Ansicht benötigt JavaScript. Die 42 Mythen sind auch
         einzeln über die Navigation erreichbar.
       </p>
@@ -110,15 +126,17 @@ myths.sort((a, b) => a.mythNumber - b.mythNumber);
 </BaseLayout>
 
 <script>
-  const toggleLink = document.querySelector('[data-list-toggle]');
+  const toggleLink = document.querySelector("[data-list-toggle]");
   if (toggleLink) {
-    toggleLink.addEventListener('click', (e) => {
+    toggleLink.addEventListener("click", (e) => {
       e.preventDefault();
-      window.dispatchEvent(new CustomEvent('fakten:setView', { detail: 'liste' }));
+      window.dispatchEvent(
+        new CustomEvent("fakten:setView", { detail: "liste" }),
+      );
       try {
         const url = new URL(window.location.href);
-        url.searchParams.set('view', 'liste');
-        history.replaceState(history.state, '', url);
+        url.searchParams.set("view", "liste");
+        history.replaceState(history.state, "", url);
       } catch {}
     });
   }

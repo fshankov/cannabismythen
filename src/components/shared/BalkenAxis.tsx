@@ -13,7 +13,11 @@ export default function BalkenAxis() {
     <div className="carm-balken__axis" aria-hidden="true">
       <span className="carm-balken__axis-tick" data-pos="0" />
       <span className="carm-balken__axis-tick" data-pos="25" />
-      <span className="carm-balken__axis-tick" data-pos="50" data-emphasis="mid" />
+      <span
+        className="carm-balken__axis-tick"
+        data-pos="50"
+        data-emphasis="mid"
+      />
       <span className="carm-balken__axis-tick" data-pos="75" />
       <span className="carm-balken__axis-tick" data-pos="100" />
     </div>
