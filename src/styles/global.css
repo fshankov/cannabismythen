@@ -404,7 +404,7 @@ hr {
   left: 8px;
   z-index: 1000;
   padding: 10px 16px;
-  background: var(--color-accent, #2d6a4f);
+  background: var(--color-accent);
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
@@ -550,7 +550,7 @@ body.scrolly-page .nav:not(.nav--scrolled) .nav__hamburger-line {
   font-weight: 700;
   font-style: normal;
   line-height: 1;
-  color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent);
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
@@ -1324,7 +1324,7 @@ button.pill[aria-pressed="true"] {
 .factsheet > header h1 {
   font-size: 1.85rem;
   margin-top: var(--space-sm);
-  color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent);
 }
 
 .myth-id {
@@ -1717,7 +1717,7 @@ button.pill[aria-pressed="true"] {
 .faq-hub__title {
   font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 700;
-  color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent);
   margin: 0 0 var(--space-sm);
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -1833,7 +1833,7 @@ button.pill[aria-pressed="true"] {
   line-height: 1.2;
   letter-spacing: -0.02em;
   margin: 0;
-  color: var(--color-accent, #2d6a4f);
+  color: var(--color-accent);
   display: flex;
   align-items: center;
   gap: 10px;
