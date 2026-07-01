@@ -111,25 +111,11 @@ const year = new Date().getFullYear();
             <div class="site-footer__block">
               <h2 class="site-footer__h">{abschlussbericht.label}</h2>
               {/* Link the word "Abschlussbericht" in the citation. before/after are
-                kept adjacent (no template whitespace) so the period hugs the word. */}
-              <p class="site-footer__line">
-                {abIdx === -1 ? (
-                  abschlussbericht.body
-                ) : (
-                  <Fragment>
-                    {abBefore}
-                    <a
-                      class="site-footer__report-link"
-                      href={ABSCHLUSSBERICHT_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {AB_WORD}
-                    </a>
-                    {abAfter}
-                  </Fragment>
-                )}
-              </p>
+                kept adjacent (no template whitespace) so the period hugs the word.
+                prettier-ignore keeps this inline: Astro treats template newlines as
+                significant whitespace, so reformatting injects spaces around the link. */}
+              {/* prettier-ignore */}
+              <p class="site-footer__line">{abIdx === -1 ? abschlussbericht.body : (<Fragment>{abBefore}<a class="site-footer__report-link" href={ABSCHLUSSBERICHT_URL} target="_blank" rel="noopener noreferrer">{AB_WORD}</a>{abAfter}</Fragment>)}</p>
             </div>
           )
         }
