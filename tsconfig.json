@@ -13,5 +13,13 @@
       "@layouts/*": ["src/layouts/*"]
     }
   },
-  "exclude": ["scripts", "_local", "dist", ".netlify", "src/lib/icons/_handoff"]
+  "exclude": [
+    "scripts",
+    "_local",
+    "dist",
+    ".netlify",
+    "src/lib/icons/_handoff",
+    "tests",
+    "playwright.config.ts"
+  ]
 }
