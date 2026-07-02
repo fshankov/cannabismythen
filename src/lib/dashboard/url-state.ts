@@ -115,7 +115,6 @@ const ALL_SOURCES_SPANNWEITE_SORTS: SourcesSpannweiteSort[] = [
  *  views keep their English name (and emit it back on round-trip). */
 const VIEW_DE: Partial<Record<ViewTab, string>> = {
   balken: "balken",
-  strips: "streifen",
   spannweite: "spannweite",
   table: "tabelle",
   sources: "quellen",
@@ -306,13 +305,15 @@ export function urlToState(): Partial<AppState> {
       rawView === "lollipop" ||
       rawView === "bar" ||
       rawView === "balken2" ||
-      rawView === "strips"
+      rawView === "strips" ||
+      rawView === "streifen"
     ) {
       // Retired views — redirect to Balken. (`balken2` was the experimental
       // text-on-bar variant, dropped 2026-05-21; `strips`/Punktwolke was
       // pulled from public tabs 2026-05-23 as part of the travel-pipeline
-      // dashboard reorg, but the underlying StripsView component stays so
-      // we don't lose tests or the export pipeline.)
+      // dashboard reorg. Its German alias `streifen` stayed reachable until
+      // 2026-07-02, when the view was retired for good — deleting the
+      // underlying StripsView component is a scheduled follow-up task.)
       state.view = "balken" as ViewTab;
     } else if (VIEW_FROM_DE[rawView]) {
       state.view = VIEW_FROM_DE[rawView];
