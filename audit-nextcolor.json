@@ -1,8 +1,0 @@
-{
-  "flipped": true,
-  "nextBtnBg": "rgb(45, 106, 79)",
-  "nextBtnText": "Nächste Frage",
-  "moreBtnBg": "rgba(182, 204, 185, 0.44)",
-  "progressFillBg": "rgba(0, 0, 0, 0)",
-  "note": "next should be rgb(45,106,79)=#2d6a4f green; progress fill may stay theme-red"
-}

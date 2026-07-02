@@ -67,3 +67,6 @@ playwright-report/
 # ────────────────────────────────────────────────────────────────────
 public/tracker/
 docs/tracker/
+
+# Session scratch (screenshot-audit dumps etc.) — keep out of the repo root
+/audit-*.json
