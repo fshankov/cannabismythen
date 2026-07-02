@@ -187,7 +187,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
   :global(.mi-layout .mi-header__title) {
     max-width: 746px;
     margin: 0;
-    color: var(--color-accent, #2d6a4f);
+    color: var(--color-accent);
     font-family: var(--font-display);
     font-size: 48px;
     font-weight: 900;
@@ -357,7 +357,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
   :global(
     .mi-layout .faq-question:has(.faq-question__details:not([open])):hover
   ) {
-    background: rgba(45, 106, 79, 0.04);
+    background: rgba(var(--color-accent-rgb), 0.04);
   }
 
   :global(.mi-layout .faq-question__summary) {
@@ -721,8 +721,8 @@ const isFachkraefte = activeAudience === "fachkraefte";
   }
   :global(.mi-layout .faq-collapse:hover),
   :global(.mi-layout .faq-collapse:focus-visible) {
-    background: rgba(45, 106, 79, 0.05);
-    color: var(--color-accent, #2d6a4f);
+    background: rgba(var(--color-accent-rgb), 0.05);
+    color: var(--color-accent);
   }
 
   /* ── Scoped: tab icon ──────────────────────────────────────────────── */
@@ -738,7 +738,7 @@ const isFachkraefte = activeAudience === "fachkraefte";
 
   :global(.mi-layout .mi-tab-bar .tab-btn.active) .mi-tab-icon {
     opacity: 1;
-    color: var(--color-accent, #2d6a4f);
+    color: var(--color-accent);
   }
 
   /* ── Responsive ────────────────────────────────────────────────────── */

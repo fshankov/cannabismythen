@@ -995,7 +995,7 @@
 
 /* Selected (committed answer) — saturated fill in the verdict colour. */
 .verdict-scale__seg.is-selected {
-  background: var(--seg-fg, #2d6a4f);
+  background: var(--seg-fg, var(--color-accent));
   color: #fff;
 }
 

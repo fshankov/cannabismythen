@@ -191,7 +191,7 @@ export default function DetailPanel({
                 alignItems: "center",
                 gap: 6,
                 padding: "8px 16px",
-                background: "#2d6a4f",
+                background: "var(--color-accent)",
                 color: "white",
                 borderRadius: 6,
                 textDecoration: "none",
@@ -202,7 +202,9 @@ export default function DetailPanel({
               onMouseOver={(e) =>
                 (e.currentTarget.style.background = "#1b4332")
               }
-              onMouseOut={(e) => (e.currentTarget.style.background = "#2d6a4f")}
+              onMouseOut={(e) =>
+                (e.currentTarget.style.background = "var(--color-accent)")
+              }
             >
               {t("detail.factsheet", state.lang)} →
             </a>

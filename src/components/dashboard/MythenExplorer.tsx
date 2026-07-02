@@ -514,7 +514,7 @@ export default function MythenExplorer({
             }}
             style={{
               padding: "8px 16px",
-              background: "var(--color-accent, #2d6a4f)",
+              background: "var(--color-accent)",
               color: "white",
               border: "none",
               borderRadius: 6,
