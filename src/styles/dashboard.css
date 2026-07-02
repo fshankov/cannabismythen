@@ -1540,7 +1540,6 @@ body:has(.carm-explorer) main {
 
 /* Iter-23b: canonical selector is `keine_aussage_moeglich`; the
    `no_classification` alias stays for legacy callers. */
-.classification--keine_aussage_moeglich,
 .classification--keine_aussage_moeglich {
   background: #f3f4f6;
   color: #6b7280;
@@ -3818,7 +3817,6 @@ body:has(.carm-explorer) main {
 .strips-myth-card__bar.classification--falsch {
   background: #be123c;
 }
-.strips-myth-card__bar.classification--keine_aussage_moeglich,
 .strips-myth-card__bar.classification--keine_aussage_moeglich {
   background: #6b7280;
 }
