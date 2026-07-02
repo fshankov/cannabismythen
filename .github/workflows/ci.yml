@@ -1,0 +1,28 @@
+# CI gate: type-check every push (the same check `npm run build` runs first).
+# Node 22 matches the Netlify build image (netlify.toml). `npm ci` picks up
+# the repo .npmrc (legacy-peer-deps=true) automatically.
+#
+# If `astro check` ever fails on Linux inside the netlify integration hooks,
+# the type-only fallback is: npx astro check --config astro.config.dev.mjs
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: astro check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx astro check
