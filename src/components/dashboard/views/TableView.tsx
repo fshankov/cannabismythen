@@ -533,7 +533,13 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                 }}
                 role="row"
               >
-                <HoverTooltip content={mythTooltipContent} verdict={verdictKey}>
+                {/* tapToggle off: on touch the row tap opens the
+                    factsheet panel — a tooltip on top would be noise. */}
+                <HoverTooltip
+                  content={mythTooltipContent}
+                  verdict={verdictKey}
+                  tapToggle={false}
+                >
                   <td className="myth-cell">
                     <div className="carm-spannweite__cell carm-spannweite__cell--label data-table__myth-wrap">
                       <GridMythCell
@@ -618,6 +624,7 @@ const TableView = forwardRef<TableViewHandle, Props>(function TableView(
                       key={col.key}
                       content={tooltipContent}
                       verdict={verdictKey}
+                      tapToggle={false}
                     >
                       <td className={`value-cell value-cell--band-${band}`}>
                         {formatValue(val, cellIndicator)}

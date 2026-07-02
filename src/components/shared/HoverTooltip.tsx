@@ -29,6 +29,18 @@
  * `onFocus` / `onBlur` handlers via `cloneElement`; any existing
  * handlers on the trigger are preserved and called after the tooltip
  * state updates.
+ *
+ * Touch (2026-07-02, audit HIGH "tooltips don't work on touch"): on
+ * hover-less pointers a tap TOGGLES the tooltip and a tap anywhere
+ * outside closes it. The browser's compatibility mouseenter/mouseleave
+ * (which made the first tap open, the second close, and every later
+ * tap a no-op because the synthetic hover state sticks) are ignored
+ * for non-mouse pointers. Taps that start on an interactive element
+ * nested inside the trigger (e.g. the expand chevron button inside a
+ * Quellen-Tabelle label cell) do not toggle — the nested control keeps
+ * its own behaviour. Keyboard focus/blur behave as before; the focus
+ * fired by a tap itself is ignored so it cannot fight the toggle.
+ * Mouse behaviour is byte-identical to before.
  */
 
 import {
@@ -67,6 +79,13 @@ interface Props {
    *  null) for neutral white-card chrome. */
   verdict?: CorrectnessClass | null;
 
+  /** Touch: tap toggles the tooltip (default). Set false where the
+   *  same tap already triggers a bigger surface — e.g. Mythen-Tabelle
+   *  rows open the factsheet panel, which carries the same data with
+   *  its own tappable tooltips; a floating tooltip on top of the
+   *  opening panel would just be noise. Desktop hover is unaffected. */
+  tapToggle?: boolean;
+
   /** The single trigger element. */
   children: ReactElement;
 }
@@ -91,12 +110,18 @@ export default function HoverTooltip({
   placement = "auto",
   className,
   verdict,
+  tapToggle = true,
   children,
 }: Props) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [coords, setCoords] = useState<Coords>({ x: 0, y: 0, place: "top" });
+  // Which pointer kind is interacting. pointerenter/pointerdown fire
+  // BEFORE the compatibility mouse events and before tap-focus, so the
+  // mouse/focus handlers below can trust these refs.
+  const pointerTypeRef = useRef<string>("mouse");
+  const pointerDownAtRef = useRef(0);
 
   const measure = useCallback(() => {
     const tr = triggerRef.current?.getBoundingClientRect();
@@ -148,6 +173,22 @@ export default function HoverTooltip({
     };
   }, [open, measure]);
 
+  // Touch: a tap anywhere outside the trigger closes the tooltip.
+  // Mouse pointers are ignored here — desktop closes via mouseleave,
+  // exactly as before.
+  useEffect(() => {
+    if (!open) return;
+    const onDocPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") return;
+      const target = e.target as Node | null;
+      if (target && triggerRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    return () =>
+      document.removeEventListener("pointerdown", onDocPointerDown, true);
+  }, [open]);
+
   // Merge our internal trigger ref with any ref the consumer's child
   // already has. Function refs + object refs both supported.
   const setRef = useCallback(
@@ -170,18 +211,53 @@ export default function HoverTooltip({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ref: setRef as any,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onPointerEnter: (e: any) => {
+      pointerTypeRef.current = e.pointerType || "mouse";
+      childProps.onPointerEnter?.(e);
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onPointerDown: (e: any) => {
+      pointerTypeRef.current = e.pointerType || "mouse";
+      pointerDownAtRef.current = Date.now();
+      childProps.onPointerDown?.(e);
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onMouseEnter: (e: any) => {
-      setOpen(true);
+      // Compatibility mouseenter after a tap is ignored — touch is
+      // handled by the click toggle below.
+      if (pointerTypeRef.current === "mouse") setOpen(true);
       childProps.onMouseEnter?.(e);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onMouseLeave: (e: any) => {
-      setOpen(false);
+      if (pointerTypeRef.current === "mouse") setOpen(false);
       childProps.onMouseLeave?.(e);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onClick: (e: any) => {
+      if (tapToggle && pointerTypeRef.current !== "mouse") {
+        // Taps starting on a nested interactive element (expand
+        // chevron, link, …) keep their own behaviour — no toggle.
+        const target = e.target as HTMLElement | null;
+        const interactive = target?.closest?.(
+          "button, a, input, select, textarea, [role='button']",
+        );
+        const isNested =
+          !!interactive &&
+          interactive !== triggerRef.current &&
+          !!triggerRef.current?.contains(interactive);
+        if (!isNested) setOpen((v) => !v);
+      }
+      childProps.onClick?.(e);
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onFocus: (e: any) => {
-      setOpen(true);
+      // The focus a tap itself produces must not fight the click
+      // toggle; keyboard focus (no recent pointerdown) opens as before.
+      const tapFocus =
+        pointerTypeRef.current !== "mouse" &&
+        Date.now() - pointerDownAtRef.current < 700;
+      if (!tapFocus) setOpen(true);
       childProps.onFocus?.(e);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
