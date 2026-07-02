@@ -4,8 +4,7 @@
  * All consumer files should import icons via `@/lib/icons` so that a
  * single SVG / colour-token change propagates site-wide:
  *
- *   • dashboard surfaces (MythenExplorer, StripsView, SourcesStripsView,
- *     FilterBar)
+ *   • dashboard surfaces (MythenExplorer, StripsView, FilterBar)
  *   • Meine Interessen audience pages (AudienceHeader, AudienceHubGrid)
  *   • scrollytelling visualisations in "Über das Projekt"
  *   • factsheet panels, share cards, filter drawers

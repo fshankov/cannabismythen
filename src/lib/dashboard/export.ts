@@ -427,7 +427,7 @@ function chartToPngDataUrl(
       img.src = dataUrl;
     });
   }
-  // Raw SVG path (StripsView / SourcesStripsView).
+  // Raw SVG path (views whose handle returns a bare <svg>, e.g. StripsView).
   const svgEl = chart;
   const w = Number(svgEl.getAttribute("width")) || svgEl.clientWidth || 800;
   const h = Number(svgEl.getAttribute("height")) || svgEl.clientHeight || 500;
@@ -629,11 +629,11 @@ function chartToSvgString(chart: ChartHandle): {
 }
 
 /**
- * Session 4b (BugHerd #55): the StripsView and SourcesStripsView render
- * column headers as absolutely-positioned HTML overlays *outside* the
- * SVG, and value pills only render when a myth/source is in focus. Both
- * are invisible to the SVG serializer, so the exported PNG/SVG was
- * showing empty header rectangles and no per-dot values.
+ * Session 4b (BugHerd #55): the StripsView renders column headers as
+ * absolutely-positioned HTML overlays *outside* the SVG, and value
+ * pills only render when a myth/source is in focus. Both are invisible
+ * to the SVG serializer, so the exported PNG/SVG was showing empty
+ * header rectangles and no per-dot values.
  *
  * Fix: those views now render in-SVG mirrors of the headers + per-dot
  * value labels inside `<g data-export-only="true">` groups, hidden in

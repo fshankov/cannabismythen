@@ -79,7 +79,7 @@ function sourceMetricUsesAnteil(metric: SourceMetricType): boolean {
 interface Props {
   state: AppState;
   update: <K extends keyof AppState>(key: K, value: AppState[K]) => void;
-  /** Prop-shape parity with SourcesBalkenView / SourcesStripsView. Not
+  /** Prop-shape parity with SourcesBalkenView / SourcesSpannweiteView. Not
    *  consumed in this view yet. */
   sharedActions?: unknown;
   definitions?: DashboardDefinitions | null;

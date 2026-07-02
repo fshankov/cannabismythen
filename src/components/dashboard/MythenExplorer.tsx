@@ -59,9 +59,6 @@ import StripsView, { type StripsViewHandle } from "./views/StripsView";
 import SpannweiteView, {
   type SpannweiteViewHandle,
 } from "./views/SpannweiteView";
-import SourcesStripsView, {
-  type SourcesStripsViewHandle,
-} from "./views/SourcesStripsView";
 import SourcesBalkenView, {
   type SourcesBalkenViewHandle,
 } from "./views/SourcesBalkenView";
@@ -172,7 +169,6 @@ export default function MythenExplorer({
   const balkenRef = useRef<BalkenViewHandle>(null);
   const stripsRef = useRef<StripsViewHandle>(null);
   const spannweiteRef = useRef<SpannweiteViewHandle>(null);
-  const sourcesRef = useRef<SourcesStripsViewHandle>(null);
   const sourcesBalkenRef = useRef<SourcesBalkenViewHandle>(null);
   const sources2Ref = useRef<SourcesSpannweiteViewHandle>(null);
   const sourcesTableRef = useRef<SourcesTableViewHandle>(null);
@@ -1205,8 +1201,8 @@ export default function MythenExplorer({
             // group pivot → Gruppen · {Indikator}. Mirrors the Streifen
             // subtitle pattern. Labels are inlined here (rather than
             // reusing the dashboard-wide translation table) because the
-            // sources view has its own German labels for metrics + groups
-            // in `SourcesStripsView.tsx` (METRIC_LABELS / GROUP_LABELS)
+            // sources views have their own German labels for metrics +
+            // groups (METRIC_LABELS / GROUP_LABELS in each Sources* view)
             // and we want exports to match what the user sees on screen.
             const sourcesPivot = state.sourcesStripsMode;
             const SOURCES_METRIC_LABEL: Record<string, string> = {

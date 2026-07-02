@@ -274,7 +274,7 @@ export function stateToUrl(state: Partial<AppState>): string {
   // Session 4b (BugHerd #53): parent-source sub-filter inside the Quellen
   // view. Numeric IDs from /data/information-sources.json. We don't validate
   // the IDs here (range check is impractical without loading the JSON);
-  // SourcesStripsView ignores any ID that doesn't resolve.
+  // SourcesSpannweiteView ignores any ID that doesn't resolve.
   if (state.sourceSubFilter && state.sourceSubFilter.length > 0)
     params.set("ssf", state.sourceSubFilter.join(","));
   if (state.stripsMode && state.stripsMode !== DEFAULTS.stripsMode)
