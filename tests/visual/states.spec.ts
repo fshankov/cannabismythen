@@ -25,3 +25,17 @@ test("state: dashboard filter drawer", async ({ page }) => {
     fullPage: true,
   });
 });
+
+/**
+ * The Streifen (StripsView) beeswarm is URL-only — no ViewTabs tab links to
+ * it, so no route baseline covers it. Pinned here so refactors around the
+ * dashboard views (e.g. removing the dead SourcesStripsView sibling) can
+ * prove the living view still renders identically.
+ */
+test("state: streifen view (URL-only)", async ({ page }) => {
+  await page.goto("/daten-explorer/?view=streifen", { waitUntil: "load" });
+  await stabilize(page, 800);
+  await expect(page).toHaveScreenshot("streifen-view.png", {
+    fullPage: true,
+  });
+});
