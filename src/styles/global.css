@@ -1140,7 +1140,6 @@ a.version-card:hover {
    embeds that haven't been re-rendered. */
 .classification--keine_aussage_moeglich,
 .classification--keine_aussage,
-.classification--keine_aussage_moeglich,
 .classification--n_a {
   background: var(--classification-keine-aussage-bg);
   color: var(--classification-keine-aussage);
